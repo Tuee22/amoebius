@@ -17,7 +17,7 @@ that consumes them; each names its own doctrine.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_artifact_calculus.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_artifact_calculus.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, README.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -60,36 +60,32 @@ a rendering of a declaration the program already holds.
 
 ## 2. The rule, and the closed exception list
 
-> **Every artifact in the repository that is not Haskell source is generated from Haskell types, unless it
-> appears on the exception list below.**
+> **Every behavioral artifact that is not tracked Haskell source is generated lazily from Haskell beneath
+> `.build/**`. Python under `pb/**` is the sole source-language exception.**
 
-The exception list is closed and admits **two** kinds of reason, and no third.
-
-The first is mechanical: **the artifact must exist before the generator can run**. A proposed exception either
-meets it or does not, and "this one is inconvenient to generate" is not an argument that can be made.
-
-The second is that **the artifact is an independent expectation**, and deriving it from the thing it checks
-turns a specification into a description. This one is a judgement, not a test, and it is the list's soft edge:
-anything can be re-described as an expectation. It is bounded by naming its members exhaustively in the table
-below rather than by stating a criterion, and adding a member is a change to this document.
+The tracked-tree classification is closed and implemented by a deny-by-default Haskell source/effect audit;
+this table is a reader-facing explanation and is never parsed as an allowlist. It is intentionally not an
+“independent expectation” exception: independently authored expectations are Haskell values, while their
+serialized encodings are generated. The repository-layout doctrine owns the exact path grammar. Qualification
+observes `pb/**` argv and `exec` effects from outside the bootstrap; metadata and documentation receive only
+structural checks and human review, which can never admit a behavioral artifact.
 
 | Exception | Why it must exist first |
 |---|---|
-| `pb/` Python sources | The pre-binary CLI asserts the host floor and *builds the binary*. No Haskell can run until it has, so its own source cannot be Haskell output |
+| `pb/` Python sources | The bounded pre-binary handoff makes the minimum platform-adapter distinction, establishes the contained toolchain, builds Haskell, and `exec`s the binary with argv unchanged. It is not the Haskell `BootstrapCoordinator` and never decides validation or product behavior |
 | Cabal project and package descriptions | Consumed by the compiler that builds the generator. Generating them would require the generator to already be built |
 | The ignore contracts | Read by version control and the container builder, both of which act on the tree before and around any amoebius process |
-| Authored expectations — `documents/`, `DEVELOPMENT_PLAN/`, the root policy files, and independently authored oracles under `test/` | These exist precisely to *not* be derived. A document or an oracle is an independent expectation, and deriving it from the thing it checks turns a specification into a description and destroys its value as a check ([`../documentation_standards.md` §16](../documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list)) |
+| Governance prose and licences | Human requirements and legal text are non-source inputs; generated documentation still belongs under `.build/docs/**` |
 
-Everything else is generated: the Dhall schema and its examples, the container recipe and the bake catalog, the
-rendered manifests, the SQL schema and its policies, the PureScript contracts and the client bundle, and the
-build mutants.
+Everything else is generated: Dhall schemas and values, the container recipe and bake catalog, rendered
+manifests, SQL, PureScript/JavaScript source and bundles, shell helpers, Proto, Pulumi programs, serialized
+fixtures/oracles, checking tools, and materialized mutants. Operator values are external or untracked inputs,
+not a source exception.
 
-**Checking tooling splits across the two reasons**, so it is stated rather than left to be inferred. A
-checker's *mechanism* — how it walks the tree, parses a document, joins two tables — is generated like anything
-else. A checker's *expectation* — the predicate it asserts, the corpus it compares against — is authored, for
-the reason [§7](#7-goldens-become-oracles) gives: an oracle written from the output it checks stays green when
-the generator is wrong. A tool that generated its own expectation would be describing its subject, and the
-generated half must therefore never be the half that decides the verdict.
+Checking mechanisms and expectations are separately reviewed Haskell source. A checker may lazily emit an
+external-language helper or encoded corpus, but that emitted half never decides its own verdict. The
+expectation remains independent because it is authored from the requirement in a distinct Haskell module and
+subject to human review, not because a serialized file is tracked.
 
 **What this forecloses.** A second home for a class of artifact. Once the tracked copy is gone there is no
 place for drift to hide, which is the guarantee
@@ -198,7 +194,7 @@ response to a red golden is to regenerate it, which is the test being deleted on
 Under this calculus the golden is also redundant with the address: a change in the rendered bytes is already a
 change in the name, so "did the output change" is answered by the calculus and needs no fixture.
 
-What replaces it is a **semantic oracle**: an independently authored predicate over the rendered artifact,
+What replaces it is a **Haskell semantic oracle**: an independently authored predicate over the rendered artifact,
 asserting the property the artifact exists to have. That a rendered manifest declares no privileged container.
 That an emitted schema's every scope-bearing table carries its constraint. That a container recipe's every
 layer is reachable from a declared stage. An oracle is written from the requirement rather than from the
@@ -211,14 +207,16 @@ output, so it stays red when the generator is wrong, which is the whole job
 
 - **It does not make the recipes correct.** A deterministic, budgeted, injectively named rendering of the wrong
   content is all of those things and still wrong. That is the [§7](#7-goldens-become-oracles) oracle's job.
-- **It does not remove the bootstrap.** The exception list is small, and it is not empty, and the artifacts on
-  it are exactly the ones with no generator to check them. They are reviewed the old way.
-- **The calculus is built; recipe delivery is incremental.** Phase 3 delivered the target set, recipe type,
-  address, and region. Phase 47 delivered the checking corpus's deterministic materialization seam: 234 tool
-  sources and 371 mutation declarations render twice to identical build-only bytes, while authored mechanisms
-  remain independent reference inputs. Deriving gate mechanisms from workflow declarations and retiring those
-  reference copies is Phase 49, so Phase 47 is not evidence for that stronger claim. Other real renderings
-  belong to their owning phases. Status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+- **It does not remove the bootstrap boundary.** Python beneath `pb/**` is the sole bounded source-language
+  exception, and qualification observes its actual argv/`exec` effects from outside the bootstrap. A
+  deny-by-default Haskell source/effect audit owns that classification; prose and filename conventions cannot
+  widen it. Repository/build metadata and documentation receive structural checks and human review only. No
+  product behavior, test expectation, oracle, mutant, fixture, recipe, or generated source is admitted merely
+  because a human reviewed a non-Haskell artifact: those declarations remain Haskell, and every serialized
+  projection is materialized lazily beneath `.build/**`.
+- **It does not establish delivery status.** Which recipes exist and which gates have been independently
+  accepted belongs only to the [tracker](../../DEVELOPMENT_PLAN/README.md). This doctrine carries no current
+  validation claim.
 
 ---
 
@@ -226,7 +224,8 @@ output, so it stays red when the generator is wrong, which is the whole job
 
 This document is normative only. Which phase delivers the target set, the recipes for each artifact class, the
 addressing scheme, and the region is owned by [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
-Normative shapes are design intent; only explicitly named phase instances are tested amoebius results.
+Normative shapes are design intent. Candidate evidence becomes accepted phase status only through the plan's
+human-controlled promotion procedure; this doctrine records no tested instance.
 
 ---
 
@@ -234,7 +233,7 @@ Normative shapes are design intent; only explicitly named phase instances are te
 - [Engineering Doctrine Index](./README.md)
 - [JIT Budget Doctrine](./jit_budget_doctrine.md) — the grant [§5](#5-materialize-consume-reap) spends and the retention grant [§6](#6-ephemeral-and-retained) demands
 - [Workflow Calculus Doctrine](./workflow_calculus_doctrine.md) — the workflows that open and close artifact regions
-- [Evidence Calculus Doctrine](./evidence_calculus_doctrine.md) — why an expectation is authored rather than generated, which is the exception [§2](#2-the-rule-and-the-closed-exception-list) admits
+- [Evidence Calculus Doctrine](./evidence_calculus_doctrine.md) — why an expectation is authored independently as Haskell while its encodings remain generated
 - [Extension Conformance Doctrine](./extension_conformance_doctrine.md) — the obligation surface an extension's artifact component fills
 - [Extension Conformance Laws](./extension_conformance_laws.md) — L2, L3, and C7, the laws stated over this calculus
 - [Generated Artifacts Doctrine](./generated_artifacts_doctrine.md) — the narrower rule this doctrine generalises

@@ -15,10 +15,12 @@ once in the type and again by a total check before any effect. The enumeration's
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Scope](#1-scope)
@@ -41,7 +43,7 @@ flowchart LR
   g2 -->|"linked extension source only"| g3
   g2 -->|"anything the decoder admits"| ps
   ps -->|"anything the seal admits"| rg
-  rg -->|"anything the golden admits"| le
+  rg -->|"anything the Haskell semantic predicate admits"| le
 ```
 *Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Storage is the largest slice and the one caught earliest, with 79 per cent foreclosed before any provisioning fold runs. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
@@ -103,8 +105,9 @@ its exactly-matching PV ([§4.1](./illegal_state_techniques.md#41-pvcpv-binding-
 **Layer:** type-foreclosed at the Haskell IR — a bare PVC or free-floating PV has no constructor once decoded — with its concrete rejection stage at gadt-decode, since Dhall has no opaque types; runtime-checked residue — that the PVC actually binds its PV.
 **Validation-locus:** `gadt-decode` (the exactly-matching-PV pairing is a Haskell smart-constructor / GADT
 discipline whose teeth Dhall cannot hold — Dhall has no opaque types to hide the raw claim and PV record
-constructors ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), so the mismatched pair is a compile-fail
-golden pinned at Phase 27, not a `dhall type` failure at authoring) + `live-effect` residue (that the running
+constructors ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)). A tracked Haskell negative declaration lazily
+materializes the mismatched-pair module beneath `.build/test-corpora/**` and requires its exact GHC refusal at
+Phase 27; this is not a `dhall type` failure at authoring) + `live-effect` residue (that the running
 PVC actually binds its PV at reconcile, owned by the runtime-enforcement proof).
 
 ### 3.18 Unbounded storage anywhere

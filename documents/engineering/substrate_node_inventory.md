@@ -19,7 +19,7 @@ follows — owned by [substrate_doctrine.md](./substrate_doctrine.md), of which 
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -31,9 +31,9 @@ that the rest of amoebius reads. It is the **single owner** (an ownership index,
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
 
-**Phase 9 read-side status.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md)
-validates the capacity/topology fold against authored in-process `NodeCapacity`, host, candidate-class, taint,
-and quota values.
+**Phase-9 read-side target — NOT VALIDATED.** The
+[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) must validate the capacity/topology fold
+against authored in-process `NodeCapacity`, host, candidate-class, taint, and quota values.
 It performs no live inventory read. The required `declared allocatable ≤ observed allocatable` cross-check,
 filesystem/runtime metadata observation, VM boot, and node join therefore remain **UNVERIFIED** until their
 owning live phases.

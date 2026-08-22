@@ -9,17 +9,10 @@
 > standard HA platform-service set from typed manifests with no Helm and no public-registry pull.
 > **Read this if**: phase 77 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 77 delivers the hostless provider child + convergence + Lease handoff; its design is owned by [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), [image_build_doctrine.md](../documents/engineering/image_build_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu → provider` substrate.
-The scoped gate is implemented at the available linux-cpu/Kubernetes boundary; actual EKS convergence remains
-UNVERIFIED because Phase 76 could not authenticate to AWS.
-Scoped seal: `python3 tools/provider_child_bringup_gate.py --reuse-fresh-live` passed 12 checks
-on 2026-08-11; ledger `external-run-reference`,
-receipt `external-run-reference`.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -32,9 +25,11 @@ receipt `external-run-reference`.
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 77.1: Two-stage capacity bootstrap for a hostless provider child ⏸️](#sprint-771-two-stage-capacity-bootstrap-for-a-hostless-provider-child-)
@@ -48,53 +43,25 @@ receipt `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-76 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 76, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-🟡 **Scoped validation complete; provider runtime incomplete.** `Amoebius.Cluster.ProviderBringUp` and
-`Amoebius.Daemon.InClusterControlPlane`, the Phase-0 corpus, contract/live tests, scoped Kubernetes driver, gate,
-enumeration, and ledger are built. Pure tests cover pinned private images, bootstrap refusals, readiness,
-complete add-on-domain cutover, managed authority, Lease freshness, exact services, hostless topology, and
-second-pass no-op. A live retained-kind drill observed the scheduler and non-Serving control-plane daemon Deployments,
-four old-UID release/replacement joins, same-UID/fresh-resourceVersion parent→absence→child Lease handoff,
-sixteen Service objects, zero forbidden mutations, `Never` pull policy, and exact cleanup. This is a
-**Kubernetes API boundary emulating the `Managed Eks` child shape, not an EKS result**. The following target
-description remains design intent wherever it requires EKS, a managed node, cloud LoadBalancer, full service
-reachability/HA, provider Keycloak ingress, or cloud/network/OS observers. This phase opens after the
-[Phase 76](phase_76_provider_deploy_checkpoint.md) gate (the provider-cluster Pulumi deploy-from-inside + Vault-Transit-enveloped MinIO checkpoint + `observeProviderAccount`, which lands a ready `Managed Eks` control plane and its base managed node group with the pinned amoebius base/scheduler OCI content already imported and capacity-debited into the first node's CRI store). It runs on the **linux-cpu → provider** substrate in
-**Register 3** (live infrastructure): the parent amoebius cluster is a single-node `kind` cluster on linux-cpu
-(the Phase 55 bootstrap coordinator), from inside which the Deployment-`replicas=1` control-plane daemon (Phase 65) drove the Phase-76
-deploy; this phase then reconciles the resulting hostless EKS child to full platform convergence. `→ provider`
-names the *deploy target class* — a cloud-managed EKS cluster reached over the cloud API — not a fifth hardware
-substrate; the provider child has **no host** and no Apple/CUDA substrate of its own, so the gate stays
-single-substrate (`linux-cpu`) while exercising a provider target. This sub-phase owns **the child's stateless
-in-cluster control plane, the two-stage capacity bootstrap, the parent→child Lease handoff, and the standard-HA
-convergence** — never the Pulumi deploy/checkpoint that produced its input ([Phase 76](phase_76_provider_deploy_checkpoint.md)),
-never the per-PV durable EBS + create-vs-delete credential model ([Phase 78](phase_78_provider_ebs_credential.md)),
-and never dynamic node provisioning or the leak-free teardown sweep ([Phase 79](phase_79_provider_dynamic_nodes.md)).
-Status transitions are recorded reverse-chronologically here once work begins.
-
-Every hardware substrate can always run the `linux-cpu` parent lane.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase delivers the **provider-managed column** of the two-cluster-kinds table: a provider child is the
+This phase's target is the **provider-managed column** of the two-cluster-kinds table: a provider child is the
 *same machine* as any other cluster from the reconciler's point of view, minus the host. It owns exactly four
-things, all driven from the single linux-cpu parent over the cloud/K8s API against a child already deployed by
-Phase 75.
+things, all driven from the single linux-cpu parent over the cloud/K8s API against a child that Phase 76 must
+first deploy and a human must approve.
 
 First, **the two-stage capacity bootstrap for a hostless child**. Once the EKS API and Phase-76 base node are
 reachable, the authenticated parent holds a cold-start capability scoped to the child's derived control-plane
@@ -117,11 +84,12 @@ k8s/etcd property of the Lease, never a bespoke amoebius election; unknown or st
 Third, **the hostless daemon topology**. A provider child runs **exactly one** in-cluster control-plane daemon role, **one**
 `amoebius-capacity` scheduler role, and **zero** host worker-daemon roles. The host-only NodePort comms path and
 host worker daemons are structurally absent — there is no host — and the child advertises **no** host substrate,
-confirming at runtime the type-level foreclosure that the `Managed Eks` arm carries no `LinuxHost` witness (a
-state already unrepresentable in the pre-cluster band's Dhall dhall-typecheck schema and GADT decoder, observed here).
+confirming at runtime the type-level foreclosure that the `Managed Eks` arm carries no `LinuxHost` witness.
+Human-approved Phase 25 schema generation and Phase 26 GADT decoding must make that state unrepresentable before
+this phase may observe the corresponding runtime residue.
 
 Fourth, **the standard-HA convergence from typed manifests**. Through the child admin REST after handoff, the
-run initializes/unseals Vault, delivers the child's projected `.dhall`, and the control-plane daemon converges the
+run initializes/unseals Vault, lazily renders the child's projection beneath `.build/dhall/**`, and the control-plane daemon converges the
 **complete** standard HA platform-service stack — registry, MinIO, Vault, Pulsar, Redis/Sentinel, Prometheus/Grafana, Postgres,
 Envoy/Gateway API, Keycloak, cloud LoadBalancer — through the Phase-58 reconciler, **not** a thinner or different
 service set, reachable and HA, with wild ingress only via Keycloak, with no Helm and no public-registry pull.
@@ -150,181 +118,105 @@ flowchart LR
 
 **Phase scope:** one cohesive claim — *a provider child is the same shape as any other amoebius cluster*. Hostless means the control-plane daemon has no privileged host beneath it to fall back on.
 
-**Substrate:** linux-cpu → provider — the [§L](development_plan_standards.md#l-one-substrate-discipline) Parent-drives-provider escape form. The acceptance gate runs on
-exactly one hardware substrate, the linux-cpu parent `kind` cluster from inside which the control-plane daemon drove the
-Phase-76 deploy and now drives this convergence; `→ provider` (EKS) is the deploy target class, not a hardware
-substrate ([development_plan_standards.md §L](development_plan_standards.md#l-one-substrate-discipline)).
+**Substrate:** linux-cpu — the acceptance gate runs on exactly one hardware substrate: the linux-cpu parent
+`kind` cluster from inside which the control-plane daemon drove the Phase-76 deploy and now drives this
+convergence. EKS is the deploy target, not a hardware substrate
+([development_plan_standards.md §L](development_plan_standards.md#l-one-substrate-discipline)).
 
-**Lane:** linux-cpu/amd64 → provider ([§L](development_plan_standards.md#l-one-substrate-discipline))
+**Lane:** provider — the canonical managed-provider target lane driven from the linux-cpu parent
+([§L](development_plan_standards.md#l-one-substrate-discipline)).
 
 **Register:** 3 (live infrastructure) — the gate brings a real provider child through bootstrap, handoff, and
 standard-service convergence and re-runs it; no register-1/2 in-process check discharges it.
 
-**Depends on:** [Phase 76](phase_76_provider_deploy_checkpoint.md) — provider Pulumi deploy-from-inside + enveloped checkpoint, which this phase consumes rather than rebuilds.
-
-**Gate:** the `InForceSpec` bring-up run satisfies every reference predicate, committed oracle, enumerated
-negative, and the seeded mutant named in [Gate integrity](#gate-integrity), from a linux-cpu parent against a
-Phase-76-deployed `Managed Eks` child. Exit 0 and a self-reported empty diff cannot satisfy it.
+**Depends on:** [Phase 76](phase_76_provider_deploy_checkpoint.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 77`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-> **Provider corpus split (by design).** `test/fixture/dhall/provider_ebs_credential/provider_provision.dhall` and the
-> `mut-35.*` mutant family are this sub-phase's own Phase-0 corpus. The four provider sub-phases
-> (Phases 49–52; see [Phase 76](phase_76_provider_deploy_checkpoint.md)) share one provider topology
-> *shape* while each commits and gates its own slice — not accidental double-ownership.
-This section carries this sub-phase's **slice** of the provider gate apparatus, partitioned along
-the hostless-child / convergence / Lease-handoff seam (per
-[`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
-The deploy/checkpoint apparatus (`test/golden/checkpoint_envelope.json`, `test/golden/engine_execve.txt`, the
-`test/negative/host_shell_pulumi_up.sh` no-in-cluster-control-plane negative, and the `mut-44.1-static-key` /
-`mut-44.1-leak-path` / `mut-44.1-drop-parallel-executor` mutants) stays in
-[Phase 76](phase_76_provider_deploy_checkpoint.md); the per-PV EBS / credential apparatus
-(`test/golden/ebs_credential_matrix.txt`, `test/fixture/provider_ebs_credential/ebs_csi_bake_expected.dhall`, and the
-`mut-46.1-allow-delete` / `mut-46.1-enable-dynamic-provisioner` / `mut-46.1-credit-old-before-observed-delete` /
-`mut-46.1-drop-copy-executor` mutants) stays in [Phase 78](phase_78_provider_ebs_credential.md); the dynamic-node
-/ quota / teardown-sweep apparatus (`test/fixture/dhall/phase_69_provider_over_quota.dhall`, the expected two-instance
-identity map and tag-sweep oracle, and the `mut-47.1-*` / `mut-47.2-skip-sweep` mutants) stays in
-[Phase 79](phase_79_provider_dynamic_nodes.md). This phase inherits only the convergence/handoff slice below.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-**Oracle-pinning (§M.1).** Every fixture, expected foreclosure/error tag, and reference table this gate checks
-against is authored and **committed in this phase's oracle-pinning sprint**, before `Amoebius.Cluster.ProviderBringUp` and the provider-child
-control-plane daemon wiring exist — no oracle is regenerated from the implementation's own output:
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *a provider child is the same shape as any other amoebius cluster*. Hostless means the control-plane daemon has no privileged host beneath it to fall back on. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 77` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 76 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-- **Representative set (§M.7)** — the committed topology `test/fixture/dhall/provider_ebs_credential/provider_provision.dhall`, restricted
-  to its **provider-child bring-up + standard-service-convergence slice**: one `Managed Eks` control plane, one
-  base managed node group (size 1, deployed by Phase 76), the child `amoebius-capacity-scheduler` (`pods=1`), the
-  stateless in-cluster control-plane daemon, and the complete standard HA service set. The dynamic-node, per-PV-EBS, and
-  teardown-sweep members of that same committed topology belong to the sibling sub-phases named above and are not
-  exercised here.
-- **The committed standard-service-set oracle** `test/golden/standard_service_set.txt` (§M.7): the **explicit**
-  service list the converged child must present — registry, MinIO, Vault, Pulsar, Redis/Sentinel, Prometheus/Grafana, Postgres,
-  Envoy/Gateway API, Keycloak, cloud LoadBalancer — authored independently of the reconciler, so "converges the
-  full standard set" is a machine-checked exact-match against a hand-authored list, not a happy-path shape.
-- **The committed convergence-path argv/image-source oracle** `test/golden/convergence_argv.txt` (§M.3/§M.5): the
-  expected absolute-path tool invocations on the convergence path (zero `helm` invocations) and the expected
-  in-cluster registry host every platform image resolves to.
-- **The committed Lease-handoff authority-sequence oracle** `test/golden/lease_handoff_sequence.txt` (§M.3): the
-  expected ordered transition parent-bootstrap-holder → drained/released → fresh holder-absence readback →
-  authenticated child-control-plane-holder, authored independently of the handoff code.
-- **The committed foreclosure tag** `NoHostSubstrateOnManagedEks` (§M.8): the specific expected foreclosure the
-  runtime substrate-shape assertion must raise — the `Managed Eks` arm carries no `LinuxHost` witness — paired
-  with a positive self-managed arm that differs only in carrying a host witness.
+## Resource provision — UNRESOLVED
 
-**Committed mutation quota (§M.2).** This phase inherits **one** committed seeded mutant from the source corpus —
-the one that breaks the bake-only supply chain on the convergence seam — committed and re-run (not run once); the
-gate MUST turn it red:
-
-- `mut-45.1-public-pull` — a platform manifest pinned to a public-registry image instead of the in-cluster
-  registry / preloaded CRI digest (effect swap on the image source). It MUST go **red** on the OS-boundary
-  image-pull observer (the CNI/containerd pull log / egress network trace), which records a pull from a host
-  outside the in-cluster registry — a red the reconciler's self-reported "converged" status could never surface,
-  which is exactly why the observer sits at the OS boundary.
-
-**Independent reference predicates (§M.3).** Every equivalence check defines its reference side **independently of the bring-up/convergence code**, never by reusing its own status report:
-
-1. the **standard-service-set** predicate takes the converged child's **live** Kubernetes/Service inventory and
-   asserts it exact-matches `test/golden/standard_service_set.txt` — every named service present, HA, and
-   reachable, with every wild route reachable **only** through Keycloak/Envoy — so a thinner or substituted
-   service set fails against the committed list rather than against the reconciler's own diff;
-2. the **no-Helm / no-public-pull** predicate reads an **OS-boundary observer** (an argv-recording shim on the
-   convergence path plus a CNI/containerd image-pull log or egress network trace, §M.5), asserts **zero** `helm`
-   invocations and **zero** image pulls from any host outside the in-cluster registry against
-   `test/golden/convergence_argv.txt`, and is the predicate `mut-45.1-public-pull` turns red;
-3. the **Lease-handoff authority** predicate reads an **independent** Kubernetes Lease/audit observer (not the
-   handoff code's self-report) and asserts the ordered sequence in `test/golden/lease_handoff_sequence.txt` with
-   **zero parent mutations after release** and **zero child mutations before acquire**; the race fixtures
-   (simultaneous acquire, lost release/acquire response, stale `resourceVersion`, watch gap, control-plane daemon Pod-UID
-   replacement) each converge to exactly one holder or refuse without effects;
-4. the **hostless-topology** predicate asserts the child runs exactly one control-plane daemon role, one capacity-scheduler
-   role, and zero host daemons, with no host NodePort peer and no advertised host substrate, and that the
-   `Managed Eks` arm's substrate-shape check raises the committed foreclosure tag `NoHostSubstrateOnManagedEks`
-   (§M.8), paired with a positive self-managed arm carrying a host witness;
-5. the **no-op** predicate reads the OS-boundary mutating-call audit trail (§M.5/§M.6) on run 2 of the bring-up
-   against the converged child and asserts **zero mutating** cloud-API/K8s-API create/modify/delete calls — not
-   exit 0, not a self-reported empty diff.
-
-**Concrete corpus (§M.7).** The representative set is named explicitly above (the bring-up/convergence slice of
-`test/fixture/dhall/provider_ebs_credential/provider_provision.dhall` plus the explicit committed service set). The bootstrap-ordering
-negatives are enumerated and each asserts its specific rejected outcome (§M.8): a guarded test Pod before
-`ManagedCapacityReady`, an omitted add-on, an old UID still present, a replacement without a reservation join, and
-a second default-scheduler exception. **Scope boundary (no forward dependency).** This gate reaches convergence,
-handoff, and the no-op re-run against a Phase-76-deployed base node group; it does **not** provision a dynamic
-extra node ([Phase 79](phase_79_provider_dynamic_nodes.md)), bind a per-PV durable EBS
-([Phase 78](phase_78_provider_ebs_credential.md)), or assert the independent leak-free tag-sweep at teardown
-([Phase 79](phase_79_provider_dynamic_nodes.md)) — the run tears the base provider stack down through Phase 70's
-own deploy lifecycle, and the leak-free sweep witness is recorded **deferred to Phase 79**, never as proven here.
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6` for the hostless child; negatives under `test/negative/provider_child_bringup/` pin a Lease handed to a holder that cannot witness it, and a verdict binds the core version the laws came from.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — hostless provider child + convergence + Lease handoff provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
-- [`cluster_lifecycle_doctrine.md §1`](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)
+- [`workflow_calculus_doctrine.md` §3 — Teardown is a type obligation](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation) — hostless provider child + convergence + Lease handoff provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
+- [`cluster_lifecycle_doctrine.md` §1 — Two cluster kinds, one lifecycle shape](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)
   — *two cluster kinds, one lifecycle shape* — with
-  [`§2`](../documents/engineering/cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
+  [`cluster_lifecycle_doctrine.md` §2 — Bring-up and bootstrap](../documents/engineering/cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
   (*bring-up and bootstrap*, the init-follows-readiness ordering) and
-  [`§3`](../documents/engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)
-  (*amoebic spawning — the recursive forest*): this phase delivers the **provider-managed column** of the
+  [`cluster_lifecycle_doctrine.md` §3 — Amoebic spawning — the recursive forest](../documents/engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)
+  (*amoebic spawning — the recursive forest*): this phase's target must deliver the **provider-managed column** of the
   two-cluster-kinds table — no child host binary, no host worker daemons, one in-cluster control-plane daemon plus the
   mandatory capacity-scheduler role — as the child-side of Phase 76's cloud-keyed amoebic spawn, converging the
   same fungible shape as a self-managed cluster in a readiness-driven order (bootstrap scheduler → add-on cutover
   → managed authority → handoff → platform convergence), never on timers.
-- [`daemon_topology_doctrine.md §3.1`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
-  and [`§5`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
+- [`daemon_topology_doctrine.md` §3.1 — "Exactly one pod" is a k8s/etcd property, not an amoebius election](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
+  and [`daemon_topology_doctrine.md` §5 — Single-instance and coordination — delegated, not elected](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
   — *exactly one pod is a k8s/etcd property* / *single-instance and coordination — delegated, not elected*: the
   child control-plane daemon's single-instance is a k8s/etcd concern held through the mandatory reconciler `Lease`, so the
   parent→child handoff is a Lease release/acquire, never a bespoke leadership election. A provider child runs
   exactly one in-cluster control-plane daemon role plus the mandatory `amoebius-capacity` scheduler role from the same
   binary/image and zero host daemons; scheduler reservation/Binding is capacity authority, not control-plane daemon election.
-- [`image_build_doctrine.md §2`](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
-  with [`§7`](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
-  — *the single distribution rule: bake the binaries, pull only in-cluster*: the scheduler bootstrap references
-  the exact OCI digest Phase 76 preloaded into the base node's CRI store, and every standard platform service is
-  a baked binary under typed manifests, so convergence needs neither the not-yet-ready child registry nor a public
-  pull — the exact contract `mut-45.1-public-pull` is committed to violate.
-- [`platform_services_doctrine.md §1`](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)
-  and [`§12`](../documents/engineering/platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)
+- [`image_build_doctrine.md` §2 — The single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
+  with [`image_build_doctrine.md` §7 — What amoebius bakes vs builds — the base container is the supply chain](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
+  — *the single distribution rule: bake the binaries, pull only in-cluster*: the scheduler bootstrap must
+  reference the exact OCI digest that the future human-approved Phase 76 gate preloads into the base node's CRI
+  store, and every standard platform service is
+  a baked binary under typed manifests, except the fixed Distribution `registry:2` image that the parent
+  preloads separately. Convergence therefore needs neither the not-yet-ready child registry nor a public pull
+  — the exact Haskell changed-subject mutant `mut-45.1-public-pull` is applied to violate this contract.
+- [`platform_services_doctrine.md` §1 — The Invariant: every cluster is the same cluster](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)
+  and [`platform_services_doctrine.md` §12 — Substrate equivalence as a structural invariant](../documents/engineering/platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)
   — *every cluster is the same cluster* / *substrate equivalence as a structural invariant*: a provider child
-  converges the **same** complete standard HA service set as any other cluster — not a thinner set — so substrate
-  equivalence is a structural invariant validated live on the provider target, with wild ingress only via
+  must converge the **same** complete standard HA service set as any other cluster — not a thinner set — so
+  substrate equivalence must be validated live on the provider target, with wild ingress only via
   Keycloak/Envoy.
-- [`illegal_state_catalog.md §3`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
+- [`illegal_state_catalog.md` §3 — The catalog — states a valid spec cannot represent](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
   — *the catalog — states a valid spec cannot represent* (the topology arm): the hostless-provider-child state —
-  the `Managed Eks` arm carrying no `LinuxHost` witness and no host-worker index — is already unrepresentable in
-  the pre-cluster band (the Dhall dhall-typecheck schema and the GADT decoder); this phase **observes that foreclosure at runtime** via the substrate-shape assertion and the committed foreclosure tag.
-- [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
+  the `Managed Eks` arm carrying no `LinuxHost` witness and no host-worker index — must first be made unrepresentable in
+  the human-approved pre-cluster band (the generated Dhall schema and the GADT decoder); this phase **observes that
+  foreclosure at runtime** via the substrate-shape assertion and a separately authored Haskell foreclosure tag.
+- [`chaos_failover_doctrine.md` §12 — The moral core — proven, tested, assumed](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
   (cross-reference) — *proven, tested, assumed*: the gate run emits a proven/tested/assumed ledger; skipping an
   applicable bring-up/handoff observation move (the independent Lease audit, the OS-boundary image-pull observer,
   the no-op audit) marks that layer UNVERIFIED, never green.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 77.1: Two-stage capacity bootstrap for a hostless provider child ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Cluster/ProviderBringUp.hs` (the
-bootstrap-scheduler creation, add-on cutover, and managed-authority mint for a provider child), reusing the
-Phase-59 `Amoebius.Scheduler.*` role and its two-stage bootstrap-cutover / execution-identity-admission
-machinery (BUILT/SCOPED-VALIDATED)
-**Blocked by**: reopened numeric predecessor gates.
-**Requires**: `cloud-account` — the credentialed account a provider child is brought up inside. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-61 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-operators-prompt-automated)).
-**Independent Validation**: the parent bootstrap holder walks a hostless child from a raw default-scheduled
-EKS to `ManagedCapacityReady` in one observed order, and every out-of-order or incomplete bootstrap fixture
-is rejected. The numbered Validation list below states that order and those negatives.
-**Docs to update**:
-`documents/engineering/cluster_lifecycle_doctrine.md` (§2 bring-up and bootstrap on a provider child),
-`documents/engineering/daemon_topology_doctrine.md` (the capacity scheduler as a mandatory in-cluster role),
-`documents/engineering/image_build_doctrine.md` (the preloaded scheduler digest, no public pull),
-`DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`cluster_lifecycle_doctrine.md §2 — Bring-up and bootstrap`](../documents/engineering/cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
 and the two-stage capacity bootstrap of the [`daemon_topology_doctrine.md §3.1`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
 capacity-scheduler role: stage a provider child from a raw default-scheduled EKS through
@@ -332,6 +224,7 @@ capacity-scheduler role: stage a provider child from a raw default-scheduled EKS
 is admitted before the child's own capacity scheduler alone binds Pods.
 
 ### Deliverables
+
 - Provider-child bring-up that, once the EKS API and base node are reachable, uses the authenticated parent's
   cold-start capability — limited to the child's derived control-plane Namespace and mandatory reconciler `Lease`
   — to create/acquire that `Lease` as the **bootstrap holder**, read back the exact holder/`resourceVersion`, and
@@ -348,6 +241,7 @@ is admitted before the child's own capacity scheduler alone binds Pods.
   self-managed cluster; the provider realization is validated here for the first time.
 
 ### Validation
+
 1. Against a Phase-76-deployed child, the parent bootstrap holder creates `amoebius-capacity-scheduler`
    (`pods=1`) referencing the preloaded CRI digest, proves the default-scheduled scheduler's exact active
    generation/config/root as `BootstrapCapacitySchedulerReady`, patches only the finite provider/kube-system
@@ -360,28 +254,16 @@ is admitted before the child's own capacity scheduler alone binds Pods.
    not-yet-ready child registry or a public registry.
 
 ### Remaining Work
+
 Run the built protocol against a Phase-76-created EKS control plane and managed node, then read back the real
 provider add-on and CRI-preload boundaries. The local and retained-Kubernetes protocol seams are complete.
 
 ## Sprint 77.2: Parent→child Lease handoff + hostless daemon topology ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Daemon/InClusterControlPlane.hs`
-(provider-child control-plane daemon wiring — exactly one control-plane daemon role, one capacity-scheduler role, zero host
-worker-daemon roles), `src/Amoebius/Cluster/ProviderBringUp.hs` (the bootstrap-authority
-release + fresh-absence readback + authenticated child acquire) (BUILT/SCOPED-VALIDATED)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: single-writer authority moves from the parent bootstrap holder to the
-authenticated child control-plane daemon through release and a fresh absence readback on the same Lease, and the child
-comes up with one control-plane daemon role, one scheduler role, and no host at all. The numbered Validation list below
-states the observed sequence and the topology assertions.
-**Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md` (§1 the provider-managed column,
-§3 cloud-keyed amoebic spawn), `documents/engineering/daemon_topology_doctrine.md` (§3.1/§5 the control-plane daemon +
-capacity scheduler as the only in-cluster daemon roles on a hostless child),
-`documents/illegal_state/illegal_state_catalog.md` (the hostless-provider-child topology arm observed at
-runtime), `DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt the provider-managed column of [`cluster_lifecycle_doctrine.md §1 — Two cluster kinds, one lifecycle shape`](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)
 and [`daemon_topology_doctrine.md §5 — single-instance and coordination — delegated, not elected`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected):
 hand the mandatory reconciler `Lease` from the parent bootstrap holder to the authenticated child control-plane daemon
@@ -389,6 +271,7 @@ through release and fresh holder-absence readback, and run the child with exactl
 one capacity-scheduler role, and zero host daemons — no host binary, no host worker daemon, no host substrate.
 
 ### Deliverables
+
 - Pre-handoff convergence under the parent bootstrap holder of the typed platform prerequisites — including the
   sealed Vault and the MinIO/registry substrate the stateless control-plane daemon depends on — leaving the child ready to
   host its own control-plane daemon.
@@ -408,6 +291,7 @@ one capacity-scheduler role, and zero host daemons — no host binary, no host w
   foreclosure tag `NoHostSubstrateOnManagedEks`.
 
 ### Validation
+
 1. From `ManagedCapacityReady`, the parent bootstrap holder converges the pre-handoff Vault and MinIO/registry
    substrate, applies the child control-plane daemon **while still holding the Lease** — the Pod stays non-Serving and
    cannot mutate — then drains/releases the bootstrap holder, freshly observes holder absence on that same
@@ -424,31 +308,16 @@ one capacity-scheduler role, and zero host daemons — no host binary, no host w
    witness.
 
 ### Remaining Work
+
 Repeat the exact Lease/topology observers on a real Managed EKS child. Retained kind establishes the Kubernetes
 ordering and no-mutation boundary only; actual provider host foreclosure remains UNVERIFIED.
 
 ## Sprint 77.3: Standard-HA platform-service convergence from typed manifests ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Cluster/ProviderBringUp.hs`
-(post-handoff child admin REST: Vault init/unseal, projected `.dhall` delivery, and the control-plane daemon's
-standard-service convergence), converging through the Phase-58 reconciler and consuming the Phase 56/39–43
-platform-service manifests (BUILT at the protocol boundary; provider enaction UNVERIFIED)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: through the child admin REST after handoff, the run
-initializes/unseals Vault, delivers the child's projected `.dhall`, and the control-plane daemon converges the
-**complete** standard HA platform-service stack (registry, MinIO, Vault, Pulsar, Redis/Sentinel,
-Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud LoadBalancer) from typed manifests via the
-Phase-58 reconciler — reachable, HA, wild ingress only via Keycloak — **not** a thinner or different service
-set. The converged live inventory exact-matches the committed `test/golden/standard_service_set.txt`; an
-OS-boundary observer records **zero** `helm` invocations and **zero** image pulls from any host outside the
-in-cluster registry.
-**Docs to update**: `documents/engineering/platform_services_doctrine.md` (fungible
-standard-service convergence on a provider substrate), `documents/engineering/cluster_lifecycle_doctrine.md`
-(§3 the child converges via the reconciler), `documents/engineering/image_build_doctrine.md` (baked
-services, no public pull), `DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`platform_services_doctrine.md §1 — every cluster is the same cluster`](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)
 and [`§12 — substrate equivalence as a structural invariant`](../documents/engineering/platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant):
 converge a provider child to the **same** complete standard HA platform-service set as any other cluster from
@@ -456,19 +325,22 @@ typed manifests via the Phase-58 reconciler, with no Helm and no public-registry
 is a structural invariant tested on the provider target.
 
 ### Deliverables
+
 - Post-handoff child admin REST bring-up: initialize/unseal the child Vault, deliver the child's projected
   `.dhall`, and hand the control-plane daemon its converge loop.
-- Convergence of the **complete** standard HA platform-service stack — registry (`distribution`), MinIO, Vault,
+- Convergence of the **complete** standard HA platform-service stack — registry (Distribution `registry:2`), MinIO, Vault,
   Pulsar, Redis/Sentinel, Prometheus/Grafana, Percona/Patroni Postgres (with pgAdmin), Envoy/Gateway API, Keycloak, and the cloud
   LoadBalancer — through the Phase-58 reconciler from typed manifests, using the same HA-capable topology at
   `replicas=1` without claiming replica redundancy, reachable, wild ingress only via Keycloak/Envoy; **not** a
   thinner or different set.
-- No Helm and no public-registry pull anywhere on the convergence path: every service image is a baked binary
-  resolved through the in-cluster registry / preloaded CRI content.
+- No Helm and no public-registry pull anywhere on the convergence path: service binaries use the baked base,
+  while the sole Distribution `registry:2` provider image and required amoebius images arrive through
+  explicitly preloaded CRI content or the healthy in-cluster registry.
 - An in-file honesty note: the standard set and its HA-capable shape are planned for self-managed clusters in
   Phases 36/39–43; convergence of that exact set on a hostless provider child is tested here for the first time.
 
 ### Validation
+
 1. The child reaches the standard-service fungible shape — the **explicit** committed service set (registry,
    MinIO, Vault, Pulsar, Redis/Sentinel, Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud LoadBalancer, §M.7),
    HA and reachable, wild ingress only via Keycloak — asserted by exact-match of the live inventory against
@@ -479,29 +351,16 @@ is a structural invariant tested on the provider target.
    public-registry image) MUST go **red** on the image-pull observer.
 
 ### Remaining Work
+
 On real EKS, converge and probe the complete services for reachability, HA shape, sole Keycloak wild ingress,
 cloud LoadBalancer behavior, zero Helm calls, and zero public-registry network pulls.
 
 ## Sprint 77.4: The provider-child bring-up gate ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/fixture/dhall/provider_ebs_credential/provider_provision.dhall` (the committed gate
-topology, exercised here on its provider-child bring-up + standard-service-convergence slice),
-`test/spec/provider/{Phase45ContractSpec,Phase45LiveSpec}.hs`,
-`tools/phase45_{provider_child_live,gate}.py`, with its generated ledger under `.build/runs/phase_71/`
-(observed footprint; provider OS/cloud observers UNVERIFIED)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: one end-to-end run takes a Phase-76-deployed `Managed Eks` child from bootstrap
-through handoff to complete standard-HA convergence, re-runs as an observed no-op, and turns
-`mut-45.1-public-pull` red; the emitted ledger marks the deferred sweep UNVERIFIED. The numbered Validation
-list below states each condition.
-**Docs to update**:
-`documents/engineering/cluster_lifecycle_doctrine.md` (§1/§2/§3),
-`documents/engineering/daemon_topology_doctrine.md` (§3.1/§5),
-`documents/engineering/platform_services_doctrine.md`, `documents/engineering/testing_doctrine.md` (the
-per-run ledger; the leak-free sweep deferred to Phase 79), `DEVELOPMENT_PLAN/README.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`cluster_lifecycle_doctrine.md §1 — Two cluster kinds, one lifecycle shape`](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)
 and [`chaos_failover_doctrine.md §12 — proven, tested, assumed`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed):
 assemble the sub-phase's single Register-3 gate — a hostless provider child brought to full standard-HA
@@ -510,6 +369,7 @@ a red `mut-45.1-public-pull` — and emit the per-run proven/tested/assumed ledg
 leak-free-sweep layer UNVERIFIED here.
 
 ### Deliverables
+
 - The gate over the committed representative set (§M.7): the provider-child bring-up + standard-service-convergence
   slice of `test/fixture/dhall/provider_ebs_credential/provider_provision.dhall`, driven end-to-end — bootstrap scheduler readiness,
   complete add-on cutover, full managed authority, parent→child Lease handoff, complete standard-HA convergence,
@@ -523,6 +383,7 @@ leak-free-sweep layer UNVERIFIED here.
   green.
 
 ### Validation
+
 1. Run the gate `InForceSpec` end-to-end over `test/fixture/dhall/provider_ebs_credential/provider_provision.dhall`
    (bring-up/convergence slice) from a linux-cpu parent: the
    child's scheduler reaches `BootstrapCapacitySchedulerReady`, every bootstrap add-on old UID is released and its
@@ -543,13 +404,15 @@ leak-free-sweep layer UNVERIFIED here.
    green here.
 
 ### Remaining Work
+
 Re-run without `PARTIAL_EXTERNAL_AUTHORITY` once valid AWS authority permits Phase 76 to materialize the EKS
 child. Eleven enumerated provider/cloud surfaces remain explicitly UNVERIFIED; Phase 79 still owns the final
 leak-free provider tag sweep.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/cluster_lifecycle_doctrine.md` — record that §1's provider-managed column (no host,
   in-cluster control-plane daemon + mandatory capacity-scheduler role only), §2 (the readiness-driven bring-up/bootstrap
   ordering), and §3 (the child side of the cloud-keyed amoebic spawn) gain an amoebius EKS reference; flip the
@@ -559,9 +422,10 @@ leak-free provider tag sweep.
   control-plane daemon role and one `amoebius-capacity` scheduler role under the Deployment-`replicas=1` control-plane daemon (§3.1),
   single-instance a k8s/etcd property, with the parent→child handoff a Lease release/acquire and no bespoke
   election (§5), and zero host daemons.
-- `documents/engineering/image_build_doctrine.md` — record that the child's scheduler bootstrap and every standard
-  platform service resolve to baked binaries via the preloaded CRI digest / in-cluster registry (§2/§7); no public
-  image or Helm path is introduced on the convergence seam.
+- `documents/engineering/image_build_doctrine.md` — record that the child's scheduler bootstrap and standard
+  services use baked binaries via the preloaded CRI digest / in-cluster registry, except that the sole
+  Distribution `registry:2` provider uses its separately pinned and preloaded image (§2/§7/§9); no alternate
+  registry, public workload pull, or Helm path is introduced on the convergence seam.
 - `documents/engineering/platform_services_doctrine.md` — record the fungible standard-service convergence on a
   provider substrate (§1 every cluster is the same cluster, §12 substrate equivalence): the same complete HA set,
   reachable, wild ingress only via Keycloak.
@@ -572,6 +436,7 @@ leak-free provider tag sweep.
   deferral of the elevated leak-free durable-resource sweep to Phase 78.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/system_components.md` — register the `amoebius-runtime` provider-child control-plane daemon wiring
   (`Amoebius.Daemon.InClusterControlPlane`) and `Amoebius.Cluster.ProviderBringUp` as Phase-77 design-first rows,
   each mapped to its owning doctrine; map the reused `Amoebius.Scheduler.*` role to its Phase 59 delivery and the
@@ -581,6 +446,7 @@ leak-free provider tag sweep.
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase 77 row's status once the gate passes; link this document.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker; Phase 77 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format) sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate integrity)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election; single-instance delegated to k8s/etcd; standard platform services on every cluster, HA always)

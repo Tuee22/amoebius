@@ -16,12 +16,12 @@ owned by [platform_services_doctrine.md](./platform_services_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is diagnostic only and never current validation evidence. Target doctrine remains normative; current state is owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
@@ -234,12 +234,11 @@ equality; equal bytes or a provider version alone never establish content equali
 old, new, failed-action, rollback, and execution capacity until action readback and old-target cleanup succeed.
 No caller-authored prior `Provisioned*` value is transition input.
 
-Phase 66 now implements and gates provider **administrative** apply/readback for all six arms over two
-equal-shaped tenants. Six separated observers recover a post-ready challenge, paired illegal graphs have zero
-provider effects, and cleanup inventories return to preflight. For Pulsar this means tenant/namespace/ACL state
-only. The authenticated native-client produce/consume round trip belongs to Phase 67; Phase 66 records that
-data-path check as UNVERIFIED rather than inferring it from administrative convergence. Ledger
-`dynamically-resolved`.
+The Phase-66 target is provider **administrative** apply/readback for all six arms over two equal-shaped
+tenants, but Phase 66 is **NOT VALIDATED**. Its eventual contract must use six separated observers, recover a
+post-ready challenge, require zero provider effects for paired illegal graphs, and return cleanup inventories
+to preflight. For Pulsar this covers tenant/namespace/ACL state only. The authenticated native-client
+produce/consume round trip belongs to Phase 67 and cannot be inferred from administrative convergence.
 
 There is no DSL surface with which to hand-author a secret-store policy, a message-bus access list, or an
 SQL grant, precisely as there is none for a network policy. A hand-authored, un-derived provider grant is
@@ -309,10 +308,10 @@ The six security laws stated over it — attestation as an index, the skolemised
 indistinguishable refusal, derived injective namespaces, and honest revocation bounds — are owned by
 [`extension_conformance_security.md`](./extension_conformance_security.md), and the states they foreclose are
 catalogued in [`../illegal_state/illegal_state_tenancy.md`](../illegal_state/illegal_state_tenancy.md).
-[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) implements the lexical Register-1 mechanism: its
-rank-2 request eliminator, private constructors, and compile pairs prevent request-index forgery, retagging,
-and escape. Persisted re-entry, law-family conformance, and provider enforcement remain outside that result;
-the [tracker](../../DEVELOPMENT_PLAN/README.md) owns current status.
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) owns the future lexical Register-1 mechanism: its
+rank-2 request eliminator, private constructors, and Haskell compile pairs must prevent request-index forgery,
+retagging, and escape. Phase 8 is **NOT VALIDATED**; persisted re-entry, law-family conformance, and provider
+enforcement are later claims.
 
 **Application code is shared; authority is not.** Low-code applications use the same generic client and server
 interpreters. Isolation therefore cannot rely on one tenant's compiled UI being absent from another image. It
@@ -321,13 +320,12 @@ policy, and server reauthorization. A deployment may instantiate one runtime sli
 pooling several tenant authorities in one process requires a separately admitted isolation shape and does not
 follow from sharing the generic binary.
 
-**Phase-68 runtime evidence.** Three real Keycloak subject credentials spanning two tenants are authenticated
-and introspected before a private Haskell request-context adapter evaluates the pinned own/foreign matrix.
-Postgres RLS, derived tenant/subject MinIO keys, derived Pulsar namespaces through the native Haskell client,
-and enforcing NetworkPolicy admit the sanctioned path and leave zero foreign provider or cursor effects.
-Independent readback, exact teardown, and the `drop_user_predicate` and `accept_body_tenant` mutants pass.
-Browser scope switching remains Phase 82; cross-cluster isolation and complete provider-audit-log
-correspondence remain `UNVERIFIED`. See [Phase 68](../../DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md).
+**Phase-68 target runtime evidence — NOT VALIDATED.** The eventual contract must authenticate independently
+issued Keycloak subjects spanning two tenants before a private Haskell request-context adapter evaluates the
+own/foreign matrix. It must independently observe the sanctioned Postgres, MinIO, Pulsar, and NetworkPolicy
+path, zero foreign effects, exact teardown, and changed-production-subject mutants. Browser scope switching,
+cross-cluster isolation, and complete provider-audit correspondence are later claims. See
+[Phase 68](../../DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md).
 
 In the default shared-service model, tenants
 share one Vault, one broker set, one MinIO, and one Kubernetes control plane, so isolation rests on per-tenant
@@ -396,7 +394,13 @@ Phase 94 adds a narrower jitML UI instance. The pure adapter refuses a copied Re
 
 ## 9. Planning ownership
 
-This document is normative tenancy doctrine only. Phase 65 delivers the root-operator `dhall update` admin boundary, Phase 66 delivers the derived six-provider administrative projection, and Phase 68 validates the real-Keycloak scoped application request path through Postgres, MinIO, Pulsar, and NetworkPolicy. Tenant-admin scope-narrowed `dhall update`, browser tenant switching, cross-cluster isolation, and complete provider audit correspondence remain later work. Delivery sequencing, completion status, validation gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and by the tenancy phase it schedules; this doc never maintains a competing status ledger and links back for status.
+This document is normative tenancy doctrine only. Phases 65, 66, and 68 respectively own the target
+root-operator administrative boundary, derived six-provider administrative projection, and real-Keycloak
+scoped application path through Postgres, MinIO, Pulsar, and NetworkPolicy. All three phases are **NOT
+VALIDATED**. Tenant-admin scope narrowing, browser tenant switching, cross-cluster isolation, and complete
+provider audit correspondence remain later work. Delivery sequencing, completion status, validation gates,
+and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); this
+document never maintains a competing status ledger.
 
 Several choices are open and owned by the plan, not fixed here: whether a Vault-namespace-per-tenant (an
 Enterprise feature) or a per-tenant policy-and-prefix on OSS Vault backs the tenant's secret boundary
@@ -406,10 +410,11 @@ which tenant/owner invariants are type-foreclosed in the decoded Haskell IR vers
 value-level fold, stated honestly because Dhall lacks dependent types
 ([§7](#7-two-isolation-layers-and-the-honest-limit)).
 
-Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), only the explicitly named Phase-8/27/45/47 and scoped Phase-91/61/72 slices are validated amoebius results. The service-native tenancy shapes this doctrine composes are the identity realm, the per-tenant secret-store
-policy, the message-bus tenant namespace, the object-store bucket policy, Kubernetes access control and
-network policy, and SQL roles and grants. Untested shapes have sibling precedents but are not upgraded into an
-amoebius result; the named phase evidence alone determines what is built and tested.
+Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
+there are no currently validated phase slices. The service-native target shapes are the identity realm,
+per-tenant secret-store policy, message-bus tenant namespace, object-store bucket policy, Kubernetes access
+control and network policy, and SQL roles and grants. Sibling precedents are context only and cannot become an
+amoebius result; only a numerically ordered, independently reviewed gate followed by human promotion may do so.
 
 ---
 

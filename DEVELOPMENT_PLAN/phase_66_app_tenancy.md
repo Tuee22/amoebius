@@ -4,31 +4,27 @@
 > provider, and establish by independent provider readback that no arm was omitted, collapsed, or hand-authored.
 > **Read this if**: phase 66 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 66 delivers the tenant/provider provisioning; its design is owned by [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-10 with `python3 tools/app_tenancy_gate.py --reuse-fresh-live`;
-ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — one sealed provider transaction](#resource-provision--one-sealed-provider-transaction)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 66.1: Derive, apply, and externally read back tenant provider policy ⏸️](#sprint-661-derive-apply-and-externally-read-back-tenant-provider-policy-)
@@ -39,30 +35,18 @@ ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-65 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 65, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-**Done.** The checked two-tenant graph is derived into a sealed, closed six-provider transaction and
-live-applied to Keycloak, Vault, Pulsar, MinIO, Kubernetes API, and Postgres. Distinct provider-native or
-scoped ServiceAccount observers recovered the fresh challenge, both illegal twins produced zero effects, both
-mutants turned red, and authenticated target inventories returned to preflight. Application-data-path,
-per-user enforcement, browser, UI-runtime, and HA claims remain explicitly UNVERIFIED.
-
-Every hardware substrate can always run the `linux-cpu` lane. When a validation needs a pristine Linux host,
-use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows; specialized lanes are additive.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -72,84 +56,51 @@ Keycloak, Vault, Pulsar, MinIO, Kubernetes API (including NetworkPolicy), and Po
 target, executor attachment, persistence demand, and cleanup action retains its `AppId` and `TenantId`; there
 is no unqualified resource coordinate and no DSL constructor for a provider-native grant.
 
-The phase then applies that sealed derivation to the live Phase-65 cluster and reads each provider back through
+The future gate must apply that sealed derivation to the human-approved Phase-65 cluster and read each provider back through
 a separately authenticated observer. The boundary tests whether checked policy was projected completely and
 faithfully for the representative corpus. It does **not** establish that a user request is confined by those
 policies: Phase 68 owns the real-credential, own-subject/foreign-subject and own-tenant/foreign-tenant
 application-data-path gate.
 
-**Session scope:** one provider-projection transaction and one acceptance command,
-`cabal test tenant-provider-provisioning-live`. Split the phase if work adds an application data operation, UI
-interaction, another cluster, HA failover, a second substrate, or a separately useful provider feature.
+**Phase scope:** one provider-projection transaction. The `tenant-provider-provisioning-live` Haskell
+component suite can supply supporting observations only; the sole acceptance command is `pb validate phase 66`. Split the phase if
+work adds an application data operation, UI interaction, another cluster, HA failover, a second substrate, or
+a separately useful provider feature.
+**Substrate:** `linux-cpu` — future live cluster observation only after the Phase-49 barrier and every predecessor approval.
+**Lane:** `linux-cpu/amd64`.
+**Register:** 3 — live provider materialization and independent readback; NOT VALIDATED.
 
-**Depends on:** [Phase 38](phase_38_ui_authorization_kernel.md) and [Phase 64](phase_64_keycloak_ingress.md). Phase 38 supplies the closed authorization graph and derive-not-author
-boundary; Phase 65 supplies the live checked-spec control-plane daemon. Phase 8 is transitive through Phase 38.
-
-**Phase scope:** one cohesive claim — *a tenant graph materializes into every required provider, or the phase fails*. Independent readback is what distinguishes materialization from intention.
-
-**Substrate:** linux-cpu — the single-node `kind` cluster assembled through Phase 64. No linux-cuda, Apple,
-Windows, provider-cloud, multicluster, or availability claim is made.
-
-**Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
-
-**Register:** 3 — live infrastructure.
-
-**Gate:** `python3 tools/run_phase_gate.py 66` passes the pinned six-arm projection relation, the
-paired illegal twins, the bypass probes, the teardown inventory, and both committed mutants of
-[Gate integrity](#gate-integrity) — Register 3 green, the application data path UNVERIFIED until Phase 67.
+**Depends on:** [Phase 65](phase_65_live_dsl_deploy.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 66`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-That one command creates two challenge-qualified tenant projections, applies their sealed provider
-transactions, and passes only when separately authenticated provider APIs expose the exact oracle-pinned
-object/policy relation for all six provider arms. A missing arm, a tenant-key collapse, a caller-authored
-grant, incomplete teardown, or either committed mutant makes it fail. Application round trips are
-deliberately absent.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *a tenant graph materializes into every required provider, or the phase fails*. Independent readback is what distinguishes materialization from intention. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 66` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 65 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-The harness may coordinate the gate but may not be its oracle. Expected relations, authority, challenges, and
-observations are independent of the policy renderer and enactor under test.
+## Resource provision — UNRESOLVED
 
-- **Representative set:** Phase 0 pins one app, two equal-shaped tenants, two issuer-qualified subjects per
-  tenant, one membership and owner relation, one derived read role, one object bucket, one Pulsar namespace,
-  one Vault prefix, one Postgres role/schema projection, and the corresponding Kubernetes namespace and
-  NetworkPolicy. Equal-shaped tenants expose accidental unqualified-key coalescing.
-- **Pinned oracle:** `test/fixture/app_tenancy/provider_projection_matrix.tsv` is hand-authored before the
-  renderer. It names each logical input relation and the required normalized provider object type, parent,
-  tenant qualifier, permission class, and absence rule. It contains symbolic challenge slots, not golden bytes
-  generated by the SUT.
-- **Fresh challenge:** after the control-plane daemon, enactor, and observers report ready, the harness generates an
-  unpredictable run nonce and distinct tenant suffixes. Those values enter through the checked test spec and
-  must be recovered from every provider's authenticated readback. Pre-recorded objects cannot satisfy the
-  oracle.
-- **Authority separation:** the enactor has only the provider mutation rights required for the transaction.
-  Six read-only observer principals, minted or scoped after the run begins, query Keycloak, Vault, Pulsar,
-  MinIO, Kubernetes, and Postgres control-plane APIs. The SUT's success response, logs, metrics, desired-state
-  cache, and rendered payload are not evidence.
-- **Paired cases:** the legal derived graph is paired with (1) the same graph containing one provider-native
-  hand-authored grant and (2) the same graph with a tenant-mismatched reference. Both illegal twins must be
-  rejected before provider mutation, while the legal twin produces the fresh observed objects.
-- **Zero-effect evidence:** authenticated pre/post provider inventories establish that each rejected twin
-  creates no object, grant, role, namespace, prefix, policy, or audit-side payload carrying its distinct
-  forbidden nonce.
-  A decode error without the external zero-effect observation cannot pass.
-- **Bypass probes:** the gate submits a provider grant directly to the public checked-spec decoder, swaps an
-  outer tenant key around an otherwise valid inner projection, and calls the enactor with an unsealed
-  derivation. No route may construct a provisioned action or cause a provider effect.
-- **Committed mutants:** `drop_provider_arm` removes the Pulsar arm after successful derivation;
-  `collapse_tenant_key` keys provider actions by unqualified local id. The first must fail exact provider
-  readback and the second must collide the equal-shaped tenants or produce the wrong tenant parent. Each mutant
-  must turn the unchanged gate red for its intended reason.
-- **Cleanup observation:** teardown uses the sealed delete transaction, then the read-only observers compare
-  complete authenticated inventories with preflight. Challenge-qualified residue, observer/enactor credential
-  reuse, missing observations, stale epochs, or a mismatched nonce fails closed.
-
-The evidence ledger records the Phase-0 oracle digest, checked-spec and derivation digests, nonce hash,
-authority identities and epochs, normalized raw-observation digests, paired-case outcomes, mutant outcomes,
-cleanup inventories, substrate, and Register. It records no credential material.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
-
-## Resource provision — one sealed provider transaction
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 - Whole-deployment binding admits the app namespace, provider persistence, provider executor, API-object,
   etcd, object-metadata, SQL-role, Pulsar-metadata, observer, teardown, and failure-retention demands before the
@@ -160,7 +111,7 @@ cleanup inventories, substrate, and Register. It records no credential material.
 - The provider index is closed and exhaustive. NetworkPolicy is a Kubernetes-API payload; Postgres roles and
   grants are Postgres provider outputs; MinIO IAM and bucket policy are provider metadata rather than app
   objects. Pulsar application produce/consume is owned by Phase 67 and scoped end-to-end enforcement by Phase
-  36.
+  68.
 - The enactors accept only provisioned actions paired with a fresh validated live target. They do not accept a
   `TenantSpec`, caller-authored policy, raw provider coordinate, or previously serialized `Provisioned*` value.
 - Deletes are explicit actions over desired and observed identity, including observed-only tenants. Old and
@@ -169,43 +120,27 @@ cleanup inventories, substrate, and Register. It records no credential material.
 
 ## Doctrine adopted
 
-- [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — tenant/provider provisioning provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
-- [`tenancy_doctrine.md` §4 — typed tenant and subject shapes](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding): consume the Phase-8 identity
+- [`workflow_calculus_doctrine.md` §3 — Teardown is a type obligation](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation) — tenant/provider provisioning provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
+- [`tenancy_doctrine.md` §4 — The typed shapes: `TenantSpec` / `SubjectSpec` / `Membership` / `Owner` / `RoleBinding`](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding): consume the Phase-8 identity
   values without reintroducing an unqualified subject, tenant, owner, membership, or resource reference.
-- [`tenancy_doctrine.md` §5 — RBAC is derived](../documents/engineering/tenancy_doctrine.md#5-rbac-is-derived-never-authored): a checked tenant/role graph is the only source of provider policy.
-- [`service_capability_doctrine.md` §4 — capability, provider, shape](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding): provider bindings supply mechanism, never caller authority.
-- [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md): apply the
+- [`tenancy_doctrine.md` §5 — RBAC is derived, never authored](../documents/engineering/tenancy_doctrine.md#5-rbac-is-derived-never-authored): a checked tenant/role graph is the only source of provider policy.
+- [`service_capability_doctrine.md` §4 — Capability → provider → shape: the binding](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding): provider bindings supply mechanism, never caller authority.
+- [`platform_services_doctrine.md` §8 — Postgres — Patroni-via-Percona, one cluster per consumer, with pgAdmin; “Tenant policy persistence is one provider-indexed transaction”](../documents/engineering/platform_services_doctrine.md#tenant-policy-persistence-is-one-provider-indexed-transaction): apply the
   provider-indexed transaction through least-authority enactors and authenticated readback.
-- [`testing_spoof_resistance.md` §12](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): bind the claim to post-ready challenges,
+- [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence): bind the claim to post-ready challenges,
   authority separation, raw external observations, paired cases, bypass probes, and killed mutants.
-- [`illegal_state_security.md` §3.80](../documents/illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant): Phase 66 provisions the policy
-  precondition but leaves its live request-enforcement residue to Phase 67.
+- [`illegal_state_security.md` §3.80 — A subject resolving or mutating another subject's resource without a grant](../documents/illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant): Phase 66 provisions the policy
+  precondition but leaves its live request-enforcement residue to Phase 68.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 66.1: Derive, apply, and externally read back tenant provider policy ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-zero-effect rejects, complete target inventory, and two mutation checks are validated at Register 3.
-**Implementation**: `src/Amoebius/Tenancy/ProviderProjection.hs`,
-`src/Amoebius/Tenancy/ProviderTransaction.hs`,
-`src/Amoebius/Tenancy/Provider/{Keycloak,Vault,Pulsar,Minio,KubernetesApi,Postgres}.hs`, and
-`test/spec/live/TenantProviderProvisioningSpec.hs`, and `tools/app_tenancy_live.py` — delivered
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: one command instantiates the pinned relation with fresh tenant
-challenges, observes all six control planes using read-only identities, establishes that both illegal twins
-have zero provider effects, kills both committed mutants, and verifies teardown inventory.
-**Docs to update**: `documents/engineering/tenancy_doctrine.md`,
-`documents/engineering/platform_services_doctrine.md`, `documents/engineering/testing_doctrine.md`, and
-`documents/illegal_state/illegal_state_security.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -222,22 +157,23 @@ provisioning alone establishes application request isolation.
 
 ### Validation
 
-1. Run `cabal test tenant-provider-provisioning-live`; require every challenge-qualified object and relation in
+1. Rejected historical observation: the `tenant-provider-provisioning-live` Cabal suite expected every
+   challenge-qualified object and relation in
    `provider_projection_matrix.tsv` exactly once under the correct app/tenant parent.
 2. Require the hand-authored-grant and tenant-mismatched twins to fail before mutation and externally establish their distinct
    forbidden nonces absent through every provider observer.
 3. Run both committed mutants against the unchanged gate and require the pinned missing-arm and tenant-key
    failures.
 4. Tear down and require authenticated provider inventories to equal preflight; persist only hashed evidence
-   and explicitly mark application data-path isolation `UNVERIFIED (Phase 62)`.
+   and explicitly mark application data-path isolation `UNVERIFIED (Phase 68)`.
 
 ### Remaining Work
 
-None. Phase 68 retains the application request-isolation residue.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Phase 68 retains the application request-isolation residue.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - `documents/engineering/tenancy_doctrine.md` and `platform_services_doctrine.md` — record tested provider
   projection/readback only.

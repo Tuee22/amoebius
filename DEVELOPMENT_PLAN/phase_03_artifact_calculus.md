@@ -1,18 +1,21 @@
 # Phase 3: The artifact calculus
 
-> **Purpose**: Targets, recipes, the content-derived address, and the materialize-consume-reap region.
+> **Purpose**: Specify the target Haskell capability to represent artifact kind, recipe,
+> content-derived address, materialization, consumption, and reap boundaries as one typed Haskell
+> calculus.
 > **Read this if**: an artifact's name, region, or recipe has to be reasoned about, or this gate has to be read precisely.
 
-Before the generative re-baseline nothing in the plan owned this: give every artifact amoebius emits a type, a recipe, and a name that is a total function of what it contains.
-Its first deliverable is a closed `Target` set indexing artifact kinds, so a consumer expecting one kind cannot be handed another, and this phase sits where the vocabulary it consumes first exists.
-The rule behind the artifact calculus is owned by [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md), which this contract implements rather than restates.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -20,12 +23,13 @@ The rule behind the artifact calculus is owned by [`jit_artifact_doctrine.md`](.
 ---
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 3.1: The artifact calculus ✅](#sprint-31-the-artifact-calculus-)
+- [Sprint 3.1: The artifact calculus ⏸️](#sprint-31-the-artifact-calculus-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,61 +37,81 @@ The rule behind the artifact calculus is owned by [`jit_artifact_doctrine.md`](.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-20, the first of the five inserted calculi to be built. `python3
-tools/artifact_calculus_gate.py` passes all fourteen sides on substrate `none`, lane `none`, natural `arm64`,
-untranslated: the authored address oracle names 24 cells over six targets and four inputs, the four calculus
-modules carry no ambient read and no partial token, the in-process suite reaches its acceptance token with
-eleven checks green, two independently seeded processes render identical bytes over all six targets, the region
-escape has no type while its legal twin compiles, and all three seeded mutants redden their own locus and no
-other. Attestation
-`sha256:520eb5ce22f97fbc6e334b83aeae88de21d94384d180d4d1b6e49f6f9570cf98` binds to a 2,066-file source
-snapshot; as everywhere here, the reference names the run and this record follows it.
+⏸️ Blocked — NOT VALIDATED.
 
-**Two divergences this phase found rather than introduced**, both recorded in
-[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#still-open-after-this-change): a library
-that shares `hs-source-dirs: src` with a sibling it also depends on recompiles that sibling's modules as home
-modules and fails to build, which `release-lifecycle` does today on an unmodified tree; and the content address
-now has two renderings, this phase's and the store's, because the calculus is below the store and cannot
-depend on it.
+Blocked by redesigned Phase 2, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-Give every artifact amoebius emits a type, a recipe, and a name that is a total function of what it contains.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to represent artifact kind, recipe, content-derived address, materialization,
+consumption, and reap boundaries as one typed Haskell calculus.
 
-**Phase scope:** one cohesive claim — *an artifact cannot exist without a recipe that produced it and a name that is a function of its content*. The kind index, the pure renderer, the address and the region that ends are one claim seen at four points.
-**Substrate:** `none`
-**Lane:** `none`
-**Register:** 1
-**Depends on:** [Phase 2](phase_02_repository_layout_conformance.md) — the target tree, which fixes the paths a recipe renders into. This is the first of the five calculi and consumes no algebra beneath it.
-**Gate:** `python3 tools/run_phase_gate.py 03` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
+
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — represent artifact kind, recipe, content-derived address,
+materialization, consumption, and reap boundaries as one typed Haskell calculus. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 2](phase_02_repository_layout_conformance.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 03`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Independent oracle.** An address table authored from the doctrine, listing the digest inputs each target folds, written before the renderer exists.
-- **Committed mutants.** Mutants drop the rendered bytes from the address, admit a clock into a recipe, and let a handle escape its region.
-- **Specific-reason negatives.** Each negative fixture asserts the reason it fails, paired with a positive differing only in a region whose exit reaps every artifact materialized inside it and not promoted to retained.
-- **Fresh challenge.** Not applicable — this gate is pure, so the separately authored predicate stands in for it: an address table authored from the doctrine, listing the digest inputs each target folds, written before the renderer exists.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — represent artifact kind, recipe, content-derived address, materialization, consumption, and reap boundaries as one typed Haskell calculus. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 03` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 02 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — the rule behind the artifact calculus.
+- [`jit_artifact_doctrine.md` §3 — Targets and recipes](../documents/engineering/jit_artifact_doctrine.md#3-targets-and-recipes) — the rule behind the artifact calculus.
 
 ## Sprints
 
-## Sprint 3.1: The artifact calculus ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done — 2026-08-20.
-**Implementation**: `src/Amoebius/Calculus/Artifact/Target.hs`,
-`src/Amoebius/Calculus/Artifact/Recipe.hs`, `src/Amoebius/Calculus/Artifact/Address.hs`,
-`src/Amoebius/Calculus/Artifact/Region.hs`, `tools/artifact_calculus_gate.py`,
-`test/spec/calculus/ArtifactCalculusSpec.hs`, `test/spec/calculus/ArtifactCorpus.hs`,
-`test/oracle/artifact_calculus/address_inputs.tsv`, `test/oracle/artifact_calculus_surfaces.tsv`,
-`test/negative/compile_fail/artifact_calculus/handle_stays_in_region.hs`,
-`test/negative/compile_fail/artifact_calculus/handle_escapes_region.hs`
-**Blocked by**: None.
-**Independent Validation**: An address table authored from the doctrine, listing the digest inputs each target folds, written before the renderer exists.
-**Docs to update**: `documents/engineering/jit_artifact_doctrine.md`
+## Sprint 3.1: The artifact calculus ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -114,15 +138,20 @@ gate requires the rejection to name the rigid type variable rather than merely t
 
 ### Remaining Work
 
-None for this phase. The budget a materialization spends is the next calculus's and is recorded `UNVERIFIED`
+The pre-reset `None` claim is permanently invalid; the phase remains blocked and NOT VALIDATED. The budget a materialization spends is the next calculus's and is recorded `UNVERIFIED`
 here; nothing in this register observes a running system.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md)
 
+**Cross-references to add:**
+
+- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+
 ## Related Documents
+
 - [Development Plan](README.md)
 - [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — the rule behind the artifact calculus.

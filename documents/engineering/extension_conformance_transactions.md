@@ -30,10 +30,12 @@ the family: the closure argument does not carry them across a seam. The algebra 
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/platform_services_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, documents/README.md, documents/engineering/README.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/platform_services_doctrine.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Scope](#1-scope)
@@ -108,8 +110,11 @@ the whole space of un-scoped statements, and the composition proof cannot reason
 a statement, no way to pass one, and no escape hatch for "just this once". If a transaction you need does not
 exist, add the arm.
 
-**Discharge.** The exported surface is asserted against an independently authored expectation, and compile-fail
-fixtures attempt to pass statement text and to build a predicate. **Residue:** an extension could shell out to a
+**Discharge.** The exported surface is asserted as exact set equality against the separately reviewed Haskell
+`transactionExportExpectation :: Set ExportedSymbol`, which does not inspect or call the production export
+enumerator. Haskell negative declarations lazily materialize attempts to pass statement text and build a
+predicate beneath `.build/test-corpora/**`, then require their exact GHC refusals; no fixture module or encoded
+diagnostic is tracked. **Residue:** an extension could shell out to a
 database client; the ambient-authority scan of C4 is what covers that, not this law.
 
 ### P2 The scope is a required field of every transaction
@@ -135,8 +140,11 @@ The column types, the `NOT NULL` constraints, the composite foreign key back to 
 indexes all follow from the row type, and anything you would have added by hand is either derivable or a
 finding.
 
-**Discharge.** The emitted DDL is compared against an independently authored expectation, and a live catalog
-oracle enumerates every scope-bearing table and requires the constraint and the composite key on each.
+**Discharge.** The emitted DDL is checked by the separately reviewed Haskell
+`rowSchemaExpectation :: RowDeclaration -> Set SchemaConstraint`, implemented without calling the DDL
+emitter. A Haskell live-catalog observer enumerates every scope-bearing table and compares its typed
+observations with that expectation, requiring the constraint and composite key on each. SQL and encoded
+observations are materialized only beneath `.build/test-corpora/**`; neither is an oracle or tracked source.
 Foreclosed state:
 [§3.96](../illegal_state/illegal_state_tenancy.md#396-a-scope-column-that-admits-null).
 
@@ -180,8 +188,10 @@ mutation union has none
 A retired column is unreferenced by the new generation and its bytes stay.
 
 **Discharge.** The generation transition is total over the declared row types, and the no-orphan fold requires
-every retained coordinate in the old generation to be reachable from the new one; the emitted migration is
-compared against an independently authored expectation. Foreclosed states:
+every retained coordinate in the old generation to be reachable from the new one. The separately reviewed
+Haskell `migrationExpectation` derives the allowed transition relation without calling the production
+migration emitter and checks its typed projection. Any emitted SQL or serialized comparison is materialized
+only beneath `.build/test-corpora/**`. Foreclosed states:
 [§3.85](../illegal_state/illegal_state_storage.md#385-a-spec-verb-that-destroys-durable-bytes),
 [§3.86](../illegal_state/illegal_state_storage.md#386-a-new-generation-that-orphans-a-retained-coordinate).
 

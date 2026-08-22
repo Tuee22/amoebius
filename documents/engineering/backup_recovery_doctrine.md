@@ -19,12 +19,12 @@ replica must meet before taking the gateway, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, documents/engineering/README.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
@@ -415,8 +415,8 @@ Per [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-t
   `NoTakeWithoutProvenFreshness` is proven at the model scope; the RTO of an actual cold-seed recovery is
   validated by drill; that the observed watermark faithfully reflects real replication/backup lag is a
   monitored, assumed premise ([`consistency_pacelc_doctrine.md` §4](./consistency_pacelc_doctrine.md#4-honesty-proven--tested--assumed)).
-- **The model-scoped freshness claim is now evidence; the recovery runtime is not.** Phase 17 proved
-  `NoTakeWithoutProvenFreshness` for the bounded gateway model and caught its dedicated witness-removal mutant.
+- **Phase 17 owns the model-scoped freshness proof obligation; the recovery runtime is separate.** Its target
+  gate must establish `NoTakeWithoutProvenFreshness` for the bounded gateway model and catch its dedicated witness-removal mutant.
   The backup representation, deploy/seed mechanics, observed-watermark fidelity, and live RTO remain design
   intent or assumed/runtime-checked residue. Phase order and gates live only in
   [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
@@ -438,9 +438,8 @@ Per [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-t
 
 ## 11. Planning ownership
 
-This document is normative backup-and-recovery doctrine only. It states the target shape; except for the
-explicit Phase-17 model-scoped freshness result above, its statements are design intent, not a built or tested
-amoebius capability. Delivery sequencing, completion status, and
+This document is normative backup-and-recovery doctrine only. It states the target shape; its statements are
+design intent, not a current implementation or validation result. Delivery sequencing, completion status, and
 validation gates — the pure representation folded into the Phase 11–19 gates, the `FreshnessWitness` proof
 extension in the formal-model phase, and the live backup/restore/cold-seed gates riding on the Vault, MinIO,
 provider-credential, multicluster, and test-topology phases — live only in

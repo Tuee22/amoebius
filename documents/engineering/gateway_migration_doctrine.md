@@ -20,6 +20,8 @@ amoebius carries a formal proof obligation rather than delegating it.
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ---
 
 ## 1. Why this doctrine exists
@@ -109,10 +111,10 @@ proper begins only from a target that already holds the source's state.
    endpoint: the target cluster is reached through its **own** apiserver, and the apiserver-VPN-IP is a
    per-cluster (stretched-cluster) construct owned by that cluster, never a shared address repointed here.
 
-**Guarantee — RPO=0.** No committed write is lost — the `PlannedIsLossless` model invariant, proven-for-the-model
-at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 75;
-[§6](#6-honesty-and-layer-markers)) — because writes were frozen and the replica was verified
-caught-up before authority moved. This is a coordinated cross-cluster switchover (Patroni-style), **not** an
+**Target guarantee — RPO=0.** No committed write may be lost. The `PlannedIsLossless` model invariant targets
+proven-for-the-model strength at scope 2, while runtime fidelity of the caught-up verification stays assumed
+until Phase 75 ([§6](#6-honesty-and-layer-markers)). Writes must be frozen and the replica verified caught-up
+before authority moves. This is a coordinated cross-cluster switchover (Patroni-style), **not** an
 asynchronous [Second-Axis](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
 event: it presents no async divergence to reconcile. Browser-session continuity comes from keeping the active
 origin unchanged while its protected host-only cookie is checked against caught-up/shared server-side session
@@ -275,7 +277,7 @@ source it admits is owned by [`backup_recovery_doctrine.md` §8](./backup_recove
 
 ## 6. Honesty and layer markers
 
-The forest/geo-replication substrate is **Phase 74**. Phase 75 realizes the migration shell in
+The forest/geo-replication substrate is assigned to **Phase 74**. Phase 75 owns the migration-shell target in
 `Amoebius.Multicluster.GatewayMigration`, `PlannedHandover`, `PromotionGate`, `DnsRepoint`, and
 `ClientRebind`. Phase order, status, and the acceptance gate are owned by
 [DEVELOPMENT_PLAN/README.md → Phase 75](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
@@ -286,9 +288,9 @@ status.
   ([gateway_migration_model_doctrine.md §3](./gateway_migration_model_doctrine.md#3-the-model), [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)), not merely argued. What stays
   **assumed** is the *runtime physics* the model abstracts — that the caught-up verification and the
   MinIO/Pulsar/Patroni lossless delegation actually hold live — a **runtime-observed** caught-up edge, not a
-  constructive type-level impossibility. Phase 75 observed it with an outside-forest journal and positive lag. Per the
+  constructive type-level impossibility. Phase 75 owns the outside-forest-journal and positive-lag observation. Per the
   honesty rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)),
-  the model property is *proven-for-the-model* and the drilled runtime fidelity is *tested*.
+  the model property targets *proven-for-the-model* strength and the drilled runtime fidelity targets *tested* strength.
 - **Both** branches are the subject of amoebius's one proof obligation, owned by
   [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) and set in the concentration
   principle of [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): the `Failover` async correctness via

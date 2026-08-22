@@ -15,12 +15,12 @@ between the parts, owned by [host_cluster_comms_doctrine.md](./host_cluster_comm
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is diagnostic only and never current validation evidence. Target doctrine remains normative; current state is owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. One runtime binary, three contexts](#1-one-runtime-binary-three-contexts)
@@ -35,24 +35,25 @@ between the parts, owned by [host_cluster_comms_doctrine.md](./host_cluster_comm
 
 ---
 
-**Pure scheduler read-side status.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
-validates the aggregate snapshot/root-version reservation guard, absent-Pod recovery debit, and the pure
-Reserved→BindingInFlight→Bound state algebra. Its 2026-08-21 reseal uses only the bounded Phase-29 suite and
-retains exact execution source/epoch controls. Phase 59 subsequently delivered the same-binary live scheduler
-role and Kubernetes Binding effects; the pure Phase-29 ledger is `external-run-reference`.
+**Target scheduler boundary — NOT VALIDATED.** The eventual
+[Phase-29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must validate the aggregate
+snapshot/root-version reservation guard, absent-Pod recovery debit, and pure
+Reserved→BindingInFlight→Bound algebra. Phase 59 must later validate the same-binary live scheduler role and
+Kubernetes Binding effects. Former reseals and external-run references are permanently invalid evidence.
 
 <a id="1-one-binary-three-contexts"></a>
 
 ## 1. One runtime binary, three contexts
 
 **Every Haskell runtime role uses the same executable.** There is no Haskell CLI package and a separate daemon
-package; one Haskell binary runs in three different ways. The Python `pb` bootstrap coordinator/admin client is the explicit
-operator-frontend boundary: it builds and `exec`s the Haskell command mode during bootstrap, then calls the
-control-plane daemon REST API after handoff. It is not a fourth runtime role.
+package; one Haskell binary runs in three different ways. Python `pb` is only the pre-binary bootstrap and
+validation handoff: it ensures the toolchain, builds, and `exec`s Haskell command mode. After handoff, that
+Haskell command mode calls the control-plane daemon REST API. `pb` is not an operator client or a fourth
+runtime role.
 
 | Context | How it runs | What it is for |
 |---------|-------------|----------------|
-| **Haskell command mode** | A one-shot invocation on a host, normally entered by `pb` during bootstrap, exits when done | `bootstrap` and host-local runtime commands; post-handoff status and administration stay in `pb` over REST |
+| **Haskell command mode** | A one-shot invocation on a host, entered through `pb` only when a pre-binary handoff is required, exits when done | `bootstrap`, host-local runtime commands, and post-handoff status/administration over the control-plane daemon REST API |
 | **Sudo host daemon** | A long-running host process with `sudo` powers | Bring up the distro (kind / rke2) — including installing the **root rke2 server** ([§2.1](#21-a-third-orthogonal-axis-rke2-serveragent-declared)) — install host tooling, talk to `kube-apiserver` over distro mTLS, **supervise host-level worker subprocesses** |
 | **In-cluster pod** | Deployed as a generated typed manifest (no Helm) inside the cluster | Hosts the **control-plane daemon role** ([§3](#3-the-control-plane-daemon)), the dedicated **capacity-scheduler role** ([§3.3](#33-the-capacity-scheduler-a-separate-role-in-the-same-binary)), or a **worker role** ([§4](#4-worker-daemons--n-unelected)) |
 
@@ -66,7 +67,7 @@ The **same-binary policy** is generalized directly from the prodbox sibling
 (`prodbox/documents/engineering/distributed_gateway_architecture.md` → "Same-binary
 policy"). This is structural, not stylistic:
 
-- **One distribution artifact, one dependency closure**, built once from the substrate bootstrap coordinator
+- **One distribution artifact, one dependency closure**, built once through the bounded pre-binary handoff
   against the current dynamically resolved compatible graph. The repository-local attestation records that graph;
   the repository stores no lock/freeze or permanent compiler/package pin
   ([DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md)).
@@ -86,16 +87,15 @@ PureScript assets and Haskell UI-server interpreter specified by
 behaviour. infernix and jitML remain linked trusted workflow and component adapters behind typed ports. The
 named behaviours are libraries inside one binary, not separate products.
 
-[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) supplies the local executable-boundary
-evidence: the existing `amoebius` artifact accepts the `serve-ui` responsibility and refuses readiness on
-missing, duplicate, contract-mismatched, or ABI-mismatched handler registries, while one additional
-unreferenced handler remains legal and unreachable. This is Register-2 evidence
-against local fakes; an in-cluster worker deployment and replica lifecycle remain UNVERIFIED.
+[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) owns the future hardware-free Haskell
+executable-boundary contract. It must admit the `serve-ui` responsibility and refuse missing, duplicate,
+contract-mismatched, or ABI-mismatched handler registries while allowing one unreferenced handler to remain
+unreachable. Phase 43 is **NOT VALIDATED**; it cannot establish an in-cluster worker or replica lifecycle.
 
 This document owns *which contexts exist and what each is for*. **How** the host daemon communicates — the
 distro-mTLS path to `kube-apiserver`, and the host-only NodePort peering with no mTLS — is owned by
 [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md). The **substrate** mechanics behind the
-sudo host daemon — substrate detection, the bootstrap coordinator, host (non-containerized) worker *nodes*, and the
+sudo host daemon — substrate detection, the Haskell `BootstrapCoordinator` role, host (non-containerized) worker *nodes*, and the
 no-environment-variables / no-`PATH` lazy-tool-ensure contract — are owned by
 [substrate_doctrine.md](./substrate_doctrine.md).
 
@@ -127,11 +127,12 @@ There is no fourth arm and no free-text role: a pod that names a role amoebius d
 constructor. `InClusterRole` is what
 [`resource_capacity_schema.md`](./resource_capacity_schema.md)'s `ContainerProcess` names when a container
 runs the amoebius binary, which is how "what this container executes" becomes typed rather than inherited
-from an image's entrypoint. The schema module that will carry these types is `dhall/amoebius/Role.dhall`, imported by `Image.dhall`
-rather than restated there — a union spelled twice is a union that drifts, and this one **has** drifted three
-ways: `Image.dhall` declares it inline and anonymously today, with a nullary `Worker` and a `HostDaemon` arm
-this section gives no container. Extracting the module is Phase 17's; until then the arms above are the target,
-not the tree ([`legacy_tracking_for_deletion_archive.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md#one-binary-many-roles--2026-08-17)).
+from an image's entrypoint. A Haskell schema declaration must carry these types exactly once; Phase 25 may
+lazily render consumer-facing `Role.dhall` and `Image.dhall` files beneath `.build/dhall/**`, but neither
+rendered file is tracked source or authority. The present tracked Dhall forms are condemned legacy
+observations, not a target module layout. Until Phase 25 closes its source row and structural gate, the arms
+above remain design intent only
+([`legacy_tracking_for_deletion.md` §2](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#2-tracked-source-violations)).
 
 **The grid's empty cells have no constructor either.** Context and role are orthogonal, but not every pairing
 exists: a CLI run holds no daemon role, and the host daemon is not a container process. Encoding the *legal
@@ -165,7 +166,8 @@ either lie in the type or route around it.
 The payload is gone for a second reason. Which workers are host-level is a quotient of the detected
 substrate ([§4.1](#41-the-engine-offering-vs-the-node-hardware-in-cluster-pod-or-host-subprocess)) and is **never authored free of it**,
 so a hand-written list of supervised kinds would be a second, unwitnessed source of truth for a derived fact.
-`HostRole` names what a process *is*; what a `BootstrapCoordinator` supervises follows from the substrate.
+`HostRole` names what a process *is*; what the Haskell `BootstrapCoordinator` supervises follows from the
+substrate. This role is never the bounded Python pre-binary handoff.
 
 `HostDaemon` is a **context**, so it appears here and never as an `InClusterRole` arm. A running
 copy learns which arm it is by decoding its `FrameConfig`
@@ -177,7 +179,7 @@ Three facts fall out of the grid:
 - **The control-plane daemon is always an in-cluster role.** A cluster's brain lives *in* the cluster it
   governs. Before that cluster exists, the **sudo host daemon** does the bootstrap work that brings the
   first control-plane daemon into being (this is the prodbox root single-node story), then defers to it — the host
-  daemon is the *bootstrap coordinator*, not the brain.
+  daemon is the Haskell *bootstrap coordinator*, not the brain or the Python pre-binary handoff.
 - **Worker daemons run in both daemon contexts.** Most workers are in-cluster pods; a few must be
   host-level subprocesses because their hardware cannot be containerized (Apple-Metal GPU work, and
   native Windows-CUDA inference — CUDA does not run performantly under WSL2). A host-level worker is the **same binary in the worker role under the host-daemon context**, supervised as a subprocess.
@@ -262,11 +264,10 @@ control-plane daemon never promotes a node from agent to server at runtime; it r
 
 ## 3. The control-plane daemon
 
-> **Current delivery boundary.** Phase 65 delivers and live-validates the in-cluster `replicas=1` control-plane daemon,
-> including the fresh-resourceVersion bootstrap-holder release/absence/control-plane-acquire handoff, separate
-> Lease-renewal authority, exact first-pass reconcile and zero-write rerun, durable replacement, and admin
-> surface. The Register-3 ledger is
-> `dynamically-resolved`.
+> **Target delivery boundary — NOT VALIDATED.** Phase 65 must eventually validate the in-cluster
+> `replicas=1` control-plane daemon, including the fresh-resourceVersion bootstrap-holder
+> release/absence/control-plane-acquire handoff, separate Lease-renewal authority, exact first-pass reconcile,
+> zero-write rerun, durable replacement, and administrative surface. No Register-3 result is current.
 
 **Every cluster has exactly one brain.** Exactly one daemon holds **total authority over the cluster and its secrets**: it runs the reconcile loop that drives the live cluster toward the global `.dhall`, and it is the
 cluster's secret authority. This role **is the prodbox root single-node control-plane behaviour, generalized**
@@ -387,11 +388,11 @@ extents deduplicate by physical allocation identity with workload extents, while
 additive. The root ledger is scheduler-field-owned and is neither server-side-applied nor pruned by the
 control-plane daemon's generic object path.
 
-Phase 59's Register-3 gate validated this role boundary with a namespace `pods=1` quota, the sole
-default-scheduler bootstrap Pod, restricted cutover authority, independently read managed taint/admission/
-Binding RBAC, real Binding assignment after reservation CAS, and leak-free removal of every gate-scoped
-cluster resource. Phase 65 subsequently delivered the in-cluster control-plane daemon without giving it scheduler
-authority.
+Phase 59's future Register-3 gate must validate this role boundary with a namespace `pods=1` quota, the sole
+default-scheduler bootstrap Pod, restricted cutover authority, independently read managed
+taint/admission/Binding RBAC, real Binding assignment after reservation CAS, and leak-free removal of every
+gate-scoped cluster resource. Phase 65 must separately deliver the in-cluster control-plane daemon without
+giving it scheduler authority. Both phases are **NOT VALIDATED**.
 
 ---
 
@@ -488,8 +489,8 @@ Properties shared by all workers:
   (unlike Apple-Metal's `apple_metal_headless_builds.md`), inheriting the honesty framing below.
 
 > **Honesty.** The Pulsar / ML / inference worker roles are **new relative to prodbox** — prodbox had no
-> Pulsar and no ML workers. Phase 67 validates the client substrate workers consume: all four Pulsar
-> subscription encodings are exposed and exercised without an amoebius election. The worker deployments,
+> Pulsar and no ML workers. Phase 67 must eventually validate the client substrate workers consume, including
+> all four Pulsar subscription encodings without an amoebius election; it is **NOT VALIDATED**. Worker deployments,
 > continuous trainer, and ML/inference roles remain forward work for their owning phases; status lives only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -625,17 +626,17 @@ bounded/tiered/retained topic lifecycle offloading to **MinIO/S3** as the cold t
   bespoke election ([§4](#4-worker-daemons--n-unelected), [§4.3](#43-the-feed-sourced-continuous-trainer-single-writer-delegated)).
 - **Operator read-models are projections.** A log-compacted topic read through a Pulsar TableView materializes
   operator-facing projections (e.g. the `workflow-health` read-model, `WorkflowName → SLOStatus`, produced
-  inside the control-plane daemon's reconcile loop and read via `pb workflow health`). A TableView yields only `key →
+  inside the control-plane daemon's reconcile loop and read via `amoebius workflow health`). A TableView yields only `key →
   latest value`; it decides nothing about who leads, because nothing leads by election. The SLO obligation that
   feeds it is owned by [monitoring_doctrine.md](./monitoring_doctrine.md).
 
-Phase 67 validates that the native client exposes and live-delivers `Exclusive`, `Failover`, `Shared`, and
-`Key_Shared`. Phase 69 now validates the topology choice: three workers attach to one broker-ranked `Failover`
-subscription with priority/name order `worker-a`, `worker-b`, `worker-c`; killing `worker-a` after its store
-commit and before command acknowledgement promotes `worker-b`. The broker owns active/standby selection;
-amoebius acquires no Lease and links no election/lock client. The orchestrator, workers, gateway, and collector
-fit their closed provision before the round starts, and teardown leaves no consumer handle or provider
-resource.
+Phase 67 must eventually validate that the native client exposes and live-delivers `Exclusive`, `Failover`,
+`Shared`, and `Key_Shared`. Phase 69 must then validate the topology choice: three workers attach to one
+broker-ranked `Failover` subscription with priority/name order `worker-a`, `worker-b`, `worker-c`, and killing
+`worker-a` after its store commit but before command acknowledgement promotes `worker-b`. The target gives the
+broker active/standby selection and gives amoebius no Lease or election/lock client. Its closed provision must
+fit before the round, and teardown must leave no consumer handle or provider resource. Neither phase is
+validated.
 
 > **Honesty.** Carrying the event log over Pulsar + MinIO is **forward design, new vs prodbox** — prodbox
 > deliberately did *not* use a durable queue for its gateway log. The signed/hash-chained/idempotent discipline
@@ -666,33 +667,30 @@ Lifecycle"); this doc records only the contract amoebius daemons share:
   frame-local fields hot-reload via atomic STM swap on a file-watch; boot fields trigger a
   drain-and-restart so the supervisor relaunches against the new file. No `PATH`, no
   environment-variable precedence on supported paths ([substrate_doctrine.md](./substrate_doctrine.md) for the no-env/no-`PATH` contract). **That frame config arrives differently per context ([§1](#1-one-binary-three-contexts)):** a **CLI / host**
-  binary reads the sibling `amoebius.dhall` written by the bootstrap coordinator; a binary **descending a bootstrap-lift frame** (VM/container) has it **streamed on `stdin` and written once before `exec`** — the parent's
+  binary reads the sibling `amoebius.dhall` written by the Haskell host bootstrap coordinator after Python
+  has execed the binary; a binary **descending a bootstrap-lift frame** (VM/container) has it **streamed on
+  `stdin` and written once before `exec`** — the parent's
   `context-init` mint ([dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)); an **in-cluster pod** receives it as a rendered
   `ConfigMap` mount ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)). In every case a
   frame receives its frame config from its parent and never rewrites its own. The dynamic `InForceSpec` is a
   separate desired-state value updated through the control-plane daemon admin API and stored as a Vault-Transit-enveloped
   MinIO object/ref, not by this file-watch path.
 
-> **Honesty.** Phase 65 validates the control-plane daemon branch of this spine in amoebius: health/readiness/metrics,
-> Lease-gated service, bounded concurrent HTTP connections, serialized admin effects, independent Lease
-> renewal, and replacement recovery. Applying the same spine to later worker roles remains phase-owned design
-> intent. The broader sibling evidence is context, not an amoebius result.
+> **Honesty — target only, NOT VALIDATED.** Phase 65 must validate the control-plane-daemon branch of this
+> spine: health/readiness/metrics, Lease-gated service, bounded concurrent HTTP connections, serialized
+> administrative effects, independent Lease renewal, and replacement recovery. Applying the same spine to
+> later worker roles remains phase-owned target design. Sibling evidence is context, not an amoebius result.
 
-Phase 76 extends the control-plane daemon contract in code with a private `ControlPlaneDaemonContext`: an empty context produces
-the pinned `NoControlPlaneDaemonContext` refusal, a replica count other than one refuses, and a prepared provider
-invocation requires absolute Pulumi/plugin paths and supplies no child environment. Scoped live readback
-confirmed the Phase-65 Deployment at one desired/ready/available replica and placed the two bounded executor
-Jobs. Because AWS authority was invalid, an actual provider `pulumi up` did not run inside that control-plane daemon and
-remains UNVERIFIED; the scoped result must not be read as EKS evidence.
+Phase 76 must eventually extend the control-plane-daemon contract with a private
+`ControlPlaneDaemonContext`: an empty context refuses, replica counts other than one refuse, and prepared
+provider invocations require absolute Pulumi/plugin paths and an empty child environment. No former scoped
+readback or invalid-authority run is current evidence, and Phase 76 is **NOT VALIDATED**.
 
-Phase 77 implements the hostless managed-child topology contract in
-`Amoebius.Daemon.InClusterControlPlane`: exactly one control-plane daemon role, one capacity-scheduler role, and no
-host-daemon context, host NodePort peers, or host-substrate witnesses. Its positive pair keeps a self-managed
-`linux-cpu` host witness, so the managed arm cannot silently erase all hosts. Pure tests and retained-kind
-Kubernetes object readback validate that shape and the Lease-gated non-Serving→Serving transition. Because the
-configured AWS identity cannot materialize EKS, the retained drill is explicitly an emulation of the object
-shape and actual Managed EKS foreclosure remains UNVERIFIED. The universal CPU/VM routing rule is recorded in
-the development-plan substrate registry.
+Phase 77 must then validate the hostless managed-child topology: exactly one control-plane-daemon role, one
+capacity-scheduler role, and no host-daemon context, host NodePort peer, or host-substrate witness. Its
+independent positive control must retain a self-managed `linux-cpu` host witness so the managed arm cannot
+erase all hosts. Actual managed-provider foreclosure requires real authority and cannot be inferred from
+emulated object shape. Phase 77 is **NOT VALIDATED**.
 
 ---
 
@@ -725,11 +723,11 @@ flowchart TD
 ```
 *Orientation. Design intent; the `Process` union and the context-and-role grid it encodes are owned by [§2](#2-context--role-an-orthogonal-grid). Every box below the fork is the same executable — the fork is a decode over a closed union, never a choice of which binary to run, and the grid's empty cells have no arm to draw.*
 
-Phase 93 validates only a host-CUDA execution slice of the accelerator-owner target. A physical GTX 970,
-`libcuda`, and `nvidia-smi` agree on one process executing 200 kernels over ten million parameters, followed by
-device-memory release. The retained kind node advertises no `nvidia.com/gpu`, so no device-plugin allocation,
-DaemonSet-like owner Pod, resource request/limit, node affinity, Pod UID/cgroup join, or Kubernetes audit row
-is claimed. Full sibling training and failover also remain UNVERIFIED. The universal `linux-cpu` route is
+Phase 93 must eventually validate a bounded host-CUDA execution slice of the accelerator-owner target. Its
+independent contract must require a physical device, `libcuda`, and `nvidia-smi` to agree on one process's
+work and subsequent device-memory release. That bounded slice cannot establish device-plugin allocation,
+DaemonSet-like owner Pods, resource requests/limits, node affinity, Pod UID/cgroup joins, Kubernetes audit, or
+full training/failover. Phase 93 is **NOT VALIDATED**. The universal `linux-cpu` route is
 unchanged: Incus supplies a clean Linux/Linux-CUDA guest, Lima serves Apple, and WSL2 serves Windows.
 
 ---
@@ -739,10 +737,11 @@ unchanged: Incus supplies a clean Linux/Linux-CUDA guest, Lima serves Apple, and
 This document is normative daemon-topology doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and never restated here. For orientation
-only (the plan is authoritative): the contexts and the same-binary spine ride the bootstrap-kernel phase; the
-in-cluster **control-plane daemon** was delivered by the Phase-65 live DSL deploy (per
+only (the plan is authoritative): the contexts and the same-binary spine are targets of the bootstrap-kernel
+phase; the in-cluster **control-plane daemon** is a target of the Phase-65 live DSL deploy (per
 [cluster_lifecycle_doctrine.md §10](./cluster_lifecycle_doctrine.md#10-planning-ownership)); single-instance is a
-k8s/etcd property, while amoebius's Lease client/handoff protocol is live-validated; and the **cross-cluster gateway migration** — the one
+k8s/etcd property, while amoebius's Lease client/handoff protocol still requires its phase-owned validation;
+and the **cross-cluster gateway migration** — the one
 simulation/proof obligation — is owned, modeled, and gated by
 [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) and
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) in the multi-cluster phase. This doc states the target
@@ -750,9 +749,9 @@ shape and links back for status.
 
 ---
 
-Phase 84's scoped UI-worker result admits three hard-spread unelected worker roles and demonstrates non-sticky
-host-process recovery after one role stops. It does not observe real Kubernetes scheduling or a provider-zone
-fault, so multi-zone worker availability remains UNVERIFIED.
+Phase 84's future scoped UI-worker contract must admit three hard-spread unelected worker roles and observe
+non-sticky recovery after one role stops. It must use real Kubernetes/provider observations for any multi-zone
+claim. Phase 84 is **NOT VALIDATED**.
 
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)

@@ -5,30 +5,27 @@
 > retained-storage rebind regression still holds behind the new edge.
 > **Read this if**: phase 64 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 64 delivers the Keycloak-owned ingress; its design is owned by [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-10 with `python3 tools/keycloak_ingress_gate.py`; ledger
-`dynamically-resolved`.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — the edge / Patroni / ACME envelope](#resource-provision--the-edge--patroni--acme-envelope)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 64.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak ⏸️](#sprint-641-the-keycloak-owned-edge--loadbalancer--envoygateway-api--keycloak-)
@@ -42,169 +39,85 @@ Validated 2026-08-10 with `python3 tools/keycloak_ingress_gate.py`; ledger
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-63 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 63, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Observed artifact migration — 2026-08-11:** the live gate reads
-`test/fixture/keycloak_ingress/expected-base-digest.txt`, a copy of the Phase-56 image observation. The file must be
-removed; image provenance is checked against Phase 56's verified attestation and the current registry catalog.
-
-**Invalidated historical record:**
-
-**Done.** All four sprints are implemented and the Phase-64 gate is sealed. The retained linux-cpu stack
-now has one externally reachable LoadBalancer, a typed Gateway/HTTPRoute projection, two Ready static Envoy
-data-plane replicas, the real Envoy Gateway v1.4.2 controller runners, Keycloak 26.3.2, and a dedicated
-three-member strict-synchronous Patroni cluster for the Keycloak consumer. The Percona CR is observed by the
-real Phase-63 operator; as in Phase 63, the exact Patroni child is honestly recorded as an amoebius-owned
-manual child projection rather than falsely attributed to the operator. The GatewayClass similarly uses the
-amoebius manual-projection controller name: Envoy Gateway's provider/Gateway API/xDS runners are live and
-observed, while the baked static Envoy Deployment is the data plane rendered from the typed route projection.
-
-The gate positively obtains an OIDC token and serves every pinned route from host, WAN, LAN, and localhost
-origins; rejects unauthenticated HTTP and invalid WebSocket tuples; proves the localhost-only NodePort is
-unreachable off-host; turns a committed backdoor seed red and returns clean; exercises default-deny policy
-through deny→allow→deny graph variation; records Vault-derived TLS/EAB provenance; and finds 93 live SSA
-objects owned by field manager `amoebius`, all using the private Phase-56 digest. Six committed mutants turn
-red for their pinned reasons. The destructive storage regression is run in a separate
-`amoebius-phase32-rebind` kind cluster over the committed Keycloak-relational row and MinIO-object payloads:
-both bytes survive a real node/API deletion and new CA, namespace UID, and node-container identity, then the
-scratch cluster is removed. This isolated projection reuses the Phase-60 persistence harness and deliberately
-does not destroy the retained Phase 35–43 platform cluster.
-
-Every hardware substrate can always run the `linux-cpu` lane. If a validation needs a pristine Linux host,
-use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows; accelerator lanes are additive and never
-remove this CPU baseline.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase closes the last opening in the platform cluster: it makes **Keycloak the sole authenticated door**
-for every wild request. It composes the LoadBalancer address published by Phase 62 (MetalLB on `linux-cpu`)
-with an **Envoy + Gateway API L7 data plane** and **Keycloak OIDC/JWT enforcement**, rendered as typed
-manifests by the Phase-58 reconciler and applied to the live cluster, so that WAN, LAN, and even a
+This phase must close the last opening in the platform cluster by making **Keycloak the sole authenticated
+door** for every wild request. It may compose only future human-approved results: the Phase-62 LoadBalancer
+address, the **Envoy + Gateway API L7 data plane**, **Keycloak OIDC/JWT enforcement**, and typed manifests
+applied by the Phase-58 reconciler. The target is that WAN, LAN, and even a
 localhost-browser connection reach a platform or app surface only after traversing
-`LoadBalancer → Envoy/Gateway API → Keycloak`. It then proves the harder, structural half of the invariant:
+`LoadBalancer → Envoy/Gateway API → Keycloak`. Its redesigned gate must also test the structural half:
 **no workload publishes its own wild ingress and no chart opens a backdoor NodePort** — the sole carve-out is
 the host-origin, localhost-only NodePort that is a *different type* of endpoint, not a wild one. The
 default-deny east-west NetworkPolicy posture, with allow-edges **derived from the declared dependency graph**,
-is applied and exercised live. Finally the phase re-runs the Phase-60 lossless-rebind proof behind the new
-edge, confirming the storage guarantee did not regress when the ingress door was added.
+must be applied and exercised live. Finally, the phase must re-run the Phase-60 lossless-rebind target behind
+the new edge; no current storage proof or ingress result is claimed.
 The same authenticated route machinery explicitly admits the UI server's HTTP upgrade: a WebSocket handshake
 must traverse Keycloak/Envoy, exact-match Origin and the versioned subprotocol, and bind the secure session plus
 single-use nonce before Envoy forwards it. There is no unauthenticated, direct-Service, or alternate SSE route.
 
 The scope stops at *the ingress door and its guarantees*. The DSL deploy through the `replicas=1` control-plane daemon,
 app tenancy, and the Pulsar/workflow runtime are Phase 65+ concerns; this phase exercises the edge from the
-host binary against the fixed standard service set that Phases 41–42 stood up. The one genuinely new-vs-prodbox
+host binary against the fixed standard service set targeted by Phases 62–63. The one genuinely new-vs-prodbox
 piece — the Envoy + Gateway API data plane replacing a hand-configured proxy — is the least evidence-backed
 part of the set.
 
 **Phase scope:** one cohesive claim — *there is exactly one door, and it is Keycloak's*. A workload that tries to publish its own wild ingress must fail rather than be reviewed.
 
 **Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the edge is wired and gated on a single-node `kind` cluster on a linux-cpu
-host, tracked in [substrates.md](substrates.md). This gate did not exercise an accelerator lane, but
+host, tracked in [substrates.md](substrates.md). The future gate does not exercise an accelerator lane, but
 `linux-cpu` remains available on every hardware substrate.
 
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure) — the gate drives a real edge on a real cluster and re-exercises a live
 delete + recreate; a Register-1/2 in-process check cannot discharge it (though the *render-time*
-impossibility of a self-published ingress was already golden-locked pre-cluster in Phase 33).
+impossibility of a self-published ingress must first receive Phase-33 and Phase-49 approval).
 
-**Depends on:** [Phase 63](phase_63_platform_services_2.md) — platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG), which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 64` is green on the live `linux-cpu` stack: the only wild path to any
-surface is `LoadBalancer → Envoy/Gateway API → Keycloak`, and every fixture, origin probe, oracle, observer,
-and committed mutant in [Gate integrity](#gate-integrity) holds.
-
-The gate is not discharged by a deny-all edge, a self-authored clean scan, a circular "derived" assertion, or
-a skipped teardown. It positively exercises OIDC enforcement, validates its own scanners against committed
-seeded violations, oracles "derived" against an independent graph-walk, and witnesses that a genuinely new
-cluster came up (see [Gate integrity](#gate-integrity)).
-
-### Representative set (concrete corpus, §M.7)
-
-The gate's "every wild route / every surface" quantifies over an explicitly enumerated route-inventory
-candidate, `test/fixture/keycloak_ingress/route-inventory.golden`, after independent review. It lists every browser surface on the
-Phase-62/42 standard service stack that the edge fronts: **Grafana, the Keycloak admin console, the Vault UI, the MinIO console, the platform API surface, and a platform-owned authenticated-WebSocket upgrade probe** (the exact set is the golden; if the stack's surface set changes,
-the golden is re-authored and re-committed, never regenerated from the running edge). The three origin classes
-— WAN, LAN, localhost-browser — are each probed from a **distinct Linux network namespace / sidecar container**
-attached to a separate veth with a non-loopback source address for WAN/LAN and the host loopback for
-localhost-browser; a single host-side `curl` of the MetalLB address is **not** an acceptable stand-in for all
-three. The `phase32-tester` realm/user fixture (`test/fixture/keycloak_ingress/realm.json`) is also a regression
-fixture until independently reviewed or replaced.
+**Depends on:** [Phase 63](phase_63_platform_services_2.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 64`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The acceptance condition the gate command discharges is the single door itself. On the live `linux-cpu` cluster
-carrying the standard service stack, every wild route — WAN, LAN, and localhost-browser — must reach a platform
-or app surface **only** through `LoadBalancer → Envoy/Gateway API → Keycloak`, and an unauthenticated request to
-any surface must be rejected at that edge. No workload or chart may publish its own wild ingress or open a
-backdoor NodePort; the sole exception is the host-origin, localhost-only NodePort, which is a distinct endpoint
-type rather than a wild one. The committed authenticated-WebSocket probe must upgrade and exchange a fresh
-challenge only with the valid session/Origin/nonce/subprotocol tuple, while unauthenticated, wrong-Origin,
-replayed-nonce, wrong-subprotocol, and direct-Service attempts produce no backend frame. And the Phase-60
-storage-rebind regression must still hold behind the new edge: a marker row in the Keycloak Patroni database and
-a marker object in MinIO survive a cluster delete + recreate byte-for-byte.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-- **Oracle provenance (§M.1):** the route inventory (`route-inventory.golden`), the test realm/user
-  (`realm.json`), the expected derived-NetworkPolicy set (`netpol-expected.golden`, see 32.3), and the marker
-  payloads (`marker-row.sql`, `marker-object.bin`) are same-commit regression fixtures until independently
-  reviewed or replaced. None may be regenerated from the implementation or promoted by the former manifest.
-- **Committed seeded mutants (§M.2):** at least three committed mutants must go red — (a) an edge variant that
-  removes the Keycloak OIDC/JWT filter (guard delete) so an unauthenticated probe reaches a surface; (b) a
-  `derive` variant that drops one allow-edge and adds one undeclared allow-edge (union-arm swap) so the
-  independent graph-walk set-equality fails; (c) a regression-harness variant that no-ops `cluster delete`
-  (dropped effect) so the recreate-witness check finds an identical cluster identity. Each is committed and
-  re-run, not a one-off strawman.
-- **WebSocket bypass mutants (§M.11/§M.12):** committed variants drop exact-Origin checking, accept a reused
-  handshake nonce, or publish the upgrade backend directly. Authority-minted valid-session success is paired
-  with wrong-Origin/replayed-nonce/direct-Service denial, and an independent backend trace must contain no
-  forbidden challenge.
-- **Independent oracle (§M.3):** the derived-NetworkPolicy check and the route-coverage check compare against
-  the committed hand tables / an independent graph-walker (a code path distinct from `renderAll`), never the
-  reconciler's own fold.
-- **External-observer traces (§M.5):** reachability, off-host-unreachability, ordering-enforcement, and
-  EAB-provenance assertions read from OS-boundary observers (per-origin netns probe exit codes, an argv/env
-  recording shim on the ACME client, a readiness-withholding harness), never a compliance trace the edge emits
-  about itself.
-- **Image provenance (§M.5):** every live `imageID` is observed at the CRI boundary and must equal both the
-  verified Phase-56 image identity supplied to this run and the current in-cluster registry catalog. A public
-  or side-loaded alternative fails. No committed expected-digest file participates.
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *there is exactly one door, and it is Keycloak's*. A workload that tries to publish its own wild ingress must fail rather than be reviewed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 64` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 63 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-```mermaid
-flowchart LR
-  %% register: algebra
-  fx["committed fixtures"]:::intent
-  or["independently authored oracle"]:::intent
-  mu["seeded mutant"]:::intent
-  g{{"the phase 64 gate command"}}:::gate
-  ok((("phase seal: the ledger this gate emits"))):::seal
-  no>"the mutant must turn it red"]:::refuse
-  fx -->|"binds the corpus"| g
-  or -->|"binds the expectation"| g
-  mu -->|"binds the defect"| g
-  g -->|"fixtures green, oracle agrees"| ok
-  g -->|"mutant green means the gate is not one"| no
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
-  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
-  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
-```
-*Validated Phase-64 gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+## Resource provision — UNRESOLVED
 
-## Resource provision — the edge / Patroni / ACME envelope
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
@@ -256,60 +169,49 @@ before the first effect, while their exact-fit twins render and reconcile.
 
 ## Doctrine adopted
 
-- [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — keycloak-owned ingress provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
+- [`workflow_calculus_doctrine.md` §3 — Teardown is a type obligation](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation) — keycloak-owned ingress provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
 - [`ui_realtime_coordination_doctrine.md §3 — one browser transport contract`](../documents/engineering/ui_realtime_coordination_doctrine.md#3-one-browser-transport-contract):
   Envoy/Gateway API carries authenticated same-origin WebSocket upgrades through the same Keycloak-owned edge,
   with exact Origin, session nonce, and versioned subprotocol checks and no direct backend route.
 
-- [`platform_services_doctrine.md` §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
+- [`platform_services_doctrine.md` §9 — The LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
   — **the LoadBalancer and the single wild-ingress path**: this phase materializes the one sanctioned ingress
-  shape (`LoadBalancer → Envoy/Gateway API → Keycloak`), its **east-west connectivity derived from the declared dependency graph** subsection, and the [§11 bring-up ordering edges](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
+  shape (`LoadBalancer → Envoy/Gateway API → Keycloak`), its **east-west connectivity derived from the declared dependency graph** subsection, and the [`platform_services_doctrine.md` §11 — Bring-up and dependency ordering](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
   that place the LB address before the Gateway listener and Keycloak before the edge admits wild traffic.
-- [`illegal_state_catalog.md` §3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)
+- [`illegal_state_security.md` §3.7 — Accidental insecure / backdoor ingress](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)
   — **accidental insecure / backdoor ingress**: a workload cannot publish its own wild ingress because
   `WildIngress` is a Keycloak-edge-only construct and the host-origin, localhost-only NodePort is a distinct
   `HostLocalPeer` endpoint that does not interconvert; this phase is the live realization of that
-  render-foreclosed impossibility (and of [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other), the derived-allow-edge NetworkPolicy rule).
-- [`pulumi_iac_doctrine.md` §5](../documents/engineering/pulumi_iac_doctrine.md#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns)
+  render-foreclosed impossibility (and of [`illegal_state_security.md` §3.6 — Blocking NetworkPolicy (services can't reach each other)](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other), the derived-allow-edge NetworkPolicy rule).
+- [`pulumi_iac_doctrine.md` §5 — DNS (route53) and TLS (zerossl): the provider integrations this doctrine owns](../documents/engineering/pulumi_iac_doctrine.md#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns)
   — **DNS (route53) and TLS (zerossl)**: the public-edge TLS wired through the edge is *referenced*, not
   re-specified here; certificate provisioning is owned by the Pulumi/IaC doctrine, and the ZeroSSL EAB material
   is a Vault `SecretRef`, never a Dhall literal.
-- [`storage_lifecycle_doctrine.md` §6](../documents/engineering/storage_lifecycle_doctrine.md#6-the-lossless-teardown-guarantee-deterministic-rebind)
+- [`storage_lifecycle_doctrine.md` §6 — The lossless-teardown guarantee: deterministic rebind](../documents/engineering/storage_lifecycle_doctrine.md#6-the-lossless-teardown-guarantee-deterministic-rebind)
   — **the lossless-teardown guarantee: deterministic rebind**: the gate re-runs the Phase-60 marker-bytes
   round-trip across a delete + recreate to confirm adding the edge introduced no storage regression.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 64.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-runners, two-replica Envoy data plane, dedicated strict-sync Keycloak Patroni cluster, OIDC route matrix, and
-WebSocket guard corpus all pass.
-**Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Keycloak.hs`
-(built), `tools/keycloak_ingress_live.py`, and `test/spec/live/KeycloakIngressLiveSpec.hs`.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: positive OIDC enforcement, not a vacuous deny-all — every committed surface is
-served only after traversing Keycloak, the wild path is confirmed per origin class, and the readiness edges are
-proven by withholding them, never by reading the implementation's own event log. The numbered validation list
-below carries each experiment.
+**Status**: Blocked — NOT VALIDATED
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`
 
 ### Objective
+
 Adopt [`platform_services_doctrine.md` §9 — the LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path):
 make Keycloak the single authenticated ingress point, fronted by Envoy + the Gateway API, atop the
 MetalLB backend selected for this phase's self-managed `kind` engine, with the [§11 ordering edges](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
 observed as readiness conditions, not durations.
 
 ### Deliverables
+
 - Envoy + Gateway API rendered as the L7 edge (a `Gateway` listener plus `HTTPRoute`s as typed `K8sObject`s),
   terminating TLS and routing, applied by the Phase-58 reconciler.
 - Keycloak deployed against its Phase-63 Patroni DB, owning OIDC/JWT enforcement in front of every platform
@@ -328,6 +230,7 @@ observed as readiness conditions, not durations.
   edge variant the gate must show going red.
 
 ### Validation
+
 1. For each surface enumerated in the committed `route-inventory.golden`, complete a real OIDC login as
    `phase32-tester` and assert the surface's content is served (2xx) only after the request traversed Keycloak;
    assert `LoadBalancer → Envoy/Gateway API → Keycloak` is the only reachable wild path, probed once per origin
@@ -351,23 +254,17 @@ observed as readiness conditions, not durations.
    attempts. The independent backend/CNI trace observes the challenge only for the valid tuple.
 
 ### Remaining Work
+
 Independently review or replace the same-commit route inventory and realm fixtures before revalidation.
 
 ## Sprint 64.2: No self-published wild ingress + public-edge TLS ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-pair, Vault EAB provenance shim, bounded ACME staging stand-in, and Dhall literal scan pass live.
-**Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Tls.hs`
-(built), `test/fixture/keycloak_ingress/backdoor-seed.yaml`, and `tools/keycloak_ingress_live.py`.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the scanner is itself validated: a committed raw-`kubectl` bypass seed must turn it
-red and its removal green, so a scan that greps a label the renderer never emits cannot pass vacuously. Off-host
-unreachability and Vault-sourced EAB provenance are observed from the OS boundary; the numbered validation list
-below carries each probe.
+**Status**: Blocked — NOT VALIDATED
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/illegal_state/illegal_state_catalog.md`, `documents/engineering/pulumi_iac_doctrine.md`
 
 ### Objective
+
 Adopt [`illegal_state_catalog.md` §3.7 — accidental insecure / backdoor ingress](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)
 live — the running-cluster realization of the single sanctioned wild-ingress path of
 [`platform_services_doctrine.md` §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
@@ -377,6 +274,7 @@ prove on the running cluster that the render-time impossibility of a self-publis
 one carve-out really is a *different type* of endpoint, not a wild one.
 
 ### Deliverables
+
 - A live audit proving there is no non-Keycloak wild path: no chart opens a backdoor NodePort to the wild, and
   no workload publishes its own `Ingress` — the `WildIngress` constructor is reachable only from the Keycloak
   edge, per the render invariant golden-locked in Phase 33.
@@ -388,12 +286,13 @@ one carve-out really is a *different type* of endpoint, not a wild one.
 - An ACME execution demand with a complete issuer-Job `PodResourceEnvelope`, bounded challenge/order/retry and
   key/CSR workspace, certificate/key revision retention, and the resulting Vault Raft/audit high-water; this
   demand is provisioned before the ACME client or Vault mutation can run.
-- The committed scanner-validation seed (`test/fixture/keycloak_ingress/backdoor-seed.yaml`, a raw-`kubectl`
-  NodePort/`Ingress` bypass authored in this phase's oracle-pinning sprint) and the argv/env-recording ACME shim used to observe EAB
-  provenance from the OS boundary.
+- A Haskell-declared scanner-validation seed that lazily renders a raw-`kubectl` NodePort/`Ingress` bypass
+  beneath `.build/test-corpora/**`, plus a run-local argv/env-recording ACME fake used to observe EAB provenance from
+  the OS boundary. Neither serialized form is tracked source or an oracle.
 
 ### Validation
-1. First validate the scanner: apply a committed out-of-band NodePort/`Ingress` seed via raw `kubectl` (not the
+
+1. First qualify the scanner: apply the Haskell-declared, run-local out-of-band NodePort/`Ingress` seed via raw `kubectl` (not the
    DSL) that opens a WAN/LAN-reachable bypass; assert the scan turns **red** and the ledger records the
    violation; remove the seed and assert **green**. Then, with no seed present, scan the live cluster and assert
    no exposed backdoor NodePort reachable from a WAN/LAN netns probe, and no non-Keycloak wild route.
@@ -411,23 +310,17 @@ one carve-out really is a *different type* of endpoint, not a wild one.
    the exact-fit twin equals the provisioned projection.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 64.3: East-west NetworkPolicy posture — derived default-deny ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-matches it, and a distinct scratch Pod observes deny→allow→deny as its declared graph edge is added/removed.
-**Implementation**: `src/Amoebius/Manifest/NetworkPolicy.hs`,
-`src/Amoebius/Platform/Edge.hs` (built), `test/fixture/keycloak_ingress/netpol-expected.golden`, and the live harness.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: "derived" is oracled two ways that a hardcoded static allow-list cannot satisfy —
-graph variation, which adds and removes a declared edge and watches both the applied policy set and live
-reachability follow, and set equality against an independently authored expectation. The numbered validation
-list below carries both.
+**Status**: Blocked — NOT VALIDATED
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/illegal_state/illegal_state_catalog.md`
 
 ### Objective
+
 Adopt the **east-west connectivity is derived from the dependency graph** subsection of
 [`platform_services_doctrine.md` §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
 and [`illegal_state_catalog.md` §3.6 — blocking NetworkPolicy, services can't reach each other](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other):
@@ -435,6 +328,7 @@ apply the default-deny + derived-allow NetworkPolicy posture live, so exactly th
 and every other is denied.
 
 ### Deliverables
+
 - A default-deny east-west baseline plus allow-edges derived from the declared dependency graph, rendered by
   the Phase-58 reconciler and applied to the live cluster — no hand-authored policy.
 - The live posture: a service that does not declare consuming `B` cannot reach `B`, and a declared edge is not
@@ -446,6 +340,7 @@ and every other is denied.
   undeclared allow-edge, which the set-equality check must show going red.
 
 ### Validation
+
 1. Assert a declared consumer reaches its provider through the applied policy.
 2. Assert a probe to an undeclared east-west edge is denied (times out).
 3. Prove "derived" by **graph variation**: deploy a scratch consumer, add a declared edge to a provider,
@@ -459,30 +354,24 @@ and every other is denied.
    by re-running the implementation's own `derive`.
 
 ### Remaining Work
+
 Independently review or replace the same-commit expected-policy fixture before revalidation.
 
 ## Sprint 64.4: The single-door + storage-rebind regression gate ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-the latter proves exact committed relational/object marker bytes across fresh cluster identities without
-destroying the retained platform stack.
-**Implementation**: `src/Amoebius/Platform/Edge.hs`, `tools/keycloak_ingress_rebind_regression.py`,
-`tools/keycloak_ingress_gate.py`, and `test/spec/live/KeycloakIngressLiveSpec.hs` (built).
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the harness proves both halves in one run and cannot fake either: the single-door
-invariant end-to-end, and the committed marker bytes surviving a **witnessed** cluster delete and recreate. A run
-that skips the delete, or reads back from the same never-torn-down cluster, fails the recreate witness. The
-numbered validation list below carries the sequence.
+**Status**: Blocked — NOT VALIDATED
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/storage_lifecycle_doctrine.md`
 
 ### Objective
+
 Adopt [`storage_lifecycle_doctrine.md` §6 — the lossless-teardown guarantee: deterministic rebind](../documents/engineering/storage_lifecycle_doctrine.md#6-the-lossless-teardown-guarantee-deterministic-rebind)
 alongside [`platform_services_doctrine.md` §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path):
 close the phase by proving the single Keycloak door end-to-end **and** that adding the edge did not regress the
 deterministic storage rebind.
 
 ### Deliverables
+
 - The phase-gate harness: assert an unauthenticated request to any platform surface is rejected at the edge and
   there is no non-Keycloak wild path (no exposed backdoor NodePort).
 - Run-local image provenance that consumes the verified Phase-56 identity and current registry catalog; remove
@@ -496,14 +385,15 @@ deterministic storage rebind.
   PVCs gone, the old PV objects `Released`, and the backing bytes intact. Then `cluster delete`, proving from
   the host boundary that the old cluster, its node container, and its apiserver are absent; `cluster recreate`,
   re-render/re-apply fresh PV objects over the retained backing, record the new cluster identity, and read the
-  same bytes back — the Phase-60 guarantee re-run behind the new edge. Plus committed mutant (c), a
+  same bytes back — the Phase-60 guarantee re-run behind the new edge. Plus applied Haskell mutant (c), a
   delete-no-op harness variant the recreate-witness check must show going red.
 
 ### Validation
+
 1. Assert the single-door invariant holds end-to-end: an unauthenticated request is rejected at the edge, a real
-   OIDC login as `phase32-tester` serves each surface in `route-inventory.golden`, and there is no backdoor wild
-   path (scanner first validated against the committed `backdoor-seed.yaml`, per 28.2).
-2. Run the marker-bytes (committed `marker-row.sql` / `marker-object.bin`) write → quiesce/owner-mediated stop
+   OIDC login as `phase32-tester` serves each Haskell-declared route expectation, and there is no backdoor wild
+   path (scanner first qualified against the generated run-local backdoor seed, per 28.2).
+2. Run Haskell-declared marker bytes, materialized beneath `.build/test-corpora/**`, through write → quiesce/owner-mediated stop
    → wait for zero Pod references → live PVC-delete/`Released` observation → full cluster delete/absence
    witness → recreate/re-apply → read cycle. Observe `Released` only after the consuming Pods have terminated
    and while the old apiserver remains live; after full deletion, assert from the host boundary that the
@@ -520,12 +410,14 @@ deterministic storage rebind.
    a seeded gate variant that reads an expected-digest file and a side-loaded public image each fail.
 
 ### Remaining Work
+
 Remove the committed expected-base-digest file and gate dependency, then rerun with Phase-56 identity supplied
 as run-local verified input.
 
 ## Documentation Requirements
 
-**Engineering docs updated with the tested Phase-64 result:**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/platform_services_doctrine.md` — when this phase lands, the §9 single-wild-ingress
   honesty note and the §11 ordering edges flip from "design intent" to a delivered-status pointer (status stays
   in the plan); the east-west-derived-NetworkPolicy subsection gains its first live amoebius realization.
@@ -540,6 +432,7 @@ as run-local verified input.
   re-exercised behind the ingress edge as a regression check.
 
 **Cross-references to add:**
+
 - [README.md](README.md) — flip the Phase 64 row status once work begins, and link this document from the
   Phase 64 paragraph.
 - [substrates.md](substrates.md) — record `linux-cpu` as the Phase 64 gate substrate in the per-phase map.

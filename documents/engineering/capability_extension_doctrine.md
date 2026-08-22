@@ -21,6 +21,8 @@ nor the extensions themselves, owned by [lift_and_compose_doctrine.md](./lift_an
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. Three extension kinds: workload, capability, and app](#2-three-extension-kinds-workload-capability-and-app)
@@ -132,7 +134,7 @@ wired by the same graph every other extension is wired by.
 
 ## 3. The PROVIDE and REQUIRE contract
 
-[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) implements a two-member link set of `{infernix, jitML}`
+[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) owns the target two-member link set of `{infernix, jitML}`
 provide/require refinement in `Amoebius.Capability.Binding`: requirements must resolve, duplicate providers
 are rejected as anti-shadow violations, and provider edges must be acyclic. Its paired legal/cyclic/shadowing
 fixtures plus a direct missing-requirement/closed-graph pair establish totality only for the pure gadt-decode
@@ -195,7 +197,7 @@ this doctrine records only its edges:
   over `ObjectStore` ([content_addressing_doctrine.md §2](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)),
   and the resolver's prebuilt-image and build inputs come from `Registry`
   ([image_build_doctrine.md](./image_build_doctrine.md)). Both are core capabilities
-  ([service_capability_doctrine.md §3](./service_capability_doctrine.md#3-one-canonical-provider-the-type-admits-alternates)).
+  ([service_capability_doctrine.md §3](./service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific)).
   Staging credentials resolve from Vault **by name** (a `SecretRef`), never as a second secret store
   ([vault_pki_doctrine.md](./vault_pki_doctrine.md)); `jit-build` introduces no key store of its own.
 
@@ -318,10 +320,12 @@ rejections; amoebius re-derives that algebra and discards the seed's packaging (
 image, no `dlopen`, [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)), and adds the total/acyclic
 graph checks specified here. The graph checks themselves are net-new amoebius design intent.
 
-Phase 93 supplies a scoped consumer instance, not a proof of the whole graph: `dhall/jitml/package.dhall`
-names exactly `JitBuild`, `Coordination`, and `InferenceEngine`, exposes no infrastructure field, and forbids a
-CPU fallback, while the leaf package compiles one untouched sibling CUDA generator. Physical host CUDA and
-retained MinIO are tested; provider readiness for the three requirements, Kubernetes device ownership, the
+Phase 93 owns a scoped target Haskell consumer value, not a proof of the whole graph. Its external/untracked
+operator projection must name exactly `JitBuild`, `Coordination`, and `InferenceEngine`, expose no
+infrastructure field, and forbid a CPU fallback; any serialized test projection is generated beneath
+`.build/**`, never tracked as `dhall/jitml/package.dhall`. The leaf package must compile one untouched sibling
+CUDA generator. Its target physical
+checks cover host CUDA and retained MinIO; provider readiness for the three requirements, Kubernetes device ownership, the
 full sibling trainer, and native-CBOR coordination remain UNVERIFIED. No physical hardware class removes the
 `linux-cpu` option. Obtain a fresh Linux environment with the substrate-native VM layer: Incus for
 Linux/Linux-CUDA, Lima for Apple, and WSL2 for Windows.
@@ -333,13 +337,13 @@ Linux/Linux-CUDA, Lima for Apple, and WSL2 for Windows.
 This document is normative capability-extension-graph doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and never restated here. For orientation
-only (the plan is authoritative): the `extRequires` field and the total/acyclic/anti-shadow merge land with the
+only (the plan is authoritative): the `extRequires` field and the total/acyclic/anti-shadow merge are assigned with the
 DSL type families and the extension seam of [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability); the
 capabilities the two capability-extensions provide are exercised by their owning doctrines
 ([content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) for `jit-build`, [daemon_topology_doctrine.md §4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) for `coordination`). This doc states the target shape and links back for status.
 
-> **Honesty.** Except for the explicitly scoped Phase-93 consumer instance above, this doctrine is design
-> intent specified before implementation. The
+> **Honesty.** The scoped Phase-93 consumer above is a target contract, not a current instance. This doctrine
+> is design intent specified before implementation. The
 > `ProjectSpec` stream algebra and the anti-shadow `validateProjectSpec` are proven in the hostbootstrap
 > sibling; that is **sibling evidence, not a tested amoebius result**, and the total/acyclic PROVIDE/REQUIRE
 > graph checks are net-new amoebius design with no sibling that stands up a capability graph today. Per

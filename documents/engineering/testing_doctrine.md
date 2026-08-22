@@ -19,12 +19,10 @@ nor the phase gates that consume its registers, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
-
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. A test is an amoebius spec](#1-a-test-is-an-amoebius-spec)
@@ -47,27 +45,32 @@ nor the phase gates that consume its registers, owned by
 ```mermaid
 flowchart LR
 %% register: orientation
-  spec["authored test spec"] --> gate{{"register gate"}}
-  gate --> evidence[("repository-local evidence")]
-  evidence --> ledger(("sealed ledger"))
+  spec["Haskell test declaration"] --> gate{{"register gate"}}
+  oracle["separately reviewed Haskell expectation"] --> gate
+  observer["independent fresh observer"] --> gate
+  gate --> evidence[("candidate .build run bundle")]
+  evidence --> review{{"human review"}}
+  review --> ledger(("admitted ledger"))
   gate --> teardown["mandatory teardown"]
 ```
 
-*Orientation: one authored topology drives the register gate, evidence, ledger, and teardown owned by [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).*
+*Orientation: a Haskell topology drives the run, but its expectation and observer remain independent and only
+human review can admit the candidate ledger. Teardown is owned by [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).*
 
 ## 1. A test is an amoebius spec
 
-**amoebius has no separate test framework — a test *is* an amoebius deployment.** Everything amoebius
+**amoebius has no separate behavioral test language — a test *is* a Haskell-declared amoebius deployment.** Everything amoebius
 already knows how to do — stand up a cluster, render typed manifests from Dhall, place workloads, inject
 secrets, fail a leader over — is exactly the machinery a test needs. So a test is not written in some second
-language with its own runner; it is written in the *same* Dhall DSL, and it inherits the *same*
+language with its own tracked runner; Haskell lazily renders the same external Dhall DSL beneath `.build/**`, and the test inherits the same
 illegal-state-unrepresentable guarantee. There is no "test mode" of the type system that lets a test express
 a broken cluster the production DSL would reject. The test suite may itself be driven by an amoebius root
 cluster — the root stands up the test topology, runs the workflow, and tears it down, exactly as it rolls
 out any child manifest.
 
-Concretely, amoebius tests are Dhall-authored `InForceSpec` topologies that spin up
-resources, run the workflow, and tear down resources — there is no need for an explicit list of tests; what
+Concretely, amoebius tests are Haskell `InForceSpec` topology declarations that lazily render any required
+Dhall, spin up resources, run the workflow, and tear down resources. There is no tracked `.dhall` test corpus
+or second-language gate runner; what
 is needed is a general test topology (which, by definition, always tears down the resources it creates). The
 vision is emphatic that there is **no enumerated catalog of tests** to maintain — there is a *topology*, and
 specific tests are values of it.
@@ -106,21 +109,9 @@ Three consequences fall straight out of "a test is a spec":
   a *test* rather than a deployment are the chaos schedule, the expectation surface, and the always-teardown
   contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
 
-> **Honesty.** Phase 48 implements and validates only the pure topology algebra: the teardown phantom state,
-> deterministic suggestion/resource projection, named flagged-credential value, and honest evidence rows.
-> Generated Dhall, host probing, runner/inventory/delete authority, Kubernetes and retained-backing cleanup,
-> Pulsar takeover, and Vault/AWS authority belong to Phase 90 and remain **UNVERIFIED**. Status is owned by
-> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); prodbox remains sibling evidence. Per
-> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive statement here as
-> a specification to be validated — evidence inherited from prodbox is evidence from a sibling system, never
-> proof in amoebius. Sequencing, status, and gates live only in the development plan.
-
 ---
 
 ## 2. The registers of amoebius testing
-
-Phase 34 supplies a concrete composite example: Register 1 checks nineteen ordered semantics and canonical generated encodings for the pure `[Step]` plan with zero actions,
-while Register 2 invokes the real executable against subprocess recorders and compares exact argv plus byte-preserving stdin relay. Neither result is a Register-3 live-substrate claim.
 
 A defect can hide at three depths, and each depth needs a *different* kind of test, because
 a test pitched at one depth is structurally blind to the others. amoebius keeps **three phase-gate registers**
@@ -131,7 +122,7 @@ Cheapest first, and never confuse one for another.
 
 | Register | Name | What it exercises | Where it runs | Mocking posture |
 |----------|------|-------------------|---------------|-----------------|
-| **1** | **Pure** | DSL decoding, renderers, validation helpers, decision functions, DAG logic | in-process, no cluster; a pinned hermetic checker over committed source (e.g. TLC) counts as Register 1 | **none** — pure code never touches a mock |
+| **1** | **Pure** | DSL decoding, renderers, validation helpers, decision functions, DAG logic | in-process, no cluster; an acquired hermetic checker over input freshly generated from Haskell (for example TLC) counts as Register 1 | **none** — pure code never touches a mock |
 | **2** | **Boundary integration** | The binary's CLI routing, subprocess behaviour, config load — through fake tools or controlled subprocesses | in-process + fake/real tool binaries | mocking only at the subprocess/interpreter boundary |
 | **2.5** | **Deterministic simulation** (an activity, never a phase gate) | The **real** daemon/reconciler code (lifted onto `io-classes`) run under `IOSim`/`IOSimPOR` against a modeled, fault-injectable environment — concurrent schedules + injected partition/reorder/redelivery/crash, deterministically replayable | in-process, no cluster | no mocks — the *real* code against *modeled* substrates (fake Pulsar/MinIO/apiserver/route53/Vault/clock) |
 | **3** | **Test-`.dhall` topology** | The whole system: a real cluster spun up, a real workflow run, real chaos injected, then torn down | a live substrate ([§8](#8-one-substrate-per-validation)) | no mocks — the real platform |
@@ -147,124 +138,14 @@ and the honesty tradeoff are owned by
 [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md); this doc owns only the register
 *definition* above.
 
-[Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md) builds the substrate serving this
-activity and gates it at Register 2 with a reference reconciler. Its ledger marks modeled-schedule invariants
-tested, model fidelity assumed, and live runtime unverified; later phases supply their own Register-2.5 runs.
-The concrete gate uses four authored semantic schedule verdicts and a separate five-row oracle over an actual
-Phase-10 composition projection. Equal same-seed trace bytes are checked only between executions and paired
-with changed-seed sensitivity; no generated trace snapshot is committed as an oracle.
-
 The first two registers **generalize the prodbox interpreter-only mocking doctrine**: *pure code never
 touches mocks; all mocking happens at the subprocess or interpreter boundary* — pure helpers, DAG logic,
 and renderers are testable without mocks, and subprocess fakes live in a boundary suite, not deep inside
 planning code. Prefer concrete typed values (real ADTs) over mocks whenever the code under test is pure.
-The standard Haskell test stack (Cabal `test-suite` stanzas, `tasty`/HUnit/QuickCheck, golden tests,
+The standard Haskell test stack (Cabal `test-suite` stanzas, `tasty`/HUnit/QuickCheck,
 `typed-process`, structured `bracket`/`finally` cleanup) is inherited from prodbox and pinned by the shared
 toolchain owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Toolchain) — this
 doc does not restate the version pins.
-
-**Register-1 ledger instance now validated.** Phase 26's bounded `gadt-decode-spec` gate is the concrete
-no-cluster decode instance: five semantic-hash-pinned positives, four distinct tagged negatives, three
-compile-fail index pairs, an executed legalized-negative red run, 5,527 exact structural rows, and an
-independently authored projection of those positives into the five Phase-10 calculus kinds. The shared
-`dsl-spec` remains the later umbrella so Phase-26 validation cannot execute future-phase checks. It emits the ordinary
-decision/protocol/runtime ledger with only the recorded spec-decode surface proven for the model and runtime
-fidelity UNVERIFIED (ledger `external-run-reference`).
-
-**Validation-locus projection now validated.** Phase 27 joins every catalog entry and named subcase
-against the independently authored registry, discharging the dhall-typecheck/gadt-decode subcases whose owners have
-been reached, including explicit Phase-8/9 predecessor evidence, and recording an exact-owner deferral for
-the rest. Its bounded `illegal-state-corpus-spec` also checks an independently authored five-calculus
-corpus/ledger projection; the counts are a dated observation and live
-in the [tracker](../../DEVELOPMENT_PLAN/README.md), not here. Its four infinite-domain QuickCheck properties are
-labelled **TESTED (sampled)** under `checkCoverage`; only the finite three-arm `Rke2Servers` enumeration is
-labelled **PROVEN (exhausted)**. This Register-1 result establishes spec composition at the registered loci;
-model-to-runtime correspondence and runtime fidelity remain **UNVERIFIED** (ledger
-`dynamically-resolved`).
-
-**Base capacity/topology Register-1 instance now validated.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md)
-adds 15 direct fold negatives with 15 legal twins, two constructed-and-placed positive topologies, seven
-compile-index pairs, an exhausted 3×3 compatibility matrix, and four sampled QuickCheck properties
-whose independent witness validator never calls the placement implementation. Every property meets its
-accept/reject coverage floor, all 19 seeded mutants turn red, and eight of eleven Phase-9-owned registry
-subcases carry evidence at their exact loci. The three Dhall loci are deferred to Phase 25. Compile
-exhaustiveness is proven for the base modules; infinite-domain
-properties remain **TESTED (sampled)**, and runtime fidelity remains **UNVERIFIED** (ledger
-`dynamically-resolved`).
-
-**Five-calculus composition Register-1 instance now validated.** The
-[Phase 10 gate](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md) exhausts the closed five-calculus
-constructor set, all 25 ordered pairs, and all 125 ordered triples. Its independent pair table states exact
-four-axis resource sums. Three 500-case QuickCheck properties sample numeric additivity, associativity, and
-transform preservation with per-constructor coverage, while a legal/illegal compiler pair holds the rank-2
-request-scope barrier and three real mutants weaken separate indices. Finite kind structure is
-**PROVEN (exhausted)**; numeric and payload domains are **TESTED (sampled)**. Arbitrary-extension closure,
-protocol behaviour, and runtime fidelity remain **UNVERIFIED** until their owning phases.
-
-**Structured compile-fail Register-1 instance now validated.** The
-[Phase 15 gate](../../DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md) binds ten unrepresentability claims
-from Phases 4, 5, 6, 7, and 10 to legal/illegal Haskell twins. A legal source must compile before its negative
-is considered; the negative is accepted only when every structured GHC error has the authored code and one
-record occurs at the exact authored line/column with all message fragments. Opposing source probes name the
-foreclosed dimension, while missing modules, parse failures, unbound names, and arbitrary nonzero exits are
-wrong reasons. This is evidence at the calculus's `this-expression-rejected` strength: it establishes that
-those ten expressions fail under the resolved GHC, not that every representation of a state is uninhabited.
-The first inventory is deliberately a representative tranche, not a declaration that later negative corpora
-have migrated; each later owner remains responsible for adopting the same schema when it opens.
-
-**Storage-geometry Register-1 instance now validated.** The [Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md)
-checks 30 exact negative/twin variants under five stable storage families, two decoded positive specs, and two
-dhall-typecheck bounded-training pairs. Six independently calculated equivalence properties satisfy their accept/reject
-coverage floors, all 31 mutants turn red, and all five Phase-28-owned registry subcases carry exact-locus
-evidence. The bounded `storage-geometry-spec` composes the observed corpus, property and mutant counts through
-all five Phase-10 calculus kinds against an independently authored projection. Compile totality is proven for
-the five storage modules; infinite arithmetic domains remain **TESTED (sampled)**. Live backing
-observation/mutation and model-to-runtime correspondence remain **UNVERIFIED**.
-
-**Full-vector Register-1 instance now validated.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
-checks 37 exact negative/twin variants spanning eighteen stable families, one accelerator-owner dhall-typecheck pair,
-and two decoded composed positives. Seven independent properties meet the decision folds' accept/reject floors,
-all 45 committed mutants turn red, and both Phase-29-owned registry rows have exact-locus evidence. The bounded
-`execution-accelerator-spec` projects those 37 negatives, 37 twins, two positives, seven properties and 45
-mutants through all five Phase-10 calculus kinds against an independently authored 128-unit projection. Direct
-one-axis controls cover the accelerator peer graph and the build, engine, monitoring and Pulumi envelopes.
-Compiler exhaustiveness covers the ten owner modules; scheduler, storage, accelerator, and provider runtime
-fidelity remain **UNVERIFIED** (ledger `external-run-reference`).
-
-**Capability-bind Register-1 instance now validated.** The [Phase 30 gate](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md)
-binds nine arms under both shapes against 18 independently authored semantic projections, keeps nine distinct
-normalized app slices equal, and observes exact controller-child inventories, unresolved references, Registry
-intent, extension totality, and the 29-row validation-locus ledger. Three dhall-typecheck and four gadt-decode
-negatives retain their exact reasons; all four paired behavioral mutants redden. The bounded
-`capability-bind-spec` projects nine arms, 18 shapes, seven negatives, one covered property, and four mutants
-through all five Phase-10 calculus kinds as 39 units. The former generated-byte snapshots are retired;
-provider realization, engine resolution, and model/runtime correspondence remain **UNVERIFIED**.
-
-**Provision-seal Register-1 instance now validated.** The [Phase 31 gate](../../DEVELOPMENT_PLAN/phase_31_provision_seal.md)
-provisions the same 18 arm/shape deployments, exercises both infrastructure-planner paths, and distinguishes
-the one creation batch, separate plan/action replay refusals, receipt-bound materialization evidence, and
-promised-identity refusal. Ten exact provision negatives, two boundary properties, and all ten paired mutants
-pass; the 40-row locus ledger is exact. The bounded `provision-seal-spec` projects 42 units through all five
-Phase-10 calculus kinds, all 25 metrics match, and 37 surfaces join to 55 items. Provider realization, engine
-resolution, and model/runtime correspondence remain **UNVERIFIED**.
-
-**Inference-accelerator Register-1 instance now validated.** The [Phase 32 gate](../../DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md)
-provisions three positives, checks four target-offering quotient cells and all twelve family/lane cells, and
-retains the URL negative's dhall-typecheck locus plus eight distinct provision tags. Its eight-branch covered
-property passes, all five paired behavioral mutants redden, and the 17-row locus ledger is exact. The bounded
-`capability-spec` projects 34 units through all five Phase-10 calculus kinds; all 18 metrics match and 29
-surfaces join to 45 items. Live jit-resolution, cross-lane weight loading, and runtime correspondence remain
-**UNVERIFIED**.
-
-**First complete Register-3 application now validated — sealed 2026-08-14.** The
-[Phase 56 gate](../../DEVELOPMENT_PLAN/phase_56_base_image_registry.md) composes the pure image/registry
-decisions, the capability-gated bootstrap/publication protocol, and live runtime observations on the
-`linux-cpu` substrate. Its independent OS-boundary evidence pairs a successful exact in-cluster digest pull
-with an `ErrImagePull`/`ImagePullBackOff` public canary under an enforcing node firewall, records firewall
-drops and zero established public-registry connections, and reruns the committed no-op-policy mutant. The
-ledger marks Decision, Protocol, and Runtime tested for the enumerated Phase-56 boundary while keeping the
-Phase-58 reconciler correspondence and Phase-62 MinIO rehome **UNVERIFIED**; the ledger itself is written into
-that run's bundle and bound to its source snapshot, never into this document.
 
 The third register is the amoebius novelty and the subject of the rest of this document. It is where "a
 test is a spec" ([§1](#1-a-test-is-an-amoebius-spec)) cashes out, and it is the only register that can prove the deployed system survives a
@@ -318,7 +199,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 ```mermaid
 flowchart TD
 %% register: algebra
-  spec["test .dhall topology (deployment-rules layer + chaos schedule + expectations + teardown)"]:::intent -->|spin up| up[/"allocate resources: cluster, PVs, stacks, workloads (tagged test-owned)"/]:::effect
+  spec["Haskell test topology; generated .dhall in .build"]:::intent -->|spin up| up[/"allocate resources: cluster, PVs, stacks, workloads (tagged test-owned)"/]:::effect
   up -->|run workflow| run[/"exercise workflow + inject faults (HA failover, substrate quorum re-election)"/]:::effect
   run -->|success| down[/"teardown: idempotent destroy of every allocated resource"/]:::effect
   run -->|workflow failure| down
@@ -330,7 +211,7 @@ flowchart TD
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Phase-48 scoped result: the structured host runner and external temporary-scope diff exercise the failure sink; cluster/provider allocation and reclamation remain UNVERIFIED.*
+*Design intent: every exit reaches the same teardown sink, and an external post-run inventory must show no test-owned residue.*
 
 The "no explicit list of tests" principle is what makes this a *contract* rather
 than a checklist: amoebius does not maintain an enumerated test catalog that each could forget the teardown
@@ -353,40 +234,55 @@ The ledger schema records these independent axes:
 
 - `layers` records Decision, Protocol, and Runtime strength as `proven`, `proven-for-the-model`, `tested`,
   `assumed`, or `UNVERIFIED`.
-- `coverage` joins each runtime-enumerated surface to an independently authored expectation and records the
+- `coverage` joins each runtime-enumerated surface to an independently authored Haskell expectation and records the
   reached strength or `UNVERIFIED`.
 - `register` and `substrate` identify the validation boundary that actually ran.
 - `checks`, `mutants`, and `cleanup` record concrete outcomes, not aggregate success claims.
 
-A ledger linter validates the run bundle before upload. It requires the register and substrate declared by
-the phase contract, rejects an unknown enumerated surface, and requires every layer outside the reached
-register to remain `UNVERIFIED`. A substrate-`none` design gate may report `proven-for-the-model`, never
-runtime proof.
+A Haskell bundle checker verifies structure before the bundle is offered for review. It requires the register
+and substrate declared by the phase contract, rejects unknown or duplicate enumerated surfaces, and requires
+every layer outside the reached register to remain `UNVERIFIED`. A substrate-`none` gate can report only the
+hardware-free layer it actually exercised. This checker establishes bundle well-formedness, not the truth of
+any semantic result recorded inside it.
 
-The immutable repository-local attestation binds the source-snapshot digest, phase contract, gate command,
-resolved dependencies, toolchain, substrate, runtime bundle, and cleanup outcome. Git contains no ledger,
-receipt, enumeration, log, trace, report, screenshot, resolved path, or copied attestation. The complete
-placement and retention contract is owned by
+Each claimed obligation must point to fresh raw observation captured after the run started. A pure gate must
+invoke the production entry point from the recorded source snapshot and compare it with a separately reviewed
+Haskell expectation; it cannot accept a success marker supplied by the subject. A boundary or live gate must
+add an independent observer of the relevant process, filesystem, API, provider, or hardware effect. Every
+required positive has a clean control, every required negative has a targeted Haskell mutation plus locus
+proof, and the same observation path must turn green for the control and red for the mutation. A generated
+summary, exit code alone, self-reported capability, copied log, pre-existing file, or fixture supplied by the
+subject is not an observation.
+
+A content-addressed candidate envelope binds the source-snapshot digest, phase contract, exact command,
+resolved dependencies, toolchain, substrate, raw observations, and cleanup outcome. Its digest proves only
+which bytes were bundled; it proves neither that the command exercised the requirement nor that the oracle
+was independent. Git contains no ledger, receipt, enumeration, log, trace, report, screenshot, resolved path,
+or copied envelope. Placement and retention are owned by
 [repository_layout_doctrine.md §5](./repository_layout_doctrine.md#5-run-evidence-and-phase-status).
 
-A phase status may move to Done only after the repository-local attestation verifies against the run's recorded
-source-snapshot digest and the gate leaves the authored tree unchanged. The digest is what binds a result to
-the source that produced it; whether that source is committed, and when, is the operator's own business and
-never a gate condition.
+Only the human user may move a sprint or phase to Done or Validated. Before doing so, the human reviews the
+recorded command against the phase contract, the subject/oracle separation, fresh observations, clean and
+mutated controls, predecessor chain, source-boundary audit, owned legacy closures, and the fact that the gate
+left the tracked tree unchanged. A script, LLM, bundle checker, digest, receipt, or generated document may
+produce candidate evidence but may never edit or authorize status.
 
 Skipping an applicable move records `UNVERIFIED`; it never produces a green substitute. The same rule applies
-to an enumerated surface lacking an authored expectation, a missing observer, a skipped mutant, incomplete
+to an enumerated surface lacking an independent Haskell expectation, a missing observer, a skipped mutant, incomplete
 cleanup, and an unavailable specialized substrate. A baseline `linux-cpu` route remains available on every
 hardware substrate, but it cannot stand in for an Apple or Linux-CUDA claim.
 
-The generated ledger remains the typed evidence consumed by a `PromotionGate`. Production promotion requires
-the Runtime/chaos layer at `tested`; a design-only or Runtime-`UNVERIFIED` attestation cannot construct that
-transition. The promotion type and environment-strength mapping are owned by
+After human acceptance, an admitted ledger may become typed evidence consumed by a product `PromotionGate`.
+That runtime release transition is distinct from development-plan status and cannot promote a sprint or
+phase. Production promotion requires the Runtime/chaos layer at `tested`; a design-only or
+Runtime-`UNVERIFIED` record cannot construct that transition. The promotion type and environment-strength mapping are owned by
 [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable).
 
 The methodology and strength vocabulary remain owned by
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). This section owns the per-run artifact boundary:
-generate locally, validate independently, attest beneath `.build/evidence-store/**`, and never commit the result.
+generate the raw candidate bundle beneath `.build/runs/**`; only after independent review may a
+content-addressed receipt be installed beneath `.build/evidence-store/**`. Neither location is committed or
+self-authorizing.
 
 ---
 
@@ -410,7 +306,7 @@ Per the original vision, `suggest-test`:
    *permissions and quotas* associated with those credentials. It probes capability (whether these credentials
    can create EBS or a hosted zone, and how much) so the emitted test is *sized to what is actually reachable*, not a
    guess.
-3. **Writes a test `.dhall`** that (a) spins up a **representative set of resources** whose fully expanded
+3. **Materializes a proposed test `.dhall` beneath `.build/**`** that (a) spins up a **representative set of resources** whose fully expanded
    CPU, memory, pod-ephemeral/catalog-cache, platform-selected OCI-content/snapshot/import workspace,
    presentation-rounded durable/native-host-cache, accelerator/VRAM, and distinct provider compute/
    node-root/durable-quota envelope
@@ -424,7 +320,7 @@ flowchart TD
   creds[/"SSH + AWS credentials: inspect permissions, candidate shapes, and quotas"/]:::effect -->|feeds| gen
   gen -->|sizes a representative topology| res["complete resource envelope within detected capacity + authority"]:::intent
   gen -->|adds chaos schedule| chaos["delegated HA + substrate-quorum failover simulation"]:::intent
-  res -->|emit| out["test .dhall (operator reviews; obeys §3 teardown contract)"]:::intent
+  res -->|emit| out[".build proposal .dhall (operator reviews; obeys §3 teardown contract)"]:::intent
   chaos -->|emit| out
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
@@ -433,8 +329,8 @@ flowchart TD
 
 Four boundaries keep `suggest-test` honest and within doctrine:
 
-- **The output is a proposal, not an oracle.** `suggest-test` emits a *starting-point* test `.dhall` the
-  operator reads, edits, and runs — it is a generator of representative topologies, never a self-certifying
+- **The output is a proposal, not source or an oracle.** `suggest-test` emits a *starting-point* test `.dhall`
+  beneath `.build/**`. The operator may export and retain it outside Git before running it. It is a generator of representative topologies, never a self-certifying
   pass. The emitted topology is an ordinary test spec and inherits [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down) (always tears down) and [§8](#8-one-substrate-per-validation) (one substrate) unconditionally.
 - **The proposal still passes the ordinary staged seal.** After provider shapes, replicas, sidecars, and the
   standard platform graph expand, `planInfrastructure` derives demand from that exact `BoundDeployment` and
@@ -483,21 +379,25 @@ amoebius re-derives the `prodbox` `aws_admin_for_test_simulation` pattern, gener
   referenced from Dhall by name only, exactly as in [§5](#5-suggest-test-detect-the-world-emit-a-representative-test-dhall) — flagging changes *which* credential a test uses and
   *what it is allowed to do*, not *where the secret lives*. The vaulting and injection are owned by
   [vault_pki_doctrine.md](./vault_pki_doctrine.md).
-- **The flagged `test-secrets.dhall` is the one secret-at-rest, and it *simulates* the operator.** In
-  production, secrets are CRUD'd into Vault **by name** through the operator's admin REST before a `.dhall` is
-  uploaded ([`bootstrap_sequence_doctrine.md` §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
-  A test has no operator at a keyboard, so a single **flagged `test-secrets.dhall`** — a value the type system
-  admits **only** for the harness and **rejects in production** — carries the secret *values*, and the harness
-  loads them into the target Vault, reproducing that operator KV-CRUD step so the rest of the run exercises the
-  real secrets-by-name path. It is the one sanctioned place a secret value lives at rest; every other `.dhall`,
-  test or not, carries only names ([`dsl_doctrine.md` §6](./dsl_doctrine.md#6-secrets-are-names-never-values)).
-- **The `<project>.dhall` under test is harness-created, or the run fails fast.** The harness **creates** the
-  `<project>.dhall` it deploys beneath its unique `.test_data/runs/<run-id>/**` root and **deletes it on
-  teardown** (the always-teardown contract,
+- **The flagged test-secret value is external, untracked, and ignored.** In production, secrets are CRUD'd
+  into Vault **by name** through the operator's admin REST before a `.dhall` is uploaded
+  ([`bootstrap_sequence_doctrine.md` §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
+  A test has no operator at a keyboard, so the operator may supply one flagged `test-secrets.dhall` as an
+  external input at the specifically ignored repository-root path. It must never be version controlled,
+  generated from repository source, copied into `.build/**` or evidence, or treated as an oracle. The harness
+  validates that the value is test-only, loads it into the target Vault, and records only secret names and
+  redacted identities. This reproduces the operator KV-CRUD step so the rest of the run exercises the real
+  secrets-by-name path. No tracked `.dhall`, test or otherwise, may carry secret material
+  ([`dsl_doctrine.md` §6](./dsl_doctrine.md#6-secrets-are-names-never-values)).
+- **The `<project>.dhall` under test is harness-created, or the run fails fast.** A Haskell declaration lazily
+  renders the `<project>.dhall` it deploys beneath a fresh `.build/test-corpora/<run-id>/**` root. The serialized
+  file is transient build input, never tracked source; `.test_data/runs/<run-id>/**` remains exclusively
+  marker-owned runtime state and is **deleted on teardown** (the always-teardown contract,
   [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down)); if a `<project>.dhall` of that name
   **already exists, the run fails fast** rather than clobber an operator's real spec. That spec is a value of
   the topology type, so it inherits the same illegal-state-unrepresentable guarantee as any production `.dhall`
-  ([§1](#1-a-test-is-an-amoebius-spec)).
+  ([§1](#1-a-test-is-an-amoebius-spec)). A pre-existing generated-input path or runtime-state root fails
+  freshness checks rather than being reused or clobbered.
 
 The resolved **create-vs-delete credential model** — normal-operation credentials may create but not delete
 cloud storage, while the elevated test credential may delete only test-flagged backing — is **owned by**
@@ -547,18 +447,12 @@ and the deterministic rebind it protects are **owned by**
 
 > **Honesty.** The flag-and-elevated-sweep mechanism above is a *design resolution* of an explicitly open
 > question in the vision, not a built or tested amoebius capability. Treat
-> the leak-free guarantee as a specification to be validated, never as a proven result. Delivery (Phase 48)
-> is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+> the leak-free guarantee as a specification to be validated, never as a proven result. Numerical ownership
+> and delivery state live in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## 8. One substrate per validation
-
-Phase 69 is the concrete three-provider-class sweep example: the gate records the complete Kubernetes,
-MinIO, and Pulsar inventory plus the named retained set, then fails unless every non-retained remainder is
-empty. It runs two full cycles under distinct experiment namespaces and seals both Register-3 live and
-Register-2.5 simulation receipts. Its `linux-cpu` execution follows the universal baseline and pristine-host
-provider table owned by [substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux).
 
 A test that silently falls back from a requested specialized lane to CPU proves nothing about that specialized
 lane. amoebius forbids that fallback: **a validation names its execution lane up front and fails fast if that
@@ -566,27 +460,13 @@ lane's inputs are missing.** This does not make `linux-cpu` hardware-exclusive. 
 selectable on every detected hardware substrate — at that host's natural architecture, never at another's
 ([substrate_doctrine.md §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule)).
 
-**An instrument is part of the substrate claim.** A gate declaring substrate `none` asserts it is decidable on
-every substrate in the catalog, and an observation tool is a substrate requirement like any other: a gate that
-reaches for a Linux kernel tracer has declared `linux-cpu` whether it says so or not. Phase 26 observed its
-OS boundary with `strace` under substrate `none` and died at `FileNotFoundError` before its first check on
-Apple — a seal that looked green for two years of Linux runs and had never been decidable on two of the four
-substrates.
+**An instrument is part of the substrate claim.** A hardware-free gate must use in-process Haskell
+observation or a generated subprocess interposer whose availability is established without a container
+engine. Requiring a kernel tracer, container image, virtual machine, cluster, or specialized device changes
+the gate into a hardware or live gate and is prohibited before the DSL promotion barrier.
 
-The rule is therefore that **a substrate-`none` gate observes the OS boundary through a mechanism the process
-model itself provides**, and `tools/argv_observer.py` is that mechanism: a recording interposer on the declared
-absolute route, and a refusing shim on the ambient `PATH` route. It sees the two routes by which a tool can be
-reached rather than every `execve`, and that boundary is stated rather than implied — a narrower observation
-that holds everywhere beats a total one that holds in one place. A kernel tracer remains the right instrument
-where a gate declares the substrate that has one; the live-browser and provider observations below are exactly
-that case.
-
-**The instrument rule is a test of availability, not of absence, and the validation frame passes it.** A gate
-that lifts a language-validation verb into `amoebius-base` through `docker run --rm` declares a container
-engine, and the host band gates one on all three substrates at each one's natural architecture — which is
-exactly the property `strace` lacked. Such a gate stays substrate `none`, and the frame's contents, its
-bind mount, and the argument in full are owned by
-[validation_frame_doctrine.md](./validation_frame_doctrine.md).
+Container replay may later test portability of an already accepted Haskell/DSL result. It cannot supply the
+semantic oracle for that result or make a hardware-dependent command count as substrate `none`.
 
 The canonical rule — *at most one substrate (`apple` | `linux-cuda` | `linux-cpu` | `windows`) per
 validation* — is **phase discipline owned by** [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
@@ -643,49 +523,22 @@ already forbids — an equivalence check defines its reference side independentl
 
 | Half | Content | Requirement | Disposition |
 |---|---|---|---|
-| **Enumeration** — which surfaces exist | declared components, admissible fault targets, capability arms, illegal-state entries, contract constructors | never lags the spec | **generated** from committed source, never committed |
-| **Expectation** — what must hold | assertions, oracles, expected error tags, goldens | independent of the code under test | **authored** and committed |
+| **Enumeration** — which surfaces exist | declared components, admissible fault targets, capability arms, illegal-state entries, contract constructors | never lags the spec | generated from Haskell, never committed |
+| **Expectation** — what must hold | Haskell assertions, semantic predicates, expected values and error identities | independent of the code under test | separately reviewed Haskell source |
 
-Phase 8 applies this split to security relations: nine generated coverage classes enumerate rejection
-branches, while committed owner-join, swap, flow-decision, and exact diagnostic matrices supply expectations.
-Five compiler-negative loci have independently compiling twins, and a registry-backed build mutant must turn
-red at both owner-swap pins. See
-[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
+The boundary applies uniformly:
 
-Phase 38 applies the same boundary to authorization: its committed action, decision, registry-error, and
-stale-epoch tables are evaluated by a string-level reference module that imports no production authorization
-code. Generated properties cover four denial classes and all five effect arms, every denied result has an empty
-pure effect trace, and separate default-allow and visibility-as-authorization runs fail at exact distinct
-loci. The artifact, budget, lift, workflow, and evidence values are real calculus values rather than copied
-arithmetic; their authored `5,6,8,9,2` projection composes to `5,30,0,0`. See
-[Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md).
+- security and authorization arms are enumerated from production Haskell declarations and joined to a
+  separately reviewed Haskell relation;
+- browser observations are compared with a distinct Haskell reference semantics and Haskell-authored expected
+  accessibility, focus, transport, and denial values; and
+- every external-language fixture, client program, browser interaction script, or encoded oracle is generated
+  beneath `.build/**` immediately before the relevant boundary or live check.
 
-Phase 42 applies the boundary across languages and a real browser. Its PureScript transitions are compared with
-a separately implemented Haskell interpreter, while committed DOM, accessibility, focus, and transport tables
-own the expected observations. Playwright reads browser state, the loopback server owns request observations,
-and the OS boundary owns the network observation (`sandbox-exec` on Darwin, `strace` on Linux); nine explicit
-mutants must fail at distinct loci. Its real artifact, budget, lift, workflow, and evidence values project
-`9,5,45,4,9` into resource vector `5,72,0,0`. See
-[Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md).
-
-Phase 44 applies the same split to the complete local application story. Generated `start`, `observe`, and
-`use-artifact` surfaces exact-join five committed interactions; committed visible/effect/access/denial tables
-remain the reference side. Real Chrome, separate domain-process append logs, and `strace` recover a post-ready
-workflow nonce through ready-handle use, while five mutations fail at distinct DOM, scope, edge, digest, and
-ordering loci. See [Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md).
-The same gate constructs the real five-calculus component vector `1,3,42,4,5`, projects it to
-`5,55,0,0`, and joins all four calculus metrics to the authored surface table.
-
-Phase 45 applies the boundary to encrypted browser persistence. A second real Chrome process opens the same
-repository-contained profile and independently recovers a fresh canary while raw IndexedDB bytes exclude it;
-Web Locks refuses the concurrent tab, a later owner advances the fencing generation, and cache/storage rows
-join the authored inventories. The production PureScript bundle is the page under test, six reference mutants
-fail at distinct loci, and the real calculus vector `2,3,25,14,6` projects to `5,50,0,0`.
-
-The split also applies to lint and mutation corpora. An authored positive seed, mutation recipe, and expected
-diagnostic may be committed. The recipe's materialized negative copies are generated enumeration/input and
-must be created under `.build/test-corpora/` or `.build/tmp/`. The gate joins each generated case to its
-authored expected diagnostic by stable mutation identity; it does not retain a second source tree of copies.
+The split also applies to lint and mutation corpora. A positive seed, mutation operator, and expected
+diagnostic identity may be committed only as Haskell. Materialized negative copies and serialized diagnostics
+are generated under `.build/test-corpora/` or `.build/tmp/`. The gate joins each case to its Haskell
+expectation by stable mutation identity; it does not retain a second source tree of copies.
 
 Git chronology is evidence, not an assumption. A fixture introduced in the same commit as its subject has no
 repository-established before-implementation provenance and is treated as a regression fixture. It becomes an
@@ -695,22 +548,22 @@ claim the stronger oracle status from that fixture alone.
 Enumeration is a pure projection of a committed typed value, so it is a generated artifact in the ordinary
 sense and inherits the ordinary treatment of
 [generated_artifacts_doctrine.md §3](./generated_artifacts_doctrine.md#3-the-rule) — emitted at gate time,
-stamped generated, never checked in. Expectation is authored source
+stamped generated, never checked in. Expectation is independently authored Haskell source
 ([generated_artifacts_doctrine.md §5](./generated_artifacts_doctrine.md#5-authored-vs-generated-the-committed-source))
-and is committed. Neither half changes the existing artifact rules; what is new is that a test contains
+and is committed as `.hs`. Neither half changes the existing artifact rules; what is new is that a test contains
 both and that they are treated differently.
 
 **The coverage obligation.** The generator emits not tests but the list of surfaces requiring an authored
-expectation. Each enumerated surface is either bound to a committed expectation or it is not, and an unbound
+expectation. Each enumerated surface is either bound to a committed Haskell expectation or it is not, and an unbound
 surface emits an **UNVERIFIED** row in the ledger's `coverage` array ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)),
 naming the surface — the `coverage` axis exists precisely so an uncovered surface is recorded, not lost.
 
 ```mermaid
 flowchart TD
 %% register: algebra
-  spec["committed typed source: InForceSpec, catalog, composed ADTs"]:::intent -->|pure projection| enum["enumeration: surfaces requiring coverage (generated, not committed)"]:::intent
+  spec["production Haskell declarations: ADTs and catalog"]:::intent -->|pure projection| enum["enumeration: surfaces requiring coverage (generated, not committed)"]:::intent
   enum -->|join by identity| oblig[/"coverage obligation"\]:::intent
-  auth["authored expectations: assertions, oracles, tagged fixtures (committed)"]:::intent -->|join by identity| oblig
+  auth["independent Haskell expectations: predicates and tagged values"]:::intent -->|join by identity| oblig
   oblig -->|every surface bound| reached["layer status from the run"]:::intent
   oblig -->|surface unbound| unver>"UNVERIFIED row naming the uncovered surface"]:::refuse
   reached --> ledger["per-run proven / tested / assumed ledger"]:::intent
@@ -718,10 +571,12 @@ flowchart TD
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Design intent: the generated enumeration accumulates with authored expectations by identity; every bound surface yields a layer status and every unbound surface falls closed to an UNVERIFIED ledger row.*
+*Design intent: the generated enumeration accumulates with independently reviewed Haskell expectations by
+identity; every bound surface yields a candidate layer observation and every unbound surface falls closed to
+an UNVERIFIED ledger row.*
 
 This introduces no new honesty vocabulary. UNVERIFIED already denotes an applicable move a run did not
-perform, already blocks promotion to prod, and is already externally checked
+perform, already blocks promotion to prod, and must be checked through independent observation and human review
 ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)). The extension is to the *set* of things
 recordable as UNVERIFIED — from skipped moves to uncovered surfaces — so absent coverage becomes a claim the
 ledger states rather than a gap no artifact represents. Because the enumeration is regenerated at gate time
@@ -729,8 +584,8 @@ and never committed, a surface cannot be removed from the required set by editin
 
 What this forecloses: a hand-curated inventory of what a suite covers, which is the artifact that goes
 stale; and generated assertions, with them the appearance of coverage a generated suite produces at no
-evidential cost. Authored expectations can still be weak or wrong — that failure is caught by the committed
-seeded-mutant discipline required at every gate, not by this boundary.
+evidential cost. Haskell expectations can still be weak or wrong; the gate's Haskell mutant operators and
+human independence review must expose that failure.
 
 The analysis this rule was drawn from — including the alternatives rejected, the recommendations not
 adopted, and the corpus defects repaired alongside it — is recorded in
@@ -761,46 +616,12 @@ To keep the SSoT boundaries crisp:
 
 ---
 
-The Phase-61 Register-3 ledger combines a pristine real delete/recreate cycle, an independent Haskell reader, Kubernetes-auth/audit provenance, storage high-water observations, and nine red mutants; its Register-2.5 companion explores 500 deterministic seeds per fault family plus the combined sequence, with modeled fidelity discharged only by the live gate and the three federation surfaces left UNVERIFIED.
-
-The Phase-65 Register-3 instance validates the Lease-held control-plane daemon with an exact seven-object first pass and zero-write rediscovery rerun; 26 pinned dhall-typecheck/gadt-decode negatives; the complete admin reach matrix and four paired capability-admission cases; byte-identical durable state after replacement; password non-persistence; and five committed mutants red for their pinned causes. Full tenant admin, parent→child use, provider materialization, and cross-cluster gateway correspondence remain UNVERIFIED. Ledger `external-run-reference`.
-
-The Phase-66 Register-3 instance validates two equal-shaped tenants through all six provider-admin arms using six separated provider-native observers, fresh challenge correspondence, paired illegal-input zero-effect checks, teardown equality, and the `drop_provider_arm` and `collapse_tenant_key` mutants. It establishes tested provider projection readiness, not the Phase-68 application data path or real-user credential enforcement.
-
-The Phase-67 Register-3 instance validates a native Haskell Pulsar client through two distinct namespaces,
-with broker-admin readback of duplicate collapse, redelivery, seek, all four subscription types, and empty
-postflight inventory. Compile-refusal fixtures pin the CBOR-only and derived-topic API boundaries; three
-source mutants turn red. Its Register-2.5 companion covers 720 dedup schedules. Ledger
-`dynamically-resolved`.
-
-The Phase-68 Register-3 instance specializes the fresh-effect envelope for user/tenant isolation. Three real
-Keycloak credentials and authenticated introspection establish authority; separate Postgres, MinIO, Pulsar,
-Keycloak, and Kubernetes/CNI observations pair sanctioned effects with zero foreign state, message, cursor,
-or reachability effect. Exact cleanup and two authority mutants pass. Complete provider-audit-log
-correspondence remains `UNVERIFIED`; normalized provider-native readback is the claimed observer boundary.
-Ledger `external-run-reference`. Every hardware substrate always
-retains the `linux-cpu` option. When this gate needs a clean machine, Linux and Linux-CUDA hosts materialize it
-with Incus, Apple hosts with Lima, and Windows hosts with WSL2.
-
-The Phase-74 Register-3 instance combines a compile-fail projection corpus, a separately authored Dhall
-classification table, content-addressed and demand goldens, two in-parent Pulumi Jobs, and external
-kind/Pulumi/Vault/MinIO/native-Pulsar/Patroni observers. It requires a no-op second pass, exact stack/cluster
-cleanup, and three red mutants. Its ledger marks physically independent child-local brokers and child-local
-Vault processes UNVERIFIED rather than inferring them from the two real child clusters. Every hardware
-substrate can always run this `linux-cpu` lane.
-
-The Phase-75 gate binds a pre-pinned numeric budget and journal schema to 24 fresh source acknowledgements per
-branch. An external file journal, retained MinIO reads, authoritative DNS queried with `dig`, Kubernetes
-authority readback, raw-kernel WireGuard inventory, and exact postflight inventories agree on Planned RPO=0
-and fenced Failover inside the declared RTO. Two guard mutants turn red. Its honesty rows keep data loss
-assumed-and-monitored and leave Route53/WAN fidelity UNVERIFIED.
-
 ## 11. Planning ownership
 
-This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates, and remaining work are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): Phase 48 owns the pure workflow algebra,
-Phase 90 the generated/live topology and harness, and Phase 75 the cross-cluster failover proof artifacts. This doc never maintains a competing status ledger; it states the target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
-the phase-specific validated instances above are amoebius results; the unimplemented test-topology and cross-cluster shapes remain design intent generalized from prodbox.
+This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates,
+and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This
+document states no current validation result. Every gate remains a candidate until the human user reviews its
+independence, sabotage controls, predecessor chain, and owned legacy closures.
 
 ---
 
@@ -811,10 +632,9 @@ A gate must observe an **unforgeable effect produced after the gate started**, n
 
 ## 13. End-to-end tests run in the Playwright image, against three browsers
 
-The validation frame is `amoebius-base` and it carries no browser
-([validation_frame_doctrine.md §5](./validation_frame_doctrine.md#5-the-one-exception-browsers)). Browser
-tests run instead in a dedicated **Playwright image**, built from the same Ubuntu base and carrying Chromium,
-Firefox, and WebKit.
+Browser tests are a later boundary/live activity and run in a dedicated **Playwright image** carrying
+Chromium, Firefox, and WebKit. The image is not a prerequisite for the hardware-free Haskell/DSL promotion
+barrier and cannot validate the DSL or generators that define its own recipe.
 
 **Every end-to-end test runs against all three engines.** A rendering, an event ordering, or a storage
 behaviour that holds in one engine and not another is a real defect in the UI runtime, and a suite that
@@ -822,10 +642,11 @@ exercises one engine cannot see it. Running the same test three times is the che
 
 Two rules keep the exception bounded:
 
-- **Running it is the host binary's job.** End-to-end tests are invoked like every other test — through the
-  host binary, as `docker run --rm` — never by a developer driving a browser by hand.
-- **The image is built, never pulled.** `amoebius-base` is published and preferentially pulled; the
-  Playwright image is built on demand and idempotently by the host binary, and is never pushed. Three browser
+- **Running it is the Haskell binary's job.** End-to-end tests are invoked through the binary after hardware
+  promotion, never through a tracked script or a developer driving a browser by hand.
+- **The target test image is built, never pulled.** `amoebius-base` is the separately published pull-only
+  artifact; after the hardware-free barrier, the host binary must build the Playwright image on demand and
+  idempotently and must never push it. Three browser
   engines are a test-only payload, and publishing it would put that payload in the lineage every pod pulls
   ([image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)).
 

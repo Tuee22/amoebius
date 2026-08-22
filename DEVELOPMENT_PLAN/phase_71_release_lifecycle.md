@@ -3,17 +3,13 @@
 > **Purpose**: Compose delivery — the immutable `Release` ledger keyed by `releaseHash`, the per-`Environment`
 > ETag-CAS promotion pointer, the `PromotionGate` that makes promote-unverified→prod unrepresentable, and the
 > readiness-gated `RolloutPlan`/`RolloutPhase` apply (DB schema-migration as a phase) — as typed values over
-> primitives amoebius already owns, gated live on linux-cpu with no external CI/CD control plane.
+> primitives supplied only by human-approved predecessor phases, gated live on linux-cpu with no external CI/CD control plane.
 > **Read this if**: phase 71 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 71 delivers the release lifecycle; its design is owned by [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), [inforcespec_migration_doctrine.md](../documents/engineering/inforcespec_migration_doctrine.md), [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-11 with `python3 tools/release_lifecycle_gate.py --reuse-fresh-live`;
-ledger `external-run-reference`.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -26,10 +22,11 @@ ledger `external-run-reference`.
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — release execution, the content/pointer store, and schema migration](#resource-provision--release-execution-the-contentpointer-store-and-schema-migration)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 71.1: The immutable `Release` ledger (`releaseHash`) ⏸️](#sprint-711-the-immutable-release-ledger-releasehash-)
@@ -43,37 +40,23 @@ ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-70 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 70, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-Done (invalidated). All four sprints are implemented in `amoebius-release` and validated in **Register 3** on the
-**linux-cpu** lane — the single-node `kind` cluster assembled through Phases 35–44, with
-its standard platform-service stack already reconciled by the Phase-65 control-plane daemon onto the Phase-60 retained
-storage. It opens only after the Phase 65 gate (live DSL deploy via the Deployment-`replicas=1` control-plane daemon and
-the SSA reconciler the `RolloutPlan` enacts on) and the Phase 69 gate (the three-tier content-addressed store
-the `releaseHash`-keyed ledger writes into) both close, because delivery here **composes** those primitives
-rather than reimplementing a reconciler or a store. Two distinct rounds validated the immutable ledger,
-ETag-CAS pointers, typed evidence refusal, and ordered schema-migration rollout, with exact cleanup and eight
-seeded mutants red. Gateway-API canary weight shifting, Pulsar consumer-group cutover, and cross-cluster/geo
-promotion remain **UNVERIFIED**.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase delivers the **release lifecycle** — build's downstream half, *promote* and *roll out* — as typed
-composition on primitives amoebius already owns, with **no external CI/CD control plane** (no Argo, no Flux, no
+This phase's target is the **release lifecycle** — build's downstream half, *promote* and *roll out* — as typed
+composition on primitives supplied only by human-approved predecessor phases, with **no external CI/CD control plane** (no Argo, no Flux, no
 Tekton). It composes four values on one substrate. First, the immutable **`Release` ledger**: every built
 generation is an append-only, content-addressed entry keyed by
 `releaseHash = sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fp)`, written into the Phase-69
@@ -90,75 +73,60 @@ surfaces as a reason-tagged `Left` at runtime. Fourth, the readiness-gated
 **`RolloutPlan`/`RolloutPhase`** apply on the Phase-65 in-cluster SSA reconciler: an ordered plan whose each
 phase is observed done from live object state (never a `threadDelay`), with a **DB schema-migration `RolloutPhase`** obeying `create-new → verified-migrate → retire-old`.
 
-The load-bearing property this phase proves live is that **an under-verified `Release` cannot advance to prod and a satisfied gate can** — the evidence edge, not an operator's discretion, is what moves the pointer. A
+The future gate must test the load-bearing property that **an under-verified `Release` cannot advance to prod and a satisfied gate can** — the evidence edge, not an operator's discretion, is what moves the pointer. A
 `Release` whose ledger records the Runtime/chaos layer UNVERIFIED yields no Runtime `EvidenceWitness`, so the
 `Prod` `PromotionGate` supplies no `advance` value and the pointer does not move; a `Release` carrying the
 required evidence strength advances the ETag-CAS pointer, after which the SSA reconciler resolves the selected
 release's `deploymentDhallRef` and recomputes desired objects through the ordered `RolloutPlan`. The scope deliberately consumes upstream primitives as
 given: the `releaseHash` formula and the hash/pointer master registry are the Phase-69/Phase-80 store's
 (consumed here as an opaque content-address protocol); the proven/tested/assumed evidence ledger the gate
-reads is the contract owned by `testing_doctrine` (consumed here as an opaque witness; Phase 48 later automates
-test-topology generation but is not a prerequisite); the Gateway-API canary weight-shift remains later-phase
+reads is the contract owned by `testing_doctrine` (consumed here as an opaque witness; Phase 48's pure
+test-workflow algebra is a required predecessor in the numeric chain, while Phase 90 owns later live topology
+automation); the Gateway-API canary weight-shift remains later-phase
 work, and the cross-cluster/geo promotion boundary is exercised in Phase 74 — neither is part of this gate.
 
 **Phase scope:** one cohesive claim — *promoting an unverified release to production has no representation*. The ledger, the CAS pointer and the gate are three views of that one foreclosure.
 
 **Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host, in
-Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched. The ledger/pointer
-protocols and the `PromotionGate` are substrate-agnostic in design but validated only here.
+Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched. This phase owns the
+future bounded live validation of the otherwise substrate-agnostic ledger/pointer protocols and
+`PromotionGate`.
 
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 70](phase_70_ui_projection_runtime.md) — owner-scoped UI projection runtime, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 71` is green: one `InForceSpec` topology on the linux-cpu kind
-cluster exercises the ledger write, the refused promotion, the satisfied advance, and the ordered rollout
-end-to-end. Its representative set, oracles, observers, and mutants are delegated to
-[Gate integrity](#gate-integrity).
+**Depends on:** [Phase 70](phase_70_ui_projection_runtime.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 71`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The gate is one `InForceSpec` test topology on the linux-cpu kind cluster, and it passes only when all four
-delivery values hold at once.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-- **A live `Release`-ledger write produces a content-addressed `releaseHash`.** The key is recomputed by an
-  independent sha256 over the resolved deployment-dhall ‖ image-digests ‖ substrate-fp and asserted byte-equal
-  to the oracle-pinned golden key, with the ledger entry immutable in the Phase-69 store.
-- **An `Environment` promotion whose `Release` ledger lacks the required evidence strength is refused by the
-  `PromotionGate`.** The committed under-verified fixture `release_unverified` — its evidence ledger marks the
-  Runtime/chaos layer UNVERIFIED — yields no `advance` value for `Prod`, and the refusal carries the specific
-  reason tag `PromotionRefused:RuntimeEvidenceMissing`, not merely "failed", paired with a positive
-  `release_verified` differing only in the Runtime evidence edge. The refusal is observed as **no pointer
-  advance in the store's ETag history**: an external-observer read of the pointer HEAD, never a self-emitted
-  gate log.
-- **A satisfied `PromotionGate` advances the ETag-CAS `Environment` pointer.** The prod pointer's ETag
-  transitions from the old `releaseHash` to `release_verified`'s, observed from the store's pointer history.
-- **A readiness-gated `RolloutPlan` applies its phases in order.** The phase-apply order is read from an
-  **external observer at the OS/API boundary** — the API-server audit log, or the run's ApplySet field-manager
-  apply sequence, never the reconciler's self-report — each phase is gated on live object status, and the plan
-  **includes a DB schema-migration `RolloutPhase`** obeying `create-new → verified-migrate → retire-old`
-  against the standing Phase-66 Postgres, whose retire phase never denotes byte destruction.
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *promoting an unverified release to production has no representation*. The ledger, the CAS pointer and the gate are three views of that one foreclosure. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 71` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 70 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**Hygiene and honesty.** The whole topology spins up, runs, tears down **leak-free**, and **re-runs
-idempotently under a distinct per-run store namespace** — a cache-bypassing independent recompute of the
-`releaseHash`, not a store-hit. It emits a generated proven/tested/assumed ledger under `.build/runs/` naming its
-register (3) and substrate (linux-cpu), marking the runtime layer **tested, never proven** and the
-cross-cluster and canary layers **UNVERIFIED**.
+## Resource provision — UNRESOLVED
 
-**Oracles, mutants, and the representative set (§M.1, §M.2, §M.7).** The gate is checked against the
-oracle-pinned fixtures named in Sprints 61.1–40.4 and **MUST turn red** on the committed seeded mutant
-`mutant/gate-admits-unverified` — a `PromotionGate` whose guard is weakened so a promotion that SHOULD be
-refused (`release_unverified` → `Prod`) is **admitted** — and on the additional mutants named per sprint. The
-representative set is exactly the `release_lifecycle.dhall` topology's one trivial app with three environment
-pointers (`Dev`/`Staging`/`Prod`), three committed `Release` entries (`release_verified`,
-`release_unverified`, `release_protocol_unverified`), and one `RolloutPlan` of three ordered phases
-(base-apply → DB schema-migration → finalize, where the `finalize` phase enacts retire-old) over the standing
-single-node platform stack plus one Postgres.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
-
-## Resource provision — release execution, the content/pointer store, and schema migration
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
@@ -234,87 +202,80 @@ flowchart LR
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact release lifecycle emits is a recipe over a content address, never an authored file.
-This phase is the first live amoebius realization of the release lifecycle. It adopts
-[`release_lifecycle_doctrine.md`](../documents/engineering/release_lifecycle_doctrine.md) end to end — the
+- [`jit_artifact_doctrine.md` §2 — The rule, and the closed exception list](../documents/engineering/jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list) — every artifact release lifecycle emits is a recipe over a content address, never an authored file.
+This phase's target is to become the first live amoebius realization of the release lifecycle. It must adopt
+[`release_lifecycle_doctrine.md` §1 — No external CI/CD control plane — delivery is typed composition on primitives amoebius owns](../documents/engineering/release_lifecycle_doctrine.md#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns),
+[`release_lifecycle_doctrine.md` §2 — `Release` and the immutable release ledger (`releaseHash`)](../documents/engineering/release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash),
+[`release_lifecycle_doctrine.md` §3 — `Environment` and the ETag-CAS promotion pointer](../documents/engineering/release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer),
+[`release_lifecycle_doctrine.md` §4 — `PromotionGate`: promote-unverified→prod is unrepresentable](../documents/engineering/release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable),
+[`release_lifecycle_doctrine.md` §5 — `RolloutPlan` / `RolloutPhase`: the readiness-gated apply](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply),
+and [`release_lifecycle_doctrine.md` §6 — What this doctrine deliberately does not own / Planning ownership](../documents/engineering/release_lifecycle_doctrine.md#6-what-this-doctrine-deliberately-does-not-own--planning-ownership) end to end — the
 composition doctrine that owns the delivery values and defers every primitive they compose. Each bullet names
-the section it adopts; individual sprints cite the same sections where they build on them.
+the section the target must adopt; individual sprints cite the same sections where they must build on them.
 
-- [`inforcespec_migration_doctrine.md §3`](../documents/engineering/inforcespec_migration_doctrine.md#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)
+- [`inforcespec_migration_doctrine.md` §3 — The DSL exposes no destructive verb — the closed `StorageMutation` union](../documents/engineering/inforcespec_migration_doctrine.md#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)
   — **the no-destruction InForceSpec-migration invariants.** A RolloutPlan that evolves the live spec is checked
   at `dhall update`: the StorageMutation closed union, the decode-time orphan / retention-shrink rejection, and
   the owner-immutability diff fold foreclose a promotion that would strand or silently destroy retained data.
-  This phase realizes that no-destruction guarantee at the store boundary as the schema-migration
+  This phase's target must realize that no-destruction guarantee at the store boundary as the schema-migration
   `create-new → verified-migrate → retire-old` discipline, where no `RolloutPhase` — the retire step included —
   denotes durable-byte destruction (Sprint 71.4).
-- [`release_lifecycle_doctrine.md §1`](../documents/engineering/release_lifecycle_doctrine.md#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns)
-  — *no external CI/CD control plane — delivery is typed composition*: this phase installs no second control
+- [`release_lifecycle_doctrine.md` §1 — No external CI/CD control plane — delivery is typed composition on primitives amoebius owns](../documents/engineering/release_lifecycle_doctrine.md#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns)
+  — *no external CI/CD control plane — delivery is typed composition*: this phase's target must install no second control
   plane; the whole lifecycle is a handful of typed values composed over the Phase-65 reconciler and the
   Phase-69 store, with desired state recomputed from the immutable release's authenticated Dhall reference,
   never polled from a controller's opinion or replayed from stored YAML.
-- [`release_lifecycle_doctrine.md §2`](../documents/engineering/release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)
+- [`release_lifecycle_doctrine.md` §2 — `Release` and the immutable release ledger (`releaseHash`)](../documents/engineering/release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)
   — *`Release` and the immutable release ledger (`releaseHash`)*: every built generation is an append-only,
   content-addressed `Release` entry keyed by `releaseHash`, written before promotion. After convergence the
   manifest reconciler appends the distinct `AppliedGeneration` application-history record
-  ([`manifest_generation_doctrine.md §6.1`](../documents/engineering/manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional));
+  ([`manifest_generation_doctrine.md` §6.1 — The release application record: every convergence is recorded](../documents/engineering/manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional));
   both records are immutable runtime-checked content-addressed-write residue.
-- [`release_lifecycle_doctrine.md §3`](../documents/engineering/release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)
+- [`release_lifecycle_doctrine.md` §3 — `Environment` and the ETag-CAS promotion pointer](../documents/engineering/release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)
   — *`Environment` and the ETag-CAS promotion pointer*: `Dev`/`Staging`/`Prod` is a closed union each naming a
   mutable pointer into the immutable ledger; promotion is an ETag-CAS of that pointer
-  ([`content_addressing_doctrine.md §2.3`](../documents/engineering/content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds), the `environment` pointer kind), then a converge — app bytes byte-identical across environments.
-- [`app_vs_deployment_doctrine.md §3`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
+  ([`content_addressing_doctrine.md` §2.3 — The hash/pointer master table: four hash classes, three pointer kinds](../documents/engineering/content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds), the `environment` pointer kind), then a converge — app bytes byte-identical across environments.
+- [`app_vs_deployment_doctrine.md` §3 — The deployment-rules surface — how the same app *runs*](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
   — *the deployment-rules surface — how the same app runs*: environment differences ride the deployment-rules
   surface, so the same immutable `Release`'s app bytes are byte-identical across `Dev`/`Staging`/`Prod` — no
   `if prod then …` in an app spec and no rebuild between environments (realized by Sprint 71.2's app-bytes
   invariance).
-- [`release_lifecycle_doctrine.md §4`](../documents/engineering/release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable)
+- [`release_lifecycle_doctrine.md` §4 — `PromotionGate`: promote-unverified→prod is unrepresentable](../documents/engineering/release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable)
   — *`PromotionGate`: promote-unverified→prod is unrepresentable*: `advance` demands an `EvidenceWitness` read
   from the test-topology evidence ledger
-  ([`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact));
+  ([`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact));
   prod requires the Runtime/chaos layer *tested* (its highest achievable strength — live injection is never
   *proven*), so an under-verified `Release` has no `advance` term —
   catalogued at
-  [`illegal_state_catalog.md §3.26`](../documents/illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence),
+  [`illegal_state_lifecycle.md` §3.26 — An unverified environment promotion (promote → prod without the required evidence)](../documents/illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence),
   the "a handle exists only once its evidence edge does" technique.
-- [`release_lifecycle_doctrine.md §5`](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
+- [`release_lifecycle_doctrine.md` §5 — `RolloutPlan` / `RolloutPhase`: the readiness-gated apply](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
   — *`RolloutPlan`/`RolloutPhase`: the readiness-gated apply*: an ordered plan enacted by the Phase-65 SSA
   reconciler
-  ([`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)),
+  ([`manifest_generation_doctrine.md` §5 — The apply/reconcile engine: snapshot-bound typed actions](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)),
   each phase's readiness a condition observed from live state
-  ([`readiness_ordering_doctrine.md §3`](../documents/engineering/readiness_ordering_doctrine.md#3-readiness-is-a-condition-never-a-duration), never a duration), with DB schema-migration a phase obeying `create-new → verified-migrate → retire-old`
-  ([`storage_lifecycle_doctrine.md §8`](../documents/engineering/storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)).
+  ([`readiness_ordering_doctrine.md` §3 — Readiness is a condition, never a duration](../documents/engineering/readiness_ordering_doctrine.md#3-readiness-is-a-condition-never-a-duration), never a duration), with DB schema-migration a phase obeying `create-new → verified-migrate → retire-old`
+  ([`storage_lifecycle_doctrine.md` §8 — Shrinking storage without representing data destruction](../documents/engineering/storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)).
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 71.1: The immutable `Release` ledger (`releaseHash`) ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Release/Ledger.hs`,
-`src/Amoebius/Release/ReleaseHash.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: at **Register 3** against the Phase-69 kind cluster's live MinIO store, a `Release`
-write emits the oracle-pinned `releaseHash` under an independent sha256, a repeat write of the same logical
-`Release` deduplicates, and an attempted edit of an existing entry is rejected. The `### Validation` list
-below states each check and its fixtures.
-**Docs to update**: `documents/engineering/release_lifecycle_doctrine.md` (§2),
-`documents/engineering/manifest_generation_doctrine.md` (§6.1 — append the application record after
-convergence), `DEVELOPMENT_PLAN/system_components.md`, this document.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`release_lifecycle_doctrine.md §2 — the immutable release ledger (`releaseHash`)`](../documents/engineering/release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash):
 write the canonical, content-addressed candidate before promotion, then append the distinct application record
 owned by [`manifest_generation_doctrine.md §6.1`](../documents/engineering/manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional)
 after convergence.
 
 ### Deliverables
+
 - A `Release` value — `{ releaseHash, deploymentDhallRef, imageDigests, substrateFp }` — written as an
   append-only entry into the Phase-69 store (pointers → manifests → blobs), keyed by
   `releaseHash = sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fp)`; the hash is consumed as
@@ -337,6 +298,7 @@ after convergence.
   substrate-distinct generations to one key; the gate MUST turn this mutant **red** against the golden vector.
 
 ### Validation
+
 1. Execute at **Register 3** against the Phase-69 single-node kind cluster's live MinIO store, never an
    in-process fake — the register is stated so the result's evidential weight is unambiguous. Write the fixed
    `release_fixture` and assert the emitted `releaseHash` is **byte-equal to the committed golden `release_hash.txt`** (independently recomputed), and that a second write deduplicates to the same
@@ -356,30 +318,22 @@ after convergence.
 > deployment *generations* — sibling evidence, not an amoebius result.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 71.2: The `Environment` ETag-CAS promotion pointer ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Release/Environment.hs`,
-`src/Amoebius/Release/Promote.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: this suite runs in **Register 3** against the live Phase-69 store, where
-`Environment` admits no fourth arm, promotion is an `If-Match` compare-and-swap that writes no new `Release`,
-and a concurrent lost-update loser takes `412` and re-applies. The `### Validation` list below states each
-check and its fixtures.
-**Docs to update**: `documents/engineering/release_lifecycle_doctrine.md` (§3),
-`documents/engineering/content_addressing_doctrine.md` (§2.3 — the `environment` pointer kind),
-`documents/engineering/app_vs_deployment_doctrine.md` (§3 — app bytes byte-identical across environments),
-`DEVELOPMENT_PLAN/system_components.md`, this document.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`release_lifecycle_doctrine.md §3 — the ETag-CAS promotion pointer`](../documents/engineering/release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer),
 reusing the [`content_addressing_doctrine.md §2.3`](../documents/engineering/content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)
 ETag-CAS protocol for the `environment` pointer kind: model promotion as a compare-and-swap of an environment's
 pointer over the fixed ledger, not a redeploy.
 
 ### Deliverables
+
 - A closed `Environment = Dev | Staging | Prod` union — no fourth, unnamed environment is representable — each
   naming one ETag-CAS pointer into the ledger, its body a `releaseHash`.
 - `promote :: Environment -> ReleaseHash -> PointerCas`: an `If-Match` compare-and-swap advancing the named
@@ -404,6 +358,7 @@ pointer over the fixed ledger, not a redeploy.
   MUST turn it **red** by a racing-CAS check that observes a lost write.
 
 ### Validation
+
 1. Assert the compile-fail fixture `fourth_environment.hs` **fails to type-check at the constructor site** (an
    un-enumerated environment has no constructor), paired with a passing enumerated-arm positive.
 2. Promote a fixed `Dev → Staging → Prod` chain and assert the pointer ETag sequence is **byte-equal to the committed `promote_history.txt`**, that `Staging` and `Prod` end pointing at the **same** immutable
@@ -421,24 +376,15 @@ pointer over the fixed ledger, not a redeploy.
 > evidence for the mechanism, not an amoebius result for environment promotion.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 71.3: The `PromotionGate` — promote-unverified→prod type-foreclosed ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Release/PromotionGate.hs`,
-`src/Amoebius/Release/EvidenceWitness.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: this suite runs in **Register 3**, where `advance` demands an `EvidenceWitness`
-read under a monotone environment→required-strength mapping, so a Runtime-UNVERIFIED `Release` yields no
-`advance` value and moves no pointer while its paired positive advances. The `### Validation` list below states
-each check, its reason tags, and its fixtures.
-**Docs to update**:
-`documents/engineering/release_lifecycle_doctrine.md` (§4), `documents/engineering/testing_doctrine.md` (§4
-— the evidence ledger the gate consumes), `documents/illegal_state/illegal_state_lifecycle.md` (§3.26 — the
-catalogued unrepresentable state), `DEVELOPMENT_PLAN/system_components.md`, this document.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`release_lifecycle_doctrine.md §4 — promote-unverified→prod is unrepresentable`](../documents/engineering/release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable):
 make the environment-pointer advance demand an `EvidenceWitness` read from the
 [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
@@ -447,6 +393,7 @@ evidence ledger, so an under-verified `Release` has no term that promotes it to 
 unrepresentable state.
 
 ### Deliverables
+
 - `advance :: Environment -> Release -> EvidenceWitness -> PointerCas` — the advance is inhabited only when the
   witness for the target environment's required layer exists; no witness ⇒ no `advance` value ⇒ nothing to CAS.
   This is the same idiom as infernix's `.ready`-gated `ArtifactRef`: a handle exists only once its evidence
@@ -476,6 +423,7 @@ unrepresentable state.
   refused advances the pointer).
 
 ### Validation
+
 1. Attempt `release_unverified → Prod` and assert it is **refused with the specific tag `PromotionRefused:RuntimeEvidenceMissing`** (not a bare failure) and that the `Prod` pointer HEAD is
    **unchanged in the store's ETag history** (external-observer read, not a gate self-report); assert the
    paired positive `release_verified → Prod` (differing only in the Runtime evidence edge) **advances**.
@@ -496,28 +444,15 @@ unrepresentable state.
 > the already-scoped multicluster `PromotionGate`.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 71.4: `RolloutPlan`/`RolloutPhase` readiness-gated apply + DB schema-migration phase (gate) ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Release/RolloutPlan.hs`,
-`src/Amoebius/Release/SchemaMigration.hs`,
-`dhall/test/release_lifecycle.dhall` (the gate topology),
-`test/spec/release/ReleaseLifecycleSpec.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: this suite runs in **Register 3** on the live single-node kind cluster, where an
-ordered `[RolloutPhase]` applies each slice under the `amoebius` field manager, gates the next on a condition
-observed from live object state, and carries the DB schema-migration phase. The `### Validation` list below
-states each check, its external observer, and its fixtures.
-**Docs to update**: `documents/engineering/release_lifecycle_doctrine.md` (§5),
-`documents/engineering/manifest_generation_doctrine.md` (§5 — the SSA reconciler the plan enacts on),
-`documents/engineering/readiness_ordering_doctrine.md` (§3 — readiness a condition, never a duration),
-`documents/engineering/storage_lifecycle_doctrine.md` (§8 — create-new → verified-migrate → retire-old),
-`documents/engineering/inforcespec_migration_doctrine.md` (§3 — the no-destruction invariants the
-schema-migration phase inherits), `DEVELOPMENT_PLAN/README.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`release_lifecycle_doctrine.md §5 — the readiness-gated apply`](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply):
 enact a satisfied promotion as an ordered, readiness-gated `RolloutPlan` on the Phase-65 SSA reconciler — with
 DB schema-migration as a [`storage_lifecycle_doctrine.md §8`](../documents/engineering/storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)
@@ -525,6 +460,7 @@ DB schema-migration as a [`storage_lifecycle_doctrine.md §8`](../documents/engi
 values end-to-end.
 
 ### Deliverables
+
 - `RolloutPlan = [RolloutPhase]` where each `RolloutPhase` carries `{ phaseObjects, phaseGate }`: the desired slice this phase applies and the readiness condition observed from live state — rollout complete, `Ready`, or CR `status` healthy, never a `threadDelay` — that gates the next phase. Enacted by the Phase-65 SSA/ApplySet engine ([`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions));
   it introduces **no new reconciler**.
 - A **DB schema-migration `RolloutPhase`** against the standing Phase-66 Postgres obeying
@@ -558,6 +494,7 @@ values end-to-end.
   status, caught by the external-observer apply-order trace).
 
 ### Validation
+
 1. Run the gate topology end-to-end on the linux-cpu kind cluster and assert, **live**: (a) the `Release`
    ledger write emits a `releaseHash` byte-equal to the committed golden (Sprint 71.1, independently
    recomputed); (b) `release_unverified → Prod` is **refused with `PromotionRefused:RuntimeEvidenceMissing`**
@@ -602,11 +539,13 @@ values end-to-end.
 > (tier b) are unrelated; only tier (c), the in-cluster SSA reconciler, enacts this plan.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/release_lifecycle_doctrine.md` — record that §2 (the `releaseHash` release ledger),
   §3 (the `environment` ETag-CAS promotion pointer), §4 (the `PromotionGate`), and §5 (the readiness-gated
   `RolloutPlan`/`RolloutPhase` with the DB schema-migration phase) are realized live in `amoebius-release`,
@@ -628,6 +567,7 @@ None.
   promotion) is realized as the type-foreclosed `PromotionGate` with live-wiring evidence from this gate.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-71 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 71's gate substrate (linux-cpu) in the per-phase substrate
   map.
@@ -636,6 +576,7 @@ None.
   `SchemaMigration`), mapped to the owning release-lifecycle doctrine, as Phase-71 design-first rows.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker; Phase 71 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton, sprint format, the doctrine-citation rule, the register + honesty + one-substrate disciplines, and the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate-integrity clauses)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no external CI/CD control plane; single-instance delegated to k8s/etcd; the content-addressed store)

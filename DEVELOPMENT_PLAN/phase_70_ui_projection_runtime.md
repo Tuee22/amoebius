@@ -5,30 +5,27 @@
 > handles cannot collapse command, subject, or tenant scope.
 > **Read this if**: phase 70 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 70 delivers the owner-scoped UI projection runtime; its design is owned by [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-11; ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — bounded owner projections](#resource-provision--bounded-owner-projections)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 70.1: Build and independently verify the owner-scoped live projection ⏸️](#sprint-701-build-and-independently-verify-the-owner-scoped-live-projection-)
@@ -39,29 +36,22 @@ Validated 2026-08-11; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-69 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 69, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-Done (invalidated). Phase 40 owns client/server plan compilation and Phase 44 owns local interpreter composition. This
-phase validates only the live owner-scoped projection/receipt seam. Release rollout, ML artifact lift, browser
-UX/reconnect, HA, and cross-cluster projection remain `UNVERIFIED`.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`UiProjectionWorker` — an arm of `WorkerKind`, so the role reaches the pod carrying the `AppId` and `ProgramDigest` it serves ([daemon_topology_doctrine.md §4](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)) — consumes canonical CBOR workflow events through the native Phase-67 Pulsar client and
+The target `UiProjectionWorker` — an arm of `WorkerKind`, so the role reaches the pod carrying the `AppId` and `ProgramDigest` it serves ([daemon_topology_doctrine.md §4](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)) — consumes canonical CBOR workflow events through the native Phase-67 Pulsar client and
 builds a compacted latest-value projection plus a compacted durable command-receipt projection. Every
 read-model message key, subscription, stored row, watermark, opaque query handle, and audit identity retains
 `(AppId, TenantId, Owner, ProjectionId)`. Every receipt retains
@@ -80,75 +70,50 @@ Every owner stream also carries a monotonic `StreamCursor` and program/scope epo
 delivery. Redis may later wake a connection owner, but only this Pulsar-backed sequence/watermark can detect a
 gap and repair it.
 
-The live gate drives equal-shaped workflows for two subjects in one tenant and a third subject in a second
+The future live gate must drive equal-shaped workflows for two subjects in one tenant and a third subject in a second
 tenant. It verifies current values and resume watermarks through a scoped server query while a separately
 authenticated native client and broker-admin observer inspect the underlying compacted topic. Same-tenant
 foreign-owner and foreign-tenant handles yield the same public denial and cannot disclose the other challenge.
 
-**Session scope:** one owner-keyed workflow-event-to-query/receipt projection and the command
-`cabal test ui-projection-runtime-live`; split if work adds a browser interaction, release transition, ML
-adapter, another substrate, HA fault, or a second acceptance command.
+**Phase scope:** one owner-keyed workflow-event-to-query/receipt projection. The
+`ui-projection-runtime-live` Haskell component suite can supply supporting observations only; the sole acceptance command is `pb
+validate phase 70`. Split if work adds a browser interaction, release transition, ML adapter, another
+substrate, HA fault, or a second independently useful claim.
+**Substrate:** `linux-cpu` — future live cluster observation only after the Phase-49 barrier and every predecessor approval.
+**Lane:** `linux-cpu/amd64`.
+**Register:** 3 — live Pulsar/provider projection and independent readback; NOT VALIDATED.
 
-**Depends on:** [Phase 43](phase_43_ui_server_boundary.md), [Phase 68](phase_68_user_tenant_isolation_live.md), and [Phase 69](phase_69_content_store_workflow.md). Phase 43 supplies sealed server dispatch, Phase 68 supplies
-the live trusted request context and scoped authorization result, and Phase 69 supplies the live workflow/event
-path. Phase 67 is transitive through Phases 68 and 69.
-
-**Phase scope:** one cohesive claim — *a projection key, a receipt key and a query handle cannot collapse command, subject or tenant scope*. The read model is owner-qualified by construction.
-
-**Substrate:** linux-cpu — one live single-node `kind` cluster. No linux-cuda, Apple, Windows, multicluster, or
-redundancy claim.
-
-**Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
-
-**Register:** 3 — live infrastructure.
-
-**Gate:** `python3 tools/run_phase_gate.py 70` passed the Phase-0 matrix with fresh Keycloak sessions. The
-scoped query, durable receipt, native consumers, broker compaction observer, edge transcript, teardown, and all
-three red mutants agreed on the exact owner-qualified projection and original command identity.
+**Depends on:** [Phase 69](phase_69_content_store_workflow.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 70`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set:** app `a`, tenants `t-a` and `t-b`, owners `alice-a`, `bob-a`, and `carol-b`, one
-  projection id, equal local entity ids, distinct scope-qualified command ids, an
-  update/tombstone/recreate/terminal sequence, exact-command redelivery, conflicting-payload reuse, and
-  disconnect/resume from a non-final watermark. Equal shapes force the command, tenant, and owner dimensions
-  to carry the isolation.
-- **Pinned oracle:** Phase 0 commits `test/fixture/ui_projection_runtime/projection_matrix.tsv`,
-  `expected_latest_values.tsv`, `expected_receipts.tsv`, and `expected_watermarks.tsv`. The tables are
-  hand-authored from the published projection/receipt folds and scope relation; the worker, handler, Pulsar
-  client, and renderer do not generate them.
-- **Real authority:** Keycloak mints least-privilege sessions after gate start. Tenant, subject, owner,
-  membership, and grants are derived by the server. Caller headers, body fields, query strings, opaque-handle
-  payloads, and browser state are hostile variants, never oracle inputs.
-- **Fresh challenges:** after Keycloak, Pulsar, worker, query handler, and observers are ready, the harness
-  creates unpredictable per-owner nonces and command ids and emits them through the Phase-69 workflow
-  boundary. Each permitted query must recover only its nonce, original command/workflow identities, exact
-  typed receipt, and correct watermark; a static row, canned response, or prior run cannot pass.
-- **External observers:** a separate read-only native Pulsar principal consumes the compacted topic and a
-  broker-admin principal observes subscription names, keys, offsets, compaction state, and watermarks. An
-  edge-side OS transcript records the scoped query/response bytes, and Keycloak/audit observers attest session
-  identity. Worker/server logs, metrics, desired state, and self-reported traces are ignored as evidence.
-- **Paired scope checks:** each own-owner success is paired with the same-tenant foreign-owner and foreign-
-  tenant handle swap differing only in authenticated session or opaque handle. Denials are indistinguishable,
-  contain no foreign nonce/existence bit, and do not advance, create, or retarget a foreign subscription.
-- **Bypass probes:** user credentials are tried directly against Pulsar and must grant no broker access. The
-  harness bypasses presentation logic and sends forged tenant/owner headers, a swapped handle, a guessed local
-  entity id, and a stale request epoch directly to the sealed query action.
-- **Committed mutants:** `drop_owner_key` removes `Owner` from the compacted message key,
-  `drop_owner_subscription` removes `Owner` from the subscription identity, and
-  `drop_receipt_command_id` collapses distinct command receipts. Equal-shaped owners and commands make each
-  mutant leak, overwrite, duplicate, or advance foreign state, and the independent key/value/receipt/watermark
-  oracle must turn red.
-- **Honest boundary:** the gate tests the pinned live projection and query matrix only. It does not establish all
-  handlers noninterfering, browser presentation safe, release compatibility, or availability.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *a projection key, a receipt key and a query handle cannot collapse command, subject or tenant scope*. The read model is owner-qualified by construction. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 70` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 69 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-Teardown deletes challenge projections, subscriptions, observer grants, test identities, and namespaces. Each
-external observer compares authenticated pre/post inventory; any challenge residue or credential sharing fails
-the gate. The ledger stores only identities/epochs and hashes of challenges, fixtures, raw observations, and
-mutant results.
+## Resource provision — UNRESOLVED
 
-## Resource provision — bounded owner projections
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 - Projection demand is finite per `(AppId, TenantId, Owner, ProjectionId)` and receipt demand is finite per
   `(AppId, TenantId, Owner, CommandId)`: event rate and size, compacted key count/value bound, receipt retention
@@ -160,49 +125,32 @@ mutant results.
 - Worker and query handler use distinct least-authority service identities. Browser/user credentials carry no
   Pulsar permission, and the public plan contains no topic or subscription coordinate.
 - A projection cannot be served until caught up to the release-required watermark. Phase 72 pins that
-  watermark/ABI in the immutable UI release; this phase establishes the live primitive only.
+  watermark/ABI in the immutable UI release; this phase's target must establish the live primitive only.
 
 - **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`; negatives under `test/negative/ui_projection_runtime/`.
 
 ## Doctrine adopted
 
-- [`extension_conformance_security.md`](../documents/engineering/extension_conformance_security.md) — owner-scoped UI projection runtime carries an identity boundary, and S1-S6 are what make crossing it unrepresentable.
-- [`pulsar_client_doctrine.md` §5.1 — derived compaction and TableView](../documents/engineering/pulsar_client_doctrine.md#51-two-derived-capabilities-read-model-and-two-deliberately-absent-ones): use the native client for a bounded
+- [`extension_conformance_security.md` §4 — S1–S6](../documents/engineering/extension_conformance_security.md#4-s1s6) — owner-scoped UI projection runtime carries an identity boundary, and S1-S6 are what make crossing it unrepresentable.
+- [`pulsar_client_doctrine.md` §5.1 — Two derived capabilities (read-model), and two deliberately absent ones](../documents/engineering/pulsar_client_doctrine.md#51-two-derived-capabilities-read-model-and-two-deliberately-absent-ones): use the native client for a bounded
   read model without making it an authority source.
 - [`low_code_ui_runtime_doctrine.md` §9 — routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge): derive current identity and scope at the trusted server edge.
 - [`low_code_ui_runtime_doctrine.md` §11 — data, forms, and storage](../documents/engineering/low_code_ui_runtime_doctrine.md#11-data-forms-and-storage): expose only scoped public contracts and opaque handles.
-- [`tenancy_doctrine.md` §4 — typed tenant and subject shapes](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding): retain app, tenant, and owner identity in every read-model coordinate.
-- [`testing_spoof_resistance.md` §12](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): require fresh challenges, real authority,
+- [`tenancy_doctrine.md` §4 — The typed shapes: `TenantSpec` / `SubjectSpec` / `Membership` / `Owner` / `RoleBinding`](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding): retain app, tenant, and owner identity in every read-model coordinate.
+- [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence): require fresh challenges, real authority,
   external raw observation, paired negatives, direct bypass probes, and killed mutants.
 - [`ui_realtime_coordination_doctrine.md §4 — typed routing and resume envelope`](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): produce the authoritative sequenced cursor stream from which lossy WebSocket fanout repairs gaps.
 - [`ui_realtime_coordination_doctrine.md §6 — durable commands, receipts, and replay`](../documents/engineering/ui_realtime_coordination_doctrine.md#6-durable-commands-receipts-and-replay): key workflow receipts by the original scoped command identity and derive acceptance from the effect owner rather than Redis or a socket write.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 70.1: Build and independently verify the owner-scoped live projection ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**:
-`src/Amoebius/Ui/Projection/{Worker,OwnerKey,Watermark,StreamCursor,ReceiptFold}.hs`,
-`test/spec/live/UiProjectionRuntimeSpec.hs`, `tools/ui_projection_runtime_live.py`, and
-`tools/ui_projection_runtime_gate.py` (built and validated)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: one command recovers fresh per-owner challenges and
-durable receipts through a scoped server query and separately authenticated Pulsar/broker/edge observers,
-establishes foreign-scope non-disclosure and zero subscription effect, and kills all three key-collapse
-mutants.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/pulsar_client_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
-`documents/engineering/ui_realtime_coordination_doctrine.md`, and
-`documents/engineering/testing_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -220,7 +168,8 @@ preserving command, issuer-qualified subject, tenant, and owner scope end to end
 
 ### Validation
 
-1. Run `cabal test ui-projection-runtime-live`; recover exactly the pinned latest value, original scoped
+1. Rejected historical observation: the `ui-projection-runtime-live` Cabal suite expected exact recovery of
+   the pinned latest value, original scoped
    command/workflow identities, terminal receipt, and watermark for each own-owner session after update,
    tombstone, recreate, exact-command redelivery, disconnect, and resume.
 2. Require foreign-owner, foreign-tenant, forged-scope, guessed-id, direct-Pulsar, and stale-epoch attempts to
@@ -232,12 +181,12 @@ preserving command, issuer-qualified subject, tenant, and owner scope end to end
 
 ### Remaining Work
 
-None for Sprint 70.1. Browser/reconnect, release, ML-lift, HA, and cross-cluster claims remain with their named
+The pre-reset `None` claim is permanently invalid; Sprint 70.1 remains blocked and NOT VALIDATED. Browser/reconnect, release, ML-lift, HA, and cross-cluster claims remain with their named
 later phases.
 
 ## Documentation Requirements
 
-**Engineering docs updated with the validated layer:**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - `documents/engineering/pulsar_client_doctrine.md`, `low_code_ui_runtime_doctrine.md`, and
   `ui_realtime_coordination_doctrine.md` attach the tested live owner-key/subscription/receipt/watermark evidence.

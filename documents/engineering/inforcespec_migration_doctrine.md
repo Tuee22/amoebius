@@ -21,6 +21,8 @@ the specification.
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. A migration is a typed diff, not a new operation](#2-a-migration-is-a-typed-diff-not-a-new-operation)
@@ -315,8 +317,8 @@ The no-destruction guarantee is honest about the layer it reaches, per
   [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)),
   and the `.ready`-gated artifact idiom in infernix; these are **sibling evidence, not amoebius results**. The
   closed `StorageMutation` union, the decode-time no-orphan fold, and the sharing-as-capability-edge remain
-  broader amoebius design intent. Phase 71 now validates the database-schema `RolloutPhase` instance: its
-  verified copy preceded retirement, and retired old bytes remained externally readable.
+  broader amoebius design intent. Phase 71 owns validation of the database-schema `RolloutPhase` instance: its
+  verified copy must precede retirement, and retired old bytes must remain externally readable.
 
 ---
 
@@ -325,7 +327,7 @@ The no-destruction guarantee is honest about the layer it reaches, per
 This document is normative `InForceSpec`-migration doctrine only. It states the **target shape**: a migration
 is a typed diff whose verb surface admits no destruction, whose `Shrink` is a verified pipeline, whose orphan
 check is decode-time, and whose sharing is an append-only revocable edge. Every statement here is **design intent**, not a built or tested amoebius capability. Delivery sequencing, completion status, and validation
-gates — including the DB schema-migration `RolloutPhase` (delivered in Phase 71 and
+gates — including the DB schema-migration `RolloutPhase` (owned by Phase 71 and
 [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
 homes), the verified-shrink migration
 ([storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)),

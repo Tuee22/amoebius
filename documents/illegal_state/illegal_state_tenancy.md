@@ -28,6 +28,8 @@ exist for the entries below. The tenant model itself is owned by
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Scope](#1-scope)
 - [2. The tenancy, scope & authentication illegal states](#2-the-tenancy-scope--authentication-illegal-states)
@@ -51,7 +53,7 @@ matrix**, the **three foreclosure layers**, and the **validation-locus axis** ar
 below names its owning doctrine, which remains the SSoT for the normative rule.
 
 Everything below states the target type discipline. [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md)
-delivers its lexical request-index kernel; authentication, persisted re-entry, provider enforcement, replay,
+owns its lexical request-index kernel; authentication, persisted re-entry, provider enforcement, replay,
 and other entry-specific residues remain with their delivery owners. Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
@@ -131,12 +133,15 @@ statement has no inhabitant; `runtime-checked` residue — that the database enf
 the role the application connects as. The emitted statement and its row policy are `decode-foreclosed`, compared by a total predicate over rendered output.
 **Validation-locus:** `gadt-decode` (a transaction value missing its scope does not typecheck) +
 `rendered-artifact-oracle` (the emitted statement text and its row-level security policy both carry the scope
-predicate, compared against an independently authored expectation) + `live-effect` residue (that the database
+predicate, compared against the separately reviewed Haskell `scopedTransactionExpectation`, implemented
+without calling the statement/policy emitter) + `live-effect` residue (that the database
 enforces the emitted row policy for the role the application connects as).
 
-**Independent oracle and mutants.** A compile-fail fixture partially applies a transaction arm and passes it to
-the executor. An oracle independent of the emitter parses every emitted statement and requires a scope
-predicate bound to a parameter that the transaction type makes mandatory. Mutants make the scope field
+**Independent oracle and mutants.** A tracked Haskell negative declaration lazily materializes a module that
+partially applies a transaction arm and passes it to the executor beneath `.build/test-corpora/**`, then
+requires its exact GHC refusal. The Haskell `scopedTransactionExpectation` parses the emitted projection and
+requires a scope predicate bound to a parameter that the transaction type makes mandatory. No SQL, fixture
+module, or encoded expected value is tracked. Haskell mutants make the scope field
 optional, default it to a match-all comparison, and emit a policy for a different column than the statement
 filters on.
 
@@ -216,7 +221,7 @@ oracle independent of the API walks every exported scoped function and requires 
 share a type. Mutants collapse two identifier newtypes into one, export a raw constructor, and add a coercion
 between scopes.
 
-**Phase-8 evidence.** The Register-1 kernel gives tenant and subject distinct private types and introduces a
+**Permanently invalidated Phase-8 run report.** The Register-1 kernel gives tenant and subject distinct private types and introduces a
 fresh request index through one rank-2 eliminator. Legal twins compile; scope retagging, request-index escape,
 and forged scope construction fail at pinned reasons. Constructor scans reject a second introduction or
 retagging rule. Live authentication and persisted-value re-entry remain `UNVERIFIED`. See
@@ -284,12 +289,14 @@ no out-of-band migration has relaxed it. The emitted DDL the oracle compares is 
 **Validation-locus:** `gadt-decode` (a row type whose scope column is optional is a different
 type, and no transaction is defined over it) +
 `rendered-artifact-oracle` (the emitted DDL carries `NOT NULL` and the composite key for
-every scope-bearing table, compared against an independently authored expectation) + `live-effect` residue (an
+every scope-bearing table, compared against the separately reviewed Haskell
+`schemaConstraintExpectation`, implemented without calling the DDL emitter) + `live-effect` residue (an
 insert of a scope-less row is rejected by the live database, and the deployed schema matches what was emitted).
 
-**Independent oracle and mutants.** An oracle independent of the emitter reads the live catalog, enumerates
-every table carrying a scope column, and requires the constraint, the composite foreign key, and an enabled
-policy on each. A live probe attempts a scope-less insert under the application role. Mutants make the scope
+**Independent oracle and mutants.** A Haskell live-catalog observer reads typed catalog observations and
+compares them with `schemaConstraintExpectation`, enumerating every table carrying a scope column and requiring
+the constraint, composite foreign key, and enabled policy on each. Serialized catalog observations exist only
+beneath `.build/test-corpora/**`. A live probe attempts a scope-less insert under the application role. Haskell mutants make the scope
 field optional in the row type, emit the column without the constraint, and disable the policy for the
 application role.
 
@@ -323,13 +330,15 @@ constructor; `decode-foreclosed` for a stored key that does not parse back to it
 `runtime-checked` residue — that no pre-existing key in a live store predates the renderer.
 **Validation-locus:** `gadt-decode` (a key cannot be constructed by concatenation, and the round-trip property
 holds for every generated component pair) + `rendered-artifact-oracle` (the emitted prefixes, topic names, and
-policies all use the one rendering, compared against an independently authored expectation) + `live-effect`
+policies all use the one rendering, compared against the separately reviewed Haskell
+`scopedKeyExpectation`, implemented independently of the production renderer) + `live-effect`
 residue (that no pre-existing key in a live store predates the renderer).
 
-**Independent oracle and mutants.** A property test over adversarial component pairs — names containing the
-separator, empty components, and shared prefixes — requires that rendering is injective and that parsing is its
-inverse. An oracle independent of the renderer scans the emitted manifests for any key-shaped literal built by
-concatenation. Mutants replace the length-prefixed encoding with a delimiter, drop the round-trip property, and
+**Independent oracle and mutants.** The Haskell `scopedKeyExpectation` covers adversarial component pairs —
+names containing the separator, empty components, and shared prefixes — and requires that rendering is
+injective and parsing is its inverse. A separate Haskell scanner checks the emitted typed manifest projection
+for any key-shaped literal built by concatenation. Any serialized manifests or observations are materialized
+only beneath `.build/test-corpora/**`. Haskell mutants replace the length-prefixed encoding with a delimiter, drop the round-trip property, and
 add a second renderer for one namespace.
 
 ---

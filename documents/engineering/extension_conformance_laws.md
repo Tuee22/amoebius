@@ -16,10 +16,12 @@ discharges them, and the closure argument that consumes C1 are owned by the hub,
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, documents/README.md, documents/engineering/README.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, documents/README.md, documents/engineering/README.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Scope](#1-scope)
@@ -39,13 +41,13 @@ to the hub, and the security and transaction families — which are *instances* 
 seams — belong to [`extension_conformance_security.md`](./extension_conformance_security.md) and
 [`extension_conformance_transactions.md`](./extension_conformance_transactions.md).
 
-[Phase 10](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md) implements the base five-calculus operation
+[Phase 10](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md) owns the target base five-calculus operation
 and finite Register-1 instances of C2, C3, C5, and C6: five component arms, 25 ordered pairs, 125 kind triples,
 exact resource addition, and a request-scope compiler barrier. That result is not an extension-law verdict.
-[Phase 20](../../DEVELOPMENT_PLAN/phase_20_extension_declaration.md) supplies the complete five-component
+[Phase 20](../../DEVELOPMENT_PLAN/phase_20_extension_declaration.md) owns the complete five-component
 declaration that law observations name.
 
-[Phase 21](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) implements a pure L1–L5 evaluator
+[Phase 21](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) owns a target pure L1–L5 evaluator
 over explicit operation, artifact, budget, flow, and claim observations joined to that declaration. Its bounded
 Register-1 suite covers two declaration shapes, six authored operation inputs, two independently seeded child-
 process render comparisons, actual budget and evidence values, and five single-law negative subjects. Finite
@@ -53,11 +55,12 @@ source scanners and the Phase-15 pinned claim/fixture compiler negative suppleme
 does not prove termination or scanner completeness, generate a gate for an arbitrary declaration, certify a
 runtime extension, or mint a conformance verdict.
 
-[Phase 22](../../DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md) implements a separate normalized
+[Phase 22](../../DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md) must implement a separate normalized
 composite value and a bounded C1–C7 evaluator. Seven ordered identity/link cases over the two declaration
-fixtures yield 49 green pair-law cells; a separate 63-cell table covers two lawful address controls and seven
-exact negative subjects. Composition preserves one request-scope index, unions Phase-21 vocabularies, and
-folds exact resource vectors. Python independently checks pair sums and four SHA-256 addresses. These samples
+fixtures must yield 49 accepted pair-law cells; a separate 63-cell table must cover two lawful address controls
+and seven exact negative subjects. Composition must preserve one request-scope index, union Phase-21
+vocabularies, and fold exact resource vectors. An independent Haskell oracle must check pair sums and four
+SHA-256 addresses. These samples
 do not prove universal C1, arbitrary-link closure, scanner completeness, collision absence, or runtime
 correspondence. Gate generation, verdict sealing, and the universal C1 proof remain owned by Phase 24 and
 later proof work. Current status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
@@ -147,20 +150,26 @@ that reaches a sink at a wider scope than its source. The S-family
 does not. An unrepresentability claim is the acute case: "this cannot be expressed" is either witnessed by a
 fixture that fails to compile, or it is commentary.
 
-**Guideline.** Every claim you make in your declaration names the fixture that discharges it. For each thing
-you say cannot be represented, commit a fixture that tries to represent it, and pin the reason it fails — so
-that a later change which makes it representable turns the fixture green and the gate red.
+**Guideline.** Every claim in a declaration names the Haskell fixture/oracle value that discharges it. For
+each thing said to be unrepresentable, commit a `.hs` declaration that generates the attempted value beneath
+`.build/**` and pin the reason it fails — so a later change which admits it turns the case green and the gate
+red. No serialized compile input or expected diagnostic is tracked.
 
-**Discharge.** The gate requires a fixture reference per claim, runs each compile-fail fixture and requires
-failure *for its pinned reason* rather than any failure, and requires each committed mutant to redden a named
-assertion. This is the [`testing_doctrine.md`](./testing_doctrine.md) evidence discipline applied per
+**Discharge.** The gate requires a Haskell fixture/oracle reference per claim, lazily renders and runs each
+compile-fail case and requires failure *for its pinned reason* rather than any failure, and requires each
+committed Haskell mutant operator to redden a named assertion. This is the [`testing_doctrine.md`](./testing_doctrine.md) evidence discipline applied per
 extension.
 
-### Implemented discharge boundary
+### Target discharge boundary — NOT VALIDATED
 
-The Phase-21 evaluator makes each L-law a separate typed verdict. Before deciding a verdict, it requires the
+The Phase-21 evaluator must make each L-law a separate typed verdict. Before deciding a verdict, it must require the
 observed operation, artifact, budget, flow, or claim names to cover the corresponding sets derived from the
-Phase-20 declaration. Its current executable evidence is deliberately finite:
+Phase-20 declaration. The executable case inventory and expected outcomes are a separately reviewed Haskell
+`NonEmpty LawVerdictCase`; neither this list nor an encoded table supplies a verdict. Each case carries its
+subject, expected per-law verdict vector, required negative control, and stable identity. The evaluator joins
+actual results to that Haskell inventory by identity and refuses missing, duplicate, or extra cases. Any
+serialized corpus or report is generated only beneath `.build/test-corpora/**` or `.build/docs/**`. Its target
+executable corpus is deliberately finite:
 
 - L1 catches exceptions over six authored inputs and scans one pure fixture for known partial tokens and
   wildcard dispatch; looping and scanner completeness remain UNVERIFIED.
@@ -173,8 +182,9 @@ Phase-20 declaration. Its current executable evidence is deliberately finite:
 - L5 constructs two real evidence claims bound to fixtures and reuses the Phase-15 legal/illegal compiler pair
   for a claim with its fixture argument omitted.
 
-The 7-by-5 authored verdict table has two all-green controls and five subjects that each fail exactly one law.
-Those verdicts establish the evaluator's behavior over this corpus; they are not extension conformance seals
+The Haskell `LawVerdictCase` inventory must project a 7-by-5 reader-facing verdict table with two all-green
+controls and five subjects that each fail exactly one law. Human review of a Markdown or serialized table
+cannot add or alter a case. Those target verdicts can establish the evaluator's behavior only over this corpus; they are not extension conformance seals
 and make no claim about the namesake `infernix` or `jitml` runtimes.
 
 ---
@@ -289,9 +299,9 @@ so equal addresses follow from equal content. The converse — that different co
 this law rests on. The gate asserts the law over the link set's declared artifact sets, pairing each shared
 address with a content comparison.
 
-### Implemented compositional discharge boundary
+### Target compositional discharge boundary — NOT VALIDATED
 
-The Phase-22 evaluator returns one typed verdict per C-law over a scope-preserving composite of complete
+The Phase-22 evaluator must return one typed verdict per C-law over a scope-preserving composite of complete
 Phase-20 declarations:
 
 - C1 evaluates Phase-21 L1–L5 over each operand and the composite vocabulary. Its current seven cases are a
@@ -305,8 +315,9 @@ Phase-20 declarations:
 - C6 rejects a sink wider than its source. The seeded widening also reddens C1 and C4, because it breaks L4
   closure and changes the affected part's projected behavior.
 - C7 recomputes addresses from bytes, admits two byte-identical artifacts sharing one address, and rejects
-  different bytes forced to one address. Four SHA-256 results are independently recomputed in Python;
-  collision resistance remains ASSUMED.
+  different bytes forced to one address. A separately authored Haskell oracle recomputes the four SHA-256
+  results directly from the raw bytes without consuming the subject's address projection; collision resistance
+  remains ASSUMED.
 
 The cross-request compiler sibling fails at the composite's phantom request index. These observations cover
 only `infernix`, `jitml`, and the empty composite; they are not a generated conformance verdict for either

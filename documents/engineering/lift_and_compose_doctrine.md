@@ -18,12 +18,12 @@ amoebius doctrine that specifies it.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/formal_model_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
@@ -33,7 +33,7 @@ amoebius doctrine that specifies it.
 - [5. The re-derivation map](#5-the-re-derivation-map)
 - [6. Convergence is the evidence](#6-convergence-is-the-evidence)
 - [7. The lift calculus](#7-the-lift-calculus)
-- [8. What the lift-era phases established, and why it is superseded](#8-what-the-lift-era-phases-established-and-why-it-is-superseded)
+- [8. What the lift-era phases established, and why it is superseded](#8-permanently-invalidated-lift-era-run-history)
 - [9. Planning ownership](#9-planning-ownership)
 - [Related Documents](#related-documents)
 
@@ -212,8 +212,8 @@ one's source layer, which is a type equation rather than a check. The substrate-
 calculus — which frames exist on which hardware, and which engine each frame provides — are owned by
 [`substrate_doctrine.md`](./substrate_doctrine.md), which reads this algebra rather than restating it.
 
-**What is built, stated honestly.** [Phase 5](../../DEVELOPMENT_PLAN/phase_05_lift_calculus.md) delivered all
-three parts as pure values in Register 1: the layer set closed at three members, the relation total over all
+**Phase-5 target boundary — NOT VALIDATED.** [Phase 5](../../DEVELOPMENT_PLAN/phase_05_lift_calculus.md) must
+cover all three parts as pure values in Register 1: the layer set closed at three members, the relation total over all
 nine ordered pairs with no fallback arm, a witness per transition that only an observation produces, and
 composition as the type equation above. Three things it did not settle. The set is closed *at three* — the
 "and so on outward" this section allows for is a change to that module rather than something the code already
@@ -225,21 +225,18 @@ observation is the substrate doctrine's. Status lives only in the
 
 ---
 
-## 8. What the lift-era phases established, and why it is superseded
+## 8. Permanently invalidated lift-era run history
 
-Four phases ran under the old doctrine and produced real results, which stand as history and are not deleted
-here. Phase 91 compiled an untouched seed module into an amoebius package and drove scoped Vault challenges,
-native Pulsar duplicate collapse, object-store publication equality, a cache miss-then-hit, two compute jobs,
-exact cleanup, and four red mutants. Phase 92 composed that handle type with a receipt fold and established
-server-derived scope, opaque handles, exact idempotency, and escaped output against Chrome and fresh identities.
-Phase 93 compiled a seed CUDA codegen module unchanged and executed real PTX steps on physical hardware with
-retained object-store pointer-last publication. Phase 94 linked that boundary into a UI lift with five compiled
-mutants and a host-CUDA computation.
+Four phases ran under the old doctrine. Their pre-reset reports are retained only as permanently invalidated
+diagnostic history and cannot establish any current result. Those reports attributed scoped Vault challenges,
+native Pulsar duplicate collapse, object-store publication equality, cache and compute observations, cleanup,
+and mutants to Phase 91; handle/receipt composition and Chrome observations to Phase 92; CUDA code generation,
+PTX execution, and retained object-store publication to Phase 93; and a UI lift, mutants, and host-CUDA
+computation to Phase 94.
 
 Every one of those instances depended on compiling seed source into an amoebius package, which is exactly what
-[§2](#2-the-two-non-dependencies) now forbids. The evidence they produced about the *seams* — that scoped Vault access works, that duplicate
-collapse works, that content digests hold across a real store — is unaffected and remains useful. The evidence
-they produced about the *lifts* is superseded, because the thing they validated is no longer the thing amoebius
+[§2](#2-the-two-non-dependencies) now forbids. The old reports may inform future challenge design, but they do
+not validate the *seams* or the *lifts*: the thing they exercised is no longer the thing amoebius
 intends to build. Each of those phases owes a re-derivation under [§4](#4-the-re-derivation-rule-name-the-guarantee-you-are-adding) and a re-run of its gate against it; the
 audit map recording that is
 [`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md).
@@ -252,7 +249,8 @@ This document is normative only. Which phase re-derives which structure is owned
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and
 [system_components.md](../../DEVELOPMENT_PLAN/system_components.md); the removal ledger and the audit map are
 [legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). Normative shapes are
-design intent; only explicitly named phase instances are tested amoebius results.
+design intent. Only a phase-specific, independently reviewed candidate plus external human approval could
+establish an amoebius result; every current phase is NOT VALIDATED.
 
 ---
 

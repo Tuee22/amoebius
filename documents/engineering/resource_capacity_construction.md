@@ -19,6 +19,8 @@ provisioned. It does not carry the types themselves, owned by
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [Checked construction](#checked-construction)
 - [Related Documents](#related-documents)
@@ -398,8 +400,10 @@ provisionEtcdLogical(desiredObjects, observedSurvivors, old/new/apply overlap, c
 ProvisionedEtcdLogicalDemand.derivedPeak <= etcd.backendQuotaBytes
 ```
 
-The pure object serializer used for this demand is the same byte model golden-locked for render; ConfigMap/
-Secret/projected sources also feed `KubeletMappedFileDemand`. The versioned MVCC model adds retained revisions,
+The pure object serializer used for this demand is checked against a separately reviewed Haskell byte-model
+expectation; neither expected bytes nor a serialized golden are tracked. Any materialized comparison inputs
+exist only beneath `.build/test-corpora/**`. ConfigMap/Secret/projected sources also feed
+`KubeletMappedFileDemand`. The versioned MVCC model adds retained revisions,
 bounded Lease population, and `ceil(eventRetention/eventWindow) × maxEventsPerWindow × maxEventBytes`.
 `EtcdLogicalDemand.churn` is the only Event authority: `eventRetention` renders the apiserver Event TTL, while
 `maxEventsPerWindow`, `eventWindow`, and `maxEventBytes` feed logical-quota derivation and any enforceable

@@ -1,38 +1,38 @@
 # Phase 54: Windows: WSL2 and the lifted Linux engine
 
 > **Purpose**: Admit `windows` as a gated substrate — read the firmware fact before anything is installed,
-> ensure WSL2, provision an amoebius-owned distro, and evaluate the proven Linux plan inside it unchanged.
+> ensure WSL2, provision an amoebius-owned distro, and evaluate the independently approved Phase-52 Linux plan
+> inside it unchanged; that predecessor approval does not yet exist.
 > **Read this if**: a Windows host has to reach the Linux engine, or the reboot verdict has to change.
 
-This phase owns the Windows route to the Linux frame: what is read before an install is attempted, what is
-installed, what a required reboot means, and where the route stops. It does not own the plan that runs once
-the frame exists — that is Phase 52's, and this phase evaluates it rather than restating it — nor the mount
-contract and the provider mapping, which
-[`substrate_doctrine.md` §4](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
-fixes once for every substrate. Its one prerequisite is [Phase 53](phase_53_apple_engine_bringup.md), which
-reached the same frame by the apple route.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/substrates.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/substrates.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 54.1: The firmware and elevation preflight 📋](#sprint-541-the-firmware-and-elevation-preflight-)
-- [Sprint 54.2: Ensuring WSL2 through the vendor installer 📋](#sprint-542-ensuring-wsl2-through-the-vendor-installer-)
-- [Sprint 54.3: The reboot verdict and the convergent retry 📋](#sprint-543-the-reboot-verdict-and-the-convergent-retry-)
-- [Sprint 54.4: The amoebius-owned distro 📋](#sprint-544-the-amoebius-owned-distro-)
-- [Sprint 54.5: The lifted Linux plan 📋](#sprint-545-the-lifted-linux-plan-)
+- [Sprint 54.1: The firmware and elevation preflight ⏸️](#sprint-541-the-firmware-and-elevation-preflight-)
+- [Sprint 54.2: Ensuring WSL2 through the vendor installer ⏸️](#sprint-542-ensuring-wsl2-through-the-vendor-installer-)
+- [Sprint 54.3: The reboot verdict and the convergent retry ⏸️](#sprint-543-the-reboot-verdict-and-the-convergent-retry-)
+- [Sprint 54.4: The amoebius-owned distro ⏸️](#sprint-544-the-amoebius-owned-distro-)
+- [Sprint 54.5: The lifted Linux plan ⏸️](#sprint-545-the-lifted-linux-plan-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -40,9 +40,20 @@ reached the same frame by the apple route.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-53 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 53, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
 ---
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -57,15 +68,15 @@ The route is three reads, one install, one provision, and one evaluation. Firmwa
 first, ahead of every install, because a disabled BIOS/UEFI setting is not a software state and nothing
 amoebius runs can clear it. Elevation is read next, because the feature install and the hypervisor launch
 setting both need administrator rights. WSL2 is then ensured, an amoebius-owned distro is provisioned from
-it, and the Linux plan Phase 52 proved is evaluated inside that distro without amendment.
+it, and the future human-approved Phase-52 Linux plan must be evaluated inside that distro without amendment.
 
 Windows is not a third implementation of the host plan, it is the Linux frame reached by a different route.
 Had this gate needed a Windows-specific plan, the kernel would have failed, because a plan that varies with
 the route it was reached by is a plan keyed on plumbing. The lift is what makes that claim checkable rather
-than aspirational: the step sequence evaluated inside the distro is compared against the sequence Phase 52
-recorded, and any divergence is a failure rather than a Windows dialect.
+than aspirational: the step sequence evaluated inside the distro must be compared against the sequence bound
+to Phase 52's future approval, and any divergence is a failure rather than a Windows dialect.
 
-**Phase scope:** one cohesive claim — *a Windows host reaches the same Linux engine the Linux band proved,
+**Phase scope:** one cohesive target claim — *a Windows host reaches the same Linux engine Phase 52 must establish,
 by a route that reads firmware before it installs and treats a required reboot as a verdict*. Its sprint
 seams are the preflight, the feature install, the reboot verdict, the distro, and the lifted plan. It splits
 if a second substrate or a second acceptance register appears.
@@ -76,91 +87,62 @@ if a second substrate or a second acceptance register appears.
 
 **Register:** 3 — live: a firmware bit, an optional-feature install, and a host reboot are facts about one real machine ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 53](phase_53_apple_engine_bringup.md)
-
-**Requires**: `host-floor`
-
-**Gate:** `python3 tools/run_phase_gate.py 54` passes every check named in
-[Gate integrity](#gate-integrity), on a Windows host at lane `linux-cpu/amd64`. The phase does not seal until
-it is green, and a reboot-required verdict seals nothing.
-
----
+**Depends on:** [Phase 53](phase_53_apple_engine_bringup.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 54`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The gate is `python3 tools/windows_engine_bringup_gate.py --execute`, and it decides five things about a
-live Windows host.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive target claim — *a Windows host reaches the same Linux engine Phase 52 must establish, by a route that reads firmware before it installs and treats a required reboot as a verdict*. Its sprint seams are the preflight, the feature install, the reboot verdict, the distro, and the lifted plan. It splits if a second substrate or a second acceptance register appears. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 54` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 53 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**The firmware fact is read, never inferred.** `VirtualizationFirmwareEnabled` and `HyperVisorPresent` are
-read through PowerShell before the first install argv, and each read is recorded with its value and its
-position in the transcript. A run that reaches `winget` with no recorded firmware read fails, because an
-install attempted against disabled firmware yields a diagnostic about the installer rather than about the
-machine, and the operator then debugs the wrong layer.
+## Resource provision — UNRESOLVED
 
-**A disabled setting is a refusal carrying an instruction.** The refusal names the prerequisite, names
-BIOS/UEFI as the place it is cleared, and leaves the host unchanged. The gate re-reads the optional-feature
-state after the refusal and compares it to the state before: a refusal that installed something first is a
-refusal in name only.
-
-**The reboot verdict is terminal, non-failing, and sealed only by a second run.** No earlier gate in this
-plan suite has an outcome that is neither a pass nor a failure, so the verdict is defined here rather than
-borrowed. The seal requires a post-reboot re-run that converges, and that re-run must converge *without*
-repeating the feature install — the transcript records the argv of both runs, and a second run naming
-`winget install` or `wsl --install` is a probe that has stopped probing.
-
-**The plan identity is joined against an independent oracle.**
-`test/oracle/windows_engine_bringup_route.tsv` enumerates the route's own steps — the two reads, the
-elevation probe, the vendor install, the distro creation — and is authored apart from the reconciler it
-checks. The distro-side step sequence is then joined against the sequence Phase 52's gate recorded, in both
-directions: a step the Linux plan does not carry, and a step it carries that the distro skipped, are both
-failures.
-
-**Every host state the gate cannot create on demand is a committed fixture.** Firmware disabled, a pending
-reboot, and an operator distro already present are held as transcripts in
-`test/fixture/windows_engine_bringup/`, so a check only a hostile BIOS could otherwise exercise is exercised
-on every run.
-
-**The battery is five mutants**, recorded in `test/mutant/registry.tsv`. No two may be caught by the same
-check, or the checks are not separating what they claim to:
-
-- a preflight that reports firmware enabled without reading it — reddens the recorded-read check;
-- a refusal that continues into `winget install` — reddens the unchanged-host check;
-- a reboot-required outcome downgraded to a retry loop — reddens the terminal-verdict check;
-- a post-reboot run that repeats the feature install — reddens the convergence check;
-- a Windows-conditional step spliced into the distro-side plan — reddens the plan-identity join.
-
----
-
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/windows_engine_bringup/`.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — windows: WSL2 and the lifted Linux engine is admitted by satisfying the contract, not by appearing on a list.
+- [`extension_conformance_doctrine.md` §5 — The conformance gate is generated, not authored](../documents/engineering/extension_conformance_doctrine.md#5-the-conformance-gate-is-generated-not-authored) — windows: WSL2 and the lifted Linux engine is admitted by satisfying the contract, not by appearing on a list.
 - [`substrate_doctrine.md` §4.2 — WSL2 on Windows](../documents/engineering/substrate_doctrine.md#42-wsl2-on-windows):
   the probe order, the vendor installer that enables the optional features so amoebius never toggles them,
   and the required reboot as a first-class outcome.
-- [`substrate_doctrine.md` §3.1 — the per-substrate floor](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply):
+- [`substrate_doctrine.md` §3.1 — The per-substrate floor: what only the operator can supply](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply):
   the Windows rows this route evaluates — package-manager root, shell, firmware virtualization, elevation,
   reboot — and the rule that a refusal is a value naming its own remedy.
-- [`substrate_doctrine.md` §4 — virtualized substrates](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux):
+- [`substrate_doctrine.md` §4 — Virtualized substrates: synthesizing a Linux host where the host is not Linux](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux):
   one Linux frame per substrate, at the parent's natural architecture, with the provider fixed by the
   detected hardware rather than chosen.
-- [`testing_doctrine.md` §4 — no skips, fail fast](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact):
+- [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact):
   a reboot-required verdict is an outcome the per-run ledger names, never a skipped check reporting success.
 
 ---
 
 ## Sprints
 
-## Sprint 54.1: The firmware and elevation preflight 📋
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Substrate/Windows/Preflight.hs`
-**Blocked by**: none within the phase
-**Requires**: `host-floor`
-**Independent Validation**: in every transcript the recorded firmware and elevation reads precede the first install argv
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+## Sprint 54.1: The firmware and elevation preflight ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -188,13 +170,9 @@ prerequisite is missing instead of failing several installs deep on a symptom.
 
 The whole sprint.
 
-## Sprint 54.2: Ensuring WSL2 through the vendor installer 📋
+## Sprint 54.2: Ensuring WSL2 through the vendor installer ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Substrate/Windows/Wsl2.hs`
-**Blocked by**: Sprint 54.1
-**Independent Validation**: the default WSL version reads as 2 and no argv in the transcript toggles an optional feature directly
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -222,13 +200,9 @@ the optional-feature API and inherits the vendor's ordering instead of guessing 
 
 The whole sprint.
 
-## Sprint 54.3: The reboot verdict and the convergent retry 📋
+## Sprint 54.3: The reboot verdict and the convergent retry ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Substrate/Windows/Reboot.hs`
-**Blocked by**: Sprint 54.2
-**Independent Validation**: the pre-reboot run exits with the reboot verdict and the post-reboot run converges with no install argv
-**Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/README.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -257,13 +231,9 @@ only a reboot can produce — never occurs.
 
 The whole sprint.
 
-## Sprint 54.4: The amoebius-owned distro 📋
+## Sprint 54.4: The amoebius-owned distro ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Substrate/Windows/Distro.hs`
-**Blocked by**: Sprint 54.3
-**Independent Validation**: the distro inventory before and after the run differs by exactly the amoebius-owned entry
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -289,13 +259,9 @@ operator installed for their own reasons.
 
 The whole sprint.
 
-## Sprint 54.5: The lifted Linux plan 📋
+## Sprint 54.5: The lifted Linux plan ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Substrate/Windows/Lift.hs`, `test/oracle/windows_engine_bringup_route.tsv`
-**Blocked by**: Sprint 54.4
-**Independent Validation**: the distro-side step sequence joins to the sequence Phase 52's gate recorded, in both directions
-**Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -326,11 +292,13 @@ The whole sprint.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/substrate_doctrine.md` — §4.2 records the implemented probe order, the reboot
   verdict, and the amoebius-owned distro once the route has run end to end on a Windows host.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/substrates.md` — replace the `windows` row's claim that no phase in the range gates it
   with this phase's gate, lane, and validation contract.
 - `DEVELOPMENT_PLAN/development_plan_standards.md` — add this phase to the `host-floor` row of the
@@ -339,6 +307,7 @@ The whole sprint.
 ---
 
 ## Related Documents
+
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md)
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md)
 - [Substrates](substrates.md)

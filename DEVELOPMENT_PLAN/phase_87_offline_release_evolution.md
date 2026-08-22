@@ -4,14 +4,10 @@
 > or retained decoders and replay handlers for the full declared compatibility horizon.
 > **Read this if**: phase 87 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 87 delivers the offline release and schema evolution; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), and the plan for reaching it is owned here.
-Register 3, scoped live, on the `linux-cpu` substrate.
-The scoped gate passed on 2026-08-11; live platform rollout/provider observations remain `UNVERIFIED`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -24,10 +20,11 @@ The scoped gate passed on 2026-08-11; live platform rollout/provider observation
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — compatibility overlap](#resource-provision--compatibility-overlap)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 87.1: Gate offline-compatible rollout and rollback ⏸️](#sprint-871-gate-offline-compatible-rollout-and-rollback-)
@@ -38,34 +35,27 @@ The scoped gate passed on 2026-08-11; live platform rollout/provider observation
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-86 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 86, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-🟡 Scoped gate passed. Promotion/horizon/compatibility checks, atomic crash-resumable migration, retained
-current-authority replay, real Chrome A→staged-B crash→B→A, append-only release/effect observers, and six
-mutants pass. Real platform observers remain `UNVERIFIED`.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase extends `UiProgramRelease` and `PromotionGate` with the offline storage/replay horizon. A release may
+This phase's target contract extends `UiProgramRelease` and `PromotionGate` with the offline storage/replay horizon. A release may
 become current only when every admitted old record kind has a total tested migration or a retained decoder and
 current-authority replay handler. Browser migration is atomic, crash-resumable, and single-leader. A
 `ReloadRequired` event can replace executable assets but cannot clear outbox or blob dependencies.
 
-**Session scope:** Gate one A→B schema migration, one retained-old-handler path, rollback B→A, and one rejected
+The bounded campaign must gate one A→B schema migration, one retained-old-handler path, rollback B→A, and one rejected
 incompatible release.
 
 **Phase scope:** one cohesive claim — *no rollout strands persisted offline state inside its declared compatibility horizon*. A migration or a retained decoder is required; discarding the state is not an option.
@@ -77,27 +67,37 @@ incompatible release.
 
 **Register:** 3 — live infrastructure.
 
-**Depends on:** [Phase 86](phase_86_offline_blobs_isolation.md) — offline blobs and partition isolation, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 87` queues A-version records offline, deploys B, reconnects
-through both migration and retained-handler cases, rolls back, and externally proves one authorized outcome
-per command; the gate rejects a release that removes its last compatible path before the horizon.
+**Depends on:** [Phase 86](phase_86_offline_blobs_isolation.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 87`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-Phase 0 pins A/B plans and schemas, migration tables, release-horizon arithmetic, crash points, typed outcomes,
-and provider-effect oracle. A fresh browser profile is taken offline before rollout. Independent browser raw
-storage, release ledger, gateway, Pulsar, and provider observers establish preservation and effects. Mutants
-clear state on reload, omit an old decoder, bypass the promotion check, run two migrations, apply a partial
-migration, and preserve an old authorization decision. Observer failure is red, not UNVERIFIED green.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *no rollout strands persisted offline state inside its declared compatibility horizon*. A migration or a retained decoder is required; discarding the state is not an option. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 87` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 86 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**Committed fixtures/goldens:** A/B plans and schemas, migration table, horizon arithmetic, crash points, and
-outcome table. **Independent oracle:** raw browser/release/provider observations evaluated by the separately
-authored migration and effect tables.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+## Resource provision — UNRESOLVED
 
-## Resource provision — compatibility overlap
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 The provision seal includes concurrent old/new codecs and handlers, migration scratch/peak local records,
 receipt retention for the full replay horizon, rollout/reconnect fanout, and provider rollback overlap. A
@@ -105,35 +105,20 @@ horizon with no finite server or storage demand is rejected.
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact offline release and schema evolution emits is a recipe over a content address, never an authored file.
-- Adopt [Browser Offline Runtime §11](../documents/engineering/browser_offline_runtime_doctrine.md#11-release-schema-and-compatibility-horizon): old records remain readable and replayable within a finite horizon.
-- Adopt [Release Lifecycle §5](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply): offline compatibility is a promotion/readiness condition.
-- Adopt [Generated Artifacts §3](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule): migrations and compatibility manifests are emitted, not a second committed truth.
+- [`jit_artifact_doctrine.md` §2 — The rule, and the closed exception list](../documents/engineering/jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list) — every artifact offline release and schema evolution emits is a recipe over a content address, never an authored file.
+- Adopt [`browser_offline_runtime_doctrine.md` §11 — Release, schema, and compatibility horizon](../documents/engineering/browser_offline_runtime_doctrine.md#11-release-schema-and-compatibility-horizon): old records remain readable and replayable within a finite horizon.
+- Adopt [`release_lifecycle_doctrine.md` §5 — `RolloutPlan` / `RolloutPhase`: the readiness-gated apply](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply): offline compatibility is a promotion/readiness condition.
+- Adopt [`generated_artifacts_doctrine.md` §3 — The rule](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule): migrations and compatibility manifests are emitted, not a second committed truth.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 87.1: Gate offline-compatible rollout and rollback ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Release/OfflineCompatibility.hs`,
-`ui/src/Amoebius/Ui/Offline/Migration.purs`, `test/spec/live/OfflineReleaseSpec.hs`,
-`tools/offline_release_evolution_live.py`, and `tools/offline_release_evolution_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/offline_release_evolution_gate.py` against pinned A/B
-artifacts, contract tests, separate Chrome processes at crash points, local release/effect observers, mutants
-**Docs to update**:
-`documents/engineering/browser_offline_runtime_doctrine.md`,
-`documents/engineering/release_lifecycle_doctrine.md`,
-`documents/engineering/generated_artifacts_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -148,7 +133,7 @@ Roll forward and back without losing or silently invalidating queued offline int
 
 ### Validation
 
-1. Run `python3 tools/offline_release_evolution_gate.py`; require the scoped canonical trace green
+1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-87 supporting suite must run; require the scoped canonical trace green
    and every compatibility mutant red.
 
 ### Remaining Work
@@ -158,7 +143,8 @@ Kubernetes, and CNI. Those observations remain `UNVERIFIED` here.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/browser_offline_runtime_doctrine.md` — record tested schema/horizon behavior.
 - `documents/engineering/release_lifecycle_doctrine.md` — record the promotion witness and rollout evidence.
 - `documents/engineering/generated_artifacts_doctrine.md` — record emitted migration/compatibility artifacts.
@@ -166,6 +152,7 @@ Kubernetes, and CNI. Those observations remain `UNVERIFIED` here.
 - `documents/engineering/testing_doctrine.md` — link raw migration and provider evidence.
 
 **Cross-references to add:**
+
 - The tracker, substrate map, and component inventory must identify release-evolution ownership.
 
 ## Related Documents

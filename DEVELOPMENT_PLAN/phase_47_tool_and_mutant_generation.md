@@ -1,20 +1,21 @@
-# Phase 47: Generated checking tools and mutants
+# Phase 47: Foreign-source generator closure, checking tools, and mutants
 
-> **Purpose**: Establish the deterministic materialization boundary for the repository's checking-tool and mutation corpora.
-> **Read this if**: a checking tool or a mutant has to be added, changed, or trusted, or this gate has to be read precisely.
+> **Purpose**: Establish the Haskell-owned deterministic materialization boundary for all non-`pb`
+> repository support material, including checking tools, mutations, and Pulumi provider-program metadata.
+> **Read this if**: a checking tool, mutant, provider-program description, or generated external form has to
+> be added, changed, or trusted, or this gate has to be read precisely.
 
-Before the generative re-baseline nothing in the plan owned the closed inventory or deterministic
-materialization of the repository's checking tools and mutation declarations. This phase establishes that
-boundary. The current authored mechanism bytes remain independent reference inputs; replacing phase gates
-with derived workflow values is the distinct self-referential seam owned by Phase 49.
-The rule behind generated checking tools and mutants is owned by [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md), which this contract implements rather than restates.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -22,12 +23,13 @@ The rule behind generated checking tools and mutants is owned by [`jit_artifact_
 ---
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 47.1: Generated checking tools and mutants ✅](#sprint-471-generated-checking-tools-and-mutants-)
+- [Sprint 47.1: Generated repository support material ⏸️](#sprint-471-generated-repository-support-material-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -35,81 +37,118 @@ The rule behind generated checking tools and mutants is owned by [`jit_artifact_
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-22. The thirteen-sided Register-1 gate passed on natural `arm64`, untranslated:
-234 checking-tool sources and 371 mutation declarations materialized twice as 605 byte-identical artifacts,
-all four whole-corpus equivalence checks passed under network isolation, all three seeded generator mutants
-reddened, all 14 metrics matched, and 639 surfaces joined to 645 runtime items. Attestation
-`sha256:9bfeffd694b2b854c0d742de1acb40dbc6ec3f5e9f3573bba2598f29b131d04e` binds source
-`sha256:fae4b04ece44c0a5…` over 2,296 files. Mechanism derivation and removal of the authored gate copies remain
-the Phase-49 boundary; protocol and live runtime behavior are UNVERIFIED.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 46, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-Materialize a closed checking-tool and mutation corpus deterministically beneath the caller-owned build tree,
-with authored mechanism bytes retained as the independent reference until the self-referential gate seam.
+**Target capability — NOT VALIDATED.** Haskell declarations and separately reviewed Haskell semantic
+expectations are to own the closed checking-tool, fixture, oracle, mutation, and provider-program metadata
+corpora. Total Haskell materializers must create every runnable or serialized byte lazily beneath
+`.build/tools/**`, `.build/test-corpora/**`, or `.build/pulumi/**`. That includes every Pulumi YAML or equivalent
+provider-program external form. Existing authored non-Haskell mechanism, mutation, and provider metadata
+bytes are condemned inputs to delete, not references to reproduce or preserve.
 
-**Phase scope:** one cohesive claim — *the repository's complete checking corpus has a typed, deterministic materializer whose output reproduces the current authored mechanisms and mutation bodies exactly*. Deriving runnable gates from workflow declarations, switching consumers, and deleting authored gate copies belongs to Phase 49.
+**Phase scope:** one target claim — all non-`pb` behavioral source and support metadata have Haskell sources
+and deterministic lazy materializers, while tracked `tools/**`, provider-program YAML, and non-Haskell
+fixtures/oracles/mutants are absent. Phase 49 is to qualify and adopt the generated Haskell-owned gate path;
+later provider phases validate provider semantics and live execution, not source migration.
 **Substrate:** `none`
 **Lane:** `none`
 **Register:** 1
-**Depends on:** [Phase 3](phase_03_artifact_calculus.md) — the artifact calculus, which is what a tool becomes an instance of, and [Phase 7](phase_07_evidence_calculus.md), which fixes which half of a checker may be generated at all.
-**Gate:** `python3 tools/run_phase_gate.py 47` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Depends on:** [Phase 46](phase_46_ui_contract_generation.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 47`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Independent oracle.** The existing authored tools are reference inputs. Four representative whole-corpus
-  checkers execute from both the authored tree and a workspace containing only the materialized tool corpus;
-  their return codes and scoped verdicts must agree.
-- **Committed mutants.** Mutants emit a tool missing one rule, drop an operator from the corpus, and commit an emitted artifact.
-- **Specific-reason negatives.** The three build-flag mutants fail only at `checker-rule-missing`,
-  `mutation-operator-missing`, or `generated-artifact-tracked`; the clean configuration is rebuilt afterward.
-- **Fresh challenge.** Not applicable — this gate is pure. Two clean materializations, exact content-address
-  observations, and execution of the materialized representative tools provide the independent challenge.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — Haskell declarations and Haskell expectations own all non-`pb` behavioral and support material; every runnable or serialized tool, fixture, oracle, mutant, and provider-program metadata byte is generated beneath `.build/**`. Tracked `tools/**`, tracked Pulumi YAML, and other tracked non-Haskell test/provider mechanisms are absent. Phase-49 qualification and later provider semantics/live execution remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 47` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: Phase 47 owns `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, and `LTD-VAL-006`; their exact zero-finding predicates, including the absence of tracked Pulumi YAML and every other non-`pb` non-Haskell source, have not been independently reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 46 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — the rule behind generated checking tools and mutants.
+- [`jit_artifact_doctrine.md` §2 — The rule, and the closed exception list](../documents/engineering/jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list) — the rule behind generated
+  checking tools, mutants, provider-program metadata, and every other non-Haskell external form.
 
 ## Sprints
 
-## Sprint 47.1: Generated checking tools and mutants ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done
-**Implementation**: `src/tool-and-mutant-generation/Amoebius/Generate/CheckingCorpus.hs`,
-`test/spec/generation/ToolAndMutantGenerationSpec.hs`, `tools/tool_and_mutant_generation_gate.py`
-**Blocked by**: None.
-**Independent Validation**: Two 605-artifact renders are byte-identical; four materialized checkers equal the authored whole-corpus verdicts; three generator mutants fail at exact loci.
-**Docs to update**: `documents/engineering/jit_artifact_doctrine.md`
+## Sprint 47.1: Generated repository support material ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Generation/Tools.hs`, `src/Amoebius/Generation/TestCorpus.hs`
+**Blocked by**: Phase 46 human approval
+**Independent Validation**: A separately authored Haskell oracle joins every declared tool/case/mutant to a lazily materialized `.build/**` artifact in both directions, proves changed-subject witnesses, and rejects empty discovery, copied tracked bytes, stale roots, and writes beneath authored roots.
+**Oracle**: planned `test/Amoebius/Generation/ToolsOracle.hs`; independent author and human reviewer unresolved
+**Legacy IDs**: `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, `LTD-VAL-006`
+**Docs to update**: `documents/engineering/jit_artifact_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 
-Establish a typed materializer over the repository's closed tool-source and mutation declarations.
+Replace tracked checking programs, serialized test corpora, materialized mutants, and Pulumi
+provider-program metadata with Haskell declarations that generate only the run-local external forms a
+consumer needs.
 
 ### Deliverables
 
-- A closed 234-row tool-source inventory and 371-row mutation inventory.
-- A total Haskell recipe that materializes all 605 declared artifacts beneath a caller-owned destination.
-- Two-render byte determinism and content addresses for every artifact.
-- Four whole-corpus checker comparisons plus network-isolated materialized execution.
-- Three exact-locus generator mutants covering omitted rules, omitted operators, and authored-tree output.
+- Closed Haskell declarations for every required checking tool, external fake, serialized case, expectation,
+  mutation operator, and provider-program metadata value.
+- Lazy, content-addressed materialization beneath one caller-owned `.build/**` run root.
+- Independent two-way expected/discovered accounting and exact semantic observations.
+- Applied changed-production-subject witnesses, unaffected controls, and containment/residue checks.
 
 ### Validation
 
-`python3 tools/tool_and_mutant_generation_gate.py` passed on 2026-08-22: all thirteen sides, all 14 metrics,
-all three mutants, and the complete authored/runtime surface join were green.
+After the predecessor is human-approved, the qualified Haskell harness must start without `tools/**` or
+tracked serialized corpora, derive every required artifact, execute the semantic controls, and reject omitted
+declarations, copied legacy bytes, no-op mutations, stale roots, empty discovery, and authored-tree writes at
+their distinct loci. This criterion has not run and is not a current candidate.
 
 ### Remaining Work
 
-None. Phase 49 owns deriving gate mechanisms as workflow values, switching their consumers, and removing the
-transitional authored copies; those are not silently credited to this materialization seam.
+Remove the tracked `tools/**`, non-Haskell `test/**`, and tracked provider-program YAML families; implement and
+independently review the Haskell subject/oracle; qualify the harness; close all four legacy rows; and obtain
+human promotion. Phase 49
+then consumes this generated surface; it does not close Phase 47's debt retroactively.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md)
 
+**Cross-references to add:**
+
+- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+
 ## Related Documents
+
 - [Development Plan](README.md)
 - [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — the rule behind generated checking tools and mutants.

@@ -1,14 +1,14 @@
 # Platform Services
 
-> **Purpose**: Define the fixed set of standard services every amoebius cluster runs (the concrete providers
-> behind the capabilities of [service_capability_doctrine.md](./service_capability_doctrine.md)), how each is
-> deployed (HA-always, image-from-the-in-cluster-registry, complete resource envelopes), and the single Keycloak-owned
+> **Purpose**: Define the runtime topology of the standard services selected by
+> [service_capability_doctrine.md](./service_capability_doctrine.md): HA-always deployment,
+> image-from-the-in-cluster-registry, complete resource envelopes, and the single Keycloak-owned
 > wild-ingress path.
 > **Read this if**: a platform service has to be deployed, replaced, or reasoned about at cluster scale.
 
-This document owns the concrete service set every cluster runs, how each is deployed, and the single
-wild-ingress path in front of them all. It does not own the capability abstraction those services realize,
-owned by [service_capability_doctrine.md](./service_capability_doctrine.md), nor the namespaces they occupy,
+This document owns how the selected service set is deployed and the single wild-ingress path in front of it.
+It does not own capability-to-provider selection, which belongs to
+[service_capability_doctrine.md](./service_capability_doctrine.md), nor the namespaces the services occupy,
 owned by [namespace_layout_doctrine.md](./namespace_layout_doctrine.md). Reading it presumes that capability
 set.
 
@@ -17,12 +17,14 @@ set.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is
+> diagnostic only and never current validation evidence. Target doctrine remains normative; current state is
+> owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. The Invariant: every cluster is the same cluster](#1-the-invariant-every-cluster-is-the-same-cluster)
@@ -69,7 +71,7 @@ The standard service set (DEVELOPMENT_PLAN "Standard platform services"):
 | **LoadBalancer** (MetalLB *or* cloud LB) | The single L4 entry point to the cluster | [substrate_doctrine.md](./substrate_doctrine.md) (the backend is derived from the materialized engine/provider) |
 | **Envoy + Gateway API** | L7 routing and edge TLS termination | [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path); [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md) (the carve-out) |
 | **Keycloak** | OIDC identity; **owns all wild ingress** | [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path) |
-| **Registry** (`distribution`) | The single-binary OCI image registry; **every image is pulled from here** (replaces Harbor) | [image_build_doctrine.md](./image_build_doctrine.md), [service_capability_doctrine.md](./service_capability_doctrine.md) |
+| **Registry** (Distribution `registry:2`) | The single-binary OCI image registry; **every image is pulled from here** | [service_capability_doctrine.md §3](./service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific) owns the fixed provider selection; [image_build_doctrine.md](./image_build_doctrine.md) owns byte flow |
 | **MinIO** | S3 object substrate: content store, Pulumi backend, app buckets | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md), [content_addressing_doctrine.md](./content_addressing_doctrine.md), [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | **Vault** | Fail-closed secrets root + PKI trust anchor | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | **Pulsar** | Native-protocol pub/sub event + workflow backbone (**new vs prodbox**) | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
@@ -77,10 +79,10 @@ The standard service set (DEVELOPMENT_PLAN "Standard platform services"):
 | **Prometheus / Grafana** | Cluster-local metrics + dashboards | (this doc, [§7](#7-prometheus--grafana--observability-is-not-an-add-on)) |
 | **Percona/Patroni Postgres + pgAdmin** | Relational store: **one Patroni cluster per consuming service** | [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin); [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 
-Application logic never names these products directly; it names the **capabilities** they realize, owned by
-[service_capability_doctrine.md](./service_capability_doctrine.md). This document is the SSoT for *which*
-concrete services exist and *how each is deployed at the platform level* — the providers behind those
-capabilities. It does **not** restate the capability abstraction, the storage model, the secrets model, the
+Application logic never names these products directly; it names the **capabilities** they realize. Provider
+selection is owned by [service_capability_doctrine.md](./service_capability_doctrine.md). This document is the
+SSoT for *how each selected service is deployed at the platform level*. It does **not** restate the provider
+binding, the capability abstraction, the storage model, the secrets model, the
 image-build pipeline, the manifest-generation engine, or the host-comms carve-out — those are owned by the
 linked siblings and only referenced here.
 
@@ -94,8 +96,9 @@ object kinds, dependency edges, and safety policies exercised at one replica are
 
 Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
 
-- **Replica count is a deployment-rules knob, not a renderer fork.** The bootstrap coordinator's `bootstrap` hand-off requires
-  `--distro={kind,rke2}`; `kind` accepts `--replicas=n` (default `1`). The typed deployment projection is shared
+- **Replica count is a deployment-rules knob, not a renderer fork.** The user supplies
+  `bootstrap --distro={kind,rke2}`; `kind` accepts `--replicas=n` (default `1`). Python forwards that argv
+  unchanged, and only the Haskell command mode interprets it. The typed deployment projection is shared
   across values of `n`. The application-logic-vs-deployment-rules split that makes replicas a separate orthogonal
   surface is owned by [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
 - **HA-capable projection even at `replicas=1`.** A single-replica deployment is still the same HA-capable object shape with one replica —
@@ -117,43 +120,41 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
   client's "mock 3-replica" pattern becomes a deployment-rules `replicas=n` value outside the checked UI
   program.
 
-> **Honesty.** Phase 62 live-tested the topology-parity portion for the linux-cpu backbone: four-drive
-> distributed MinIO, three ZooKeeper members, three BookKeeper bookies, and two Pulsar brokers were rendered
-> from the same HA-shaped Haskell models used for replica-count variants. This is a Register-3 *tested*
-> amoebius result, not proof of consensus or multi-zone availability. Redis/Postgres/observability, Keycloak,
-> cloud LoadBalancers, and the Phase-84 whole-zone outcome remain design intent. Status and gates live
-> only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
+> **Validation reset.** Phase 62 and every later platform phase are NOT VALIDATED. The four-drive MinIO,
+> three-member ZooKeeper, three-bookie BookKeeper, and two-broker Pulsar topology is the target contract;
+> pre-reset run descriptions are diagnostic only and establish neither topology parity nor consensus or
+> multi-zone availability. Status and gates live only in
+> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## 3. The registry — the single image source
 
-The in-cluster registry is the **single-binary `distribution` (`registry:2`) OCI registry**, which
-**replaces Harbor**. Once it is up, **nothing in the cluster pulls from a public registry**: every image is
+The in-cluster registry runs the **single-binary Distribution `registry:2` OCI registry** selected by
+[service_capability_doctrine.md §3](./service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific).
+This document does not admit or select registry providers; it owns only this provider's runtime topology.
+Once it is up, **nothing in the cluster pulls from a public registry**: every image is
 either baked into the base container or built by amoebius and served from here. The result is reproducibility
 (amoebius owns the bytes), air-gap capability, and zero exposure to upstream rate-limits or flakes.
 
-- **No bootstrap chicken-and-egg.** The registry binary is baked into the base image, which is loaded onto
-  the node before bring-up ([image_build_doctrine.md §9](./image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)), so the registry runs from the preloaded
-  image rather than pulling itself from a public registry (the prodbox Harbor bootstrap problem dissolves).
+- **No bootstrap chicken-and-egg.** The fixed Distribution `registry:2` image is digest-checked and preloaded
+  into the node before bring-up ([image_build_doctrine.md §9](./image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)); its binary is not baked into `amoebius-base`, and the service never tries to pull itself.
   Its one runtime dependency is MinIO, which holds the registry's blobs and is itself a preloaded, PV-backed
   service — so the dependency is a plain ordering edge (MinIO before the registry, [§11](#11-bring-up-and-dependency-ordering)), never a pull cycle.
-- **The pre-MinIO bootstrap is finite and already validated.** Phase 56.2 runs the registry backend behind a
+- **The pre-MinIO bootstrap target is finite — NOT VALIDATED.** Phase 56.2 is required to run the registry backend behind a
   read-only service proxy and a sole capability-gated mutation proxy from the side-loaded image. Its temporary
   filesystem blob store is a snapshot-admitted, size-limited `emptyDir`; the exact digest-keyed object,
   concurrent-upload workspace, and failed-upload/GC peak remain charged. Phase 62 migrates those admitted
   bytes to MinIO before ordinary whole-deployment ownership, so the bootstrap store is an explicit bounded
-  ordering seam rather than a second storage architecture. Phase 56.3 atomically published the exact audited
-  two-architecture index and proved a zero-mutation rerun; Phase 56.4 paired a successful exact private pull
-  with a public-pull timeout under an enforcing node firewall and observed zero established public-registry
-  connections. All four sprints are sealed by the 2026-08-14 Phase-56 run. The MinIO-backed driver and the
-  migration of those admitted bytes remain **UNVERIFIED**: Phase 62 is open under the reopened numeric
-  sequence, and its pre-amendment record does not carry forward.
-- **It needs no relational database, and no PV of its own.** Unlike Harbor, `distribution` stores its blobs
+  ordering seam rather than a second storage architecture. Phase 56.3 must publish one architecture-qualified
+  child atomically and demonstrate a zero-mutation rerun; Phase 56.4 must pair an exact private pull with a
+  public-pull refusal under an enforcing node firewall. Earlier run descriptions and seals are invalid as
+  current evidence. The MinIO-backed driver and migration of those admitted bytes are likewise unverified.
+- **It needs no relational database, and no PV of its own.** Distribution `registry:2` stores its blobs
   in **MinIO via the S3 storage driver** ([§4](#4-minio--the-object-substrate)) — it holds no PersistentVolume and runs no Postgres/Redis of
   its own, so it takes neither a Patroni cluster under the [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) rule nor a retained PV under the storage
-  model. amoebius drops Harbor's scanning, web UI, robot RBAC, and replication as separate concerns,
-  revisited only if ever needed.
+  model. Registry scanning, a registry web UI, registry-local RBAC, and registry replication are outside the
+  admitted service contract and may not imply a second provider.
 - **The build side is not owned here.** Baking binaries, one native build per architecture (`amd64`/`arm64`),
   the content-address-derived tag, and host-vs-in-pod builds are owned by
   [image_build_doctrine.md](./image_build_doctrine.md); *which* provider backs the Registry capability is
@@ -285,7 +286,7 @@ independent version and lifecycle, and clean per-namespace teardown.
 - **The Percona operator is itself a platform component**, drawn from the shared inventory ([§12](#12-substrate-equivalence-as-a-structural-invariant)) so it
   installs identically on every substrate. A service needing SQL renders a `PerconaPGCluster` in its own
   namespace; the cluster-wide operator reconciles it. This generalizes the prodbox Patroni dependency
-  contract, where Keycloak is the proven consumer, without retaining its Helm-specific implementation.
+  contract, where Keycloak is the sibling-system example, without retaining its Helm-specific implementation.
 - **HA always applies here too ([§2](#2-ha-always--including-replicas1)).** At its configured steady state a Patroni cluster runs multiple
   replicas; at `replicas=1` it is still a Patroni cluster, never a bare Pod. This doc deliberately fixes
   **no specific replica count** — the count is a deployment-rules value, not a doctrine constant.
@@ -307,13 +308,13 @@ independent version and lifecycle, and clean per-namespace teardown.
   re-proving it, and the delegation holds **only** with these settings. Absent them an intra-cluster failover
   can promote a replica missing acknowledged commits and thereby lose them — so this is stated as a required
   configuration, not an assumed default.
-- **Canonical consumers.** Phase 63 fixes the current amoebius database-consumer set to exactly `{Grafana}`;
-  its Patroni cluster, pgAdmin surface, and Grafana migrations are live-tested. Keycloak remains a future
+- **Canonical consumers.** The Phase-63 target fixes the amoebius database-consumer set to exactly `{Grafana}`;
+  its Patroni cluster, pgAdmin surface, and Grafana migrations are NOT VALIDATED. Keycloak is the planned
   Phase-64 consumer. Other standard services that later need a
-  relational database each get their own Patroni cluster + pgAdmin. (The registry does **not** —
-  `distribution` needs no database, [§3](#3-the-registry--the-single-image-source) — which is one fewer Patroni consumer than prodbox's Harbor.) The
+  relational database each get their own Patroni cluster + pgAdmin. The Registry has no Patroni consumer
+  because Distribution `registry:2` needs no database ([§3](#3-the-registry--the-single-image-source)). The
   authoritative list is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); this
-  doctrine records the Phase-63 tested floor without preventing later typed additions.
+  doctrine fixes the target floor without preventing later typed additions.
 - **Storage is not owned here.** Retained PVs, the `<namespace>/<statefulset>/pv_<integer>` naming, sizing,
   and deterministic rebind are owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
 - **Capacity remains per consumer.** Binding constructs one `PatroniSqlDemand` for each consuming capability:
@@ -345,11 +346,10 @@ The canonical demand shapes are owned by
 the tenant-qualification, empty/diff planner, executor coalescing, target-change retention, MinIO physical fold,
 and sealed provider enactors are owned by [tenancy_doctrine.md §5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored).
 
-Phase 66 delivers provider administrative apply/readback for all six arms; its separated live observers cover
-Keycloak, Vault, Pulsar, MinIO, Kubernetes API, and Postgres for two equal-shaped tenants. Its Pulsar adapter
-applies and observes tenant/namespace/ACL policy but does not use an application client. Phase 67, after the native `amoebius-pulsar`
-client exists, owns the authenticated produce/consume round-trip gate. Administrative policy convergence in
-Phase 66 is not proof of the Phase-67 data path; its ledger leaves that surface UNVERIFIED.
+Phase 66 must eventually validate provider administrative apply/readback for all six arms with separated live
+observers over equal-shaped tenants. Its Pulsar scope is tenant/namespace/ACL policy, not an application
+client. Phase 67 separately owns the authenticated native-client produce/consume contract. Both phases are
+**NOT VALIDATED**, and administrative convergence can never substitute for data-path evidence.
 
 ---
 
@@ -549,14 +549,16 @@ into a foreclosed illegal state at
   witness exists. The finite pre-SSA Phase-56 registry/proxy units are bootstrap inputs, not an exception for
   new workloads: they must be included in the cutover domain and become custom-scheduled before this witness.
 - **LoadBalancer before the Envoy/Gateway edge** — the Gateway needs an LB address to publish a listener.
-- **MinIO before the registry** — the `distribution` registry stores its blobs via MinIO's S3 API
+- **MinIO before the registry** — Distribution `registry:2` stores its blobs via MinIO's S3 API
   ([§3](#3-the-registry--the-single-image-source), [§4](#4-minio--the-object-substrate)), so MinIO must be serving before the registry is ready. MinIO runs from
   the preloaded base image on retained PVs, so this is a plain ordering edge, not a pull cycle.
 - **The registry before later runtime-image pulls** — once MinIO backs it, the registry must be serving before
   amoebius publishes or pulls the generic `Runtime` and trusted-adapter variants
   ([§3](#3-the-registry--the-single-image-source)). Checked UI programs follow the immutable content/release
-  path rather than minting per-app images. Platform services do not
-  wait on the registry: they run from the preloaded base image ([image_build_doctrine.md §9](./image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)).
+  path rather than minting per-app images. Platform services other than the Registry do not wait on it: their
+  binaries run from the preloaded base image. The Registry itself runs only from the separately pinned and
+  preloaded Distribution `registry:2` image and becomes ready after MinIO
+  ([image_build_doctrine.md §9](./image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)).
 - **The Percona operator before any Postgres consumer** — a `PerconaPGCluster` has nothing to reconcile it
   otherwise ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)).
 - **Vault before Redis credentials; Redis/Sentinel readiness before a UI-server accepts WebSockets** — Vault
@@ -616,12 +618,12 @@ while replacing its Helm-specific realization with typed object generation. The 
 4. **The architecture and the accelerator lane index the base image's parent, and nothing else.** Mechanism 2
    forbids re-pinning a component version or image ref on the active substrate, and that prohibition stands:
    "the managed target needs a different Envoy" remains inexpressible. What this clause admits is narrower by
-   construction rather than by promise. The bake catalog is **one authored document**, and each image is a
+   construction rather than by promise. The bake catalog is **one tracked Haskell value**, and each image is a
    *projection* of it — the same steps, the same pinned package versions, the same release values, read once
    per architecture and lane. A per-target component version is therefore not something a reviewer must
    refrain from writing; it is something the projection has no field for. The only values indexed are the
    parent image and the architecture-qualified tag, drawn from closed sets and selected by detected hardware,
-   never authored by a cluster `.dhall`.
+   never selected by an external/untracked cluster `.dhall` value.
 
    **This governs authored values, not layer bytes.** Installing a pinned package version against two parents
    yields the same version and a different dependency closure, so the two images' layer digests differ and are
@@ -635,34 +637,33 @@ engine/provider-derived LB mapping, and the no-env/no-PATH lazy-tool-ensure cont
 host tooling that brings these services up is discovered lazily through the substrate's package manager and
 invoked by full path — there is no `PATH`-based discovery anywhere in the bring-up sequence.
 
-> **Honesty.** Where this section generalizes a behaviour proven in prodbox, that proof is *evidence from a
-> sibling system*, not proof in amoebius. amoebius has now live-tested the Phase-56 registry, Phase-61 Vault,
-> the Phase-62 linux-cpu backbone subset, and the Phase-63 Redis/Patroni/pgAdmin/Prometheus/Grafana subset.
-> The Phase-64 identity/ingress edge, specialized/provider installers, and their complete equivalence checks
-> remain design intent.
+> **Validation reset.** Where this section generalizes sibling behaviour, that remains sibling evidence only.
+> Phases 56, 61, 62, 63, 64, and 77 are all NOT VALIDATED. The subsections below preserve pre-reset
+> observations solely as diagnostic context; none is a current pass, seal, proof, tested result, or promotion
+> input. Only a rewritten phase contract and human promotion can establish current status.
 
 ---
 
-### Validated Vault readiness floor
+### Phase-61 Vault readiness diagnostic — invalidated
 
-Phase 61 supplied the first live amoebius proof of the Vault readiness edge: a secret consumer stayed blocked
+An earlier run reported a secret consumer staying blocked
 while Vault was sealed, then authenticated through `auth/kubernetes/login` and read the exact canary only after
-unseal. A real cluster delete/recreate retained Vault state and the PKI root without re-initialization. The remaining service-DAG edges are
-owned by their later phases.
+unseal, plus cluster delete/recreate retaining Vault state and the PKI root without re-initialization. That
+observation is not current Phase-61 evidence. The remaining service-DAG edges are owned by their later phases.
 
-### Validated Phase-62 backbone
+### Phase-62 backbone diagnostic — invalidated
 
-Phase 62 live-tested MetalLB, distributed MinIO, the registry's MinIO S3 rehome, and Pulsar's
+An earlier run reported observations of MetalLB, distributed MinIO, the registry's MinIO S3 rehome, and Pulsar's
 ZooKeeper/BookKeeper/broker topology. External observations covered a stable reachable VIP, MinIO byte
 identity, registry source stability and target objects, native Pulsar CBOR/dedup traffic, size-triggered
 offload, and a hot tier below its committed cap. Fifty-three SSA-owned object projections and eleven freshly
 rendered Haskell execution-unit projections were byte-identical to the live fields they own; every runtime
-image ID resolved to the baked Phase-56 digest and no public pull was observed. This is tested on `linux-cpu`,
-not a proof of third-party consensus or multi-zone HA.
+image ID resolving to the then-recorded Phase-56 digest and no public pull being observed. These are invalidated
+diagnostics, not current `linux-cpu` evidence or proof of third-party consensus or multi-zone HA.
 
-### Validated Phase-63 service set
+### Phase-63 service-set diagnostic — invalidated
 
-Phase 63 live-tested the exact database-consumer set `{Grafana}` with a three-member Patroni cluster carrying
+An earlier run reported the database-consumer set `{Grafana}` with a three-member Patroni cluster carrying
 `synchronous_mode: on`, `synchronous_mode_strict: on`, and a bytes-bounded
 `maximum_lag_on_failover`; pgAdmin became Ready and Grafana completed hundreds of migrations through that
 Postgres service. The Percona 2.6 operator observed the `PerconaPGCluster`, while the receipt honestly records
@@ -671,15 +672,15 @@ operator. Prometheus ran from a descriptor-derived retained-storage and query bu
 denied by NetworkPolicy, its proxy accepted an in-bound query and rejected the one-over series bound, and
 Grafana used Postgres. Redis ran one primary, two replicas, and three mutually authenticated Sentinel voters;
 a Vault-issued TLS/ACL client observed replication, forced promotion, and retained the TTL-bound challenge,
-with no PVC/AOF/RDB/backup. The gate also sealed 256 deterministic partial-failure schedules, eleven fresh
+with no PVC/AOF/RDB/backup. The old report also named 256 deterministic partial-failure schedules, eleven
 Haskell projections, fifty SSA projections, eight red mutants, and a 14-service warm apiserver readiness
-trace. These are tested linux-cpu results, not proofs of third-party consensus. Hardware selection never
+trace. These are invalidated diagnostics, not current linux-cpu evidence or proofs of third-party consensus. Hardware selection never
 removes the `linux-cpu` fallback. When the run needs a clean guest instead of the existing host, launch it
 through Incus for Linux or Linux-CUDA hardware, Lima for Apple hardware, and WSL2 for Windows hardware.
 
-### Validated Phase-64 authenticated edge
+### Phase-64 authenticated-edge diagnostic — invalidated
 
-Phase 64 live-tested the first complete amoebius wild edge. Exactly one LoadBalancer remained:
+An earlier run reported one amoebius wild-edge topology with exactly one LoadBalancer:
 `edge-system/envoy` at the MetalLB VIP. The typed Gateway/HTTPRoute inventory covered Grafana, Keycloak,
 Vault, MinIO, the platform API, and the authenticated WebSocket probe. Host, WAN-Pod, LAN-Pod, and
 localhost-port-forward observers all completed positive OIDC requests; the paired unauthenticated requests
@@ -690,35 +691,34 @@ data-plane projection; it does not attribute that child to Envoy Gateway.
 
 Keycloak uses its own retained three-member Patroni cluster in `keycloak-db`, separate from Grafana's cluster,
 with strict synchronous mode and the bounded failover-lag oracle. The Percona operator observed the Keycloak
-CR while the exact child is recorded as an amoebius manual projection. Default-deny policy passed an external
+CR while the exact child is recorded as an amoebius manual projection. The old report said default-deny policy completed an external
 scratch-Pod deny→allow→deny graph variation, the committed backdoor Service made the scanner red before its
 removal restored green, and the sole `HostLocalPeer` NodePort succeeded on node loopback but failed from the
-WAN Pod. Valid and invalid WebSocket tuples proved exact Origin, one-use nonce, subprotocol, authentication,
-and direct-Service denial. These are Register-3 linux-cpu results, not proofs of third-party controller or
-database consensus.
+WAN Pod. Valid and invalid WebSocket tuples were reported for Origin, one-use nonce, subprotocol,
+authentication, and direct-Service denial. These are invalidated diagnostics, not current Register-3
+linux-cpu evidence or proofs of third-party controller or database consensus.
 
-### Scoped Phase-77 provider-child convergence boundary
+### Phase-77 provider-child diagnostic — invalidated
 
-Phase 77 pins the exact sixteen-object standard service-name set and implements exact-set/no-extra/no-missing
-validation in the provider-child protocol. The retained-kind drill created and read back those sixteen
-Service objects, then proved the second pass performed zero Kubernetes mutations. This is an object-inventory
-and protocol result only: it does not establish EKS, a cloud LoadBalancer, service data-plane reachability,
-HA behavior, or wild ingress exclusively through provider Keycloak/Envoy. Those provider observations remain
-UNVERIFIED until a real child can be materialized. Phase 77's tracker and substrate row carry the universal
-CPU fallback and pristine-host routing contract.
+The Phase-77 contract pins the exact sixteen-object standard service-name set and requires
+exact-set/no-extra/no-missing validation in the provider-child protocol. A pre-reset retained-kind drill
+reported creating and reading those Service objects with zero second-pass Kubernetes mutations. It is not
+current evidence and does not establish EKS, a cloud LoadBalancer, service data-plane reachability, HA
+behavior, or wild ingress exclusively through provider Keycloak/Envoy. Phase 77 is NOT VALIDATED.
 
 ## 13. Planning ownership
 
 This document is normative platform-services doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (the full service set lands across **Phase 56 and Phases 40–43**).
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (the baked service inventory is a
+Phase-56 target; the live backbone, remaining services, identity, and edge are Phase-62–64 targets).
 This doc never maintains a competing status ledger; it states the target shape and links back for status.
 
 ---
 
-Phase 84 tests the three-zone Redis/Sentinel topology and ephemeral-authority rules only as a scoped admission
-kernel plus a loopback process campaign. Real Redis/Sentinel election and provider-zone survival remain
-UNVERIFIED; topology parity is not observed availability.
+Phase 84 is planned to test the three-zone Redis/Sentinel topology and ephemeral-authority rules as a scoped
+admission kernel plus a loopback process campaign. It is NOT VALIDATED; real Redis/Sentinel election,
+provider-zone survival, and observed availability remain unverified.
 
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)

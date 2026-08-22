@@ -6,31 +6,27 @@
 > Failover standby with no bespoke election and a leak-free teardown.
 > **Read this if**: phase 69 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 69 delivers the content store + workflow runtime (Pulsar-Failover single-writer); its design is owned by [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), [resource_capacity_storage.md](../documents/engineering/resource_capacity_storage.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate. Validated 2026-08-11 with
-`python3 tools/content_store_workflow_gate.py --reuse-fresh-live`; ledger
-`dynamically-resolved`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — the four-Pod runtime plus gateway/collector envelope](#resource-provision--the-four-pod-runtime-plus-gatewaycollector-envelope)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 69.1: Three-tier content-addressed MinIO store ⏸️](#sprint-691-three-tier-content-addressed-minio-store-)
@@ -44,43 +40,22 @@ Register 3, live, on the `linux-cpu` substrate. Validated 2026-08-11 with
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-68 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 68, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Observed artifact migration — 2026-08-11:** `manifest_canonical.cbor`,
-`manifest_canonical.sha256`, and `manifest_noncanonical.cbor` are reproducible from one logical manifest and
-the independent canonicalizer/mutation definition. They must be generated during the run. The authored
-logical manifest, canonicalization rules, reference adapter, and expected mismatch locus remain eligible
-source after independent review.
-
-**Invalidated historical record:**
-
-Done (invalidated). The phase runs on the **linux-cpu** substrate in **Register 3** (live infrastructure) — a single-node
-`kind` cluster brought up by the Phase 55 bootstrap coordinator with
-Pulsar and MinIO already standing as HA platform services (Phase 62) on retained storage (Phase 60), and it
-opens only after the Phase 67 gate (the native-protocol Pulsar client, CBOR codec, four subscription types,
-and broker-side dedup) closes, because the workflow runtime consumes that client rather than reimplementing a
-transport. The three-tier store shape is proven in the sibling `jitML` checkpoint format
-(`jitML/src/JitML/Checkpoint/Format.hs`) and the Failover-subscription worker path in the sibling `infernix`
-ML-workflow runtime; those remain sibling context, while the Phase-69 evidence is an amoebius result. The
-gate sealed the canonical store, terminal-Job protocol, two native Failover cycles, full three-class cleanup,
-256 deterministic schedules, and all ten red mutants. Cross-cluster replication, the Phase-80 experiment-hash
-derivation, and Pulsar consensus internals remain explicitly UNVERIFIED.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase delivers the durable-artifact and workflow core that every later ML-workflow phase consumes, in two
+This phase's target is the durable-artifact and workflow core that every later ML-workflow phase may consume only after human approval, in two
 composed pieces on one substrate. First, the **three-tier content-addressed MinIO store** — write-once
 self-naming `blobs/<sha256>` and canonical-CBOR `manifests/<sha256>` under `If-None-Match: *` (with `412
 Precondition Failed` treated as success), and the only mutable objects, `pointers/*`, advanced by an
@@ -95,16 +70,16 @@ derived topic; worker daemons attached over a Pulsar **Failover** subscription h
 consumer and the rest as name-ordered hot standbys; the active worker writes a content-addressed artifact and
 produces an `event` carrying the manifest SHA the orchestrator fetches back by that SHA.
 
-This phase also closes the Job-terminal live-proof boundary deliberately left open in Phase 58. Phase 58
-builds and model-checks the closed success/failure completion state machine but has no MinIO or sole content
-mutation gateway, so its live terminal Pod remains retained and charged. Here the already-provisioned
+This phase's gate must also close the Job-terminal live-proof boundary deliberately left open in Phase 58. Human-approved Phase 58
+must supply the closed success/failure completion state machine but has no MinIO or sole content
+mutation gateway, so its live terminal Pod remains retained and charged. Here the predecessor-provisioned
 collector/verification Job is driven through the full live sequence: terminal outcome → exact
 content-addressed `JobCompletion` write through the sole gateway → independent MinIO digest/outcome/revision
 readback → cleanup deadline plus scheduler release partition → authenticated terminal-Pod cleanup. A failed or
 ambiguous write retains the Pod and all modeled resident axes; an equal persisted completion yields
 `CompletedJobNoOp` and cannot recreate the Job until a new execution revision.
 
-The load-bearing property this phase proves live is that **standby takeover is delegated to Pulsar, not elected by amoebius**. Killing the active worker triggers the subscription's own ranked failover to the
+The future gate must test the load-bearing property that **standby takeover is delegated to Pulsar, not elected by amoebius**. Killing the active worker must trigger the subscription's own ranked failover to the
 name-ordered standby, with the Phase-67 at-least-once contract redelivering the un-acked command; the store's
 ETag-CAS single atomic commit point plus the typed `AdvancePredicate` keep the mutable pointer race-free, and
 content-addressed confluence makes the standby's re-fetch of the artifact by manifest SHA safe without any
@@ -117,62 +92,44 @@ typeclass, and SplitMix seed derivation are the Phase 80 determinism kernel, not
 **Phase scope:** one cohesive claim — *an artifact is fetched by its manifest hash, and a failed worker's successor resumes without bespoke coordination*. Failover is the broker's, not amoebius's.
 
 **Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host, in
-Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched, and the store's CAS
-protocol and worker failover are substrate-agnostic in design but validated only here.
+Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched. This phase owns the
+future bounded live validation of the otherwise substrate-agnostic CAS protocol and worker failover.
 
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 68](phase_68_user_tenant_isolation_live.md) — live subject/tenant isolation, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 69` is green: the `round_trip_failover.dhall` topology passes
-the round trip, critical-window failover, capacity drill, terminal-Job protocol, leak-free teardown, and
-seeded mutants of [Gate integrity](#gate-integrity), on the linux-cpu kind cluster at Register 3.
+**Depends on:** [Phase 68](phase_68_user_tenant_isolation_live.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 69`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The acceptance run is one `InForceSpec` test topology, and every claim it makes is read from something other
-than the runtime under test. It is checked against the reviewed expectations and run-time references named in
-Sprints 59.1 and 38.3, and MUST turn red on the mutants named there — among them the insertion-order-leaking
-CBOR encoder and the ack-before-store-write worker.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *an artifact is fetched by its manifest hash, and a failed worker's successor resumes without bespoke coordination*. Failover is the broker's, not amoebius's. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 69` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 68 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-- **Representative service set:** exactly the `round_trip_failover.dhall` topology's **one orchestrator +
-  three workers** (one active, two name-ordered standbys) over the standing single-node Pulsar + MinIO.
-  Nothing larger is in gate scope.
-- **Store and fetch by manifest SHA:** a worker writes the artifact into the three-tier MinIO store and the
-  orchestrator reads it back by the manifest SHA carried in the workflow `event`, so what crosses the wire is
-  a content address rather than a payload.
-- **The critical-window kill:** the active worker is killed **after its store write and before its `event`
-  ack** — the same window Sprint 69.4 injects in simulation — and that placement (store-write-done,
-  event-unacked) is recorded in the per-run ledger. A kill against an already-drained worker would exercise
-  nothing.
-- **Takeover delegated to Pulsar, read externally:** the **lexically next-in-name-order** standby takes over
-  the Pulsar Failover subscription, with the promoted consumer's identity read from the Pulsar admin
-  `subscription/{sub}/consumers` API rather than a self-emitted worker log, and the un-acked command
-  redelivered at least once. Single-writer liveness is the subscription's, never a bespoke amoebius election.
-- **The safety story asserted live:** the promoted standby re-fetches the artifact by manifest SHA, the
-  resulting `pointers/latest` HEAD is **byte-identical to a fresh independent no-fault reference run**
-  retained only in the run bundle, and an **external Pulsar consumer** observes the workflow command **exactly
-  once**.
-- **The failed-commit capacity drill:** a separate drill uploads the maximum blob/manifest write set and
-  deliberately loses the pointer CAS. An external MinIO inventory proves those orphan bytes remain resident
-  and debited before the positive finite GC horizon, an over-capacity follow-on write is refused with zero
-  object mutation, and capacity is credited only after the GC horizon has elapsed **and** a fresh inventory
-  observes deletion. The independent checker projects committed + concurrent + orphan logical extents through
-  the Phase-62 per-drive erasure/healing and uniform-claim witness.
-- **The first live Phase-58 terminal protocol:** the collector/verification Job's exact completion variant is
-  gateway-written and independently read back before deadline/release-authorized Pod deletion; a forced
-  gateway-write failure proves retention, and a rerun proves `CompletedJobNoOp`.
-- **Leak-free teardown and an independent re-run:** the whole topology spins up, runs, and tears down
-  leak-free — the postflight sweep inventories every resource class enumerated in Sprint 69.3 and fails hard
-  on any non-empty remainder outside its explicitly named retained-by-design set — and **re-runs idempotently
-  under a distinct `experiment-hash` namespace**, a cache-bypassing independent recompute rather than a
-  content-addressed store-hit. Each run emits a per-run proven/tested/assumed ledger artifact.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+## Resource provision — UNRESOLVED
 
-## Resource provision — the four-Pod runtime plus gateway/collector envelope
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 The representative runtime's provisioned steady epoch contains exactly four resource-bearing Pods: one
 orchestrator and three workers. A pure `WorkflowRuntimeDemand` contains the exact identity-keyed runnable
@@ -233,17 +190,18 @@ keys, multiparts, observed-UID runtime-metadata components/roles/backings, scope
 The collector's terminal record is the `JobCompletion` member of `ControlPlaneState`, not a content blob or an
 unaccounted side table. Its exact execution-identity digest, outcome variant, revision, canonical byte bound,
 retention/failure/orphan horizon, `StorageBudgetId`, and mutation admission join the global object-producer
-inventory and MinIO physical fold before the collector Pod is created. The same sole gateway is the only
+inventory and MinIO physical fold before the collector Pod may be created. The same sole gateway must be the only
 mutation route. Cleanup consumes a fresh external MinIO readback plus deadline and scheduler-release evidence;
 neither a Job status condition nor a gateway acknowledgement alone is sufficient.
 
-The committed boundary corpus makes each runnable source envelope, exact four-instance steady expansion,
+The Haskell-declared boundary corpus makes each runnable source envelope, exact four-instance steady expansion,
 gateway/collector, kind-indexed controller/rollout/failover
 overlap, runtime-metadata shape/component/role/backing, topic cursor/backlog, object identity/count/size, concurrent/failure/orphan term, storage budget,
 API-object revision/Event, and etcd term one unit short. Omission mutants dropping either standby, the gateway
 or collector, the largest simultaneous runtime-metadata row, a role/domain/ownership/grouping witness, or pinned kubelet model, a failed CAS object, a declared pointer object, the `Content` producer arm, one desired API
 object, the collector's `JobCompletion` identity/retention/failure extent, a churn operand, or the etcd model
-refuse before any k8s/Pulsar/MinIO effect; exact-fit twins render
+refuse before any k8s/Pulsar/MinIO effect; any serialized case is generated beneath
+`.build/test-corpora/**`, and exact-fit twins render
 and match live readback.
 
 ```mermaid
@@ -263,91 +221,76 @@ flowchart LR
 
 ## Doctrine adopted
 
-- [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) — the bytes content store + workflow runtime (Pulsar-Failover single-writer) causes to exist are charged to a grant that carries its ceiling and concurrency together.
-This phase is the first live amoebius realization of the content store and the delegated-single-writer workflow
-runtime. Each bullet names the section it adopts; individual sprints cite the same sections where they build on
-them.
+- [`jit_budget_doctrine.md` §3 — A ceiling is inseparable from its concurrency](../documents/engineering/jit_budget_doctrine.md#3-a-ceiling-is-inseparable-from-its-concurrency) — the bytes content store + workflow runtime (Pulsar-Failover single-writer) causes to exist are charged to a grant that carries its ceiling and concurrency together.
+This phase's target is to become the first live amoebius realization of the content store and the
+delegated-single-writer workflow runtime. Each bullet names the section the target must adopt; individual
+sprints cite the same sections where they must build on them.
 
-- [`content_addressing_doctrine.md §2`](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
+- [`content_addressing_doctrine.md` §2 — The three-tier store: blobs ← manifests ← pointers](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
   — *the three-tier store: blobs ← manifests ← pointers*: the three object classes and two write protocols
-  ([`§2.1`](../documents/engineering/content_addressing_doctrine.md#21-three-object-classes-two-write-protocols) three classes / two protocols; [`§2.2`](../documents/engineering/content_addressing_doctrine.md#22-why-this-shape-removes-the-races) why the shape removes the write/write and write/read hazards), keyed under the
-  [`§3 experimentHash`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
-  namespace consumed here as an opaque pinned prefix. The same [§2.1](../documents/engineering/content_addressing_doctrine.md#21-three-object-classes-two-write-protocols) capacity contract and
-  [`resource_capacity_storage.md §5.1`](../documents/engineering/resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
+  ([`content_addressing_doctrine.md` §2.1 — Three object classes, two write protocols](../documents/engineering/content_addressing_doctrine.md#21-three-object-classes-two-write-protocols) three classes / two protocols; [`content_addressing_doctrine.md` §2.2 — Why this shape removes the races](../documents/engineering/content_addressing_doctrine.md#22-why-this-shape-removes-the-races) why the shape removes the write/write and write/read hazards), keyed under the
+  [`content_addressing_doctrine.md` §3 — `experimentHash`: identity is *what was requested* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
+  namespace consumed here as an opaque pinned prefix. The same [`content_addressing_doctrine.md` §2.1 — Three object classes, two write protocols](../documents/engineering/content_addressing_doctrine.md#21-three-object-classes-two-write-protocols) capacity contract and
+  [`resource_capacity_storage.md` §5.1 — Durable demand is logical first, physical only after geometry](../documents/engineering/resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
   require committed residents + bounded in-flight writes + every failed-write orphan through the finite
   positive GC horizon to remain charged through MinIO's physical and uniform-claim witness.
-- [`content_addressing_doctrine.md §5`](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)
+- [`content_addressing_doctrine.md` §5 — Confluence: content-addressed data crosses cluster boundaries safely](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)
   — *confluence*: content-addressed data is a join-semilattice, which is what makes the standby's re-fetch by
   manifest SHA and the at-least-once redelivery idempotent without a distributed lock.
-- [`content_addressing_doctrine.md §6`](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)
+- [`content_addressing_doctrine.md` §6 — The honest ceiling: types make the bookkeeping total, not the physics deterministic](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)
   — *the honest ceiling*: store bookkeeping totality (immutability + a commutative/associative/idempotent
-  pointer join) is a proven-in-types argument; this phase validates the CAS protocol's runtime behaviour, and
-  claims neither compute determinism nor cross-cluster replication.
-- [`daemon_topology_doctrine.md §5`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
-  and [`§5.2`](../documents/engineering/daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)
+  pointer join) is a proven-in-types argument; this phase's future gate must validate the CAS protocol's runtime
+  behaviour and must claim neither compute determinism nor cross-cluster replication.
+- [`daemon_topology_doctrine.md` §5 — Single-instance and coordination — delegated, not elected](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
+  and [`daemon_topology_doctrine.md` §5.2 — The coordination plane is for worker events and audit, not leadership](../documents/engineering/daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)
   — *single-instance and coordination — delegated, not elected*: worker single-consumer semantics come from a
   Pulsar `Exclusive`/`Failover` subscription, never a bespoke election; Pulsar + MinIO are the workflow event
   stream and audit trail, not an election substrate.
-- [`daemon_topology_doctrine.md §4`](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)
-  and [`§4.3`](../documents/engineering/daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated)
+- [`daemon_topology_doctrine.md` §4 — Worker daemons — N, unelected](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)
+  and [`daemon_topology_doctrine.md` §4.3 — The Feed-sourced continuous trainer: single-writer delegated](../documents/engineering/daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated)
   — *worker daemons, N, unelected* / *single-writer delegated*: the orchestrator and workers are unelected
   worker daemons; liveness (at most one active per subscription) is the Pulsar subscription and safety
   (race-free `latest`) is the store's ETag-CAS commit point plus the typed `AdvancePredicate`.
-- [`daemon_topology_doctrine.md §3.1`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
+- [`daemon_topology_doctrine.md` §3.1 — "Exactly one pod" is a k8s/etcd property, not an amoebius election](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
   — *exactly one pod is a k8s/etcd property*: the workflow is deployed by the Deployment-`replicas=1`
   control-plane daemon (Phase 65), whose single-instance is delegated to k8s/etcd, so nothing in this phase
   runs an election of any kind.
-- [`pulsar_client_doctrine.md §5`](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek)
-  and [`§7`](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)
+- [`pulsar_client_doctrine.md` §5 — The capability surface: lookup · produce · consume · subscribe · seek](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek)
+  and [`pulsar_client_doctrine.md` §7 — Delivery: at-least-once with broker-side dedup (the robust default)](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)
   — *the capability surface (the Failover subscription)* / *at-least-once with broker-side dedup*: the Phase-67
-  subscription surface this phase consumes for standby takeover and the redelivery/dedup contract that keeps a
+  subscription surface this phase's target must consume for standby takeover and the redelivery/dedup contract that keeps a
   retried produce or a redelivered consume idempotent.
-- [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
+- [`deterministic_simulation_doctrine.md` §4 — Register 2.5 — where deterministic simulation sits](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
   — *Register 2.5 — where deterministic simulation sits*: Sprint 69.4 runs the real Sprint-64.2/32.3 workflow
   runtime under `IOSimPOR` against the Phase-16 modeled environment as a Register-2.5 lower-register cross-check
   of the same leak-free-takeover / no-double-application properties the Register-3 live gate asserts.
-- [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
+- [`chaos_failover_doctrine.md` §12 — The moral core — proven, tested, assumed](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
   (cross-reference) — *proven, tested, assumed*: each gate run emits a proven/tested/assumed ledger; skipping
   an applicable failover-injection move marks that layer UNVERIFIED, never green. The asynchronous
   **cross-cluster** failover boundary and its formal model are owned by
-  [`§16`](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
+  [`chaos_failover_second_axis.md` §16 — The Second Axis — when one cluster becomes a forest](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
   and realized by Phase 74's geo-replication plus Phase 75's gateway-migration drills, not here — this phase
   exercises the intra-cluster subscription only.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 69.1: Three-tier content-addressed MinIO store ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Store/ContentAddress.hs`,
-`src/Amoebius/Store/Manifest.hs`, `src/Amoebius/Store/Pointer.hs`,
-`src/Amoebius/Store/ControlPlaneState.hs`, and
-`src/Amoebius/Execution/JobTerminalLive.hs` (built and validated)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: at Register 3 against the cluster's live MinIO, the write-once blob and canonical
-manifest protocols, the single `pointers/latest` CAS commit point, the failed-commit capacity drill, and the
-live `JobCompletion` write-and-readback each hold, while every direct-PUT or over-capacity route is refused.
-The numbered `### Validation` list below carries the cases.
-**Docs to update**: `documents/engineering/content_addressing_doctrine.md` (§2),
-`documents/engineering/resource_capacity_doctrine.md` (§5.1 — the content-store logical peak this sprint
-provisions), `documents/engineering/storage_lifecycle_doctrine.md` (the retained-PV MinIO the bytes land
-on), `DEVELOPMENT_PLAN/system_components.md`, this document.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`content_addressing_doctrine.md §2 — the three-tier store: blobs ← manifests ← pointers`](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers),
 namespaced under [`§3 experimentHash`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
 as an opaque pinned prefix: build the three object classes and two write protocols so the only race in the whole
 store is a single one-object atomic pointer flip.
 
 ### Deliverables
+
 - `blobs/<sha256>` — write-once content-addressed payloads keyed by `sha256(bytes)`, PUT with
   `If-None-Match: *`, `412` treated as success (the bytes already exist by definition).
 - `manifests/<sha256>` — write-once **canonical-CBOR** manifests keyed by `sha256(canonical-cbor(manifest))`,
@@ -389,6 +332,7 @@ store is a single one-object atomic pointer flip.
   `mutant/orphan-budget-omitted` (drops the full-horizon failure term) MUST turn that corpus red.
 
 ### Validation
+
 1. Run this suite at **Register 3** against the **single-node kind cluster's live MinIO** — the standing
    Phase-62 HA service on the Phase-60 retained PV, never an in-process or local S3 fake, so the evidential
    weight of every item below is unambiguous. Write the same blob twice through the gateway under
@@ -432,27 +376,17 @@ store is a single one-object atomic pointer flip.
 > amoebius result.
 
 ### Remaining Work
+
 Remove the tracked canonical CBOR, SHA, and noncanonical CBOR copies. Retain or create the independently
 reviewed logical input, independently review the write-budget table, generate reference/mutated bytes during
 the run, and rerun the Phase-69 gate.
 
 ## Sprint 69.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Workflow/Runtime.hs`,
-`src/Amoebius/Workflow/Orchestrator.hs`,
-`src/Amoebius/Workflow/Worker.hs`, and
-`src/Amoebius/Workflow/Resources.hs` (kind-indexed runnable sources and structural
-runtime-metadata sources consumed by the shared capacity provisioner) (built and validated)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the orchestrator's `command` → artifact → `event` round trip returns the artifact
-by its manifest SHA byte-for-byte, and a retried produce or a redelivered consume is observed once downstream
-through the Phase-67 dedup. The numbered `### Validation` list below adds the no-election audit and the
-one-short provision cases.
-**Docs to update**: `documents/engineering/daemon_topology_doctrine.md` (§4, §5),
-`documents/engineering/content_addressing_doctrine.md` (§5), `DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`daemon_topology_doctrine.md §4 — worker daemons, N, unelected`](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)
 and [`content_addressing_doctrine.md §5 — confluence`](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely):
 wire the Phase-67 client, its topology algebra, and the Sprint-64.1 store into an orchestrator/worker runtime
@@ -460,6 +394,7 @@ whose command → artifact → event round-trip is idempotent by construction �
 artifact reference a content address.
 
 ### Deliverables
+
 - An orchestrator daemon that, using the Phase-67 topology algebra, produces a workflow `command` on the
   derived topic and consumes the corresponding `event`; it is an unelected worker daemon, not a leader.
 - Worker daemons that consume the command, write a content-addressed artifact to the store (Sprint 69.1), and
@@ -476,6 +411,7 @@ artifact reference a content address.
   four-instance all-running standby epoch before any command is produced.
 
 ### Validation
+
 1. Run the command → event round-trip and assert the artifact the worker wrote is fetched by the orchestrator
    by its manifest SHA and matches byte-for-byte.
 2. Assert a retried produce and a redelivered consume are collapsed by the Phase-67 broker-side dedup so
@@ -495,25 +431,17 @@ artifact reference a content address.
    exactly the four provisioned identities and envelopes.
 
 ### Remaining Work
-None. Delivered and validated by the Phase-69 gate.
+
+The pre-reset record said `None` and claimed delivery/validation by the old Phase-69 gate; both statements are
+permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row,
+predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 69.3: Pulsar Failover standby takeover + leak-free teardown (gate) ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `dhall/test/round_trip_failover.dhall`,
-`test/spec/runtime/FailoverSpec.hs`, `src/Amoebius/Workflow/Resources.hs`, and
-`tools/content_store_workflow_live.py` (built and validated)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the gate `InForceSpec` stores and fetches by manifest SHA, the critical-window
-kill promotes the specific name-ordered standby read from the Pulsar admin API, the resulting HEAD matches a
-fresh no-fault run, and the topology tears down leak-free and re-runs under a distinct `experiment-hash`
-namespace. The numbered `### Validation` list below carries the assertions and mutants.
-**Docs to update**:
-`documents/engineering/pulsar_client_doctrine.md` (§5, §7),
-`documents/engineering/daemon_topology_doctrine.md` (§5, §5.2),
-`documents/engineering/chaos_failover_doctrine.md` (§12), `DEVELOPMENT_PLAN/README.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`pulsar_client_doctrine.md §5 — the capability surface (the Failover subscription)`](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek),
 [`§7 — at-least-once with broker-side dedup`](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default),
 and [`daemon_topology_doctrine.md §5 / §5.2 — single-instance and coordination, delegated not elected`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected):
@@ -521,6 +449,7 @@ prove that killing the active worker yields standby takeover through Pulsar's ow
 bespoke amoebius election — and assemble the phase gate.
 
 ### Deliverables
+
 - Worker daemons attached over a Pulsar **Failover** subscription (Phase 67): one active, the rest
   name-ordered hot standbys; single-writer liveness is the subscription, safety is the store's ETag-CAS commit
   point plus the typed `AdvancePredicate` (Sprint 69.1), so even a bounded failover overlap cannot regress
@@ -553,6 +482,7 @@ bespoke amoebius election — and assemble the phase gate.
   the live gate cannot start from a raw bound topology.
 
 ### Validation
+
 1. Run the gate topology end-to-end on the linux-cpu kind cluster and assert the artifact is fetched by manifest
    SHA and matches. **Land the kill inside the critical window** — after the active worker's store write and
    before its `event` ack, the window verified from broker/consumer state — and assert live that (a) the
@@ -589,31 +519,20 @@ bespoke amoebius election — and assemble the phase gate.
 > broker/bookie consensus is delegated, not re-proven. The
 > Failover-subscription worker shape is proven over WebSockets in the sibling `infernix` — sibling evidence,
 > not an amoebius result; this sprint proves it over the native protocol for the first time. The eventual
-> reclaim of test-flagged durable bytes is the elevated harness's prerogative (Phase 48), kept out of the
+> reclaim of test-flagged durable bytes is the elevated live harness's prerogative (Phase 90), kept out of the
 > normal teardown path.
 
 ### Remaining Work
+
 Remove the tracked no-fault HEAD, generate the comparison run at gate time, independently review or replace
 the failover-rank table, and rerun under universal artifact hygiene.
 
 ## Sprint 69.4: Register-2.5 workflow failover takeover under simulated fault ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/spec/sim/WorkflowFailoverSimSpec.hs` (the
-`IOSimPOR` property harness), `test/spec/sim/WorkflowSimScenario.hs` (the injected
-kill/redelivery/partition schedule), and the same `Amoebius.Workflow.Runtime` state transitions exercised by
-the live suite (built and validated).
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the real `io-classes` workflow runtime, run under `IOSimPOR` against the modeled
-fake Pulsar and MinIO with the gate's critical-window kill, redelivery, and partition faults injected, holds
-leak-free takeover and no-double-application on every explored schedule. The numbered `### Validation` list
-below carries the properties, mutants, and Register-2.5 ledger.
-**Docs to update**:
-`documents/engineering/deterministic_simulation_doctrine.md` (the Register-2.5 workflow failover simulation
-entry), `documents/engineering/chaos_failover_doctrine.md` (§12 — the Register-2.5 ledger feeding the same
-proven/tested/assumed ledger as the live gate), `DEVELOPMENT_PLAN/system_components.md`, this document.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`deterministic_simulation_doctrine.md §4 — Register 2.5 — where deterministic simulation sits`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits) at
 **Register 2.5** on the **`none`** substrate: run the *real* Sprint-64.2/32.3 workflow runtime and its
 Failover-takeover path — the daemon/workflow code written against `io-classes` — under `IOSimPOR` against the
@@ -622,6 +541,7 @@ live gate asserts (leak-free standby takeover; no double-application), now **det
 adversarial schedules instead of a single live wall-clock trace.
 
 ### Deliverables
+
 - A `WorkflowFailoverSimSpec` that binds `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` (Sprints 59.2–38.3)
   to the Phase 16 Sprint 16.2 `Amoebius.Sim.Env` substrate through `io-classes` and drives it under `IOSimPOR` — the
   production code path, not a simulation-only re-implementation.
@@ -643,6 +563,7 @@ adversarial schedules instead of a single live wall-clock trace.
   survives the promotion), each of which some explored `IOSimPOR` schedule MUST falsify.
 
 ### Validation
+
 1. Run `WorkflowFailoverSimSpec` under `IOSimPOR` and assert that, on every explored schedule with the
    `kill-worker-mid-workflow` fault, a name-ordered standby takes over the Failover subscription and the run is
    leak-free — no orphaned consumer, producer, or artifact handle outlives the promoted standby. Assert the
@@ -662,11 +583,15 @@ adversarial schedules instead of a single live wall-clock trace.
 > here are exactly the ones the live gate asserts; the register is lower because the environment is modeled.
 
 ### Remaining Work
-None. Delivered and validated by the Phase-69 gate.
+
+The pre-reset record said `None` and claimed delivery/validation by the old Phase-69 gate; both statements are
+permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row,
+predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/content_addressing_doctrine.md` — record that §2 (the three-tier store + the two write
   protocols) is realized in `amoebius-store`, namespaced under an opaque `experiment-hash` prefix, with the §3
   `experimentHash` derivation and seed kernel explicitly deferred to Phase 80; note §5 confluence is consumed
@@ -692,6 +617,7 @@ None. Delivered and validated by the Phase-69 gate.
   schedules, feeding the same proven/tested/assumed ledger as the live gate.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-69 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 69's gate substrate (linux-cpu) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register the `amoebius-store` and `amoebius-runtime` packages and
@@ -699,6 +625,7 @@ None. Delivered and validated by the Phase-69 gate.
   Phase-69 design-first rows.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker; Phase 69 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton, sprint format, the doctrine-citation rule, the register + honesty + one-substrate disciplines)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election; single-instance delegated to k8s/etcd; the content-addressed store)

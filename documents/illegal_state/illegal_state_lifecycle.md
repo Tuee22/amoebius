@@ -23,7 +23,7 @@ be observed as having happened. The numbering belongs to
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Scope](#1-scope)
@@ -45,7 +45,7 @@ flowchart LR
   g2 -->|"linked extension source only"| g3
   g2 -->|"anything the decoder admits"| ps
   ps -->|"anything the seal admits"| rg
-  rg -->|"anything the golden admits"| le
+  rg -->|"anything the Haskell semantic predicate admits"| le
 ```
 *Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Lifecycle is the only slice reaching the extension-source check, and no entry has the provisioning seal as its primary locus. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
@@ -123,8 +123,10 @@ that the observed condition actually resolves (owned by [`readiness_ordering_doc
 
 **Validation-locus:** `gadt-decode` (the closed `Readiness` union with no `AfterDuration` arm is a Haskell
 `data` type on the Phase-34 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
-type` fixture can exercise it and "wait N then assume ready" is a GHC compile-fail golden, not an editor-time
-`dhall type` failure, per the dhall-typecheck-vs-gadt-decode caveat of [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force); a
+type` fixture can exercise it. A tracked Haskell negative declaration materializes the attempted "wait N then
+assume ready" module only beneath `.build/test-corpora/**` and requires GHC to reject it for the separately
+pinned Haskell diagnostic identity; this is not an editor-time `dhall type` failure, per the
+dhall-typecheck-vs-gadt-decode caveat of [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force); a
 start-handle likewise exists only once its dependency's `Ready` edge does, and the total `mkBringUpOrder` fold
 returns `Left` on a cycle or an undeclared dependency) + `live-effect` (that the observed condition actually
 resolves in bounded time — the port becomes responsive — owned by the reconciler and the chaos doctrine). Per
@@ -158,10 +160,12 @@ actually ran and that prod actually converged on the promoted `Release`, owned b
 doctrines). Per the validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md),
 orthogonal to the foreclosure layer above.
 
-**Validated instance:** Phase 71 compiled the closed `Environment`/opaque `EvidenceWitness` boundary and
-exercised it live. Runtime- and Protocol-missing fixtures returned their specific refusal tags and produced no
-pointer mutation; the tested Runtime witness produced the only Prod advance. The live wiring is tested, never
-proven; Phase 48 later automates topology derivation rather than owning this illegal-state boundary.
+**Phase-71 target instance — NOT VALIDATED:** the gate must compile the closed
+`Environment`/opaque-`EvidenceWitness` boundary and exercise it live. Runtime- and Protocol-missing fixtures
+must return their specific refusal tags and produce no pointer mutation; the Runtime witness must produce the
+only Prod advance. Even successful live wiring would be tested, never proven; Phase 48 owns only the pure
+test-workflow/evidence algebra, while Phase 90 owns later live topology derivation and execution after the
+Phase-49 barrier.
 
 ### 3.43 An unmonitored workflow or extension (or an unauthenticated monitoring surface)
 
@@ -196,7 +200,8 @@ and the `routes[].workflow`-vs-`name` reconciliation; `runtime-checked` residue 
 `gadt-decode` (the coverage and non-vacuousness folds and the `routes[].workflow`-vs-`name` reconciliation return `Left` at decode) + `provision-seal` (the monitoring feasibility Σ fold returns a `ProvisionError`
 after binding and before any `ProvisionedSpec` exists) + `rendered-artifact-oracle` (that the emitted monitoring surface renders
 behind the Keycloak-owned edge with no `Public` listener — the no-backdoor-ingress analog of
-[§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress), caught by a golden test on the rendered manifest rather than a
+[§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress), checked by a separately reviewed
+Haskell semantic predicate over the rendered object projection rather than by tracked expected bytes or a
 cluster) + `live-effect` (that the SLO is actually met, the alert fires, the named `/metrics` series exists, and
 a `SubjectScoped` filter actually excludes another subject's data). Per the validation-locus axis of
 [`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the foreclosure layer above.
@@ -227,8 +232,10 @@ to the invariant it stresses. **Owner:**
 (a phantom-typed reference that cannot name a component outside the enclosing spec) +
 [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (the `NonEmpty` schedule).
 **Layer:** `type-foreclosed` at the Haskell IR — a `FaultTarget` referencing an undeclared component has no
-inhabitant (a compile-fail golden, like the cross-tenant [§3.8](./illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)) —
-with a `runtime-checked` residue only that the injected fault *actually* perturbs the live component as modeled.
+inhabitant. A tracked Haskell negative declaration generates the attempted module beneath
+`.build/test-corpora/**` and checks the exact GHC refusal, using the same discipline as the cross-tenant
+[§3.8](./illegal_state_security.md#38-cross-tenant-references-and-literal-secrets). The only
+`runtime-checked` residue is that the injected fault *actually* perturbs the live component as modeled.
 
 **Validation-locus:** `gadt-decode` — because Dhall has no opaque or dependent types (the caveat of
 [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
@@ -319,10 +326,13 @@ generated projection of that data. **Owner:**
 (the renderer). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (a `NonEmpty` required field) + [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
 (a pinned identity per step rather than a fetched address). **Layer:** `type-foreclosed` — an interpolated
-shell fragment has no constructor — with a `rendered-artifact-oracle` residue pinning the emitted Dockerfile. Pinning the emitted Dockerfile is `decode-foreclosed`, a total predicate over the rendered file.
+shell fragment has no constructor — with a `rendered-artifact-oracle` residue applying a separately reviewed
+Haskell semantic predicate to the emitted Dockerfile. No expected Dockerfile bytes are tracked; any serialized
+projection is materialized only beneath `.build/test-corpora/**`. The total predicate is `decode-foreclosed`.
 
-**Validation-locus:** `dhall-typecheck` — the absent `RunShell`/`Url` arms are a Dhall-schema closure, so an
-authored shell fragment fails `dhall type` with no binary involved.
+**Validation-locus:** `dhall-typecheck` — the absent `RunShell`/`Url` arms are a generated Dhall-schema
+closure, so an external/untracked operator value containing a shell fragment fails `dhall type` with no live
+infrastructure; the Haskell negative declaration and oracle remain the tracked sources.
 
 ### 3.77 A worker naming an extension its own binary does not link
 

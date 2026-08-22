@@ -19,7 +19,7 @@ numbers entering them come from, owned by
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [4. The total fold: `fits`, `carve`, `place`, and the nesting](#4-the-total-fold-fits-carve-place-and-the-nesting)
@@ -72,12 +72,14 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Target fold and honesty boundary. The base subset is implemented and Register-1 validated in Phase 9; the physical residue that the kernel and kubelet honour the caps remains runtime-checked.*
+*Target fold and honesty boundary. Phase 9 owns Register-1 validation of the base subset; the physical residue
+that the kernel and kubelet honour the caps remains runtime-checked. No current result is asserted here.*
 
-**Base-fold validation status.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md)
-builds `Amoebius.Capacity.Types`, `Amoebius.Capacity.Fold`, and `Amoebius.Dsl.Topology` with exhaustive-pattern
-warnings promoted to errors. Fifteen direct negative/twin pairs, two real Dhall positives, four sampled
-properties with independent witness recomputation, and 19 seeded mutants validate the base CPU, memory,
+**Base-fold target contract — NOT VALIDATED.** The
+[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) must build `Amoebius.Capacity.Types`,
+`Amoebius.Capacity.Fold`, and `Amoebius.Dsl.Topology` with exhaustive-pattern warnings promoted to errors.
+Fifteen direct negative/twin pairs, two real Dhall positives, four sampled properties with independent witness
+recomputation, and 19 seeded mutants must challenge the base CPU, memory,
 logical ephemeral, pod-slot, CSI-attach, finite CPU-policy, eligibility, and fixed/elastic placement axes.
 The storage, execution/runtime, accelerator, and provider-root extensions described below remain
 **UNVERIFIED** until Phases 28–29; live enforcement is not established by this result.

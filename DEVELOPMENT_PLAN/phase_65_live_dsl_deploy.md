@@ -1,36 +1,32 @@
 # Phase 65: Live DSL deploy via the replicas=1 control-plane daemon
 
-> **Purpose**: Turn the pre-cluster-proven DSL into a live deploy — hand the mandatory reconciler Lease from
+> **Purpose**: Turn the human-approved pre-cluster DSL into a live deploy — hand the mandatory reconciler Lease from
 > the observed bootstrap host to the Deployment-`replicas=1` control-plane daemon, then have that control-plane daemon
 > decode one `.dhall` and reconcile the platform plus a trivial app onto a real cluster, with single-writer
 > exclusion delegated to k8s/etcd and no amoebius election.
 > **Read this if**: phase 65 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 65 delivers the live DSL deploy via the replicas=1 control-plane daemon; its design is owned by [preflight_validation_doctrine.md](../documents/engineering/preflight_validation_doctrine.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-09 with `python3 tools/live_dsl_deploy_gate.py --reuse-fresh-live`;
-ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — the control-plane daemon's sealed whole-deployment envelope](#resource-provision--the-control-plane-daemons-sealed-whole-deployment-envelope)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 65.1: The control-plane daemon — a Deployment replicas=1, single-instance from k8s/etcd ⏸️](#sprint-651-the-control-plane-daemon--a-deployment-replicas1-single-instance-from-k8setcd-)
@@ -44,191 +40,93 @@ ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-64 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 64, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Scope amendment — 2026-08-13 (first live enforcement of secret admission).** This is the first phase that
-applies an `InForceSpec` against a live cluster, so it is where
-[vault_pki_doctrine.md §3.4](../documents/engineering/vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect)
-is first enforced: admission collects the `SecretRef`s the decoded spec names and refuses **before any
-effect** if any is absent from Vault, naming every missing reference rather than the first. A spec naming no
-secret is admissible with no Vault interaction at all, which is what leaves Phases 36–39 independent of
-Phase 60. The paired positive — the same spec admitted after the Phase-61 prompt CLI writes the secret — is
-this claim's other half; neither alone is evidence.
-
-**Invalidated historical record:**
-
-**Done.** All four sprints are implemented and the Phase-65 Register-3 gate is sealed. It ran after the
-Phase 64 gate (Keycloak-owned ingress) on the **linux-cpu** substrate: the retained single-node
-`kind` cluster after Phases 35–43, with the full standing shape assembled by the registry/base-image work
-(Phase 56), Vault/PKI (Phase 61), platform services (Phases 41–42), and Keycloak-owned edge (Phase 64), all
-applied through the Phase-58 typed renderer + SSA reconciler onto Phase-60 retained storage. The delivered
-stateless Haskell control-plane daemon holds the Kubernetes Lease, serves its health and admin endpoints, reconciles the
-pinned platform-plus-app fixture with exact first-pass and no-op second-pass evidence, survives replacement,
-and fronts the four admin endpoint families. Kubernetes/etcd supplies Lease exclusion; the live audit evidence
-proves the bootstrap-host-holder → observed release/absence → control-plane-holder handoff authorizes no
-overlapping writers.
-
-Every hardware substrate can always run the `linux-cpu` lane. Accelerator support is additive and never
-removes that baseline. When a validation needs a pristine Linux host, use Incus on Linux or Linux-CUDA, Lima
-on Apple, and WSL2 on Windows.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase makes the DSL **run live**. Its design half is already discharged in the pre-cluster band
-(Registers 1–2, substrate `none`): the typed spec gates — dhall-typecheck, the Dhall typechecker (Phase 25), and gadt-decode,
-the in-process `Dhall.inputFile auto` decoder (Phase 26) — the illegal-state corpus and its per-entry
-validation-locus ledger (Phase 27), the capacity/topology folds (Phase 9), the capability→provider→shape
-binder (Phase 30) and opaque provision seal (Phase 31), the pure `renderAll` goldens (Phase 33), and the
-`chain`/`--dry-run` plan (Phase 34) were all
-authored and proven **in-process, with no cluster**. Phase 65 adds the runtime residue: the in-cluster
-**control-plane daemon** — the `ControlPlaneDaemon` arm of `InClusterRole` ([daemon_topology_doctrine.md §2](../documents/engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)), decoded from the pod's frame config — deployed as a Kubernetes **Deployment with `replicas=1`** — exactly one Lease-held
-authority at a time, despite possible replacement-Pod overlap, holding total cluster + secret authority — that decodes the already-proven `InForceSpec` and runs the
-idempotent `discover → diff → enact → re-observe` reconcile loop driving a **real** linux-cpu cluster toward
-it, applying the standard platform stack plus a trivial app through the Phase-58 reconciler to convergence with
-a leak-free teardown.
+**Target capability — NOT VALIDATED.** This phase is to make the DSL **run live** only after every predecessor
+and the Phase-49 hardware-free barrier have external human approval. It may consume the Phase-25/26 typed
+projection and decoder, Phase-27 illegal-state corpus, Phase-9 capacity/topology folds, Phase-30/31 binding and
+provision seal, Phase-33 `renderAll`, and Phase-34 chain/dry-run semantics only through those exact approvals;
+none is currently discharged. The live target is the in-cluster **control-plane daemon** — the
+`ControlPlaneDaemon` arm of `InClusterRole`
+([daemon_topology_doctrine.md §2](../documents/engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)) — deployed as a Kubernetes
+**Deployment with `replicas=1`** and exactly one Lease-held mutation authority at a time despite replacement-Pod
+overlap. It must decode the approved `InForceSpec`, run `discover → diff → enact → re-observe`, drive a real
+linux-cpu cluster toward it, apply the approved standard platform plus a trivial app through the Phase-58
+reconciler, converge, and tear down without leaks.
 
 Single-writer authority for that control-plane daemon is **delegated to k8s/etcd**: the Deployment controller converges
 to desired `replicas=1` and reschedules on node loss, but update/replacement may transiently expose distinct old,
 terminating, and replacement Pod UIDs. Strict at-most-one-writer is therefore a Kubernetes `Lease` (the
 etcd-backed client-go leader-election
-object) — **never a bespoke amoebius election, no ranked-failover rule, no warm-standby candidate population, no signed-commit-log protocol**. The control-plane daemon is **stateless at the pod level** — it holds no PVC; its
-durable state is exclusively the Vault-enveloped MinIO bucket — so a lost pod loses nothing. As a regression
-belt, the pre-cluster negative corpus of Phase 27 is re-run against this live deploy path and each fixture still
-fails to type-check or decode — but that type/decode result was **already proven in the pre-cluster band**;
-here it is a live guard, not the proof. Full app tenancy (own namespace, `<app>/<bucket>` ObjectStore,
+object) — **never a bespoke amoebius election, no ranked-failover rule, no warm-standby candidate population,
+no signed-commit-log protocol**. The target daemon is **stateless at the pod level** — it holds no PVC; its
+durable state is exclusively the Vault-enveloped MinIO bucket. As a regression guard, the future gate must
+re-run the approved Phase-27 Haskell negative corpus through this live deploy path and require every case to
+fail at its pinned type/decode locus. That is a live inheritance check, not a new proof. Full app tenancy (own namespace, `<app>/<bucket>` ObjectStore,
 in-namespace Sql) is deliberately deferred to Phase 66; the app here is trivial.
 
-The initial ownership transition is explicit. Phase 58 acquired the deployment-global mandatory reconciler
-Lease under the bootstrap-host holder before any host-driven apply and kept renewing it through Phases 39–42.
-In this phase the host applies the control-plane daemon Deployment while retaining that Lease; the new Pod may load and
-finish prerequisites but cannot mutate or advertise `/readyz`. The host then stops minting actions, drains
+The target initial ownership transition is explicit. After future Phase-58/59 approval, the bootstrap-host
+holder retains the deployment-global reconciler Lease until this phase's handoff. It must apply the
+control-plane daemon Deployment while retaining that Lease; the new Pod may load and finish prerequisites but
+cannot mutate or advertise `/readyz`. The host then stops minting actions, drains
 in-flight effects, releases the Lease, and freshly observes its holder absent/released. Only the authenticated
 control-plane daemon Pod UID may acquire the same object. Its held-Lease readback plus `/readyz` Serving condition retires
 the host's direct-apiserver authority. Lost responses, stale resourceVersions, watch gaps, or replacement-Pod
 UID changes fail closed and re-observe; they never infer handoff from time.
 
-**Phase scope:** one cohesive claim — *the pre-cluster-proven language deploys to a real cluster, written by exactly one holder of the Lease*. Single-writer exclusion is delegated, not re-implemented here.
+**Phase scope:** one cohesive target claim — *the independently approved pre-cluster language deploys to a real cluster, written by exactly one holder of the Lease*. Single-writer exclusion is delegated, not re-implemented here.
 
-**Substrate:** linux-cpu — the single-node `kind` cluster from Phases 35–43; no apple, linux-cuda, or windows
+**Substrate:** linux-cpu — the single-node `kind` cluster and services targeted by Phases 55–64; no apple, linux-cuda, or windows
 substrate is exercised by this phase's gate.
 
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 64](phase_64_keycloak_ingress.md) — keycloak-owned ingress, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 65` passes on a single-node linux-cpu `kind` cluster: one `.dhall`,
-delivered through the control-plane daemon's admin REST surface, reconciles the standard platform-service stack plus a
-trivial app to convergence and tears down leak-free. [Gate integrity](#gate-integrity) carries the rest.
-
-```mermaid
-flowchart LR
-  %% register: orientation
-  s0["Sprint 65.1: The control-plane daemon — a Deployment replicas=1…"]
-  s1["Sprint 65.2: Live reconcile of the platform + a trivial app from one .dhall"]
-  s2["Sprint 65.3: Phase gate harness — live deploy + the pre-cluster negative…"]
-  s3["Sprint 65.4: The admin REST surface — vault init/unseal, dhall update…"]
-  gate["the phase 65 gate"]
-  s0 -->|"produces what the next consumes"| s1
-  s1 -->|"produces what the next consumes"| s2
-  s2 -->|"produces what the next consumes"| s3
-  s3 -->|"the last seam the gate closes over"| gate
-```
-*Orientation. The seams Phase 65 delivered in order; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns the sealed apparatus.*
-
-**Gate-integrity clauses ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate is hardened as follows and passes only when every clause below holds:
-
-- **Attribution via an OS-boundary observer (§M.5, forecloses the decorative-control-plane cheat).** The gate
-  harness (`test/spec/integration/LiveDslDeployGate.hs`) runs under a kubeconfig whose RBAC (a committed
-  `test/fixture/live_dsl_deploy/harness-rbac.yaml`) grants it exactly: `create`/`get`/`delete` on the control-plane daemon's own
-  `Deployment`, `ServiceAccount`, and `RoleBinding`, and cluster-wide read-only (`get`/`list`/`watch`) —
-  **and no write verb on any platform/app object kind**. Every platform-service and trivial-app object mutation
-  observed in the gate window is read from the **apiserver audit log** (the OS-boundary observer — never a
-  trace the control-plane daemon emits about itself) and each such write's `user.username` /
-  `user.extra.authentication.kubernetes.io/…` MUST resolve to the control-plane daemon pod's in-cluster ServiceAccount;
-  the audit log MUST record **zero** platform/app-object writes attributed to the harness principal. A run in
-  which the harness principal issued any platform/app write, or in which the control-plane daemon SA issued none, fails.
-- **History capacity is a gate precondition, not assumed retention.** Before the first platform/app mutation,
-  the harness reads the Phase-55 `ControlPlaneStorageDemand` enforcement and proves Event/audit retention
-  covers the complete declared gate observation window and that its rotated-byte peak remains inside
-  `EngineSystemReserve`. A too-short history or over-carve configuration refuses before the positive run;
-  absence of an audit record can therefore never be explained away as retention loss.
-- **Concrete representative set (§M.7).** The Phase-62/42 service set reconciled by this fixture is exactly:
-  stack: **MetalLB, the `distribution` registry re-homed onto MinIO's S3 driver, MinIO (distributed), Pulsar
-  (broker + ZooKeeper metadata store + BookKeeper bookies), Prometheus+Grafana, the Percona operator, and the
-  named per-consumer Patroni Postgres clusters with pgAdmin**; the "trivial app" is exactly the
-  single-service Deployment+Service+HTTPRoute of `dhall/examples/platform_plus_trivial_app.dhall`. No other
-  service set satisfies the gate.
-- **oracle-pinned oracle (§M.1).** The positive fixture `dhall/examples/platform_plus_trivial_app.dhall`, the
-  expected per-pass enact sets (`test/fixture/live_dsl_deploy/expected-enact-pass1.json`,
-  `…/expected-enact-pass2.json`), the perturbation target list (`…/perturb-targets.txt`), and the negative
-  corpus's expected dhall-typecheck/gadt-decode rejection-tag table (`…/negative-expected-tags.tsv`, hand-authored,
-  independent of the control-plane daemon's own decoder output — §M.3) are all **committed in this phase's oracle-pinning sprint before `Daemon.hs`/`Reconcile.hs`/`Deploy.hs` exist**; none is regenerated from implementation output. The
-  admin-surface oracles of [Sprint 65.4](#sprint-654-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-)
-  — `test/golden/admin/reach-matrix.tsv`, `test/golden/admin/admission-tags.tsv`, and the paired
-  `test/fixture/admin/secrets-capability/` corpus — are pinned on the same terms, before `AdminApi.hs` exists.
-- **Committed seeded mutant (§M.2).** The gate names **≥1 committed seeded mutant** that MUST turn it red:
-  the **dropped-effect** mutant `Reconcile.hs::enact` that returns success without issuing the SSA patch (so
-  the perturbed platform component is never restored) — committed under
-  `test/fixture/live_dsl_deploy/mutants/enact-noop.patch` and re-run each gate, asserted red because pass-1 restores
-  nothing. A second **effect-swap** mutant (the harness principal, not the control-plane daemon SA, issues the writes)
-  MUST also go red via the attribution clause above. [Sprint 65.4](#sprint-654-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-)
-  adds three more that MUST each turn the gate red: `persist-password` (dropped effect), `reach-any` (guard
-  weakening on the seal-critical reach), and `admit-unproven-secret` (guard weakening on `dhall update`
-  admission).
+**Depends on:** [Phase 64](phase_64_keycloak_ingress.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 65`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-**What the acceptance run must show.** The run is a **Register-3** live-infrastructure check, and the
-control-plane daemon it exercises is a **Deployment `replicas=1`** whose single-writer authority is delegated to
-k8s/etcd, with **no amoebius election**. Before that control-plane daemon's first mutation the gate observes the exact
-bootstrap-host holder drain and release, holder absence at a fresh resourceVersion, and then acquisition by
-the authenticated control-plane daemon Pod UID; the apiserver audit and watch history must admit no overlapping holder
-and no overlapping mutation authority. The pre-cluster (Phase-27) negative corpus is re-run against that same
-live deploy path and each fixture still fails at dhall-typecheck or gadt-decode, so the live path is shown to inherit the
-type discipline rather than to re-establish it.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive target claim — *the independently approved pre-cluster language deploys to a real cluster, written by exactly one holder of the Lease*. Single-writer exclusion is delegated, not re-implemented here. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 65` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 64 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**The `.dhall` reaches the cluster through one door.** The operator drives `vault init/unseal`, then
-`dhall update`, then `kv put/get/list/delete`, and nothing else. The operator password is never persisted;
-every seal-critical verb attempted from a non-node-local reach is refused before any Vault contact; and every
-named `SecretRef` whose capability probe fails is rejected before any reconcile, each with its own distinct
-reason tag rather than a generic refusal.
+## Resource provision — UNRESOLVED
 
-**Secret-admission criteria — added 2026-08-13.** This phase is the first to apply an `InForceSpec` against a
-live cluster, so it is where the admission contract of
-[vault_pki_doctrine.md §3.4](../documents/engineering/vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect)
-is first enforced. It is proven as paired cases, never as a single assertion:
-
-- **The refusal.** A spec naming a `SecretRef` absent from Vault is refused **before any effect** — the
-  external observer records zero applied objects and zero provider calls — and the refusal names every
-  missing reference, not the first. A spec naming two absent secrets that reports one is a failure.
-- **The paired positive.** The identical spec, after the Phase-61 prompt CLI writes those secrets, is
-  admitted and reconciles. Neither half alone is evidence: the refusal alone cannot distinguish *checked and
-  refused* from *broken*, and the positive alone cannot distinguish *checked* from *never looked*.
-- **The vacuous case.** A spec naming no `SecretRef` is admitted with Vault sealed. This proves the check
-  ranges over what a spec names rather than gating every apply on Vault — the property that keeps Phases
-  25–29 independent of Phase 60.
-- **Presence, not value.** The admission path is exercised with a token carrying existence but not read
-  capability on the secret, and still admits.
-- **Seeded mutant.** A mutant that treats an unresolvable reference as present must turn the refusal case
-  red.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
-
-## Resource provision — the control-plane daemon's sealed whole-deployment envelope
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 This phase applies — as consumed background, not a newly adopted doctrine — the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
@@ -313,16 +211,16 @@ refuse before the first apiserver or object-store mutation.
 
 ## Doctrine adopted
 
-- [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — live DSL deploy via the replicas=1 control-plane daemon provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
-- [`preflight_validation_doctrine.md`](../documents/engineering/preflight_validation_doctrine.md)
+- [`workflow_calculus_doctrine.md` §3 — Teardown is a type obligation](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation) — live DSL deploy via the replicas=1 control-plane daemon provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
+- [`preflight_validation_doctrine.md` §2 — The `Check` algebra](../documents/engineering/preflight_validation_doctrine.md#2-the-check-algebra)
   — *the `Check` validation algebra*: the pure-functional free GADT (short-circuit `Bind`; accumulating
   `AllOf`/`Both`/`independently`) **is** the mechanism of this phase's `dhall update` admission gate, and its
   `SubtreeValidated` proof tree is what makes an unproven `SecretRef` refuse before reconcile. Adopted here;
   the credential/host/quota probe instances (AWS `DryRun` + STS join, SSH reach + hardware match) are adopted
   by [phase_76](phase_76_provider_deploy_checkpoint.md) / [phase_79](phase_79_provider_dynamic_nodes.md).
-- [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)
+- [`daemon_topology_doctrine.md` §3 — The control-plane daemon](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)
   — *the control-plane daemon*: every cluster has exactly one brain holding total authority over the cluster
-  and its secrets. Per [§3.1](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
+  and its secrets. Per [`daemon_topology_doctrine.md` §3.1 — "Exactly one pod" is a k8s/etcd property, not an amoebius election](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
   ("exactly one pod" is a k8s/etcd property, not an amoebius election), the control-plane daemon is a **Deployment `replicas=1`**, **stateless** at the pod level (no PVC; durable state exclusively the Vault-enveloped MinIO
   bucket), and single-writer authority is **delegated to k8s/etcd** through the mandatory `Lease`, never a
   bespoke election. This phase also performs the one-way authority handoff from the observed Phase-58
@@ -330,56 +228,39 @@ refuse before the first apiserver or object-store mutation.
   supplies exclusion, while amoebius proves it never mints overlapping mutation capabilities. This phase
   delivers that role live; prodbox's root single-node control-plane behaviour is
   **sibling evidence, not an amoebius result**.
-- [`daemon_topology_doctrine.md §5`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
+- [`daemon_topology_doctrine.md` §5 — Single-instance and coordination — delegated, not elected](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
   — *single-instance and coordination — delegated, not elected*: amoebius builds no ranked-failover rule, no
   signed-commit-log election, and no warm-standby candidate population; re-deriving consensus etcd already
   provides would add a second coordination plane to prove correct and deadlock at cold-start. This phase honors
   that posture — the only intra-cluster single-writer machinery is the Deployment plus its mandatory `Lease`;
   the typed bootstrap release/acquire sequence is a client protocol around that Lease, not another election.
-- [`daemon_topology_doctrine.md §6`](../documents/engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine)
+- [`daemon_topology_doctrine.md` §6 — The shared daemon spine](../documents/engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine)
   — *the shared daemon spine*: the control-plane daemon runs the `load → prereq → acquire → ready → serve → drain → exit`
   lifecycle with bounded concurrent connections and scoped threads (no unscoped `forkIO`), serves `/healthz` / `/readyz` / `/metrics`, logs
   structured JSON, and takes no `PATH` or environment-variable precedence; readiness is a witnessed condition,
   never a `threadDelay` or filesystem marker. The spine is **proven in prodbox** — inherited design intent, not
   a tested amoebius result.
-- [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
-  — *the illegal-state-unrepresentable contract*: dhall-typecheck, gadt-decode, bind/expand, the Phase-31 provision seal,
-  and Phase-33 `renderAll` were discharged in-process in the pre-cluster band. This phase runs the **runtime residue** — the live path must follow decoded IR → bind/expand → `planInfrastructure` → explicit
+- [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
+  — *the illegal-state-unrepresentable contract*: typecheck, decode, bind/expand, the provision seal, and
+  `renderAll` must already have independently approved predecessor receipts from the pre-cluster band. This
+  phase owns only the **runtime residue** — the live path must follow decoded IR → bind/expand → `planInfrastructure` → explicit
   already-materialized observation (or validated/CAS-enacted batch and receipt) → `ProvisionContext` →
   `provision` → opaque `ProvisionedSpec` → `renderAll`; an incompatible target returns `Left` before effects.
-  The live gate proves the apiserver
-  admits the sealed desired objects without re-establishing the pure contract itself.
+  The future live gate observes whether the apiserver admits the sealed desired objects; it cannot prove the
+  apiserver or re-establish the pure contract itself.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 65.1: The control-plane daemon — a Deployment replicas=1, single-instance from k8s/etcd ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-and exact runtime-storage/control-plane-state seals are implemented and live-validated.
-**Implementation**: `src/Amoebius/ControlPlane/Daemon.hs` (the in-cluster control-plane daemon
-role + the shared daemon spine); `src/Amoebius/ControlPlane/Reconcile.hs` (the `discover → diff → enact →
-re-observe` loop wrapping the Phase-58 typed reconciler and its observed-Pod/runtime-storage normalization);
-`src/Amoebius/ControlPlane/AuthorityHandoff.hs` (bootstrap-holder drain/release/readback and control-plane daemon
-acquire); `src/Amoebius/Capacity/RuntimeStorage.hs` (shared component-role/layout and scope-indexed
-node-accounting fold), plus `app/amoebius/Amoebius/Entry/ControlPlane.hs` and `tools/live_dsl_deploy_runtime_helper.py` — delivered.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: on the single-node linux-cpu cluster the control-plane daemon is a Deployment `replicas=1`
-with no PVC, serves the daemon spine's health endpoints, survives Pod deletion without losing durable state,
-and holds the Lease alone at every resource version. The numbered validation list below states each observed
-condition, the handoff sequence, and the readback that proves no data loss.
-**Docs to update**:
-`documents/engineering/daemon_topology_doctrine.md`,
-`documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon),
 [`§3.1`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election),
 [`§5`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected),
@@ -389,6 +270,7 @@ authority and runs the reconcile loop, with single-writer authority delegated to
 bootstrap-host-to-control-plane Lease handoff, and no amoebius election.
 
 ### Deliverables
+
 - **The collapse of `app/singleton/` into the one executable.** The control-plane daemon branch reached its pod by being
   a second `executable` stanza — `amoebius.cabal:933`, whose `Main.hs` parses no arguments at all, because the
   file that was executed *was* the role selection. It becomes the `ControlPlaneDaemon` arm of the decoded
@@ -396,7 +278,7 @@ bootstrap-host-to-control-plane Lease handoff, and no amoebius election.
   phase-ordinal identities that rode along go with it: the `/phase33-artifacts/` and `/phase33-dhall/` paths,
   the six `phase32-`/`phase33-` object names, and the `amoebius-phase33-singleton` field manager minted at
   `ControlPlane/Daemon.hs:138`
-  ([legacy_tracking_for_deletion_archive.md](legacy_tracking_for_deletion_archive.md#one-binary-many-roles--2026-08-17)).
+  ([legacy_tracking_for_deletion.md §4](legacy_tracking_for_deletion.md#4-host-image-and-lift-violations)).
   Closing this also retires the transitional half of Phase 43's search-path gate check, which can only fail by
   the tree regaining a second executable.
 - A control-plane daemon deployed as a **generated typed `Deployment replicas=1`** by the Phase-58
@@ -431,10 +313,11 @@ bootstrap-host-to-control-plane Lease handoff, and no amoebius election.
   re-observes with no authority. Holder identity/object UID/resourceVersion and every observation enter the
   fingerprint; unknown or changed state restarts the read-only prefix.
 - Secret authority fused to the role (operates root Vault as the single in-cluster writer) and the admin-REST
-  control surface stub through which the operator `pb` client later drives the cluster — promoted to the real
+  control surface stub through which the operator's Haskell command-mode client later drives the cluster — promoted to the real
   four-endpoint surface by [Sprint 65.4](#sprint-654-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-).
 
 ### Validation
+
 1. The control-plane daemon manifest is a `Deployment replicas=1` with no PVC and carries no amoebius election
    controller, no ranked-failover configuration, and no standby Pod; the Pod comes up, runs the daemon spine,
    and serves `/healthz`, `/readyz`, and `/metrics`. During initial handoff, assert the Pod
@@ -478,25 +361,15 @@ bootstrap-host-to-control-plane Lease handoff, and no amoebius election.
 > before enabling the control-plane daemon. Cross-cluster gateway migration remains owned by the multi-cluster phase.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 65.2: Live reconcile of the platform + a trivial app from one `.dhall` ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-second-pass audit/enact set after fresh discovery, routes the trivial app through the Phase-64 edge, and
-restores the retained stack during teardown.
-**Implementation**: `dhall/examples/platform_plus_trivial_app.dhall` (the positive
-deploy fixture); `src/Amoebius/ControlPlane/Deploy.hs` (the control-plane daemon's platform + trivial-app reconcile
-entry), with live effects in `tools/live_dsl_deploy_runtime_helper.py` — delivered.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: one `.dhall` decodes through `Dhall.inputFile auto` and the control-plane daemon reconciles
-the standard platform stack plus a trivial single-service app to ready on the linux-cpu cluster, then tears
-down leaving the shared stack as found. Because Phases 35–43 leave that stack pre-converged, the numbered
-validation list below fixes the perturbation, the audit-log enact oracles, and the sweep scope.
-**Docs to update**: `documents/engineering/dsl_doctrine.md`,
-`documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
 at the runtime layer: the typed spec gates guard the **live** deploy, but decoded IR is never reconciled
 directly. The control-plane daemon must bind/expand it, derive the conditional infrastructure result, authenticate the
@@ -507,6 +380,7 @@ effects. This gate proves the apiserver admits what the complete pure pipeline s
 itself was proven in-process in the pre-cluster band; here it is exercised, not re-established.
 
 ### Deliverables
+
 - A positive deploy `.dhall` composing the standard platform-service stack (Phases 41–42) and a **trivial**
   single-service app — deliberately narrower than the Phase-66 tenancy projection (no per-app namespace,
   ObjectStore, or in-namespace Sql fanout), but still carrying a complete app Pod/rollout envelope.
@@ -529,6 +403,7 @@ itself was proven in-process in the pre-cluster band; here it is exercised, not 
   swept.
 
 ### Validation
+
 1. Before the first pass the harness deletes the components named in
    `test/fixture/live_dsl_deploy/perturb-targets.txt` — at minimum one platform `Deployment` and its `Service`, for
    example Prometheus's — so a pre-converged Phase-62/42 stack cannot ride the gate (§M.6). The first pass
@@ -551,28 +426,15 @@ itself was proven in-process in the pre-cluster band; here it is exercised, not 
    checking `Ready`.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 65.3: Phase gate harness — live deploy + the pre-cluster negative corpus as a live regression guard ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-attribution, durable replacement, leak-free teardown, ledger, and mutation checks are sealed.
-**Implementation**: `test/spec/integration/LiveDslDeployGate.hs` (linux-cpu spin-up / reconcile /
-teardown + the negative regression assertions); `test/spec/integration/RuntimeStorage.hs`
-(planned-slot→observed-Pod-UID readback, SplitRuntime backing boundaries, node scope/domain/ownership
-equality, reservation/observed no-double-debit, and alias controls); the reused Phase-27 negative corpus
-under `dhall/examples/illegal_*.dhall` (re-run, not re-authored), `test/spec/live/ControlPlaneDaemonLiveSpec.hs`,
-`tools/live_dsl_deploy_live.py`, and `tools/live_dsl_deploy_gate.py` — delivered.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the harness deploys the platform plus trivial app from one `.dhall` on linux-cpu
-under the perturbation and attribution regime of Sprint 65.2, tears down leak-free, then re-runs the Phase-27
-negative corpus against the same live deploy path and emits a **Register-3** ledger naming the live
-substrate. The numbered list below pins the entry point and its rejection oracle.
-**Docs to update**:
-`DEVELOPMENT_PLAN/substrates.md`, `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md`
-(flip the Phase-65 status when the gate passes).
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
 assemble the phase's single live acceptance gate — one `.dhall` deploys the platform + a trivial app on
 linux-cpu and the live apiserver admits the rendered manifests — and, as a regression guard, re-run the
@@ -581,41 +443,43 @@ against the live path, and the positive fixtures still decode. That type/decode 
 the pre-cluster band; here the guard confirms the live deploy path never admits an illegal spec.
 
 ### Deliverables
-- The positive gate: the Sprint-60.2 platform + trivial-app deploy driven to ready by the control-plane daemon and torn
-  down leak-free, expressed as a test-topology `.dhall` with a teardown obligation.
+
+- The positive gate: the Sprint-60.2 platform + trivial-app deploy driven to ready by the control-plane daemon
+  and torn down leak-free, declared in Haskell with any test-topology `.dhall` rendered beneath `.build/**`.
 - The negative regression guard: the Phase-27 corpus (a bad PVC↔PV pairing, a Keycloak-bypassing open ingress, a
   product named in application logic, and the capacity/topology/bounded-storage set) **re-run** against the
   live deploy path (the same control-plane daemon `Deploy.hs` entry the positive fixture used), each asserted to fail at
-  dhall-typecheck or gadt-decode **with its specific foreclosure tag matching the oracle-pinned hand-authored oracle `test/fixture/live_dsl_deploy/negative-expected-tags.tsv`** (each row: fixture → expected `dhall type` error or
-  `DecodeError` tag, authored independently of the control-plane daemon's decoder — §M.3/§M.8), and each paired with a
+  dhall-typecheck or gadt-decode **with its specific foreclosure tag matching a separately authored Haskell
+  expectation** (each case maps to an expected `dhall type` error or `DecodeError` tag independently of the
+  control-plane daemon's decoder — §M.3/§M.8), and each paired with a
   positive that differs only in the foreclosed dimension — **never re-establishing** the type discipline, only
   guarding that the deploy path inherits it.
-- **Committed seeded mutants (§M.2):** at least `test/fixture/live_dsl_deploy/mutants/enact-noop.patch` (the
+- **Applied Haskell changed-subject mutants (§M.2):** at least `enact-noop` (the
   dropped-effect `Reconcile.hs::enact`, red because the perturbed component is never restored) and an
   attribution mutant (harness principal issues the writes, red because the audit clause detects a non-control-plane
-  writer) — both committed and re-run each gate, each asserted to turn the gate red.
-- The **oracle-pinned oracle bundle** committed before any implementation exists:
-  `dhall/examples/platform_plus_trivial_app.dhall`, `expected-enact-pass1.json`, `expected-enact-pass2.json`,
-  `perturb-targets.txt`, `negative-expected-tags.tsv`, and `harness-rbac.yaml` (under `test/fixture/live_dsl_deploy/`).
+  writer) — both applied to the Haskell production subject and re-run, each asserted to turn the gate red.
+- The **independent Haskell oracle bundle** is reviewed before the subject; every Dhall/JSON/text/YAML form it
+  needs is generated beneath the candidate's `.build/**` root and is never tracked source or authority.
 - A **Register-3** proven/tested/assumed ledger recording the live-enforcement result (the apiserver admitted
   the rendered manifests) and marking the deferred surfaces — full app tenancy (Phase 66), and the
   cross-cluster gateway-migration correspondence (the multi-cluster phase) — as UNVERIFIED, never green.
-- The committed resource-boundary corpus: one exact-fit topology plus one-short and omission cases for the
+- The Haskell-declared resource-boundary corpus: one exact-fit topology plus one-short and omission cases for the
   control-plane daemon envelope, rollout overlap, runtime component roles/layout backings and scope-indexed node
   domain/ownership/grouping, admission gateway, and all five `ControlPlaneState` entry kinds and
   their `StorageBudgetId`/retention/failure terms. Each negative also asserts zero audit writes and zero MinIO
   mutation.
 
 ### Validation
+
 1. After perturbation, the positive `.dhall` restores and brings the platform + trivial app up (first-pass
    audit-log enact set matches `expected-enact-pass1.json`, all writes attributed to the control-plane daemon SA), the app
    is reachable through the Keycloak edge, and teardown leaves no leaked resources over the run-unique label
-   set; the committed `enact-noop` mutant turns this red.
+   set; the applied Haskell `enact-noop` mutant turns this red.
 2. "The live deploy path" is pinned to the identical entry point the positive fixture used, foreclosing the
    host-side re-run cheat (§M.3): every Phase-27 negative fixture is submitted through the exact same control-plane daemon
    spec-ingestion/`Deploy.hs` entry, never a separate host-side CorpusSpec decoder, and each yields a
-   structured dhall-typecheck (`dhall type` error) or gadt-decode (`DecodeError` tag) rejection whose emitted tag equals the
-   committed `negative-expected-tags.tsv` oracle for that fixture (§M.8) — a bare "it failed" does not satisfy
+   structured dhall-typecheck (`dhall type` error) or gadt-decode (`DecodeError` tag) rejection whose emitted
+   tag equals the separately authored Haskell expectation for that case (§M.8) — a bare "it failed" does not satisfy
    this. That no fixture reaches the apiserver is proven rather than assumed (§M.5): across the whole corpus
    run the audit log shows zero platform/app-object writes and the pre/post full-cluster `resourceVersion`
    snapshot is equal, so cluster state is byte-for-byte unchanged. The positive fixtures decode, and the
@@ -626,31 +490,15 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
    Pod/controller/object-store projection is equal to the private provisioned value.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 65.4: The admin REST surface — `vault init/unseal`, `dhall update`, secret KV-CRUD ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-Vault init/unseal, Dhall update, and Vault KV CRUD; reach and four capability pairs are live-validated.
-**Implementation**: `src/Amoebius/ControlPlane/AdminApi.hs` (the four endpoint families,
-their reach classes, and the `dhall update` admission gate), `pb/pb/admin.py` (the **admin-REST client**
-mode of the two-mode `pb` CLI, deferred to "the control-plane daemon" by
-[phase_55](phase_55_bootstrap_coordinator_kind.md) Sprint 55.3 and owned here), `pb/pb/cli.py`, and
-`app/amoebius/Amoebius/Entry/ControlPlane.hs` — delivered. This sprint promotes Sprint 65.1's admin-REST
-**control-surface stub** to the real surface; it does not re-implement the Sprint-55.1 Argon2id→AEAD unlock
-envelope, the Phase-61 Vault client, or the Sprint-60.2 reconcile loop — it is the operator-facing channel
-into all three.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: an operator drives the whole post-handoff sequence — `vault init/unseal`, then
-`dhall update`, then `kv put/get/list/delete` — through the amoebius NodePort admin surface alone, and the
-cluster reconciles toward the delivered `InForceSpec`. The numbered list below states the non-persistence
-observer, the reach matrix, and the paired admission negatives that make that claim falsifiable.
-**Docs to update**:
-`documents/engineering/bootstrap_sequence_doctrine.md`, `documents/engineering/substrate_doctrine.md`,
-`documents/engineering/vault_pki_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
-`DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`bootstrap_sequence_doctrine.md` §5 — the admin control plane: the CLI ↔ the control-plane daemon REST API](../documents/engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)
 in full, read with [`vault_pki_doctrine.md` §5 — the root cluster single-node password-encrypted unseal](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)
 and [`dsl_doctrine.md` §6 — secrets are names, never values](../documents/engineering/dsl_doctrine.md#6-secrets-are-names-never-values):
@@ -677,6 +525,7 @@ LB→Envoy→Keycloak door — so "Keycloak owns all *wild* ingress"
 is untouched by its existence.
 
 ### Deliverables
+
 - **`vault init/unseal`** — authenticated by the operator password (the Argon2id→AEAD unlock material of Sprint
   30.1, cited not restated), filling the *pluggable pre-Vault unseal seam* that doctrine leaves open. The
   password is transported and never persisted; `unseal` against an already-unsealed Vault is a typed no-op,
@@ -692,17 +541,16 @@ is untouched by its existence.
   in Vault before uploading the `.dhall`; this command transports the value into envelope storage, while the
   specification continues to contain only its name
   ([`vault_pki_doctrine.md` §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)).
-- **The `pb` admin-REST client mode** — the second mode of the two-mode Python CLI, completing the deferral
-  Phase 55 Sprint 55.3 records. It is a client of this surface and adds no second control path.
+- **The Haskell command-mode admin-REST client** — the post-handoff operator client. It shares the one
+  amoebius executable, consumes this surface, and adds no second control path; `pb` has already ended at exec.
 - **The reach-class enforcement** as typed structure rather than deployment convention, so a seal-critical verb
   has no constructor reachable from a non-node-local source.
-- **oracle-pinned oracles (§M.1)**, authored before `AdminApi.hs` exists: `test/golden/admin/reach-matrix.tsv`
-  (hand-authored (endpoint family × reach class) → admit/refuse plus the exact refusal tag, independent of the
-  implementation — §M.3); `test/golden/admin/admission-tags.tsv` (one row per foreclosed admission cause with
-  its distinct reason tag); and the paired corpus `test/fixture/admin/secrets-capability/` — four
+- **independent Haskell oracles (§M.1)**, authored before `AdminApi.hs` exists: a reach matrix mapping endpoint
+  family × reach class to admit/refuse plus the exact refusal tag, an admission-tag inventory with one row per
+  foreclosed cause, and a Haskell paired corpus for secrets capability — four
   negative/positive pairs (absent secret · SSH key that cannot connect · host short of its declared resources ·
   cloud credential lacking permission or quota), each pair differing **only** in the foreclosed dimension (§M.8).
-- **Committed seeded mutants (§M.2)**, committed and re-run, each MUST turn Validation red: (i) a
+- **Applied Haskell changed-subject mutants (§M.2)**, generated and re-run, each MUST turn Validation red: (i) a
   *dropped-effect* mutant `persist-password` that writes the operator password to the container
   filesystem (must fail the §M.5 non-persistence observer); (ii) a *guard-weakening* mutant
   `reach-any` that accepts a seal-critical verb over any reach (must fail the reach matrix); and
@@ -719,6 +567,7 @@ is untouched by its existence.
 > control-plane daemon lose readiness or act on stale authority.
 
 ### Validation
+
 1. **The post-handoff operator sequence, end to end.** After Sprint 65.1's observed handoff, drive `vault
    init/unseal` → `dhall update` → `kv put/get/list/delete` through the NodePort surface only, and assert the
    cluster converges to the delivered `InForceSpec` via the Sprint-60.2 loop. The operator password crosses
@@ -742,11 +591,13 @@ is untouched by its existence.
    tenant-admin and parent→child uses UNVERIFIED; a ledger reporting either as proven fails the gate.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/daemon_topology_doctrine.md` — the §3 / §3.1 control-plane-control-plane and the §5
   delegated-single-instance honesty notes flip from "design intent for the live-DSL-deploy phase" to a
   delivered Deployment-`replicas=1` control-plane daemon with its Register-3 ledger attached; record that single-instance
@@ -761,22 +612,24 @@ None.
   "Phase 0 design intent" to a delivered four-endpoint surface with its Register-3 ledger attached; the §7
   planning-ownership orientation records that the whole surface — seal-critical verbs included — lands with the
   control-plane daemon in this phase, since no control-plane daemon exists to host an endpoint before it.
-- `documents/engineering/substrate_doctrine.md` — the §6 bootstrap coordinator-contract note that `pb`'s second mode is "a
-  later phase" resolves to Sprint 65.4.
+- `documents/engineering/substrate_doctrine.md` — the §6 pre-binary handoff contract leaves every
+  post-handoff administrative verb to this phase's Haskell command mode.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-65 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — confirm the Phase-65 linux-cpu gate row (the replicas=1 control-plane daemon, no
   election).
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/ControlPlane/{Daemon,Reconcile,Deploy,AdminApi}.hs`
   as Phase-65 design-first rows, and re-anchor the in-cluster-control-plane row to the current
   `#3-the-control-plane-daemon` (no election).
-- `DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md` — Sprint 55.3's deferred `pb` admin-REST client mode
-  now names Sprint 65.4 as its owner.
+- `DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md` — its exec handoff now names Sprint 65.4 as owner
+  of the Haskell admin-REST client.
 - `DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md` — its post-handoff child admin-REST bring-up can now
   name Sprint 65.4 in `Blocked by`.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker and phase order this document serves
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (the replicas=1 control-plane daemon)
@@ -790,8 +643,8 @@ None.
   plane (CLI ↔ control-plane daemon REST) delivered by Sprint 65.4, and the [§4](../documents/engineering/bootstrap_sequence_doctrine.md#4-the-host-daemon--control-plane-daemon-handoff) handoff point at which it is exposed
 - [Vault / PKI Doctrine](../documents/engineering/vault_pki_doctrine.md) — the password-encrypted unseal and the
   `SecretRef`-is-a-name contract the admin endpoints front
-- [phase_55](phase_55_bootstrap_coordinator_kind.md) — the two-mode `pb` CLI whose admin-REST client mode Sprint
-  24.3 defers to the control-plane daemon and Sprint 65.4 owns
+- [phase_55](phase_55_bootstrap_coordinator_kind.md) — the bootstrap-to-Haskell exec handoff that precedes
+  the command-mode admin client Sprint 65.4 owns
 - [phase_61](phase_61_vault_pki.md) — the root Vault, unlock-material envelope, and built-in Vault client the
   admin endpoints call
 - [phase_77](phase_77_provider_child_bringup.md) — the parent→child bring-up that drives a child through this

@@ -3,7 +3,7 @@
 > **Purpose**: Define the host substrates amoebius runs on (apple / linux-cpu / linux-cuda / windows),
 > the virtualized substrates that synthesize a Linux host (Incus / Lima / WSL2), the host worker nodes that
 > reach substrate-specific hardware as host subprocesses, the no-environment-variable / no-`PATH` lazy
-> tool-ensure contract, and the substrate-specific bootstrap coordinator CLI that builds and hands off to the binary —
+> tool-ensure contract, and the bounded pre-binary Python handoff that builds and execs the binary —
 > while the Apple-Metal host worker's headless, on-host, **no-VM** build/run shape (fixed Metal bridge +
 > runtime MSL compilation) is owned by [apple_metal_headless_builds.md](./apple_metal_headless_builds.md).
 > **Read this if**: amoebius has to run on a particular host, or a host-specific capability has to be reached.
@@ -19,12 +19,12 @@ does not own the cluster engine that runs on it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, pb/README.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is diagnostic only and never current validation evidence. Target doctrine remains normative; current state is owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. The substrate is a fact about the host, not a knob](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)
@@ -32,7 +32,7 @@ does not own the cluster engine that runs on it, owned by
 - [3. The no-environment / no-`PATH` lazy tool-ensure contract](#3-the-no-environment--no-path-lazy-tool-ensure-contract)
 - [4. Virtualized substrates: synthesizing a Linux host where the host is not Linux](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
 - [5. Host worker nodes: substrate-specific hardware that cannot be containerized](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)
-- [6. The bootstrap coordinator contract: a Python CLI ensures a toolchain, builds the binary, hands off](#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)
+- [6. The pre-binary handoff contract](#6-the-pre-binary-handoff-contract)
 - [7. The LoadBalancer backend follows the materialized compute engine and provider](#7-the-loadbalancer-backend-follows-the-materialized-compute-engine-and-provider)
 - [8. The node inventory: the single owner of hosts, capacity, and taints](#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)
 - [9. Planning ownership](#9-planning-ownership)
@@ -40,11 +40,12 @@ does not own the cluster engine that runs on it, owned by
 
 ---
 
-**Pure inventory read-side status.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
-validates closed kubelet filesystem layouts, OCI/runtime metadata routing, provider-root template identities,
-accelerator family/profile ownership, peer-graph requirements, and raw/reserved/allocatable VRAM arithmetic in
-Register 1. The 2026-08-21 reseal adds a direct missing-peer/exact-connected twin. Detection, materialization,
-attachment, and observed readback remain unverified; ledger `external-run-reference`.
+**Target inventory read-side boundary — NOT VALIDATED.** The eventual
+[Phase-29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must validate closed kubelet
+filesystem layouts, OCI/runtime metadata routing, provider-root template identities, accelerator
+family/profile ownership, peer-graph requirements, and raw/reserved/allocatable VRAM arithmetic in Register 1.
+Former reseals and external-run references are permanently invalid evidence. Detection, materialization,
+attachment, and observed readback are later claims.
 
 ## 1. The substrate is a fact about the host, not a knob
 
@@ -199,11 +200,11 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 > coordinated multi-doc work: a new closed substrate + detector and, downstream, a new `EngineRuntime` arm and
 > landing-relation entry.
 
-> **Honesty.** The detector, universal-CPU/provider mapping, `AbsExe` tool boundary, and Python bootstrap coordinator are now
-> implemented. A pristine Incus VM on the physical `linux-cuda` parent exercised clean install, build, handoff,
-> idempotence, divergence repair, and teardown; evidence is retained under
-> `DEVELOPMENT_PLAN/evidence/phase_19`. This is not a complete Phase-55 pass because the full live enforcement
-> inventory remains unfinished. Status and gates live only in
+> **Permanently invalidated history.** Former detector, mapping, tool-boundary, Python-coordinator, Incus-run,
+> and `DEVELOPMENT_PLAN/evidence/phase_19` statements are not current validation evidence. The Python
+> coordinator is condemned legacy rather than an accepted implementation. Every substrate claim is **NOT
+> VALIDATED** until its numerical phase has a reviewed Haskell subject and independent oracle, completes the
+> required gate, and is human-promoted in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -281,14 +282,14 @@ not an operator obligation.
 names and the remedy that clears it, so the whole floor is decidable for a substrate the running
 host is not — which is what lets an apple host check that its plan for windows is well-formed.
 
-**The tables above are authored data, not a description of it.** Each row — the prerequisite id,
-what needs it, the probe that decides it, and the remedy — is declared beside the toolchain
-requirements the same resolver reads, and the floor is evaluated *before* any requirement is
-resolved. A host that cannot support the run is told which prerequisite is missing and what clears
-it, rather than being walked into a resolution failure several requirements deep on a symptom.
-The decidability claim is a check of its own: every substrate's floor is evaluated on every run,
-including the ones the running host is not, so a plan that has stopped being well-formed for
-windows fails on an apple host that will never execute it.
+**The tables above are reader-facing specification, never resolver input.** Each prerequisite id,
+dependency relation, probe, and remedy is declared as a reviewed Haskell `HostFloor` value; an independently
+authored Haskell oracle states the expected closed set. The resolver reads only those compiled values. Editing
+this Markdown cannot add, remove, or alter a prerequisite. The floor is evaluated *before* any requirement is
+resolved, so a host that cannot support the run is told which prerequisite is missing and what clears it rather
+than being walked into a later symptom. The decidability claim is a check of its own: every substrate's Haskell
+floor value is evaluated on every run, including those the running host is not, so a plan that has stopped being
+well formed for windows fails on an apple host that will never execute it.
 
 **How an ensured tool is acquired, and why the package manager is not the default.** A
 package-manager install cannot be verified against a publisher digest, because the package manager
@@ -410,16 +411,10 @@ is which layers exist on which hardware and which provider supplies each. The di
 new substrate is then an *extension* satisfying a contract rather than an edit to a union
 ([`extension_conformance_doctrine.md` §8](./extension_conformance_doctrine.md#8-a-hardware-substrate-is-an-extension-too)).
 
-**What is built today, stated honestly.** Phase 51 delivered the frame layer as a three-constructor closed set —
-Linux on the metal, an Apple host's Linux guest, and a Windows host's Linux distribution — with the
-substrate-to-frame and frame-to-engine relations as *total wildcard-free* functions, and a lift context
-distinguishing running on the host, inside a frame through its resolved entry point, and inside a container
-through a resolved engine. That is the calculus's closed layer set and total relation, at one substrate family.
-Phase 5 has since delivered the general calculus above it, including the per-transition witness type this
-paragraph used to record as missing: a witness is produced by an observation and has no other introduction
-rule. What remains doctrine rather than delivered code is the Incus row above, and the live observations
-themselves — no phase yet reads a running frame or a responding engine, so every witness so far is produced
-from an observation a suite handed it. Status lives only in the
+**Target frame boundary — NOT VALIDATED.** The plan must establish the three-constructor frame set, total
+wildcard-free substrate/frame/engine relations, and observation-only transition witnesses through the
+numerically owned Haskell contracts. No former implementation or suite result is retained here, and none of
+the provider rows or live observations is current validation evidence. Status lives only in the
 [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 This provider mapping is mandatory for pristine-host gates: **Incus on either Linux hardware substrate,
@@ -503,9 +498,9 @@ a host worker*.
 > **Honesty.** Lima, WSL2, and Incus are implemented VM providers in the `hostbootstrap` seed. The headless,
 > on-host Apple build/run shape is **proven in the sibling jitML project** (its implemented fixed-Metal-bridge
 > path) and the sibling `infernix` library **removed** its own legacy Tart path in favour of it — that is
-> sibling evidence for physical Metal. Phase 89 now implements the Lima/brew plan, private disk/capacity fold,
-> and headless bridge/build/lifecycle contracts, but its Linux `x86_64` scoped gate leaves live Apple/Lima/brew
-> and Metal **UNVERIFIED**. Under [§1.1](#11-the-natural-architecture-rule) that scoped gate cannot close them
+> sibling evidence for physical Metal. Phase 89 owns the future Lima/brew plan, private disk/capacity fold,
+> and headless bridge/build/lifecycle contracts, but is **NOT VALIDATED**. A Linux `x86_64` scoped gate cannot
+> establish live Apple/Lima/brew or Metal behavior. Under [§1.1](#11-the-natural-architecture-rule) it cannot close them
 > later either: an `apple` claim is provable only on Apple Silicon, whose natural architecture is `arm64`.
 > There is no amoebius Tart code, now or planned. Every hardware substrate always retains `linux-cpu` at its
 > own natural architecture; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
@@ -593,91 +588,98 @@ flowchart TD
 
 ---
 
-## 6. The bootstrap coordinator contract: a Python CLI ensures a toolchain, builds the binary, hands off
+## 6. The pre-binary handoff contract
 
-The **bootstrap coordinator** is the one pre-binary tool amoebius owns — a **Python CLI, not a shell script** — and it
-does as little as possible: get a built amoebius Haskell binary onto the host and then get out of the way,
+The **pre-binary handoff** is the one pre-binary tool amoebius owns — bounded Python under `pb/**`, not a
+shell script and not the Haskell `BootstrapCoordinator` role. It does as little as possible: get a built
+amoebius Haskell binary onto the host and then get out of the way,
 because the no-`PATH` / no-env, lazy-tool-ensure discipline ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract))
-cannot start until there is a Haskell binary to enforce it. It is Python for two reasons: it must run on a
-**bare host before any Haskell toolchain exists**, and it is **unified with the operator CLI** — one Python
-CLI (`pb`) with two modes, **bootstrap coordinator** (bare host → build → `exec` the Haskell binary, this section) and
-**admin-REST client** (the operator CLI that drives the control-plane daemon after handoff,
-[bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
+cannot start until there is a Haskell binary to enforce it. It is Python only because it must run on a
+**bare host before any Haskell toolchain exists**. It has no Python-owned public command surface: after the
+minimum platform distinction required to select its toolchain adapter, every user argv—including empty,
+help, version, bootstrap, validation, unknown, and future commands—is opaque. `pb` establishes the pinned
+toolchain beneath `.build/**`, builds the one source-bound binary, and `exec`s it with argv unchanged. Haskell
+owns host-floor decisions and the entire post-handoff command mode
+([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
 amoebius owns **no shell script**; the earlier `bootstrap.sh` is retired
 ([../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md)).
 
-`pb` is a **distribution**, installed with `pipx` so its own dependencies live in their own environment and
-never enter a project's. That gives it one further surface, and exactly one: an explicit `update` command
-that reinstalls the distribution from its source of truth. It is not a third mode, because it acts on the
-tool rather than on a host or a cluster, and it is explicit because an installer that silently updates itself
-mid-run makes the run's own provenance unanswerable. Nothing else consults or mutates the installation.
+The target handoff runs from the checkout using the externally supplied host Python floor and the standard
+library only. It creates no `pipx`, Poetry, virtualenv, package cache, or dependency environment in a user
+home or global prefix; any migration-only Python environment is run-owned beneath `.build/**` and cannot be a
+gate input. Current third-party dependencies and packaging machinery remain `LTD-SRC-008` debt rather than a
+target installation contract. A running invocation cannot update itself: doing so would make the run's own
+provenance unanswerable.
 
-**Observed implementation.** [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md) has a footprint
-with the shape below; whether it is validated is recorded in the
-[tracker](../../DEVELOPMENT_PLAN/README.md) and nowhere here. The
-distribution is Poetry-built with an in-project virtualenv; the command surface is a Click group registered
-at import, so it is enumerable rather than discovered, and an unknown verb resolves to no command instead of
-being guessed at. A maintainer surface exists beside the consumer one and resolves to nothing outside a
-development checkout, re-checking that in its own body rather than relying on being hidden. One
-subprocess choke point owns every route to a child process — argv only, never a shell, an absolute
-executable refused before the kernel sees it, an environment overlaid rather than replaced, and output
-mirrored live and captured at once — and it owns `exec` too, because a choke point with a second door is
-not one. Every invocation is classified as a probe or a mutation and recorded, which is what makes the
-idempotence claim an observation: a converged second pass carries probes and no mutation at all.
+**Observed implementation.** The tracked `pb/**` footprint is migration debt under `LTD-SRC-008`; file
+presence and lexical inspection do not establish the role above. Phase 0 must close that row with a
+deny-by-default Haskell AST/import/effect grammar and external effect observation before Phase 49 can emit a
+candidate. [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md) then validates the runtime behavior
+of the already-bounded handoff. The tracker records both phases as **NOT VALIDATED**.
 
-Phase 50 delivers the pre-binary mode and the closed surface both modes share; Phase 65 Sprint 65.4 owns the
-second mode's live validation in `pb/pb/admin.py` — node-local Vault init/unseal plus Dhall update and KV
-CRUD against the control-plane daemon — which remains UNVERIFIED until that phase runs. This does not change the universal baseline: every hardware substrate can always run
+Phase 65 owns the Haskell command-mode administrative client —
+node-local Vault init/unseal plus desired-spec update and KV CRUD against the control-plane daemon. Both phases
+are **NOT VALIDATED**. This does not change the universal baseline: every hardware substrate can always run
 `linux-cpu` at its own natural architecture ([§1.1](#11-the-natural-architecture-rule)), and a pristine Linux
 host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The Phase-76 provider-parent instance follows the same rule. The actual Pulumi 3.228.0 binary was resolved by
-absolute path and observed through `strace` with zero child-environment entries, while the pure engine boundary
-also requires an absolute AWS-plugin path and rejects `PATH`, `PULUMI_*`, and `AWS_*`. The provider `up` and
-AWS-plugin `execve` remain UNVERIFIED because the configured AWS identity is invalid. This does not alter the
+The Phase-76 provider-parent target follows the same rule: its eventual contract must resolve the provider
+engine and plugin by absolute path, independently observe an empty child environment, and reject `PATH`,
+`PULUMI_*`, and `AWS_*` authority. Phase 76 is **NOT VALIDATED**; former invalid-identity traces cannot
+establish provider execution. This does not alter the
 universal route: every hardware substrate can always run the linux-cpu parent at its own natural
 architecture, with pristine Linux supplied by Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The contract, on the canonical Apple lane (`pb bootstrap` mode):
+For a user invocation whose unchanged argv will later be interpreted by Haskell as `bootstrap`, the canonical
+Apple establishment path is:
 
-1. **Ensure the package manager.** On Apple that is **Homebrew**. Homebrew is the toolchain *root* — it
-   cannot be installed *through* a resolved host tool because there is no prior package manager to install
-   it (the bootstrap coordinator's Homebrew-ensure is, by design, a verified no-op when `brew` is present and a fail-fast
-   with the install instruction otherwise). So the bootstrap coordinator ensures `brew` **pre-binary**.
-2. **Ensure `ghcup` via the package manager** (`brew install ghcup`).
-3. **Resolve and install the current compatible GHC and Cabal** via `ghcup`. Authored requirements select a
-   compatible release channel/range; resolved versions and executable paths are written only to the run-local
-   toolchain record described by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
-4. **Build the project Haskell binary** (`cabal build`).
-5. **Hand off to the binary.** The bootstrap coordinator's final act is to `exec` the freshly built binary's `bootstrap`
-   subcommand with its mandatory distro flag — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]` (`replicas` defaults to `1` on `kind`). From here the binary takes over: it installs further build tools
-   and dependencies through the package manager **as needed and by full path** ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)) — including, on Apple,
+1. **Select the direct establishment adapter.** Python may inspect only the minimum OS/architecture facts
+   needed to select the pinned publisher artifact, verification material, and contained path convention. It
+   does not probe, require, install, or prescribe Homebrew, `apt`, `winget`, or any other host-floor tool; it
+   does not turn absence into user guidance or a command verdict.
+2. **Materialize a verified `ghcup` beneath the repository toolchain root.** The selected direct adapter
+   acquires the pinned publisher artifact directly into `.build/toolchain/<os>-<arch>/bootstrap/**`; it does
+   not invoke a package manager, use a global package prefix, or place an executable in ambient `PATH`.
+3. **Resolve and install the current compatible GHC and Cabal** via that absolute `ghcup` path into
+   `.build/toolchain/<os>-<arch>/**` with an explicit isolated home/cache. Authored requirements select a
+   compatible release channel/range; resolved versions and executable paths are written only to the
+   run-local toolchain record described by
+   [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+4. **Build the project Haskell binary** into the contained `.build/**` build root using only those absolute
+   executable and package-store paths.
+5. **Hand off to the binary.** The pre-binary handoff's final act is to `exec` the freshly built binary with
+   the user's original argv unchanged. For example, a user invocation of
+   `pb bootstrap --distro={kind,rke2} [--replicas=n]` reaches Haskell as
+   `amoebius bootstrap --distro={kind,rke2} [--replicas=n]`; Python neither inserts nor interprets the distro
+   flag. From here the binary takes over: it owns the host-floor decision and establishes further build tools
+   and dependencies **as needed and by full path** ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)) — including, on Apple,
    source-building the fixed Metal bridge headless on the host with `/usr/bin/clang` ([§4.4](#44-no-macos-build-vm-apple-builds-are-headless-on-host) / [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), never in a VM — and drives cluster
    bring-up.
 
-The bootstrap coordinator is **substrate-specific** because step 1 differs: brew on apple, the system package manager
-(e.g. `apt`) on linux, `winget` on windows. Steps 2–5 are identical across substrates — the same authored
-compatibility policy, the same per-run resolver, the same build, and the same `bootstrap` hand-off — so the per-substrate surface area is exactly
-the package-manager-root bootstrap and nothing else. The bootstrap coordinator is a **thin driver**: it installs no
-packages beyond the toolchain root, holds no cluster logic, and never runs after the `exec`.
+The pre-binary handoff is **substrate-specific only at its minimal adapter-selection seam**: publisher
+artifact identity, verification material, executable form, and contained path convention may differ by
+OS/architecture. Steps 2–5 retain one closed role across substrates — direct verified acquisition, the same
+authored compatibility policy, the same contained resolver/build, and the same unchanged-argv handoff. The
+pre-binary handoff is a **thin driver**: it makes no package-manager or broader host-floor decision, installs
+no packages beyond the contained Haskell toolchain root, holds no cluster logic, and never runs after the
+`exec`.
 
 ```mermaid
 flowchart TD
 %% register: orientation
-  pb[pb bootstrap coordinator CLI, Python] -->|ensure package-manager root| pm[brew / apt / winget]
-  pm -->|install| ghcup[ghcup]
-  ghcup -->|resolve and install compatible GHC and Cabal| tc[Run-local resolved toolchain on host]
+  pb[pb pre-binary handoff, bounded Python] -->|select direct OS/architecture adapter| ghcup[Verified contained ghcup]
+  ghcup -->|resolve and install beneath .build| tc[Run-local contained GHC and Cabal]
   tc -->|cabal build| bin[amoebius Haskell binary on the host]
-  bin -->|amoebius bootstrap --distro=kind or rke2| handoff[Binary owns the rest: lazy tool-ensure, VM providers, cluster bring-up]
+  bin -->|exec with original argv; Haskell interprets bootstrap flags| handoff[Binary owns the rest: lazy tool-ensure, VM providers, cluster bring-up]
 ```
-*Orientation. Design intent; the bootstrap coordinator contract is owned by [§6](#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off). Everything right of the handoff belongs to the binary, and the Python program does not return.*
+*Orientation. Design intent; the pre-binary handoff contract is owned by [§6](#6-the-pre-binary-handoff-contract). Everything right of the handoff belongs to the binary, and the Python program does not return.*
 
 What the in-binary `bootstrap` command then *does* — substrate detection, VM-provider ensure, single-node
 cluster bring-up, the `--distro` / `--replicas` orchestration — is owned by
 [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md), not here. This section owns only the
 **pre-binary** contract and the hand-off point.
 
-> **Provider clusters have no bootstrap coordinator and no host binary.** A fully managed cluster (e.g. EKS) is
+> **Provider targets have no local pre-binary handoff or host binary.** A fully managed cluster (e.g. EKS) is
 > provisioned over an API from within an existing amoebius cluster; there is no
 > host access, so there is no host worker node and no on-host bootstrap. That path is owned by
 > [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). The highest-level parent is therefore generally a
@@ -729,12 +731,12 @@ surfaces remain UNVERIFIED after its scoped Linux-host gate); the in-cluster CUD
 **Phase 93** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
 and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
-Phase 80 validates deterministic recomputation and Tier-1 executable-engine cache reuse on the retained
-`linux-cpu` platform. It does not establish cross-substrate bit equality, cross-node reuse, production
-llama.cpp inference, or CUDA/Metal cache behavior; those surfaces remain UNVERIFIED. This scoped result does
-not narrow platform availability: every hardware substrate can always run `linux-cpu` at its own natural
-architecture. When a pristine Linux host is required, Linux and Linux-CUDA use Incus, Apple uses Lima, and
-Windows uses WSL2.
+Phase 80 must eventually validate deterministic recomputation and Tier-1 executable-engine cache reuse on its
+declared `linux-cpu` platform; it is currently **NOT VALIDATED**. Its bounded target cannot establish
+cross-substrate bit equality, cross-node reuse, production llama.cpp inference, or CUDA/Metal cache behavior.
+Those exclusions do not narrow the target platform model: every hardware substrate can run `linux-cpu` at its
+natural architecture. When a pristine Linux host is required by a later live gate, Linux and Linux-CUDA use
+Incus, Apple uses Lima, and Windows uses WSL2.
 
 ---
 

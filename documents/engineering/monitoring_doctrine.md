@@ -24,7 +24,7 @@ not own the capacity types that cost passes through, owned by
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Monitoring is a property of what is deployed, not a bolt-on](#1-monitoring-is-a-property-of-what-is-deployed-not-a-bolt-on)
@@ -40,11 +40,11 @@ not own the capacity types that cost passes through, owned by
 
 ---
 
-**Pure cost-model status.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
-executes the finite `MonitoringWorkBudget` evaluation, query/proxy compute, and TSDB temporary-plus-resident
-storage derivation in Register 1. The 2026-08-21 reseal adds a direct one-axis volume-over-budget case beside
-its exact-fit twin. Prometheus behavior and rendered/live correspondence remain unverified; the pure fold
-ledger is `external-run-reference`.
+**Pure cost-model target — NOT VALIDATED.** The
+[Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must execute the finite
+`MonitoringWorkBudget` evaluation, query/proxy compute, and TSDB temporary-plus-resident storage derivation in
+Register 1. It must pair a direct one-axis volume-over-budget case with its exact-fit twin. Prometheus behavior
+and rendered/live correspondence remain unverified; no current fold ledger is asserted here.
 
 ## 1. Monitoring is a property of what is deployed, not a bolt-on
 
@@ -322,7 +322,7 @@ The operator sees monitoring two ways, both on pre-existing surfaces:
 - **The `workflow-health` read-model (typed).** A compacted `workflow-health` Pulsar topic is projected
   through the existing compaction + TableView machinery ([pulsar_client_doctrine.md §5.1](./pulsar_client_doctrine.md#51-two-derived-capabilities-read-model-and-two-deliberately-absent-ones), [daemon_topology_doctrine.md §5.2](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)) as `WorkflowName -> SLOStatus`, the first
   operator-facing TableView beside the internal leader-election one. The control-plane daemon produces the projection
-  inside its existing reconcile loop — no new container — and the operator reads it via a `pb workflow health`
+  inside its existing reconcile loop — no new container — and the operator reads it via an `amoebius workflow health`
   verb on the control-plane daemon admin REST ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)).
 
 ```text
@@ -454,7 +454,7 @@ fabric's invariants are rejected.
   ([network_fabric_doctrine.md](./network_fabric_doctrine.md)). So in-cluster parent→child telemetry is
   foreclosed by the same isolation invariant that makes cross-tenant references unrepresentable
   ([illegal_state_catalog.md §3.10](../illegal_state/illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree)). The accepted cross-forest viewer is the out-of-forest
-  human operator, whose laptop reaches each cluster's own Grafana and `pb` admin plane through Keycloak — a
+  human operator, whose laptop reaches each cluster's own Grafana and `amoebius` admin surface through Keycloak — a
   privileged admin path, not a forest data edge.
 
 **What it forecloses.** A spawned child can be unhealthy indefinitely with its in-cluster parent structurally
@@ -565,14 +565,13 @@ not a flat "type-foreclosed":
 
 ---
 
-### Historical Phase-63 bounded observability result (invalidated)
+### Permanently invalidated Phase-63 observability history
 
-Phase 63 live-tested a descriptor-derived Prometheus provision with finite evaluation, retention, query
-concurrency, series, sample, range, timeout, and retained-storage operands. The sole query proxy returned 200
-for an in-bound request and 429 for the one-over series request; NetworkPolicy denied Grafana's direct query
-to Prometheus. Three platform targets were active, derived rules were loaded, retained TSDB high-water stayed
-inside its usable bound, and Grafana completed its PostgreSQL-backed migrations. This is a tested
-`linux-cpu` result, not a proof that every future SLO is satisfied.
+A pre-reset Phase-63 report described a descriptor-derived Prometheus provision with finite evaluation,
+retention, query concurrency, series, sample, range, timeout, and retained-storage operands. It also reported
+bounded proxy responses, a NetworkPolicy denial, active platform targets, loaded derived rules, bounded TSDB
+high-water, and completed Grafana migrations. This history is diagnostic only and permanently invalidated; it
+does not establish a current `linux-cpu` result or satisfy any future SLO.
 
 ---
 
@@ -580,12 +579,12 @@ inside its usable bound, and Grafana completed its PostgreSQL-backed migrations.
 
 Phase order, status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). The monitoring obligation types — including
-the `UnitMonitor` of [§2.4](#24-per-execution-unit-obligation--boundexecutionunitmonitor) — land in **Phase 25**,
+the `UnitMonitor` of [§2.4](#24-per-execution-unit-obligation--boundexecutionunitmonitor) — are assigned to **Phase 25**,
 their decoder and non-vacuity refinements in **Phase 26**, and the
 `validateTopology` fold in **Phase 67**; the execution-set monitoring fold rides the whole-deployment seal in
-**Phase 31**; rendered monitoring shapes and baked binaries (including the alert receiver) land in
+**Phase 31**; rendered monitoring shapes and baked binaries (including the alert receiver) are assigned to
 **Phases 33 and 56**;
-the bounded Prometheus/Grafana projection and derived rules/panels landed in **Phase 63**, while the receiver,
+the bounded Prometheus/Grafana projection and derived rules/panels are assigned to **Phase 63**, while the receiver,
 the `AccessScope`-behind-Keycloak obligation, and any optional local Thanos companion remain owned by their
 respective later delivery surfaces; the `workflow-health` TableView
 projection in **Phase 65** and the orchestrator/worker SLO-status event in **Phase 69**; the extension surfaces in **Phase 91**

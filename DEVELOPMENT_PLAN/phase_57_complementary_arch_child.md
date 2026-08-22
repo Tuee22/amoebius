@@ -4,27 +4,27 @@
 > under its own architecture-qualified tag, advertised only on the attestation produced by the host that ran it.
 > **Read this if**: phase 57 is next in the queue, or a later phase pulls the complementary architecture's tag.
 
-Phase 57 delivers the complementary architecture of the base image, published beside
-[Phase 56](phase_56_base_image_registry.md)'s under its own tag; its design is owned by
-[image_build_doctrine.md](../documents/engineering/image_build_doctrine.md) and
-[substrate_doctrine.md](../documents/engineering/substrate_doctrine.md), and the plan for reaching it is owned
-here. It does not own the bake catalog, the acquisition ladder, or the registry standup, all of which are
-Phase 56's and are consumed unchanged. Register 3, live, on the `apple` substrate's `linux-cpu/arm64` lane.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 57.1: The complementary-architecture bake on its own hardware ⏸️](#sprint-571-the-complementary-architecture-bake-on-its-own-hardware-)
@@ -37,34 +37,52 @@ Phase 56's and are consumed unchanged. Register 3, live, on the `apple` substrat
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-56 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 56, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-**The complement's tag is an address too, which is what makes 'advertised only on its own attestation' checkable.** Because the tag is derived from the recipe rather than chosen, there is no second name under which a half-uploaded or foreign-built child could become resolvable ([`image_build_doctrine.md` §2.1](../documents/engineering/image_build_doctrine.md#21-a-published-tag-is-a-cache-warm-up-and-its-name-is-the-content-address)). This phase's claim narrows accordingly: it is about the hardware that produced the content, not about who holds the naming rights.
+**Target capability — NOT VALIDATED.** The complement's tag must be an address too, which is what makes
+“advertised only on its own attestation” checkable. Because the target tag is derived from the recipe rather
+than chosen, there must be no second name under which a half-uploaded or foreign-built child can become
+resolvable ([`image_build_doctrine.md` §2.1](../documents/engineering/image_build_doctrine.md#21-a-published-tag-is-a-cache-warm-up-and-its-name-is-the-content-address)). This phase's claim therefore narrows
+to the hardware that produced the content, not who holds the naming rights.
 
-Phase 56 leaves the cluster pulling only from itself, at one architecture. This phase supplies the other one.
+If Phase 56 is independently approved, it will leave the cluster pulling only from itself at one architecture;
+this phase must then supply the other one. Neither result exists yet.
 
-It bakes the **same typed catalog** on a host whose natural architecture is the complement of Phase 56's,
-executes every baked binary there **natively**, and publishes that architecture's image under its own
+The future gate must bake the **same typed catalog** on a host whose natural architecture is the complement
+of Phase 56's, execute every baked binary there **natively**, and publish that architecture's image under its own
 **architecture-qualified tag**. There is no index and no manifest list: the architecture lives in the
 reference a consumer names, not in a descriptor a registry resolves
 ([`image_build_doctrine.md` §3](../documents/engineering/image_build_doctrine.md#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index)).
 An earlier contract joined the two halves into one attested index; that join was retracted with the manifest
 list, and what survives it is the rule the join existed to enforce.
 
-**Publication is where the amendment's rule becomes a check rather than a claim.** A tag is advertised
-**only** with the attestation produced by the hardware that executed its content — recording that host's
+**Publication is where the amendment's rule must become a check rather than a claim.** A tag may be advertised
+**only** with an attestation produced by the hardware that executed its content — recording that host's
 detected substrate, selected lane, and natural architecture, and the per-binary execution and ELF-machine
-observations. An image whose attestation is missing, belongs to the other architecture, or cannot be verified
-against the content it describes is treated exactly as one that was never pushed: the tag is not advertised.
+observations. The future gate must treat an image whose attestation is missing, belongs to the other
+architecture, or cannot be verified against the content it describes exactly as one that was never pushed:
+the tag must not be advertised.
 
-What this phase deliberately does not do is re-derive Phase 56's work. The acquisition ladder, the bake
-inventory oracle, the registry standup, the mutation-admission proxy, and the egress boundary are consumed as
-Phase 56 sealed them. This phase adds one architecture, one publication, and the negatives that keep the tag honest.
+What this phase deliberately does not do is re-derive Phase 56's work. The acquisition ladder, bake-inventory
+oracle, registry standup, mutation-admission proxy, and egress boundary may be consumed only as bound to Phase
+56's future external human approval. This phase targets one architecture, one publication, and the negatives
+that keep the tag honest.
 
-**Phase scope:** one cohesive claim — *the base image is published for both architectures, and each was
-proven where it runs*. Its seams are the complementary bake, the attested publication, and the negatives; its
+**Phase scope:** one cohesive target claim — *the base image must be published for both architectures, and each
+must be tested on its own natural architecture*. Its seams are the complementary bake, the attested publication, and the negatives; its
 acceptance command is one gate; it splits further only if a third architecture is ever added, which would be
 its own substrate and therefore its own phase.
 
@@ -79,185 +97,130 @@ the host, not the accelerator. Any host natively running `arm64` Linux satisfies
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 56](phase_56_base_image_registry.md) — the base image, the jit-build resolver, and the in-cluster registry, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 57` publishes the complementary architecture's tag
-on a natively produced attestation, and satisfies every fixture, oracle, OS-boundary observation, and seeded
-mutant named in [Gate integrity](#gate-integrity).
+**Depends on:** [Phase 56](phase_56_base_image_registry.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 57`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-**The mutant corpus for this phase does not exist yet.** The six mutations named below are the ones this gate
-must seed; none is committed, and `test/mutant/registry.tsv` carries no `complementary_arch_child` capability.
-Seeding them, and registering them, is part of the phase rather than a precondition of it.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive target claim — *the base image is published for both architectures, and each is tested on its own natural architecture*. Its seams are the complementary bake, the attested publication, and the negatives; its acceptance command is one gate; it splits further only if a third architecture is ever added, which would be its own substrate and therefore its own phase. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 57` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 56 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-Per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
-the oracles below are authored independently of the implementation and committed before it. This section is
-the phase doc's explicit representative set (§M.7).
+## Resource provision — UNRESOLVED
 
-```mermaid
-flowchart LR
-  %% register: algebra
-  fx["committed fixtures: the two authored attestation shapes"]:::intent
-  or["independently authored publication oracle"]:::intent
-  mu["seeded mutants: emulated, foreign, and absent attestation"]:::intent
-  g{{"the phase 57 gate command"}}:::gate
-  ok((("phase seal: two architecture-qualified tags, each proven where it runs"))):::seal
-  no>"a mutant that stays green means the attestation checks nothing"]:::refuse
-  fx -->|"binds the corpus"| g
-  or -->|"binds the expectation"| g
-  mu -->|"binds the defect"| g
-  g -->|"fixtures green, oracle agrees"| ok
-  g -->|"mutant green"| no
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
-  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
-  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
-```
-*Design intent. Phase 57's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses and [`substrate_doctrine.md` §1.1](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule) the rule they enforce.*
-
-**What the gate command accepts.** On a host whose natural architecture is `arm64`, the typed catalog bakes
-that architecture's child, every baked binary executes natively by absolute path against the Phase-56 oracle's
-pinned probes, and the child's attestation is written. The gate then joins that child with the Phase-56 child
-by digest and advertises one index under one immutable digest-pinned tag. Both architectures resolve under
-that tag from the in-cluster registry, and the egress observer sees zero public-registry connections
-throughout.
-
-The gate is not passed unless, in addition:
-
-- **No emulator participates (§M.5).** An OS-boundary observer — process accounting plus the kernel's
-  registered `binfmt_misc` interpreter table, read before and after — proves no foreign-architecture
-  interpreter was registered, mounted, or executed for the whole run. A self-report from the build tooling
-  cannot satisfy this; the check reads the kernel, not the builder.
-- **Each attestation is bound to the host that produced it (§M.9/§M.10).** The harness issues a fresh nonce
-  after the builder starts on each host; the attestation carries it, and the admission check recovers it from
-  the independent observation. A pre-recorded or copied attestation fails because it cannot carry this run's nonce.
-- **The reference side is independent (§M.3).** The expected publication shape — the tag, its platform, and
-  the attestation fields required — is an authored fixture,
-  `test/fixture/complementary_arch/expected_tag.dhall`, never a value the publisher emits about itself.
-- **The negatives name their reason (§M.8).** Each negative below asserts the exact refusal tag and is paired
-  with the positive that differs only in the foreclosed dimension.
-- **Both halves are the same catalog (§M.3).** An independent reconciliation proves the two architectures were
-  baked from one `dhall/amoebius/BakeCatalog.dhall` content digest and one resolved toolchain graph identity,
-  so the pair cannot be two different images that merely differ in architecture.
-
-**Committed seeded mutants, each of which its named sprint must turn red (§M.2):**
-- `emulated-build` — the complementary image produced under a mounted
-  foreign-architecture interpreter; red at Sprint 57.1's kernel-read `binfmt` negative.
-- `stub-arm64-binary` — a zero-byte binary at a baked path in the `arm64` image;
-  red at Sprint 57.1's native execution and ELF check. This is the pre-amendment Phase-56 mutant, re-homed to
-  the phase whose gate can now execute it.
-- `foreign-attestation` — the `arm64` image paired with the `amd64` build's
-  attestation; red at Sprint 57.2's architecture binding.
-- `unattested-image` — an image pushed with no attestation at all; red at
-  Sprint 57.2's admission check.
-- `advertise-before-upload` — the tag advertised while the upload is still
-  partial; red at Sprint 57.2's registry-API un-advertised assertion.
-- `divergent-catalog` — the two architectures baked from different catalog
-  digests; red at Sprint 57.3's same-catalog reconciliation.
-
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/complementary_arch_child/`.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — the complementary-architecture base image is admitted by satisfying the contract, not by appearing on a list.
+- [`extension_conformance_doctrine.md` §5 — The conformance gate is generated, not authored](../documents/engineering/extension_conformance_doctrine.md#5-the-conformance-gate-is-generated-not-authored) — the complementary-architecture base image is admitted by satisfying the contract, not by appearing on a list.
 - [`substrate_doctrine.md` §1.1 — the natural-architecture rule](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule):
   a substrate proves its lane only at its own architecture, which is why this phase exists as a separate gate
   on a separate host rather than as a second platform argument to Phase 56's build.
-- [`image_build_doctrine.md` §3 — one image per architecture](../documents/engineering/image_build_doctrine.md#3-multi-architecture-images--one-natively-built-child-per-architecture):
+- [`image_build_doctrine.md` §3 — One image per architecture — the tag carries the architecture, not an index](../documents/engineering/image_build_doctrine.md#3-multi-architecture-images--one-natively-built-child-per-architecture):
   the architecture is in the tag and nothing joins the two, so this phase publishes beside Phase 56 rather
   than on top of it.
-- [`image_build_doctrine.md` §4 — atomic publication](../documents/engineering/image_build_doctrine.md#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload):
+- [`image_build_doctrine.md` §4 — Atomic publication — a partial upload is a failed upload](../documents/engineering/image_build_doctrine.md#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload):
   the advertisement is one act; an unattested image is an absent image, so a partial upload is never
   advertised.
-- [`development_plan_gate_integrity.md` §S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate)
+- [`development_plan_gate_integrity.md` §S — Universal source and artifact hygiene gate](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate)
   clause 15: the run records the detected substrate, the selected lane, and the natural architecture, and every
   executed artifact belongs to that architecture.
 
 ## Sprints
 
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
 ## Sprint 57.1: The complementary-architecture bake on its own hardware ⏸️
 
-**Status**: Blocked by the Phase-56 gate, which produces the child this sprint complements.
-**Implementation**: `tools/complementary_arch_build.py`, `src/Amoebius/Image/Attestation.hs`
-**Blocked by**: [Phase 56](phase_56_base_image_registry.md)'s gate.
-**Requires**: `host-floor` — on the complementary architecture's own host
-**Independent Validation**: `docker image inspect <tag>` reports exactly `linux/arm64`; every
-baked binary executes natively by absolute path against Phase 56's committed
-`bake_inventory_expected.dhall` probes; the layer passes its ELF `e_machine` check; and a before/after read of
-the kernel's `binfmt_misc` table proves no foreign interpreter was registered.
-**Docs to update**: `documents/engineering/image_build_doctrine.md`, `documents/engineering/substrate_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`substrate_doctrine.md` §1.1 — the natural-architecture rule](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule);
 bake the complementary child from the same typed catalog on hardware that natively runs it.
 
 ### Deliverables
+
 - The complementary-architecture image, built by one plain `docker build` on a host of that architecture.
 - A typed `Attestation` recording the host's detected substrate, selected lane, natural architecture, the
   run nonce, and the per-binary execution and ELF-machine observations for that image.
 - The committed mutants `emulated-build` and `stub-arm64-binary`.
 
 ### Validation
+
 1. The image's platform is exactly this host's natural platform.
 2. Every baked binary runs natively by absolute path and matches its pinned probe.
 3. The `binfmt_misc` table is unchanged across the run and no emulator binary is executed.
 4. Both committed mutants turn the sprint red for their specific reasons.
 
 ### Remaining Work
+
 The whole sprint.
 
 ## Sprint 57.2: The architecture-qualified publication and its atomic advertisement ⏸️
 
-**Status**: Blocked by Sprint 57.1.
-**Implementation**: `src/Amoebius/Image/AttestedPublication.hs`, `tools/complementary_arch_publish.py`
-**Blocked by**: Sprint 57.1.
-**Independent Validation**: the published reference equals the authored
-`test/fixture/complementary_arch/expected_tag.dhall` shape; the attestation verifies against the content it
-describes and against the nonce its host was issued; and the registry API omits the tag until the whole
-upload has landed.
-**Docs to update**: `documents/engineering/image_build_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`image_build_doctrine.md` §3](../documents/engineering/image_build_doctrine.md#3-multi-architecture-images--one-natively-built-child-per-architecture)
 and [§4](../documents/engineering/image_build_doctrine.md#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload);
 publish one attested, architecture-qualified tag.
 
 ### Deliverables
+
 - The pure admission decision: one attested image to one advertised tag, total, with a closed refusal set for
   a missing, foreign, or unverifiable attestation.
 - One immutable digest-pinned, architecture-qualified tag resolving from the in-cluster registry.
 - The committed mutants `foreign-attestation`, `unattested-image`, and `advertise-before-upload`.
 
 ### Validation
+
 1. The published descriptor set equals the authored oracle, layer for layer.
 2. The attestation verifies against the image's content digest and its host's issued nonce.
 3. A `GET /v2/<repo>/tags/list` omits the tag until the whole attested upload lands.
 4. All three committed mutants turn the sprint red for their specific reasons.
 
 ### Remaining Work
+
 The whole sprint.
 
 ## Sprint 57.3: The no-emulation and unattested-child negatives ⏸️
 
-**Status**: Blocked by Sprint 57.2.
-**Implementation**: `tools/complementary_arch_gate.py`
-**Blocked by**: Sprint 57.2.
-**Independent Validation**: the sealed gate runs every negative and reports each refusal tag, and an
-independent reconciliation proves both children came from one catalog digest and one resolved toolchain graph.
-**Docs to update**: `documents/engineering/image_build_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`development_plan_gate_integrity.md` §S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate)
 clause 15; seal the phase behind negatives that fail for their stated reasons.
 
 ### Deliverables
+
 - The phase gate composing both sprints' validations plus the same-catalog reconciliation.
 - The committed mutant `divergent-catalog`.
 - A repository-local attestation recording both hosts' substrate, lane, and natural architecture.
 
 ### Validation
+
 1. Every negative asserts its exact refusal tag, each paired with a positive differing only in the foreclosed
    dimension.
 2. The same-catalog reconciliation joins both children to one `BakeCatalog.dhall` content digest.
@@ -266,21 +229,25 @@ clause 15; seal the phase behind negatives that fail for their stated reasons.
    hold on both hosts, including clause 15 on each.
 
 ### Remaining Work
+
 The whole sprint.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/image_build_doctrine.md` — the attested-join half of §3 moves from target shape to
   validated boundary, naming the index this phase published.
 - `documents/engineering/substrate_doctrine.md` — the `apple` substrate's `linux-cpu/arm64` lane gains its
   first live result, while the Metal lane stays UNVERIFIED until Phase 89.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/substrates.md` — the per-phase map row for this phase.
 - `DEVELOPMENT_PLAN/phase_56_base_image_registry.md` — the predecessor whose child this phase joins.
 
 ## Related Documents
+
 - [Phase 56](phase_56_base_image_registry.md) — the catalog, ladder, registry, and first child this phase consumes
 - [Phase 58](phase_58_object_reconciler.md) — runs on the native-architecture child alone; the joined index is published after it, so no phase before this one consumes the join
 - [Image Build & Registry](../documents/engineering/image_build_doctrine.md) — the join and publication contract

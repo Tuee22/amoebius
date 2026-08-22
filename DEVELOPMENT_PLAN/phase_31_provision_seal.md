@@ -2,41 +2,37 @@
 
 > **Purpose**: Take the fully expanded `BoundDeployment` produced by [Phase 30](phase_30_capability_bind.md),
 > run it through the conditional infrastructure planner/materialization boundary and then the Phase-9/15/16
-> capacity folds, and either prove the declared target materialized — sealing one opaque whole-deployment
+> capacity folds over explicit Haskell values, and either model a declared materialized target — sealing one opaque whole-deployment
 > `ProvisionedSpec` carrying a single identity-keyed `ProvisionedRenderSourceSet` with per-field ownership and
 > four-stage activation — or return exactly one structured `ProvisionError` at the `provision-seal` locus.
 > **Read this if**: phase 31 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 31 delivers the whole-deployment provision seal + expansion; its design is owned by [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [resource_capacity_sources.md](../documents/engineering/resource_capacity_sources.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-The Register-1 gate passed on 2026-08-09 with ledger
-`dynamically-resolved`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ✅](#sprint-311-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
-- [Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ✅](#sprint-312-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
-- [Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ✅](#sprint-313-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
-- [Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ✅](#sprint-314-the-provision-seal-propertycorpus--the-register-1-gate-)
+- [Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ⏸️](#sprint-311-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
+- [Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️](#sprint-312-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
+- [Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️](#sprint-313-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
+- [Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ⏸️](#sprint-314-the-provision-seal-propertycorpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -44,91 +40,33 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-21. `python3 tools/provision_seal_gate.py` passes all eleven sides on natural
-`darwin/arm64`, untranslated. The bounded suite provisions all 18 inherited arm/shape positives, exercises
-both infrastructure-planner paths, rejects ten specific seal-locus negatives, observes all four activation
-stages, and covers both provision properties. The 40-entry validation-locus ledger is exact; all ten paired
-mutants redden; 42 observed units compose through all five calculus kinds; all 25 metrics match; and all 37
-surfaces join to 55 items. The project-contained attestation is
-`sha256:f7b2deabc1f523c89e54d63ddbd01ccf6b17c716a71f612b865c540df70312f1`, bound to source snapshot
-`sha256:731bcd90f8e4074f…` over 2,252 files. Provider realization, engine resolution, and model/runtime
-correspondence remain UNVERIFIED at their later owners.
+⏸️ Blocked — NOT VALIDATED.
 
-Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
-changed what this phase's gate had to cover, so the earlier seals below remain history.
+Blocked by redesigned Phase 30, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-**The rerun corrected a second consequence of Phase 2's registry merge.** This gate enumerates its run-time
-items from a list of authored sources and read each one's first column. That column was the mutant id while
-each capability had its own `mutants.tsv`; in the one registry it is the capability, so the gate enumerated
-every phase's rows and the comment block with them. It now asks the registry for its own capability's mutants,
-which is what the first column used to mean. The same correction lands in the inference-accelerator and
-render-manifest gates, which share the enumerator.
-
-**Opened 2026-08-17** when the preceding phase resealed.
-[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
-the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
-architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
-it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
-[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-15. `python3 tools/provision_seal_gate.py` passed all ten sides: 26 activation,
-planner, provision, and mutant items, all ten mutants, all twelve metrics, and the honesty ledger pass; 34
-surfaces join to 42 enumerated items. The project-contained attestation is
-`sha256:308b526838567e092e59afdff70e48337acd988bb39f67f857e95357f7fc21b5`, bound to source snapshot
-`sha256:450cd22ff1ff6667…`; Phase 31 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:78503b2cb8dc1a0a…`
-(1936 non-ignored files) and published a verified pre-containment external attestation
-`sha256:46f666a4abf03ac312c5f90f695e87670dbe1855f8d068e1152f3e5b991d1cb8`.
-
-**Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 18
-inherited capability positives provision, both infrastructure-planner paths hold, the creation plan validates
-under CAS and enacts against its readback, the render source set is one equal-keyed map across four activation
-stages, ten specific negatives redden at their tags, both property boundaries hold exact-versus-one-short, and
-all ten seeded mutants redden. Evidence and the ledger move into `.build/runs/phase_31/<run-id>/`, and 26
-run-time items — four activation witnesses, two planner cases, ten provision cases, and ten mutant names —
-partition one-to-one across the claim surfaces.
-
-**Six formerly unverified contract surfaces are now measured directly**: exact metrics cover the one creation
-action batch, plan-token replay rejection, action-token replay rejection, all three materialization-evidence
-classifications, both promised-identity rejections, and the complete 40-row validation-locus ledger. The
-pre-amendment gap is closed in
-[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md).
-
-**Invalidated historical record:**
-
-Done (invalidated). The pure planner, provision fold, opaque seal, corpus, properties, and mutant battery passed on
-2026-08-09. The retained evidence is in `evidence/phase_25/` and the exact claim boundary
-is recorded in `ledgers/phase_31_provision_seal.md`. This phase opened after the [Phase 30](phase_30_capability_bind.md)
-gate (the capability union + representational `bind` + object-node-multiset shape oracle, which produces the
-wholly-unprovisioned `BoundDeployment` this phase consumes) and the [Phase 29](phase_29_execution_accelerator_folds.md)
-gate (the execution-epoch/scheduler-reservation/runtime-metadata/accelerator folds and the composed
-full-resource-vector place-witness gate this phase *invokes*), and runs on **no substrate** (`none`) in
-**Register 1** — it stands up no host, no cluster, and no provider, only the pure `planInfrastructure` boundary,
-the total `provision` fold, and the render-source seal, plus their property/corpus battery. This sub-phase owns
-**the seal and the expansion that drives the folds**, never the folds' own soundness (that is the earlier-phase
-gate) and never the `bind` that produced its input.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase makes amoebius's *"every resource provision is explicit, pure first, and impossible targets have no
-deployable value"* invariant executable as the **post-bind provision seal**. It owns exactly two total
-functions and the private artifact they seal:
+**Target capability — NOT VALIDATED.** This phase specifies the pure Haskell **post-bind provision seal**.
+It models exactly two total functions and the private artifact they may construct; it does not inspect a host,
+provider, or cluster and cannot establish that an observation-shaped input came from reality. Haskell values
+own every case and expectation; any serialized plan or case is generated lazily beneath `.build/**`.
 
 `planInfrastructure :: ProvisionTargetSupply -> BoundDeployment -> Either ProvisionError InfrastructurePlanningResult`
 — the **conditional infrastructure planner / materialization boundary**. It derives the exact infrastructure
 demand *internally* from the fully expanded `BoundDeployment` (never accepting a caller-authored demand vector),
-and either proves the declared target already materialized (`NoInfrastructureRequired`) or returns exactly one
+and either models the declared target as already materialized (`NoInfrastructureRequired`) or returns exactly one
 non-renderable `InfrastructureRequired` plan owning one batch-scoped Pulumi
 graph/checkpoint/dependency/concurrency/quota partition and a fresh plan token. `StandaloneRoot` supplies the
 complete declared node/host/account/backing/API-etcd inventory; `ForestMember` supplies the exact opaque
-`ClusterBudget`. Only fresh validation and receipt-bound provider/host readback
-(`ObservedInfrastructureMaterialization`) construct `ProvisionContext`; replay, missing readback, or promised
-identities reject.
+`ClusterBudget`. In this pure phase, `ObservedInfrastructureMaterialization` is only a constructor-private
+Haskell input shape. Authentic provider/host readback, freshness, and receipt binding are post-Phase-49 live
+obligations; no supplied value may be cited here as a real observation.
 
 `provision :: ProvisionContext -> Topology -> BoundDeployment -> Either ProvisionError ProvisionedSpec`
 — the **whole-deployment provision fold**. It is the *sole constructor* of every `Provisioned*` projection. It
@@ -164,231 +102,111 @@ What is **not** here:
 - and the live realization of any provider or the actual jit-resolve of an engine
   ([Phase 80](phase_80_determinism_jitcache.md), the live band).
 
-**Phase scope:** one cohesive claim — *a deployment is sealed exactly once, and only against an inventory that was observed*. The seal is opaque so nothing downstream can reach past it.
+**Phase scope:** one target claim — a deployment can be sealed only once against an explicit, typed
+observation-shaped value. The phase does not establish that the value was observed from a live target.
 
-**Substrate:** none — no host, no cluster, no provider; the gate is an in-process `cabal test` over
-`planInfrastructure` + `provision` + `provisionRenderSources`, analogous to the Phase-29 fold battery it invokes.
+**Substrate:** none — no host, cluster, provider, or hardware; the canonical Haskell gate owns the candidate verdict.
 
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
-**Register:** 1 — pure/golden, in-process, no cluster. The emitted ledger's acceptance token reads
-*binding-composition proven* / *proven for the model*, never *runtime proven*: a green seal establishes that the
-expanded deployment composes and fits its declared target, not that any provider came up. The live realization
-of every provider and the jit-resolve of every engine are marked **UNVERIFIED**, owned by the live band.
+**Register:** 1 — pure Haskell only. A future candidate may speak only about the supplied model; authentic
+inventory, provider realization, and engine resolution remain UNVERIFIED live-band obligations.
 
-**Depends on:** [Phase 30](phase_30_capability_bind.md) — capability union + representational bind, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 31` passed on no substrate, Register 1.
-It covers both planner paths, 18 provision positives, ten specific negatives, two boundary properties, and ten
-mutants. The complete apparatus is named in [`## Gate integrity`](#gate-integrity).
+**Depends on:** [Phase 30](phase_30_capability_bind.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 31`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-This section carries this sub-phase's **slice** of the source capability-binder gate apparatus, partitioned
-along the provision-seal seam (per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
-The `bind`/shape-oracle apparatus (`bound_shape_semantics.tsv`, `mutant_copy_shape_tag`,
-`mutant_catchall_arm`, `mutant_shared_app_import`, the dhall-typecheck/gadt-decode negatives) stays in
-[Phase 30](phase_30_capability_bind.md); the identity-complete accelerator source/workload/residency/coexistence
-apparatus (`illegal_accelerator_count_shortage`, `illegal_accelerator_source_workload_mismatch`,
-`illegal_accelerator_policy_domain_mismatch`, `illegal_accelerator_residency_placement`,
-`illegal_accelerator_coexistence_overcommit`, `illegal_engine_family_unavailable_on_lane`,
-`illegal_engine_by_url`, and the five `mutant_*_accelerator_*` / `mutant_skip_accelerator_shard_validation`
-mutants) stays in [Phase 32](phase_32_inference_accelerator_provision.md). This phase inherits only the
-seal-locus slice below.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-
-```mermaid
-flowchart LR
-  %% register: orientation
-  s0["Sprint 31.1: The conditional infrastructure planner + materialization…"]
-  s1["Sprint 31.2: The whole-deployment provision fold…"]
-  s2["Sprint 31.3: The ProvisionedSpec seal + identity-keyed render-source set…"]
-  s3["Sprint 31.4: The provision-seal property/corpus + the Register-1 gate"]
-  gate["the phase 31 gate"]
-  s0 -->|"produces what the next consumes"| s1
-  s1 -->|"produces what the next consumes"| s2
-  s2 -->|"produces what the next consumes"| s3
-  s3 -->|"the last seam the gate closes over"| gate
-```
-*Orientation. The seams Phase 31 built in order; [Gate integrity](#gate-integrity) owns the passing apparatus.*
-
-**Oracle-pinning (§M.1).** Every fixture, expected `ProvisionError` tag, and reference table this gate checks
-against is authored and **committed in this phase's oracle-pinning sprint**, before `planInfrastructure`/`provision` exist — no oracle is
-regenerated from the implementation's own output, and the opaque `ProvisionedSpec` has *no* golden (a golden
-value would defeat its opacity; its correctness is checked only through the independent reference predicates
-below):
-
-### Inherited positive corpus
-
-(authored in this phase's oracle-pinning sprint, provisioned here): the nine per-arm positive fixtures
-`dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine capability arms — each already
-`bind`-checked against its independently authored semantic projection in Phase 30 — are provisioned against their
-declared target topologies. Two oracle-pinned `ProvisionTargetSupply` fixtures drive the planner boundary:
-a **pre-existing** fixture that must yield `NoInfrastructureRequired`, and a **creation** fixture that must
-return one `InfrastructureRequired` plan, validate/CAS-enact its `ProvisionedProviderActionBatch` into a
-`ValidatedInfrastructureActionBatch`, and feed a receipt-bound `ObservedInfrastructureMaterialization` into
-`ProvisionContext`.
-
-### Seal-locus negative corpus
-
-Each fixture asserts **its specific `ProvisionError` reason (§M.8)**, and each is paired with a positive
-differing only in the foreclosed dimension:
-- `dhall/examples/illegal_post_bind_expansion_overcommit.dhall` (an app skeleton that fits alone but whose
-  case table makes the selected provider's kind-indexed desired replica, surge instance, retained old
-  revision, live terminating instance, sidecars, standard-platform graph, model-derived kubelet/CRI runtime
-  metadata, or one physical partition's unique child-carve sum exceed its exact boundary by one — each case
-  returns its exact structured `Left`, proving the seal runs the fold *after* identity-keyed epoch expansion
-  and component→role→layout-backing derivation, not over the raw app)
-- `illegal_monitoring_work_over_budget.dhall` (the expanded `Observability` descriptor exceeds one mandatory
-  finite `MonitoringWorkBudget` workflow/rule/series/evaluation-work bound by one → `Left
-  MonitoringBudgetExceeded`, its paired positive differing only in that bound)
-- `illegal_accelerator_vram_shortage.dhall` (a residency epoch that fits raw device `memory.total` but
-  exceeds net `allocatableVram` → `ProvisionError VramOvercommit`)
-- `illegal_cuda_on_cpu_target.dhall` (a CUDA-requiring workload on a non-CUDA topology → `ProvisionError
-  MissingCapability Cuda`)
-- `illegal_controller_child_unbounded.dhall` (`Left UnknownCommitment`: a CR arm with no finite child
-  pod/PVC/rollout envelope)
-- `illegal_elastic_per_node_expansion_overcommit.dhall` (a workload that fits raw candidate allocatable but
-  not after multiplying/subtracting required per-node execution units)
-- and `illegal_prior_provision_ref_{missing,stale,wrong_generation,wrong_arm}.dhall` (the corresponding
-  structured `ProvisionError` raised **before** any transition execution, allocation, or copy).
-
-**Committed mutation quota (§M.2).** This phase inherits **ten** of the source's committed seeded mutants —
-the ones that break the seal or its expansion — committed and re-run (not run once); the gate MUST turn each
-red when substituted:
-
-- `mutant_fixed_prometheus_requests` — bypass the versioned monitoring cost fold with a fixed Prometheus
-  envelope (effect swap; caught by the `Observability` budget property and the `illegal_monitoring_work_over_budget`
-  negative);
-- `mutant_provisioned_value_in_bound_deployment` — inject a `Provisioned*` result into the boundary before
-  `provision` runs (union-arm addition; caught by the structural inventory that proves `BoundDeployment`
-  contains no `Provisioned*` field and that `provision` is the sole constructor);
-- `mutant_unchecked_prior_ref` — accept a missing, stale, wrong-generation, or wrong-arm prior provision
-  reference without resolving it from `ProvisionContext` (dropped check; caught by the
-  `illegal_prior_provision_ref_*` corpus);
-- `mutant_drop_execution_replica`, `mutant_drop_execution_surge`, `mutant_drop_execution_old_revision` — omit
-  one kind-indexed identity from its required steady/rollout/live epoch (dropped effect; caught by the
-  independent instance/epoch enumeration and the one-unit-short pairs);
-- `mutant_wrong_execution_revision_join` — join a `MaterializedExecutionInstance` to the wrong source revision
-  (effect swap; caught by the `(sourceUnit, revision, ordinal, resource)` exact-join predicate);
-- `mutant_double_debit_controller_child` — charge the explanatory controller witness after the lowered
-  kind-indexed unit already paid (dropped `UNCHANGED`; caught by the no-second-debit inventory);
-- `mutant_drop_largest_kubelet_metadata` — omit the largest simultaneous Pod runtime-metadata row from the node
-  aggregate (dropped effect; caught by the runtime-storage ownership predicate);
-- `mutant_missing_kubelet_metadata_model` — accept a missing/changed target model or scalar byte fallback,
-  drop/swap a component role, resolve a role to the wrong backing, mismatch a planned/observed domain, overlap
-  or leak qualified Pod/image ownership, or double-debit an alias group (guard weakening; caught by the
-  runtime-storage domain/role/ownership predicate).
-
-**Independent reference predicates (§M.3).** Every equivalence check defines its reference side **independently of `provision`'s own fold**, never by reusing it:
-
-1. an **independently enumerated** kind-indexed `(sourceUnit, revision, ordinal, resource) →
-   MaterializedExecutionInstance` instance/epoch map (a distinct enumeration over the expanded runnable-source
-   inventory, not `provision`'s fold) is checked exact-equal to the provision result for the steady map
-   (including a Job-completed empty control) and every empty-capable rollout step; a separate pure property
-   feeds normalized observed identities to the same shared fold and exact-fits the live
-   desired ∪ referenced-old ∪ terminating ∪ scheduler-reservation union, including confirmed-bound
-   `BindingRecovery`, and rejects its one-unit-short terminating pair, copied-new-as-old input, wrong
-   generation, invented first-deploy old row, and two-candidate stale-residual race;
-2. the **runtime-storage** predicate derives each metadata component's `KubeletNodefs | CriRuntimeRoot` role,
-   resolves it through `Unified | SplitRuntime | SplitImage`, and independently asserts the largest simultaneous
-   epoch/snapshot node aggregate has the exact assigned domain, disjoint-and-exhaustive qualified Pod/image
-   ownership, and one grouped debit per physical carve; SplitRuntime nodefs and imagefs/containerfs one-byte-short
-   cases and role/domain/ownership/alias mutants reject, and for an elastic target it asserts the class carries
-   `PerInstanceKubeletFilesystemLayout` with only elastic `(instance, disk, carve)` refs (never a fabricated
-   concrete `DiskCarveId`), each materialized one-for-one by an `ObservedNodeTargetBinding`;
-3. an independent **four-stage activation classifier** enumerates every source in `ProvisionedDeploymentParts`,
-   classifies it into `Immediate | BootstrapSchedulerStage | AfterBootstrapAddonCutover |
-   AfterManagedCapacityReady` from an oracle-pinned reference table, and rejects a missing/extra stage, a
-   managed-node taint/admission source placed in an early stage, a duplicate/omitted source-domain candidate, a
-   map key unequal to its embedded identity, or a source whose activation disagrees with its provisioned owner —
-   proving the seal produces exactly one equal-keyed `ProvisionedRenderSource` per `K8sObjectIdentity` with one
-   global owner for shared Namespace/quota/scheduler/admission/RBAC/`Lease`/CRD sources.
-
-**Concrete corpus (§M.7).** The "representative set" is named explicitly above: the nine per-arm positives under
-both shapes, the two `ProvisionTargetSupply` boundary fixtures, and the ten named seal-locus negatives. The
-QuickCheck totality property carries `checkCoverage` obligations so the reject/boundary branch fires a stated
-minimum fraction; exact-fit execution-epoch / runtime-storage-backing / accelerator-VRAM boundaries accept while
-each one-resource-or-one-byte-short minimally-differing pair rejects, exercising both boundary directions.
-
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/provision_seal/`.
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — pure Haskell may seal a deployment exactly once against an explicit typed observation-shaped value; any serialized plan or case is generated beneath `.build/**`; authenticity of any live inventory is not claimed here. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 31` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 30 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`extension_conformance_laws.md`](../documents/engineering/extension_conformance_laws.md) — the L-laws whole-deployment provision seal + expansion must satisfy in isolation, and the C-laws its composition with any peer must satisfy.
-- [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) — the bytes whole-deployment provision seal + expansion causes to exist are charged to a grant that carries its ceiling and concurrency together.
-- [`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
-  and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
+- [`extension_conformance_laws.md` §3 — L1–L5: the per-extension laws](../documents/engineering/extension_conformance_laws.md#3-l1l5-the-per-extension-laws) and [`extension_conformance_laws.md` §4 — C1–C7: the compositional laws](../documents/engineering/extension_conformance_laws.md#4-c1c7-the-compositional-laws) — the L-laws whole-deployment provision seal + expansion must satisfy in isolation, and the C-laws its composition with any peer must satisfy.
+- [`jit_budget_doctrine.md` §3 — A ceiling is inseparable from its concurrency](../documents/engineering/jit_budget_doctrine.md#3-a-ceiling-is-inseparable-from-its-concurrency) — the bytes whole-deployment provision seal + expansion causes to exist are charged to a grant that carries its ceiling and concurrency together.
+- [`resource_capacity_doctrine.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
+  and [`resource_capacity_doctrine.md` §4 — The total fold: `fits`, `carve`, `place`, and the nesting](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
   — **the complete resource envelope and the opaque post-fold `ProvisionedSpec` boundary.** This phase owns the
   ordering's tail: after Phase 30 expands every provider/shape into a `BoundDeployment`, the seal runs the
   Phase-9/15/16 folds and hands only the checked opaque result to Phase 33. A capacity check over a pre-bind
   skeleton is insufficient; the seal folds the *fully expanded* vector — kind-indexed desired/old/surge/
   terminating epochs, sidecars, controller children, the standard platform graph, and
   component→role→layout-backed runtime metadata — and returns `Left` on any one-axis overcommit.
-- [`resource_capacity_sources.md §9.2`](../documents/engineering/resource_capacity_sources.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget)
-  and [`§10`](../documents/engineering/resource_capacity_doctrine.md#10-planning-ownership)
+- [`resource_capacity_sources.md` §9.2 — Monitoring cost folds through the standard machinery, and the forest has no parent-rollup budget](../documents/engineering/resource_capacity_sources.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget)
+  and [`resource_capacity_doctrine.md` §10 — Planning ownership](../documents/engineering/resource_capacity_doctrine.md#10-planning-ownership)
   — **monitoring cost folds through the standard machinery**, and **planning ownership.** The seal runs the
   named, version-pinned conservative cost models that derive the Prometheus/proxy compute envelope and the
   rounded TSDB/query storage from the expanded `Observability` descriptor's cardinality — no
   descriptor-independent fixed request, tiny PVC, or optional-budget path — and `MonitoringBudgetExceeded` is a
   checked rejection, not a default. `planInfrastructure`/`provision` are the sole planning owners of the
   post-bind boundary.
-- [`service_capability_doctrine.md §4`](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding)
+- [`service_capability_doctrine.md` §4 — Capability → provider → shape: the binding](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding)
   — **Capability → provider → shape: the binding**, its provisioning tail. The provider/shape are chosen by
   deployment rules and expanded by `bind` (Phase 30); this phase provisions that fully expanded graph against
   the cluster's topology before anything can render, so a byte-identical app that binds to a structurally
   different graph per cluster provisions — or is refused — per cluster.
-- [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)
+- [`service_capability_doctrine.md` §4.1 — The InferenceEngine capability — the engine is target-offering-selected and jit-resolved, never authored](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)
   — the `InferenceEngine` capability, its **enforcement half only**: a served model whose engine family is
   unavailable on the serving lane, or a CUDA-requiring workload on a non-CUDA topology, is a post-bind
   **`provision-seal` `Left`**. This phase implements that seal-locus rejection over the accelerator folds it
   invokes; the *representational* `EngineRuntime` union and the identity-complete residency/coexistence corpus
   are [Phase 32](phase_32_inference_accelerator_provision.md).
-- [`illegal_state_catalog.md §3`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
-  with [`§2` the load-bearing limit](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
+- [`illegal_state_catalog.md` §3 — The catalog — states a valid spec cannot represent](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
+  with [`illegal_state_catalog.md` §2 — The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
   — the seal proves the *binding composes and its target has capacity*, not that the *running provider* came up.
   Every insufficiency is a structured `ProvisionError` at the `provision-seal` locus, and the runtime residue
   (the provider actually up, the engine actually resolved) stays UNVERIFIED, deferred to the live band.
-- [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
+- [`manifest_generation_doctrine.md` §2 — The typed manifest model: `renderAll` is the sole public pure function to objects](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
   — **`renderAll` is the sole public pure function to objects.** The provision seal is what *produces* the
   unique identity-keyed `ProvisionedRenderSourceSet` under the opaque `ProvisionedSpec` that Phase 33's
   `renderAll` privately maps; no service projection can invoke render on its own, and the seal's per-source
   field ownership and activation stage are what the later typed diff/enactor must honor.
-- [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
-  (**Register 1** — pure/golden, in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the
+- [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+  (**Register 1** — pure/semantic-oracle, in-process, no cluster) and [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the
   register this gate reaches and the ledger it emits, with the live realization of any provider (and the
   jit-resolve of any engine) marked UNVERIFIED, owned by the live band.
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-21 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
-> established by the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-## Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Capacity/Provision.hs` implements the planner, supply/result types, internal
-demand derivation, validation/enaction, observed readback, and receipt-bound context. It imports no renderer.
-**Blocked by**: None.
-**Independent Validation**: pre-existing standalone and forest supplies return `NoInfrastructureRequired`.
-Creation returns one exact action batch; fresh snapshot validation and exact readback construct the context.
-Replay, stale snapshots, missing identities, and promised identities reject. QuickCheck compares internally
-derived exact capacity with a one-unit-short supply.
-**Docs to update**: `documents/engineering/resource_capacity_doctrine.md` (§10
-planning-ownership backlink), `documents/engineering/manifest_generation_doctrine.md` (§9 the planning
-boundary), `DEVELOPMENT_PLAN/system_components.md`.
+> **Permanently invalidated history.** Every completion, seal, reseal, transcript, evidence, and
+> closure statement in the sprint bodies below is rejected as current validation. The material is retained
+> only as a target-capability inventory and cannot support status, promotion, or a validation claim.
+
+## Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`resource_capacity_doctrine.md §10 — Planning ownership`](../documents/engineering/resource_capacity_doctrine.md#10-planning-ownership):
 implement the conditional infrastructure planner as a pure total function that derives — never accepts — the
 matching infrastructure demand from the fully expanded `BoundDeployment` and either proves the declared target
 already materialized or returns exactly one non-renderable plan owning the closed provider-action batch.
 
 ### Deliverables
+
 - `planInfrastructure :: ProvisionTargetSupply -> BoundDeployment -> Either ProvisionError
   InfrastructurePlanningResult`, run after every capability/provider graph and standard-platform expansion.
   `StandaloneRoot` supplies the complete declared node/host/account/backing/API-etcd inventory; `ForestMember`
@@ -403,31 +221,23 @@ already materialized or returns exactly one non-renderable plan owning the close
   validation/CAS-enaction of any batch is the live band ([Phase 76](phase_76_provider_deploy_checkpoint.md)).
 
 ### Validation
+
 1. The pre-existing fixture yields `NoInfrastructureRequired`; the creation fixture returns exactly one
    `InfrastructureRequired` plan with a fresh token and one action batch; the derived demand equals an
    independent enumeration over the expanded `BoundDeployment`; only receipt-bound readback constructs
    `ProvisionContext`, and replay / missing-readback / promised-identity inputs reject.
 
 ### Remaining Work
-None. Both planner arms, the exact action batch, separate plan/action replay refusals, receipt-bound readback,
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Both planner arms, the exact action batch, separate plan/action replay refusals, receipt-bound readback,
 and promised-identity refusals are sealed by the Phase-31 gate.
 
-## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Capacity/Provision.hs` implements `provision` and the opaque seal.
-`src/Amoebius/Capacity/RuntimeStorage.hs` supplies scope-indexed metadata and node runtime/image accounting.
-**Blocked by**: None.
-**Independent Validation**: all nine arms under both shapes retain independently counted desired instances,
-runtime rows, provider objects, and intents. Exact runtime backing accepts and one byte short rejects.
-Monitoring, accelerator, controller-child, elastic, and four prior-reference failures return distinct tags.
-The ten provision mutants each turn red.
-**Docs to update**:
-`documents/engineering/resource_capacity_doctrine.md` (§3/§4/§9.2 backlink),
-`documents/engineering/service_capability_doctrine.md` (§4 the provisioning tail),
-`documents/illegal_state/illegal_state_catalog.md` (the post-bind provision-seal locus),
-`DEVELOPMENT_PLAN/system_components.md`.
+## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`resource_capacity_doctrine.md §4 — the total fold`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
 and [`§9.2 — monitoring cost folds through the standard machinery`](../documents/engineering/resource_capacity_sources.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget):
 provision the fully expanded `BoundDeployment` against its topology by driving the Phase-9/15/16 folds over the
@@ -435,6 +245,7 @@ complete resource vector, so the only deployable representation is the opaque wh
 and an impossible target has no deployable value.
 
 ### Deliverables
+
 - `provision :: ProvisionContext -> Topology -> BoundDeployment -> Either ProvisionError ProvisionedSpec`, run
   after every capability/provider graph and the standard platform set have been expanded. Its private
   constructor — never a caller scalar — stores compute placement, `ProvisionedExecutionEpochs`, per-class/
@@ -504,6 +315,7 @@ and an impossible target has no deployable value.
   the real read this phase does not.
 
 ### Validation
+
 1. Each of the nine per-arm positives provisions to an opaque `ProvisionedSpec` on both shapes; the independent
    instance/epoch enumeration exact-equals the provision result for steady (incl. Job-completed empty) and every
    rollout step, and each one-unit-short desired-replica/surge/old-revision case rejects. The
@@ -518,27 +330,23 @@ and an impossible target has no deployable value.
    suite goes **red** under each of the ten inherited seeded mutants.
 
 ### Remaining Work
-None. The 18 inherited deployments, ten exact negatives, two boundary properties, and ten paired mutants seal
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The 18 inherited deployments, ten exact negatives, two boundary properties, and ten paired mutants seal
 the post-bind provision fold and its expansion boundary.
 
-## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Capacity/RenderSource.hs` implements opaque, identity-keyed sources,
-their four activation stages, and the checked source-set constructor without importing a renderer.
-**Blocked by**: None.
-**Independent Validation**: the source domain equals provider objects plus four globals. Keys equal embedded
-identities, witnesses independently fix owners, and all four activation stages appear. Duplicate, omitted,
-key-mismatched, owner-mismatched, activation-mismatched, and missing-stage candidates reject.
-**Docs to update**: `documents/engineering/manifest_generation_doctrine.md` (§2 who seals the whole-deployment
-render-source set), `DEVELOPMENT_PLAN/system_components.md`.
+## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`manifest_generation_doctrine.md §2 — `renderAll` is the sole public pure function to objects`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects):
 seal the checked provision result into one opaque whole-deployment `ProvisionedSpec` carrying a single
 identity-keyed render-source set with per-field ownership and a four-stage activation order, so Phase 33's
 `renderAll` privately maps a unique set and no service projection can render on its own.
 
 ### Deliverables
+
 - `K8sObjectIdentity` (and its compatibility alias `KubernetesObjectId`), the closed private
   `ProvisionedRenderSource identity`, and the closed
   `RenderActivation = Immediate | BootstrapSchedulerStage | AfterBootstrapAddonCutover |
@@ -557,30 +365,22 @@ identity-keyed render-source set with per-field ownership and a four-stage activ
   activation is the live band.
 
 ### Validation
+
 1. The full `ProvisionedDeploymentParts` domain contributes exactly one equal-keyed `ProvisionedRenderSource`
    per object identity; duplicate/omitted/key-mismatched/owner-mismatched candidates reject; the independent
    activation classifier assigns each source its stage from the committed reference table and rejects a
    missing/extra stage, an early-staged managed taint/admission source, or an owner-disagreeing activation.
 
 ### Remaining Work
-None. The opaque source set, exact domain/key/owner correspondence, and all four activation stages are sealed.
 
-## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ✅
-**Status**: Done
-**Implementation**: `test/spec/capability/{ProvisionProps,RuntimeStorageBindingProps,ProvisionSealGate}.hs`,
-`test/oracle/provision_seal/`, `test/mutant/provision_seal/`, the paired Dhall corpus, and `tools/provision_seal_gate.py`.
-The 18 per-arm/shape semantic fixtures remain inherited from [Phase 30](phase_30_capability_bind.md).
-**Blocked by**: None.
-**Independent Validation**: `cabal test provision-seal-spec` covers 18 positives, two planner paths, ten exact
-negative tags, four activation stages, and two boundary properties. The phase gate runs all ten mutants
-individually, checks complete locus coverage, emits retained evidence, and validates the hashed ledger.
-**Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
-`documents/engineering/service_capability_doctrine.md` (§4.1 the seal-locus family/CUDA rejection),
-`documents/illegal_state/illegal_state_catalog.md` (§2 the load-bearing limit at the provision-seal locus),
-`documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-31 status when the
-gate passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-31 `none` gate row).
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The opaque source set, exact domain/key/owner correspondence, and all four activation stages are sealed.
+
+## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`testing_doctrine.md` §2/§4](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
 and [`illegal_state_catalog.md §2 — the load-bearing limit`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
 assemble the sub-phase's single Register-1 gate — every positive need provisions to a checked opaque deployment
@@ -589,6 +389,7 @@ constructing `ProvisionedSpec` — and emit the per-entry validation-locus ledge
 UNVERIFIED.
 
 ### Deliverables
+
 - The **concrete provision corpus** (§M.7): the nine per-arm positives (both shapes, inherited) provisioned
   against their declared targets, the pre-existing and creation `ProvisionTargetSupply` boundary fixtures, and
   the ten named seal-locus negatives. A committed exhaustiveness unit check asserts every positive provisions
@@ -621,7 +422,9 @@ UNVERIFIED.
   claims.
 
 ### Validation
-1. `cabal test provision-seal-spec` is green — each of the nine per-arm positives provisions (both shapes) to
+
+1. Rejected historical observation: the `provision-seal-spec` Cabal suite was recorded green — each of the
+   nine per-arm positives provisions (both shapes) to
    an opaque `ProvisionedSpec` on its positive topology satisfying the three independent reference predicates;
    the two boundary fixtures exercise both planner arms; each seal-locus negative returns its specifically-tagged
    `Left` before `renderAll`, each paired with a minimally-differing positive; exact-fit boundaries accept and
@@ -631,12 +434,14 @@ UNVERIFIED.
    attestation.
 
 ### Remaining Work
-None. The eleven-sided Register-1 gate, 40-row locus ledger, 42-unit five-calculus projection, 25 metrics, and
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The eleven-sided Register-1 gate, 40-row locus ledger, 42-unit five-calculus projection, 25 metrics, and
 37-surface/55-item join are sealed.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/resource_capacity_doctrine.md` — backlink §3/§4 (the complete envelope and the opaque
   post-fold `ProvisionedSpec` boundary), §9.2 (monitoring cost folds through the standard machinery), and §10
   (planning ownership) to the implemented `Amoebius.Capacity.{Provision,RuntimeStorage,RenderSource}`; confirm
@@ -654,6 +459,7 @@ None. The eleven-sided Register-1 gate, 40-row locus ledger, 42-unit five-calcul
   (live realization and engine-resolve fidelity UNVERIFIED).
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-31 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-31 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register the `planInfrastructure`/`provision`/`provisionRenderSources`
@@ -661,6 +467,7 @@ None. The eleven-sided Register-1 gate, 40-row locus ledger, 42-unit five-calcul
   property + gate suites as Phase-31 design-first rows.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker and phase order this document serves
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *binding-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the explicit-provision / opaque-`ProvisionedSpec`

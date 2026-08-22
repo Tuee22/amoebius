@@ -1,18 +1,19 @@
-# Phase 46: Generated browser contracts and bundle
+# Phase 46: Haskell-generated browser contracts and bundle
 
 > **Purpose**: PureScript contracts, codecs and the one generic bundle become recipes rather than authored source.
 > **Read this if**: a browser contract, codec, or bundle is being changed, or this gate has to be read precisely.
 
-Before the generative re-baseline nothing in the plan owned this: make the browser contract surface a recipe rather than authored source.
-Its first deliverable is contracts and codecs rendered from the checked public boundary, and this phase sits where the vocabulary it consumes first exists.
-The rule behind generated browser contracts and bundle is owned by [`low_code_ui_runtime_doctrine.md`](../documents/engineering/low_code_ui_runtime_doctrine.md), which this contract implements rather than restates.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md
 **Generated sections**: none
 
 </details>
@@ -20,12 +21,13 @@ The rule behind generated browser contracts and bundle is owned by [`low_code_ui
 ---
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 46.1: Generated browser contracts and bundle ✅](#sprint-461-generated-browser-contracts-and-bundle-)
+- [Sprint 46.1: Generated browser contracts and bundle ⏸️](#sprint-461-generated-browser-contracts-and-bundle-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,62 +35,70 @@ The rule behind generated browser contracts and bundle is owned by [`low_code_ui
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-22. The fourteen-sided Register-1 gate passes on natural `arm64`, untranslated.
-Sixteen independently projected public contracts render three PureScript recipes twice with byte-identical
-paths and contents. The strict `ui-client-v1` bundle is content-addressed as
-`sha256:a7473c3334c797dfa016f404e301da539e42686bc7447146e3da3b81c79ef5b7`; six independent scanner rules are
-clean, all three production mutants red at their exact scanner loci, all 11 metrics match, and 47 surfaces
-join to 54 enumerated items. Attestation
-`sha256:f69a69ebedb305830b6a3d7df83d52fadd87814f7d5a61c7d60b11bd296adb86` binds source
-`sha256:59c38520465d4ce0…` over 2,285 files. Protocol and runtime behavior remain UNVERIFIED.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 45, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-The browser contract surface is now a recipe rather than authored source. A dedicated Haskell library
-enumerates the closed public `ValueType` boundary, excludes the private `ServerHandle`, and emits public
-contract types, total field codecs, and the generic ABI entry point only into a caller-supplied build root.
-The gate independently parses the actual `ValueType`, `ClientPlan` encoder, and PureScript `Transition` type
-before comparing the result with the authored sixteen-row contract inventory.
+**Target capability — NOT VALIDATED.** A dedicated Haskell library is to be the sole tracked source for the
+closed public `ValueType` boundary, public contract types, total field codecs, generic ABI entry point, package
+description, build description, and browser bundle source. It must lazily emit every PureScript, JavaScript,
+JSON, YAML, and other browser-build byte beneath `.build/ui/**`; private `ServerHandle` values and provider
+coordinates must have no public projection. Separately reviewed Haskell semantic rows must constrain the
+public boundary without parsing or trusting generated output as their authority. Compilation and bundle
+inspection remain unresolved target observations; no successful render, compile, or scan is asserted here.
 
-Two clean renders and a denied-network render agree. The first clean render is injected into a contained copy
-of the one Spago workspace, where strict compilation produces one bundle containing the generated
-`ui-client-v1` ABI marker. Its digest is observed at run time rather than committed as an expectation. The
-independent scanner rejects raw browser sinks, private server fields, and provider coordinates in generated
-source and the built bundle.
-
-**Phase scope:** one cohesive claim — *the browser surface is rendered from the UI types rather than authored beside them*. What stays authored is the oracle each rendered contract is checked against.
+**Phase scope:** one target claim — the browser surface is generated from Haskell UI types rather than tracked
+beside them; separately reviewed Haskell semantics, not generated bytes, are the oracle.
 **Substrate:** `none`
 **Lane:** `none`
 **Register:** 1
-**Depends on:** [Phase 40](phase_40_ui_plan_compiler.md) — the UI plan compiler, whose emitted plan is the
-declaration these contracts are rendered from; and [Phase 45](phase_45_encrypted_browser_runtime.md) — the
-sealed generic bundle and offline consumer this migration must preserve. Phase 45 is the consumer and numeric
-handoff rather than the semantic source of the generated contracts.
-**Gate:** `python3 tools/run_phase_gate.py 46` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Depends on:** [Phase 45](phase_45_encrypted_browser_runtime.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 46`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Independent oracle.** A hand-authored contract inventory derived from the Haskell boundary types, written apart from the renderer.
-- **Committed mutants.** Mutants add a raw sink to the catalog, serialize a server handle, and emit a codec the boundary does not declare.
-- **Specific-reason negatives.** Each negative fixture asserts the reason it fails, paired with a positive differing only in an artifact scanner independent of the generator.
-- **Fresh challenge.** Not applicable — this gate is pure, so the separately authored predicate stands in for it: a hand-authored contract inventory derived from the Haskell boundary types, written apart from the renderer.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — Haskell UI types and Haskell semantic expectations generate every browser contract, package, build, and bundle source byte beneath `.build/ui/**`; no non-Haskell browser source or generated oracle is tracked. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 46` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: Phase-46-owned `LTD-SRC-004` remains active. Its exact `ui/**` plus root `package.json` zero-finding check, per-format reintroduction negatives, independently reviewed Haskell binding, and sprint-level owner assignment have not been accepted. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 45 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`low_code_ui_runtime_doctrine.md`](../documents/engineering/low_code_ui_runtime_doctrine.md) — the rule behind generated browser contracts and bundle.
+- [`low_code_ui_runtime_doctrine.md` §13 — Generic PureScript client and amoebius UI server](../documents/engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server) — the rule behind generated browser contracts and bundle.
 
 ## Sprints
 
-## Sprint 46.1: Generated browser contracts and bundle ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done
-**Implementation**: `src/ui-contract-generation/Amoebius/Ui/Generate/BrowserContracts.hs`,
-`test/spec/ui/UiContractGenerationSpec.hs`, `test/oracle/ui_contract_generation/**`,
-`test/mutant/ui_contract_generation/**`, `tools/ui_contract_generation_gate.py`
-**Blocked by**: [Phase 45](phase_45_encrypted_browser_runtime.md) gate
-**Independent Validation**: A hand-authored contract inventory derived from the Haskell boundary types, written apart from the renderer.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`
+## Sprint 46.1: Generated browser contracts and bundle ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -107,14 +117,19 @@ Two renders must agree byte for byte, and the scanner must find no executable in
 
 ### Remaining Work
 
-None. Protocol use and live runtime behavior belong to their later Register-2/3 phases and remain UNVERIFIED.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Protocol use and live runtime behavior belong to their later Register-2/3 phases and remain UNVERIFIED.
 
 ## Documentation Requirements
 
-**Engineering docs updated with this seal:**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - [`low_code_ui_runtime_doctrine.md`](../documents/engineering/low_code_ui_runtime_doctrine.md)
 
+**Cross-references to add:**
+
+- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+
 ## Related Documents
+
 - [Development Plan](README.md)
 - [`low_code_ui_runtime_doctrine.md`](../documents/engineering/low_code_ui_runtime_doctrine.md) — the rule behind generated browser contracts and bundle.

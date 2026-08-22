@@ -15,12 +15,10 @@ bridges model and implementation, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_14_refinement_checker.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_14_refinement_checker.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
-
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
@@ -75,13 +73,9 @@ and no more. The constructor set is declared below rather than described, so the
 per-constructor coverage floor ([DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md))
 quantifies over an enumerated set and not over prose.
 
-**Implementation status.** Phase 11 built this fragment in `src/Amoebius/Formal/Model.hs` and validated both
-readings on 2026-08-21 with the Register-1 gate in
-[phase_11](../../DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md). The gate exercised every constructor below
-across 200 generated models. Its dedicated-root `formal-composition-model` adapter also projects the real
-Phase-10 ordered calculus sequence and exact resource fold into a one-state `Model`; it consumes that algebra
-rather than defining a formal substitute. This is tested renderer correspondence, not Phase-17 code or
-runtime fidelity.
+The owning gate must exercise every constructor below through both renderings and a separately implemented
+checker. Its composition adapter consumes the real calculus sequence and resource fold rather than defining a
+formal substitute. The development plan alone records whether that obligation has been validated.
 
 ```haskell
 data Model = Model
@@ -269,7 +263,7 @@ explorer over `interpret` (breadth-first over reachable states, pruned by the TL
 invariant on every reachable state — the same shape TLC applies to the emitted spec). A model is validated by
 running **both** checkers on the same `Model`:
 
-- the in-process explorer (Register 1, a `cabal test`), and
+- the in-process Haskell explorer suite (Register 1, a supporting observation rather than a phase verdict), and
 - TLC on the emitted `.tla` (Register 1 as well; run through the standard `tla2tools` toolchain).
 
 A validated model is one where both agree — green on the correct model — **and both go red under the same mutation** (a deliberately broken variant of the model reaches the illegal state and both checkers report it).
@@ -306,7 +300,7 @@ produce identical **canonical state-fingerprint *sets*** — not merely equal ca
 alone do not establish (equal count + equal verdict is not equal state set) — alongside the same verdict,
 shrinking any divergence to a minimal offending model. This differential faithfulness claim is **scoped to the safety sub-fragment**: the generator exercises `emitTLA`'s `Init`/`Next`/`INVARIANT`/`CONSTRAINT` rendering, and
 the explorer checks no liveness, so the `modelFairness`/`modelProperties` (`WF`/`SF`/`PROPERTY`) rendering is
-**not** covered by this test and rests on the authored renderer-semantic fact oracle and the TLC-only liveness
+**not** covered by this test and rests on the independently reviewed Haskell renderer-semantics oracle and the TLC-only liveness
 runs instead. This is the single most valuable place in the
 kernel for a **proof assistant**: a machine-checked meta-theorem that each `Expr`/`Temporal` constructor's
 `interpret`-denotation equals the TLA+ denotation `emitTLA` targets would upgrade faithfulness from
@@ -330,16 +324,17 @@ the snapshot after a failure erases its evidence. The content address already ob
 therefore asks what the generated module *means*, not whether its whitespace and declaration layout remained
 frozen.
 
-**The chosen rule.** The kernel carries a **reference model** — one small, complete, hand-authored `Model`
+**The chosen rule.** The kernel carries a **reference model** — one small, complete, independently reviewed Haskell `Model`
 that exists only to validate the renderers, distinct from every model that describes a real amoebius protocol.
-Its committed expectations are semantic:
+Its committed Haskell expectations are semantic:
 
-1. `ToyModel.renderer_semantics.tsv` fixes the exact set of module, extension, declaration, initial-assignment,
-   action, fairness-strength, invariant, constraint, temporal-kind, specification, and deadlock facts. The
-   suite extracts those facts from the freshly rendered `.tla`/`.cfg` and compares sets in both directions.
-2. `ToyModel.invariant_cases.tsv` fixes an independently authored truth table over valid and independently
-   invalid states. It catches obligation weakening that retains the same invariant name and would remain green
-   under model checking.
+1. A distinct Haskell renderer-semantics module fixes the exact set of module, extension, declaration,
+   initial-assignment, action, fairness-strength, invariant, constraint, temporal-kind, specification, and
+   deadlock facts. The suite extracts those facts from freshly rendered `.tla`/`.cfg` and compares sets in
+   both directions.
+2. A distinct Haskell invariant-case module fixes an independently authored truth table over valid and invalid
+   states. It catches obligation weakening that retains the same invariant name and would remain green under
+   model checking.
 3. The safety differential and TLC syntax/semantic run retain the details a fact projection intentionally
    does not restate: action effects, `UNCHANGED`, quantifier denotation, precedence, state constraints, and the
    complete reachable-state fingerprint set.
@@ -354,12 +349,12 @@ the explorer under TLC. This partition matters: no one oracle is credited for a 
 declared semantics may change only through the oracle-amendment discipline
 ([development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
 Copying fresh output into an expected fixture remains prohibited. The concrete reference model — its name, its
-protocol, its semantic fixture paths, and the mutants that must break them — is a build artifact of the
-formal-model phase and is named in
+protocol, its Haskell oracle modules, and the mutants that must break them — is specified by the
+formal-model phase contract in
 [DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md);
-this doctrine owns only the obligation and its rationale. The reference model proves the **kernel**; it is not
-an amoebius protocol, and no claim about amoebius follows from it. The obligations that ride the kernel this
-fixture validates are the **cross-cluster gateway migration**
+this doctrine owns only the obligation and its rationale. The reference model is specified to qualify the
+**kernel**; whether its gate has done so is plan status. It is not an amoebius protocol, and no protocol claim
+follows from it. The obligations intended to ride a qualified kernel are the **cross-cluster gateway migration**
 ([gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)) and the **DSL's own semantics**
 — the decoder, the folds, `renderAll`, the `chain`/`Step` descent, the reconcile invariants, and the
 snapshot-token/CAS and reservation protocols.
@@ -372,8 +367,8 @@ nor a claim over the unbounded DSL. Generated normalization hashes are change de
 semantic acceptance. The obligations that a model alone can discharge are the ones about
 **behaviour over time** — a token that must not be reused after an observed transition, a reservation that
 must not double-debit, a Lease that must admit one writer. No type in the decoder constrains their
-interleavings, and until they were modelled the only proof claim attached to the reconcile loop was evidence
-from a sibling project.
+interleavings. Without that model and an accepted gate, only the motivating seed observation remains; it is
+not amoebius validation evidence.
 
 ---
 
@@ -449,37 +444,21 @@ Four layers, each answering a limit the one above it leaves:
 - **A deterministic-scheduler simulator,** answering the concurrency limit, where the bug is an interleaving
   rather than a state ([`deterministic_simulation_doctrine.md`](./deterministic_simulation_doctrine.md)).
 
-**The explicit-state layer is concrete.** [Phase 12](../../DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md)
-built a dedicated-root checker that independently breadth-first searches the shared `Model`/`interpret`
-semantics; it does not call the Phase-11 explorer. Its verdict distinguishes safe completion, invariant or
-deadlock counterexamples, and bound exhaustion, and binds the result to a checker-local digest of the model
-constructor tree plus the declared bound. Counterexample steps bind and replay their source/event/target
-fingerprints. Seven hand-enumerated models cover all four result classes, five overlap cases agree with the
-reference explorer, and guard-widening, invariant-skip, and frontier-truncation defects are each red at their
-own locus. This strengthens checker ownership, not model fidelity: runtime correspondence and every state
-beyond the declared bound remain `UNVERIFIED`.
+**The explicit-state layer is independent.** It must breadth-first search the shared `Model`/`interpret`
+semantics without calling the primary explorer. Its verdict distinguishes safe completion, invariant or
+deadlock counterexamples, and bound exhaustion. Haskell reference models and expected result classes constrain
+it; generated traces or tables do not.
 
-**The symbolic ownership choice is settled.**
-[Phase 13](../../DEVELOPMENT_PLAN/phase_13_symbolic_checker.md) implements the second reading: amoebius owns a
-total classifier, QF linear-integer/boolean SMT-LIB translation, and full-conjunction base/step induction
-schema over `Model`; a dynamically resolved absolute Z3 path supplies only the formula decision procedure.
-An unsatisfiable set of obligations produces a query-digest witness, a satisfiable obligation retains its
-solver model as a base or step counterexample, and unsupported syntax or `unknown` remains explicit rather
-than becoming proof. Five overlapping fixtures agree with the independent explicit-state result, while one
-reachable-safe model is deliberately non-inductive and therefore demonstrates conservative incompleteness.
-The result is unbounded only for an invariant admitted by one-step induction in the supported theory; solver
-correctness, model intent, code refinement, and runtime fidelity remain premises or `UNVERIFIED`.
+**The symbolic layer has a separate reading.** amoebius owns a total classifier, QF
+linear-integer/boolean SMT-LIB translation, and full-conjunction base/step induction schema over `Model`; a
+dynamically resolved absolute Z3 path supplies only formula decisions. Unsupported syntax and `unknown` stay
+explicit. A reachable-safe but non-inductive Haskell model must demonstrate conservative incompleteness.
 
-**The refinement ownership choice is settled.**
-[Phase 14](../../DEVELOPMENT_PLAN/phase_14_refinement_checker.md) implements the deliberately smaller owned
-fragment instead of vendoring a general-purpose refinement checker. Actual one-equation `Integer` Haskell
-modules carry a closed source annotation and are first accepted by an injected absolute GHC. The owned checker
-then parses the same supported arithmetic/boolean/conditional body, constructs preservation and
-postcondition-to-invariant implication queries, and injects absolute Z3 only to decide them. The invariant
-input is not copied from a prose table: a compiled Haskell projection constructs two real `Model` values,
-requires the Phase-11 explorer to find their eight reachable states safe, and structurally emits their named
-invariant expressions beneath `.build/checkers/**`; an authored table is retained only as an independent
-semantic expectation over that projection.
+**The refinement layer is deliberately narrow.** One-equation `Integer` Haskell modules carry a closed source
+annotation and are accepted by an injected absolute GHC. The owned checker parses the supported
+arithmetic/boolean/conditional body and constructs preservation and postcondition-to-invariant implication
+queries. Named invariant expressions are emitted beneath `.build/checkers/**`; independent semantic
+expectations remain Haskell values.
 
 This is a narrow source proof, not a whole-language theorem. The fixture annotation declares which named
 model result the function implements, and the supported models deliberately share the state name `result`;
@@ -493,35 +472,15 @@ counterexample, or a non-decision is never promoted to proof.
 
 ## 7. Prototype validation
 
-The mechanism of this doctrine — a `Model` value, the `interpret` explorer, and the `emitTLA` renderer producing
-a TLC-checkable spec — was **prototyped in a throwaway spike** over a small transition-system model. The spike
-confirmed the load-bearing claims end to end: the in-process explorer and TLC reached the *same* verdict on the
-generated spec (identical reachable-state count), and a seeded mutation of the model produced the *expected*
-counterexample in both. The spike has been removed; per
-[documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) this
-was historical evidence that the mechanism worked. Phase 11 has now superseded that spike with the built
-amoebius kernel: eight exact `ToyModel` fingerprints, safety and liveness under fairness, fairness sensitivity,
-all committed mutants killed, and 200 differential models green. The result remains scoped to the model and
-does not by itself establish Phase-17 protocol correspondence or runtime fidelity. Phase 12 separately
-enumerates the same model semantics through an amoebius-owned BFS and agrees with the reference explorer on
-all five applicable finite fixtures; this is checker-algorithm correspondence, not production-code
-correspondence. Phase 13 adds an independent symbolic reading: three fixture invariants pass 14 base/step
-obligations, base and step failures carry satisfying solver models, and the safe-but-non-inductive fixture is
-rejected without being called unsafe. That is an unbounded result only within the supported QF_LIA/boolean
-theory and the stated induction schema. Phase 14 compiles six real Haskell source fixtures and the two
-Phase-11 `Model` values whose safe invariants it projects; three functions preserve their refinements and
-imply those projected predicates, while three exact negatives and three checker defects are rejected. That
-is code refinement only for the owned one-equation fragment and the declared result projection. Phase 17
-subsequently used that kernel for the concrete `GatewayMigration` value: explorer/TLC agreement on 53 states,
-five safety and three liveness obligations green, bounded IOSimPOR agreement, and all committed mutants
-caught. Its generated TLA+/CFG acceptance is the same semantic rule as §4.1: twelve authored facts replace
-the former byte snapshots, and two meaning-changing renderer mutations must disturb them. The phase also
-passes the actual Phase-10 composition through the Phase-11 formal bridge. Phase 18 adds a bounded DSL and
-protocol tranche: five DSL/protocol models plus the composition model cover 18 reachable states, eight safety
-and four fair-liveness obligations, five explorer/TLC fingerprint agreements, eight exact safety mutants, and
-four fairness-removal controls. Its actual-code side exercises named decoder, capacity, render/chain, Lease,
-reservation, and node-observation cases; it is a finite differential, not general DSL or effectful-runtime
-correspondence. Runtime fidelity remains UNVERIFIED.
+Prototype or prior-run evidence never validates this doctrine. The formal-model phase must qualify the real
+Haskell kernel with independent Haskell reference models, semantic expectations, and production-source
+mutants. At minimum, it must expose renderer meaning changes, explorer/checker disagreement, fairness
+weakening, invariant deletion, frontier truncation, unsupported-theory refusal, and stale evidence.
+
+Generated TLA+/CFG bytes, traces, fingerprints, and solver transcripts are observations beneath `.build/**`.
+They cannot be committed or used as their own reference. A green finite model establishes only the declared
+bound; an inductive result establishes only the supported theory; neither establishes effectful runtime
+fidelity.
 
 ---
 
@@ -547,17 +506,11 @@ live forest). The concrete obligation for the one model is owned by
 
 ## 9. Planning ownership
 
-This document remains the normative formal-model doctrine. The `Model` EDSL, the `interpret` explorer, and the
-`emitTLA` renderer were built and validated in Phase 11; the bounded amoebius explicit-state checker was built
-and validated in Phase 12; the QF_LIA/boolean symbolic induction checker was built and validated in Phase 13;
-the bounded compiled-source refinement checker was built and validated in Phase 14; the concrete
-`GatewayMigration` model, both branches, was built and validated in Phase 17 with semantic renderer and actual
-five-calculus projections. The bounded DSL/protocol set was built and validated in Phase 18 with semantic
-actual-code projections, explorer/TLC agreement, and load-bearing mutation controls. Phase order, status, and
-gates live only in
-[DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The kernel and protocol claims above are
-tested/proven-for-the-model at their recorded scopes; effectful-daemon and live-runtime fidelity remain design
-intent and UNVERIFIED.
+This document remains the normative formal-model doctrine. Phase order, validation status, gate ownership,
+and remaining work live only in
+[DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This doctrine records no current validation
+result. Hardware-free model, DSL, and generator checks must pass the human-approved promotion barrier before
+any live runtime correspondence check begins.
 
 ---
 

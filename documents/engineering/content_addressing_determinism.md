@@ -11,12 +11,12 @@ This document owns the determinism construction and its per-stage obligations. I
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -95,12 +95,12 @@ content-addressing/determinism *use* of it, the catalog owns the typing discipli
 
 ### 4.5 The ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss
 
-[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) validates the representational first step:
-`InferenceEngine` carries one of the closed named `AppleMetal | Cuda | LinuxCpu` lanes, with no URL or download
-constructor, and the URL negative fails dhall-typecheck. [Phase 32](../../DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md)
-validates the complete offering quotient, family/lane availability relation, identity-complete owner demands,
-and accelerator provision against every permitted coexistence epoch. Bounded-cache materialization and live
-first-miss resolution remain owned by their later phases.
+[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) must eventually validate the representational
+first step in Haskell: `InferenceEngine` carries one closed named `AppleMetal | Cuda | LinuxCpu` lane and has no
+URL/download constructor. [Phase 32](../../DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md) must
+then validate the complete offering quotient, family/lane relation, identity-complete owner demands, and
+accelerator provision across permitted coexistence epochs. Both phases are **NOT VALIDATED**. Bounded-cache
+materialization and live first-miss resolution remain owned by later phases.
 
 **The budget has since generalised past ML assets.** `CacheBudget` was introduced here because model weights,
 engines, and compiled kernels are the largest things amoebius materializes, and it reads throughout this
@@ -118,9 +118,9 @@ An earlier design gave each a *different* lifecycle (engine baked into the image
 lazily JIT'd). This round **collapses all three onto one shape**: a **bounded, content-addressed, ephemeral cache**, populated on first miss by `resolve = {download | build}`, shared across `infernix` and `jitML` through
 the **`jit-build` capability-extension** ([`service_capability_doctrine.md`](./service_capability_doctrine.md)).
 The DRY win is one resolver and one bounded pool for all three asset kinds instead of three bespoke paths.
-The resolver's enumerated Haskell dependency surface and the native Pulsar fork/codegen dependency were
-build-tested together by the [Phase 1 toolchain gate](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md); no
-resolver or runtime behavior is claimed by that Register-1 result.
+The [Phase 1 toolchain gate](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md) must build the resolver's
+enumerated Haskell dependency surface together with the native Pulsar fork/codegen dependency; even a passing
+Register-1 observation would claim no resolver or runtime behavior.
 
 The single design rule survives, restated for the collapse: **no asset is ever fetched by authoring a URL.**
 Each asset is **named** by a typed content-addressed identity drawn from a **closed catalog** — there is no
@@ -238,8 +238,9 @@ The three asset kinds, **one cache shape** (`resolve = {download | build}` on fi
   download — the identity is drawn from a closed catalog. The base image and the resolver's build inputs are
   owned by [`image_build_doctrine.md`](./image_build_doctrine.md); this **replaces** `infernix`'s per-engine
   Poetry-venv + curl-tar-at-image-build with the one shared resolve-on-miss path.
-  Phase 56.1, sealed 2026-08-14, has live-tested only the base image's resolver/toolchain presence and byte
-  identity on both Linux architectures; first-miss materialization into `CacheBudget` remains a Phase 80 gate.
+  Phase 56.1 owns the bounded base-image acceptance criterion for resolver/toolchain presence and byte identity
+  on both Linux architectures; first-miss materialization into `CacheBudget` remains a Phase 80 gate. Neither
+  criterion is a current result in this doctrine.
 - **Tier 2 — `ModelArtifact` = eager STAGE-THEN-SERVE, and *staging by name IS a provenance-carrying import*.**
   The parent-minted nested `infernix.dhall` names the model *set*; the in-cluster control-plane daemon stages each
   model into the shared bounded cache, and the `.ready` sentinel is written **last** so the `model` pointer ([§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete

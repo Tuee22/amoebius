@@ -18,12 +18,12 @@ the specification language of [dsl_doctrine.md](../engineering/dsl_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_tenancy.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, documents/README.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_tenancy.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Scope](#1-scope)
@@ -51,7 +51,8 @@ subsystem doctrine that defines its storage, gateway, secret, capacity, topology
 
 Everything here is **design intent**, not a tested amoebius result: the type discipline it describes (the spec
 composes; no illegal value is constructible) is a **Tier-1** (design-time / in-process) property targeted for
-in-process validation in the **pre-cluster type/decode gates (Phases 11–20)** (Dhall dhall-typecheck `dhall type` + the Haskell decoder gadt-decode + QuickCheck), while
+in-process validation in the **pre-cluster schema/decode/bind/plan gates (Phases 25–34, aggregated by Phase 49)**
+(generated Dhall typecheck + the Haskell decoder + Haskell-owned properties), while
 its **runtime enforcement** remains **Phase 65** (Tier 2). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
@@ -497,9 +498,11 @@ flowchart TD
 **The two-tier mapping.** (This *Tier* vocabulary is the same split the plan and the catalog name in *Register*
 terms: **Tier-1 corresponds to Registers 1–2** and **Tier-2 to Register 3** — one pre-cluster/runtime boundary
 under two names.) Layers 1–2 (`type-foreclosed` + `decode-foreclosed`) are the **Tier-1** design-time /
-in-process integrity band — the spec composes and the type discipline holds in the abstract — validated
-**in-process in the pre-cluster type/decode gates (Phases 11–20)** (Dhall dhall-typecheck, Haskell decoder gadt-decode, QuickCheck,
-bind/expand, the opaque provision seal, and `renderAll` goldens). Layer 3
+in-process integrity band — the spec composes and the type discipline holds in the abstract — whose target
+**in-process validation is owned by the pre-cluster schema/decode/bind/plan gates (Phases 25–34, aggregated by
+Phase 49)** (generated Dhall typecheck, Haskell decoder, Haskell-owned properties, bind/expand, the opaque
+provision seal, and `renderAll` semantic
+oracles). Layer 3
 (`runtime-checked`) is **Tier-2** runtime-enforcement integrity — that the running cluster enforces what the spec
 composed — and stays **deferred and UNVERIFIED** until its live real-resource phase (owned by
 [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine).
@@ -558,12 +561,15 @@ makes to the one locus that observes it.
 
 **Different questions, but not an unconstrained product.** Only seven of the eighteen layer×locus pairs are
 inhabitable, because a locus downstream of the check that forecloses a state never sees that state and a
-locus upstream of an effect cannot settle a residue about it. The relation is authored once, in
-[the catalog router](./README.md#which-locus-can-observe-which-layer), and the covering generator reads it
-there. Its consequence is worth naming here, where both axes are defined: the layer is a **function of the
+locus upstream of an effect cannot settle a residue about it. The relation's human-facing doctrine is stated
+once in [the catalog router](./README.md#which-locus-can-observe-which-layer). The covering generator never
+parses that Markdown: a separately reviewed Haskell declaration encodes the executable relation and an
+independently authored Haskell oracle checks it. Its consequence is worth naming here, where both axes are
+defined: the layer is a **function of the
 locus** at five of the six loci, and only `gadt-decode` admits both foreclosure layers — which is the
 dhall-typecheck-vs-gadt-decode caveat above, seen from the covering's side. That is why an entry's `Cells:`
-line is authored rather than derived: it carries exactly the one bit the locus does not.
+line specifies the pairing for a reader while its reviewed Haskell counterpart carries the executable bit the
+locus does not; no `Cells:` line is a generator, checker, or oracle input.
 
 The six loci:
 
@@ -617,7 +623,8 @@ Because the axes are orthogonal, a single entry commonly names several loci at o
 `rendered-artifact-oracle` (the derived rules/panels in the emitted objects), and `live-effect` (that the alert actually
 fires) — and the foreclosure *layer* of each part is stated separately in the entry. The loci also map loosely onto
 the two-tier band: `dhall-typecheck`, `gadt-decode`, `extension-astcheck`, `provision-seal`, and `rendered-artifact-oracle` are
-**Tier-1** design-time / in-process gates (validated in the **pre-cluster type/decode gates, Phases 11–20** — inside the plan's pre-cluster band, Phases 1–34), while
+**Tier-1** design-time / in-process gates (their target validation is owned by the **pre-cluster
+schema/decode/bind/plan gates, Phases 25–34, aggregated by Phase 49**), while
 `live-effect` is the **Tier-2** runtime-enforcement residue
 deferred to its live phase.
 
@@ -686,5 +693,5 @@ forbids reading a complete covering as a closed proof of safety, exactly as it f
 - [Pulumi IaC Doctrine](../engineering/pulumi_iac_doctrine.md) — route53 / zerossl name→address binding ([§4.5](#45-content-address-totality--names-are-total-functions-of-content))
 - [Chaos / Failover Doctrine](../engineering/chaos_failover_doctrine.md) — the `runtime-checked` / `live-effect` residue (the honest limit)
 - [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) — proven/tested/assumed honesty discipline
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 11–20) / Tier-2 (Phase 65) tier split
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 25–34, aggregated by Phase 49) / Tier-2 (live phases beginning only after the barrier) split
 - [Engineering Doctrine Index](../engineering/README.md)

@@ -9,10 +9,12 @@ import Amoebius.Image.Resolver (runResolverCommand)
 import Amoebius.Image.Build (runAdmittedBuildxOci, runBakeInventory, runRenderBakeDockerfile)
 import Amoebius.Vault.Client (runVaultPromptWriteCommand, runVaultReadCommand, runVaultTransitCommand)
 import Amoebius.Vault.Seal (openUnlockMaterial, sealUnlockMaterialIO)
+import Amoebius.Validation.Dispatch (runValidateCommand)
 import Data.ByteString.Base64 qualified as Base64
 import Data.ByteString.Char8 qualified as StrictByteString
 import Data.ByteString.Lazy qualified as ByteString
 import System.Environment (getArgs)
+import System.Exit (exitWith)
 
 main :: IO ()
 main = do
@@ -28,6 +30,7 @@ main = do
     "vault-read" : options -> runVaultReadCommand options
     "vault-transit-decrypt" : options -> runVaultTransitCommand options
     "vault-prompt-write" : options -> runVaultPromptWriteCommand options
+    "validate" : options -> runValidateCommand options >>= exitWith
     ["vault-seal-unlock"] -> runSealUnlock
     ["vault-open-unlock"] -> runOpenUnlock
     ["dev", "boundary-fixture", kubectl, docker, helm, pulumi, manifestPath] -> do

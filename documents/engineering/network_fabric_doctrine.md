@@ -68,17 +68,17 @@ with cluster_topology.
 
 **Adopt raw kernel WireGuard, configured directly by amoebius. Reject Netmaker.** Netmaker is not
 "WireGuard" — it is a WireGuard *control-plane product*, and every subsystem it brings duplicates one
-amoebius already owns, in a weaker, unreviewed form carrying its own desync-able state store. It is the
-Harbor/Helm of networking: the duplicated-control-plane pattern amoebius rejects
+the amoebius target architecture assigns elsewhere, in a weaker, unreviewed form carrying its own desync-able state store. It is the
+Duplicated networking control plane: the pattern amoebius rejects
 ([manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not), [image_build_doctrine.md](./image_build_doctrine.md)).
 
-| Netmaker brings | amoebius already owns |
+| Netmaker brings | Amoebius target owner |
 |---|---|
 | Its own control server | The control-plane daemon ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) |
 | Its own DB (a desired-state store) | Pure `bind/expand → plan/resolve infrastructure → provision → renderAll` from `InForceSpec` plus authenticated materialization — **no external desired-state store** ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)) |
 | Its own MQTT broker to push peer changes | Pulsar — the one coordination plane ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) |
 | Its own PKI / mTLS | The Vault forest CA + secrets model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) |
-| Its own node/peer inventory | The typed node inventory ([substrate_doctrine.md](./substrate_doctrine.md)) + the Dhall spec |
+| Its own node/peer inventory | The typed node inventory ([substrate_doctrine.md](./substrate_doctrine.md)) + external/untracked operator input decoded by Haskell |
 
 Five duplicated control planes, five second state stores. amoebius configures the
 raw WireGuard *primitive* it owns end to end, and runs none of Netmaker's machinery. What this forecloses:
@@ -137,13 +137,13 @@ flowchart TD
 
 *Design intent. Rendered peer configs and Vault-injected keys are Tier-1 in-process; the wg0 interface is the one effectful seam where `wg set` enacts — runtime-checked, not proven here.*
 
-[Phase 73](../../DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md) validates this v1 seam on the
-always-available `linux-cpu` lane. Two fresh Vault-KV keypairs are resolved by `SecretRef` through the
-current-tree Haskell Kubernetes-auth client; exact rendered config brings up a real two-namespace kernel
-fabric. The spoke reaches the gateway-role hub by ICMP and TCP, while underlay `tcpdump` sees WireGuard
-UDP/51820 and not the fresh plaintext canary. `wg show`, cgroup-v2, `tc`, bounded logs/nodefs, zero-mutation
-rediscovery, and cleanup are external observations. The broker geo-replication peer render, gateway hub
-repoint, and stretched `ControlPlanePeer` remain UNVERIFIED.
+The eventual [Phase-73 gate](../../DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md) must test this v1
+seam on its declared `linux-cpu` lane, but Phase 73 is **NOT VALIDATED**. Its contract must require two fresh
+Vault-KV keypairs resolved by `SecretRef`, exact rendered configuration, a real two-namespace kernel fabric,
+ICMP/TCP reachability, and an underlay observation that sees WireGuard UDP/51820 but not a fresh plaintext
+canary. Independent observations must also cover `wg show`, cgroup-v2, `tc`, bounded logs/nodefs,
+zero-mutation rediscovery, and cleanup. Broker geo-replication peer render, gateway-hub repoint, and stretched
+`ControlPlanePeer` are outside that bounded claim.
 
 ---
 
@@ -288,11 +288,13 @@ candidate into a first-class phase (the network fabric is now *load-bearing* for
 "redundant, do not adopt" default that candidate assumed when it measured only against north-south
 ingress); the Linkerd half collapses to the written verdict in [§6](#6-the-service-mesh-verdict-no-linkerd-for-v1).
 
-> **Honesty.** Phase 73 supplies Register-3 tested evidence for the static two-peer raw-kernel fabric,
-> Vault-by-name key resolution, gateway-role hub reachability, encrypted underlay, bounded resource controls,
-> and exact teardown. Keyless/overlapping/out-of-CIDR foreclosure remains proven-for-the-model in the
-> pre-cluster band. Broker geo-replication, gateway migration/repoint, stretched control-plane peering, and
-> arbitrary WAN failure behavior remain UNVERIFIED until their owning gates run.
+> **Honesty — target only, NOT VALIDATED.** Phase 73 must eventually supply independently observed Register-3
+> evidence for the static two-peer raw-kernel fabric, Vault-by-name key resolution, gateway-role hub
+> reachability, encrypted underlay, bounded resource controls, and exact teardown. No such evidence is current.
+> Keyless, overlapping, and out-of-CIDR foreclosure also remains unvalidated in the pre-cluster band. Broker
+> geo-replication, gateway migration/repoint, stretched control-plane peering, and arbitrary WAN failure
+> behavior remain outside the bounded claim until their numerical owners are independently validated and
+> human-promoted.
 
 ---
 

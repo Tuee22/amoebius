@@ -18,6 +18,8 @@ rule disagree, the rule is correct and the example is the defect. Nothing here h
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [Appendix A — retired (control-plane single-instance is delegated to k8s/etcd)](#appendix-a--retired-control-plane-single-instance-is-delegated-to-k8setcd)
 - [Appendix B — Worked example (fenced): cross-cluster geo-replication failover (the open cross-cluster failover question)](#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)
@@ -163,7 +165,7 @@ dedup + pointer-merge fold (decision layer); the modeled two-cluster safety/live
 replication-lag/promotion-gate, and failback-idempotency drills. *Assumed* — the data-loss-window /
 replication-lag bound (R8/R9), monitored never proven; the PACELC latency-for-consistency posture (R7);
 runtime fidelity and behaviour beyond 2 clusters. **Under the two-tier schedule, the two-cluster
-design-model's safety/liveness properties are *proven for the model at scope 2* in Phase 17 (design-first), and
+design-model's safety/liveness properties are Phase-17 proof obligations at scope 2 (design-first), and
 model↔code correspondence is differentially checked; the runtime fidelity (real physics) and live
 cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the Tier-2 Phase-75 obligation, and the single
 place the per-system proof concentrates.**

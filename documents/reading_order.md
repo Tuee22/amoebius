@@ -37,9 +37,9 @@ prior knowledge, but every stop presumes the stops above it.
 
 ## Before starting
 
-> **The repository contains implementation and tests, but every prior phase seal is reopened.** Existing
-> results are historical diagnostics until each redesigned gate passes against a recorded source snapshot and its
-> repository-local attestation verifies. Prescriptive doctrine remains design intent unless it names that evidence.
+> **Doctrine describes the target; it is not implementation or validation evidence.** Candidate gate output
+> cannot promote itself. Only the human-controlled plan records phase status, after independent expectations,
+> sabotage controls, predecessor order, and the applicable hardware-free barrier have been reviewed.
 
 - [`glossary.md`](./glossary.md) — open in a second tab and leave it open; every stop below assumes it.
 
@@ -50,8 +50,7 @@ discussion.
 
 - [`DEVELOPMENT_PLAN/overview.md` §1](../DEVELOPMENT_PLAN/overview.md#1-the-everything-orchestrator-shape-one-runtime-binary-three-contexts) — one binary, three contexts, and the shape of the whole system.
 - [`DEVELOPMENT_PLAN/overview.md` §2](../DEVELOPMENT_PLAN/overview.md#2-the-seed-projects-reference-implementations-amoebius-re-derives-from) — the five seed projects amoebius re-derives from, and why depending on none of them is the point.
-- [`DEVELOPMENT_PLAN/overview.md` §5](../DEVELOPMENT_PLAN/overview.md#5-current-baseline--reopened-implementation) — the reopened baseline; read this before treating an implemented surface as validated.
-- [`repository_layout_doctrine.md`](./engineering/repository_layout_doctrine.md) — the complete authored and generated tree, including what can never enter version control.
+- [`repository_layout_doctrine.md` §1](./engineering/repository_layout_doctrine.md#1-classification-rule) — the closed source boundary: behavioral source is Haskell, `pb/**` is the sole source-language exception, and everything else is generated lazily or supplied externally.
 
 Stop there. The invariant table in
 [§3](../DEVELOPMENT_PLAN/overview.md#3-the-hard-constraints-cross-cutting-invariants) and the phase index in
@@ -89,13 +88,15 @@ lawful instances compose.
 
 ## Stop 3. The description language
 
-- [`dsl_doctrine.md` §2](./engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) — the split between what Dhall carries and what Haskell carries.
+- [`dsl_doctrine.md` §2](./engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) — the split between external, untracked Dhall values and version-controlled Haskell logic.
 - [`app_vs_deployment_doctrine.md` §1](./engineering/app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once) — the split that lets one application run many ways unchanged.
 - [`service_capability_doctrine.md` §2](./engineering/service_capability_doctrine.md#2-the-capability-set) — the abstract service roles an application names instead of products.
 
 ## Stop 4. From description to effect
 
-This is the spine: how an authored file becomes a running cluster.
+This is the spine: how an external operator value or a version-controlled Haskell declaration becomes a
+running cluster. External-language materializations are lazy `.build/**` products, never a second tracked
+source surface.
 
 - [`dsl_doctrine.md` §5](./engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) — the contract stop 2 described, stated as the language's own guarantee.
 
@@ -116,11 +117,22 @@ what makes the rest of it readable at face value.
 - [`formal_model_doctrine.md` §6](./engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not) — the boundary between what the model establishes and what the code must still earn.
 - [`gateway_migration_doctrine.md` §5](./engineering/gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine) — the one place that obligation concentrates, drawn as a state machine.
 
+The first promotion barrier is hardware-free: the DSL parser/typechecker/decoder, pure semantics, generation
+determinism, independent Haskell expectations, negative controls, and source-boundary audit must be accepted
+before container, cluster, browser, provider, accelerator, or other hardware-specific replay can count as
+downstream evidence. Later replay checks portability; it cannot stand in for the language result it consumes.
+
 ## Stop 6. The plan
 
 - [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — the tracker; the only place phase order, status, and gates live.
-- [`development_plan_standards.md` §M](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the twelve clauses that stop a gate from being passable by a stub.
+- [`development_plan_standards.md` §M](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the fixed eighteen-row contract that stops a gate from being passable by a stub.
 - [`development_plan_standards.md` §K](../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed) — how stop 5's discipline binds a phase before it may be marked done.
+- [`development_plan_standards.md` §C](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — status is a human decision; a command, script, generated report, or agent may produce candidate evidence but may not mark a sprint or phase Done or Validated.
+- [`development_plan_standards.md` §L](../DEVELOPMENT_PLAN/development_plan_standards.md#l-one-substrate-discipline) — later hardware evidence stays scoped to the one natural substrate actually exercised and cannot be generalized to an untested substrate.
+
+Work proceeds in numerical phase order. A later hardware-dependent gate does not compensate for an open or
+unaccepted predecessor, and no hardware provisioning should begin merely to validate a language surface that
+has not crossed the hardware-free barrier above.
 
 ## Stop 7. Where to go next, by role
 

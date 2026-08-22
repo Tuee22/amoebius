@@ -18,12 +18,12 @@ resulting node set, owned by [resource_capacity_folds.md](./resource_capacity_fo
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Two axes: the substrate is detected, the engine is declared](#1-two-axes-the-substrate-is-detected-the-engine-is-declared)
@@ -58,9 +58,10 @@ numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and [resourc
 
 The pure relation begins with Phase 9, its reflected schema/decoder consumers arrive in Phases 25–26, and
 runtime engine realization belongs to Phases 52–54.
-The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) has now built and Register-1
-validated `Amoebius.Dsl.Topology`: seven compile-time index pairs, the exhausted 3×3 engine/environment
-compatibility matrix, host distinctness, fixed placement, and elastic growth all pass, with their mutants red.
+The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) must validate
+`Amoebius.Dsl.Topology` at Register 1: seven compile-time index pairs, the exhausted 3×3 engine/environment
+compatibility matrix, host distinctness, fixed placement, and elastic growth must be accepted with their
+mutants red.
 The three corresponding Dhall-typecheck loci remain Phase-25 work rather than a backward dependency.
 No EKS resource was created, no VM booted, and no node joined; those runtime facts remain **UNVERIFIED**.
 Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
@@ -253,7 +254,8 @@ never an amoebius-built second control-plane fabric (the surface-provider-vs-bui
 [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision));
 the stretched treatment is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
 
-The untyped CLI surface — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]` ([substrate_doctrine.md §6](./substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off))
+The untyped Haskell CLI surface — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]`
+([substrate_doctrine.md §6 — The pre-binary handoff contract](./substrate_doctrine.md#6-the-pre-binary-handoff-contract))
 — is a *projection* of this typed `ComputeEngine`, not a second source of truth.
 
 ---
@@ -284,7 +286,7 @@ the virtualization provider.
 - **Honesty.** The witness demand is type-foreclosed (no constructor). That the Lima/WSL2 VM *actually boots* and
   presents a working kernel is runtime-checked, owned by
   [substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
-  and exercised in Phase 94.
+  and is assigned to Phase 94 for runtime exercise.
 
 ---
 
@@ -467,7 +469,8 @@ different moves, never fused:
   Pulumi node provisioning enacts it
   ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm), [pulumi_iac_doctrine.md §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)).
 - **Quorum is fixed by declaration.** The server count is *not* an autoscaled quantity: moving `Single → Ha3`
-  (or `Ha3 → Ha5`) is a **deliberate re-provision of the control plane**, authored in the `.dhall`, never a
+  (or `Ha3 → Ha5`) is a **deliberate re-provision of the control plane**, declared in the operator's
+  external/untracked `.dhall`, never a
   `ScalingPolicy` outcome. Quorum is pinned by the declared `Rke2Servers` arm; the capacity arithmetic over the
   resulting node set is owned by [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm).
 
@@ -640,10 +643,11 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 
 This document is normative topology doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the `ComputeEngine` /
-`LinuxHost` / `Topology` types and the compatibility relation land in **Phase 25** (with the negative `.dhall`
-gate); the Lima `LinuxHost` witness is exercised on **Phase 89** (`apple`); live kind topology lands in
-**Phases 35/53**, while live multi-node rke2 remains an explicitly unassigned Phase-N gate; the `Managed Eks`
-arm lands in **Phase 76**. This doc never maintains a competing status ledger; it
+`LinuxHost` / `Topology` types and the compatibility relation are assigned to **Phase 25**, with Haskell
+expectations and generated run-local Dhall negatives; the Lima `LinuxHost` witness is assigned to **Phase
+89** (`apple`) for runtime exercise; first live kind topology is assigned to **Phase 55**, while live
+multi-node rke2 remains an explicitly unassigned
+Phase-N gate; the `Managed Eks` arm is assigned to **Phase 76**. This doc never maintains a competing status ledger; it
 states the target shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---

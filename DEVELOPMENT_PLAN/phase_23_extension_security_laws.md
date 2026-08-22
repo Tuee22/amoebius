@@ -1,22 +1,22 @@
 # Phase 23: The security laws S1-S6
 
-> **Purpose**: Mechanically evaluate S1–S6 over a bounded pure security kernel with typed identity and request
-> scope boundaries.
+> **Purpose**: Specify the target Haskell capability to evaluate S1–S6 over a bounded pure Haskell
+> security kernel with typed identity and request-scope boundaries using independently authored
+> `.hs` evidence.
 > **Read this if**: the attested identity, scoped operation, derived namespace, revocation-policy value, or its
 > finite evidence boundary must change.
 
-This phase owns a Register-1 evaluator and a small two-tenant/two-subject model for the six security laws. It
-reuses Phase 8's lexical rank-2 request scope; it does not claim that arbitrary application states are
-unrepresentable, provide the persisted-value re-entry back door, prove timing indistinguishability, verify a
-production identity provider, or close the S family under composition. The normative laws remain owned by
-[`extension_conformance_security.md`](../documents/engineering/extension_conformance_security.md).
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md
 **Generated sections**: none
 
 </details>
@@ -24,12 +24,13 @@ production identity provider, or close the S family under composition. The norma
 ---
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 23.1: The security laws S1-S6 ✅](#sprint-231-the-security-laws-s1-s6-)
+- [Sprint 23.1: The security laws S1-S6 ⏸️](#sprint-231-the-security-laws-s1-s6-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,95 +38,82 @@ production identity provider, or close the S family under composition. The norma
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All thirteen gate sides passed on natural `arm64`, untranslated: thirteen exact
-metrics matched and 26 surfaces joined to 30 run-time items. Attestation
-`sha256:d93277812867d29982bdead0f3af23f29f698672eb4aa229bb0a0cddb63547dd` binds source
-`sha256:e1cf7fa2dbb2d06e…` over 2,247 files. Repository-conformance attestation
-`sha256:76a767b39cc3654c99721671c336780b30539a3deb881567f4933dc70759d9e7` and documentation lint passed on
-that snapshot. Production cryptography, wall-clock timing, persisted-value re-entry, compositional S closure,
-runtime correspondence, and a conformance verdict remain UNVERIFIED.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 22, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`lib:extension-security-laws` distinguishes `Identity 'Claimed` from `Identity 'Attested`; only the fixture
-verification boundary introduces the latter. Eliminating an attested identity delegates to Phase 8's rank-2
-`withRequestScope`, so every scoped operation and derived key requires the fresh request index. Opaque stores
-resolve tenant, subject, and resource together, use one public refusal for absent and foreign resources, and
-expose no unscoped operation arm. The five derived keyspaces use one length-framed renderer and a scope-indexed
-key. Authority layers have only two constructors: an observed revocation edge or a declared positive staleness
-bound.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to evaluate S1–S6 over a bounded pure Haskell security kernel with typed
+identity and request-scope boundaries using independently authored `.hs` evidence.
 
-The evaluator consumes explicit observations for all six laws. Its finite corpus covers five operations over
-own, foreign, and absent targets; five adversarial namespace component transpositions; one observed edge and
-one enforced modeled bound; one lawful six-law subject and six one-law defects. Four compiler negatives pin
-claimed-as-attested use, a promotion function, missing request scope, and a key minted under a different
-request. Six executable mutants redden the exact corresponding law loci.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
 
-**Phase scope:** one valid and one tampered fixture envelope, fifteen scoped operation cases, five
-foreign/absent refusal pairs, five modeled equal-step observations, five injective namespace pairs, two
-authority-layer policies, 42 authored S-law verdicts, four exact compiler barriers, one finite constructor and
-unsafe-token scan, one independently recomputed fixture SHA-256 signature, and six executable mutants.
-Production cryptographic verification, wall-clock timing, persisted-value re-entry, arbitrary application
-surfaces, compositional S closure, and the Phase-24 conformance verdict remain outside the claim.
-**Substrate:** `none`
-**Lane:** `none`
-**Register:** 1
-**Depends on:** [Phase 21](phase_21_extension_laws_per_extension.md) — L1–L5, which S2, S3 and S5 sharpen at a particular seam. The other three add obligations no per-extension law reaches, so this phase is not a corollary of its predecessor.
-**Gate:** `python3 tools/run_phase_gate.py 23` rebuilds both suites and requires thirteen
-metrics, independent Python signature and namespace framing, authored operation/revocation/verdict tables,
-four specific compiler failures, six exact mutants, the complete surface join, architecture, containment,
-write guard, ledger, and source-bound attestation; [Gate integrity](#gate-integrity) owns the anti-tautology
-apparatus.
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — evaluate S1–S6 over a bounded pure Haskell security kernel
+with typed identity and request-scope boundaries using independently authored `.hs` evidence.
+NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 22](phase_22_extension_laws_compositional.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 23`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set (§M.7):** the store names two tenants and two subjects. Read, update, delete, replay,
-  and cache lookup each run against own, foreign, and absent targets. All five keyspace constructors receive a
-  component-transposition pair, and the authority table contains one connected and one disconnected layer.
-- **Independent oracle (§M.1/§M.3):** authored TSVs state all fifteen operation outcomes, five namespace
-  pairs, two authority policies, and 42 verdicts. Python independently checks their shapes, recomputes every
-  emitted length-framed namespace, and recomputes the fixture SHA-256 signature from an eight-byte big-endian
-  framing implementation separate from the Haskell fixture.
-- **Mutation quota (§M.2):** tampered-identity acceptance, caller-supplied scope, an unscoped arm,
-  distinguishable refusal, resource-only namespace, and missing revocation policy each redden exactly S1,
-  S2, S3, S4, S5, and S6 respectively.
-- **Specific-reason negatives (§M.8):** the legal claimed identity compiles. Claimed-as-attested use, an
-  explicit promotion, and missing scope fail at GHC-83865 on their named types/call; a cross-request key fails
-  at GHC-25897 on the rigid request indices.
-- **Finite coverage honesty (§M.4):** the signature is a fixture SHA-256 check rather than a production
-  cryptographic identity provider. Refusal timing compares modeled step counts with a declared zero-step
-  difference, not wall-clock observations. The unsafe/source scanner recognizes a finite token set, and the
-  two authority layers do not stand for a runtime inventory.
-- **External observation (§M.5/§M.10):** authored TSVs, a separately implemented Python framing/signature
-  oracle, GHC diagnostics, and executable mutant modes observe the library. The production evaluator does not
-  author its expected verdict table.
-- **Authority/bypass (§§M.11–M.12):** attested identity, verification key, store, scoped key, staleness bound,
-  and authority-layer constructors are private. Observation bundles decide bounded law evidence; they do not
-  mint scopes, decrypt persisted values, or seal a conformance verdict. Phase 8 still has no persisted-value
-  re-entry combinator, so the doctrine's single audited back door remains owed.
-- **Fresh challenge (§M.9):** not applicable. This gate is pure; independent authored tables, Python
-  recomputation, compiler twins, and executable mutants supply its challenge apparatus.
-- **Extension conformance (§M.13).** Not applicable. This phase implements bounded S1–S6 evidence; Phase 24
-  still owns generation and sealing of an extension conformance verdict.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — evaluate S1–S6 over a bounded pure Haskell security kernel with typed identity and request-scope boundaries using independently authored `.hs` evidence. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 23` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 22 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`extension_conformance_security.md`](../documents/engineering/extension_conformance_security.md) — the rule behind the security laws S1-S6.
+- [`extension_conformance_security.md` §4 — S1–S6](../documents/engineering/extension_conformance_security.md#4-s1s6) — the rule behind the security laws S1-S6.
 
 ## Sprints
 
-## Sprint 23.1: The security laws S1-S6 ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done.
-**Implementation**: `src/extension-security-laws/Amoebius/Extension/Laws/Security.hs`,
-`test/{harness,mutant}/extension_security/*.hs`,
-`test/negative/compile_fail/extension_security/SecurityCompile.hs`,
-`test/spec/extension/ExtensionSecurityLawsSpec.hs`, `test/oracle/extension_security/*.tsv`,
-`test/oracle/extension_security_laws_surfaces.tsv`, and `tools/extension_security_laws_gate.py`.
-**Blocked by**: None.
-**Independent Validation**: authored operation, namespace, authority, and 42-cell verdict tables; independent
-Python framing/signature checks; legal/illegal compiler twins; finite source scan; and six exact mutants.
-**Docs to update**: `documents/engineering/extension_conformance_security.md`
+## Sprint 23.1: The security laws S1-S6 ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -152,17 +140,22 @@ and compositional residues honestly.
 
 ### Remaining Work
 
-None. Production cryptography, wall-clock timing, persisted-value re-entry, compositional S closure, runtime
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Production cryptography, wall-clock timing, persisted-value re-entry, compositional S closure, runtime
 integration, and a generated conformance verdict remain later work rather than Phase-23 completion criteria.
 
 ## Documentation Requirements
 
-**Engineering docs to update after the capability gate passes:**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - [`extension_conformance_security.md`](../documents/engineering/extension_conformance_security.md) — record
   the bounded S1–S6 evaluator without upgrading production cryptography, wall-clock timing, persisted-value
   re-entry, compositional closure, or runtime fidelity.
 
+**Cross-references to add:**
+
+- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+
 ## Related Documents
+
 - [Development Plan](README.md)
 - [`extension_conformance_security.md`](../documents/engineering/extension_conformance_security.md) — the rule behind the security laws S1-S6.

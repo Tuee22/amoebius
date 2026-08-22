@@ -18,7 +18,7 @@ by [resource_capacity_folds.md](./resource_capacity_folds.md).
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -37,9 +37,10 @@ The Dhall gates foreclose only structurally-illegal specifications. dhall-typech
 
 An untyped, per-call validation layer fails the property amoebius requires. Ad-hoc checks scattered through the deploy path report the first failure and stop, cannot express which checks are independent (and therefore parallelisable) versus dependent, and admit a deploy that then fails halfway through `pulumi up` with resources half-created. The admission the deploy needs is a single composable structure whose success is a precondition of any mutation.
 
-amoebius already owns the runtime admission gate this requires. `dhall update` "actively proves each named secret before admitting the upload, and rejects fail-fast otherwise"
+The target architecture assigns this runtime admission gate to `dhall update`: it must actively check each named
+secret before admitting the upload and reject fail-closed otherwise
 ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)). It reaches real hosts and cloud APIs
-before any reconcile. It rejects an absent secret, a key that cannot connect, a host short of its declared
+before any reconcile. It must reject an absent secret, a key that cannot connect, a host short of its declared
 resources, or a credential lacking permission or quota.
 
 This document owns the *mechanism* of that gate: one pure-functional `Check` algebra ([§2](#2-the-check-algebra)), its probe instances ([§3](#3-the-check-instances-the-mechanism-of-the-dhall-update-gate)), and the recursive lift of the same algebra over the forest ([§4](#4-the-recursive-forest)). It adds two extensions the gate's own prose does not yet spell out — the worst-case dynamic envelope that validates a future-needed credential now, and the ack/nack proof tree.
@@ -87,7 +88,7 @@ The canonical `Applicative`/`Monad` instances short-circuit (`<*> = ap`). Error 
 
 The laws are stated over a pure interpreter `runPure :: Env -> Check a -> Outcome a`, quantified over generated `Env` and `Check`. The `Bind` fragment satisfies the Functor, Applicative, and Monad laws, including coherence (`<*> = ap`) and short-circuit (a failed `mf` leaves `mx` unobserved). `AllOf`/`Both` are homomorphisms into `Validation`'s accumulating applicative, preserving error multiplicity (`errorCount (Both a b) = errorCount a + errorCount b`). The load-bearing law is non-collapse: `both a b` and `a >>= \x -> b >>= \y -> pure (x, y)` agree on the successful value but differ on failure — the former accumulates both reasons, the latter reports one. `Select` is left-biased: on the left branch's success the right is unobserved; on both-branch failure both reasons are kept.
 
-A committed mutant corpus fixes these properties, following the seeded-mutant idiom of [formal_model_doctrine.md](./formal_model_doctrine.md) and [testing_doctrine.md](./testing_doctrine.md): each mutation must turn a property red. Each representative mutant is listed with the property that kills it.
+A committed Haskell mutant-operator corpus fixes these properties, following the seeded-mutant idiom of [formal_model_doctrine.md](./formal_model_doctrine.md) and [testing_doctrine.md](./testing_doctrine.md): each operator materializes its mutation only beneath `.build/**`, and each mutation must turn a property red. Each representative operator is listed with the property that kills it.
 `AllOf` short-circuits (accumulation homomorphism, non-collapse); `Both` drops the second error (homomorphism, non-collapse); `Select` drops an unproven branch's errors (the `Select` law); `<*>` accumulates (coherence); `AllOf`'s `mappend` becomes set-union, losing multiplicity; `both` becomes silently monadic (non-collapse); and the success seal is exposed so `renderAll` accepts an unsealed value (the seal-opacity golden of [illegal_state_techniques.md §6](../illegal_state/illegal_state_techniques.md)).
 
 ### 2.5 Interpreters, result type, and the seal
@@ -249,8 +250,9 @@ flowchart TD
 ### 4.5 The Phase-11 seal stack and transport
 
 The effect of a subtree consumes a stack of three seals, in order.
-First the pure `ProvisionedSpec` that `renderAll` accepts, settled per node in Phase 1; then the recursive
-`SubtreeValidated`, settled for the whole subtree in Phase 1; then a fresh `ValidatedInfrastructureActionBatch` and single-use snapshot token, re-read immediately before
+First the pure `ProvisionedSpec` that `renderAll` accepts, which the Phase-1 target must settle per node; then
+the recursive `SubtreeValidated`, which the same target must settle for the whole subtree; then a fresh
+`ValidatedInfrastructureActionBatch` and single-use snapshot token, re-read immediately before
 each mutation in Phase 11
 ([pulumi_iac_doctrine.md §8](./pulumi_iac_doctrine.md#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated)). The first two are settled before any effect, which is what validate-before-effect means; the third handles world-drift per mutation, and a stale token restarts observation with zero mutation. The acknowledgement rides the `ParentReachChannel` projected from each child's compute engine, so a child its parent cannot reach has no inhabitant ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)); reachability is a factor of `localProof`, so an unreachable child collapses every ancestor's product.
 

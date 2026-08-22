@@ -1,39 +1,35 @@
-# Phase 25: Dhall dhall-typecheck schema + smart-constructor prelude
+# Phase 25: Haskell-derived Dhall projection and smart-constructor prelude
 
-> **Purpose**: Stand up the typed Dhall DSL surfaces and their smart-constructor prelude so that dhall-typecheck — the
-> Dhall typechecker — accepts every positive fixture and rejects every dhall-typecheck-class illegal spec at authoring
-> time, before any amoebius binary exists.
+> **Purpose**: Define the typed DSL surfaces and smart-constructor prelude in Haskell, then lazily project the
+> Dhall representation and all typechecking cases beneath `.build/dhall/**` for a Haskell-owned verdict.
 > **Read this if**: phase 25 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 25 delivers the Dhall dhall-typecheck schema + smart-constructor prelude; its design is owned by [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-The complete dhall-typecheck gate passed on 2026-08-09; gadt-decode semantics and runtime fidelity remain UNVERIFIED.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ✅](#sprint-251-dhall-prelude--typed-surfaces--smart-constructors-)
-- [Sprint 25.2: dhall-typecheck positive corpus ✅](#sprint-252-dhall-typecheck-positive-corpus-)
-- [Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ✅](#sprint-253-dhall-typecheck-class-negative-corpus--partial-foreclosure-ledger-)
-- [Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ✅](#sprint-254-the-shared-secretref-union-and-the-plaintext-secret-negative-)
+- [Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ⏸️](#sprint-251-dhall-prelude--typed-surfaces--smart-constructors-)
+- [Sprint 25.2: dhall-typecheck positive corpus ⏸️](#sprint-252-dhall-typecheck-positive-corpus-)
+- [Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ⏸️](#sprint-253-dhall-typecheck-class-negative-corpus--partial-foreclosure-ledger-)
+- [Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ⏸️](#sprint-254-the-shared-secretref-union-and-the-plaintext-secret-negative-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,473 +37,90 @@ The complete dhall-typecheck gate passed on 2026-08-09; gadt-decode semantics an
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All eleven gate sides passed on natural `arm64`, untranslated: twenty exact
-metrics matched and 20 surfaces joined to 24 run-time items. Attestation
-`sha256:9fa9d64aa7942c0ede6cf6e183cc6f82f99dd347be9b9521bdfc75a3deb89a02` binds source
-`sha256:710489258c7b2768…` over 2,259 files. Repository-conformance attestation
-`sha256:db84b7328636385546c44909eea7f9efda56e024c948f4942ec9170f276ced68` and documentation lint passed on
-that snapshot. All nineteen Phase-24 obligations are projected; every one and the conformance verdict remain
-UNVERIFIED because Dhall typechecking does not observe extension-law semantics.
+⏸️ Blocked — NOT VALIDATED.
 
-**The rerun found a defect the previous seal could not have caught.** `tools/dhall_typecheck.py` read its oracle
-from `tests/oracle/dhall-typecheck/` — a directory this repository has never had under that name. Every oracle-backed
-check therefore died at the first `FileNotFoundError` rather than comparing anything, and the battery's exit
-status was the only thing standing between that and a green board. The root is now
-`test/oracle/dhall_typecheck_schema/`, which is where the eighteen authored oracle files actually live, and the
-eighteen metrics are compared rather than skipped.
+Blocked by redesigned Phase 24, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-**Opened 2026-08-17** when the preceding phase resealed; **reopened 2026-08-16 by the natural-architecture amendment.**
-[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
-the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
-architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
-it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
-[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-15. `python3 tools/dhall_typecheck_schema_gate.py` passed all nine sides after canonical
-Dhall normalization: all 18 authored metrics match, every field-deletion, type-substitution, special-resource,
-and custom-arm mutant reddens, 18 surfaces join to 21 run-time items, and generated results, host inventory,
-and authored roots remain contained and unchanged. The project-contained attestation is
-`sha256:4a315c09a5250c2c35e9461cee0a3390fbfa4e0afa969333c4c483c931c0eb85`, bound to source snapshot
-`sha256:1cd60cf72d7ad324…`; Phase 25 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-13 after the secrets amendment, attestation
-`sha256:e08489a637b107c5da2770a1b7265d526705963bcd321f8c93b330311c6469e9`.
-
-**What the reseal added.** `dhall/amoebius/SecretRef.dhall` is the shared three-arm union — `Vault`,
-`TransitKey`, `Prompt`, and no inline-value arm — with a `Sensitive` record giving a sensitive field its type.
-Its arms are pinned in the independent arm-inventory oracle, so an escape arm is caught by a table authored
-away from the schema. A new secret-policy negative differs from its paired positive in exactly one place, a
-literal where a reference belongs, and fails `dhall type` against a committed golden. The oracle moved from 17
-schema modules to 18 with its reviewed inventory extended beside it, and the enumeration carries a
-`secret-reference-policy` surface joined to that negative's metric.
-
-**Reopened 2026-08-13.** This phase was Done (invalidated), sealed 2026-08-12 against source snapshot
-`sha256:81c596c46e9c8772…` with attestation
-`sha256:00bfda42ed8e2ddc333713e05262a92f41d9bc76b2dad1219202e12099a9c019`. That seal is invalidated by a
-scope amendment, not by a defect in the run: dhall-typecheck must now admit a `SecretRef` and give a `Text` in a
-sensitive field no inhabitant
-([vault_pki_doctrine.md §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)).
-That adds an authored module to the dhall-typecheck corpus, which moves this phase's `schema-modules` oracle and its
-reviewed module inventory — the gate's own count changes, so the gate changes
-([§N](development_plan_standards.md#n-reopening-and-amending-a-phase)). The
-[one-binary-many-roles amendment](README.md#the-2026-08-17-one-binary-many-roles-amendment) moves it a second
-time, for `dhall/amoebius/Role.dhall`: the role union lives inline and **anonymous** in `Image.dhall` today,
-and `union_arms` resolves types by their `let` binding, so `arm_inventory.csv` pins none of its arms — a fifth
-could be added and no gate would notice. Extracting the module is what makes them pinnable. `schema-modules`
-becomes 19, the sorted inventory string gains the module, and `arm_inventory.csv` gains the rows for
-`Process`, `InClusterRole`, and `WorkerKind`. The `Image,ContainerProcess,AmoebiusRole|BakedService` row is
-**unchanged** — the top-level union keeps its two arms; what changes is what the `AmoebiusRole` arm carries.
-A union-only module adds no fields, so `resource_fields.csv`, `surface_fields.csv`, and the mutant counts are
-untouched.
-
-**This gate cannot run today, for an unrelated reason.** `tools/dhall_typecheck.py:21` resolves its oracle to
-`tests/oracle/dhall-typecheck`; the tree has `test/oracle/dhall_typecheck_schema/`. Both halves of the path are wrong, and
-they are read at run time, so the gate fails before its first check — which also means the seal above was
-recorded against a path that has since moved. Fixing the constant is this phase's, and is tracked in
-[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md#one-binary-many-roles--2026-08-17).
-
-**Why the type lands here and not in Phase 60.** Phase 61 builds Vault; dhall-typecheck is *this* phase's boundary.
-"A production config cannot express a secret value" is a statement about the typechecker, and putting it in
-the phase that happens to need it first would leave Phases 25 and 26 claiming a complete dhall-typecheck/gadt-decode
-admission boundary that a later phase quietly completes — the forward dependency
-[§E](development_plan_standards.md#e-one-canonical-phase-model) forbids. Reopening is the cheaper honesty:
-this is a pure Register-1 gate.
-
-**Remaining work.** None. Sprint 25.4 discharged the amendment and the gate is green on all eight sides.
-
-**Invalidated seal — historical record:**
-
-**Observed progress — 2026-08-12:** **Policy-conformant.** The dhall-typecheck capability result is unchanged and
-re-run: four positive fixtures typecheck, eight catalog, three image/process, and two import-policy negatives
-each fail at their own specific error, the arm, surface-field, and resource-field inventories match their
-authored expectations exactly, and the 525 field-deletion, 176 type-substitution, four special-resource, and
-one custom-arm mutants all turn the battery red. `dhall` now resolves from `tools/toolchain_requirements.json`, the
-run bundle replaces the plan-tree evidence directory, the ledger is derived into that bundle, and 17 surfaces
-join to 20 run-time enumerated items. The battery no longer reads back a generated Markdown ledger from the
-plan tree to confirm its own honesty caveat — that reasoning is authored prose and lives in this contract,
-while the machine-checkable half is the `gadt-decode-residue` metric — and its hard-coded `dhall` fallback path is
-replaced by a hard failure when the resolver has not supplied one.
-
-**Two authored inputs were corrected, both from intent rather than from a failing run.**
-`dhall/amoebius/SanctionedApi.dhall` and `dhall/amoebius/UiOffline.dhall` were not `dhall lint` clean, which
-this phase has always required; both are now normalized, and the change is pure formatting — list collapsing
-and record punning. Separately, the `schema-modules` oracle read 14 while the tree holds 17, because Phase 37
-added `SanctionedApi`, Phase 56 added `BakeCatalog`, and Phase 45 added `UiOffline`. A bare count is a weak
-oracle that drifts silently as later phases grow the schema, so it is amended to 17 **and** paired with a new
-`schema-module-inventory` metric carrying the reviewed module list — a module added without review now breaks
-the inventory instead of sliding past a number
-([§M.1 amendment](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
-
-**Invalidated historical record:**
-
-Done (invalidated). The Register-1 gate passed on 2026-08-09 with `python3 tools/dhall_typecheck_schema_gate.py`, emitting ledger
-`dynamically-resolved`. Fourteen schema modules are
-`dhall type`/`dhall lint` clean; all four representative positives type-check; all eight catalog negatives
-and three image/process negatives fail for their byte-locked normalized structural reason. Both import-policy
-negatives and twelve constructor-misuse fixtures are red. Independent oracles pin 57 closed unions, 525
-required fields, and 176 critical nested type bindings; all field-deletion/type-substitution mutants, four
-special resource/transition mutants, and the extra-`Custom` arm mutant are red. This proves the recorded
-dhall-typecheck spec-composition shapes only. gadt-decode refinements, binding/index equality, capacity arithmetic, and
-runtime fidelity remain **UNVERIFIED**. The former generated projection is
-`ledgers/phase_35_dhall-typecheck.md`; it is migration input, not current evidence.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase delivers the first of the DSL's typed spec gates as an in-process, authoring-time proof. It stands
-up the Dhall prelude and the typed record/union surfaces — the cluster spec, the app spec, and the
-deployment-rules surface — as *data that carries parameters, not logic*, and exposes them only through a
-**smart-constructor vocabulary**: a lexicon with no illegal words, in which a whole class of illegal cluster
-states has no syntax an author could write. dhall-typecheck is the Dhall typechecker itself: an expression that does
-not match its declared schema simply does not type-check, and the check fires entirely before the amoebius
-binary runs — in the operator's editor, in `dhall type`, in CI. The phase assembles the positive corpus that
-type-checks and the dhall-typecheck-class negative corpus that fails `dhall type`, and records the honest limit that
-binding- and index-shaped foreclosures get only *partial* teeth here (smart-constructor convention) and their
-real teeth at the Haskell GADT decoder in Phase 26. This is a **Register 1** (pure/golden, in-process, no
-cluster) gate, analogous to the Phase 0 documentation lint: it exercises the `dhall` typechecker over a text
-corpus and touches no infrastructure.
+**Target capability — NOT VALIDATED.** Haskell declarations are the sole repository-owned source for the
+cluster, application, and deployment-rules surfaces. A total Haskell generator is to materialize their Dhall
+projection, positive cases, and minimally different negative cases only beneath `.build/dhall/**`; none of
+those rendered files is tracked source or an oracle. The Haskell validator is to run the Dhall typechecker over
+that run-local projection and compare its observations with separately reviewed Haskell expectations. This
+layer can foreclose only structural syntax; binding- and index-shaped refusals remain Phase-26 obligations.
 
-**Phase scope:** one cohesive claim — *an illegal specification has no syntax*. The typechecker is the first
-foreclosure layer, and it runs before any amoebius binary exists to be trusted. For one bounded `dhall-schema`
-declaration and its self peer, the Phase-24 generator derives nineteen L/C/compile/S obligations; this register
-records every one as `UNVERIFIED` because schema typechecking does not observe those semantics and therefore
-mints no conformance verdict.
+**Phase scope:** one target claim — the Haskell-defined structural language projects to Dhall with no syntax
+for the named illegal shapes. The target gate runs through the Haskell binary and mints no verdict about
+binding, effects, hardware, or runtime enforcement.
 
-**Substrate:** none — no host, no cluster; the gate is an in-process `dhall type` battery over the fixture
-corpus.
+**Substrate:** none — no host, cluster, browser, or hardware; only the canonical Haskell gate may interpret
+the generated typechecker observations.
 
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
-**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
+**Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 24](phase_24_conformance_gate_generator.md) — the generated conformance gate, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 25` requires twenty exact metrics across eleven sides:
-positives, specific-reason negatives, independent inventories, mutants, and the authored nineteen-row
-Phase-24 projection, with no conformance verdict. [Gate integrity](#gate-integrity) owns the apparatus.
-
-```mermaid
-flowchart LR
-  %% register: orientation
-  s0["Sprint 25.1: Dhall prelude + typed surfaces + smart constructors"]
-  s1["Sprint 25.2: dhall-typecheck positive corpus"]
-  s2["Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger"]
-  s3["Sprint 25.4: SecretRef and plaintext-secret rejection"]
-  projection["Phase-24 plan projection: 19 unresolved obligations"]
-  gate["the phase 25 gate"]
-  s0 -->|"produces what the next consumes"| s1
-  s1 -->|"produces what the next consumes"| s2
-  s2 -->|"produces what the next consumes"| s3
-  s3 -->|"schema evidence"| gate
-  projection -->|"verdict remains UNVERIFIED"| gate
-```
-*Validated boundary. Phase 25 consumes Phase 24 without upgrading Dhall typechecking into semantic conformance; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns the apparatus.*
+**Depends on:** [Phase 24](phase_24_conformance_gate_generator.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 25`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The suite typechecks the reflected schema; the gate additionally requires each negative to fail at its own construct and re-renders twice to prove the reflection deterministic.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-
-The apparatus phase 25's gate closes over, in the slot
-[§D](development_plan_standards.md#d-the-per-phase-document-skeleton) reserves for it. Every clause it
-discharges is owned by
-[§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
-
-### Representative set (explicit, §M.7)
-
-The dhall-typecheck-class negative corpus is EXACTLY these eight catalog
-entries, one committed `dhall/examples/illegal_*.dhall` fixture each: product-named capability ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)),
-insecure/backdoor ingress arm ([§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)), a workload missing its complete resource envelope ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)), unbounded
-storage backing ([§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)), un-tiered / no-retention topic ([§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), capacity-growth-without-scaling-policy
-([§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)), even/zero-server rke2 control plane ([§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), and a substrate/topology arm the union does not offer
-([§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)/[§3.15](../documents/illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)). The malformed-received-body subcase of the non-CBOR payload entry ([§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)) is a layer-2
-decode foreclosure, recorded in the partial-foreclosure ledger as deferred to
-[Phase 26](phase_26_gadt_decode_ir.md)'s gadt-decode; its separate produce-side no-constructor subcase is left
-to Phase 27's exhaustive registry-driven corpus. Neither [§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload) subcase is counted toward this representative
-gate's green. This eight-entry set is the single canonical dhall-typecheck-class membership and supersedes any
-shorter parenthetical elsewhere in this doc.
-
-**Import-policy negatives (not counted toward the eight).** Two further committed fixtures,
-`dhall/examples/illegal_import_env.dhall` and `dhall/examples/illegal_import_remote.dhall`, pin the
-`env:`/remote-import ban of [`dsl_doctrine.md §4`](../documents/engineering/dsl_doctrine.md#4-total-composability)
-at this gate: each must fail resolution with a `ForbiddenImport` reason, and each carries the §M.8 paired
-positive — the same spec with the import replaced by a frozen local one — which must type-check. They are
-policy negatives rather than illegal-state catalog entries, so they are recorded here and excluded from the
-representative set's green; the enforcing resolve-and-freeze stage is owned by
-[Phase 26](phase_26_gadt_decode_ir.md).
-
-**Secret-policy negative (not counted toward the eight).** One further committed fixture,
-`dhall/examples/illegal_plaintext_secret.dhall`, pins the typed half of the `SecretRef` contract of
-[`vault_pki_doctrine.md §3`](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value):
-a sensitive field holding a literal instead of a reference must have no inhabitant. Its §M.8 paired positive
-is `dhall/examples/legal_secret_reference.dhall`, which differs in exactly one place and type-checks, and its
-golden pins the observed `dhall type` error. Rejecting a literal *value* at decode is gadt-decode surface and
-belongs to [Phase 26](phase_26_gadt_decode_ir.md); whether the named secret exists is a live question
-neither gate can answer, and is owned by
-[Phase 61](phase_61_vault_pki.md).
-
-### Paired positive per negative (§M.8 / §M.3)
-
-Each `illegal_*.dhall` is a MINIMAL one-construct mutation of a named committed green positive (its
-`legal_*.dhall` sibling): reverting only the single tagged illegal construct yields a fixture that
-type-checks. `tools/dhall_typecheck_negatives.sh` asserts BOTH directions per fixture — the negative fails
-`dhall type` AND its reverted paired positive type-checks — and is red if either direction is violated.
-
-### Specific-reason error goldens (§M.8 / §M.1)
-
-For each negative, a golden `dhall type` error transcript is authored and COMMITTED IN THIS PHASE'S ORACLE-PINNING SPRINT
-(`test/oracle/dhall_typecheck_schema/<entry>.err`), pinning the failure to name the targeted union/arm/field/record; the
-harness is red if the observed `dhall type` stderr does not match its committed golden (a negative that
-fails for an unrelated typo/import/field error mismatches and goes red).
-
-### Arm-inventory oracle, independent of the schema (§M.3)
-
-A committed hand-authored catalog table (`test/oracle/dhall_typecheck_schema/arm_inventory.csv`, authored in this phase's oracle-pinning sprint from
-`illegal_state_catalog`
-[§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)/[§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)/[§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress),
-NOT derived from the schema modules) pins each union's exact arm set; the harness normalizes each shipped
-schema module and compares its arm inventory byte-exactly against this table, red on any extra (e.g. a
-`Custom : Text` / `Raw : Text` escape arm) or missing arm.
-
-**Canonical CSV rendering convention (§M.1).** `arm_inventory.csv`, `surface_fields.csv`, and
-`resource_fields.csv` are authored and compared under one pinned convention, without which a byte-exact
-fixture is not writable: UTF-8 without BOM; Unix `LF` line endings with a trailing `LF` on the final row;
-one header row naming the columns; rows sorted lexicographically by their full key path under the C locale
-(byte order, not locale collation); arms within a row emitted in the union's declaration order; `,`
-separator with no surrounding whitespace and no quoting unless a field contains `,`, `"`, or a newline
-(then RFC-4180 double-quoting); and **no generated-by stamp, timestamp, path, or run-varying field of any
-kind**. "Normalizes" above means exactly this rendering applied to the shipped module's extracted
-inventory — no other transformation.
-
-### Resource-shape oracle, independent of the schema (§M.3)
-
-A committed hand-authored `test/oracle/dhall_typecheck_schema/resource_fields.csv` pins the recursive field/arm inventory
-for `PodResourceVec`, `Resources`, lifecycle-tagged `ContainerEnvelope`, `PodLocalStorageDemand`,
-`PodRuntimeMetadataSource`, raw `ExecutionUnitIntent { id, revision, controller, resource }`, with the
-closed controller inventory:
-- `Deployment { Once|Replicated, Recreate|RollingUpdate{maxSurge,maxUnavailable} }`
-- `StatefulSet { Once|Replicated, OnDelete|RollingUpdate NativeSerialPartitionZero }`
-- `DaemonSet { selector, OnDelete|RollingUpdate(Surge|Unavailable) }`
-- `Job { completions, parallelism, backoffLimit, podRestartPolicy=Never, podReplacementPolicy=Failed,
-  terminalRetention }`
-- or `HostProcess { Once|PerNode, replacement }`.
-
-The same sprint declares the capacity vocabulary those envelopes are checked against, grouped by what each
-group measures:
-
-- **Envelopes** — the closed pod/host-worker `KubeletMappedFileDemand` source/model operands and the closed
-  pod/host-worker `ResourceEnvelope` arms.
-- **Node and host supply** — `NodeCapacity` including pod slots and driver attach slots,
-  `PhysicalHostCapacity`, and `PhysicalDiskPartition { backing, allocatableRawBytes, systemReserve, vmDisks,
-  directNodePools, retainedPools, hostCachePools, hostStoragePools }`.
-- **Disks and carves** — `DiskParentExtent`; the parent-indexed `NamedDiskCarve parent` arms
-  `ExactParentExtent { id, parentBytes } | PresentedUsableExtent { id, requiredUsableBytes, presentation,
-  allocation }`; raw `VmDiskCarve { id, presentation : FilesystemPresentation, allocation, guestSystem,
-  kubelet }`; `NodeLocalStorageCapacity` including `kubeletMetadataModel`; `NodeFilesystemBacking`; and the
-  closed `KubeletFilesystemLayout`.
-- **Images** — `ImageArtifact` and `ImageLayer`.
-- **Provider templates and quotas** — `ProviderNodeCapacityTemplate`, `ProviderQuota`,
-  `NodeRootStorageQuota`, `DurableQuota`, `PerInstanceDiskTemplate`, `ProviderUsableDiskCarveTemplate`,
-  `ProviderNodeRootVolumePolicy`, `PerInstanceNodeLocalStorageTemplate`, and the closed
-  `PerInstanceKubeletFilesystemLayout`.
-- **Accelerator supply** — `PerInstanceAcceleratorOffering` and its template links, concrete
-  `CudaDeviceOffering` and links, and `VramShard`/`ShardingPlan`.
-- **Build-time demand** — `DeclaredVolumeDemand`, `BuildStageDemand`, and `BuildExecutionEnvelope`.
-- **Transition intents** — `PriorProvisionRefSource { deployment, generation, resource = Execution | Volume |
-  Registry }`; the required whole-deployment `ExecutionTransitionIntent = FirstDeployment | UpdateFrom
-  PriorProvisionRefSource`; and the `StorageMigrationPolicy`/`StorageMigrationIntent`,
-  `SchemaMigrationPolicy`/`SchemaMigrationIntent` and
-  `RegistryBackendMigrationPolicy`/`RegistryBackendMigrationIntent` pairs.
-- **kind and control-plane engines** — `KindEngineDemand`/`KindHostEngineReserve`,
-  `KindHostRuntimeStorageDemand`, `EngineSystemReserve`, `EngineProcessEnvelope`, `EngineStorageDemand`,
-  `ControlPlaneStorageDemand`, `EtcdLogicalDemand`/`EtcdChurnBudget`, and `WorkerEngineStorageDemand`.
-- **Presentation and backing** — `FilesystemPresentation`, `VolumePresentation`, and
-  `StorageBacking`/`BackingAllocationPolicy`.
-- **Caches and materialized assets** — `InClusterCacheDemand`, `HostCacheDemand`, `CachePopulationDemand`,
-  `AssetMaterializationDemand`, and `RegistryStorageIntent` with exact image-digest identities.
-- **Vault** — `VaultPersistedObjectDemand`, `VaultAuditDemand`, and `VaultStorageDemand`.
-- **Message-bus metadata** — `BookKeeperGeometry` and its fault policy, `BookKeeperLogicalDemand`,
-  `ZooKeeperMetadataStoreDemand` with its member/znode/churn operands, and the closed
-  `PulsarMetadataStoreDemand = ZooKeeper`.
-- **SQL** — `PatroniSqlIntent`, `PatroniLogicalStorageIntent`, and `SqlMutationIntent`.
-- **Object store** — `MinioErasureGeometry` and its fault policy, `ObjectStoreBucketNeed`,
-  `ObjectStoreDemand`, exact `ObjectStoreObjectId` residents, `ObjectStoreRetentionBudget`,
-  `ObjectStoreWriteBudget`, `ObjectStoreMutationAdmission`, the six-arm `ObjectStoreProducerIntent`
-  including `ControlPlaneStateObjectDemand` and its closed five entry kinds, `ObjectStoreGatewayIntent`, and
-  `ContentStoreLogicalDemand`.
-- **Budgets** — the closed `StorageBudget` arms, each with a `StorageBudgetId` and a single owner.
-- **Provisioning** — `PulumiExecutionDemand` with its exact deploy/plugin/concurrency/workspace source, and
-  `StatefulSetClaimSlot`.
-- **Accelerator demand** — `AcceleratorWorkloadSource`, `AcceleratorResidencyDemand`,
-  `AcceleratorCoexistencePolicy`, identity-keyed `CudaOwnerDemand`/`MetalOwnerDemand`, the distinct pod and
-  host accelerator demand/offering unions, and the closed substrate-indexed `HostRuntimeEnforcement =
-  LinuxCgroupV2 | WindowsJobObject | AppleSupervisor` policy.
-
-The authored transition surfaces are the required whole-deployment `FirstDeployment | UpdateFrom` execution
-arm (whose ref must carry the `Execution` resource arm), `StorageMigrationIntent { identity, old :
-PriorProvisionRefSource, replacement, policy }`, `RegistryBackendMigrationIntent { identity, source :
-PriorProvisionRefSource, replacement, policy }`, and `SchemaMigrationIntent`.
-`RegistryBackendMigrationIntent.replacement` is a `RegistryStorageIntent`. `PatroniSqlIntent` contains
-database/budget/logical-storage/declared-volume/mutation inputs but no `ControllerChildEnvelope`;
-`ObjectStoreGatewayIntent` contains only gateway identity and execution-model selection, while binding later
-merges producer writer policies. Binder-output `StorageMigrationDemand`, `RegistryStorageDemand`,
-`RegistryBackendMigrationDemand`, `SchemaMigrationDemand`, `PatroniSqlDemand`, `ObjectStoreProducerDemand`,
-and `ObjectStoreAdmissionGatewayDemand` are absent from dhall-typecheck. No Dhall source field has a `Provisioned*`
-type. It requires CPU, memory, per-container runtime-memory and the closed `ReadOnlyRootfs | WritableRootfs
-{ allowance }` plus log allowance, explicit bounded disk-backed volumes and access-/persistence-indexed
-memory-backed volumes; platform-indexed OCI index, child-manifest, config, and compressed-layer
-digest/stored-byte metadata plus snapshot-chain/unpacked-byte metadata and pull/import workspace; and
-`NodeLocalStorageCapacity { podEphemeralAllocatable, filesystems, imageStorageModel, imagePullConcurrency,
-kubeletMetadataModel }`; every pod carries structural network-attachment and exact container→volume mount
-identities in `PodRuntimeMetadataSource`, never a metadata-byte scalar; node capacity also carries positive
-allocatable pod slots and driver-scoped attachment slots, while `ProviderNodeCapacityTemplate` carries the
-exact `podSlots : ProviderPodSlotPolicy` and `attachableVolumes : Map CsiDriverId ProviderAttachSlotPolicy`
-catalog/CNI/CSI-derived fields. The `Managed Eks` surface is exactly `{ account : CloudAccountId,
-nodeClasses, quota }`, so provider instance identity and account quota have an authored join key. The
-filesystem layout is exactly `Unified | SplitRuntime | SplitImage`, with its required `nodefs`/`imagefs`
-carve references and no authorable third pool. Every supported operator/CR arm also requires its versioned
-controller descriptor's exact replica/rollout operands, complete child pod resource templates, and child
-durable-volume logical/geometry/presentation/backing operands. There is no generic `childPeak`,
-resource-free CR, or authorable `ControllerChildEnvelope`; the binder alone expands those source fields into
-the private identity-keyed child envelope and webhook execution demand. Globally scoped
-`PhysicalDiskBackingId` / `DiskCarveId` fields, VM-disk layout subcarve relationships, and materialized-node
-filesystem references preserve the physical debit; the `SplitImage` node/provider arms additionally require
-their runtime witness/requirement field; and the exactly-once
-`BackingId`/`CacheBackingId`/`HostStorageBackingId` → retained/cache/role-tagged-host-pool → physical-carve
-path (including `BuildScratch`); plus class-local disk/carve and accelerator-slot names for reusable
-per-instance provider templates, including required `podSlots`, CNI/IP `cniSlots`, and driver-indexed
-`attachableVolumes` policies, and `PerInstanceDiskTemplate { id, backing, systemReserve :
-ProviderUsableDiskCarveTemplate, carves : NonEmpty ProviderUsableDiskCarveTemplate }`, where every usable
-carve template is exactly `{ id, requiredUsableBytes }` and `backing` is `InstanceStore { skuDevice,
-provisionedRawBytes, presentation : FilesystemPresentation } | EphemeralRootEbs { policy :
-ProviderNodeRootVolumePolicy { volumeType, presentation : FilesystemPresentation, allocation :
-BackingAllocationPolicy } }`. `PerInstanceNodeLocalStorageTemplate` independently carries the per-instance
-filesystem layout. `provisionedRawBytes` is fixed SKU raw supply; system reserve and layout carves are
-mounted-filesystem usable demand and cannot inhabit the same sum. The provider root EBS size is deliberately
-absent from dhall-typecheck: provisioning later derives a private rounded request from system plus unique-carve
-demand. A private `ProvisionedPerInstanceDiskTemplate` then converts either the instance-store raw supply or
-that rounded root request through the pinned presentation to `mountedUsableBytes` before proving the nested
-usable-carve fit; neither private field is authorable here. Durable/cache/registry/Vault storage requires
-`Block | Filesystem { fsType, overheadModel }` volume presentation, backing allocation positive
-`minimumBytes`/`quantumBytes`. VM disks and provider node roots require `FilesystemPresentation`
-directly—`Block` is not an arm of either root shape—while raw VM disk carves have no authorable aggregate
-bytes and only private checked construction derives their required-usable/provisioned high-water. Exact
-catalog-asset cache populations with finite first-miss concurrency, exact registry OCI object sets with
-finite upload/failure/GC operands, and bounded Vault persisted-object versions/live leases plus pinned
-Raft/audit operands. BookKeeper ensemble/write/ack quorum and journal/index fields plus required positive
-`retainedHotBytes`, `openLedgerHeadroom`, `inFlightOffloadBytes`, and `deletionLagBytes` quantities (zero,
-omission, and `Optional` forbidden); MinIO data/parity/block/metadata/healing fields; committed object
-extents, bounded concurrent/failed write sets, finite positive orphan-GC horizon; the fault-policy bounds
-from which complete failure subsets are derived; claim-template slot identity from which provisioning later
-derives the uniform max-ordinal debit; accelerator family/profile and CUDA wholesale whole-device count;
-exact identity-keyed served-model, training-job, JIT, and library-work sources; equal-keyed structural
-residency demands; finite class-based residency/concurrency policy; unsharded/replicated-per-device/sharded
-bytes and interconnect; concrete/ template link endpoints and link kind; plus the pod owner `ContainerId`,
-CUDA device `rawVram`/mandatory `driverRuntimeReserve`/net `allocatableVram` on both concrete devices and
-provider slots, and Apple Metal profile/unified-memory demand to remain distinct. The oracle also requires
-every build's non-empty stage graph, per-stage platform/dependencies/runtime CPU/memory reservation+ceiling,
-intermediate-byte peak and cache-write delta, named `BuildScratch` backing, named `CacheBudget`/backing, and
-separate finite architecture and stage concurrency policies. Every self-managed engine reserve requires its
-`KindControlPlane | KindWorker | Rke2Server | Rke2Agent` role, exact role-indexed named process set,
-per-process CPU/memory reservation+ceiling, a named system carve, and the corresponding closed storage arm.
-Kind and rke2-server control planes require a non-optional `ControlPlaneStorageDemand`: `staticEngineBytes`,
-`etcd { backendQuotaBytes, maxWalFiles, retainedSnapshots, maintenance = SerializedSnapshotAndDefrag,
-storageModel : EtcdStorageModelVersion, logical : EtcdLogicalDemand { desiredObjects, churn, model } }`,
-where `churn` is the sole Event authority and requires `maxEventsPerWindow`, `eventWindow`, `maxEventBytes`,
-and `eventRetention`, `audit { maxBytesPerFile, maxBackups, retention }`, and `kubeletRuntimeLogs {
-maxBytesPerFile, maxBackups, retention }`, plus `historyRequirement : FiniteDuration`; its
-`EngineSystemReserve.storage` also requires the named `DiskCarveId` and that demand. An rke2 agent instead
-requires `WorkerEngineStorageDemand { staticEngineBytes, kubeletRuntimeLogs }`; it has no editable empty
-control-plane placeholder. `KindEngineDemand` additionally requires non-empty ordinal-indexed kind
-node-container runtime + full `NodeCapacity` + in-node reserve, and a distinct host-only engine reserve.
-Every durable `DeclaredVolumeDemand` requires its StatefulSet claim slot, `BackingId`, logical bytes, closed
-direct/BookKeeper/MinIO geometry owner, and `VolumePresentation`; every volume-producing host/provider
-backing arm requires `allocation : { minimumBytes : Quantity Bytes, quantumBytes : Quantity Bytes }`, while
-the provider-object `CloudQuota` arm retains its independently bounded object-count plus model-indexed
-`Logical | Billed` byte quota. No authorable rounded physical-byte shortcut exists for durable or root
-EBS/VM creation; the sole fixed provider-template raw operand is the SKU-pinned
-`InstanceStore.provisionedRawBytes`. The gate is red if a field is dropped, merged into an untyped
-scalar/map, or supplied by a schema default instead of being required.
-
-### Committed seeded mutant (§M.2)
-
-At least one committed seeded mutant MUST turn the harness red and is
-re-run every gate: `test/mutant/dhall_typecheck_schema/dhall_typecheck_capability_custom_arm.dhall` adds a `Custom : Text` arm to `Capability`
-(union-arm-addition operator). The gate is invalid if that mutant type-checks the product-named negative or
-passes the arm-inventory oracle.
-
-### Resource-field deletion mutants (§M.2)
-
-Committed mutants separately delete `podEphemeralAllocatable`, the filesystem layout, `imageStorageModel`,
-`imagePullConcurrency`, `kubeletMetadataModel`, one `PodRuntimeMetadataSource` network/mount identity, one
-execution id/revision/ cardinality/replicated-count/per-node-selector/rollout field (including either raw
-rolling-progress operand), one accelerator source/workload/residency/coexistence field, mismatch either
-coexistence-map domain from the exact source classes, or make sharded totals/ids/count disagree, provider
-`podSlots`, provider `cniSlots` and `attachableVolumes`, the `Managed Eks.account : CloudAccountId` join
-key, one of `ProviderQuota.maxInstances`/`maxVcpu`/`acceleratorCaps`/`nodeRootStorage`/`durable`, one OCI
-index/manifest/config/compressed-layer stored-byte field, one snapshot-chain/unpacked-byte field, provider
-root `backing`/presentation, `InstanceStore.provisionedRawBytes`, a
-`ProviderUsableDiskCarveTemplate.requiredUsableBytes`, or EBS policy/allocation, a present
-`ComputeHeadroomDemand`'s `reason` or `pad` (either alone, since a pad without a justification and a
-justification without a pad are both foreclosed), or the `VerticalGrowth` arm's `horizon`,
-`PhysicalDiskPartition.allocatableRawBytes`, a `NamedDiskCarve` parent index/arm/geometry field, raw-VM
-presentation/allocation/layout, the node-root-storage quota arm, `VolumePresentation`,
-`MonitoringWorkBudget.volume.presentation`, backing allocation minimum/quantum, cache population, registry
-upload, the required whole-deployment `FirstDeployment | UpdateFrom PriorProvisionRefSource` arm, one
-prior-ref deployment/generation/resource field (including the `Execution` arm), any
-`StorageMigrationIntent`/`RegistryBackendMigrationIntent`/`SchemaMigrationIntent`/`PatroniSqlIntent`/
-`ObjectStoreProducerIntent`/`ObjectStoreGatewayIntent` source field, any of the four
-`EtcdLogicalDemand.churn` Event fields, or Vault Raft/audit operands. A committed field-type substitution
-mutant replaces a prior ref with a `Provisioned*` record; an implicit/latest-generation execution transition
-or an optional transition field is likewise a failure. A duplicate-Event-authority mutant adds a sibling
-`events` record; all MUST fail the independent `resource_fields.csv` comparison; an `Optional` or defaulted
-replacement is also a failure.
-
-### Oracle-pinning (§M.1)
-
-All goldens, the arm/resource-inventory tables, and the seeded mutant above are
-committed in this phase's oracle-pinning sprint before any schema module exists; none is regenerated from the shipped schema's own
-output.
-
-This gate is Register 1 (pure/golden, in-process, no cluster). It still emits the [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)
-proven/tested/assumed ledger (below), marks binding/index (layer-2/3) foreclosures UNVERIFIED here, and
-carries the acceptance token *spec-composition proven*, never *runtime proven*.
-- **Extension conformance (§M.13).** `test/spec/extension/DhallSchemaConformanceSpec.hs` constructs one scoped
-  `dhall-schema` declaration, derives the Phase-24 plan with its self peer, and compares all nineteen
-  L/C/compile/S rows with `test/oracle/dhall_typecheck_schema/conformance_projection.tsv`. Every observation is
-  explicitly failed as `not-observed-at-dhall-typecheck`; the gate requires `CasesFailed 19`, writes the
-  generated projection beneath `.build/`, and records `extension-conformance-verdict = UNVERIFIED`. A passing
-  verdict is a failure here because this register observes schema shape, not extension-law semantics.
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — Haskell declarations generate the Dhall structural language and Haskell-owned cases beneath `.build/dhall/**`; the generated projection has no syntax for the named illegal shapes. Binding, effects, hardware, and runtime enforcement remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 25` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: Phase-25-owned `LTD-SRC-002` remains active. Its exact whole-family zero-finding check (278 `.dhall` paths plus `dhall/examples/locus_registry.tsv`), reintroduction negatives, independently reviewed Haskell binding, and sprint-level owner assignment have not been accepted. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 24 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact dhall dhall-typecheck schema + smart-constructor prelude emits is a recipe over a content address, never an authored file.
-- [`dsl_doctrine.md §2 — Dhall carries params, Haskell carries logic`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic):
-  the hard split between the two languages. This phase authors the **Dhall data** half — typed, total,
-  side-effect-free surfaces that carry the desired world's parameters — deliberately holding back the Haskell
-  chain/Step logic that acts on them (that decode-and-act half is Phase 26 and later). The Dhall never "runs";
-  it is authored, type-checked, and (from Phase 26 on) decoded.
-- [`dsl_doctrine.md §5 — the illegal-state-unrepresentable contract`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
-  specifically **dhall-typecheck — the Dhall typechecker**, stood up here as the authoring-time structural boundary
+- [`jit_artifact_doctrine.md` §2 — The rule, and the closed exception list](../documents/engineering/jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list) — every Dhall schema and
+  case is a lazy projection beneath `.build/**`, never repository-owned source.
+- [`dsl_doctrine.md` §2 — Two languages, one system: Dhall carries params, Haskell carries logic](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic):
+  the hard split between the two languages. Haskell owns the repository-side declarations and generates the
+  Dhall data projection lazily; an external operator may supply a Dhall value, but amoebius tracks no Dhall
+  source. The Dhall never "runs"; it is type-checked and, from Phase 26 onward, decoded by Haskell.
+- [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
+  specifically **dhall-typecheck — the Dhall typechecker**, targeted here as the authoring-time structural boundary
   of the later `decode → bind/expand → plan/resolve infrastructure → provision → ProvisionedSpec → renderAll` contract. A union with no arm
   for insecure ingress gives no syntax to request it; a record that requires a reference gives no way to
   omit it. gadt-decode (the in-process typed decoder) is deferred to [Phase 26](phase_26_gadt_decode_ir.md);
   whole-deployment feasibility and the opaque deployable seal are Phase 31.
 - [`illegal_state_catalog.md §1 — Illegal states fail to type-check`](../documents/illegal_state/illegal_state_catalog.md#1-illegal-states-fail-to-type-check),
-  [`§2 — the load-bearing limit`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it),
-  [`§3 — the catalog`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent),
-  and [`§4 — planning ownership`](../documents/illegal_state/illegal_state_catalog.md#4-planning-ownership): the catalog of
+  [`illegal_state_catalog.md` §2 — The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it),
+  [`illegal_state_catalog.md` §3 — The catalog — states a valid spec cannot represent](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent),
+  and [`illegal_state_catalog.md` §4 — Planning ownership](../documents/illegal_state/illegal_state_catalog.md#4-planning-ownership): the catalog of
   illegal states and the typing techniques that foreclose each, adopted **at the honest foreclosure layer**.
-  The layer-1 type-foreclosed entries — closed unions, required fields, no-arm — are discharged at dhall-typecheck
-  here; decoder-local checked rejections defer to Phase 26, whole-deployment resource/target checks defer to
-  Phase 31's `provision-seal`, and runtime-checked entries defer to the live band. The catalog's [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) limit is
+  The target Haskell corpus must cover layer-1 closed unions, required fields, and missing arms through the
+  generated Dhall projection; decoder-local checked rejections defer to Phase 26, whole-deployment checks to
+  Phase 31's `provision-seal`, and runtime-checked entries defer to the live band. The catalog's [`illegal_state_catalog.md` §2 — The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) limit is
   honored verbatim: *a type-check proves the spec composes, not that the
   cluster enforces it.*
-- [`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
-  the one pure resource vocabulary. dhall-typecheck owns the **presence and closed shape** of every
+- [`resource_capacity_doctrine.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
+  the one pure resource vocabulary. The target typecheck boundary owns the **presence and closed shape** of every
   `ResourceEnvelope`/`Capacity` declaration; Phases 26, 9, and 28 own normalization, arithmetic feasibility, and
   post-bind provisioning respectively. Explicit declarations here are not a claim that the target has enough
   real capacity. This doctrine carries no Documentation-Requirements doc-sync line here because its honest
@@ -516,34 +129,25 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
 
 ## Sprints
 
-> **Current validation record.** All four sprints are covered by the sealed 2026-08-21 amended gate. Historical dates,
-> pass/seal claims, and repository-resident evidence paths below remain diagnostic only. Any instruction to
-> commit generated output, freeze dependency resolution, retain a resolved version, path, or integrity hash,
-> or consume repository-resident evidence, ledgers, or enumerations is superseded by the current
-> generated-artifact and dynamic-resolution doctrine.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-## Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ✅
-**Status**: Done.
-**Implementation**:
-`dhall/amoebius/{prelude,Cluster,App,Deployment,Capability,Topology,Capacity,Resources,Storage,Retention,Image,Extension,Consistency,Backup}.dhall`
-— the typed surfaces and their smart constructors.
-**Blocked by**: none within the phase.
-**Requires**: `host-floor` — nothing beyond it; the `dhall` this sprint runs is acquired by Phase 1, and
-no Haskell skeleton is needed (that arrives with the gadt-decode decoder in Phase 26).
-**Independent Validation**: every schema module stands on its own under `dhall type` / `dhall lint`, and its
-shipped arm and required-field inventories match the committed oracle tables byte-exactly, so no freeform
-escape arm, missing foreclosing field, or collapsed resource axis passes. The numbered `### Validation` list
-below names the fixtures and the tables.
-**Docs to update**: `documents/engineering/dsl_doctrine.md` (dhall-typecheck status backlink),
-`DEVELOPMENT_PLAN/system_components.md` (DSL schema inventory).
+> **Permanently invalidated history.** Every completion, seal, reseal, transcript, evidence, and
+> closure statement in the sprint bodies below is rejected as current validation. The material is retained
+> only as a target-capability inventory and cannot support status, promotion, or a validation claim.
+
+## Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`dsl_doctrine.md §2/§5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
 stand up the three typed Dhall surfaces (cluster, app-spec, deployment-rules) as *data* carrying parameters
 not logic, and expose them only through smart constructors so that dhall-typecheck — the Dhall typechecker — becomes
 an authoring-time boundary that fires before any binary runs.
 
 ### Deliverables
+
 - The last three schema modules close doctrine surfaces that no phase previously owned, so each is delivered
   here rather than left absent:
   - `Extension.dhall` carries `ExtensionSpec` with its **mandatory, non-optional**
@@ -578,8 +182,9 @@ an authoring-time boundary that fires before any binary runs.
   [§3.76](../documents/illegal_state/illegal_state_lifecycle.md#376-a-build-stage-whose-content-is-unmodeled)); and the
   required `ContainerProcess` naming what a container executes (catalog
   [§3.75](../documents/illegal_state/illegal_state_lifecycle.md#375-a-container-whose-process-is-unnamed)). Their
-  negatives — a spec naming a foreign image, an authored shell fragment, a container with no `process` — must
-  each fail `dhall type` at the committed expected error.
+  negatives — Haskell-generated cases naming a foreign image, requesting an unmodeled shell fragment, or
+  omitting `process` — must each fail `dhall type` at the separately authored Haskell expectation; serialized
+  cases and diagnostics exist only beneath `.build/**`.
 - The pure resource declarations of
   [`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
   unit-tagged quantity fields; `PodResourceVec = { cpu, memory, ephemeralStorage }`; `Resources = {
@@ -755,24 +360,25 @@ VolumePresentation }, tsdbCostModel }`, with positive counts/rate, finite interv
 typed CPU/memory, and an exact StatefulSet claim/backing/presentation; no default, omitted field, scalar
 query-temp, or descriptor-independent fixed Prometheus provision is an alternate arm. Non-applicable
 resource arms use their closed `None`/empty form; omission of the envelope or capacity declaration itself is
-impossible. A committed schema-shape oracle (`test/oracle/dhall_typecheck_schema/surface_fields.csv`, hand-authored in Phase
-0) pins these required field-name→type bindings; Sprint 25.1 validation compares the shipped record types
-against it byte-exactly. The companion `resource_fields.csv` recursively pins every nested resource field
+impossible. A separately authored Haskell schema-shape oracle pins these required field-name→type bindings;
+Sprint 25.1 must compare the generated record types against it semantically. A separate Haskell resource-field
+oracle recursively pins every nested resource field
 and closed arm, so an envelope containing only CPU/memory, a bucket name without its structural
 retention/write demand, a free-standing pair of pod/image byte pools, an image reference without complete
 stored-object/snapshot/workspace metadata, a backing without presentation/minimum/quantum, or scalar-only
 cache/registry/Vault storage cannot pass.
 
 ### Validation
-1. `dhall type` and `dhall lint` accept each schema module on its own, every surface type is well-formed, and
-   each shipped union's arm inventory matches the committed `test/oracle/dhall_typecheck_schema/arm_inventory.csv`
-   byte-exactly, so no freeform escape arm survives. Every smart constructor elaborates to a value of its
+
+1. `dhall type` and `dhall lint` accept each generated schema module on its own, every surface type is
+   well-formed, and each generated union's arm inventory matches a separately authored Haskell arm oracle, so
+   no freeform escape arm survives. Every smart constructor elaborates to a value of its
    declared type, and a smart constructor cannot be applied to an out-of-schema argument
-   without a type error — discharged by a named committed fixture set `test/fixture/dhall_typecheck_schema/ctor_reject/*.dhall`
-   (≥1 expect-fail application fixture per smart constructor, enumerated in the harness manifest), each of
+   without a type error — discharged by named Haskell cases that generate `ctor_reject/*.dhall` only beneath
+   `.build/test-corpora/**` (at least one expect-fail application per smart constructor, discovered in both directions), each of
    which MUST fail `dhall type`; this is not discharged by appeal to Dhall function typing alone.
-2. The shipped record types match the committed `surface_fields.csv` and `resource_fields.csv` oracles
-   byte-exactly (the wiring above), red on any missing required foreclosing field or any dropped/collapsed
+2. The generated record types match the independent Haskell surface/resource-field oracles semantically (the
+   wiring above), red on any missing required foreclosing field or any dropped/collapsed
    CPU, memory, logical pod-ephemeral/root-filesystem arm, node filesystem layout/model/object/snapshot
    metadata, physical-backing/carve/logical-pool identity, provider account identity, provider
    `podSlots`/CNI-IP `cniSlots`/driver-indexed `attachableVolumes`, all five `ProviderQuota` fields and both storage quota unions,
@@ -792,26 +398,22 @@ cache/registry/Vault storage cannot pass.
    anywhere except `ControlPlaneStorageDemand.etcd.logical.churn`.
 
 ### Remaining Work
-None. The schema modules and independently authored union, required-field, and nested-type inventories agree;
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The schema modules and independently authored union, required-field, and nested-type inventories agree;
 525 field deletions, 176 required-type substitutions, and the special resource mutants all turn the gate red.
 
-## Sprint 25.2: dhall-typecheck positive corpus ✅
-**Status**: Done.
-**Implementation**: `dhall/examples/legal_*.dhall` (worked-example cluster / app /
-deployment specs); `tools/dhall_typecheck.sh` (a `dhall type` corpus harness) — built.
-**Blocked by**: none within the phase.
-**Independent Validation**: every positive fixture type-checks under `dhall
-type` against the Sprint-17.1 schema; the harness exit code is a single green/red over the whole positive
-set.
-**Docs to update**: `DEVELOPMENT_PLAN/system_components.md` (positive corpus inventory),
-`documents/engineering/dsl_doctrine.md` (dhall-typecheck corpus backlink).
+## Sprint 25.2: dhall-typecheck positive corpus ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`illegal_state_catalog.md §1 — Illegal states fail to type-check`](../documents/illegal_state/illegal_state_catalog.md#1-illegal-states-fail-to-type-check): assemble the
 positive fixtures that a legal amoebius world is authored from and prove they pass the dhall-typecheck typechecker —
 the authoring-time demonstration that the schema *admits* every intended world.
 
 ### Deliverables
+
 - Positive fixtures — the explicit representative set `legal_multisubstrate_cluster`, `legal_managed_eks`,
   `trivial_app`, and `legal_deployment_rules` — each a well-typed Dhall value built entirely through the
   Sprint-17.1 smart constructors, and each populating every REQUIRED foreclosing field of its surface record
@@ -837,6 +439,7 @@ the authoring-time demonstration that the schema *admits* every intended world.
 - A corpus harness that runs `dhall type` over the positive set and reports one aggregate result.
 
 ### Validation
+
 1. Every positive fixture type-checks; the harness is red if any positive fixture fails `dhall type`.
 2. Each positive fixture's surface record instantiates every required foreclosing field named in
    `surface_fields.csv` and every nested resource field named in `resource_fields.csv` (checked by the harness
@@ -844,23 +447,16 @@ the authoring-time demonstration that the schema *admits* every intended world.
    `{ name : Text }` skeleton or a CPU/memory-only envelope.
 
 ### Remaining Work
-None. All four positives type-check after wiring the non-empty nested capacity, image, cache, registry, Vault,
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. All four positives type-check after wiring the non-empty nested capacity, image, cache, registry, Vault,
 engine, transition, accelerator, and monitoring structures required above.
 
-## Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ✅
-**Status**: Done.
-**Implementation**: `dhall/examples/illegal_*.dhall` (the dhall-typecheck subset);
-`tools/dhall_typecheck_negatives.sh` (an expect-fail `dhall type` harness) — built.
-**Blocked by**: none within the phase.
-**Independent Validation**: each of the eight canonical dhall-typecheck-class negatives fails `dhall type` for its
-pinned reason while its reverted paired positive type-checks, the committed seeded mutant goes red, and the
-partial-foreclosure ledger accounts for every entry. The numbered `### Validation` list below carries the
-goldens, the mutant, and the deferred-row obligation.
-**Docs to update**:
-`documents/illegal_state/illegal_state_catalog.md` (per-entry dhall-typecheck foreclosure-layer annotation),
-`DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md` (backlink: the decode-foreclosed residue lands there).
+## Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`illegal_state_catalog.md §2 — the load-bearing limit`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it),
 [`§3 — the catalog`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent),
 and [`§4 — planning ownership`](../documents/illegal_state/illegal_state_catalog.md#4-planning-ownership): assemble the
@@ -869,6 +465,7 @@ honestly recording which foreclosures are complete at dhall-typecheck and which 
 at gadt-decode.
 
 ### Deliverables
+
 - The eight canonical dhall-typecheck negatives named in the **Gate** representative set, one committed
   `illegal_*.dhall` each, MUST fail `dhall type`: product-named capability ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)), insecure/backdoor ingress
   arm ([§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)), a missing complete resource envelope on an execution unit ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)), unbounded storage backing
@@ -882,10 +479,10 @@ at gadt-decode.
   dhall-typecheck fixture: it is layer-2 decode-foreclosed and appears in the ledger as a deferred row owned by
   [Phase 26](phase_26_gadt_decode_ir.md)'s gadt-decode. The separate produce-side no-constructor subcase is
   outside this representative set and lands in Phase 27's exhaustive registry-driven corpus.
-- A committed per-negative golden `dhall type` error transcript (`test/oracle/dhall_typecheck_schema/<entry>.err`, authored
-  in Phase 0) pinning each failure's targeted union/arm/field.
-- The committed seeded mutant `test/mutant/dhall_typecheck_schema/dhall_typecheck_capability_custom_arm.dhall` (union-arm-addition operator) that
-  the harness re-runs and MUST report red.
+- A separately authored Haskell predicate per negative pins the targeted union/arm/field and structured reason;
+  raw `dhall type` transcripts are run-local observations beneath `.build/**`, never tracked goldens.
+- An applied Haskell union-arm-addition mutant lazily renders its altered Dhall projection beneath
+  `.build/test-corpora/**`; the harness re-runs it and MUST report red.
 - The **partial-foreclosure ledger** is the [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) proven/tested/assumed artifact this phase emits under `.build/runs/`,
   with schema and external retention per `testing_doctrine.md`. It names Register 1,
   carries the acceptance token *spec-composition proven*, maps each of the eight negatives to its catalog
@@ -894,13 +491,14 @@ at gadt-decode.
   ledger is the single [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) artifact the Definition of Done requires; there is no separate coverage note.
 
 ### Validation
-1. Every one of the eight canonical dhall-typecheck-class negatives fails `dhall type` at authoring time with no
-   binary run; `tools/dhall_typecheck_negatives.sh` is red if any tagged negative type-checks.
+
+1. Every one of the eight Haskell-declared dhall-typecheck-class negatives fails `dhall type` in the generated
+   run-local corpus; the Haskell phase gate is red if any tagged negative type-checks.
 2. Per negative, the harness asserts the paired positive (the fixture with only the tagged illegal construct
-   reverted) type-checks (§M.8/§M.3), AND the observed `dhall type` stderr matches the committed per-entry
-   `<entry>.err` golden naming the targeted type/arm/field (§M.8); red if either the paired positive fails or
-   the error text diverges from its golden.
-3. The harness re-runs the committed seeded mutant `test/mutant/dhall_typecheck_schema/dhall_typecheck_capability_custom_arm.dhall` and is red
+   reverted) type-checks (§M.8/§M.3), AND the observed structured `dhall type` failure satisfies the separately
+   authored Haskell predicate naming the targeted type/arm/field (§M.8); red if either the paired positive
+   fails or the expected rejection locus differs.
+3. The harness re-runs the applied Haskell union-arm-addition mutant and is red
    unless the mutant is caught — i.e. the arm-inventory oracle goes red on the extra `Custom : Text` arm. If
    instead the mutant passes the arm-inventory oracle or lets the product-named negative type-check, the
    mutant has escaped and the seeded-mutant gate is invalid (§M.2).
@@ -913,20 +511,13 @@ at gadt-decode.
 
 ### Remaining Work
 
-None. Eight paired catalog negatives, two import-policy negatives, and the secret-policy negative are red for
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Eight paired catalog negatives, two import-policy negatives, and the secret-policy negative are red for
 their authored reasons; the capability-arm and structural mutants are caught; and the run-local ledger records
 the gadt-decode/runtime residue as UNVERIFIED. The historical repository-resident ledger is not consumed.
 
-## Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ✅
-**Status**: Done.
-**Implementation**: `dhall/amoebius/SecretRef.dhall`, `dhall/examples/legal_secret_reference.dhall`,
-`dhall/examples/illegal_plaintext_secret.dhall`, `tools/dhall_typecheck.py`, `tools/dhall_typecheck_schema_gate.py`
-**Blocked by**: Sprint 25.3
-**Requires**: `host-floor` — the `dhall` this sprint runs is acquired, not assumed.
-**Independent Validation**: the arm-inventory table authored away from the schema pins the three arms, so an
-added inline-value arm is red; the paired positive type-checks and its one-place mutation does not.
-**Docs to update**: `documents/engineering/vault_pki_doctrine.md` (dhall-typecheck backlink),
-`DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `DEVELOPMENT_PLAN/README.md`
+## Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -958,7 +549,8 @@ None at this register. dhall-typecheck decides shape; the decoder's rejection of
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/dsl_doctrine.md` — backlink §5's dhall-typecheck to this in-process Phase-25 proof; keep gadt-decode
   (the typed decoder) as the companion boundary owned by Phase 26, and runtime enforcement as the deferred
   live-band residue.
@@ -967,12 +559,14 @@ None at this register. dhall-typecheck decides shape; the decoder's rejection of
   (layer 3) entries deferred.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase 25 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-25 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `dhall/amoebius/` and `dhall/examples/` as Phase-25
   design-first rows.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker and phase order this document serves
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the DSL vision

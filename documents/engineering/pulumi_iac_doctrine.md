@@ -19,7 +19,7 @@ unable to remove durable backing. It does not own the capacity checks that admit
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [0. Decision record: why Pulumi stays — and why that is not the Helm decision](#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision)
@@ -52,7 +52,7 @@ mean building or adopting an engine that otherwise does not exist. The work Pulu
 materially harder to replace than the work Helm did; the two removals are *not* symmetric.
 
 **The v1 decision: keep Pulumi.** It brings mature multi-cloud CRUD/diff/destroy and provider coverage, and
-its encrypted-MinIO-backend + Vault-Transit envelope shape ([§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)) began as sibling prodbox evidence and now has the scoped amoebius Phase-74/55 validation recorded in [§10](#10-planning-ownership).
+its encrypted-MinIO-backend + Vault-Transit envelope shape ([§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)) began as sibling prodbox evidence; the target scoped amoebius Phase-74/76 obligations are specified in [§10](#10-planning-ownership).
 Reimplementing that surface is a far larger and riskier undertaking than the Helm removal was, for no
 present gain.
 
@@ -246,9 +246,9 @@ flowchart TD
 
 > **Honesty.** This backend shape originated as evidence from the sibling prodbox project (`Prodbox.Pulumi.EncryptedBackend`:
 > a scratch backend hydrated from an opaque Model-B MinIO object, with a Transit/KV Vault gate on every
-> apply/destroy). amoebius has since built its backend layer: Phase 74 tested child checkpoint custody, and
-> Phase 76 tested the exact six-object peak, direct Transit decrypt, opaque MinIO readback, and sealed-Vault
-> pre-PUT refusal. This does not validate an AWS provider checkpoint, direct-S3 denial, or the engine-pod
+> apply/destroy). Phase 74 owns child-checkpoint-custody validation, and Phase 76 owns the exact six-object
+> peak, direct Transit decrypt, opaque MinIO readback, and sealed-Vault pre-PUT refusal. None is a current
+> result, and these criteria do not cover an AWS provider checkpoint, direct-S3 denial, or the engine-pod
 > filesystem observer; those remain UNVERIFIED. Read broader statements here as design intent
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -283,7 +283,7 @@ credential class.* In prodbox this is machine-enforced — every stack is one `S
   Pulumi-side reading of the storage cardinal rule
   ([storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation)): durable storage exists until a
   deliberate, privileged deletion, never "until the next teardown."
-- **The class assignment is the single source of truth for both backend and credential.** A resource's
+- **The Haskell lifetime-class assignment is the single source of truth for both backend and credential.** A resource's
   class selects *which* logical checkpoint namespace it lives in and *which* credential may mutate it, so the two can
   never drift apart. The managed-resource registry that makes this total — one typed entry per creatable
   resource, each with a `discover` and a `destroy` — is owned by the reconciler doctrine
@@ -297,9 +297,12 @@ credential class.* In prodbox this is machine-enforced — every stack is one `S
 Pulumi is amoebius's provisioning mechanism for everything that is *not* a typed-manifest-reconciled
 in-cluster object. In-cluster workloads are reconciled through the kube API by amoebius's own typed reconciler
 ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)); the **substrate beneath and around** a
-cluster — the cloud account, the other clusters, the DNS, the certs — is reconciled through Pulumi. This
-table is the catalog; the **owner** column names where each resource's *meaning* lives, so this doc never
-duplicates it.
+cluster — the cloud account, the other clusters, the DNS, the certs — is reconciled through Pulumi. The closed
+executable inventory must be the Haskell `ManagedResource` type together with its total discovery, provision,
+lifetime, credential, and destruction mappings. Pulumi planning must enumerate that Haskell value and never parse
+this prose. The table is a reader-facing overview; the **owner** column names where each resource's *meaning*
+lives. A row that lacks a `ManagedResource` constructor, or a constructor omitted by the total Haskell
+mappings, is a fail-closed finding rather than a provisionable resource.
 
 | Resource | What Pulumi does here | Owned by |
 |---|---|---|
@@ -429,8 +432,8 @@ trust. Both are external mutations, so both are Pulumi/IaC concerns, and **amoeb
   not a hard-wired constant.
   The DNS provider is operator-selectable wherever a programmable API exists, with route53 as the canonical
   default.
-- **Zones and records are declarative, provisioned via Pulumi.** A cluster's public name(s) and the
-  records that resolve them are `.dhall`-declared and realized through the route53 provider, tracked in the
+- **Zones and records are declarative, provisioned via Pulumi.** A cluster's public names and the
+  records that resolve them are declared by external/untracked `.dhall` operator input and realized through the route53 provider, tracked in the
   encrypted MinIO backend ([§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)) under the lifetime class ([§3](#3-state-lifetime-matches-resource-lifetime-per-class)) matching the zone: a per-cluster subzone is
   per-run/durable; a shared apex/parent zone is long-lived.
 - **"DNS that binds to the wrong IP address" is unrepresentable.** The DSL ties a record to the cluster's
@@ -544,7 +547,7 @@ flowchart TD
 
 Every Pulumi action in this document — spawn a child ([§4](#4-what-pulumi-provisions-the-resource-catalog)), provision a node ([§4](#4-what-pulumi-provisions-the-resource-catalog)), materialize an EBS volume
 ([§6](#6-the-ebs-create-vs-delete-credential-model)), create a DNS record or issue a cert ([§5](#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns)) — is enacted by the **same reconciler shape** the rest of
-amoebius uses: *observe the authoritative source, diff against the `.dhall`, enact, re-observe,* idempotent
+amoebius uses: *observe the authoritative source, diff against the decoded external/untracked `.dhall` input, enact, re-observe,* idempotent
 by construction, with three-valued `Present | Absent | Unreachable` observation and `Unreachable → refuse`.
 Every arm's read-only prefix includes exact checkpoint-object inventory/metadata, the complete parent
 `ObservedInventory`, parent executor capacity and live commitments, plugin/workspace/cache backing residuals,
@@ -651,56 +654,60 @@ To keep SSoT boundaries crisp:
 This document is normative Pulumi-IaC doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
-only (the plan is authoritative): root Vault/PKI lands in **Phase 61**; public-edge ZeroSSL/route53 integration
-lands in **Phase 64**; gateway-migration route53 repointing lands in **Phase 75**; amoebic spawning via SSH-key
-Pulumi with the MinIO backend + Vault-envelope encryption lands in **Phase 74**; provider-managed clusters
-(EKS) and dynamic node
-provisioning land in **Phase 76**; the elevated-harness storage-deletion safety that makes the [§6](#6-the-ebs-create-vs-delete-credential-model)
-create-vs-delete model leak-free lands in **Phase 48**. Per
+only (the plan is authoritative): root Vault/PKI is assigned to **Phase 61**; public-edge ZeroSSL/route53
+integration is assigned to **Phase 64**; gateway-migration route53 repointing is assigned to **Phase 75**;
+amoebic spawning via SSH-key Pulumi with the MinIO backend + Vault-envelope encryption is assigned to
+**Phase 74**; provider-managed clusters (EKS) and dynamic node provisioning are assigned to **Phase 76**; the
+elevated live-harness storage-deletion safety that makes the
+[§6](#6-the-ebs-create-vs-delete-credential-model) create-vs-delete model leak-free is assigned to
+**Phase 90**. Phase 48 owns only the substrate-free test-workflow and teardown algebra; it may not exercise a
+provider, elevated harness, or storage deletion. Per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius
-result except the narrow Phase-64 integration residue below: the model otherwise generalizes behaviour proven
-in prodbox into amoebius design intent, and the [§6](#6-the-ebs-create-vs-delete-credential-model) EBS
-credential model is an explicit *resolution of an open question*, not a tested capability.
+result: the model generalizes behaviour proven in prodbox into amoebius design intent, and the
+[§6](#6-the-ebs-create-vs-delete-credential-model) EBS credential model is an explicit *resolution of an open
+question*, not a tested capability.
 
-Phase 64 validated the narrow TLS credential-provenance seam on linux-cpu: a bounded in-cluster ACME recording
-Job received only the Vault `SecretRef` path in argv, read EAB bytes from the Vault-derived Secret volume,
-recorded no values, and found no EAB literal in Dhall. The certificate chain was issued by the retained
-internal Vault PKI as the explicitly allowed staging stand-in. This is not evidence of live ZeroSSL issuance,
+**Phase-64 target seam — NOT VALIDATED.** A bounded in-cluster ACME recording Job must receive only the Vault
+`SecretRef` path in argv, read EAB bytes from the Vault-derived Secret volume, record no values, and find no
+EAB literal in Dhall. The certificate chain must be issued by retained internal Vault PKI as the explicitly
+allowed staging stand-in. This would not evidence live ZeroSSL issuance,
 Route53 ownership, or Pulumi execution; those provider effects retain their later owners.
 
-Phase 74 realizes the first in-cluster Pulumi owner in `Amoebius.Pulumi.Engine`, the encrypted-checkpoint
-contract in `Amoebius.Pulumi.Backend.EncryptedMinio`, and the command-provider program under
-`pulumi/child-cluster/`. Two resource-bounded Jobs ran Pulumi inside a parent `kind` cluster, created two child
-clusters concurrently, exported checkpoint state, observed an unchanged second pass, and destroyed both
-stacks. Vault Transit envelope ciphertext and the checkpoint object were read back from retained MinIO; direct
-checkpoint admission and one-byte-short storage are refused by the gate. Provider-managed programs remain
+**Phase-74 target boundary — NOT VALIDATED.** Phase 74 must realize the first in-cluster Pulumi owner in
+`Amoebius.Pulumi.Engine`, the encrypted-checkpoint contract in `Amoebius.Pulumi.Backend.EncryptedMinio`, and a
+Haskell-declared command-provider program whose required external form is rendered lazily beneath
+`.build/pulumi/**`. Nothing beneath `pulumi/**` is target tracked source. Two resource-bounded Jobs
+must run Pulumi inside a parent `kind` cluster, create two
+child clusters concurrently, export checkpoint state, observe an unchanged second pass, and destroy both
+stacks. The target observer must read Vault Transit envelope ciphertext and the checkpoint object from retained
+MinIO; the gate must refuse direct checkpoint admission and one-byte-short storage. Provider-managed programs remain
 Phase 75.
 
-Phase 75 realizes the provider-neutral DNS decision and hub handoff in
-`Amoebius.Multicluster.DnsRepoint` and `GatewayMigration`. The live drill queried a dedicated authoritative DNS
-server from outside the migration runtime and moved a raw-kernel `wg0` role. The configured AWS token failed
-authentication, so the Route53 API/Pulumi mutation remains UNVERIFIED and is not certified by that local DNS
-result.
+**Phase-75 target boundary — NOT VALIDATED.** Phase 75 must realize the provider-neutral DNS decision and hub handoff in
+`Amoebius.Multicluster.DnsRepoint` and `GatewayMigration`. The live drill must query a dedicated authoritative
+DNS server from outside the migration runtime and move a raw-kernel `wg0` role. Route53 API/Pulumi mutation
+remains UNVERIFIED and cannot be certified by a local DNS result.
 
-Phase 76 builds the provider plan and receipt boundary in `Amoebius.Pulumi.Provider.Eks`, extends
+**Phase-76 target boundary — NOT VALIDATED.** Phase 76 must build the provider plan and receipt boundary in `Amoebius.Pulumi.Provider.Eks`, extend
 `Amoebius.Pulumi.Engine` with exact bounded executor provisioning and the control-plane daemon/absolute-path/empty-child-
 environment contract, and implements the exact checkpoint fold in
-`Amoebius.Pulumi.Backend.EncryptedMinio`. The scoped Register-3 run observed two concurrent resource-bounded
-Jobs, a zero-environment absolute Pulumi `version` `execve`, HTTP-503 sealed-Vault refusal before MinIO
-mutation, six Transit-enveloped MinIO objects, direct Transit decrypt, three red mutants, and exact cleanup.
-The configured AWS identity returned `InvalidClientTokenId`; therefore provider-account observation, actual
+`Amoebius.Pulumi.Backend.EncryptedMinio`. The scoped Register-3 challenge must observe two concurrent
+resource-bounded Jobs, a zero-environment absolute Pulumi `version` `execve`, HTTP-503 sealed-Vault refusal
+before MinIO mutation, six Transit-enveloped MinIO objects, direct Transit decrypt, three red mutants, and
+exact cleanup. Provider-account observation, actual
 control-plane daemon `pulumi up`, EKS, the managed node group, CloudTrail, AWS-plugin `execve`, pod-filesystem inspection,
 and direct-S3 denial remain UNVERIFIED.
 
-Phase 78 implements the pure durable-EBS program in `Amoebius.Pulumi.Ebs` and the closed operational/CSI/
-elevated-test action matrix in `Amoebius.Pulumi.Credential`. It validates integral-GiB allocation, byte/count
+**Phase-78 target boundary — NOT VALIDATED.** Phase 78 must implement the pure durable-EBS program in
+`Amoebius.Pulumi.Ebs` and the closed operational/CSI/elevated-test action matrix in
+`Amoebius.Pulumi.Credential`. Its gate must validate integral-GiB allocation, byte/count
 quota refusal, deterministic promised slots, receipt-only materialization, distinct durable checkpoint keys,
 protect/Retain metadata, old+new migration overlap, and all five seeded mutants. The scoped live observer used
 real Vault Transit and MinIO for separate ephemeral/durable checkpoint namespaces. No AWS volume or IAM call
 occurred, so create/delete authorization, volume retention, receipt-bound EBS state, and provider migration
 remain UNVERIFIED. The development-plan tracker owns the portable CPU/clean-guest routing rule.
 
-Phase 79 implements `Amoebius.Pulumi.NodeGroup` as receipt-only provider-node materialization and
+**Phase-79 target boundary — NOT VALIDATED.** Phase 79 must implement `Amoebius.Pulumi.NodeGroup` as receipt-only provider-node materialization and
 `Amoebius.Pulumi.Teardown` as fail-closed per-class teardown plus broadened run-owned enumeration. The pure
 contract requires the managed-capacity taint, complete supply/layout/device and fresh scheduler authority,
 rejects foreign-pod admission, retains durable resources, and discovers owned resources through run tag, VPC,

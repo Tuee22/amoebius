@@ -25,7 +25,9 @@ half of the partition is derived directly from it.
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is
+> diagnostic only and never current validation evidence. Target doctrine remains normative; current state is
+> owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
@@ -78,18 +80,18 @@ default-deny boundary.
 
 Each platform capability of [service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set)
 occupies **exactly one namespace**, holding the manifests of that capability's canonical provider
-([service_capability_doctrine.md §3](./service_capability_doctrine.md#3-one-canonical-provider-the-type-admits-alternates))
+([service_capability_doctrine.md §3](./service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific))
 as deployed by [platform_services_doctrine.md](./platform_services_doctrine.md). The set is fixed and
 derived — not a layout an installer hand-maintains:
 
-| Namespace | Capability / role | Concrete provider (owned by platform_services) |
+| Namespace | Capability / role | Deployed provider topology (selection owned by service capabilities) |
 |---|---|---|
 | `amoebius-minio` | ObjectStore | MinIO — the single S3 substrate ([platform_services_doctrine.md §4](./platform_services_doctrine.md#4-minio--the-object-substrate)) |
 | `amoebius-vault` | SecretStore | Vault — the fail-closed secrets root ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) |
 | `amoebius-pulsar` | MessageBus | Pulsar + ZooKeeper + BookKeeper ([platform_services_doctrine.md §6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)) |
 | `amoebius-postgres` | Sql | the Percona operator ([§3](#3-the-postgres-namespace-holds-the-operator-not-per-consumer-databases)) |
 | `amoebius-observability` | Observability | Prometheus / Grafana / alert receiver / Thanos / TensorBoard ([platform_services_doctrine.md §7](./platform_services_doctrine.md#7-prometheus--grafana--observability-is-not-an-add-on), [monitoring_doctrine.md](./monitoring_doctrine.md)) |
-| `amoebius-registry` | Registry | `distribution` (`registry:2`), blobs in MinIO, no PV ([platform_services_doctrine.md §3](./platform_services_doctrine.md#3-the-registry--the-single-image-source)) |
+| `amoebius-registry` | Registry | Distribution `registry:2`, blobs in MinIO, no PV ([platform_services_doctrine.md §3](./platform_services_doctrine.md#3-the-registry--the-single-image-source)) |
 | `amoebius-keycloak` | Identity | Keycloak — owns all wild ingress ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) |
 | `amoebius-edge` | Edge | Envoy + Gateway API + the L4 LoadBalancer (MetalLB or cloud LB) |
 | `amoebius-inference` | InferenceEngine | the target-offering-selected serving runtime and its provisioned workload |
@@ -98,9 +100,9 @@ derived — not a layout an installer hand-maintains:
 
 Three properties make the set a *derivation*, not a convention:
 
-Phase 33's Register-1 `render-golden` battery is the validated rendering enactment of this partition: every
-sealed render-source identity is emitted once in deterministic order, and the output-domain property rejects
-missing, duplicate, or cross-owned identities. Live namespace admission remains Phase-58/runtime residue.
+Phase 33's NOT-VALIDATED contract requires every provision-sealed render-source identity to be emitted once
+in deterministic order, with missing, duplicate, and cross-owned identities rejected. Existing source and
+test material are observed footprints only; live namespace admission remains Phase-58/runtime residue.
 
 - **One namespace per capability, never a shared one.** The Identity edge (Keycloak) and the L7 edge
   (Envoy/Gateway) are distinct capabilities and therefore distinct namespaces (`amoebius-keycloak`,
@@ -121,8 +123,9 @@ missing, duplicate, or cross-owned identities. Live namespace admission remains 
   apiserver/config/readiness edges required by the scheduler role are admitted. No platform workload, app,
   controller child, or control-plane daemon Pod may land there.
 
-The concrete provider set, its HA-always deployment, and its bring-up ordering are owned by
-[platform_services_doctrine.md](./platform_services_doctrine.md); this doctrine owns only that the set is
+Provider selection is owned by [service_capability_doctrine.md §3](./service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific).
+Its HA-always deployment and bring-up ordering are owned by
+[platform_services_doctrine.md](./platform_services_doctrine.md); this doctrine owns only that the selected set is
 partitioned one-namespace-per-capability plus the two closed control roles and that the partition is derived.
 
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
@@ -162,7 +165,7 @@ flowchart LR
   sys -->|"default-deny, plus only the derived apiserver and readiness edges"| policy
   appns -->|"default-deny, allow edges derived from declared dependencies"| policy
 ```
-*Orientation. Design intent. Every namespace above is computed from the identity on its left and is never authored; the concrete providers deployed into the platform namespaces are owned by [platform_services_doctrine.md](./platform_services_doctrine.md), the app partition by [service_capability_doctrine.md §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding), and the policy derivation by [§5](#5-networkpolicy-default-deny--derived-allow-follows-the-dependency-graph-referenced). Whether a running cluster actually enforces the boundary is runtime-checked and is not shown here.*
+*Orientation. Design intent. Every namespace above is computed from the identity on its left and is never authored; provider selection is owned by [service_capability_doctrine.md §3](./service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific), provider topology by [platform_services_doctrine.md](./platform_services_doctrine.md), the app partition by [service_capability_doctrine.md §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding), and policy derivation by [§5](#5-networkpolicy-default-deny--derived-allow-follows-the-dependency-graph-referenced). Whether a running cluster actually enforces the boundary is runtime-checked and is not shown here.*
 
 ---
 

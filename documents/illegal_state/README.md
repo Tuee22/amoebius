@@ -16,7 +16,7 @@ that document defines.
 
 **Status**: Reference only
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, documents/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: documents/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -59,37 +59,43 @@ fixes. This router owns the declaration. The taxonomy is the product of three cl
 - **Validation locus** — `dhall-typecheck` · `gadt-decode` · `extension-astcheck` · `provision-seal` ·
   `rendered-artifact-oracle` · `live-effect`, owned by
   [`illegal_state_techniques.md` §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).
-  It answers *where the claim is checked*, and is the axis
-  [`dhall/examples/locus_registry.tsv`](../../dhall/examples/locus_registry.tsv) records per subcase.
+  It answers *where the claim is checked*. Haskell declarations record the locus per subcase and lazily emit
+  any tabular view beneath `.build/docs/**`; no tracked serialized locus registry is authoritative.
 - **Case family** — the structural axis, closed at fourteen members: `accelerator` · `backup` · `cache` ·
   `capability-provision` · `capacity` · `image` · `lifecycle` · `messaging` · `ml-asset` · `multicluster` ·
   `security` · `storage` · `topology` · `ui`. It answers *what the state is about*.
 
   The members are listed here rather than described, because an axis defined as "whatever the entries happen to
   use" cannot make an empty cell a defect — a family nothing declares would produce no cells to be empty, so
-  the covering could never report a missing domain. This list is the axis;
-  [`../../tools/covering_grid.py`](../../tools/covering_grid.py) reads it, and
-  `tools/locus_registry_lint.py` accepts exactly these values. Note that the family axis is **not** a
+  the covering could never report a missing domain. This list is the reader-facing specification of the axis.
+  A separately reviewed Haskell declaration must encode exactly these values; the Haskell covering-grid
+  generator consumes that declaration, never this Markdown, and may materialize views only beneath
+  `.build/**`. The existing Python/Markdown/TSV mechanisms are condemned
+  migration footprints tracked only by
+  [`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). Note that the family axis is **not** a
   refinement of the themed slices and is not meant to be: there is a `tenancy` slice with no `tenancy` family
   (its states are `security`), and `backup`, `image`, `ui` and `accelerator` are families with no slice of
   their own. A slice is a reading unit; a family is a subject.
 
-A **cell** is one triple, and an entry declares the cells it occupies on its own **`Cells:`** line — one
-`` `layer`×`locus` `` pair per foreclosure the entry makes, so a reader and the generator see the same
-pairing. Every cell either holds at least one catalog entry, is inadmissible under the relation below, or
+A **cell** is one triple, and an entry specifies the cells it occupies on its own **`Cells:`** line — one
+`` `layer`×`locus` `` pair per foreclosure the entry makes, so a reader can inspect the intended pairing.
+The line is doctrine, not a serialized registry: no generator, checker, or oracle may parse it. The executable
+pairing is a separately reviewed Haskell value, and a separate Haskell oracle checks it. Every cell either
+holds at least one catalog entry, is inadmissible under the relation below, or
 carries a one-line statement of why no illegal state lives there; an unjustified empty cell is a defect. A
 justification may cover a whole row or column where the reason is structural rather than particular. The grid
-itself is **generated** to `.build/docs/` from the three axes, so widening an axis reports its own new empty
-cells; the entries, the relation, and the justifications stay authored, because each is an independent
-expectation.
+itself is **generated** to `.build/docs/` from Haskell declarations of the three axes, so widening an axis
+reports its own new empty cells. Markdown remains explanatory doctrine and never becomes executable input.
 
-**Why the pairing is authored per entry.** It was not, until 2026-08-20. The generator credited an entry with
+**Historical result (invalidated).** Before this reset, the Python generator credited an entry with
 the *product* of every layer its prose named and every locus its prose named, because the pairing lived in
 sentences no parser could split. Fifty-eight of the ninety-seven entries name more than one of each, so the
 grid reported 143 occupied cells where the entries assert 64 — occupancy was an upper bound, the unjustified
 count a floor, and eleven cells were left owing a reason nobody could honestly write, because each was
 *unknown* rather than empty. The `Cells:` line replaces that estimate with a measurement, and the eleven
-resolved into occupied, inadmissible, and three genuinely empty cells whose reasons are stated below.
+resolved into occupied, inadmissible, and three genuinely empty cells whose reasons are stated below. Those
+numbers are rationale only and cannot be reused as current evidence; the Python/Markdown parser remains
+condemned by the active legacy register.
 
 ### Which locus can observe which layer
 
@@ -98,8 +104,8 @@ They classify different questions, but their product is not inhabited: a locus *
 that forecloses a state never sees that state, because the value did not survive to reach it, and a locus
 **upstream** of the effect a residue is about cannot settle it, because the effect has not happened yet. Seven
 of the eighteen pairs are inhabitable and the other eleven are empty for that reason rather than for want of
-an entry. [`../../tools/covering_grid.py`](../../tools/covering_grid.py) reads this table and reports those
-cells as `inadmissible`, instead of asking for fourteen identical sentences apiece.
+an entry. A reviewed Haskell relation must encode this rule, a separately authored Haskell oracle must check
+it, and any tabular view is emitted only beneath `.build/**`; neither may parse this explanatory table.
 
 | layer | loci that can observe it | why not the others |
 |---|---|---|
@@ -112,13 +118,14 @@ The relation is a consequence of what the two axes mean, and it holds one honest
 has no opaque types and the residual teeth of a type-foreclosure land at the Haskell decoder
 ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
 So the layer axis carries one bit of information beyond the locus axis, at one locus, and that bit is what
-each entry's `Cells:` line authors.
+each entry's `Cells:` line specifies for the reader and its Haskell counterpart declares for execution.
 
 ### The justified empty cells
 
 In these rows `*` reads as "every member of that axis". They apply only to **admissible** cells: the eleven
-inadmissible pairs are already foreclosed by the relation above and need no row. The generated grid at
-`.build/docs/covering.tsv` resolves each cell against occupancy, then the relation, then this table.
+inadmissible pairs are already foreclosed by the relation above and need no row. This table records doctrine
+for human review only. The target grid at `.build/docs/covering.tsv` resolves each cell against independently
+reviewed Haskell occupancy, relation, and justification values; it never reads this table.
 
 | cell | why no illegal state lives there |
 |---|---|
@@ -139,9 +146,10 @@ inadmissible pairs are already foreclosed by the relation above and need no row.
 | `*` × `rendered-artifact-oracle` × `multicluster` | A multi-cluster state is a relation *between* two clusters' specs. The rendered output of either one shows only its own half, so the relation has no witness there. |
 | `*` × `rendered-artifact-oracle` × `storage` | Storage states are decided by the geometry folds before rendering and by the live volume afterwards. The emitted PVC/PV pair restates the fold's conclusion rather than testing it. |
 
-**What the covering now claims.** [`../../tools/covering_grid.py`](../../tools/covering_grid.py) resolves all
-**252** cells — 3 layers × 6 loci × 14 families — against the 97 entries' authored pairings, the relation, and
-the table above:
+**Target covering claim — NOT VALIDATED.** The Haskell generator must resolve all **252** cells — 3 layers ×
+6 loci × 14 families — against Haskell-declared entry pairings, relation, and justifications whose rationale
+is stated above. The
+following counts are target expectations, not a current tool result:
 
 | | cells |
 |---|---|
@@ -150,10 +158,10 @@ the table above:
 | admissible, empty, and justified | 34 |
 | **admissible, empty, and still owing a reason** | **0** |
 
-The obligation is discharged over every cell, and the honesty that survives it is stated rather than hidden.
-Occupancy is now what the entries assert rather than an upper bound over their prose, which is why the count
-fell from 143 to 64: the missing 79 were pairings no entry ever made. Two entries changed meaning in the
-course of authoring the pairings, and both were defects the product-credited grid had concealed — an
+The obligation is not discharged until Phase 27 has a reviewed Haskell subject, an independent Haskell
+oracle, a qualified harness, and human promotion. The target occupancy uses declared pairings rather than an
+upper bound over prose. Historical analysis reduced an earlier estimate from 143 to 64 and exposed defects,
+but that analysis is rationale, not current validation evidence — an
 `image` state was recorded as having no runtime residue when [§3.77](./illegal_state_lifecycle.md#377-a-worker-naming-an-extension-its-own-binary-does-not-link)
 plainly claims one, and five entries claimed a foreclosure layer at no locus at all
 ([§3.69](./illegal_state_multicluster.md#369-a-cold-seeded-secondary-taking-the-gateway-without-proven-freshness),
@@ -168,7 +176,8 @@ lying along an axis nobody declared stays outside the claim, which is the residu
 [`illegal_state_techniques.md` §6.2](./illegal_state_techniques.md#62-the-covering-obligation--exhaustive-relative-to-a-declared-taxonomy)
 carries. The covering also says nothing about whether an occupied cell's entry is *right*; that each entry's
 foreclosure actually rejects its fixture at the locus it names is the Phase-27 corpus obligation, keyed to the
-same pairing through [`../../dhall/examples/locus_registry.tsv`](../../dhall/examples/locus_registry.tsv).
+same pairing through separately reviewed Haskell declarations. Any serialized registry is lazily generated
+beneath `.build/**` and has no verdict authority.
 
 ## Related Documents
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index.

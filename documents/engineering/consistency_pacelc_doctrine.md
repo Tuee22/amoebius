@@ -22,6 +22,8 @@ in [chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentra
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ---
 
 ## 1. Why this doctrine exists
@@ -270,7 +272,7 @@ Per the proven/tested/assumed discipline
 - **The async cross-cluster posture is the recorded price**, not a defect: synchronous cross-cluster
   replication would pay cross-cluster RTT per publish
   ([`chaos_failover_worked_examples.md` Appendix B](./chaos_failover_worked_examples.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)).
-- Everything here is **design intent** (Phase 0). The Dhall types land at dhall-typecheck (`dhall type`) and the
+- Everything here is **design intent** (Phase 0). The Dhall types are assigned to the dhall-typecheck locus (`dhall type`) and the
   GADT-indexed decoder + folds at gadt-decode; the upload-time feasibility push-back and the availability-first
   failover are the one cross-cluster proof obligation. Phase order and status live only in
   [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
@@ -283,7 +285,7 @@ Per the proven/tested/assumed discipline
 |---|---|
 | The whole-stance PACELC posture statement (the [§2](#2-the-r7-classification-applied-once-per-boundary) four-leg table) | Each leg's normative rule — the consistency boundary, fail-closed Vault, the odd quorum, the async substrate — stays with its owner |
 | The **unified deployment-rules PACELC surface** ([§3](#3-the-one-configurable-axis--the-deployment-rules-pacelc-surface)): the `ReplicationLink` / `FailoverBudget` / `Distribution` types and the derived-RPO rule | The `GatewayFailover` pairing relation shape and the `<Planned \| Failover>` taxonomy → [`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md) |
-| That the mode is world-triggered, not an authored field ([§3.4](#34-the-mode-is-world-triggered-not-authored)) | R7/R8/R9, the I-confluence classifier, and the failover proof obligation → [`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need), [[§16](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](./chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows)](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest) |
+| That the mode is world-triggered, not an authored field ([§3.4](#34-the-mode-is-world-triggered-not-authored)) | R7/R8/R9, the I-confluence classifier, and the failover proof obligation → [`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need), [§16](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](./chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows) |
 | The upload-time feasibility push-back as a hybrid decode+runtime gate ([§3.5](#35-the-upload-time-feasibility-push-back)) | The refuse-on-unsatisfiable reconciler posture it mirrors → [`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md) |
 | The no-`Confluent`-arm rule on the authorable disposition ([§3.6](#36-the-cross-boundary-disposition)) | The confluence classification itself (a model obligation) → [`chaos_failover_second_axis.md` §17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier) |
 

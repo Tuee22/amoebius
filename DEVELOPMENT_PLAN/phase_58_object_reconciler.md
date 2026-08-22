@@ -7,39 +7,37 @@
 > kind-indexed controllers, staged serial/host/accelerator execution, Job terminal retention, and
 > authenticated deletion — observing each action's live postcondition until the generation converges and
 > proving an immediate re-run is a no-op; the `amoebius-capacity` scheduler that later binds guarded Pods by
-> CAS reservation is layered on in Phase 58.
+> CAS reservation is layered on in Phase 59.
 > **Read this if**: phase 58 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 58 delivers the typed renderer + object reconciler; its design is owned by [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [readiness_ordering_doctrine.md](../documents/engineering/readiness_ordering_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-Sprints 38.1–27.5 and the complete phase gate have passed.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 58.1: Deployment-global desired state + authenticated live inventory + typed action plan 📋](#sprint-581-deployment-global-desired-state--authenticated-live-inventory--typed-action-plan-)
-- [Sprint 58.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch 📋](#sprint-582-bootstrap-lease-authority--generic-typed-action-dispatcher--scoped-ssa--storage-scaling-dispatch-)
-- [Sprint 58.3: Staged execution transitions, Job terminal protocol, and authenticated deletion 📋](#sprint-583-staged-execution-transitions-job-terminal-protocol-and-authenticated-deletion-)
-- [Sprint 58.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) 📋](#sprint-584-wait-for-ready--the-idempotent-convergence-gate-re-run-no-op-)
-- [Sprint 58.5: Register-2.5 reconciler + staged-execution convergence under simulated faults 📋](#sprint-585-register-25-reconciler--staged-execution-convergence-under-simulated-faults-)
+- [Sprint 58.1: Deployment-global desired state + authenticated live inventory + typed action plan ⏸️](#sprint-581-deployment-global-desired-state--authenticated-live-inventory--typed-action-plan-)
+- [Sprint 58.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch ⏸️](#sprint-582-bootstrap-lease-authority--generic-typed-action-dispatcher--scoped-ssa--storage-scaling-dispatch-)
+- [Sprint 58.3: Staged execution transitions, Job terminal protocol, and authenticated deletion ⏸️](#sprint-583-staged-execution-transitions-job-terminal-protocol-and-authenticated-deletion-)
+- [Sprint 58.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) ⏸️](#sprint-584-wait-for-ready--the-idempotent-convergence-gate-re-run-no-op-)
+- [Sprint 58.5: Register-2.5 reconciler + staged-execution convergence under simulated faults ⏸️](#sprint-585-register-25-reconciler--staged-execution-convergence-under-simulated-faults-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -47,116 +45,22 @@ Sprints 38.1–27.5 and the complete phase gate have passed.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-57 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 57, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — reopened 2026-08-16 because Phase 56's successor OCI handoff is being amended to include Pulsar's S3 offloader bundle. Revalidate this phase against the amended exact handoff before Phase 59 proceeds.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Superseded containment seal:** resealed 2026-08-16 under the repository-containment amendment, attestation
-`sha256:85cf27abdea88522d4b4e5d3941d22d11fe68c6ed53fd6ec43bab1305643f9f1`.
-`python3 tools/object_reconciler_gate.py --execute` passed all **11** recorded sides against source snapshot
-`sha256:7b588caeaa7a2507366c389138d7a860b9edabc20a52d502da9a37c62cd97751`.
-The run verified Phase 56 attestation `sha256:e6ff9163d299b66b8ce77c216d5114e13af6fe4beb7e299834ee390e9963816a`
-and image index `sha256:4d8891f619fc26276288b3bc7f3586750f81dbb59b9b40b93e3149f4c4666dcd`,
-created a fresh project-private daemon, kind cluster, registry, and node pull route beneath one marker-owned
-`.test_data/**` run, then destroyed the fixture before attestation. All five sprints passed; all 11 mutants
-reddened; all 13 metrics matched; and all 31 surfaces joined to 30 run-time items. Generated output and the
-five sprint receipts stayed beneath `.build/**`; the immutable record reports every check `pass` with
-`cleanup.left_resources=false`, and the outside-host inventory remained empty.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-14, attestation `sha256:0ba91376b2c536930ba52ade70c9581798a9dfb861d468a28f5bb0d13fc353e0`. Reopened 2026-08-11 because the prior seal
-did not include the universal artifact-hygiene postcondition; `python3 tools/object_reconciler_gate.py --execute` now
-passes on **all ten sides** against the run's own source snapshot, and left no authored path created, changed,
-or removed.
-
-**What the seal added — 2026-08-14: Policy-conformant.** The reconciler ran against the live single-node
-`kind` cluster from Phase 55, pulling its corpus Deployment from the `distribution` registry Phase 56 published
-to, and converged: the re-run is byte-stable with **zero** planned mutations, readiness is observed rather than
-slept through, both `OnDelete` slots replaced in order with distinct UIDs through observed absence, the terminal
-Job Pod stayed retained with no completion object, the amoebius CR's child conformed to its provisioned
-envelope, and one of two simultaneous reservations was admitted under the one-Pod quota with zero
-over-allocation. Postflight left nothing behind. The Register-2.5 battery ran 2,048 deterministic schedules
-against the same real action modules. All **11** committed mutants went red, 13 recorded metrics equal their
-authored values, and 31 surfaces join to 30 enumerated items — `modeled-apiserver-fidelity`,
-`completion-release-ledger`, and `rollback-ledger` stay **UNVERIFIED**, which is what this register can
-honestly claim.
-
-*The gate could not run at all, for four separate reasons.* It read five sprint receipts, three mutant
-batteries, and two live observations out of `DEVELOPMENT_PLAN/evidence/phase_38` — a plan-tree directory that
-no longer exists — compared a committed golden ledger against a derived one, read its surface list out of a
-committed enumeration file that was also gone, and invoked a **developer-home `cabal`** in eight places, so it
-was bound to one machine and to whichever GHC that installation offered. It is now a six-side `PhaseGate` over
-a run bundle: `test/oracle/object_reconciler_surfaces.tsv` authors 31 surfaces for the first time, the ledger is
-emitted into the bundle and bound to a source-snapshot digest, and cabal and the compiler resolve per run from
-`tools/toolchain_requirements.json`.
-
-*The corpus was reconciling a digest that no longer existed.* `tools/object_reconciler_live.py` and
-`tools/object_reconciler_execution_live.py` each pinned the Phase-56 base image by a literal digest from a build that is
-gone, and the one assertion tying the running pod to Phase 56's published artifact compared against that same
-literal — so on any host but the one that produced it the corpus would have failed `ImagePull`, and the check
-that should have caught it was comparing a constant to itself. The reference is supplied by the caller, and the
-assertion now reads it from what this run was told to reconcile. The three live-evidence Haskell suites read
-the retired evidence path as a string constant; they take this run's bundle path as their argument.
-
-**Invalidated historical record:**
-
-Complete. Sprints 38.1–27.5 and the complete Register-3/2.5 phase gate passed. This phase opened after the **Phase 56 gate** (the
-native-architecture base image + jit-build resolver + in-cluster `distribution` registry) and the **Phase 55 gate**
-(the single-node `kind` cluster + substrate detect), and runs on the **linux-cpu** substrate in
-**Register 3** — the first phase whose gate actually *applies* rendered objects to a live cluster and observes
-them to convergence. It builds the **object-reconciler half** of the manifest doctrine: Phase 33 already stood
-up the pure private per-source `renderSourcePrivate` plus the deployment-global `renderAll` owner union and
-golden-locked them in Register 1; this phase wires that exact value through the
-`observe → diff → scoped-SSA → staged-enact → delete → wait-for-ready` reconciler onto the single-node `kind`
-cluster from Phase 55. The reconciler is exercised here **from the host binary against a scratch namespace**,
-against the pinned Phase-33 corpus — the in-cluster **control-plane daemon** that eventually owns it
-(a Deployment `replicas=1` whose single-instance guarantee is delegated to k8s/etcd with **no bespoke election**) arrives in Phase 64. The `amoebius-capacity` scheduler — its CAS `Reserved`→`BindingInFlight`→
-`Bound` reservation ledger, two-stage bootstrap cutover, and execution-identity admission — is **Phase 59, layered on this reconciler**; in this phase the corpus Pods are bound by the **default Kubernetes scheduler**,
-and the typed-action engine, scoped SSA, staged enactors, authenticated deletion, and unified observed-readiness
-path are amoebius's new code proven live here.
-
-- **2026-08-09 — Sprint 58.1 complete.** The separately validated desired index, authenticated observed
-  execution union, once-per-identity commitment normalization, physical-backing runtime grouping,
-  whole-vector preflight, single-use Lease/storage tokens, and exact 12-action corpus plan passed with the
-  unchanged Phase-33 renderer gate. An import lint found no writer boundary in the read-only preflight modules.
-  Receipt: `sprint-26.1-receipt.json`, fingerprint
-  `dynamically-resolved`.
-- **2026-08-09 — Sprint 58.2 complete.** The typed Lease token/renewal rounding, effect dispatcher, and scoped
-  SSA boundary passed pure tests and a live scratch-namespace run. The run observed namespace-before-Lease
-  cold ordering, exact bootstrap holder/UID/resourceVersion, stale-CAS rejection, `amoebius` field ownership,
-  correction of an owned-field drift, preservation of a foreign-manager annotation, a resourceVersion-stable
-  no-op, and leak-free teardown. Receipt:
-  `sprint-26.2-receipt.json`, fingerprint
-  `dynamically-resolved`.
-- **2026-08-09 — Sprint 58.3 complete.** The pure serial, ordinary/CUDA/Metal release, Job terminal, and
-  authenticated-delete protocols passed. Live OnDelete replacement deleted and re-observed two provisioned
-  slots in order; each replacement had a distinct UID and reached Bound+Ready. The successful Job pod remained
-  retained with no completion object. A wrong UID/resourceVersion delete precondition conflicted while the exact
-  one deleted, and the label-only mutant went red. Receipt:
-  `sprint-26.3-receipt.json`, fingerprint
-  `dynamically-resolved`.
-- **2026-08-09 — Sprint 58.4 complete.** A clean Register-3 run converged 19 externally observed objects,
-  proved an immediate server-side-apply rerun byte-stable and mutation-free, observed non-instantaneous
-  readiness, serialized both `OnDelete` replacements through absence and distinct Bound+Ready UIDs, retained
-  the terminal Job, independently checked the healthy CR child envelope, and admitted only one of two
-  simultaneous children under a one-Pod quota. Never-ready, over-bound-child, generation-after-diff, and
-  label-only-delete controls were red; both namespaces, the CRD, and the static test PV were absent postflight.
-  Receipt: `sprint-26.4-receipt.json`, fingerprint
-  `dynamically-resolved`.
-- **2026-08-09 — Sprint 58.5 complete.** The real Lease-token, scoped-SSA, serial, host/device-release, Job,
-  authenticated-delete, and readiness modules ran through the Phase-16 `IOSim` environment: eight fault
-  classes × 256 deterministic schedules, bounded `IOSimPOR` exploration, byte-identical same-seed replay,
-  and seven committed red mutants. Modeled-apiserver fidelity remains an explicit assumption and is
-  independently bounded by Sprint 58.4's live evidence. Receipt:
-  `sprint-26.5-receipt.json`, fingerprint
-  `dynamically-resolved`.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase delivers amoebius's live typed-action **object reconciler**. Pure Phase 33 supplies
+This phase's target is amoebius's live typed-action **object reconciler**. Human-approved Phase 33 must supply
 `renderAll :: ProvisionedSpec -> [K8sObject]`: one deployment-global rendered list with exact structural source ownership across service controllers, admission, quota, RBAC/config, route, storage, and control-plane projections. `validateAndIndexRenderedObjects` is the separate pure step that checks each emitted object's identity against its source key and constructs the `Map KubernetesObjectId (K8sObject, RenderActivation)` used
 by diff; it rejects duplicates, source/object-stage mismatch, or domain mismatch rather than changing
 `renderAll`'s canonical signature. Omitted global projections and per-service last-writer-wins concatenation
@@ -171,7 +75,7 @@ rendered list and applies a later-stage object early. **List membership alone is
 control-plane Namespace and the mandatory reconciler `Lease`) and the general, default-scheduled workload
 actions; the *stage-unlock gating* that consumes `BootstrapSchedulerStage`, `AfterBootstrapAddonCutover`, and
 `AfterManagedCapacityReady` is produced by the two-stage scheduler bootstrap and therefore belongs to
-Phase 58. This phase owns the index-preservation and the fail-closed refusal to grant generic apply authority
+Phase 59. The Phase-58 contract owns the index-preservation and the fail-closed refusal to grant generic apply authority
 over a Pod/controller or mutable ledger/Lease field; Phase 59 owns the witnesses that unlock the guarded
 stages.
 
@@ -183,7 +87,7 @@ represents `Reserved | LaunchInFlight | RetainedArtifacts` **host-supervisor** l
 identity is yet or any longer observable; it cannot masquerade as a running process or be omitted from residual
 capacity. (This is amoebius's own host-daemon reservation ledger, observed through the HostProcess supervisor;
 the *k8s scheduler* reservation ledger and its `Reserved | BindingInFlight | Bound | Terminating |
-TerminalRetained` records are a distinct structure added in Phase 58.) The observed set validates the
+TerminalRetained` records are a distinct structure added in Phase 59.) The observed set validates the
 admission-protected deployment/generation/source/revision/reservation-template annotations and the kind-indexed
 Pod owner chain — Deployment Pod→ReplicaSet→Deployment, or direct StatefulSet/DaemonSet/Job — plus
 resourceVersions; host processes carry the analogous supervisor provenance. A terminating predecessor and its
@@ -209,7 +113,7 @@ Success alone mints one single-use `ValidatedLiveTarget` containing the object/i
 relevant resourceVersions, the exact normalized and runtime-storage witnesses, the mandatory-Lease
 identity/bootstrap-holder/resourceVersion readback, a complete map of `ValidatedExecutionTransitionAction`s, and
 the exact map of `ValidatedStorageScalingAction`s derived from Phase-28 policy-only envelopes and fresh storage
-snapshots. (The scheduler-ledger CAS-version arm of `ValidatedLiveTarget` is added in Phase 58.) A final
+snapshots. (The scheduler-ledger CAS-version arm of `ValidatedLiveTarget` is added in Phase 59.) A final
 fingerprint recheck consumes the applicable token; change restarts the read-only prefix.
 
 Enactment follows those actions, not a blind SSA/prune loop. Ordinary desired-object actions may use scoped SSA
@@ -221,13 +125,14 @@ replacement UID Bound+Ready, advance to the next slot. Host start is authorized 
 and fingerprint-bound. Owner labels discover prune candidates but do not authorize deletion: exact
 owner/generation/resourceVersion, retention, and dependency guards must mint the delete action.
 
-Jobs use a typed terminal state machine. This phase builds and model-checks success and backoff-exhausted-failure
-completion variants, digest/outcome equality, cleanup deadlines, and `CompletedJobNoOp`; the live Phase-58
-cluster has neither MinIO nor the Phase-69 sole content-mutation gateway, so it does **not** claim a durable
-completion write/readback or delete a terminal Pod on that basis. Its live Job reaches terminal and remains
+The target must make Jobs use a typed terminal state machine. It must build and model-check success and
+backoff-exhausted-failure completion variants, digest/outcome equality, cleanup deadlines, and
+`CompletedJobNoOp`; the future Phase-58 cluster must have neither MinIO nor the Phase-69 sole content-mutation
+gateway, so its gate must **not** claim a durable
+completion write/readback or delete a terminal Pod on that basis. Its future live Job must reach terminal and remain
 explicitly retained and charged; the only inhabitant of the live protocol is
 `RetainTerminalAwaitingCompletionGateway`. The first live gateway write → independent matching readback →
-deadline/release → terminal cleanup gate is Phase 68. The Job controller still uses `restartPolicy=Never`,
+deadline/release → terminal cleanup gate is Phase 69. The Job controller still uses `restartPolicy=Never`,
 `podReplacementPolicy=Failed`, its exact finite wave/retention provision, and no `ttlSecondsAfterFinished`;
 Kubernetes TTL never bypasses the later typed cleanup action.
 
@@ -261,7 +166,7 @@ resource/capability while independent observers show **zero writes**: no SSA, au
 host/provider/backing allocation, or completion record, and no owned object's `resourceVersion` changes. A
 preflight that runs after the first mutation is invalid.
 
-**Phase scope:** one cohesive claim — *nothing is mutated until the target's inventory has been re-observed and cross-checked*. The renderer's output is validated and indexed separately from the act of applying it.
+**Phase scope:** one cohesive claim — *nothing is mutated until the target's inventory has been re-observed and cross-checked*. The renderer's output must be checked and indexed separately from the act of applying it.
 
 **Substrate:** linux-cpu — the whole gate runs on the single-node `kind` cluster on a linux-cpu host from
 Phase 55; no apple, linux-cuda, or windows substrate is touched (the CUDA/Metal transition arms are exercised
@@ -272,200 +177,107 @@ Phase 89 respectively).
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 33](phase_33_render_manifest_oracles.md) — pure `renderAll`, whose object list this reconciler enacts, and [Phase 56](phase_56_base_image_registry.md), the registry it pulls from.
-
-**Gate:** `python3 tools/run_phase_gate.py 58` passes in Register 3 the pinned reconcile corpus renders, enacts on the live single-node `kind` cluster
-through stage-eligible typed actions alone, converges under observed postconditions, and re-runs byte-stable as
-a no-op against every fixture, oracle, and mutant in [Gate integrity](#gate-integrity).
+**Depends on:** [Phase 57](phase_57_complementary_arch_child.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 58`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The apparatus below is this phase's **slice** of the source reconcile corpus, partitioned along the
-object-reconciler seam; the `amoebius-capacity` scheduler's bootstrap/cutover/reservation fixtures and its
-`bind-before-reservation-CAS` mutant are partitioned to Phase 59 and are **not** duplicated here. The
-`amoebius-capacity` scheduler bootstrap, its CAS reservation/Binding ledger, and execution-identity admission are
-likewise **not** part of this gate; they are Phase 59's gate, layered on this reconciler.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *nothing is mutated until the target's inventory has been re-observed and cross-checked*. The renderer's output is validated and indexed separately from the act of applying it. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 58` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 57 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**What the acceptance run must do.** The Phase-33 pure deployment-global `renderAll` list for the pinned
-representative corpus below is rendered in full and separately validated/indexed with its source activation
-stages, then enacted in a scratch namespace **only through stage-eligible typed actions** — list membership alone
-is never generic-SSA authorization. The cold-start authority can create only the derived control-plane Namespace
-and the deployment-global mandatory reconciler `Lease`, acquire it under the bootstrap-host identity through the
-typed `Absent → BootstrapHeld` action, and read that holder/object-UID/resourceVersion back; its rounding-aware
-renewal count and exact one-update/one-revision-per-attempt etcd debits are already provisioned. Every
-present-object renew uses the expected observed resourceVersion CAS and a fresh single-use token; acknowledgement,
-conflict, timeout, or lost response consumes the token and requires re-observation before authority continues. The
-Phase-56 registry/proxy objects are authenticated read-only as the one declared bootstrap predecessor and cannot
-be rewritten before `Lease` acquisition.
+## Resource provision — UNRESOLVED
 
-A fresh independent whole-deployment inventory then proves the `ProvisionedSpec`'s declared
-CPU/memory/logical-ephemeral-storage, finite CPU-limit budget, pod/CNI/CSI slots, etcd logical quota and mapped
-files, layout-routed physical node storage, durable/object-store/migration/native-host-cache pools, and
-accelerator device/net-and-current-free-VRAM assumptions plus content/snapshot, controller-child/webhook, gateway,
-and executor bounds fit the **residual transition capacity** after every surviving live allocation. The resulting
-`ValidatedLiveTarget` drives scoped SSA, kind-indexed controller actions, the three staged
-serial/host/accelerator actions, Job terminal retention (with durable completion/cleanup capability absent in this
-live phase), and authenticated deletion. Each action's postcondition is **observed** (never a `threadDelay`) until
-the generation converges. A **mismatch writes nothing** — any missing/unbounded/stale arm fails closed with its
-specific offending resource before effects. An **immediate re-run** of the same spec is a **no-op** — only
-`NoOp`/unchanged terminal-retention decisions, zero further mutations, and the same converged live state, measured
-**byte-stable** by independent apiserver, `Lease`, and host observers. Every committed seeded mutant below goes
-red, and the committed never-ready fixture keeps convergence red on the honest engine.
-
-```mermaid
-flowchart LR
-  %% register: orientation
-  s0["Sprint 58.1: Deployment-global desired state + authenticated live…"]
-  s1["Sprint 58.2: Bootstrap Lease authority + generic typed-action dispatcher…"]
-  s2["Sprint 58.3: Staged execution transitions, Job terminal protocol, and…"]
-  s3["Sprint 58.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op)"]
-  s4["Sprint 58.5: Register-2.5 reconciler + staged-execution convergence…"]
-  gate["the phase 58 gate"]
-  s0 -->|"produces what the next consumes"| s1
-  s1 -->|"produces what the next consumes"| s2
-  s2 -->|"produces what the next consumes"| s3
-  s3 -->|"produces what the next consumes"| s4
-  s4 -->|"the last seam the gate closes over"| gate
-```
-*Orientation. The seams phase 58 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
-
-**The representative reconcile corpus (oracle-pinned, §M.7 concrete corpus).** The gate's applied service set
-is the committed fixture `test/fixture/live/reconcile-corpus/` — a subset of the Phase-33 byte-for-byte
-golden corpus (`test/golden/render/` service specs, referenced by their golden IDs, never a freshly
-hand-picked spec) — and it MUST span, with each kind exercising a *live readiness transition that is not
-instantaneous*:
-- (i) at least one Deployment whose container image is pulled from the Phase-56 in-cluster `distribution`
-  registry and whose readiness probe carries a **non-zero `initialDelaySeconds`** (so rollout-complete
-  cannot be true at apply time and the registry dependency is actually exercised by a running pod)
-- (ii) one StatefulSet or DaemonSet `OnDelete` transition with at least two ordered slots
-- (iii) one Job with provisioned success and backoff-exhausted completion variants whose terminal Pod is
-  observed retained and charged (no live completion persistence yet)
-- (iv) at least one object that reaches a `Ready`/`Available` status after apply
-- and (v) at least one **CustomResource of amoebius's own in-phase capacity/reservation CRD** — an
-  amoebius-defined, amoebius-controlled CRD whose small controller is rendered by `renderAll` and reconciled
-  in this phase, scheduled by the default Kubernetes scheduler — whose `status` transitions from
-  absent/unhealthy to healthy after apply and whose child Deployment/PVC conforms to a provisioned
-  child-resource/rollout envelope.
-
-**The fix that pins item (v) to amoebius's own CRD rather than an external workload operator (e.g. the Percona operator built in Phase 63) is deliberate:** it keeps the corpus and its over-bound-child mutant
-self-contained within this phase and earlier phases, removing a latent forward dependency on Phase 62. The
-corpus, its golden-ID manifest, and the committed hand-authored expected-action table are authored and
-committed in **Phase 0 before `Reconcile.hs` exists** (§M.1 oracle-pinning). Corpus Pods are bound by the
-**default scheduler** in this phase; the guarded-Pod-behind- `amoebius-capacity` requirement is added to the
-corpus by Phase 58.
-
-**Committed seeded mutants the gate MUST turn red (§M.2).** The gate re-runs against a committed mutant set and
-requires each to go red: (a) **`waitForReady = pure ()`** (dropped-effect operator) — must fail against the
-never-ready red-path fixture below; (b) a **generation-label-stamped-after-diff** mutant whose re-run rewrites a
-per-run `amoebius/owner` generation label the diff ignores — must be caught red by the external apiserver
-`managedFields`/`resourceVersion`/label comparison, not the engine's self-report; (c) a
-**delete-from-owner-label-alone** mutant that deletes an unlabeled/foreign-generation object or retained terminal
-Pod without typed authorization — must fail Sprint 58.3; and (e) a **healthy-CR/over-bound-child** mutant whose
-amoebius controller reports its **own in-phase capacity/reservation CR** healthy while its actual child exceeds the
-provisioned resource/PVC/rollout envelope — must prevent convergence after child enumeration in Sprint 58.4. (The
-source's **bind-before-reservation-CAS** mutant (d) audits the scheduler ledger and is partitioned to Phase 58.)
-A committed **never-ready red-path fixture** `test/fixture/live/reconcile-corpus-never-ready/` (one Deployment
-whose probe never passes) MUST turn the convergence suite red on the *honest* engine too (convergence is never
-declared), foreclosing an immediate-return `Wait.hs`.
-
-**The external apiserver reader (§M.5/§M.6 measurement locus).** All "no-op / byte-stable / converged" verdicts
-are read by a distinct apiserver client (a `kubectl get -o json` / client-go reader) that is **not the reconciler and shares no diff/fold code with it**. Immediately before and after the re-run it snapshots every owned object
-directly from the apiserver and asserts, per object, that `resourceVersion`, `managedFields`, and the full
-label/annotation set are **byte-identical**, and that the `amoebius/owner`-labeled object set is unchanged. The
-reconciler's self-reported "0 mutations, 0 prunes" is corroborating evidence only, never the passing condition.
-Independent readers also assert the same bootstrap-host `Lease` holder/resourceVersion, that no Job-completion
-object/version exists in this pre-gateway phase, the retained terminal UID, and no host-process/device mutation.
-
-**Independent reference predicate (§M.3).** The reference side of every equivalence check is the committed
-hand-authored `test/fixture/live/reconcile-corpus/expected-actions.json` — the full object-action and
-`ValidatedExecutionTransitionAction` domain, authored **before** the planner — and the external apiserver reader
-above; neither reuses the reconciler's own diff/fold or `action→effect` function. Each one-field negative
-(§M.8) is paired with a positive that differs only in the foreclosed dimension and asserts *why* it fails (its
-specific offending resource/capability or `UnknownCommitment`), with independent observers proving zero writes on
-every mutation surface.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact typed renderer + object reconciler emits is a recipe over a content address, never an authored file.
-- [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
+- [`jit_artifact_doctrine.md` §2 — The rule, and the closed exception list](../documents/engineering/jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list) — every artifact typed renderer + object reconciler emits is a recipe over a content address, never an authored file.
+- [`manifest_generation_doctrine.md` §5 — The apply/reconcile engine: snapshot-bound typed actions](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
   — **the apply/reconcile engine.** This phase realizes scoped SSA, kind-indexed and staged execution actions,
   authenticated dependency-gated deletion, the pure and simulated Job completion/cleanup state machine, live
   terminal retention, and readiness observed from live state. The amoebius scheduler-role CAS/Binding protocol
-  named by [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is Phase 59; durable Job completion/cleanup first runs live in Phase 69; rollback and the release
+  named by [`manifest_generation_doctrine.md` §5 — The apply/reconcile engine: snapshot-bound typed actions](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is Phase 59; durable Job completion/cleanup first runs live in Phase 69; rollback and the release
   ledger stay deferred.
-- [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
-  — **desired is the validated identity index of `renderAll(provisionedSpec)`, observed is live inventory, and actions are typed.** `renderAll` retains the canonical `[K8sObject]` result; a separate pure `validateAndIndexRenderedObjects` checks source/object identity and duplicate freedom before diff. Desired state is recomputed; actual Pod UIDs/process IDs, owner chains, host reservations, completions, and physical allocations are observed to authorize transitions, never treated as another desired source. (The state-indexed *k8s scheduler* reservation ledger this model also names is added in Phase 58.)
-- [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
+- [`manifest_generation_doctrine.md` §6 — The reconcile state model: desired is `renderAll(ProvisionedSpec)`, observed is live inventory, actions are typed](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
+  — **desired is the validated identity index of `renderAll(provisionedSpec)`, observed is live inventory, and actions are typed.** `renderAll` retains the canonical `[K8sObject]` result; a separate pure `validateAndIndexRenderedObjects` checks source/object identity and duplicate freedom before diff. Desired state is recomputed; actual Pod UIDs/process IDs, owner chains, host reservations, completions, and physical allocations are observed to authorize transitions, never treated as another desired source. (The state-indexed *k8s scheduler* reservation ledger this model also names is added in Phase 59.)
+- [`manifest_generation_doctrine.md` §2 — The typed manifest model: `renderAll` is the sole public pure function to objects](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
   — **the typed manifest model** (the pure renderer half): this phase *consumes* the Phase-33 pure, total private
   per-source `renderSourcePrivate` projections through the exact deployment-global `renderAll` owner union. The
-  `[K8sObject]` list is byte-for-byte the value `--dry-run` previews; its separately validated identity index is the desired map. An unchecked `ServiceSpec`, duplicate `KubernetesObjectId`, or emitted/source identity mismatch cannot reach diff. - [`resource_capacity_doctrine.md §8`](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)
+  `[K8sObject]` list is byte-for-byte the value `--dry-run` previews; its separately validated identity index is the desired map. An unchecked `ServiceSpec`, duplicate `KubernetesObjectId`, or emitted/source identity mismatch cannot reach diff.
+- [`resource_capacity_doctrine.md` §8 — Where the numbers come from: declared in pure input, provisioned before render, cross-checked at runtime](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)
   — **declared at decode, cross-checked at runtime.** Immediately before mutation, this phase re-observes
   CPU/memory/local-ephemeral capacity, pod/CNI/CSI slots, mapped files/etcd logical quota, disjoint
   durable/object-store/migration/native-host-cache pools, admission/executor pods, planned execution slots,
   authenticated observed execution identities, role-routed runtime storage, and accelerator
   devices/profiles/raw-reserved-allocatable plus current-free VRAM and epoch holds, and refuses a stale or false
   provision witness with zero writes.
-- [`readiness_ordering_doctrine.md §6`](../documents/engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps)
-  — **the runtime enactor: the reconciler observes, never sleeps.** The wait-for-ready this phase builds is the
+- [`readiness_ordering_doctrine.md` §6 — The runtime enactor: the reconciler observes, never sleeps](../documents/engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps)
+  — **the runtime enactor: the reconciler observes, never sleeps.** This phase's target must build wait-for-ready as the
   runtime enactor of a readiness edge — the live condition is read from the object, never assumed by a fixed
   sleep.
-- [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)
+- [`daemon_topology_doctrine.md` §3 — The control-plane daemon](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)
   — **the control-plane daemon.** The reconciler is, at steady state, run by the in-cluster control-plane daemon — a
   Deployment `replicas=1`, stateless (no PVC), single-writer authority delegated to k8s/etcd through its mandatory
   `Lease`, **no bespoke election**. This phase drives the reconciler from the host binary as a precursor; standing
-  it up *inside* the control-plane daemon is Phase 64.
-- [`conformance_harness_doctrine.md §3`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
+  it up *inside* the control-plane daemon is Phase 65.
+- [`conformance_harness_doctrine.md` §3 — The load-bearing invariant: rendering never touches live infrastructure](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
   — **rendering never touches live infrastructure.** The boundary this phase honors from the other side: the
   `renderAll`/plan/`--dry-run` path stayed cluster-free through Phase 34, and **apply is the first live step** —
   so live prerequisites (a reachable cluster, credentials) belong here, never on the render path.
-- [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
-  — the applied `[K8sObject]` set is emitted from the Haskell source of truth and **never committed**; what reaches the cluster is generated at apply time, not a checked-in manifest. - [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+- [`generated_artifacts_doctrine.md` §3 — The rule](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
+  — the applied `[K8sObject]` set is emitted from the Haskell source of truth and **never committed**; what reaches the cluster is generated at apply time, not a checked-in manifest.
+- [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
   — **Register 3** (live infrastructure): the register this phase's gate reaches; and
-  [`§4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact),
+  [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact),
   the per-run proven/tested/assumed ledger the live convergence emits (no skips, fail fast; the scratch namespace
   is torn down leak-free).
-- [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
+- [`deterministic_simulation_doctrine.md` §4 — Register 2.5 — where deterministic simulation sits](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
   — **Register 2.5, where deterministic simulation sits.** Sprint 58.5 validates the *built* reconciler and staged
   enactors under `IOSimPOR` fault schedules in-process and deterministically replayable — one rung below the
   Register-3 live gate in the register ladder, not chronologically ahead of it.
 
 ## Sprints
 
-> **Current seal rule.** Sprints 38.1–27.5 were resealed in order by the 2026-08-16 repository-contained run.
-> Historical evidence paths retained in the prose describe the retired record only: current evidence is written
-> into its run bundle under `.build/runs/`. Functional and validation outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-## Sprint 58.1: Deployment-global desired state + authenticated live inventory + typed action plan 📋
-**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that
-resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; the corpus, its
-independently authored action table, and the read-only preflight boundary all held, and; that stands as
-history and no longer presents completion evidence.
-`sprint-26.1-receipt.json` records fingerprint
-`sha256:80bebfeb5b649416fa923f4ac811fa3097d5025d10448143d9dfadf2b6916312`.
-**Implementation**:
-`src/Amoebius/Manifest/{Preflight,Reconcile,Diff,Actions,Authority}.hs`,
-`src/Amoebius/Execution/{Observe,Normalize,RuntimeStorage}.hs`, and `src/Amoebius/Storage/ScalingAction.hs`
-(fresh storage observation, validation, and state-indexed action token). (The
-`src/Amoebius/Scheduler/Ledger.hs` reservation-ledger normalization is partitioned to Phase 58.)
-**Blocked by**: the [Phase-56](phase_56_base_image_registry.md) gate.
-**Independent Validation**: a fresh snapshot produces exactly the committed
-`test/fixture/live/reconcile-corpus/expected-actions.json`, authored before the planner. It includes the
-full object-action and `ValidatedExecutionTransitionAction` domains, not merely add/update/prune names. All
-one-field negatives fail before any apiserver, host, provider, or object-store write.
-**Docs to update**:
-`documents/engineering/manifest_generation_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+> **Permanently invalid pre-reset seal record.** A 2026-08-16 run claimed to reseal Sprints 38.1–27.5; that
+> claim and every referenced path are historical inventory only and cannot satisfy this contract. There is no
+> current candidate evidence or approval. A future candidate may write only run-owned material beneath
+> `.build/**`. Functional and validation outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Future closure
+> requires the redesigned phase gate, predecessor approval, legacy closure, universal artifact hygiene, and
+> external human promotion.
+
+## Sprint 58.1: Deployment-global desired state + authenticated live inventory + typed action plan ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
 Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
 — the reconcile state model. Make desired state the separately validated identity index of the exact Phase-33
-`renderAll provisionedSpec :: [K8sObject]` owner union; make observed state a coherent snapshot of Kubernetes objects, actual Pod/process identities, host reservations, completions, and physical allocations; and mint only the typed actions justified by the whole transition. No planned slot is accepted as a live identity, no object label alone is a mutation capability, and no preflight module imports a writer. The state-indexed `amoebius-capacity` scheduler reservation ledger is layered on this observation in Phase 58.
+`renderAll provisionedSpec :: [K8sObject]` owner union; make observed state a coherent snapshot of Kubernetes objects, actual Pod/process identities, host reservations, completions, and physical allocations; and mint only the typed actions justified by the whole transition. No planned slot is accepted as a live identity, no object label alone is a mutation capability, and no preflight module imports a writer. The state-indexed `amoebius-capacity` scheduler reservation ledger is layered on this observation in Phase 59.
 
 ### Deliverables
 
@@ -499,7 +311,7 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
   transition-indexed: host-only `NoChange`, retained-carve, and verified-migration arms carry
   `StorageScalingCloudObservation.NotRequired`, while only `CreateProviderCapacity` can carry the
   `Required ObservedCloudInfrastructureSnapshot` arm. (The scheduler-ledger CAS-version field of
-  `ValidatedLiveTarget` is added in Phase 58.)
+  `ValidatedLiveTarget` is added in Phase 59.)
 - Execution actions cover `NoOp`, kind-indexed Pod-controller apply, the three serial OnDelete stages, host
   stop/start authorizations, removed-controller prune, Job completion write/terminal cleanup/completed no-op, plus
   owner-authenticated ordinary object actions. Completion/cleanup constructors additionally require the provisioned
@@ -518,7 +330,7 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
 
 ### Validation
 
-1. The deployment-global `[K8sObject]` list equals its Phase-33 golden; the separately validated desired map and action plan equal independently authored fixtures. Seeded duplicate object identity, source/emitted-identity mismatch, source/object activation-stage mismatch, generic-SSA-over-full-list, missing global projection, cached observation, and action-domain omission mutants turn red. A Register-1 planner fixture with modeled observed completion still renders the pure Job baseline but plans `CompletedJobNoOp`, proving enactment is not a blind render-list apply; the live fixture instead plans terminal retention because no gateway/readback exists yet. 2. Execution negatives cover missing or spoofed annotations, wrong Deployment ReplicaSet hop, wrong direct controller kind/resourceVersion, map-key/embedded-identity mismatch, planned-slot-as-Pod-UID, and terminator/replacement UID collapse. Host negatives cover omission of Reserved/`LaunchInFlight`/retained-artifact `HostReservationId`, use of a fake process id for a ledger-only row, and double debit after process join. Positive recovery fixtures cover an absent-process host row in each host-supervisor ledger state and prove each remains charged until its state-specific release evidence. Exact-fit controls debit each identity once. (The k8s scheduler reservation-record negatives — unclassified-orphan record, missing reservation, wrong ledger state/node/template, Bound-Pod-plus-ledger double debit — are Phase 58.)
+1. The deployment-global `[K8sObject]` list equals its Phase-33 golden; the separately validated desired map and action plan equal independently authored fixtures. Seeded duplicate object identity, source/emitted-identity mismatch, source/object activation-stage mismatch, generic-SSA-over-full-list, missing global projection, cached observation, and action-domain omission mutants turn red. A Register-1 planner fixture with modeled observed completion still renders the pure Job baseline but plans `CompletedJobNoOp`, proving enactment is not a blind render-list apply; the live fixture instead plans terminal retention because no gateway/readback exists yet. 2. Execution negatives cover missing or spoofed annotations, wrong Deployment ReplicaSet hop, wrong direct controller kind/resourceVersion, map-key/embedded-identity mismatch, planned-slot-as-Pod-UID, and terminator/replacement UID collapse. Host negatives cover omission of Reserved/`LaunchInFlight`/retained-artifact `HostReservationId`, use of a fake process id for a ledger-only row, and double debit after process join. Positive recovery fixtures cover an absent-process host row in each host-supervisor ledger state and prove each remains charged until its state-specific release evidence. Exact-fit controls debit each identity once. (The k8s scheduler reservation-record negatives — unclassified-orphan record, missing reservation, wrong ledger state/node/template, Bound-Pod-plus-ledger double debit — are Phase 59.)
 3. Runtime-storage negatives cover component drop/role swap, model ownership overlap/hole, Unified alias
    double-debit/drop, SplitRuntime one-byte-short kubelet-nodefs and CRI imagefs/containerfs backings, SplitImage
    routing mismatch, Pending with a node row, and Bound with both a planned and an observed row. Exact fits succeed.
@@ -533,26 +345,12 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
 
 ### Remaining Work
 
-None. The receipt and its three-check transcript are written into this run's bundle under `.build/runs/`, never
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The receipt and its three-check transcript are written into this run's bundle under `.build/runs/`, never
 into the plan tree. Sprint 58.2 consumes the typed action/authority boundary.
 
-## Sprint 58.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch 📋
-**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that
-resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; the Lease CAS, scoped
-managed fields, stable no-op, and clean postflight were observed live, and `sprint-26.2-receipt.json` in
-that run's bundle records fingerprint; that stands as history and no longer presents completion evidence.
-`sha256:1d406509991c0942996918564d6cc03a7756b053513e15fb02c3a6bd0e319459`.
-**Implementation**: `src/Amoebius/Manifest/{Apply,Enact,Authority}.hs` and
-`src/Amoebius/Storage/ScalingAction.hs`, plus `tools/object_reconciler_authority_live.py`. The `amoebius-capacity` scheduler
-(`src/Amoebius/Scheduler/*.hs`) and execution-identity admission
-(`src/Amoebius/Admission/ExecutionIdentity.hs`) are layered on this dispatcher in Phase 58.
-**Blocked by**: none; Sprint 58.1 is sealed.
-**Independent Validation**: the host holds the mandatory reconciler `Lease` (via the typed
-`Absent → BootstrapHeld` action) before any non-authority mutation; ordinary object actions retain correct
-SSA field ownership; storage-scaling actions dispatch only their transition-indexed capability and never
-reuse a token after a lost response. No non-SSA effect flows through the SSA module.
-**Docs to update**:
-`documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+## Sprint 58.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -560,7 +358,7 @@ Adopt [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_
 — the apply/reconcile engine. Build the bootstrap `Lease` authority and the generic typed-action dispatcher.
 Scoped ordinary-object actions may use SSA; all other effects must consume their dedicated capability. The host
 precursor must hold the same provisioned mandatory `Lease` that the Phase-65 control-plane daemon later receives by an
-observed handoff. The scheduler's CAS reservation/Binding path and its two-stage bootstrap are Phase 58.
+observed handoff. The scheduler's CAS reservation/Binding path and its two-stage bootstrap are Phase 59.
 
 ### Deliverables
 
@@ -588,7 +386,7 @@ observed handoff. The scheduler's CAS reservation/Binding path and its two-stage
   generation/owner/provenance annotations come from the desired object; they are never stamped after diff. The
   bootstrap Namespace/`Lease` objects have dedicated staged actions and can never enter this generic SSA path; the
   scheduler-cutover stage gating that further restricts the general stage behind `BootstrapCapacitySchedulerReady`/
-  `ManagedCapacityReady` is added in Phase 58.
+  `ManagedCapacityReady` is added in Phase 59.
 
 ### Validation
 
@@ -609,26 +407,11 @@ observed handoff. The scheduler's CAS reservation/Binding path and its two-stage
 
 ### Remaining Work
 
-None. The live receipt records the Lease CAS, scoped managed fields, stable no-op, and clean postflight.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The live receipt records the Lease CAS, scoped managed fields, stable no-op, and clean postflight.
 
-## Sprint 58.3: Staged execution transitions, Job terminal protocol, and authenticated deletion 📋
-**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that
-resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; both ordered replacements,
-the retained terminal Pod, and the authenticated delete were observed live, and; that stands as history and
-no longer presents completion evidence.
-`sprint-26.3-receipt.json` records fingerprint
-`sha256:b17161985d4653dde53726be7b85516db998eea93d4b6fc833cfd879c29faeee`.
-**Implementation**:
-`src/Amoebius/Execution/{SerialOnDelete,HostTransition,AcceleratorRelease,JobTerminal}.hs` and
-`src/Amoebius/Manifest/Delete.hs`, plus `tools/object_reconciler_execution_live.py`.
-**Blocked by**: none; Sprint 58.2 is sealed.
-**Independent Validation**: no stage can use evidence from the prior snapshot, no second serial Pod is deleted before the
-expected replacement is Bound+Ready, no CUDA/Metal/host replacement starts before its resource-indexed
-release, the abstract Job protocol cannot clean a terminal Pod before durable completion, and the live
-pre-gateway gate retains that Pod rather than pretending persistence; no label alone can authorize object
-deletion.
-**Docs to update**: `documents/engineering/manifest_generation_doctrine.md`,
-`DEVELOPMENT_PLAN/system_components.md`.
+## Sprint 58.3: Staged execution transitions, Job terminal protocol, and authenticated deletion ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -671,7 +454,7 @@ capability.
    the deterministic observed-device model, not nonexistent GPU hardware in this phase.
 2. Register-2/2.5 transition tests cover ordinary host exit, CUDA device holds/free VRAM, and Metal drain/allocation/
    cache release; one missing release component and one stale observation reject before start. CUDA/Metal live
-   substrate proof remains owned by Phase 93 and Phase 94.
+   substrate proof remains owned by Phase 93 and Phase 89 respectively.
 3. Register-1/2 Job tests, available at this sprint's completion, cover all-success and backoff-exhausted failure
    waves, completion-write failure, wrong digest/outcome/revision, cleanup before persistence/deadline, retained-axis
    partition, restart after modeled persistence, and no-rerun until new revision; the exhaustive IOSim schedules over
@@ -684,27 +467,11 @@ capability.
 
 ### Remaining Work
 
-None. Sprint 58.4 composes these actions into the full convergence/no-op corpus.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Sprint 58.4 composes these actions into the full convergence/no-op corpus.
 
-## Sprint 58.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) 📋
-**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that
-resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; the corpus converged and
-re-ran byte-stable with zero mutations, with all four red controls red, and `sprint-26.4-receipt.json`
-records fingerprint `sha256:ef271e8922c15f89ea77931620810130df2ad59ba9c63ada158a7f9301202a7d`.; that stands
-as history and no longer presents completion evidence.
-**Implementation**: `src/Amoebius/Manifest/Wait.hs`,
-`test/spec/live/ReconcileConvergeSpec.hs`, `test/spec/live/SerialOnDeleteSpec.hs`,
-`test/spec/live/JobTerminalRetentionSpec.hs`, and `tools/object_reconciler_live.py` — built and validated. (The
-`test/spec/live/SchedulerReservationSpec.hs` live scheduler suite is Phase 58.)
-**Blocked by**: none; Sprint 58.3 is sealed.
-**Independent Validation**: the representative corpus reconciles a non-instantaneous
-Deployment, a serial replacement Bound+Ready between deletions, CR health plus child conformance on
-amoebius's own in-phase capacity/reservation CRD, and terminal Job retention without a gateway. The
-immediate rerun has byte-stable objects and no host/object-store/delete effect. A never-ready fixture and
-dropped-wait mutant turn red.
-**Docs to update**: `documents/engineering/manifest_generation_doctrine.md`,
-`documents/engineering/readiness_ordering_doctrine.md` (the §6 runtime-enactor claim gains its first
-amoebius validation), `DEVELOPMENT_PLAN/README.md` (flip the Phase-58 status when the gate passes).
+## Sprint 58.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -742,7 +509,8 @@ This is the phase gate.
 
 ### Validation
 
-1. `cabal test reconcile-converge serial-on-delete job-terminal-retention` is green on the linux-cpu `kind` corpus.
+1. Rejected historical observation: the `reconcile-converge`, `serial-on-delete`, and
+   `job-terminal-retention` Cabal suites were recorded green on the linux-cpu `kind` corpus.
    A non-instantaneous Deployment reaches rollout-complete only after its `initialDelaySeconds`; the serial second
    deletion follows replacement Bound+Ready; the terminal Job remains observed and charged with no completion/delete
    effect; and CR children conform. The immediate rerun is byte-stable and effect-free by independent observers.
@@ -758,29 +526,13 @@ This is the phase gate.
 
 ### Remaining Work
 
-None. The receipt and the live/mutation results are written into this run's bundle under `.build/runs/`. The
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The receipt and the live/mutation results are written into this run's bundle under `.build/runs/`. The
 content-addressed completion gateway and the rollback/release ledger stay deferred to the content-store phase
 and are carried UNVERIFIED, never green.
 
-## Sprint 58.5: Register-2.5 reconciler + staged-execution convergence under simulated faults 📋
-**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that
-resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; 2,048 deterministic
-schedules ran against the real action modules with all seven mutants red, and `sprint-26.5-receipt.json` in
-that run's bundle records fingerprint; that stands as history and no longer presents completion evidence.
-`sha256:7aca66fa137adc421efd00da590e6731612781c065cc2bf1f3271d28afadc05e`.
-**Implementation**: `test/spec/sim/{ReconcileSim,ExecutionTransitionSim,ObjectReconcilerSimCommon}.hs`, driving the
-real Manifest/Execution modules above on the Phase-34 `io-classes` `Env` — built and validated. (The
-`test/spec/sim/SchedulerSim.hs` schedule battery is Phase 58.)
-**Blocked by**: none; Sprint 58.4 is sealed.
-**Independent Validation**: `IOSimPOR` interleaves object
-resourceVersion conflicts, bootstrap-`Lease` acquire/renew ambiguity, serial stage changes,
-host/device-release ordering, completion-write failure, and external mutation inside critical sections.
-Every schedule either converges to typed no-op or fails closed without overlapping writers, premature
-deletion, a host start before release, or a token reused after an observed-state transition; counterexamples
-replay by seed.
-**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-58
-status backlink), `documents/engineering/manifest_generation_doctrine.md`,
-`DEVELOPMENT_PLAN/system_components.md`.
+## Sprint 58.5: Register-2.5 reconciler + staged-execution convergence under simulated faults ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -808,19 +560,21 @@ open. The scheduler's CAS-race schedules are Phase 59's `SchedulerSim`.
 
 ### Validation
 
-1. `cabal test reconcile-sim execution-transition-sim` is green at the documented exploration bound. Coverage proves
+1. Rejected historical observation: the `reconcile-sim` and `execution-transition-sim` Cabal suites were
+   recorded green at the documented exploration bound. The historical coverage claim said
    every fault enters its critical section; every safety invariant holds; every committed mutant is caught; and each
    discovered counterexample replays identically under its seed.
 
 ### Remaining Work
 
-None. The Register-2.5 receipt and its seven-mutant ledger are written into this run's bundle under
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The Register-2.5 receipt and its seven-mutant ledger are written into this run's bundle under
 `.build/runs/`; modeled-apiserver fidelity remains assumed, as the register boundary requires, and the same run's
 Register-3 half supplies the live boundary evidence that bounds it.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/manifest_generation_doctrine.md` — §5's typed SSA/staged-action/delete/wait engine flips
   from design intent to delivered with the Register-3 ledger attached (the scheduler CAS/Binding half of §5 stays
   design intent until Phase 59); §6's planned-vs-observed and `renderAll` model gains its first validation. Keep
@@ -833,6 +587,7 @@ Register-3 half supplies the live boundary evidence that bounds it.
 - `documents/engineering/generated_artifacts_doctrine.md` — note that the applied `[K8sObject]` set is generated at apply time and never committed. - `documents/engineering/resource_capacity_doctrine.md` — record the read-only pre-mutation live inventory cross-check and its zero-write failure path. - `documents/engineering/deterministic_simulation_doctrine.md` — add the Phase-58 Register-2.5 status backlink for the Sprint-43.5 reconciler/execution fault battery.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-58 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 58's gate substrate (linux-cpu) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register the Phase-58

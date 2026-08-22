@@ -4,40 +4,37 @@
 > kubelet/CRI runtime-metadata and node-local OCI/image accounting, the accelerator residency/net-allocatable-VRAM
 > fold, and the provider-root disk-template arithmetic as total in-process Haskell, then **compose** them with the
 > Phase 9 base capacity fold and the Phase 28 storage geometry into the full-resource-vector `place` witness that
-> proves every axis on the positive corpus and rejects every execution/accelerator/provider-root/runtime-metadata
+> must cover every axis in a Haskell corpus and reject every execution/accelerator/provider-root/runtime-metadata
 > negative directly on its isolated insufficient axis — before any host or cluster exists.
 > **Read this if**: phase 29 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 29 delivers the execution-epoch + scheduler + accelerator + provider-root folds; its design is owned by [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [resource_capacity_folds.md](../documents/engineering/resource_capacity_folds.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-Gate passed 2026-08-09; ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ✅](#sprint-291-execution-epoch-expansion--scheduler-reservation-algebra-)
-- [Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ✅](#sprint-292-kubeletcri-runtime-metadata--node-local-oci-contentsnapshotimage--physical-disk-parent-accounting-)
-- [Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ✅](#sprint-293-accelerator-residencynet-allocatable-vram--provider-root-disk-template--enginebuildetcdmonitoring-compute-)
-- [Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ✅](#sprint-294-the-composed-full-resource-vector-place-witness--properties--independent-validator--per-axis-mutants-)
-- [Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ✅](#sprint-295-the-executionacceleratorprovider-root-fold-negative-corpus--the-composed-gate-)
+- [Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ⏸️](#sprint-291-execution-epoch-expansion--scheduler-reservation-algebra-)
+- [Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ⏸️](#sprint-292-kubeletcri-runtime-metadata--node-local-oci-contentsnapshotimage--physical-disk-parent-accounting-)
+- [Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ⏸️](#sprint-293-accelerator-residencynet-allocatable-vram--provider-root-disk-template--enginebuildetcdmonitoring-compute-)
+- [Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ⏸️](#sprint-294-the-composed-full-resource-vector-place-witness--properties--independent-validator--per-axis-mutants-)
+- [Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ⏸️](#sprint-295-the-executionacceleratorprovider-root-fold-negative-corpus--the-composed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -45,82 +42,28 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. `python3 tools/execution_accelerator_gate.py` passed all eleven sides on natural
-`arm64`, untranslated. The bounded suite rejects 37 direct variants beside 37 legal twins, admits two decoded
-composed positives, retains the accelerator-owner Gate-1 pair, and composes 128 observed units through all five
-calculus kinds. All 45 mutants redden, all 17 metrics match, both Phase-29 registry rows discharge, and 57
-surfaces join to 103 items. The project-contained attestation is
-`sha256:105c9db46ad2cd0d081120819eb8a23c4b0537211010542f37af0ff461e661cf`, bound to source snapshot
-`sha256:6a074c77a1af3f3a…` over 2,267 files. Repository conformance and documentation support gates pass; Phase
-29 owns no remaining migration deferral.
+⏸️ Blocked — NOT VALIDATED.
 
-**The amended run closed the stale boundaries it exposed.** The gate now runs only the bounded
-`execution-accelerator-spec`, reconciles current Phase-29 registry ownership, and composes the 37 negatives,
-37 twins, two positives, seven properties and 45 mutants through all five Phase-10 calculus kinds. Direct
-one-axis cases now exercise the accelerator peer graph, build cache budget, engine storage reserve, monitoring
-volume budget and Pulumi executor concurrency, so none of those five contract surfaces remains empty. The
-result-only mutant wrapper now seeds a paired-result admission mutation and proves it changes a previously
-green fixture before accepting the expected red observation.
+Blocked by redesigned Phase 28, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-**Opened 2026-08-17** when the preceding phase resealed.
-[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
-the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
-architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
-it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
-[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-15. `python3 tools/execution_accelerator_gate.py` passed all ten sides: 32 variants
-and twins across eighteen negative families, one dhall-typecheck barrier, seven properties, all 45 mutants, all 13
-authored metrics, and the honesty ledger pass; 56 surfaces join to 94 run-time items. The project-contained
-attestation is `sha256:c7215afa4852c49dbc4eb9320c41430eef84afeb1ca60b06236a74e354bfa9a8`,
-bound to source snapshot `sha256:374fe1168768d0fe…`; Phase 29 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:5d183b9ec0877167…`
-(1934 non-ignored files) and published a verified pre-containment external attestation
-`sha256:305cadfdf77170e64269d4842fdc9e8a7fea370b991056a7f465db7009c4bd0b`.
-
-**Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 18
-named negative families across 32 variant rows redden at their specific tags beside 32 green twins, two
-positives decode and place the full resource vector, the single dhall-typecheck accelerator-owner negative fails at its
-exact locus beside a green twin, seven QuickCheck properties hold with coverage on the decision folds, and all
-45 seeded mutants redden at their own loci. Evidence and the ledger move into
-`.build/runs/phase_17/<run-id>/`.
-
-**Historical surface finding (closed by the current seal):** the earlier join partitioned 77 run-time items across 37 claim surfaces and found five surfaces with nothing
-behind them.** The 32 oracle variants and 45 mutants are claimed exactly once each, so an item nobody claims or
-one claimed twice fails the gate. What that exercise exposed is that `accelerator-interconnect`,
-`build-execution-envelope`, `engine-system-reserve`, `monitoring-work-budget`, and
-`pulumi-execution-envelope` have no oracle case, no mutant, and no metric of their own — the pre-amendment
-ledger reported all five `tested` by naming them in a hand-maintained set, which is an assertion, not
-evidence. The current seal adds a direct negative/twin for every one while the genuinely live-only surfaces
-remain UNVERIFIED, and records the closure in
-the active [legacy register](legacy_tracking_for_deletion.md)'s
-[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md).
-
-**Invalidated historical record:**
-
-Done (invalidated). `python3 tools/execution_accelerator_gate.py` passed on 2026-08-09 on **no substrate**
-(`none`) in **Register 1**, with ledger
-`dynamically-resolved`. The gate stood up no host or
-cluster: it exercised the pure execution, scheduler, runtime/image-storage, accelerator, provider-root, and
-host-only compute folds plus their composed placement witness. Live scheduler Binding, runtime inventory,
-device attachment, provider materialization, and model-to-runtime correspondence remain **UNVERIFIED**.
-Where a shape below is exercised in a sibling system (prodbox's
-`Prodbox/CLI/Rke2.hs` single-node rke2 base and its teardown push-back soundness), that is **sibling evidence, not an amoebius result**.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase makes amoebius's *"every resource provision is explicit and impossible targets have no deployable
-value"* invariant executable along its **execution, accelerator, and provider-root axes**, and composes those
+**Target capability — NOT VALIDATED.** A pure Haskell fold is to make amoebius's *"every resource provision
+is explicit and impossible targets have no deployable value"* invariant executable along its **execution,
+accelerator, and provider-root axes**, composing those
 axes with the Phase-9 base fold and the Phase-28 storage geometry into the single whole-deployment place-witness.
+Haskell values own every case and expectation; any serialized case or mutation is generated lazily beneath
+`.build/**`.
 Phase 31's post-bind provision seal invokes the same folds only after full bind/expansion; Phase 29 does not move
 them into `Dhall.inputFile`.
 
-It owns the private kind-indexed `BoundExecutionBody` and its expansion:
+The target Haskell model includes the private kind-indexed `BoundExecutionBody` and its expansion:
 
 - The `FirstDeployment | UpdateFrom PriorExecutionProvisionRef` `ExecutionTransitionSource`, the
   `PriorExecutionProvision` steady projection, and the desired `BoundExecutionSet` carried by
@@ -188,272 +131,92 @@ allocation ([phase_60_retained_storage.md](phase_60_retained_storage.md)), provi
 ([phase_93_jitml_rederivation.md](phase_93_jitml_rederivation.md), [phase_89_apple_metal_host_daemon.md](phase_89_apple_metal_host_daemon.md)). Phase 29 owns the pure
 representation and fold only; it cannot validate or enact a live transition.
 
-**Phase scope:** one cohesive claim — *the full resource vector places, or the phase names the one axis that refused*. This is where the separate folds become a single witness.
+**Phase scope:** one target claim — the pure Haskell full-resource-vector fold returns a placement witness or
+names the refusing axis. It observes no device, host, provider, or cluster.
 
-**Substrate:** none — no host, no cluster; the gate is an in-process `cabal test` fold + QuickCheck battery,
-analogous to the Phase 26 decode battery, the Phase 27 property suite, and the sibling Phase 9/15 fold gates.
+**Substrate:** none — no host, cluster, device, or provider; the canonical Haskell gate owns the candidate verdict.
 
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
-**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
+**Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 28](phase_28_storage_geometry_folds.md) — logical→physical storage geometry folds, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 29` passes the composed positives, the eighteen fold negatives with their specific
-committed tags, the coverage floors, the totality scan, and the seeded mutants of
-[Gate integrity](#gate-integrity). The ledger must record Register 1 green and the live residue UNVERIFIED.
+**Depends on:** [Phase 28](phase_28_storage_geometry_folds.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 29`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The suite covers the four folds; the gate additionally asserts the accelerator ownership index admits no second owner and no fractional claim.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-
-This section pins the concrete interpretations the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-clauses require for Phase 29; it strengthens, never weakens, the Gate and sprint Validations above. It is this
-phase's **partition** of the forty-one fixtures / per-fold mutant battery of the original capacity/topology corpus
-— the base-fold and topology slice is owned by [phase_09_resource_index.md](phase_09_resource_index.md)
-and the storage-geometry slice by [phase_28_storage_geometry_folds.md](phase_28_storage_geometry_folds.md); all
-forty-one fixtures and their expected `Left`-tags are committed once in Phase 0 (§M.1), and each sub-phase asserts
-only its seam's slice.
-
-```mermaid
-flowchart LR
-  %% register: orientation
-  s0["Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra"]
-  s1["Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI…"]
-  s2["Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root…"]
-  s3["Sprint 29.4: The composed full-resource-vector place-witness —…"]
-  s4["Sprint 29.5: The execution/accelerator/provider-root fold-negative…"]
-  gate["the phase 29 gate"]
-  s0 -->|"produces what the next consumes"| s1
-  s1 -->|"produces what the next consumes"| s2
-  s2 -->|"produces what the next consumes"| s3
-  s3 -->|"produces what the next consumes"| s4
-  s4 -->|"the last seam the gate closes over"| gate
-```
-*Orientation. The seams Phase 29 built and sealed in order; [Gate integrity](#gate-integrity) owns the validated apparatus.*
-
-The single acceptance run is `cabal test execution-accelerator-spec`, and it has five legs. Its positive leg places
-`legal_multisubstrate_cluster` and `legal_managed_eks` feasibly across CPU/memory, pod-CNI and CSI slots,
-logical and physical node storage, OCI content/snapshots/workspace, durable/cache demand, accelerator devices
-plus every owner residency epoch, every execution/admission envelope, and provider-root VM/root-EBS; the
-returned witness must additionally be accepted by the independent composed witness validator below (§M.3).
-Its negative leg applies the folds directly to the hand-authored demand/capacity fixture that isolates each
-negative's insufficient axis, and requires that fixture's own committed tag rather than merely some `Left`;
-the bind, infrastructure-plan, context, and provision path around those folds belongs to Phase 31 and is no
-part of this condition. The remaining legs are the totality scan, the seeded-mutant battery, and the authored
-five-calculus projection over the observed negative, twin, positive, property, and mutant counts, all stated
-below. Every fixture, golden, and expected `Left`-tag the run checks against is pinned in this phase's
-oracle-pinning sprint, ahead of the folds that consume them (§M.1), and the whole run is Register 1 and in
-process: it stands up no host and no cluster.
-
-The coverage floor every property in that run must meet is its committed `cover`/`checkCoverage` minimum of
-30% rejecting and 30% accepting per fold (§M.4). A property that holds only because its generator never
-produced a rejecting case has not been exercised.
-
-### Representative set (§M.7)
-
-This phase's fold-negative corpus is *exactly* the eighteen named fixtures on
-the execution/accelerator/provider-root/runtime-metadata seam:
-`illegal_hard_ceiling_overcommit`, `illegal_node_local_storage_over_backing`,
-`illegal_disk_backing_alias_double_spend`, `illegal_filesystem_layout_alias`,
-`illegal_filesystem_layout_swapped`, `illegal_image_content_join_missing`,
-`illegal_image_snapshot_join_missing`, `illegal_image_storage_model_missing`,
-`illegal_split_image_unsupported`, `illegal_provider_instance_store_root_underprovisioned`,
-`illegal_provider_node_root_ebs_over_quota`, `illegal_control_plane_storage_transition_overrun`,
-`illegal_cuda_on_cpu_target`, `illegal_accelerator_count_shortage`,
-`illegal_accelerator_vram_fragmentation`, `illegal_accelerator_vram_reserve_boundary`,
-`illegal_apple_metal_profile_mismatch`, and `illegal_shared_accelerator_double_owner`; the composed positive
-set is exactly `legal_multisubstrate_cluster` and `legal_managed_eks` (whose cover requires at least two
-nodes materialized from one candidate class). `legal_tmpfs_two_concurrent_writers_single_debit` is
-owned by [phase_09_resource_index.md](phase_09_resource_index.md) but is re-exercised through the
-composed witness here (it places feasibly on the composed vector). The base-fold negatives
-(`illegal_engine_substrate_mismatch`, `illegal_rke2_reused_host`, `illegal_overcommit_{host,vm,cluster}`,
-`illegal_untolerated_taint`, `illegal_pod_ephemeral_overcommit`, `illegal_cpu_limit_over_policy`,
-`illegal_memory_backed_underreserved`, `illegal_tmpfs_init_persistence_underreserved`, and the four
-`illegal_elastic_*`) belong to Phase 9; the storage-geometry negatives (`illegal_store_over_backing`,
-`illegal_topic_time_only_offload`, `illegal_hot_tier_over_bookie`, `illegal_cache_over_local_pool`,
-`illegal_incluster_cache_bound_mismatch`) belong to Phase 28. This phase does not
-re-assert them.
-- `illegal_hard_ceiling_overcommit` is a stable fixture identifier; **its kind-indexed execution controller/rollout/live-epoch cases are variants of it** — separately making only a controller webhook,
-  object-write/query/registry gateway, Pulumi executor, storage/registry/schema migration executor, or
-  ZooKeeper/Patroni child one CPU/memory/ephemeral unit or pod slot short, and separately making a
-  kind-indexed desired replica, DaemonSet-selected slot, surge instance, exact prior old/removed revision, or
-  live terminating instance one unit short; other variants copy the new envelope into a deliberately
-  larger/different old source, invent a predecessor under `FirstDeployment`, resolve the wrong/latest
-  generation, omit the reachable empty recreate step, or admit a replacement while an observed terminator
-  holds the last provisioned unit. Its ephemeral cases validate the finite limit plus routed physical peak;
-  they do not assert Kubernetes provides a synchronous per-container filesystem quota. This phase directly
-  exercises legal Deployment `{ maxSurge = 1, maxUnavailable = 0 }` and `{ 0, 1 }` epoch controls and an
-  internal guard-weakening mutant that attempts to inject `{ 0, 0 }`; the Phase-26
-  `illegal_decode_unspellable` zero-progress rolling case remains an inherited gadt-decode precondition.
-- `illegal_node_local_storage_over_backing` has a committed case table: logical pod ephemeral fits, but the
-  layout-routed union of OCI content, snapshots, writable layers, concurrent pull/import workspace, and
-  model-derived per-Pod kubelet/CRI runtime metadata exceeds a physical backing. **Kubelet-runtime-metadata cases are variants of it** — dropping the largest simultaneous metadata row, removing/changing the pinned
-  model, dropping/swapping a component `KubeletNodefs | CriRuntimeRoot` role, mismatching planned/observed
-  domains, overlapping or leaking qualified Pod/image ownership, double-debiting an alias group, and making
-  either `SplitRuntime` nodefs or imagefs/containerfs exactly one byte short.
-- `illegal_disk_backing_alias_double_spend` has a committed case table covering same-host duplicate-carve,
-  cross-host duplicate-backing, the `PhysicalDiskPartition` VM-usable-for-raw substitution, an underived
-  presented usable carve, an omitted `systemReserve`, and a child debit repeated through an alias; its
-  partition cases include an `allocatableRawBytes` one byte short of the derived
-  `systemReserve raw parent debit + Σ unique VM provisionedBytes + Σ unique other raw parent debits` and a
-  VM `requiredUsableBytes` one byte short of its nested usable debits.
-- The named per-fold tags this phase asserts (§M.8): `illegal_filesystem_layout_swapped` →
-  `Left FilesystemLayoutMismatch`; `illegal_image_content_join_missing` (and the snapshot/model join
-  variants) → `Left ImageMetadataMissing`; `illegal_provider_node_root_ebs_over_quota` →
-  `Left ProviderNodeRootQuotaExceeded`; `illegal_control_plane_storage_transition_overrun` →
-  `Left EngineStorageOvercommit`; the kind-indexed hard-ceiling and provider-instance-store cases →
-  `Left Overcommit`/`Left Unschedulable` naming the offending axis; the accelerator negatives → their
-  specific committed accelerator tag (family-absent for `illegal_cuda_on_cpu_target`, device-count for
-  `illegal_accelerator_count_shortage`, residency-fit for `illegal_accelerator_vram_fragmentation`,
-  net-allocatable-reserve for `illegal_accelerator_vram_reserve_boundary`, profile for
-  `illegal_apple_metal_profile_mismatch`, and shared-device for `illegal_shared_accelerator_double_owner`).
-  Each negative is asserted to return its **specific** committed tag, **not merely "some `Left`"**, and each
-  is paired with a positive differing only in the foreclosed dimension.
-
-### Committed per-fold seeded-mutant battery (§M.2)
-
-Every listed execution/accelerator mutation is an
-independently required red case from the operator set:
-- **kind-indexed execution expansion** (admit a zero-progress `{ 0, 0 }` Deployment rolling policy or a policy
-  field from the wrong controller kind; copy the desired envelope/revision into a prior row; drop a
-  removed-prior unit, desired replica, selector-matched DaemonSet/host slot, surge instance, or retained
-  old/terminating revision; invent an old row for `FirstDeployment`; resolve implicit latest instead of the
-  exact prior generation; lose either prior or desired source-unit/revision/ordinal join; omit the reachable
-  empty recreate/initial step; or charge only the steady epoch) — with the named members
-  `mutant_copy_new_execution_as_old`, `mutant_drop_removed_execution`, `mutant_invent_first_deploy_old`,
-  `mutant_resolve_latest_execution`, `mutant_drop_execution_replica`, `mutant_drop_execution_surge`, and
-  `mutant_drop_execution_old_revision`;
-- **scheduler reservation algebra** (drop the aggregate-root CAS for per-record CAS; release a reservation on
-  timeout; credit a crash/lost-response as release from `BindingInFlight`; bypass via direct-nodeName or a
-  post-bind delta; fail to invalidate the token on a post-validation terminating/pending/resident/config set
-  change; drop a Pod-disappeared row as an orphan rather than selecting the state-specific
-  `LedgerOnlyAbsentRecovery` debit; or admit a replacement while an observed terminator consumes the last
-  provisioned unit);
-- **controller-child lowering** (a second controller-child resource debit, a dropped controller source
-  witness, or a free validating-webhook execution);
-- **kubelet/CRI runtime metadata** (drop the largest simultaneous Pod, accept a missing/changed model, omit a
-  structural component, drop or swap its `KubeletNodefs | CriRuntimeRoot` role, resolve a role to the wrong
-  layout backing, admit a planned-slot/observed-UID domain mismatch, overlap or leave a hole in the qualified
-  Pod/image component ownership, or charge an aliased backing twice) — with the named members
-  `mutant_drop_largest_kubelet_metadata` and `mutant_missing_kubelet_metadata_model`;
-- **node-local filesystem/image accounting** (ignore logical pod-ephemeral allocatable, target platform, OCI
-  index/manifest/config/compressed content, snapshot chain/unpacked bytes, model version, pull
-  concurrency/workspace, or layout routing; assume unpinned residents are free; fail to deduplicate object
-  digests/chain ids; accept a missing join, a forbidden alias, swapped nodefs/imagefs roles, or unsupported
-  `SplitImage`);
-- **disk identity** (accept duplicate physical backing/carve ids);
-- **physical-disk parent accounting** (mix a `VmGuestUsableExtent` debit into the physical-raw sum, use a VM's
-  `requiredUsableBytes` instead of its derived `provisionedBytes`, fail to derive a presented usable carve's
-  private raw parent debit, omit `systemReserve`, or debit one child twice) — with the named members
-  `mutant_partition_mixes_vm_usable_bytes`, `mutant_partition_drops_system_reserve`, and
-  `mutant_partition_double_debits_child`;
-- **shared supply allocation** (assign one physical accelerator id to two cluster budgets);
-- **accelerator capability** (treat `None` as CUDA or ignore a Metal-profile mismatch);
-- **accelerator residency placement** (drop a source/workload item, accept unequal source/workload or
-  policy-class domains, choose a favorable rather than every policy-permitted coexistence epoch, split one
-  `Unsharded` residency across devices, fail to charge `ReplicatedPerDevice` bytes on every owner device,
-  accept non-unique or wrong-sum/over-count `Sharded` assignments, or spend raw VRAM without subtracting the
-  mandatory `driverRuntimeReserve`);
-- **provider-template instantiation** (reuse one class-local disk/accelerator template id as the concrete
-  physical id on two materialized nodes; accept duplicate/unresolved/layout-invalid template roles; author a
-  raw VM or root-EBS byte aggregate; skip VM filesystem overhead/rounding; under-size an instance-store root;
-  omit the root policy/presentation/allocation; fail to derive and round the private root-EBS request; or
-  debit it from durable quota rather than the separate `nodeRootStorage` byte/volume-count ceiling);
-- **host-only compute derivation** (drop a build stage, scratch/cache-write/concurrency term, or observed
-  cache resident from `BuildExecutionEnvelope`; collapse an `EngineSystemReserve` engine-process map to an
-  aggregate; double-charge Events outside `EtcdLogicalDemand`; omit WAL preallocation/overshoot, snapshot-save,
-  or defrag overlap; omit one control-plane/worker storage/retention term; drop kind-host OCI content,
-  per-ordinal active snapshots/writable layers, pull workspace, or data-root identity; bypass
-  `MonitoringWorkBudget` evaluation+query/proxy compute or TSDB presentation derivation; or drop the Pulumi
-  deploy/plugin/concurrency executor envelope).
-
-Field-deletion operators are explicit members: delete one OCI stored object, snapshot chain, model version,
-filesystem-layout reference, root-backing policy/quota, presentation/allocation rule, or etcd WAL/defrag
-operand and require a structured rejection rather than treating absence as zero or falling back to an
-aggregate. The per-axis/per-capability validator mutants of Sprint 29.4 are additional and separately required.
-
-### Totality gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub))
-
-Compile every `Amoebius.Capacity.*` execution, accelerator, and provider-root fold module under
-`-Werror=incomplete-patterns` and `-Werror=incomplete-uni-patterns`, and reject `error`, partial `head`, and
-`fromJust`. The sampled QuickCheck no-crash run supplements that compile-time exhaustiveness result; the gate
-requires both, and neither substitutes for the other.
-
-### Independent witness validator (§M.3)
-
-Defined in Sprint 29.4 Deliverables; the composed validator never
-calls `podFits` or `place`, computing residuals directly from the generated fixture's declared allocatables
-across every axis — CPU/memory, pod-CNI/CSI slots, logical+physical node storage, OCI/snapshot/workspace,
-durable/cache (Phase 28), accelerator net-allocatable VRAM, execution/admission envelopes, and provider-root.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — the pure Haskell full-resource-vector fold returns a placement witness or one structured refusing axis. It consumes Haskell values; any serialized case or mutation is generated beneath `.build/**`; and it makes no hardware or live-capacity claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 29` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 28 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) — the bytes execution-epoch + scheduler + accelerator + provider-root folds causes to exist are charged to a grant that carries its ceiling and concurrency together.
-- [`resource_capacity_construction.md — checked construction`](../documents/engineering/resource_capacity_construction.md#checked-construction)
+- [`jit_budget_doctrine.md` §3 — A ceiling is inseparable from its concurrency](../documents/engineering/jit_budget_doctrine.md#3-a-ceiling-is-inseparable-from-its-concurrency) — the bytes execution-epoch + scheduler + accelerator + provider-root folds causes to exist are charged to a grant that carries its ceiling and concurrency together.
+- [`resource_capacity_doctrine.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
   — the identity and derivation obligations checked construction adds beyond a record's fields. This phase's
   execution/accelerator/provider-root smart constructors discharge them: every demand it declares is derived
   through its stated operands rather than authored, and its identity keys (planned slot, observed Pod UID,
   per-device residency epoch) are checked at construction, not asserted downstream.
-- [`resource_capacity_doctrine.md §4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
+- [`resource_capacity_doctrine.md` §4 — The total fold: `fits`, `carve`, `place`, and the nesting](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
   — the total fold `fits`/`carve`/`place` and the nesting: this phase composes the four total functions and the
   host → VM → workload nesting over the full resource vector, with `place` branching per
-  [§4.1](../documents/engineering/resource_capacity_folds.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)
+  [`resource_capacity_folds.md` §4.1 — `place` branches: static proves a placement, dynamic proves a growth envelope](../documents/engineering/resource_capacity_folds.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)
   (a fixed node set proves a placement witness; an elastic one proves a growth envelope), reading the declared
-  `Capacity`/`Demand`/`Budget` types of [§3](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
-  and the execution/accelerator/provider-root demands this phase adds atop the Phase-9 base fold.
-- [`resource_capacity_doctrine.md §2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)
+  `Capacity`/`Demand`/`Budget` types of [`resource_capacity_doctrine.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
+  and the execution/accelerator/provider-root demands this phase's target must add atop the Phase-9 base fold.
+- [`resource_capacity_doctrine.md` §2 — The load-bearing honesty limit: a capacity sum is a decode-foreclosed check, never type-foreclosed](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)
   — the load-bearing honesty limit: a capacity/accelerator/execution sum is a checked rejection
   (**decode-foreclosed** in the historical layer taxonomy), never type-foreclosed; its concrete locus is the
   post-bind `provision-seal`, and the composed compute placement is **sound, not complete** (first-fit-decreasing
   may reject a packable spec but never admits an unplaceable one). The QuickCheck properties assert soundness
   only for `place`; completeness is deliberately not claimed.
-- [`illegal_state_catalog.md §4.6`](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
-  — the capacity-accounting placement-witness technique this phase discharges along its seam, covering the
-  execution/runtime-metadata/provider-root entries [§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar) and the accelerator entries [§3.27](../documents/illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)–[§3.30](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool) at
+- [`illegal_state_techniques.md` §4.6 — Capacity accounting — placement witness (compute) and summed demand within capacity (storage), checked](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
+  — the capacity-accounting placement-witness technique this phase's target must discharge along its seam, covering the
+  execution/runtime-metadata/provider-root entries [`illegal_state_security.md` §3.11 — An unsafe workload (no resource limits, no hardened securityContext)](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[`illegal_state_capacity.md` §3.17 — An over-committed deploy or workload (host / VM / cluster capacity exceeded)](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[`illegal_state_storage.md` §3.19 — An application consuming more storage than its backing (MinIO and Pulsar)](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar) and the accelerator entries [`illegal_state_capacity.md` §3.27 — A deployment that fits in aggregate but has no resource-capable placement](../documents/illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)–[`illegal_state_capacity.md` §3.30 — An accelerator memory envelope that cannot fit the selected devices or unified-memory pool](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool) at
   the honest layer
-  ([`§6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
+  ([`illegal_state_techniques.md` §6 — Three layers of foreclosure (and the honesty they force)](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
   every capacity/accelerator **sum** is checked at `provision-seal` and never type-foreclosed, honoring the
   load-bearing limit of
-  [`§2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it).
-  (The [§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) compatibility/topology technique and the [§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.16](../documents/illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) topology entries are discharged by [phase_09_resource_index.md](phase_09_resource_index.md); the durable/object/Pulsar [§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)–[§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy) storage-geometry entries by [phase_28_storage_geometry_folds.md](phase_28_storage_geometry_folds.md).)
-- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
-  (**Register 1** — pure/golden, in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the
+  [`illegal_state_catalog.md` §2 — The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it).
+  (The [`illegal_state_techniques.md` §4.7 — Compatibility / topology relations by construction over a collection](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) compatibility/topology technique and the [`illegal_state_topology.md` §3.13 — A compute engine incompatible with its substrates (managed providers first-class)](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[`illegal_state_topology.md` §3.16 — A multi-node rke2 cluster with fewer Linux hosts than nodes (or a host reused)](../documents/illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) topology entries are discharged by [phase_09_resource_index.md](phase_09_resource_index.md); the durable/object/Pulsar [`illegal_state_storage.md` §3.19 — An application consuming more storage than its backing (MinIO and Pulsar)](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)–[`illegal_state_storage.md` §3.21 — Capacity growth without an amoebius-owned scaling policy](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy) storage-geometry entries by [phase_28_storage_geometry_folds.md](phase_28_storage_geometry_folds.md).)
+- [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+  (**Register 1** — pure/semantic-oracle, in-process, no cluster) and [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the
   register this gate reaches and the ledger it emits, with model↔runtime correspondence and runtime fidelity
   marked UNVERIFIED (owned by the live band).
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-21 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
-> established by the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-## Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Capacity/Execution.hs` owns the closed controller bodies, exact prior
-reference, identity-keyed materialization, empty-capable epochs, and componentwise peak;
-`src/Amoebius/Capacity/Scheduler.hs` owns reservation projection, aggregate snapshot/root-version guard,
-content/CSI/device unions, absent-Pod recovery debits, and Reserved→BindingInFlight→Bound transitions;
-`src/Amoebius/Capacity/HostReservation.hs` owns the zero-capable compute and retained physical-artifact release
-partitions. These declarations live beside their owner folds rather than enlarging the Phase-9 base
-`Types.hs`/`Fold.hs` pair.
-**Blocked by**: None.
-**Independent Validation**: a unit + property suite independently expands the deployment-level transition
-source into identity-keyed steady, rollout, and live epochs and exercises the reservation algebra over them;
-the numbered Validation list below carries the cases, the controls, and the mutants it must redden.
-**Docs to update**:
-`documents/engineering/resource_capacity_doctrine.md` (Phase-29 status backlink),
-`documents/engineering/daemon_topology_doctrine.md` (§3 control-plane daemon reservation read-side),
-`documents/illegal_state/illegal_state_catalog.md` (§3.17 execution/scheduler layer reconciliation),
-`DEVELOPMENT_PLAN/system_components.md`.
+> **Permanently invalidated history.** Every completion, seal, reseal, transcript, evidence, and
+> closure statement in the sprint bodies below is rejected as current validation. The material is retained
+> only as a target-capability inventory and cannot support status, promotion, or a validation claim.
+
+## Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`resource_capacity_doctrine.md §4/§4.1`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
 and the honesty limit of [`§2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed):
 build the kind-indexed `BoundExecutionBody` expansion into `MaterializedExecutionInstance`s and complete
@@ -462,6 +225,7 @@ root-ledger CAS, and `LedgerOnlyAbsentRecovery`), as pure, checked `provision-se
 numbers only — the pure expansion fold Phase 31's `provision` seal later invokes.
 
 ### Deliverables
+
 - `BoundExecutionInventory` carries exactly one `FirstDeployment | UpdateFrom PriorExecutionProvisionRef`
   transition source and the desired `BoundExecutionSet`. `FirstDeployment` resolves to an exact empty prior map;
   an update resolves the exact digest-keyed prior steady projection from `ProvisionContext`, including
@@ -509,6 +273,7 @@ numbers only — the pure expansion fold Phase 31's `provision` seal later invok
   debit.
 
 ### Validation
+
 1. Generated kind-indexed execution-unit cases independently exact-fit and miss by one on each full
    steady/rollout/live epoch; the suite rejects a copied-new-as-old envelope, dropped
    removed/desired/surge/old/terminating instance, invented first-deploy predecessor, implicit-latest lookup, any
@@ -542,24 +307,15 @@ numbers only — the pure expansion fold Phase 31's `provision` seal later invok
    exact full or retained `LedgerOnlyAbsentRecovery` debit instead.
 
 ### Remaining Work
-None.
 
-## Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Capacity/NodeLocalStorage.hs`, `src/Amoebius/Capacity/RuntimeStorage.hs`,
-and the runtime-metadata / node-local / physical-disk extensions to `src/Amoebius/Capacity/Types.hs`.
-**Blocked by**: None.
-**Independent Validation**: a reference fold rebuilds the runtime-metadata shape and the two physical-disk
-parent equations from the fixture's own structural counts, never from the fold under test; the numbered
-Validation list below carries the exact-fit cases, the one-byte-short pairs, and the named mutants.
-**Docs to update**:
-`documents/engineering/resource_capacity_doctrine.md` (Phase-29 status backlink),
-`documents/engineering/storage_lifecycle_doctrine.md` (§5.2 node-local backing read-side),
-`documents/engineering/substrate_doctrine.md` (§8 node inventory / kubelet layout read-side),
-`documents/illegal_state/illegal_state_catalog.md` (§3.17–§3.18 node-local/runtime-metadata layer
-reconciliation), `DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+
+## Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`resource_capacity_doctrine.md §4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
 and the capacity-accounting technique of
 [`illegal_state_catalog.md §4.6`](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked):
@@ -570,6 +326,7 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
 `provision` seal.
 
 ### Deliverables
+
 - Each `NodeCapacity.localStorage` carries logical pod-ephemeral allocatable separately from physical
   `KubeletFilesystemLayout`, a pinned `NodeImageStorageModelVersion`, a pinned
   `kubeletMetadataModel : KubeletRuntimeMetadataModelVersion`, and enforced `Serial | BoundedParallel n` pull
@@ -639,6 +396,7 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
   `NamedDiskCarve`, and `ProvisionedVmDiskCarve`.
 
 ### Validation
+
 1. Runtime-metadata cases exact-fit every grouped backing, fail with SplitRuntime nodefs one byte short for a
    kubelet component or imagefs/containerfs one byte short for a CRI component, and reject a missing/mismatched
    model, a dropped/swapped role, a planned/observed domain mismatch, a Pod/image ownership hole/overlap, an
@@ -665,29 +423,15 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
    alias double debit.
 
 ### Remaining Work
-None.
 
-## Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Capacity/Accelerator.hs` (family/profile/device ownership, complete
-coexistence epochs, unsharded/replicated/sharded placement, interconnect, and net VRAM);
-`src/Amoebius/Capacity/ProviderRoot.hs` (private VM/root-EBS
-high-water derivation and node-root quota); `src/Amoebius/Capacity/Etcd.hs` (exact desired/live API-object
-transition and churn quota fit before physical WAL/snapshot/defrag expansion);
-`src/Amoebius/Capacity/PulumiExecution.hs` (deploy/plugin join and concurrent executor/workspace peak);
-the modules retain their demand, provisioned, and structured-error types beside their folds.
-**Blocked by**: None.
-**Independent Validation**: a unit + property suite rederives the accelerator, provider-root, and host-only
-compute numbers from the fixture's declared devices, disks, and stage graph rather than from the folds under
-test; the numbered Validation list below carries the cases and the per-term drops it must redden.
-**Docs to update**:
-`documents/engineering/resource_capacity_doctrine.md` (Phase-29 status backlink),
-`documents/engineering/substrate_doctrine.md` (accelerator profile / provider-root read-side),
-`documents/engineering/monitoring_doctrine.md` (the `MonitoringWorkBudget` compute read-side),
-`documents/illegal_state/illegal_state_catalog.md` (§3.27–§3.30 accelerator + §3.19 provider-root layer
-reconciliation), `DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+
+## Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`resource_capacity_doctrine.md §4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
 and the capacity-accounting technique of
 [`illegal_state_catalog.md §4.6`](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked):
@@ -697,6 +441,7 @@ implement the accelerator residency/net-allocatable-VRAM fold, the provider-root
 derivations as pure, checked `provision-seal` operations that feed the composed resource vector.
 
 ### Deliverables
+
 - Closed pod/host accelerator demand and offering types, and the accelerator residency placement: the returned
   witness proves exact whole accelerator devices, identity-complete residency demand, every policy-permitted
   coexistence epoch's per-device assignment/aggregate, explicit shard-byte assignment, and required peer/NVLink
@@ -739,6 +484,7 @@ derivations as pure, checked `provision-seal` operations that feed the composed 
   object-store arm.
 
 ### Validation
+
 1. A CUDA-family-absent topology, a device-count shortage, an `Unsharded` residency that fits no device, a
    `ReplicatedPerDevice` residency not chargeable on every owner device, an explicit shard/per-device epoch
    assignment that does not fit, a demand fitting raw `memory.total` but exceeding `allocatableVram` after the
@@ -765,25 +511,15 @@ derivations as pure, checked `provision-seal` operations that feed the composed 
    deploy/plugin/concurrent-executor/workspace peak the same way.
 
 ### Remaining Work
-None.
 
-## Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Capacity/Composed.hs` retains the Phase-9 placement, Phase-28 storage, and
-Phase-29 execution/runtime/accelerator/provider-root witnesses; `test/spec/dsl/ExecutionAcceleratorProps.hs`
-contains seven sampled properties and the implementation-independent composed witness validator;
-`test/spec/dsl/ExecutionAcceleratorFixtures.hs` carries deterministic controller, scheduler-state, observed-UID,
-host-only compute, replicated-residency/interconnect, and cover-slot identity checks.
-**Blocked by**: None.
-**Independent Validation**: `cabal test execution-accelerator-spec` runs the composed-placement soundness, totality,
-execution-epoch equality, runtime-metadata grouping, accelerator-residency, and provider-root properties
-green over generated inputs at their committed coverage floors, and the seeded-mutant battery of
-[Gate integrity](#gate-integrity) reddens the suite one mutant at a time (§M.2).
-**Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
-`documents/engineering/testing_doctrine.md` (the Register-1 property register),
-`DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+
+## Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (Register 1) and the honesty
 limit of [`resource_capacity_doctrine.md §2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed):
 express the composed full-resource-vector `place` witness as QuickCheck properties. For the checks that are
@@ -793,6 +529,7 @@ hand-authored reference. Reserve **soundness-only** (the witness never admits an
 may reject a packable one) for the composed compute `place`, and never claim completeness there.
 
 ### Deliverables
+
 - The **implementation-independent composed witness validator** (§M.3): a reference predicate that reads the
   generated fixture's declared allocatables directly and **never calls `podFits` or `place`**.
   - For every node in the returned `Placement` it recomputes effective
@@ -855,6 +592,7 @@ may reject a packable one) for the composed compute `place`, and never claim com
   input yields an exception, `error`, or partial match. A green sample alone does not satisfy this guard.
 
 ### Validation
+
 1. Every fold reaches its declared property-coverage floor. Re-run the complete seeded battery from
    [Gate integrity](#gate-integrity) — including the kind-indexed execution,
    scheduler-CAS, runtime-metadata, node-local, physical-partition, accelerator-residency, and
@@ -863,39 +601,15 @@ may reject a packable one) for the composed compute `place`, and never claim com
    fold's own comparison.
 
 ### Remaining Work
-None.
 
-## Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ✅
-**Status**: Done
-**Implementation**: `test/oracle/execution_accelerator/execution_accelerator_cases.tsv` pins 37 variants across
-eighteen families and one legal twin each; `test/oracle/execution_accelerator/dhall_typecheck_cases.tsv`
-and `dhall/examples/execution_accelerator/*` pin the accelerator-owner editor barrier;
-`test/spec/dsl/ExecutionAccelerator{Fixtures,Props,Gate,Mutants,Spec}.hs` implements the dedicated and integrated
-battery; `test/oracle/execution_accelerator/calculus_projection.tsv` pins the independent five-calculus
-projection; the `execution_accelerator` rows of `test/mutant/registry.tsv` pin 45 individually selected mutants;
-and `tools/execution_accelerator_gate.py` seals the bounded suite, ownership ledger, totality scan, evidence, and result ledger.
-**Blocked by**: None.
-**Independent Validation**: the gate applies the Phase-29 folds (the execution expansion, scheduler-reservation algebra,
-runtime-metadata/node-local, accelerator-residency, provider-root, and engine/etcd/build/monitoring helper
-folds, composed with the Phase-9 base `fits`/`podFits`/`carve`/`place` and the Phase-28 storage folds)
-**directly to each hand-authored demand/capacity fixture**. The higher-level bind, infrastructure-plan,
-context, and provision path is outside this phase and covered by phases 30–31. The composed positives place
-feasibly across every axis and each negative returns the fold's structured `ProvisionError`/`Left` on its
-isolated insufficient axis — **each negative asserting its specific expected tag** (e.g.
-`illegal_filesystem_layout_swapped` → `Left FilesystemLayoutMismatch`, `illegal_image_content_join_missing`
-→ `Left ImageMetadataMissing`, `illegal_provider_node_root_ebs_over_quota` → `Left
-ProviderNodeRootQuotaExceeded`, `illegal_control_plane_storage_transition_overrun` → `Left
-EngineStorageOvercommit`, and the accelerator negatives their specific committed accelerator tag), **not merely "some `Left`", and each paired with a positive differing only in the foreclosed dimension** (§M.8) —
-each assertion annotated with its catalog entry
-([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)/[§3.27](../documents/illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)–[§3.30](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool))
-and its checked-rejection layer at the `provision-seal` locus. The execution and accelerator run emits its
-own Register-1 proven/tested/assumed ledger over the epoch, accelerator and provider-root folds.
-**Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (the
-resource/capability §3.11/§3.17–§3.19/§3.27–§3.30 checked-rejection / `provision-seal` entries → layer-2
-Register-1), `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-29
-status when the gate passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-29 `none` gate row).
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+
+## Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`illegal_state_catalog.md §4.6`](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 and [`§3`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent):
 assemble the phase's single Register-1 gate — the composed folds place the whole-deployment positives feasibly
@@ -903,6 +617,7 @@ across every axis and reject each execution/accelerator/provider-root/runtime-me
 axis — and emit the per-entry validation-locus ledger that names the honest foreclosure layer of each.
 
 ### Deliverables
+
 - The fold-negative fixtures on this seam — `illegal_hard_ceiling_overcommit` ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)),
   whose case table separately makes only a controller webhook, object-write/query/registry gateway, Pulumi
   executor, storage/registry/schema migration executor, or ZooKeeper/Patroni child one CPU/memory/ephemeral
@@ -954,7 +669,9 @@ axis — and emit the per-entry validation-locus ledger that names the honest fo
   arithmetic generalizes prodbox's teardown push-back soundness, not an amoebius result.
 
 ### Validation
-1. `cabal test execution-accelerator-spec` is green — every one of the eighteen execution/accelerator/provider-root/runtime-metadata
+
+1. Rejected historical observation: the `execution-accelerator-spec` Cabal suite was recorded green — every
+   one of the eighteen execution/accelerator/provider-root/runtime-metadata
    fold negatives ([Gate integrity](#gate-integrity) representative set) returns its **specific committed** tagged
    `Left`, both composed positives place feasibly across every axis, the QuickCheck battery holds at its coverage
    minima, and the committed per-fold seeded-mutant battery ([Gate integrity](#gate-integrity)) turns the suite
@@ -962,11 +679,13 @@ axis — and emit the per-entry validation-locus ledger that names the honest fo
    retain an UNVERIFIED row for every effect that only a runtime observation can settle.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs updated at the gate seal:**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/resource_capacity_doctrine.md` — backlink §4's fold + §4.1 static/elastic branch to the
   implemented `Amoebius.Capacity.*` execution/accelerator/provider-root modules; confirm every
   capacity/accelerator sum stayed a checked pre-effect rejection at the post-bind `provision-seal` and
@@ -988,7 +707,8 @@ None.
 - `documents/engineering/testing_doctrine.md` — record the Register-1 property + composed-fold ledger this gate
   emits (correspondence and runtime fidelity UNVERIFIED).
 
-**Cross-references added:**
+**Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-29 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-29 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Capacity/{Scheduler,HostReservation,
@@ -1000,6 +720,7 @@ None.
 - `DEVELOPMENT_PLAN/phase_31_provision_seal.md` — the post-bind provision seal that re-exercises these folds.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker and phase order this document serves
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the capacity/execution/accelerator invariants

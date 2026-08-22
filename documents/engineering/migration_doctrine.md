@@ -17,7 +17,7 @@ listed here only to be recognised as the same shape. Reading it presumes the hon
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, documents/engineering/README.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -112,7 +112,7 @@ clause-5 answer.
 | Browser record schema | total migration, or a retained decoder + current-authority replay handler | promotion refused without one of the two | atomic per partition, crash-resumable; `ReloadRequired` never clears the outbox | `decode-foreclosed` promotion gate | [browser_offline §11](./browser_offline_runtime_doctrine.md#11-release-schema-and-compatibility-horizon) |
 | UI program release | coherent client/server/program generation moved together | projector watermark reached before the traffic shift | `ReloadRequired` and no effect executes; CAS back to the prior `Release` | `runtime-checked` watermark on a `type-foreclosed` release identity | [low_code_ui_runtime §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 | Tenant promotion to a child cluster | **open** — asserted as a `RolloutPhase`, which is the in-cluster apply; no owner covers moving durable bytes across the cluster boundary | none stated | none stated | unresolved | [tenancy §7](./tenancy_doctrine.md#7-two-isolation-layers-and-the-honest-limit) |
-| DSL schema evolution | widening (optional field / uninhabited arm) is transparent; narrowing is a dhall-typecheck rejection the operator resolves by editing the authored value; reinterpretation is inadmissible | dhall-typecheck typecheck over the committed fixture corpus | no automatic rewrite of an authored `.dhall`; the prior schema is the prior `Release` | `type-foreclosed` (dhall-typecheck) + review residue on reinterpretation | [generated_artifacts §5.1](./generated_artifacts_doctrine.md#51-when-the-reflected-schema-changes-under-an-operators-dhall) |
+| DSL schema evolution | widening (optional field / uninhabited arm) is transparent; narrowing is a typecheck rejection the operator resolves by editing the external/untracked value; reinterpretation is inadmissible | Haskell-declared cases lazily render `.build/**` inputs for the generated typechecker | no automatic rewrite of external/untracked `.dhall`; the prior schema is the prior `Release` | `type-foreclosed` + review residue on reinterpretation | [generated_artifacts §5.1](./generated_artifacts_doctrine.md#51-when-the-reflected-schema-changes-under-an-operators-dhall) |
 
 The tenant-promotion row is recorded as **open** rather than omitted. Under
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) an
@@ -167,8 +167,8 @@ demonstrated in a sibling project that is sibling evidence, not an amoebius resu
 
 Phase order, status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). Each instance in
-[§3](#3-one-discipline-many-instances) is delivered by the phase its owning doctrine names; this document adds
-no phase of its own and maintains no competing status ledger.
+[§3](#3-one-discipline-many-instances) is assigned to the phase its owning doctrine names; assignment is not a
+completion or validation claim. This document adds no phase of its own and maintains no competing status ledger.
 
 ---
 

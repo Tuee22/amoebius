@@ -16,12 +16,12 @@ discharge is owned by [gateway_migration_doctrine.md](./gateway_migration_doctri
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. The defect this doctrine targets](#1-the-defect-this-doctrine-targets)
@@ -252,11 +252,11 @@ lossless-delegation premise therefore holds only where `synchronous_mode: on`, a
 stance (with the named behavior when no synchronous standby exists), and `maximum_lag_on_failover` are set as a
 **required typed platform-service invariant** — owned by
 [platform_services_doctrine.md §8](./platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) —
-not left to Patroni's default. Phase 63 supplied the first amoebius live evidence for that premise: the
-committed oracle matched `synchronous_mode: on`, `synchronous_mode_strict: on`, and
+not left to Patroni's default. Phase 63 owns the live acceptance criterion for that premise: an independent
+oracle must match `synchronous_mode: on`, `synchronous_mode_strict: on`, and
 `maximum_lag_on_failover: 1048576` on a Ready three-member Patroni cluster, while the async-default mutant
-failed for its specific reason. This is evidence that the delegation precondition was rendered and operated,
-not a proof of Patroni consensus or a multi-zone failover theorem. amoebius **delegates** the
+must fail for its specific reason. Even that observation would establish only that the delegation precondition
+was rendered and operated, not prove Patroni consensus or a multi-zone failover theorem. amoebius **delegates** the
 synchronous-HA correctness obligation to these systems rather than re-deriving it. Pulsar supplies any
 topic-lifecycle coordinator's sole-consumer behavior through its subscription and deduplicated-delivery
 contracts; amoebius introduces no coordinator election
@@ -518,16 +518,17 @@ giving up: the FoundationDB/TigerBeetle/Antithesis move is to make Pulsar/MinIO/
 onto `io-classes`, so one source is production and model — against them under `IOSimPOR`. The catastrophic
 *cross-actor* invariant is still owned by the TLA+ model ([§9](#9-move-ii--model-prove-the-protocol-not-the-program)),
 and DST does not re-prove the delegated consensus ([§6](#6-the-concentration-principle--where-the-obligation-lives));
-what DST newly earns is that the built daemon's real schedule, and its behaviour under injected
-partition/reorder/redelivery/crash, are **validated in-process and deterministically replayable before any live deployment**. The mechanics, the register's place in the spine, and the honest tradeoff it buys — replacing a
+what DST is specified to earn is that the daemon's real schedule, and its behaviour under injected
+partition/reorder/redelivery/crash, are **validated in-process and deterministically replayable before any
+live deployment**. The mechanics, the register's place in the spine, and the honest tradeoff it buys — replacing a
 broad *unvalidated-until-live* surface with a narrow *modeled-environment-fidelity* premise, discharged by a
 small Register-3 conformance suite — are owned by
 [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md). The standing tax (polymorphism in `m`) is paid deliberately in exchange for it.
 
-The first concrete rung is built in
+The first concrete rung is assigned to
 [Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md): `Env m`, injected real clients, an
-`IOSim` interpreter, six modeled substrates, and deterministic/POR replay of a reference reconciler. The phase
-keeps real-substrate fidelity assumed and live behavior unverified.
+`IOSim` interpreter, six modeled substrates, and deterministic/POR replay of a reference reconciler. The
+target keeps real-substrate fidelity assumed and live behavior unverified.
 
 ---
 
@@ -540,8 +541,9 @@ reboot, but asserting that the control-plane daemon invariant holds when the own
 that the forest stays well-defined when a cluster is killed *mid geo-sync* and the gateway is failed over to
 it.
 
-**In amoebius, the fault harness is itself an `InForceSpec` topology.** A test is a Dhall-authored spec that spins
-up resources, runs a workflow, and — by definition — always tears down, simulating HA failovers and
+**In amoebius, the fault harness is itself a Haskell-declared `InForceSpec` topology.** A test lazily renders any
+serialized input beneath `.build/**`, spins up resources, runs a workflow, and — by definition — always tears
+down, simulating HA failovers and
 substrate quorum re-elections (etcd/Patroni); `suggest-test` detects the substrate and emits a representative one. That entire
 machinery — the test-as-`InForceSpec` contract, `suggest-test`, the flagged test credentials, and the per-run
 ledger artifact — is owned by [testing_doctrine.md](./testing_doctrine.md). This doctrine owns only the
@@ -672,8 +674,8 @@ reported as proven. Keep this ledger explicitly:
 |---|---|---|---|
 | GADT-indexed state machine | Illegal in-process transitions are compile errors | **Proven** (machine-checked, exhaustive) | Anything across processes |
 | **Extract** — pure decision + property test | The branch is a total function of typed inputs; unknowns and distinguished states are explicit; safety-critical freshness is fenced | **Proven** for purity / totality / fence wiring; **tested** (sampled) for the property unless the input space is finite and exhausted | That the protocol composing these decisions is sound; that an unfenced observation is current |
-| **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) **safety** invariant and, under a named fairness, the **liveness** property, under modeled crash/reorder, within scope | **Proven for the model** at TLC-green — safety on every reachable state, liveness (TLC-only) **under the assumed fairness `F`** (fairness-sensitivity checked); one shared `Model` removes the manual mapping, while differential checks test the spec↔decision-core `interpret` correspondence, **not** the effectful daemon; the three instruments over one `Model` = **one** protocol proof (TLC) + renderer cross-checks, not three; **assumed** for runtime fidelity — bridged early by **trace validation** (Register 2.5 sim, Register 3 live) and confirmed by Register-3 chaos (Phase 75) — and for actor counts beyond scope | That the built runtime's real physics refine the model; behaviour above scope; real-time / clock-skew / fairness premises (R8, F) |
-| **Simulate** — design schedules (Register 1) then deterministic daemon simulation (Register 2.5) | The pure decision upholds the invariant under bounded-exhaustive IOSimPOR schedules (Tier-1, Phase 17); **and later** the *built daemon/reconciler code*, run under `IOSim`/`IOSimPOR` against a **modeled faulty environment** (fake Pulsar/MinIO/apiserver/route53/Vault/clock), upholds the invariants under injected partition/reorder/redelivery/crash — deterministically replayable, no cluster | **Tested** — bounded schedules for the Phase-17 decision model; modeled-environment daemon schedules remain UNVERIFIED until their owning phase, and fidelity to the real substrate remains **assumed** until Register 3 | Schedules/faults beyond the recorded bounds; that the real Pulsar/k8s behave as the sim models them (Register 3); real-time physics |
+| **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) **safety** invariant and, under a named fairness, the **liveness** property, under modeled crash/reorder, within scope | **Target strength: proven for the model** after TLC covers safety on every reachable state and liveness (TLC-only) **under the assumed fairness `F`**, with fairness sensitivity checked; one shared `Model` removes the manual mapping, while differential checks test the spec↔decision-core `interpret` correspondence, **not** the effectful daemon; the three instruments over one `Model` = **one** protocol proof (TLC) + renderer cross-checks, not three; runtime fidelity remains **assumed** until trace validation (Register 2.5 sim, Register 3 live) and the Phase-75 Register-3 challenge — as do actor counts beyond scope | That the built runtime's real physics refine the model; behaviour above scope; real-time / clock-skew / fairness premises (R8, F) |
+| **Simulate** — design schedules (Register 1) then deterministic daemon simulation (Register 2.5) | The pure decision must uphold the invariant under bounded-exhaustive IOSimPOR schedules (Tier-1, Phase 17); **and later** the daemon/reconciler code, run under `IOSim`/`IOSimPOR` against a **modeled faulty environment** (fake Pulsar/MinIO/apiserver/route53/Vault/clock), must uphold the invariants under injected partition/reorder/redelivery/crash — deterministically replayable, no cluster | **Target strength: tested** — Phase 17 owns the bounded decision-model schedules; modeled-environment daemon schedules remain UNVERIFIED until their owning phase, and fidelity to the real substrate remains **assumed** until Register 3 | Schedules/faults beyond the recorded bounds; that the real Pulsar/k8s behave as the sim models them (Register 3); real-time physics |
 | **Inject** — live fault injection | The deployed forest survived the injected faults | **Tested** (the faults chosen), never proven | Faults/interleavings not injected; that the invariant is *sound* |
 | Synchrony / real-time assumption (R8) | The timing premise (clock skew, lease, heartbeat) is named, bounded, monitored | **Assumed** — monitored at runtime, never proven by any move | Behaviour when the bound is exceeded; that it holds in the field |
 | Intra-cluster external-effect fencing window (a `Lease` is mutual exclusion, not output fencing) | The at-most-one-writer of *external* side effects (route53 / Vault) during a pause/partition is bounded by the lease TTL and absorbed by idempotent / last-writer-safe writes + reconciler re-convergence; single-instance itself is delegated to k8s/etcd (no election) | **Assumed** — monitored, never proven (R8-adjacent, [daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)) | That a stale external write never lands during the window; safety of a *non*-idempotent external effect |
@@ -681,15 +683,15 @@ reported as proven. Keep this ledger explicitly:
 (Three further rows — the cross-boundary consistency premise, the failover budget, and the
 invariant-confluence classification — belong to the Second Axis and are recorded in [§19](#19-the-cross-boundary-ledger-and-conformance-rows).)
 
-**Applied to amoebius today, the ledger is layered — and that is by design.** Phases 11 and 17 are built:
-the formal kernel and bounded `GatewayMigration` protocol are proven-for-the-model/tested at Register 1.
+**The target amoebius ledger is layered — and that is by design.** Phases 11 and 17 own the formal-kernel
+and bounded-`GatewayMigration` Register-1 obligations; their target strength is proven-for-the-model/tested.
 The effectful daemon, modeled environment, and live forest remain **UNVERIFIED**; sibling prodbox results are
 still evidence, not amoebius proof. The
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) phase-discipline rule makes this binding: *every
 validation emits a proven/tested/assumed ledger artifact, and skipping an applicable test move marks that
-correctness layer UNVERIFIED, never green.* The gateway-migration design model is now TLC-checked at Register 1;
-when the multi-cluster runtime is built and its live model↔code correspondence is closed (Phase 75, deferred
-Tier-2), its runtime ledger can turn green. Until then, claiming the
+correctness layer UNVERIFIED, never green.* The gateway-migration design model must be TLC-checked at Register 1;
+Phase 75 owns the deferred Tier-2 multi-cluster runtime and live model↔code correspondence. Until a human
+promotes that phase from independently reviewed evidence, claiming the
 control-plane daemon is "hardened" because prodbox proved a sibling invariant is exactly what this section forbids.
 
 The rule, stated once and meant absolutely: **never report a tested, assumed, or merely argued result as proven.** Type-checking, decision purity, and finite-and-exhausted decision properties can be *proven* at
@@ -698,14 +700,15 @@ but a precise record of what is known and by what means. An honestly
 *conditional* invariant a system enforces is worth more than an *absolute* one it silently violates under
 partition.
 
-### Phase-69 layered result
+### Phase-69 target layered challenge — NOT VALIDATED
 
-Phase 69 records a Register-2.5 cross-check (256 deterministic schedules plus bounded `IOSimPOR`) and a
-Register-3 live injection on `linux-cpu`. The live fault kills `worker-a` after immutable store commit and
-before acknowledgement; broker-ranked `worker-b` takes over, the broker output counter proves redispatch, the
-external subscription observes one command, and Kubernetes/MinIO/Pulsar remainders are empty. Double-apply and
-orphan-consumer mutants fail in simulation, while all ten phase mutants fail in the assembled gate. These are
-tested intra-cluster results. Cross-cluster failover and Pulsar consensus internals remain UNVERIFIED.
+Phase 69 must record a Register-2.5 cross-check (256 deterministic schedules plus bounded `IOSimPOR`) and a
+Register-3 live injection on `linux-cpu`. The live fault must kill `worker-a` after immutable store commit and
+before acknowledgement; broker-ranked `worker-b` must take over, an external broker counter must prove
+redispatch, the external subscription must observe one command, and Kubernetes/MinIO/Pulsar remainders must be
+empty. Double-apply and orphan-consumer mutants must fail in simulation, while all ten phase mutants must fail
+in the assembled gate. These target only intra-cluster observations. Cross-cluster failover and Pulsar
+consensus internals remain UNVERIFIED.
 
 ---
 
@@ -789,10 +792,10 @@ invariant cannot be **asserted** in Inject or Simulate until it has been **state
 made pure and checkable by Extract); Simulate sits between, checking the real code against schedules before
 the expense of live injection.
 
-Under amoebius's two-tier schedule this dependency runs *ahead of the built code*: the Phase-17 Model is
-authored against the **fixed Appendix A/B snapshot/observation vocabulary** before the built Extract
-exists, so it needs no runtime to be TLC-checked design-first. Under the model-as-data pattern — where
-`interpret` (the built decision core) and `emitTLA` render one `Model` — the model↔code correspondence holds
+Under amoebius's two-tier schedule this dependency runs *ahead of effectful implementation*: the Phase-17
+contract authors the Model against the **fixed Appendix A/B snapshot/observation vocabulary** before Extract
+is available, so it needs no runtime to be TLC-checked design-first. Under the model-as-data pattern — where
+`interpret` (the target decision core) and `emitTLA` render one `Model` — the model↔code correspondence holds
 **by construction**, so no naming-reconciliation table is deferred
 ([formal_model_doctrine.md](./formal_model_doctrine.md), [gateway_migration_model_doctrine.md §6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)).
 What is thereby deferred is not the design proof, and not a correspondence table, but the **runtime fidelity** —
@@ -880,20 +883,22 @@ A crossing owes evidence, and the rows it owes are enumerated rather than left t
 rows are carried by
 [chaos_failover_second_axis.md](./chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows).
 
-**Phase-74 tested boundary.** `Amoebius.Multicluster.ConfluenceClass` classifies the pinned crossing set and
-defaults every unknown invariant to non-confluent; `Amoebius.Multicluster.GeoReplication` supplies the
-duplicate/reorder-stable work fold. The Register-3 gate used two real projected child clusters and external
-Vault, MinIO, native Pulsar, and Patroni observers. Three classifier/projection/resource-accounting mutants
-turn red. This establishes the classifier and the child boundary as tested, not the Phase-75 planned/failover
-migration correspondence and not physically independent brokers per child. The lane this ran on, and the guest that
-supplies it on each substrate, are owned by
+**Phase-74 target boundary — NOT VALIDATED.** `Amoebius.Multicluster.ConfluenceClass` must classify the pinned
+crossing set and default every unknown invariant to non-confluent; `Amoebius.Multicluster.GeoReplication` must
+supply the duplicate/reorder-stable work fold. The Register-3 gate must use two real projected child clusters
+and external Vault, MinIO, native Pulsar, and Patroni observers. Three
+classifier/projection/resource-accounting mutants must turn red. This would test the classifier and child
+boundary, not the Phase-75 planned/failover migration correspondence or physically independent brokers per
+child. The required lane and guest on each substrate are owned by
 [substrate_doctrine.md §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule) rather than restated here.
 
-**Phase-75 migration datapoint.** `Amoebius.Multicluster.GatewayMigration` delegates its decisions to the
-Phase-17 `interpret` model. Planned and Failover traces cover all sixteen migration actions; an outside-forest
-journal observes eight unreplicated acknowledgements at each cut, zero Planned loss, fenced promotion, and
-post-heal convergence. Recovery time is tested, while the data-loss bound remains assumed-and-monitored.
-Authoritative local DNS and a raw-kernel hub move are tested; Route53 and real WAN behavior are UNVERIFIED.
+**Phase-75 target migration challenge — NOT VALIDATED.** `Amoebius.Multicluster.GatewayMigration` must
+delegate its decisions to the Phase-17 `interpret` model. Planned and Failover traces must cover all sixteen
+migration actions; an outside-forest journal must observe eight unreplicated acknowledgements at each cut,
+zero Planned loss, fenced promotion, and post-heal convergence. Recovery time is to be tested, while the
+data-loss bound remains assumed-and-monitored. Authoritative local DNS and a raw-kernel hub move are also
+future gate subjects; Route53 and real WAN behavior remain outside that claim. No sentence in this target
+description is a validation result.
 
 ---
 

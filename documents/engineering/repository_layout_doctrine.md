@@ -1,21 +1,21 @@
 # Repository Layout and Artifact Provenance
 
-> **Purpose**: Define the complete amoebius repository layout, the authored-versus-derived classification,
-> every generated-output class, and the required `.gitignore` and `.dockerignore` contracts.
+> **Purpose**: Define the complete tracked-tree grammar, generated-output classes, local-state roots, and
+> `.gitignore` and `.dockerignore` contracts.
 > **Read this if**: a file is being added, generated, moved, ignored, packaged into a container context, or
 > considered for version control.
 
-This document owns repository placement and artifact provenance. It does not own a generator's domain
-semantics, which remain with that subsystem's doctrine. Phase sequencing and migration status live in
-[`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). Familiarity with the generated-artifact
-rule in [`generated_artifacts_doctrine.md`](./generated_artifacts_doctrine.md) is useful but not required.
+This document owns repository placement and the closed tracked-source classification. Generator semantics
+belong to the subsystem that declares each artifact. Phase order, validation status, and migration state live
+only in [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md) and the single
+[`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) register.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
 **Generated sections**: none
 
 </details>
@@ -36,782 +36,303 @@ rule in [`generated_artifacts_doctrine.md`](./generated_artifacts_doctrine.md) i
 
 ## 1. Classification rule
 
-Every repository path has exactly one provenance class.
+The tracked-source rule is closed:
 
-| Class | Meaning | Version-controlled |
-|---|---|---|
-| Authored input | A human-maintained source, contract, independent fixture, or policy | Yes |
-| External immutable input | Reviewed vendored source or patch whose upstream provenance is recorded | Yes |
-| Derived output | Any file reproducible from another file, command, compiler, resolver, renderer, or test | No |
-| Run evidence | Logs, receipts, ledgers, traces, reports, screenshots, and machine observations from one execution | No |
-| Runtime state | Secrets, credentials, caches, downloaded tools, browser profiles, databases, and local service state | No |
+> **Every version-controlled product, runtime, test, gate, generator, checker, fixture, oracle, and mutant
+> source file is Haskell and ends in `.hs`. Python source beneath `pb/**` is the sole source-language
+> exception.**
 
-A file's extension does not decide its class. An independently authored `.json`, `.tsv`, `.dhall`, or golden
-may be source. The same extension emitted by a command is derived output. Copying, renaming, or reformatting a
-derived file does not convert it into authored input.
+The rule is about a file's role as well as its suffix. An executable, shebang-bearing file, embedded program,
+serialized predicate, command table, or interpreter input does not become metadata by losing its extension or
+moving into `test/`. A tracked `.json`, `.tsv`, `.yaml`, `.dhall`, `.purs`, `.js`, `.mjs`, `.sh`, `.proto`,
+Pulumi program, Dockerfile, golden, expected-diagnostic file, mutation body, or executable without an extension
+is prohibited when it carries behavior, a test case, or a validation decision.
 
-The classification question is mechanical: if repository inputs plus a documented command can reproduce the
-file, the file is generated and cannot be version-controlled. A generated result may be inspected or retained
-under `.build/`, but it never moves back into an authored root. Python interpreter bytecode is the sole
-location exception: it may be cached beside imported source, but both ignore contracts exclude it and it is
-never an authored input, tracked file, or container-context input.
+The non-source input set is also closed:
+
+| Class | Admitted tracked content |
+|---|---|
+| Haskell source | `.hs` under the Haskell roots in [§2](#2-complete-repository-structure) |
+| Bootstrap source | Python under `pb/**`, limited to the minimum platform distinction needed to establish the contained toolchain, build the source-bound Haskell binary, and `exec` that exact binary with every argument unchanged; `pb validate phase NN` is opaque argv, not Python dispatch |
+| Governance prose | Markdown under the root, `documents/**`, and `DEVELOPMENT_PLAN/**` |
+| Build metadata | Cabal package/project descriptions and the minimal `pb` packaging metadata required before Haskell can build |
+| Repository metadata | ignore files, attributes, licence, and editor-neutral repository policy |
+
+`pb` is not a general scripting exception. It cannot implement product behavior, calculate or reinterpret a
+gate verdict, host an oracle, select phase status, or remain in control after the Haskell binary exists. Tests
+of the bootstrap boundary are Haskell tests that observe `pb` as an external process.
+
+Governance prose is not an executable registry. A checker may inspect Markdown structure, links, and status
+syntax, but no product, generator, corpus, semantic oracle, or validation verdict may derive behavioural
+values from a Markdown table, tag, list, or code block. The corresponding executable declarations and
+independent expectations are Haskell.
+
+Operator-supplied values are neither generated source nor repository source. They enter through an explicit
+runtime input, secret store, or ignored local test-input path. They are never committed merely because the
+runtime language happens to be Dhall, JSON, YAML, or another non-Haskell format.
+
+All other files are one of these untracked classes:
+
+| Class | Required location |
+|---|---|
+| Lazily generated artifact | `.build/**` |
+| Run evidence | `.build/runs/**` or `.build/evidence-store/**` |
+| Resolved dependency or tool | `.build/toolchain/**`, `.build/locks/**`, or `.build/vendor/**` |
+| Production runtime state | `.data/**` |
+| Harness-owned runtime state | `.test_data/**` |
+| External operator input | Outside Git; copied or streamed into a run without becoming source |
+
+Copying, renaming, hand-formatting, or independently typing generated bytes does not change their class.
+Independent expectations are separately reviewed Haskell values; any textual or binary encoding of those
+values is generated lazily.
 
 ## 2. Complete repository structure
 
-The tree below is the **target final layout**: the shape the repository has at completion, not a record of
-what a build target once needed. It is exhaustive by ownership; `**` denotes every descendant of the named
-root. Every root is justified by what its contents *are* — the language they are written in, or the reader
-that consumes them — never by which phase or build target introduced them. A new top-level root requires an
-amendment here, reviewed against that justification, before any file is added
-([`development_plan_standards.md` §U](../../DEVELOPMENT_PLAN/development_plan_standards.md#u-the-final-repository-layout)).
+The following tree is the exhaustive final layout. It contains no transitional source root.
 
 ```text
 amoebius/
-├── .git/**                               local VCS metadata; never a build/context input
+├── .git/**                               local version-control metadata
+├── .build/**                             generated artifacts, tools, tests, and evidence; ignored
+├── .data/**                              operator-retained production state; ignored
+├── .test_data/**                         harness-owned disposable state; ignored
 ├── .dockerignore                         authored container-context policy
 ├── .gitignore                            authored worktree policy
-├── AGENTS.md                             authored agent policy, read by every agent
-├── CLAUDE.md                             the same policy's second entry point; a link, never a copy
+├── AGENTS.md                             authored agent policy
+├── CLAUDE.md                             import-only entry point to AGENTS.md
+├── LICENSE*                              authored licence text, when present
 ├── README.md                             authored repository entry point
-├── amoebius.cabal                        the one authored Haskell package: libraries, executables, suites, flags
-├── cabal.project                         authored package set and compatibility requirements
-├── package.json                          authored JavaScript/PureScript tool requirements
-├── DEVELOPMENT_PLAN/**                   authored plan suite: rulebook, tracker, one contract per phase
-├── documents/**                          authored doctrine suite and illegal-state catalog
-├── src/**                                authored Haskell library source; one module tree, read by GHC
-│   └── vendor/**                         forked upstreams amoebius maintains as its own source, one directory per fork
-├── app/amoebius/**                       the one executable's main module and its entry-point-only helpers
-├── dhall/**                              TRANSITIONAL: renders to .build/dhall/; retires with its closing phase
-│   └── amoebius/Role.dhall               the closed process/role vocabulary every other module imports
-├── proto/**                              TRANSITIONAL: renders to .build/proto/; retires with its closing phase
-├── ui/**                                 TRANSITIONAL: emitted output renders to .build/ui/; the interpreter's source moves to src/
-├── pb/**                                 authored Python distribution whose console script is `pb`
-├── pulumi/**                             TRANSITIONAL: renders to .build/pulumi/; retires with its closing phase
-├── test/**                               authored specs, fixtures, goldens, negatives, oracles, mutants, harnesses
-├── tools/**                              TRANSITIONAL: renders to .build/tools/; authored oracles move to test/oracle/
-├── probe/**                              the standalone toolchain probe: the one package resolved apart
-├── vendor/**                             reviewed external source with recorded upstream provenance, one directory per upstream
-├── .build/**                             reproducible, transient, and evidentiary local output; ignored by both contracts
-├── .data/**                              production runtime and durable state; operator-retained; ignored by both contracts
-├── .test_data/**                         harness-owned test runtime and durable state; safely disposable; ignored by both contracts
-├── test-secrets-types.dhall              tracked test-secret field/type shape; contains no values
-└── test-secrets.dhall                    ignored test-only cleartext values; never production input
+├── amoebius.cabal                        authored Haskell package description
+├── cabal.project                         authored Haskell project/compatibility description
+├── DEVELOPMENT_PLAN/**                   authored plan and validation contracts; Markdown only
+├── documents/**                          authored doctrine; Markdown only
+├── src/**/*.hs                           product and runtime Haskell
+│   └── vendor/**/*.hs                    maintained Haskell forks, when required
+├── app/**/*.hs                           the single executable's Haskell entry modules
+├── test/**/*.hs                          Haskell specs, fixtures, oracles, mutants, and harnesses
+├── probe/**/*.hs                         separately resolved Haskell probe source, when required
+└── pb/**                                 bounded Python bootstrap plus minimal packaging metadata
 ```
 
-**Five rows are marked TRANSITIONAL, and the marker is a commitment rather than a hedge.** `dhall/`, `proto/`,
-`ui/`, `pulumi/`, and `tools/` each holds an artifact class that the generative re-baseline makes *rendered from
-Haskell types* rather than authored, so at completion there is nothing for any of them to contain
-([`jit_artifact_doctrine.md` §2](./jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list)). Their
-rendered forms live beneath `.build/**` ([§3.1](#31-canonical-build-tree)) and their destinations are recorded
-per root in [§2.2](#22-present-day-roots-and-their-required-destination).
+`dhall/`, `proto/`, `ui/`, `pulumi/`, `tools/`, top-level `vendor/`, and non-Haskell fixture trees are absent
+from the final tracked tree. Their materialized forms belong under `.build/**`; their declarations, recipes,
+test expectations, and checking logic belong in Haskell modules.
 
-They stay in this tree until the phase that closes each one, because the row and the **relocation map** move
-together: the map's destination cells are checked against this tree, so deleting a row here while a completed
-relocation still points at it turns one intended change into a page of unrelated findings. The removal is
-therefore part of the plan-suite re-baseline that re-bases the map, not of the doctrine amendment that states
-the target. Until then the marker is what a reader sees, and a `TRANSITIONAL` row may receive no new content —
-the same rule [§2.2](#22-present-day-roots-and-their-required-destination) applies to a migration surface.
+The Haskell roots may contain Markdown provenance beside a maintained fork only when that prose is required to
+identify upstream authorship or licensing. Such prose is repository metadata, never executable input. A
+non-Haskell upstream program is resolved lazily into `.build/vendor/**`; it is not vendored into Git.
 
-A sixth root, `patches/`, carried the marker until 2026-08-20 and is now absent rather than transitional. It
-retired for a different reason than the five above, and the difference is worth recording because a reader who
-goes looking for the root should find why it is not here. A patch has no rendered form and no generator; it
-retired because its *subject* did. A patch applies to source resolved outside this repository, so the root was
-inhabited exactly as long as some build input was fetched rather than tracked — and its one patch's subject,
-`supernova`, is now reviewed source under `vendor/**`
-([§4.1](#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head)).
-[§4](#4-dependency-and-toolchain-resolution) admits no later out-of-tree source that would re-inhabit it.
-
-Two roots fix a second level, because their second level is where the taxonomy drifted:
-
-```text
-test/
-├── spec/**                               suite mains and independently authored reference implementations
-├── fixture/**                            authored positive inputs
-├── golden/**                             authored expected outputs, byte-exact under a pinned convention
-├── negative/**                           authored rejected inputs, each beside its expected diagnostic
-├── oracle/**                             independently authored reference tables and predicates
-├── mutant/**                             seeded mutants: one record format, one registry, every operator
-└── harness/**                            fakes, argv shims, OS-boundary observers, gate scripts
-
-app/
-├── amoebius/Main.hs                      the one entry point: argv dispatch, nothing else
-└── amoebius/Amoebius/Entry/**            one entry-point-only seam per argv verb, never a second binary
-```
-
-`src/vendor/**` is where a **forked upstream** lives once amoebius maintains it — a model checker, a refinement
-checker, a protocol client. It is distinct from the top-level `vendor/**`, which holds reviewed external source
-amoebius reads but does not own: a fork under `src/` compiles as part of the one package, carries amoebius's own
-obligations, and has no upstream maintainer to wait for
-([`formal_model_doctrine.md` §6.1](./formal_model_doctrine.md#61-the-proof-stack-is-amoebius-owned),
-[`lift_and_compose_doctrine.md` §2](./lift_and_compose_doctrine.md#2-the-two-non-dependencies)). One directory
-per fork, each recording the upstream commit it began from.
-
-`app/`'s second level has exactly one name, because there is exactly one executable and the role it runs is a
-decoded value rather than a filename
-([daemon_topology_doctrine.md §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)). Below
-that name sits `Amoebius/Entry/**`: **one module per argv verb, each an entry-point-only seam kept out of
-`src/` so it links against dsl-core rather than recompiling it.** A seam is not a second binary.
-
-**The namespace is the enumeration, and that is why it is a namespace.** This paragraph once named a single
-file, `Amoebius/Ui/Server/Main.hs`, and when a second seam arrived it went unmentioned — a tree block listing
-one file cannot say how many there are. `Amoebius.Entry.*` is checkable: every module in it is a seam, every
-seam is in it, and adding one cannot silently escape the count. It also removes a trap the old names set — a
-module called `...Main` that defines no `main` reads as an executable, so `app/` appeared to hold three
-binaries where it holds one.
-
-Every `test/` second-level name is a **singular** role noun. A plural sibling, a case variant, or an eighth
-role is non-conforming on sight; module hierarchy lives *below* `test/spec/`, never at `test/`'s second level,
-so casing is decided by the module name and cannot fork.
+`app/` contains one executable entry point. Runtime roles are decoded Haskell values, not separate programs.
+`test/` contains only Haskell modules: a positive fixture is a typed Haskell value, an oracle is a separately
+reviewed Haskell predicate or expected value, and a mutant is a Haskell transformation or alternate module.
+Their serialized forms exist only during a run.
 
 ### 2.1 When a unit warrants its own build package
 
-There is exactly one authored Haskell package. The criterion is **separately resolvable, never merely
-separately configured** — three admitted grounds, each independently checkable:
+There is one authored Haskell package unless a separately resolved Haskell probe needs an isolated compiler or
+dependency graph. A different flag set, module namespace, warning set, test group, or runtime role is not a
+reason to create a package or executable. Cabal already expresses those distinctions within one package.
 
-| Ground | Test | Instances |
-|---|---|---|
-| Foreign provenance | its source is not authored in this repository | `vendor/**` |
-| Foreign resolution | it must solve against a different compiler, project file, or dependency set — including a deliberately perturbed one used as a gate mutant | `probe/**` |
-| Foreign consumer | something outside this repository depends on it by name and version | none today |
-
-None of the following is a ground, because cabal answers each *inside* one package: a different flag set
-(flags are package-scoped and `if flag(…)` is per-component), a different module namespace (`library <name>`
-sub-libraries), a different `hs-source-dirs` or warning set (per-component), a different test grouping
-(unlimited `test-suite` stanzas), or an import cycle. The cycle case is the one that matters: an intra-package
-sub-library graph cannot cycle at the package level, so a package split introduced to break a cycle creates
-the cycle it breaks. A `build-type: Custom` `Setup.hs` is likewise not a ground — it is a generator, and
-[§3.1](#31-canonical-build-tree) already declares its output's home.
-
-**When a unit warrants its own executable.** It does not, if it is a runtime role. A role is a value the one
-binary decodes ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)),
-so giving it a `Main.hs` moves role selection out of the type system and into the filesystem, where no gate
-reads it — and buys a second dependency closure, a second argv parser, and a second copy of every shared
-module for the privilege. The admitted grounds are the three above, applied to a program rather than a
-package: foreign provenance, foreign resolution, or a foreign consumer. `probe/` is the only instance today.
-A program a third-party engine executes is not an exception but an application of the reader rule below: it
-lives in that reader's root, and the Haskell deciding what to ask it lives in `src/`.
-
-The same reasoning names the roots by their reader rather than their owner: `dhall/` is read by the Dhall
-interpreter, `proto/` by protoc, `pb/` by CPython, `ui/` by purs, `pulumi/` by the Pulumi engine, and
-`src/`/`app/` by GHC. Where a subject has both a program the third-party engine executes and Haskell that
-decides what to ask it, the program lives in the reader's root and the Haskell lives in `src/`.
-
-Per-substrate host code is a module tree, not a root. `src/Amoebius/Substrate/**` and
-`src/Amoebius/HostWorker/**` hold every substrate side by side, which is what makes the Apple and Windows host
-workers structurally symmetric as [`substrate_doctrine.md`](./substrate_doctrine.md) requires; a root for one
-substrate and none for the other contradicts that symmetry rather than expressing it.
+A third-party program invoked by amoebius does not acquire a tracked reader-language root. Haskell declares
+what is required, the resolver materializes the program beneath `.build/toolchain/**` or `.build/vendor/**`,
+and Haskell invokes the resolved absolute path. Generated source for an external compiler or interpreter is
+materialized beneath `.build/**` immediately before use.
 
 ### 2.2 Present-day roots and their required destination
 
-The roots below exist today and are **migration surfaces, not canonical source classes**. Each is owned by the
-phase named in
-[`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md), which carries the
-closure condition; none may receive new content.
+Any current path outside the target tree is a migration surface, not an exception. The single legacy register
+owns its deletion condition. The canonical destinations are:
 
-| Present path | Required destination |
+| Present content | Required destination |
 |---|---|
-| `DEVELOPMENT_PLAN/evidence/**` | `.build/runs/**` plus the repository-local evidence store under `.build/evidence-store/` |
-| `DEVELOPMENT_PLAN/ledgers/**` | authored reasoning retained in a phase doc; generated ledger views to `.build/docs/**` |
-| `test/enumeration/**` | `.build/test-surfaces/**` |
-| `test/golden/phase_*_ledger.json` | `.build/runs/<phase>/<run-id>/ledger.json` |
-| `mutants/**`, `test/live/mutants/**`, `test/host/mutants/**` | **migrated.** One `test/mutant/**` under one registry, `test/mutant/registry.tsv`; the roots that actually existed were `mutants/`, `test/mutants/`, `test/kernel/mutants/`, and `test/inject/mutants/` |
-| `test/goldens/**`, `test/fixtures/**`, `test/negatives/**`, `test/Ui/**` | **migrated.** Each is its singular-role sibling; `test/Ui/**` and `test/ui/**` are one `test/spec/ui/**` |
-| `toolchain/bin/**`, `toolchain/runtime/**`, `toolchain/downloads/**`, `toolchain/cache/**` | `.build/toolchain/**`; the authored requirements file moves beside its only consumer under `tools/**` |
-| `docker/**` | **migrated.** The root is gone; the typed bake catalog under `dhall/**` is the authored half and `.build/docker/**/Dockerfile` the rendered one |
-| `app/singleton/**` | **relocated.** An `amoebius control-plane` verb over `app/amoebius/Amoebius/Entry/ControlPlane.hs`, beside the other seam and for the same reason: `hs-source-dirs` is a search path, not a module filter, so an entry point in `src/**` recompiles the shared core into the executable instead of linking it. The decoded `InClusterRole` arm stays with the phase that owns the role |
-| `infernix/app/**` | **the root is gone.** A seed's source tree is not an amoebius path under any name. What the driver exercised is re-derived as an amoebius extension and tested through the conformance gate ([`extension_conformance_doctrine.md`](./extension_conformance_doctrine.md)) |
-| `ui-runtime/**` | **migrated.** `ui/**`, under the one spago project at `ui/spago.yaml` |
-| the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots | **migrated.** Every surviving root is a stanza in `amoebius.cabal` over amoebius-owned source under `src/**`, `test/**`, `proto/**`, and `dhall/**`; the lift-era roots have no destination, because the code they held was a seed's |
-| out-of-tree `hs-source-dirs` reaching a seed checkout | **the root is gone.** No build input resolves outside this repository, and `source-repository-package` on a seed is forbidden by name ([`lift_and_compose_doctrine.md` §2](./lift_and_compose_doctrine.md#2-the-two-non-dependencies)). The structures those paths reached are re-derived as amoebius source under `src/**` |
-| root dependency lock/freeze files | `.build/locks/**` |
-| `toolchain/pins.json` | **migrated.** The authored half is the compatibility requirements — ranges, release channels, asset patterns, no paths; the resolved half is `.build/toolchain/resolved.json`, written per run |
-| `tools/doc_lint_corpus/**/negative_*` and `negative_multi_*` | keep authored positive seeds and mutation recipes; materialize negative copies under `.build/test-corpora/**` |
-| reference-program expected output beneath `test/golden/**` | retain the reference program and authored inputs; produce expected results under the run bundle |
-| frozen seed-source and expected-hash tables | **the tables are gone.** They pinned the contents of a checkout amoebius does not build; nothing downstream of the non-dependency rule has a boundary to freeze |
-| fixed versions, URLs, paths, or integrity fields in bootstrap/toolchain envelopes | split authored compatibility requirements from run-local resolution under `.build/toolchain/**` |
-| generated digest, checksum, trace, and expected-output fixtures | independently author and review the expectation, or regenerate it under the owning run bundle |
-| `dhall/**` | `.build/dhall/**`, reflected from the Haskell checked-IR types; an operator's own `InForceSpec` lives in the deployment that owns it, never here |
-| `proto/**` | `.build/proto/**`, rendered from the message types; the wire schema is a projection of them |
-| `ui/**` | `.build/ui/**` for every emitted contract, codec, and bundle; the generic interpreter's own source moves under `src/**` as ordinary authored source once its build is a recipe |
-| `pulumi/**` | `.build/pulumi/**`, rendered from the typed provider declarations |
-| `tools/**` | `.build/tools/**`, emitted from the declarations each tool checks; an independently authored oracle moves to `test/oracle/**`, where an authored expectation belongs |
-| `gen/**`, `dist-*/**`, `node_modules/**`, `toolchain/{bin,runtime,downloads,cache}/**` | the matching class beneath `.build/**` |
-| `/tmp/amoebius*`, `/var/tmp/amoebius*`, `/var/lib/amoebius/**`, `~/.amoebius/**`, `~/.local/share/amoebius/**` | `.build/**`, `.data/**`, or `.test_data/**` according to lifecycle; delete the external path after verified migration |
-| host-global Docker containers, volumes, build cache, and daemon data for amoebius | a project-scoped engine whose entire data root and runtime directory are beneath `.data/**` or `.test_data/**` |
+| `tools/**/*.py`, shell tools, and extensionless executables | Haskell mechanisms under `src/**` or `test/**`; any emitted helper under `.build/tools/**` |
+| `dhall/**/*.dhall` | Haskell schema/value declarations; emitted Dhall under `.build/dhall/**` |
+| `proto/**/*.proto` and generated bindings | Haskell protocol declarations; emitted Proto/bindings under `.build/proto/**` |
+| `ui/**/*.{purs,js,mjs,ts,css,html}` | Haskell client-runtime declarations; emitted language source and bundles under `.build/ui/**` |
+| `pulumi/**` | Haskell infrastructure declarations; emitted Pulumi programs under `.build/pulumi/**` |
+| tracked Dockerfiles and bake catalogs | Haskell bake declarations; emitted recipes under `.build/docker/**` |
+| serialized fixtures, oracles, expectations, inventories, and mutants | independently reviewed Haskell values/operators; emitted encodings under `.build/test-corpora/**` |
+| non-Haskell vendored source | lazy acquisition beneath `.build/vendor/**`; Haskell adapter or transformation declarations remain tracked |
+| `package.json` and other generated-language package inputs | generated beneath the owning `.build/**` materialization root |
+| plan-tree evidence and ledgers | `.build/runs/**` and `.build/evidence-store/**` |
+| operator/test `.dhall`, JSON, YAML, or secret values | external or ignored input; never tracked |
 
-A fixture remains version-controlled only when its expectation was authored independently. A generated
-snapshot, reference-program output, enumeration, coverage table, or run ledger cannot remain in any authored
-root. No path in either tree above carries a phase ordinal
-([`development_plan_standards.md` §U](../../DEVELOPMENT_PLAN/development_plan_standards.md#u-the-final-repository-layout)
-clause 3).
+No migration surface may receive new content. Removing its final file and its obsolete ignore rule is one
+change; leaving an empty placeholder root would preserve ambiguity.
 
 ### 2.3 The closed local-state roots
 
-**The problem.** A path can be ignored and still escape the project. System temporary directories, user-home
-state, global Docker volumes, and `/var/lib` backing survive beyond the checkout, evade the repository audit,
-and make cleanup depend on remembering every tool's private default.
+`.build/`, `.data/`, and `.test_data/` are the only repository-contained state roots.
 
-**Why the obvious alternative fails.** Documenting a longer list of external paths does not create
-containment. It merely makes the escape reproducible, while a shared daemon or changed environment variable
-can introduce another storage home without amending the repository contract.
+- `.build/**` is reproducible or evidentiary and may be deleted when no run is using it.
+- `.data/**` is production runtime state and is removed only by the operator's explicit lifecycle action.
+- `.test_data/**` is owned by the harness and must be safe for that harness to delete after a run.
 
-**The rule.** amoebius has a closed set of project-owned local-state roots:
-
-- `.build/**` contains every reproducible or transient byte: builds, acquired tools, package stores, caches,
-  generated source, temporary files, run bundles, logs, and the local content-addressed evidence store.
-- `.data/**` contains production runtime and durable state. Normal teardown may remove ephemeral objects but
-  never this root or durable descendants; destructive reclamation is an explicit operator action.
-- `.test_data/**` contains only harness-created test runtime and durable state. A run owns a unique descendant,
-  records an ownership marker before mutation, and may delete only that exact descendant after proving the
-  marker and path are unchanged. Tests fail before acting when production state or configuration is present.
-- `test-secrets.dhall` is the only cleartext secret-at-rest amoebius permits. It is ignored, excluded from
-  every container context, read only by the elevated test harness, and rejected by every production command.
-
-Path resolution starts from the physical repository root, not the caller's current directory. amoebius sets
-tool-specific cache, store, temp, Docker data-root, Docker runtime, kubeconfig, and service-state paths below
-the appropriate project root before invoking a tool. A container or guest may use conventional internal
-paths only when the image, volume, and virtual disk that back those bytes are themselves stored below the
-project root. Operator-installed prerequisite executables may be shared; amoebius must not place
-project-owned data beside them.
-
-```mermaid
-flowchart LR
-  %% register: orientation
-  repo["physical amoebius checkout"] --> build[".build: reproducible + transient + evidence"]
-  repo --> data[".data: production runtime + durable state"]
-  repo --> test[".test_data: marker-owned test state"]
-  repo --> secrets["test-secrets.dhall: test-only cleartext seam"]
-  test -->|"exact marker-proven teardown"| gone["deleted after the run"]
-  data -->|"normal teardown"| kept["durable bytes retained"]
-```
-*Orientation. The root selected at creation determines lifecycle and deletion authority; the [testing doctrine](./testing_doctrine.md) owns test deletion, and no arrow leaves the physical checkout.*
-
-**What it forecloses.** amoebius cannot use the host's default system Docker daemon for project-owned
-containers, volumes, or build cache, cannot fall back to `/tmp`, `/var/tmp`, `/var/lib/amoebius`, or a user
-home, and cannot run a test against `.data/**`. A tool that cannot redirect all project-owned state into the
-closed roots is not an admissible backend.
-
-**A published toolchain image is not project-owned state.** The one artifact the rule above would otherwise
-foreclose is the base image a consumer pulls rather than builds. It is admissible on the same terms as an
-operator-installed prerequisite executable, because it is a *resolved-toolchain artifact* rather than data:
-it holds no runtime, durable, or evidentiary bytes, its content is a pure function of the authored recipe and
-its parent, it is named by a digest nobody typed, and it is reclaimable by one declared command. Every
-*mutable* byte a run produces still lands in the closed roots. A run that leaves behind a container, volume,
-network, or daemon state surviving the run is a containment failure exactly as before.
+No generated or runtime command writes to the repository root, a source root, a system temporary directory, a
+user home, or host-global engine state. A tool that insists on another location is invoked through an isolated
+root below the appropriate contained-state directory.
 
 ## 3. Complete generated-output inventory
 
-Every generated file belongs to one of the paths below, including the explicitly source-adjacent Python cache
-patterns in §3.2. A generator requiring a new output class must amend this inventory before it writes the file.
+Every non-Haskell program, test encoding, rendered configuration, compiler product, resolved dependency, and
+run observation is generated beneath `.build/**`.
 
 ### 3.1 Canonical `.build/` tree
 
 ```text
 .build/
-├── tla/**/*.tla                          emitted TLA+ modules
-├── tla/**/*.cfg                          emitted TLC configurations
-├── manifests/**/*.{yaml,yml,json}        rendered Kubernetes and provider objects
-├── dhall/**/*.dhall                      reflected or projected Dhall
-├── calculus/**                           core-algebra battery observations, one directory per calculus
-├── checkers/**                           formal-checker observations, one directory per checker
-├── dsl/**                                decoder/fold/bind battery observations and locus ledgers
-├── ui/**                                 client/server/offline plans and compiled browser output
-│   ├── client-plans/**
-│   ├── server-plans/**
-│   ├── contracts/**
-│   ├── codecs/**
-│   ├── migrations/**
-│   ├── service-workers/**
-│   └── bundles/**
-├── docker/**/Dockerfile                  rendered image recipes
-├── proto/**/*.hs                         generated protobuf Haskell modules
-├── proto/**/*.{hi,o,dyn_hi,dyn_o}        protobuf compiler output
-├── test-surfaces/phase_*.json            runtime test enumeration
-├── test-corpora/**                       materialized negatives derived from authored seeds/recipes
-├── locks/**                              dependency solver output
-│   └── phase_*/resolution-*.json
-├── toolchain/<os>-<arch>/**              downloaded/resolved tool state, partitioned by platform
-│   ├── resolved.json
-│   ├── downloads/**
-│   ├── bin/**
-│   └── runtime/**
-├── cabal-store/**                        repository-local Cabal package store
+├── artifacts/<content-address>/**        JIT materializations
+├── cabal-store/**                        repository-local Cabal store
+├── checkers/**                           emitted formal-checker inputs
 ├── dist-newstyle/**                      Cabal build root
-├── node_modules/**                       package-manager dependency tree
-├── evidence-store/**                     content-addressed local gate attestations
-├── runs/<phase>/<run-id>/**              one-run evidence
-│   ├── ledger.{json,tsv}
-│   ├── receipt.{json,tsv}
-│   ├── commands.json
-│   ├── environment.json
-│   ├── toolchain.json
-│   ├── substrate.json
-│   ├── checks.{json,tsv}
-│   ├── mutants.{json,tsv}
-│   ├── coverage.{json,tsv,xml}
-│   ├── junit.xml
-│   ├── traces/**
-│   ├── logs/**
-│   ├── screenshots/**
-│   ├── browser-profile/**
-│   └── topology/**
-├── host_ensure_kernel/**                 the ensure kernel's emitted plans; one such root per gate that emits
-├── artifacts/<address>/**                materialized JIT artifacts, one directory per content address
-├── recipes/**                            rendered recipes and the declaration digest each was rendered from
-├── grants/**                             per-region grant accounting: ceiling, concurrency, and outstanding reservations
-├── pulumi/**                             rendered provider programs
-├── tools/**                              emitted checking tools
-├── sql/**                                emitted schema, constraints, and row policies
-├── docs/**                               generated dashboards and reports
-└── tmp/**                                disposable generator scratch space
+├── dhall/**/*.dhall                      reflected schemas and runtime/test values
+├── docker/**/Dockerfile                  rendered image recipes
+├── docs/**                               generated reports and indexes
+├── evidence-store/**                     content-addressed receipts admitted after independent review
+├── locks/**                              resolver observations
+├── manifests/**/*.{yaml,yml,json}        rendered Kubernetes/provider objects
+├── metal/**                              emitted Objective-C/C bridge and Metal shader source
+├── proto/**                              emitted Proto and generated bindings
+├── pulumi/**                             emitted provider programs
+├── runs/<phase>/<run-id>/**              logs, ledgers, receipts, traces, and observations
+├── sql/**                                emitted schema, statements, and policies
+├── test-corpora/**                       encoded positives, negatives, oracles, and mutants
+├── test-surfaces/**                      generated coverage enumeration
+├── tla/**/*.{tla,cfg}                    emitted formal-model inputs
+├── toolchain/<os>-<arch>/**              acquired tools and dependency graphs
+├── tools/**                              emitted external-language helper programs
+├── ui/**                                 emitted PureScript/JavaScript/assets and bundles
+└── tmp/**                                bounded disposable scratch space
 ```
 
 ### 3.2 Build, compiler, package-manager, and cache output
 
-| Pattern | Generated content |
-|---|---|
-| `dist-newstyle/**`, `.cabal-sandbox/**`, `.ghc.environment.*` | Cabal/GHC plans, builds, indexes, objects, interfaces |
-| `**/*.{o,hi,dyn_o,dyn_hi,hie}` | Haskell compiler output |
-| `node_modules/**` | npm-installed dependency trees and their nested lock metadata |
-| `ui/.spago/**`, `ui/output/**`, `ui/dist/**` | Spago and PureScript build state |
-| `**/__pycache__/**`, `**/*.{pyc,pyo,pyd}` | Source-adjacent Python interpreter caches; permitted locally only because both ignore contracts exclude them |
-| `.pytest_cache/**`, `.coverage`, `.coverage.*`, `htmlcov/**`, `coverage/**` | Python and general coverage state |
-| `toolchain/bin/**`, `toolchain/runtime/**`, `toolchain/downloads/**`, `toolchain/cache/**` | acquired tools and archives |
-| `.phase*-build/**`, `phase*-build/**`, `build/**`, `_build/**`, `out/**`, `output/**`, `dist/**` | phase and language build roots |
-| `.cache/**`, `tmp/**`, `temp/**` | local caches and temporary files |
-| `playwright-report/**`, `test-results/**`, `screenshots/**` | browser/test reports |
-| browser profiles, SQLite run databases, PID files, sockets, logs | ephemeral runtime state |
+Compiler objects, interfaces, coverage, package stores, language package trees, browser profiles, reports,
+screenshots, logs, sockets, and caches are generated. Commands redirect them beneath `.build/**`. This includes
+Python bytecode, virtual environments, and caches created by `pb`; no source-adjacent cache exception exists.
 
 ### 3.3 Dependency-resolution output
 
-No `.lock` or `.freeze` file is version-controlled. The rule covers, without exception:
-
-- `cabal.project.freeze`, `*.freeze`, and `*.lock`;
-- `package-lock.json`, `npm-shrinkwrap.json`, `yarn.lock`, and `pnpm-lock.yaml`;
-- `spago.lock`, `flake.lock`, `poetry.lock`, `Pipfile.lock`, `Gemfile.lock`, `composer.lock`, and `mix.lock`;
-- `go.sum` and any package-manager checksum database;
-- any generated package graph, solver plan, downloaded-package manifest, or dependency SHA table.
+Lock files, freeze files, solver plans, checksums, resolved versions, package graphs, downloaded archives, and
+absolute executable paths are run observations. They are emitted beneath `.build/locks/**` or
+`.build/toolchain/**` and never committed.
 
 ### 3.4 Generated source, tests, and documentation
 
-The prohibition includes generated source code. Protobuf bindings, reflected codecs, generated PureScript,
-test enumerations, expected outputs produced by a reference program, generated Markdown, tables, diagrams,
-contents blocks, and copied command output remain untracked. The original `.proto`, authored reference
-implementation, authored expectation, or authored prose remains the source.
+Generated source is still generated. Dhall, PureScript, JavaScript, shell, Proto, Pulumi, SQL, TLA+, checking
+tools, Dockerfiles, test programs in another language, and serialized fixture/oracle/mutant files remain
+untracked even when a third-party compiler requires them.
 
-A generated negative corpus follows the same rule. Version control retains the smallest independently
-meaningful source: positive seed files, an explicit mutation definition, and the checker. Mutated copies,
-Cartesian expansions, and other mechanically materialized negatives are emitted under `.build/test-corpora/`
-or `.build/tmp/`. Their number, path layout, or usefulness as test input does not make them source.
-
-Generated Markdown is written only under `.build/docs/**`. Governed Markdown under `documents/` and
-`DEVELOPMENT_PLAN/` always declares `**Generated sections**: none`.
+Governed Markdown is an authored non-source input. Generated Markdown, tables, diagrams, dashboards, and
+reports go to `.build/docs/**`; governed documents declare `**Generated sections**: none`.
 
 ### 3.5 TSV inventory and provenance
 
-TSV is a transport format, not a source class. The repository audit classifies the present TSV families as
-follows:
-
-| Path or filename family | Classification and destination |
-|---|---|
-| `DEVELOPMENT_PLAN/evidence/**/*.tsv` | Generated run evidence; relocate to `.build/runs/<phase>/<run-id>/**`, attest in `.build/evidence-store/**`, and remove from the plan tree |
-| `.build/**/*.tsv` | Canonical local generated output; ignored and never version-controlled |
-| `phase-results.tsv`, `validation-locus-ledger.tsv`, `live-*.tsv`, `sprint-*.tsv`, `*-red-before-correction.tsv` in any root | Generated observation or report; canonicalize beneath the owning run bundle |
-| `dhall/examples/locus_registry.tsv`, `test/fixture/**/*.tsv`, `test/oracle/formal/**/*.tsv`, non-ledger `test/golden/**/*.tsv`, `test/oracle/**/*.tsv` | Candidate authored fixture/oracle; version-control only with independent authorship or review provenance |
-| `mutants/**/*.tsv`, `test/mutant/**/*.tsv`, `tools/ledger_lint_corpus/**/*.tsv` | Candidate authored negative corpus; version-control only when rows are intentionally authored and not emitted by the system under test |
-| Any `expected_hashes.tsv`, `expected_digests.tsv`, `reference_traces.tsv`, expected-output table, or copied inventory | Ambiguous migration input; the owning phase must establish independent authorship or regenerate it under `.build/**` |
-
-Renaming a run ledger to “golden” or an emitted table to “oracle” does not make it source. Phase 0 records the
-provenance decision for shared corpora; each later phase owns its domain-specific tables before revalidation.
+TSV, JSON, YAML, CSV, golden, expected-output, and diagnostic text are transport formats, never tracked source
+classes. Haskell may render them beneath `.build/**` for a consumer. A semantic expectation that needs one of
+those formats is authored as Haskell and encoded only for the duration of the check.
 
 ### 3.6 Authored negative corpora and their audit scope
 
-A corpus that seeds a defect contains that defect on purpose, so the repository audit would otherwise report
-its own fixtures. The exemption that resolves this is **one authored declaration**, not a special case per
-corpus: the table below names every authored negative corpus and the audit rules it deliberately seeds, and
-the audit steps over exactly those pairings. A rule the corpus does not seed still applies to it, and a path
-the table does not name is never exempt.
-
-| Corpus | Rules it seeds | Why the corpus must contain what the rule rejects |
-|---|---|---|
-| `tools/ledger_lint_corpus/` | r2 | A hand-written run ledger is the only way to seed the ledger-shape classifier |
-| `tools/doc_lint_corpus/` | r15 | The documentation lint checks plan-document naming, so its positive seed must be a synthetic `phase_NN_<slug>.md`; the ordinal is the property under test, not a label on a capability |
-| `tools/artifact_policy_selftest.py` | r1, r5, r6, r16 | The audit's own per-rule mutants: an invented output class, a generated path beneath an authored root, a resolved home path, and explicit outside-host state paths |
-| `tools/toolchain_spike_negative_corpus.py` | r6 | The toolchain gate's build configurations carry a developer-home compiler path and an archive checksum beside its URL |
-| `tools/attestation_negative_corpus.py` | r5 | A refused run bundle must name a plan-tree evidence path for the store to reject it |
-
-Two properties keep the declaration from becoming a silence. A corpus is a **dedicated module or directory**
-whose entire purpose is visible in one reading, so seeded bodies move out of the tool that consumes them
-rather than exempting that tool. And every declared pairing must **actually suppress a finding**: a corpus
-that stops seeding its rule, or a path that no longer exists, is reported as a stale exemption and removed.
+Negative corpora have no file-format exemption. A committed mutant is a Haskell value or source
+transformation with an independently reviewed expected failure. Applying it produces a disposable negative
+under `.build/test-corpora/**`. The gate must prove that the transformation changed the intended production
+locus and that the clean control still succeeds; a copied bad file is not an oracle.
 
 ## 4. Dependency and toolchain resolution
 
-amoebius records requirements, not resolver output. An authored requirement may state a compiler/API
-compatibility range, a package name, a release channel, or a minimum feature set. It does not contain a
-library archive SHA, package checksum, transitive solver graph, local executable path, or user-home path.
+amoebius records compatibility requirements in Haskell or the minimal bootstrap metadata. Each clean run
+resolves current compatible tools and dependencies, verifies publisher-provided authenticity material, and
+records the result beneath `.build/**`. A missing tool is acquired rather than treated as an undeclared host
+prerequisite.
 
-Each clean run resolves the current compatible set dynamically. The resolver writes versions, source
-identities, download URLs, observed checksums, signatures, executable paths, and the complete dependency graph
-to `.build/toolchain/**` and `.build/locks/**`. Those observations are attached to run evidence, not copied
-into Markdown or a tracked manifest.
+No tracked file contains a developer-home path, host-specific executable path, resolved archive digest, or
+dependency graph. Standard guest paths are contractual only when the generated guest image owns them.
 
-Transport authentication and upstream signatures are verified when an ecosystem supplies them. A checksum
-computed after resolution detects corruption within that run; it is not promoted into a permanent package
-pin. This policy deliberately trades repository-embedded frozen resolution for continuously refreshed
-compatibility evidence.
+### 4.1 A compatibility edit is fixed source, not a patch against a moving head
 
-### 4.1 A compatibility edit is vendored source, not a patch against a moving head
+The previous tracked-vendor rule is retired for non-Haskell source. A required external program is acquired
+into `.build/vendor/**` at a recorded identity. If compatibility requires a transformation, Haskell declares
+and applies that transformation after acquisition; any patch text is generated under `.build/**`. A maintained
+Haskell fork may live under `src/vendor/**` because it still satisfies the `.hs` source rule.
 
-**The problem.** A release channel resolves to whatever the branch head is on the day of the run, so the source
-a patch applies to is not fixed. Two failures follow, and the second is the dangerous one. A patch that stops
-applying fails the checkout loudly. A patch that still applies after the surrounding code changed applies
-cleanly to a different program, and nothing reports that: the diff was reviewed once, against source no run
-sees again. The defect surfaces at run time, in the resolver, and only as a compile error if the edit happens
-to conflict with the compiler.
-
-**Why the obvious alternative fails.** The tempting fix is to pin the revision the patch was reviewed against.
-That is resolver output promoted to an authored pin, which the rule above forbids, and it trades the whole of
-this section's dynamic-compatibility position for one file's stability. Re-reviewing the patch against each
-resolved head is the honest alternative and is unaffordable per run.
-
-**The rule.** A package amoebius must edit to compile is **vendored**: a reviewed source copy under
-`vendor/**`, one directory per upstream project, carrying a `PROVENANCE.md` that records that project, the
-upstream channel, and the released package name and version. It records no commit, tag, or archive checksum —
-those remain resolver observations. There is no patch root and no admitted patch: the last one, a
-compatibility edit to `supernova`, became `vendor/supernova/**` on 2026-08-20, and the `patches/` root retired
-with it ([§2](#2-complete-repository-structure)). A vendored
-package amoebius goes on to maintain as its own source becomes a fork and moves to `src/vendor/**`
-([§2](#2-complete-repository-structure)).
-
-**What it forecloses.** Automatic pickup of an upstream fix. A refresh becomes a reviewed source update on a
-schedule amoebius chooses, and the review surface grows from a diff to a tree — which is the cost of reviewing
-against something that holds still.
-
-**Resolution acquires; it does not require.** A requirement whose tool is absent is satisfied by installing
-it, not by reporting a manual prerequisite — the four-step ensure contract of
-[`substrate_doctrine.md` §3](./substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract).
-There is therefore no requirement kind meaning "expected on the developer host", and the only things a host
-must already supply are the per-substrate floor of
-[§3.1](./substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply). An acquired
-tool lands beneath `.build/toolchain/**`, taken from its publisher's own release and verified against that
-publisher's own checksum fetched in the same run; the package manager is used for the floor's root and for
-what only it can supply, because a package-manager install is its own trust root and cannot be checked
-against a publisher digest.
-
-**One platform vocabulary.** An authored requirement that names a platform names it as `<os>-<arch>`, where
-the architecture half is the closed lane vocabulary of
-[`substrate_doctrine.md` §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule) — `amd64` or `arm64`,
-never a kernel's own spelling of either. One normalizer produces that token and every reader of an authored
-platform table consumes it, because a second normalizer is a second answer: two of them once disagreed about
-Apple silicon, and the authored tables carried both spellings to paper over it. A requirement whose publisher
-offers no asset for the host's token is a refusal naming the token, never a fallback to another one — an
-artifact of another architecture is exactly what
-[`development_plan_standards.md` §S](../../DEVELOPMENT_PLAN/development_plan_standards.md#s-universal-artifact-hygiene-gate)
-clause 15 forbids a run to execute.
-
-No tracked file may contain an absolute path beneath a developer home directory. Gates resolve logical tool
-names through the run-local toolchain record. Standard guest paths may be contractual only when the guest
-image itself owns them.
+This preserves reviewable intent without introducing a second tracked implementation language. A dependency
+that cannot be acquired, transformed, and verified under this rule is unsupported rather than silently
+vendored.
 
 ## 5. Run evidence and phase status
 
-A gate emits its evidence under `.build/runs/**` and installs an immutable, content-addressed attestation in
-`.build/evidence-store/**`. Git contains neither the ledger nor a copy of the receipt. The attestation binds the source tree,
-phase contract, command, resolved dependency graph, toolchain, substrate, checks, mutants, coverage, cleanup,
-and raw-observation digests.
+A gate emits candidate evidence beneath `.build/runs/**` and may install a content-addressed receipt beneath
+`.build/evidence-store/**`. Git contains neither. A digest establishes provenance only; it does not establish
+correctness or authorize a status change.
 
-The development-plan tracker records the human status decision and a content-addressed run reference when needed. It
-does not embed a generated ledger hash or duplicate run output. A Done decision requires a run whose recorded
-source-snapshot digest still matches the tree; editing the source afterwards invalidates the binding and needs
-a fresh run. Commit timing is orthogonal and is never a gate condition.
+Only the human user may promote a phase or sprint to Done or Validated. The plan records that decision after
+the gate, oracle-independence review, sabotage controls, predecessor chain, and owned legacy closures have all
+been inspected. Doctrine does not record current validation results.
 
 ## 6. `.gitignore` contract
 
-The tracked `.gitignore` must cover every generated class. The block below is normative and **exhaustive in
-both directions**: order may differ, but a class the block names and the file omits is missing coverage, and a
-pattern the file carries and the block does not name is an undeclared class. Both are findings. A one-way
-subset check lets the file grow patterns nobody reviewed — which is how a build root came to be clean only
-under a developer's personal ignore configuration, invisible to every check that reads the worktree.
+`.gitignore` excludes all of `.build/`, `.data/`, and `.test_data/`, plus tool-specific spill classes that a
+misdirected command might create. Source-adjacent `__pycache__/` or Python bytecode is a containment failure,
+even when a defensive ignore pattern catches it. An ignore rule does not
+make a path conforming: the source-boundary audit must still reject an ignored source input used to complete a
+build or gate.
 
-A pattern here is also a claim that the path is generated. An ignore rule for a path the
-[§2](#2-complete-repository-structure) target tree does not contain is removed rather than kept, because a rule
-hiding a path nobody intends is how a second home for a generated class survives review. The rules covering
-migration surfaces in [§2.2](#22-present-day-roots-and-their-required-destination) are therefore temporary:
-each retires with the root it covers, owned by the phase that relocates it.
-
-```gitignore
-# Every pattern here is a claim that the path it names is generated, and that the
-# repository-layout doctrine section 2 target tree contains it. A rule for a path the
-# tree does not contain is removed rather than kept — a rule hiding a path nobody
-# intends is how a second home for a generated class survives review. The rules covering
-# section 2.2 migration surfaces are temporary and retire with the root they cover.
-
-# Canonical contained-state roots. Production and test state are both local but have
-# different teardown authority; neither is a source or container-context input.
-/.build/
-/.data/
-/.test_data/
-
-# Pre-containment migration surfaces; remove these rules with their legacy paths.
-/gen/
-/DEVELOPMENT_PLAN/evidence/
-/test/enumeration/
-/test/golden/phase_*_ledger.json
-
-# Dependency resolution is refreshed dynamically and never committed.
-*.lock
-*.freeze
-package-lock.json
-npm-shrinkwrap.json
-pnpm-lock.yaml
-go.sum
-
-# Haskell and formal-model build output. Cabal roots are redirected beneath `.build/**`
-# by a `--builddir` argument, which is a convention each invocation must carry rather
-# than a property of the repository: cabal rejects `builddir` in project and config
-# files and ignores `CABAL_BUILDDIR`, so a bare `cabal build` writes a root here. These
-# class rules are unanchored on purpose — they name generated content wherever it lands,
-# and never claim a second top-level root the section 2 tree does not have.
-dist-newstyle/
-.cabal-sandbox/
-.ghc.environment.*
-*.o
-*.hi
-*.dyn_o
-*.dyn_hi
-*.hie
-*.tla
-*.cfg
-
-# JavaScript and PureScript build output. `node_modules/` is unanchored for the same
-# reason as the Cabal roots: the toolchain installs it beneath `.build/` with `--prefix`,
-# but `package.json` sits at the repository root, so a bare `npm install` lands here.
-node_modules/
-
-# Legacy PureScript build output below the authored UI root.
-/ui/.spago/
-/ui/output/
-/ui/dist/
-
-# Python may keep source-adjacent interpreter caches. They are always generated
-# and must never become repository inputs.
-__pycache__/
-*.py[cod]
-
-# The Poetry distribution's virtualenv. Unanchored for the same reason as `node_modules/`:
-# `pb/poetry.toml` pins it in-project so an environment check is a question about this
-# checkout, and a resolved dependency tree is never an authored input wherever it lands.
-.venv/
-
-# Cabal's per-worktree configure output. It sits beside the authored `cabal.project` and
-# carries resolved compiler and flag choices, which are run-local observations.
-cabal.project.local
-
-# Finder metadata. The apple substrate writes it into any directory a person opens, so it
-# reaches an authored root without any command in this repository running.
-.DS_Store
-
-# Python test and coverage state, written beside the run that produced it.
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-
-# Browser-harness reports. Playwright writes both to the working directory by default,
-# so neither reaches `.build/runs/**` on its own.
-playwright-report/
-test-results/
-
-# Runtime output written beside a run.
-*.log
-*.pid
-*.sock
-
-# The single sanctioned cleartext-secret file is the test-secrets seam of
-# vault_pki_doctrine.md section 3.3: test-only, flagged, never tracked.
-/test-secrets.dhall
-```
-
-A generic ignore pattern never substitutes for the provenance check. CI must also reject a tracked file whose
-header or generator registry classifies it as derived.
+Migration-only ignore rules retire with their paths. An obsolete rule is a finding because it can conceal a
+reintroduced root.
 
 ## 7. `.dockerignore` contract
 
-The Docker context excludes every derived, evidentiary, secret, and runtime-state class. It is at least as
-strict as `.gitignore` for generated content, and the block below is normative and **exhaustive in both
-directions** on the same terms as [§6](#6-gitignore-contract): a class named here and absent from the file is
-missing coverage, and a pattern the file carries and this block does not name is an undeclared class.
-
-```dockerignore
-# Every pattern here is a claim that the path it names is generated, and that the
-# repository-layout doctrine section 2 target tree contains it, on the same terms as
-# `.gitignore`. This contract is at least as strict as that one for generated content.
-
-# Version-control metadata is never a build input.
-.git
-.git/**
-
-# Canonical contained-state roots.
-.build
-.build/**
-.data
-.data/**
-.test_data
-.test_data/**
-
-# Pre-containment migration surfaces.
-gen
-gen/**
-DEVELOPMENT_PLAN/evidence
-DEVELOPMENT_PLAN/evidence/**
-test/enumeration
-test/enumeration/**
-test/golden/phase_*_ledger.json
-
-# Dependency resolution is refreshed dynamically.
-**/*.lock
-**/*.freeze
-**/package-lock.json
-**/npm-shrinkwrap.json
-**/pnpm-lock.yaml
-**/go.sum
-
-# Cabal and GHC build roots. Redirection beneath `.build/` is a per-invocation
-# `--builddir` argument, not a repository property, so a bare `cabal build` leaves a root
-# in the context. `**/`-prefixed on purpose: a class anywhere, never a new context root.
-**/dist-newstyle
-**/dist-newstyle/**
-**/.cabal-sandbox
-**/.cabal-sandbox/**
-**/.ghc.environment.*
-
-# Package-manager dependency trees. Installed beneath `.build/` with `--prefix`, but
-# `package.json` sits at the context root, so a bare `npm install` lands here.
-**/node_modules
-**/node_modules/**
-
-# Haskell, JavaScript, and PureScript build products.
-**/*.o
-**/*.hi
-**/*.dyn_o
-**/*.dyn_hi
-**/*.hie
-**/*.tla
-**/*.cfg
-ui/.spago
-ui/.spago/**
-ui/output
-ui/output/**
-ui/dist
-ui/dist/**
-
-# Source-adjacent Python interpreter caches are local accelerators, never image
-# build inputs.
-**/__pycache__
-**/__pycache__/**
-**/*.pyc
-**/*.pyo
-**/*.pyd
-**/.venv
-**/.venv/**
-**/cabal.project.local
-**/.DS_Store
-
-# Python test and coverage state, written beside the run that produced it.
-**/.pytest_cache
-**/.pytest_cache/**
-**/.coverage
-**/.coverage.*
-**/htmlcov
-**/htmlcov/**
-
-# Browser-harness reports. Playwright writes both to the working directory by default.
-**/playwright-report
-**/playwright-report/**
-**/test-results
-**/test-results/**
-
-# Runtime output written beside a run.
-**/*.log
-**/*.pid
-**/*.sock
-
-# The test-secrets seam of vault_pki_doctrine.md section 3.3 is test-only and never
-# enters a build context.
-test-secrets.dhall
-```
-
-An image build that needs a derived artifact regenerates it inside a staged build or receives it as an
-explicit build input from the current run. It never broadens the context to include local caches or evidence.
+`.dockerignore` excludes version-control metadata, all three contained-state roots, secrets, evidence, caches,
+resolved dependencies, and every tool-specific spill class. A generated artifact needed by an image build is
+regenerated in a staged build or passed explicitly from the current `.build/**` materialization; the context is
+never broadened to include local state.
 
 ## 8. Enforcement and source-snapshot acceptance
 
-Every phase gate inherits these postconditions:
+Every candidate phase gate inherits these fail-closed checks:
 
-1. The run binds to its source snapshot: every non-ignored file as it stands when the gate starts.
-2. Every deliberate generator, compiler, resolver, tool, and subprocess writes only to `.build/**`; normal
-   source-adjacent Python interpreter caches are the sole location exception.
-3. Test enumeration is regenerated and joined to independently authored expectations by stable identity.
-4. No test or generator writes beneath an authored root except for Python's ignored interpreter cache.
-5. `git ls-files` contains no derived path, generated header, lock/freeze file, bytecode, or run evidence.
-6. The gate leaves every tracked file unchanged and creates no unignored generated file.
-7. The Docker context audit contains no derived output, evidence, cache, credential, or runtime state.
-8. The repository-local attestation verifies before the phase can be marked Done.
-9. The source snapshot contains every authored input referenced by a build, test, or gate; an ignored
-   worktree file can never complete the repository's source closure.
-10. The tracked-tree audit classifies files semantically, not only by ignore-pattern or path match, and rejects
-    reproducible copies even when they live in an otherwise authored root.
+1. Classify every tracked path by role, extension, executable bit, shebang, and content signature.
+2. Reject behavioral source that is not `.hs`, except bounded Python under `pb/**`, unless the finding maps
+   bijectively to one active migration row owned by a strictly later phase; that temporary accounting rule
+   admits no new input and expires at the owning phase.
+3. Reject `pb` logic that decides a validation result or continues past Haskell `exec` handoff.
+4. Reject tracked serialized fixtures, oracles, expected outputs, mutants, or checking programs.
+5. Materialize every required non-Haskell input from Haskell into a fresh `.build/**` tree.
+6. Run clean-room checks with the condemned tracked copies physically absent.
+7. Reject any generator or test write beneath an authored root.
+8. Reject any required ignored or untracked worktree input.
+9. Reject generated, evidentiary, secret, cache, or runtime-state bytes in the effective container context.
+10. Leave tracked files unchanged and no unignored output behind.
+11. Require zero findings for rows owned by the candidate or any earlier phase, exact two-way equality between
+    remaining findings and strictly-later active rows, and no stale, duplicate, reassigned, or unregistered row.
+12. Treat receipts and hashes as provenance, never as correctness or promotion authority.
 
-The inherited host-inventory, production/test separation, and test-secrets postconditions are stated once in
-[`development_plan_gate_integrity.md` §S](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate).
+The audit must include no-op, constant-success, extension-renaming, shebang-without-extension, misplaced-source,
+empty-discovery, missing-oracle, skipped-mutant, stale-evidence, and tracked-copy-present sabotage cases. Each
+applicable sabotage must make the audit red for the intended reason before a clean run can be considered.
 
-Python commands run with ordinary bytecode caching enabled. The cache may remain beside source on a developer
-worktree because `.gitignore` excludes `__pycache__/` and all Python bytecode suffixes, while `.dockerignore`
-excludes the same paths from every build context. Phase 0 rejects missing patterns, tracked bytecode, Docker
-context leakage, and command-level bytecode suppression; it does not require deleting a valid ignored cache.
-
-Phase 0 audits two different boundaries. The current-tree audit covers tracked, ignored, untracked, and
-effective Docker-context paths, then repeats the documented verifier against the source snapshot alone. The revision-history
-audit separately scans reachable commits for secrets, credentials, generated artifacts, obsolete names, and
-other files that current ignore rules cannot remove retroactively. Unreachable local objects are reported as
-local state and are not treated as part of the shared repository closure.
-
-A secret or credential found in history requires immediate rotation and a coordinated history purge. A
-non-secret generated or obsolete historical blob requires forward removal plus an explicit recorded decision:
-retain the old history, or perform an operator-approved coordinated rewrite. A documentation or cleanup phase
-must never rewrite shared history implicitly.
-
-When a pristine Linux host is required, every hardware substrate supplies the `linux-cpu` lane. Incus is used
-on Linux and Linux-CUDA hosts, Lima on Apple, and WSL2 on Windows. A specialized Apple or Linux-CUDA gate may
-add its one specialized lane without removing the baseline.
+Hardware discovery and live infrastructure are prohibited until the human user accepts the hardware-free DSL
+promotion barrier and every predecessor. A container cannot establish the semantics of the DSL that generates
+its own recipe or runtime inputs.
 
 ## 9. Migration boundary
 
-The repository does not yet satisfy this doctrine. The current generated ledgers, evidence, enumeration,
-derived test corpora, reference-program outputs, checksum/digest fixtures, resolved paths, and hard-coded
-package integrity values are migration inputs, not exceptions. Ignored authored compatibility patches and
-human reasoning in ignored phase ledgers must be relocated before their old paths are deleted. Their exact
-disposition is tracked in
-[`../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md).
+The target grammar above does not assert that the current tree conforms. Every current non-Haskell source
+family outside `pb/**`, every serialized behavioral input, and every obsolete source root is an active
+divergence until its row is removed from
+[`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) by satisfying its
+mechanical closure condition.
 
-Documentation adoption alone supplies no implementation evidence. The 2026-08-11 source-closure audit found the
-Phase-0 verifier depending on ignored inputs; as of 2026-08-12 the provenance classifier, semantic tracked-path
-and effective Docker-context audits, authored-root write guard, history audit, fresh-clone gate,
-dynamic-resolution audit, and repository-local attestation are implemented and pass two-sided from a clone. Phase 0
-is sealed: the gate publishes an attestation bound to the source snapshot it ran against.
-
-The migration surface those checks reveal is not closed by them. Each finding outside the running phase's
-ownership is deferred to the phase named in
-[`../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md),
-reported on every run, and cleared by that phase's gate. Every later phase remains reopened until its gate
-uses the new output paths, produces repository-local evidence, and passes the source-snapshot acceptance above.
+Documentation adoption, a passing legacy command, or the presence of Haskell wrappers supplies no migration
+evidence. A phase may close only after its old source is absent and its clean-room Haskell materialization is
+independently reviewed. Git history is the archive; no second legacy-register file is admitted.
 
 ## Related Documents
 
-- [Generated Artifacts](./generated_artifacts_doctrine.md) — semantic rule for projections and authored inputs
-- [Testing Doctrine](./testing_doctrine.md) — enumeration, independent expectations, and repository-local evidence
-- [Documentation Standards](../documentation_standards.md) — governed Markdown remains authored
+- [JIT Artifact Doctrine](./jit_artifact_doctrine.md) — artifact recipes, addresses, and lifetimes
+- [Generated Artifacts](./generated_artifacts_doctrine.md) — the semantic no-commit rule
+- [Testing Doctrine](./testing_doctrine.md) — Haskell expectations and generated test encodings
+- [Documentation Standards](../documentation_standards.md) — governed Markdown as an authored non-source input
 - [Development Plan Standards](../../DEVELOPMENT_PLAN/development_plan_standards.md) — phase-gate adoption
-- [Legacy Tracking](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) — migration work and deletion owners
-- [Substrate Doctrine](./substrate_doctrine.md) — universal `linux-cpu` and pristine-host routing
+- [Legacy Tracking](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) — the sole active divergence register

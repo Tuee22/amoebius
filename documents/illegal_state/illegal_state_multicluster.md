@@ -21,6 +21,8 @@ them appears in the single-cluster slices. Their numbering is held by
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Scope](#1-scope)
 - [2. The multi-cluster & fabric illegal states](#2-the-multi-cluster--fabric-illegal-states)
@@ -41,7 +43,7 @@ flowchart LR
   g2 -->|"linked extension source only"| g3
   g2 -->|"anything the decoder admits"| ps
   ps -->|"anything the seal admits"| rg
-  rg -->|"anything the golden admits"| le
+  rg -->|"anything the Haskell semantic predicate admits"| le
 ```
 *Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. The forest slice is the only one where an entry's *primary* locus is a live effect; secondary live-effect residues are common everywhere. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
@@ -61,8 +63,9 @@ The surrounding framing is owned elsewhere and is **referenced, not restated** h
 
 Each entry below keeps its existing `**Layer:**` foreclosure tag and adds a new `**Validation-locus:**` line —
 the orthogonal axis defined in [`illegal_state_techniques.md`](./illegal_state_techniques.md) — naming *where*
-the illegal state is caught (at the Dhall editor, in the total decoder, at the post-bind provision seal, in a
-golden test on the rendered manifest, or only as runtime residue). As throughout the catalog, everything here is **design intent**: a
+the illegal state is caught (at the Dhall editor, in the total decoder, at the post-bind provision seal, by a
+separately reviewed Haskell semantic predicate over a lazily rendered `.build/**` projection, or only as
+runtime residue). As throughout the catalog, everything here is **design intent**: a
 type-check proves the specification composes into something internally coherent, not that the running
 deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md) [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)).
 
@@ -94,8 +97,9 @@ folding its capacity as *two* `Topology`s is precisely this uninhabitable cross-
 (the relation/collection is over one cluster's `NonEmpty Node`; a second `Topology` has no place in the fold's
 arity). **Layer:** type-foreclosed uninhabitable-by-arity; runtime-checked residue lives only in the deferred geo-replication
 enaction (Phase 74).
-**Validation-locus:** `gadt-decode` (the arity is a property of the **Haskell** `place`, so a fold written
-over two `Topology`s is a compile-fail golden at the gadt-decode layer — **not** a `dhall type` failure: a root
+**Validation-locus:** `gadt-decode` (the arity is a property of the **Haskell** `place`. A tracked Haskell
+negative declaration materializes the attempted two-`Topology` module only beneath `.build/test-corpora/**`
+and requires the exact GHC refusal at the gadt-decode layer — **not** a `dhall type` failure: a root
 `InForceSpec` legitimately names many clusters, so nothing at the Dhall layer forbids naming a second one;
 what has no inhabitant is a single `place` call folding both); `live-effect` (the only residue is
 the deferred geo-replication enaction, Phase 74).

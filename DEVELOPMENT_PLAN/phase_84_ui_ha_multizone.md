@@ -4,30 +4,27 @@
 > stateless UI servers, redundant projectors, resumable streams, and an externally observed live fault.
 > **Read this if**: phase 84 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 84 delivers the initial online UI multi-zone high availability; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), and the plan for reaching it is owned here.
-Register 3, scoped live, on the `linux-cpu → provider` substrate.
-The scoped gate passed on 2026-08-11; genuine provider multi-zone HA remains `UNVERIFIED`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: DEVELOPMENT_PLAN/phase_69_spa_live_deploy.md (HA/failover portion)
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — multi-zone UI fault envelope](#resource-provision--multi-zone-ui-fault-envelope)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 84.1: Run the multi-zone UI failure campaign ⏸️](#sprint-841-run-the-multi-zone-ui-failure-campaign-)
@@ -38,25 +35,18 @@ The scoped gate passed on 2026-08-11; genuine provider multi-zone HA remains `UN
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-83 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 83, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-🟡 Scoped gate passed. Topology admission, fault-scope, post-fault authority, durable repair, a three-role
-host-process campaign, and all ten mutation loci pass. Provider multi-zone availability is still
-`UNVERIFIED`; replica counts and local roles are not a live HA claim.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -72,90 +62,53 @@ fault removes the selected-zone Redis/Sentinel members as well as application me
 reconnect through Sentinel, and any lost Pub/Sub hint repairs from Pulsar/projection cursors. This is the
 online HA gate. Offline outbox/blob continuity is not claimed until Phase 87.
 
-**Session scope:** Implement and run one provider multi-zone UI failover campaign with one acceptance command,
-`cabal test phase58-ui-ha-multizone`; split if validation adds another provider, substrate, simultaneous-zone
-loss model, or disaster-recovery claim.
+**Supporting observation:** a phase-number-neutral Haskell multi-zone suite may drive the provider campaign;
+the sole acceptance command is `pb validate phase 84`. Split if validation adds another provider, substrate,
+simultaneous-zone loss model, or disaster-recovery claim.
 
 **Phase scope:** one cohesive claim — *availability survives the loss of a provider failure domain, observed from outside*. Redundancy is only a claim until an externally injected fault exercises it.
 
-**Substrate:** `linux-cpu → provider` — the parent drives one managed provider target
-([§L](development_plan_standards.md#l-one-substrate-discipline)). Every hardware substrate can always run
+**Substrate:** `linux-cpu` — the parent runs the single baseline hardware substrate and drives one managed
+provider target ([§L](development_plan_standards.md#l-one-substrate-discipline)). Every hardware substrate can always run
 `linux-cpu`. When pristine Linux is needed, use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on
 Windows.
 
-**Lane:** linux-cpu/amd64 → provider ([§L](development_plan_standards.md#l-one-substrate-discipline))
+**Lane:** provider — the canonical managed-provider target lane driven from the linux-cpu parent
+([§L](development_plan_standards.md#l-one-substrate-discipline)).
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 83](phase_83_ui_rollout_reconnect.md) — UI rollout, projection catch-up, and reconnect, which this phase extends across failure domains.
-
-**Gate:** `python3 tools/run_phase_gate.py 84` provisions the exact redundant topology, runs the declared
-whole-zone isolation while an off-cluster authenticated probe exercises the pinned operation and tenant matrix,
-and satisfies every external availability, isolation, placement, disruption, reconnect, and mutant predicate in
-[Gate integrity](#gate-integrity).
+**Depends on:** [Phase 83](phase_83_ui_rollout_reconnect.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 84`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-**Representative set.** The provider target has at least three schedulable zones, three ready UI-server Pods
-with hard topology spread, at least three ready owner-keyed projector Pods across the same three zones, a
-PodDisruptionBudget, and non-sticky correctness. Keycloak/Envoy, SQL, MinIO, Pulsar, and the exercised workflow
-are deployed in the redundant shapes their owning phases admit, with the gate refusing if a required dependency
-has all serving members in the selected fault zone. Tenant A contains owner and non-owner subjects; tenant B
-contains a foreign owner with equal-shaped ids, data, action, and cursor. The inventory is captured from the
-Kubernetes and provider APIs before traffic begins.
-Redis has one primary, at least two replicas, and three Sentinel voters spread across the zones with no
-persistent volume. Its loss may close sockets but cannot change durable effects or cursor repair.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *availability survives the loss of a provider failure domain, observed from outside*. Redundancy is only a claim until an externally injected fault exercises it. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 84` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 83 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**Pinned oracle and budgets.** Phase 0 commits `test/golden/ui_ha_multizone/ha_timeline.tbl`,
-`test/golden/ui_ha_multizone/placement.tbl`, `test/golden/ui_ha_multizone/access_matrix.tbl`, and
-`test/golden/ui_ha_multizone/post_fault_authority.tbl`. They independently fix the failure trigger, complete
-selected-zone member set, maximum login/reconnect window, post-fault OIDC and membership/epoch outcome,
-read/mutation/workflow/subscription outcomes, accepted-action rule, minimum zone distribution, and paired
-same-owner/same-tenant-non-owner/foreign-tenant outcomes. The implementation cannot widen those budgets after
-observing a run.
+## Resource provision — UNRESOLVED
 
-**Fresh live operation matrix.** An off-cluster Playwright/API probe obtains distinct least-privilege OIDC
-sessions for tenant A's owner/non-owner and tenant B's owner. It primes an owner-scoped stream, then invokes a
-provider-native fault that isolates every node and serving endpoint in the selected zone as one fault domain.
-While provider/API evidence says the whole zone is isolated, a cookie-empty browser context completes a new
-OIDC authorization-code/PKCE login for tenant A's owner and the UI server re-reads current membership and scope
-epoch before issuing the new session. The probe then uses post-fault authority to issue fresh challenges for a
-bounded read, idempotent mutation, and workflow start and keeps the subscription active. The same stable origin
-must authenticate/respond/reconnect within pinned bounds; every accepted mutation/start nonce must reach
-authoritative Pulsar/data observations exactly once; the read must return the current challenged version; and
-the stream must resume without owner, tenant, cursor, or sequence change. A pre-fault cookie, cached membership,
-or replayed token cannot satisfy the post-fault authority row.
-
-**External observers and paired denial.** A provider read-only API identity confirms that every predeclared
-member and endpoint in the selected zone is isolated, not merely one node; Kubernetes API watches record
-scheduling and endpoint membership; a separate Keycloak event/membership observer records the new post-fault
-authorization and current epoch; Envoy logs record identity and backend continuity; an independent native
-Pulsar consumer records message ids/cursors; and provider-native SQL/MinIO request/audit readers confirm reads
-and effects. During the fault, the same-tenant non-owner and tenant-B owner repeat tenant A's opaque handle,
-mutation, workflow start, and cursor and must remain denied with zero forbidden read, dispatch, subscription,
-or provider effect. Unavailable or challenge-mismatched authority/observers fail the gate rather than becoming
-UNVERIFIED green.
-
-**Bypass probes and mutants.** During the isolated-zone interval, a named caller Pod using each real user
-session probes UI-server Pod IPs, the projector Service, SQL, MinIO, Pulsar, Vault, and inference endpoints.
-CNI flow logs plus provider authentication/audit must show that only the public Keycloak/Envoy origin is usable;
-an HTTP denial alone is insufficient. The gate must turn red for `test/mutant/ui_ha_multizone/replicas_one.dhall`,
-`test/mutant/ui_ha_multizone/sticky_session_required.dhall`,
-`test/mutant/ui_ha_multizone/drop_pdb.dhall`, and
-`test/mutant/ui_ha_multizone/drop_topology_spread.dhall`, plus
-`test/mutant/ui_ha_multizone/fault_one_node_only.patch` and
-`test/mutant/ui_ha_multizone/drop_tenant_cursor_key.patch`, plus
-`test/mutant/ui_ha_multizone/drop_keycloak_zone_spread.dhall`. Placement/provider observation catches structural or
-under-scoped faults; the external login/operation/reconnect trace catches identity unavailability and
-sticky-state dependence; and the cross-tenant broker/access oracle catches scope collapse. A Deployment status
-claiming three replicas is not placement or availability evidence.
-The gate also turns red for `test/mutant/ui_ha_multizone/redis_one_node.dhall`,
-`test/mutant/ui_ha_multizone/redis_persistent_receipt.patch`, and
-`test/mutant/ui_ha_multizone/skip_cursor_repair.patch`.
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6` across zones; negatives under `test/negative/ui_ha_multizone/` pin a projection served from a zone the request's scope does not reach, with the verdict bound to the emitted declaration.
-
-## Resource provision — multi-zone UI fault envelope
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 Before mutation, the provision seal accounts for all UI-server/projector replicas, topology and disruption
 constraints, post-fault Keycloak login/membership observation, gateway/auth/data/workflow dependency survival
@@ -167,37 +120,24 @@ buffer refuses before the first provider or Kubernetes mutation.
 
 ## Doctrine adopted
 
-- Adopt [`low_code_ui_runtime_doctrine.md` §14 — runtime role, deployment, and HA](../documents/engineering/low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability): stateless replicas and resumable subscriptions, with no leader election.
-- Adopt [`daemon_topology_doctrine.md` §4 — unelected workers](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected): scale UI workers without granting control-plane authority.
-- Adopt [`platform_services_doctrine.md` §2 — one topology across replica counts](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1): distinguish an HA-capable shape from an observed HA outcome.
-- Adopt [`testing_spoof_resistance.md` §12](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): bind the claim to an off-cluster challenge and provider-observed fault.
-- Adopt [`ui_realtime_coordination_doctrine.md §§5–8`](../documents/engineering/ui_realtime_coordination_doctrine.md#5-redis-is-ephemeral-platform-internal-coordination): survive one-zone Redis/Sentinel and UI-server loss through bounded reconnect plus durable cursor/receipt repair.
+- Adopt [`low_code_ui_runtime_doctrine.md` §14 — Runtime role, deployment, and high availability](../documents/engineering/low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability): stateless replicas and resumable subscriptions, with no leader election.
+- Adopt [`daemon_topology_doctrine.md` §4 — Worker daemons — N, unelected](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected): scale UI workers without granting control-plane authority.
+- Adopt [`platform_services_doctrine.md` §2 — HA always — including `replicas=1`](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1): distinguish an HA-capable shape from an observed HA outcome.
+- Adopt [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence): bind the claim to an off-cluster challenge and provider-observed fault.
+- Adopt [`ui_realtime_coordination_doctrine.md` §5 — Redis is ephemeral platform-internal coordination](../documents/engineering/ui_realtime_coordination_doctrine.md#5-redis-is-ephemeral-platform-internal-coordination),
+  [`ui_realtime_coordination_doctrine.md` §6 — Durable commands, receipts, and replay](../documents/engineering/ui_realtime_coordination_doctrine.md#6-durable-commands-receipts-and-replay),
+  [`ui_realtime_coordination_doctrine.md` §7 — Replicas, drain, rollout, and gateway migration](../documents/engineering/ui_realtime_coordination_doctrine.md#7-replicas-drain-rollout-and-gateway-migration),
+  and [`ui_realtime_coordination_doctrine.md` §8 — Resource, observability, and failure obligations](../documents/engineering/ui_realtime_coordination_doctrine.md#8-resource-observability-and-failure-obligations): survive one-zone Redis/Sentinel and UI-server loss through bounded reconnect plus durable cursor/receipt repair.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 84.1: Run the multi-zone UI failure campaign ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Ui/Ha/MultiZone.hs`,
-`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/spec/live/UiHaSpec.hs`,
-`tools/ui_ha_multizone_live.py`, and `tools/ui_ha_multizone_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
-**Requires**: `cloud-account` — the credentialed account whose zones this HA gate spreads across.
-**Independent Validation**: `python3 tools/ui_ha_multizone_gate.py`; the scoped topology,
-fault, authority, repair, host-process, and mutant predicates are tested. Provider-confirmed zone isolation
-and off-cluster observations remain `UNVERIFIED`.
-**Docs to update**:
-`documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/daemon_topology_doctrine.md`, `documents/engineering/platform_services_doctrine.md`,
-`documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -216,7 +156,7 @@ Deliver one externally observed provider-zone failure result for the complete UI
 
 ### Validation
 
-1. Run `python3 tools/ui_ha_multizone_gate.py`; require the scoped canonical run green and
+1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-84 supporting suite must run; require the scoped canonical run green and
    every named mutant red. The ledger must not promote unavailable provider observations above `UNVERIFIED`.
 
 ### Remaining Work
@@ -227,7 +167,8 @@ observers. Until then, no provider HA claim exists.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record the exact tested fault and bounds.
 - `documents/engineering/platform_services_doctrine.md` — distinguish topology parity from observed HA.
 - `documents/engineering/daemon_topology_doctrine.md` — record worker failover behavior without election.
@@ -236,6 +177,7 @@ observers. Until then, no provider HA claim exists.
   zone-fault envelope and retain the lossy-routing/durable-repair boundary.
 
 **Cross-references to add:**
+
 - The phase tracker, substrate map, and component inventory must identify this as the first UI HA claim.
 
 ## Related Documents

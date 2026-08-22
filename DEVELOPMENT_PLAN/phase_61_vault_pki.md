@@ -5,9 +5,10 @@
 > reads a `SecretRef` by name — the secrets floor the standard-service stack is built on.
 > **Read this if**: phase 61 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 61 delivers the root Vault + PKI + built-in Haskell Vault client; its design is owned by [vault_pki_doctrine.md](../documents/engineering/vault_pki_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-The amended gate passed 2026-08-16.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -20,15 +21,17 @@ The amended gate passed 2026-08-16.
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 61.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild 📋](#sprint-611-root-single-node-password-encrypted-vault--init-once--unseal-on-rebuild-)
-- [Sprint 61.2: The self-signed PKI trust anchor issues 📋](#sprint-612-the-self-signed-pki-trust-anchor-issues-)
-- [Sprint 61.3: Built-in Haskell Vault client (no agent sidecar) reads a `SecretRef` by name — the gate 📋](#sprint-613-built-in-haskell-vault-client-no-agent-sidecar-reads-a-secretref-by-name--the-gate-)
-- [Sprint 61.4: Register-2.5 fail-closed Vault unseal under simulated faults 📋](#sprint-614-register-25-fail-closed-vault-unseal-under-simulated-faults-)
+- [Sprint 61.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild ⏸️](#sprint-611-root-single-node-password-encrypted-vault--init-once--unseal-on-rebuild-)
+- [Sprint 61.2: The self-signed PKI trust anchor issues ⏸️](#sprint-612-the-self-signed-pki-trust-anchor-issues-)
+- [Sprint 61.3: Built-in Haskell Vault client (no agent sidecar) reads a `SecretRef` by name — the gate ⏸️](#sprint-613-built-in-haskell-vault-client-no-agent-sidecar-reads-a-secretref-by-name--the-gate-)
+- [Sprint 61.4: Register-2.5 fail-closed Vault unseal under simulated faults ⏸️](#sprint-614-register-25-fail-closed-vault-unseal-under-simulated-faults-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -36,80 +39,29 @@ The amended gate passed 2026-08-16.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-60 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 60, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — reopened 2026-08-16 behind the amended Phase-56 handoff and Phase-60 revalidation. Its prior capability record remains historical until the exact predecessor chain is resealed.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Superseded containment seal:** the amended gate sealed 2026-08-16 as
-`sha256:4f029c9f8fe3fa35da3da2cd1a6b94cdc7f2d2a808a821540d290848d6130dcb`.
-`python3 tools/vault_pki_gate.py --execute` verified the exact Phase-60 predecessor and Phase-56 image
-handoff, initialized Vault once, genuinely deleted and recreated its private cluster, unsealed the retained
-Vault, preserved its cluster and PKI identities, and passed the independent Haskell reader. All 12 mutants
-were red, all 10 metrics matched, and all 35 authored surfaces joined to 33 run-time items. The private
-fixture, retained test state, kubeconfig, daemon, and loop mounts were removed; generated evidence remained
-beneath `.build/**`, `test-secrets.dhall` was rejected by production and copied nowhere, and the outside-host
-inventory remained empty.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Superseded scope amendment — 2026-08-13.** This phase was initially assigned the `SecretRef` type itself. Reviewing the
-sibling hostbootstrap secrets policy established that
-[`vault_pki_doctrine.md` §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)
-names four constructors and a production-mode validator, while `src/Amoebius/Vault/SecretRef.hs` implements
-two and no validator, and no `SecretRef` exists under `dhall/amoebius/**`. The type lands here rather than in
-the sealed dhall-typecheck/gadt-decode phases because this is where the Vault root that resolves the names lands: Phases 11
-and 6 sealed against the surfaces they actually name, and adding a type they never carried does not reopen
-them ([§N](development_plan_standards.md#n-reopening-and-amending-a-phase)). The corresponding divergence rows
-are recorded in [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md).
-
-**Scope amendment — 2026-08-13 (secrets reach a workload only from Vault).** This phase additionally owns:
-
-- the `Prompt` arm and the **prompt-to-Vault write path** — a CLI subcommand that reads elevated material
-  with echo disabled and writes it straight into Vault, never to disk, an environment variable, or a process
-  argument;
-- `writeKvField` and a **presence-only** `kvFieldExists` on `VaultTransport`, which today carries a read and
-  a transit decrypt and so cannot express either half of this contract;
-- `assertSecretsPresent`, the admission API of
-  [vault_pki_doctrine.md §3.4](../documents/engineering/vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect):
-  it ranges over the `SecretRef`s a spec names, reads existence rather than value, and reports **every**
-  missing reference at once rather than the first;
-- deletion of the `PHASE29_OPERATOR_PASSWORD` / `PHASE29_DEVELOPMENT_PASSWORD` environment path in this
-  phase's live runner, which is the exact pattern §3.3 forbids;
-- the tracked `test-secrets-types.dhall` shape — field names and types, no values — narrowed to what an
-  amoebius phase actually reads.
-
-The `SecretRef` *type* is not here: it is dhall-typecheck/gadt-decode surface and belongs to Phases 25 and 26, which are
-reopened for it. This phase consumes that type; it does not define it.
-
-**Invalidated historical record:**
-
-Done (invalidated). All four sprints and the whole-phase gate are implemented and validated. The Register-3 live proof used
-a single-node `kind` cluster on the **linux-cpu** lane, exact Phase-56 OCI archive, and Phase-60 retained ext4
-backings; the Register-2.5 proof explored 500 deterministic schedules per fault family plus the combined
-sequence. The pristine live cycle initialized Vault exactly once, deleted and recreated the real cluster, then
-unsealed the retained Vault and recovered the same PKI root and canary bytes. The independent reader and all
-nine committed mutants passed their intended green/red obligations. The live command was
-`python3 tools/phase29_vault_live.py`, followed immediately by
-`python3 tools/phase29_gate.py --seal-existing-live` on 2026-08-10. The sealed
-ledger is `external-run-reference`; the phase receipt is
-`dynamically-resolved`.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase installs the **secrets root** every later phase depends on. It brings up the **root Vault** as a
+This phase's target is the **secrets root** every later phase depends on. Its gate must bring up the **root Vault** as a
 single-node, Shamir-sealed, password-encrypted, human-gated, **fail-closed** service whose first-ever `vault
 init` runs exactly once against an empty retained PV and whose every later bring-up only **unseals** the same
 durable data — never a re-init, never a key regeneration. The one-and-only ephemeral secret is the operator's
 memorized password, which decrypts (via a real Argon2id KDF feeding an AEAD, never raw SHA-256) the
 password-sealed unlock material that recovers the Shamir keys; it is supplied at the prompt and persisted
 nowhere. The unsealed Vault owns the forest's **one self-signed PKI trust anchor** — a `pki/` root CA that issues
-internal leaf certificates that chain back to it. Finally, the phase proves the **built-in Haskell Vault client**:
+internal leaf certificates that chain back to it. Finally, the gate must test the **built-in Haskell Vault client**:
 the client is linked directly into the amoebius binary, so an in-cluster consumer authenticates to Vault with its
 Kubernetes service-account JWT and resolves a `SecretRef` by name — **no HashiCorp Vault Agent sidecar**, no
 Secret-mounted plaintext, no environment variable, no `PATH` lookup. A sealed, uninitialized, policy-missing, or
@@ -126,125 +78,86 @@ volumes and writable/log allowances, durable/audit backings as above, cache `Non
 linux-cpu.
 
 What this phase deliberately does **not** do: the full standard-service stack that consumes these secrets
-(Phases 41–42), the Keycloak-owned edge (Phase 64), and the parent/child unseal modes, parent secret injection, and the
+(Phases 62–63), the Keycloak-owned edge (Phase 64), and the parent/child unseal modes, parent secret injection, and the
 cross-cluster intermediate-CA hierarchy (the amoebic-spawning/federation phases). Only the root cluster's own
 single-node Vault, its self-signed anchor, and the in-cluster read path are in scope here.
 
 **Phase scope:** one cohesive claim — *secrets have a fail-closed root, and the client that reads them is compiled in rather than run beside*. No agent sidecar is a security claim, not a packaging preference.
 
-**Substrate:** `linux-cpu` — this lane is always available on every hardware substrate. The validated run used
-the local Linux CPU-only lane. When a pristine Linux host is required, use Incus on Linux or Linux-CUDA, Lima
+**Substrate:** `linux-cpu` — this lane is available on every hardware substrate. The future gate is restricted
+to the local Linux CPU-only lane. When a pristine Linux host is required, use Incus on Linux or Linux-CUDA, Lima
 on Apple, and WSL2 on Windows.
 
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 60](phase_60_retained_storage.md) — no-provisioner retained storage + lossless rebind, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 61` passes the representative live, simulation, secret-boundary,
-oracle, and mutant checks of [Gate integrity](#gate-integrity) on one fresh private linux-cpu cluster fixture,
-then removes the marker-owned test run without changing the outside-host inventory.
+**Depends on:** [Phase 60](phase_60_retained_storage.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 61`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The gate also proves the secrets seam at the production boundary. `test-secrets.dhall` is the only cleartext
-secret-at-rest and only the elevated test harness may read it to drive the ordinary prompt-to-Vault write.
-Production mode, ordinary configuration loading, and every non-harness command reject that file and the test
-credential arm before effects. An external scan proves its values never reach `.build/**`, `.test_data/**`,
-argv, environment, logs, manifests, container contexts, Vault audit output, or the attestation.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *secrets have a fail-closed root, and the client that reads them is compiled in rather than run beside*. No agent sidecar is a security claim, not a packaging preference. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 61` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 60 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-That one command has four legs, and it is green only when all four are. First, the root single-node
-password-encrypted Vault **inits exactly once and unseals fail-closed**: an empty correctly provisioned PV
-inits and password-seals its unlock material without printing raw keys, a delete+recreate only unseals the
-same Vault, and a secret-dependent workload against a sealed Vault fails closed. Second, the bounded source
-populations plus versioned Raft/audit models derive exact retained and rotated-audit backing demands, a
-one-byte-under provision is rejected before effects, live snapshot/compaction/recovery plus audit rotation
-remain inside those caps, and every Vault app/init/rotation execution unit and volume exactly matches its
-complete `ProvisionedServiceSpec` projection. Third, the Vault `pki/` engine holds a **self-signed root CA
-that issues** an internal leaf chaining back to it. Fourth, the **built-in Haskell Vault client (no agent
-sidecar)** authenticates via Vault Kubernetes auth and **reads a `SecretRef` by name**, returning a typed
-fail-closed error on any sealed/missing/denied read — a **Register-3** live-infrastructure check.
+## Resource provision — UNRESOLVED
 
-```mermaid
-flowchart LR
-  %% register: algebra
-  fx["committed fixtures"]:::intent
-  or["independently authored oracle"]:::intent
-  mu["seeded mutant"]:::intent
-  g{{"the phase 61 gate command"}}:::gate
-  ok((("phase seal: the ledger this gate emits"))):::seal
-  no>"the mutant must turn it red"]:::refuse
-  fx -->|"binds the corpus"| g
-  or -->|"binds the expectation"| g
-  mu -->|"binds the defect"| g
-  g -->|"fixtures green, oracle agrees"| ok
-  g -->|"mutant green means the gate is not one"| no
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
-  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
-  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
-```
-*Design intent. Phase 61's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
-
-The gate's oracles are **pinned in this phase's oracle-pinning sprint, ahead of any
-`src/Amoebius/Vault/*.hs`**
-([§M.1](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)):
-- (a) a canary KV fixture `test/golden/vault/canary.json` — `SecretRef.Vault { mount="secret",
-  path="amoebius/canary", field="token" }` with a fixed 32-byte value
-- (b) the pinned unlock-material envelope format spec `test/golden/vault/unlock-envelope.spec` (magic bytes,
-  Argon2id parameters `m/t/p`, AEAD algorithm identifier, and field layout), hand-authored independently of
-  `Seal.hs` (§M.3)
-- (c) the typed-error-tag table `test/golden/vault/error-tags.golden` enumerating the six tags
-  (`unavailable`/`uninitialized`/`sealed`/ `policy-missing`/`secret-missing`/`decrypt-denied`) with, per
-  tag, the exact redacted log line the client must emit (§M.3, §M.8)
-- (d) `test/golden/vault/storage-demand.golden`, a hand-calculated component table for the bounded
-  KV/Transit/PKI/auth/version/lease population and pinned Raft model, including resident, WAL, snapshot,
-  old+new-compaction, and recovery bytes
-- and (e) `test/golden/vault/audit-rotation.golden`, the independent
-  per-file/backups/retention/total-backing oracle (§M.3).
-
-The **representative set (§M.7)** is exactly: this one KV `SecretRef.Vault`, one `TransitKey` unwrap, the
-self-signed root CA plus one internal leaf, the six typed error tags, and the one bounded storage-population
-fixture with its exact-fit/one-byte-under variants — no other shapes are in gate scope. **External-observer traces (§M.5)** are read from a Vault **audit device** (file backend) and an argv/exec observer on the
-consumer pod, never from any log the client emits about itself. Each sprint below names **>=1 committed seeded mutant** (§M.2) that MUST turn the gate red, committed and re-run.
-
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`; negatives under `test/negative/vault_pki/`.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`extension_conformance_security.md`](../documents/engineering/extension_conformance_security.md) — root Vault + PKI + built-in Haskell Vault client carries an identity boundary, and S1-S6 are what make crossing it unrepresentable.
-- [`vault_pki_doctrine.md §5`](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)
+- [`extension_conformance_security.md` §4 — S1–S6](../documents/engineering/extension_conformance_security.md#4-s1s6) — root Vault + PKI + built-in Haskell Vault client carries an identity boundary, and S1-S6 are what make crossing it unrepresentable.
+- [`vault_pki_doctrine.md` §5 — The root cluster: single-node, password-encrypted unseal](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)
   — *the root cluster: single-node, password-encrypted unseal*: the root's single-node shape lets it bootstrap
   with zero secrets, so the only secret standing up its Vault is the one a human types; the unlock material is
   password-AEAD-sealed (Argon2id → ChaCha20-Poly1305/AES-256-GCM), **never** raw SHA-256, and never plaintext at
   rest. The prodbox password-encrypted root unseal is **sibling evidence, not an amoebius result**.
-- [`vault_pki_doctrine.md §4`](../documents/engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)
+- [`vault_pki_doctrine.md` §4 — Init follows readiness: fail-closed Vault init](../documents/engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)
   — *init follows readiness: fail-closed Vault init*: **init-once / unseal-on-rebuild** — `vault init` runs exactly
   once when the retained PV is empty, and every later bring-up only unseals; a rebuilt cluster is *not* a fresh
   Vault.
-- [`vault_pki_doctrine.md §2`](../documents/engineering/vault_pki_doctrine.md#2-vault-is-the-fail-closed-secrets-root)
+- [`vault_pki_doctrine.md` §2 — Vault is the fail-closed secrets root](../documents/engineering/vault_pki_doctrine.md#2-vault-is-the-fail-closed-secrets-root)
   — *Vault is the fail-closed secrets root*: a sealed Vault **bricks** the cluster; the sole-backend and
   no-degraded-leak invariants mean no secret reconstructs from any non-Vault source and secret-dependent Pod
   startup fails its readiness gate.
-- [`vault_pki_doctrine.md §8`](../documents/engineering/vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor)
+- [`vault_pki_doctrine.md` §8 — The root cluster owns the PKI trust anchor](../documents/engineering/vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor)
   — *the root cluster owns the PKI trust anchor*: exactly one self-signed root of trust, the Vault `pki/` root CA,
-  with internal certs chaining to it; this phase builds **plane 1 (internal PKI) only** — public-edge TLS (Phase
+  with internal certs chaining to it; this phase's target must build **plane 1 (internal PKI) only** — public-edge TLS (Phase
   25) and the cross-cluster intermediate-CA hierarchy (federation) are deferred and **live-proof-pending even in prodbox**.
-- [`vault_pki_doctrine.md §9`](../documents/engineering/vault_pki_doctrine.md#9-in-cluster-consumers-authenticate-to-vault-directly)
-  and [`§3`](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value) —
+- [`vault_pki_doctrine.md` §9 — In-cluster consumers authenticate to Vault directly](../documents/engineering/vault_pki_doctrine.md#9-in-cluster-consumers-authenticate-to-vault-directly)
+  and [`vault_pki_doctrine.md` §3 — The SecretRef contract: a name, never a value](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value) —
   *in-cluster consumers authenticate to Vault directly* and *the SecretRef contract, a name never a value*: the
   built-in client authenticates per consumer via Vault Kubernetes auth (service account → role → least-privilege
   policy → JWT) and resolves a `SecretRef.Vault { mount, path, field }` by name — no Secret-mounted plaintext, no
   env var, no `PATH`, and no agent sidecar (the `Prodbox.Vault.Client` shape as **sibling evidence**).
-- [`vault_pki_doctrine.md §11`](../documents/engineering/vault_pki_doctrine.md#11-error-model-and-no-leak-logging)
+- [`vault_pki_doctrine.md` §11 — Error model and no-leak logging](../documents/engineering/vault_pki_doctrine.md#11-error-model-and-no-leak-logging)
   — *error model and no-leak logging*: Vault failures are ordinary typed control flow (unavailable / uninitialized
   / sealed / policy-missing / secret-missing / decrypt-denied) that let a caller fail closed with an actionable,
   non-leaking message; a log line never emits a resolved value, a token, or a presence oracle.
-- [`platform_services_doctrine.md §11`](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
-  — *bring-up and dependency ordering*: the hard edge this phase installs — **Vault reachable, initialized, and unsealed before any secret-dependent startup** — as a witnessed readiness gate, never a timer.
-- [`resource_capacity_doctrine.md §5`](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) — *`StorageBudget`: bounded by construction, single-owner ceiling per arm*: the canonical
+- [`platform_services_doctrine.md` §11 — Bring-up and dependency ordering](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
+  — *bring-up and dependency ordering*: the hard edge this phase's target must install — **Vault reachable,
+  initialized, and unsealed before any secret-dependent startup** — as a witnessed readiness gate, never a timer.
+- [`resource_capacity_doctrine.md` §5 — `StorageBudget`: bounded by construction, single-owner ceiling per arm](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) — *`StorageBudget`: bounded by construction, single-owner ceiling per arm*: the canonical
   `VaultStorageDemand` and private `ProvisionedVaultStorageDemand` — every persisted source population and
   history is finite, the version-pinned Raft model includes WAL/snapshot/compaction/recovery peaks, and the
   file audit device has a named backing/presentation with finite rotation. A raw demand cannot author its own physical
@@ -252,22 +165,14 @@ consumer pod, never from any log the client emits about itself. Each sprint belo
 
 ## Sprints
 
-## Sprint 61.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild 📋
-**Status**: Planned
-**Implementation**: `src/Amoebius/Vault/Init.hs`, `src/Amoebius/Vault/Unseal.hs`,
-`src/Amoebius/Vault/Seal.hs` (the Argon2id-KDF → ChaCha20-Poly1305-IETF password-sealed unlock-material
-envelope), `tools/vault_pki_live.py`, and `test/fixture/vault_pki/kind.yaml` — built and validated.
-**Blocked by**: [Phase 60](phase_60_retained_storage.md) gate.
-**Independent Validation**: `vault init` runs exactly once on an empty PV, a cluster rebuild brings the same
-Vault up by unseal only, a secret-dependent workload against a sealed Vault fails its readiness gate closed,
-and the derived Raft and rotated-audit boundaries hold live. The numbered `### Validation` list below carries
-the witnesses, byte-scans, and boundary cases.
-**Docs to update**: `documents/engineering/vault_pki_doctrine.md`,
-`documents/engineering/platform_services_doctrine.md`,
-`documents/engineering/storage_lifecycle_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+## Sprint 61.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`vault_pki_doctrine.md §5`](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal),
 [`§4`](../documents/engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init), and
 [`§2`](../documents/engineering/vault_pki_doctrine.md#2-vault-is-the-fail-closed-secrets-root): bring up the
@@ -275,6 +180,7 @@ single-node, password-encrypted, human-gated, fail-closed secrets root, init-onc
 retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoebius result**.
 
 ### Deliverables
+
 - Root Vault in **Shamir seal mode**, rendered and reconciled onto the Phase-60 retained PV; first-ever `vault
   init` runs only when the PV is empty, and every later bring-up redeploys against existing data and only
   unseals. The PVC/PV claim slot, backing, presentation, required usable bytes, and rounded provisioned
@@ -317,10 +223,11 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
   limits or points the audit path outside its named backing (must fail render identity and the live cap probe).
 
 ### Validation
-1. **Init-once / unseal-on-rebuild witness (forecloses wipe-and-re-init).** On an empty PV, run init; write the
-   committed canary secret `test/golden/vault/canary.json` into Vault and record (i) the canary value read back and
+
+1. **Init-once / unseal-on-rebuild witness (forecloses wipe-and-re-init).** On an empty PV, run init; write
+   Haskell-declared run-unique canary bytes into Vault and record (i) the canary value read back and
    (ii) the SHA-256 digest of the at-rest unlock-material ciphertext. Then delete + recreate the cluster and assert:
-   (a) the canary reads back **byte-identical** to the committed fixture (proves the same durable data, not a fresh
+   (a) the canary reads back **byte-identical** to the independently retained run-local expectation (proves the same durable data, not a fresh
    Vault); (b) the unlock-material ciphertext digest is **unchanged** (no key regeneration); (c) a `vault operator
    init` attempt against the recreated cluster returns **already-initialized**; and (d) the Vault audit device
    records an **unseal** operation and **no** init operation on the rebuild.
@@ -364,24 +271,20 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
    the named mount. The storage-term-deletion and unbounded-audit mutants must turn these live checks red.
 
 ### Remaining Work
-None.
 
-## Sprint 61.2: The self-signed PKI trust anchor issues 📋
-**Status**: Planned
-**Implementation**: `src/Amoebius/Vault/Pki.hs` (the `pki/` root-CA mount + internal
-leaf issuance) plus the OpenSSL-independent evidence reader — built and validated.
-**Blocked by**: Sprint 61.1.
-**Independent Validation**: the Vault `pki/` engine holds a
-self-signed **root CA**; an internal leaf certificate issued from `pki/` **chains to that root CA**; while
-Vault is sealed, no certificate issues.
-**Docs to update**: `documents/engineering/vault_pki_doctrine.md`,
-`documents/engineering/platform_services_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+
+## Sprint 61.2: The self-signed PKI trust anchor issues ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`vault_pki_doctrine.md §8`](../documents/engineering/vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor):
 make the root Vault's `pki/` engine the one self-signed trust anchor for the forest, building **plane 1 (internal PKI) only** — public-edge TLS and the cross-cluster intermediate-CA hierarchy are explicitly out of scope here.
 
 ### Deliverables
+
 - The Vault `pki/` engine holding a **self-signed root CA** as the single forest trust anchor.
 - Internal-leaf issuance from `pki/` for in-cluster service-to-service TLS, every issued cert chaining back to the
   root anchor.
@@ -395,30 +298,22 @@ make the root Vault's `pki/` engine the one self-signed trust anchor for the for
   unrelated key so it does **not** chain back to the self-signed root CA (must fail the chain-verify check).
 
 ### Validation
+
 1. Assert `pki/` holds a self-signed root CA after bring-up.
 2. Issue an internal leaf cert from `pki/` and assert it chains to the self-signed root CA.
 3. Seal Vault and assert issuance fails closed with the typed **`sealed`** reason (no certificate is produced) —
    the run differing only in seal state from item 2's successful unsealed issuance (§M.8).
 
 ### Remaining Work
-None.
 
-## Sprint 61.3: Built-in Haskell Vault client (no agent sidecar) reads a `SecretRef` by name — the gate 📋
-**Status**: Planned
-**Implementation**: `src/Amoebius/Vault/Client.hs`, `src/Amoebius/Vault/SecretRef.hs`,
-`src/Amoebius/Vault/Error.hs`, `app/amoebius/Main.hs`, `tools/vault_pki_gate.py`,
-`tools/vault_secret_boundary.py`, `test/spec/vault/VaultPkiSpec.hs`, `test/spec/live/VaultPkiSpec.hs`,
-`test/oracle/vault_pki_surfaces.tsv`, and `test/mutant/vault_pki/**` — built and validated.
-**Blocked by**: Sprint 61.2.
-**Independent Validation**: an in-cluster consumer authenticates to Vault with its Kubernetes service-account
-JWT and resolves a `SecretRef.Vault` by name, with no agent sidecar, no plaintext Secret mount, and a typed
-fail-closed error carrying no secret material on every denied or missing read. The numbered `### Validation`
-list below carries the audit-device provenance witness and the six-tag negatives.
-**Docs to update**: `documents/engineering/vault_pki_doctrine.md`,
-`documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-61 status when the
-gate passes), `DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+
+## Sprint 61.3: Built-in Haskell Vault client (no agent sidecar) reads a `SecretRef` by name — the gate ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`vault_pki_doctrine.md §9`](../documents/engineering/vault_pki_doctrine.md#9-in-cluster-consumers-authenticate-to-vault-directly),
 [`§3`](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value), and
 [`§11`](../documents/engineering/vault_pki_doctrine.md#11-error-model-and-no-leak-logging): prove the one
@@ -427,6 +322,7 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
 **sibling evidence, not an amoebius result**.
 
 ### Deliverables
+
 - **`src/Amoebius/Vault/Client.hs`**: the Vault client compiled directly into the amoebius binary — **no HashiCorp Vault Agent sidecar**, no Secret-mounted plaintext, no environment variable, no `PATH` lookup;
   in-cluster reads authenticate via **Vault Kubernetes auth** (service account → Vault role → least-privilege
   policy → service-account JWT), so a leaked grant is contained to one consumer's paths.
@@ -446,6 +342,7 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
   requested path (must fail the error-tag table and the presence-oracle checks).
 
 ### Validation
+
 1. **K8s-auth provenance witness (forecloses image-baked token).** A consumer authenticates via Vault Kubernetes
    auth and reads the canary `SecretRef.Vault`-named KV secret, getting **byte-identical** the value in
    `test/golden/vault/canary.json`; the **Vault audit device** records the read ran under a token minted by
@@ -464,23 +361,15 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
 3. Emit the Register-3 ledger; assert the deferred federation surfaces are recorded UNVERIFIED, not green.
 
 ### Remaining Work
-None.
 
-## Sprint 61.4: Register-2.5 fail-closed Vault unseal under simulated faults 📋
-**Status**: Planned
-**Implementation**: `test/spec/vault/UnsealFailClosedSpec.hs` (the
-`IOSim`/`IOSimPOR` driver that runs the **real** `src/Amoebius/Vault/{Init,Unseal,Seal,Client}.hs` against
-the modeled Vault) — built and validated.
-**Blocked by**: Sprint 61.3.
-**Independent Validation**: the real `io-classes` init/unseal client, unchanged from the live path, holds the
-fail-closed invariant under every adversarial `IOSim`/`IOSimPOR` schedule against the Phase-16 modeled Vault,
-and every failing schedule replays from its seed. Substrate `none`, Register 2.5; the numbered
-`### Validation` list below carries the fault families and coverage floors.
-**Docs to update**:
-`documents/engineering/deterministic_simulation_doctrine.md`, `documents/engineering/vault_pki_doctrine.md`,
-`documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+
+## Sprint 61.4: Register-2.5 fail-closed Vault unseal under simulated faults ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) and
 re-adopt [`vault_pki_doctrine.md §2`](../documents/engineering/vault_pki_doctrine.md#2-vault-is-the-fail-closed-secrets-root):
 prove the **fail-closed secrets-root invariant in simulation** — run the real init/unseal client against the
@@ -490,6 +379,7 @@ unproven. This is a **Register-2.5** deterministic-simulation check, run in-proc
 Register-3 live gate — not a substitute for it.
 
 ### Deliverables
+
 - An `IOSim`/`IOSimPOR` harness running the **real** `src/Amoebius/Vault/{Init,Unseal,Seal,Client}.hs` code
   (`io-classes`-written, byte-for-byte the live path — no simulation-only fork) against the **Phase 16 Sprint 16.2 modeled Vault** (`src/Amoebius/Sim/Fakes/*`) with its fault knobs — **sealed**, **unreachable**, **lease-expiry**, and
   **restart** — driven by the scheduler.
@@ -513,6 +403,7 @@ Register-3 live gate — not a substitute for it.
   assumption is discharged only by this phase's **Sprint-55.3 Register-3 live gate**, never by simulation.
 
 ### Validation
+
 1. Run the real init/unseal client under `IOSim`/`IOSimPOR` across **>=500 seeds per fault family** and assert the
    fail-closed invariant holds on every explored interleaving — no PKI issuance, no `.dhall` acceptance, no
    `SecretRef` read while sealed or freshness-unproven — **and** assert the §M.4 `cover`/`classify` fractions above
@@ -524,11 +415,13 @@ Register-3 live gate — not a substitute for it.
    simulation.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/vault_pki_doctrine.md` — the §5 root-unseal, §4 init-once/unseal-on-rebuild, §8 PKI-anchor,
   and §9/§11 built-in-client + error-model honesty notes flip from "design intent for the root-Vault phase" to a
   delivered single-node root Vault with its proven/tested/assumed ledger attached; the KDF/AEAD primitives and the
@@ -543,12 +436,14 @@ None.
   surfaces UNVERIFIED).
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-61 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 61's gate substrate (linux-cpu) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Vault/{Init,Unseal,Seal,Pki,Client,SecretRef,Error}.hs`
   as Phase-61 design-first rows against the component inventory.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker and phase order this document serves
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants

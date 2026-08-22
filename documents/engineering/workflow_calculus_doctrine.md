@@ -16,7 +16,7 @@ rather than restated.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -85,14 +85,12 @@ This is the arm the algebra exists for.
 **Provision returns two things.** A handle to the resource, and a **teardown obligation** — a value that is
 discharged only by tearing that resource down. The obligation is not optional, not defaulted, and not
 discardable, and the mechanism is a linear obligation: the value has no discard rule, so it must be consumed
-exactly once, and a workflow ending while it still holds one is rejected at compile time.
-[Phase 6](../../DEVELOPMENT_PLAN/phase_06_workflow_calculus.md) built that, and it is worth recording *how*,
-because the shape decides what the guarantee covers. The outstanding obligations are the workflow's type
-index — a set of resource names that `provision` adds to and only `teardown` and `transfer` remove — and the
-runner accepts only a workflow whose set is empty at both ends. There is no combinator that shrinks the set
-any other way, so "no discard rule" holds by there being nothing to discard with. Three committed
-compile-fail fixtures establish it: a workflow that ends owing, a transfer with no condition, and a discharge
-of an obligation the workflow never held.
+exactly once, and a workflow ending while it still holds one is rejected at compile time. The target shape is
+an outstanding-obligation type index — a set of resource names that `provision` adds to and only `teardown`
+and `transfer` remove — with a runner that accepts only a workflow whose set is empty at both ends. There is no
+combinator that shrinks the set another way. Separately authored Haskell compile-fail cases cover a workflow
+that ends owing, a transfer without its condition, and a discharge of an obligation the workflow never held;
+current delivery and validation remain in the plan.
 This is the same shape as a region that ends holding an unreaped artifact
 ([`jit_artifact_doctrine.md` §5](./jit_artifact_doctrine.md#5-materialize-consume-reap)).
 
@@ -150,17 +148,18 @@ inspectable values: what a gate does is derivable from its declaration, which is
 ([`extension_conformance_doctrine.md` §5](./extension_conformance_doctrine.md#5-the-conformance-gate-is-generated-not-authored)).
 
 The risk of self-reference is equally real and is named here rather than left implied: a calculus that validates
-itself can be consistently wrong. The mitigation is the independent-oracle discipline — every gate's assertion
-is authored against the requirement, by a path that does not run through the machinery under test — and that
-discipline is owned by [`testing_doctrine.md`](./testing_doctrine.md), not by this algebra.
+itself can be consistently wrong. An independent oracle and a few mutants do not close that shared-trust gap.
+The gate representation is therefore only a subject. The separately reviewed Haskell validation kernel first
+rejects the fixed qualification sabotage corpus, observes every applied production mutation, and then compares
+clean workflow execution with raw external observations. Neither representation can authorize status; the
+human validation authority alone may approve the candidate
+([`testing_spoof_resistance.md`](./testing_spoof_resistance.md)).
 
-The pure boundary now exists. Phase 49 freezes one independent declaration inventory over all 96 contracts,
-derives workflow values for the 93 entries that carry commands, and routes those entries through one runner.
-The runner executes the retained command without a shell, observes its exit verdict, then seals that verdict
-through a typed workflow whose ledger contains the five arms and balances the gate-process obligation. The
-three contracts with prose-only gates do not receive invented commands; their values arise when their owning
-phases make the gate runnable. This is a Decision-layer result. Whatever live effects a retained mechanism
-performs keep that mechanism's own register and evidence burden.
+[Phase 49](../../DEVELOPMENT_PLAN/phase_49_self_referential_gates.md) is the target integrated instance. It
+routes the complete hardware-free DSL pipeline through the workflow value after the independently reviewed
+kernel freezes the claim. It does not execute a retained Python command, wrap a supplied exit code, consume a
+checked-in command inventory, or seal its own verdict. All serialized declarations, observations, and mutation
+worktrees are generated lazily beneath `.build/**`.
 
 ---
 
@@ -180,10 +179,9 @@ performs keep that mechanism's own register and evidence burden.
   *before* the provider call and reconciled after a restart, which is the reconciler's shape rather than the
   calculus's ([`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md)). Until a phase delivers it,
   crash-orphaned resources are a `live-effect` residue that this calculus does not reduce.
-- **It does not make the retained mechanism self-authenticating.** Phase 49 delivers workflow values, the
-  teardown obligation, and the routed consumer, but keeps each authored command as an independent executable
-  predicate. Removing that path would turn the self-reference from a risk with a control into an unchecked
-  assumption. Status and the exact delivered counts live in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+- **It does not make a gate self-authenticating.** A workflow value, typed teardown, routed consumer,
+  qualification run, and evidence bundle remain candidate observations. Human approval is a separate trust
+  boundary; status lives in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -191,8 +189,8 @@ performs keep that mechanism's own register and evidence burden.
 
 This document is normative only. Which phase delivers the workflow value, the five arms, the teardown
 obligation, and the self-referential gate is owned by
-[DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Normative shapes are design intent; only
-explicitly named phase instances are tested amoebius results.
+[DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). All numbered phases are presently NOT
+VALIDATED; this doctrine contains no current tested instance.
 
 ---
 

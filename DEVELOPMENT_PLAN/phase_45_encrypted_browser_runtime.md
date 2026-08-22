@@ -1,29 +1,32 @@
-# Phase 45: Encrypted browser offline runtime
+# Phase 45: Haskell offline-state semantics and runtime projection
 
-> **Purpose**: Implement the generic browser facilities that persist bounded offline state encrypted at rest,
-> partition it by identity and scope, and give one fenced tab ownership of migration, connection, and replay.
+> **Purpose**: Define encrypted, identity-partitioned offline-state and fenced-ownership semantics in Haskell
+> and lazily project the generic browser runtime without executing a browser before the Phase-49 barrier.
 > **Read this if**: phase 45 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 45 delivers the encrypted browser offline runtime; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), and the plan for reaching it is owned here.
-Register 2: a real boundary against fake tools.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 45.1: Build the encrypted local interpreter ✅](#sprint-451-build-the-encrypted-local-interpreter-)
+- [Sprint 45.1: Build the encrypted local interpreter ⏸️](#sprint-451-build-the-encrypted-local-interpreter-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -31,70 +34,77 @@ Register 2: a real boundary against fake tools.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-22. `python3 tools/encrypted_browser_runtime_gate.py` passes all fourteen sides on
-natural `arm64`, untranslated. The production PureScript graph and generic bundle compile with all offline
-modules; two real Chrome processes pass the fourteen-action trace and all twelve WebCrypto, IndexedDB,
-partition, Web Locks, BroadcastChannel, Service Worker, cache, restart, and quota observations. Three storage
-rows, two immutable assets, three quota rows, three access rows, and all six production-reference mutants pass.
-The real five-calculus projection accounts for 50 units, all 17 metrics match, and 66 surfaces join completely.
-Attestation `sha256:ae246b901d94b7b2013812e71af9de8d9f65676fdb8346e75b4e1ef4b9c8d8ef` binds source
-`sha256:593e71d60584b02e…` over 2,274 files. Server replay and live multi-zone behavior remain UNVERIFIED.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 44, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase implements the trusted interpreter for `ClientPlan.offline`: encrypted IndexedDB structured state,
-encrypted IndexedDB/OPFS blobs, immutable public service-worker assets, explicit quota/eviction results, local
-unlock and offline-auth states, and a Web Locks/BroadcastChannel leader with a durable fencing generation.
-Credentials, refresh tokens, private plans, and cross-partition records cannot be stored. A browser lacking the
-required coordination primitives takes the safe single-tab/refuse-concurrency path.
+This phase defines the offline state machine, encryption envelope, identity partitioning, quota/eviction
+outcomes, replay ordering, and fenced ownership as Haskell values. Haskell also declares the projection that
+will lazily generate IndexedDB/OPFS/service-worker/Web-Locks/BroadcastChannel runtime source beneath
+`.build/**`. Credentials, refresh tokens, private plans, and cross-partition records have no admitted state
+constructor.
 
-**Phase scope:** one cohesive claim — *offline state at rest is encrypted, partitioned by identity, and owned by exactly one fenced tab*. Ownership is what makes replay safe rather than merely ordered.
+The target gate is to exercise the pure transition and cryptographic-format contracts against separately reviewed
+Haskell oracles. It does not start Chrome or another browser and cannot claim browser storage, Web Locks,
+service-worker, or WebCrypto fidelity; those are post-Phase-49 live-browser obligations.
 
-**Substrate:** `none` — the gate drives a hermetic Chrome runtime through the browser debugging protocol.
+**Phase scope:** one cohesive claim — Haskell semantics foreclose invalid offline-state transitions and deterministically project the generic runtime; browser fidelity remains UNVERIFIED.
+
+**Substrate:** `none` — pure Haskell state/envelope semantics and lazy projection only; no browser debugging protocol or browser engine.
 
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
-**Register:** 2 — hermetic browser boundary tests with controlled fakes.
+**Register:** 1 — pure Haskell semantic, property, and generator checks.
 
-**Depends on:** [Phase 44](phase_44_ui_local_composition.md) — local UI composition, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 45` drives fresh browser profiles through queue, restart,
-unlock, quota, tenant/subject switch, two-tab handoff, service-worker upgrade, and storage inspection; it finds
-no prohibited plaintext or cross-partition disclosure and turns every named mutant red.
+**Depends on:** [Phase 44](phase_44_ui_local_composition.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 45`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-Phase 0 pins a browser action trace, ciphertext/storage-key inventory, allowed asset manifest, quota outcomes,
-and two-partition access table. The external observer reads raw browser storage and service-worker caches after
-fresh random canaries. Mutants store plaintext, retain credentials/private-plan fields, allow two replay
-leaders, omit fencing, silently evict a depended-on record, and reuse a partition key across tenants. Observer
-failure fails the gate; runtime self-report is not evidence.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-**Committed fixtures/goldens:** the pinned trace, storage inventory, asset manifest, quota table, and access
-table. **Independent oracle:** raw Chromium storage/cache inspection plus the separately authored access table;
-neither calls the runtime under test.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — the pure Haskell state model admits only encrypted-envelope, identity-partitioned, single-fenced-owner transitions and lazily projects runtime source beneath `.build/**`. Actual browser storage, locks, crypto, service-worker, and replay behavior is not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 45` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 44 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- Adopt [Browser Offline Runtime §6](../documents/engineering/browser_offline_runtime_doctrine.md#6-closed-browser-facilities-and-encrypted-storage): closed facilities and encrypted local data.
-- Adopt [Browser Offline Runtime §7](../documents/engineering/browser_offline_runtime_doctrine.md#7-offline-identity-and-partitioning): opaque partitions are not credentials or authority.
-- Adopt [Browser Offline Runtime §8](../documents/engineering/browser_offline_runtime_doctrine.md#8-one-active-tab-owns-connection-and-replay): one fenced active tab.
+- Adopt [`browser_offline_runtime_doctrine.md` §6 — Closed browser facilities and encrypted storage](../documents/engineering/browser_offline_runtime_doctrine.md#6-closed-browser-facilities-and-encrypted-storage): Haskell models closed facilities and encrypted envelopes; live browser fidelity is deferred.
+- Adopt [`browser_offline_runtime_doctrine.md` §7 — Offline identity and partitioning](../documents/engineering/browser_offline_runtime_doctrine.md#7-offline-identity-and-partitioning): Haskell models opaque partitions that are not credentials or authority.
+- Adopt [`browser_offline_runtime_doctrine.md` §8 — One active tab owns connection and replay](../documents/engineering/browser_offline_runtime_doctrine.md#8-one-active-tab-owns-connection-and-replay): Haskell models one fenced owner; actual cross-tab behavior is deferred.
 
 ## Sprints
 
-## Sprint 45.1: Build the encrypted local interpreter ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done
-**Implementation**:
-`ui/src/Amoebius/Ui/Offline/{Store,Crypto,Partition,Leader,ServiceWorker,Runtime}.{purs,js}`,
-`src/Amoebius/Ui/Offline/Browser/{Store,Crypto,Partition,Leader,ServiceWorker}.hs`,
-`test/spec/browser/OfflineRuntimeSpec.hs`, `tools/encrypted_browser_runtime_live.py`, and `tools/encrypted_browser_runtime_gate.py`
-**Blocked by**: [Phase 44](phase_44_ui_local_composition.md) gate
-**Independent Validation**: `python3 tools/encrypted_browser_runtime_gate.py` with a two-process
-Chrome profile, raw browser-storage/cache inspection, model contracts, and six compile-time mutants
-**Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`,
-`documents/engineering/testing_doctrine.md`, `documents/engineering/generated_artifacts_doctrine.md`
+## Sprint 45.1: Build the encrypted local interpreter ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -109,22 +119,24 @@ Persist and recover bounded offline state without disclosing protected records o
 
 ### Validation
 
-1. Run `python3 tools/encrypted_browser_runtime_gate.py`; require the canonical model and real Chrome
+1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-45 supporting suite must run; require the canonical model and real Chrome
    traces green and every mutant red.
 
 ### Remaining Work
 
-None. Server replay remains owned by Phase 85, and live multi-zone continuity remains owned by Phase 88;
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Server replay remains owned by Phase 85, and live multi-zone continuity remains owned by Phase 88;
 neither is inferred from this local browser boundary.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/browser_offline_runtime_doctrine.md` — record supported facilities and tested assumptions.
 - `documents/engineering/testing_doctrine.md` — link raw-storage and two-tab evidence.
 - `documents/engineering/generated_artifacts_doctrine.md` — record the emitted service-worker manifest.
 
 **Cross-references to add:**
+
 - The tracker, substrate map, and component inventory must identify the browser runtime.
 
 ## Related Documents

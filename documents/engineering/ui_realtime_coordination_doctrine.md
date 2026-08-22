@@ -15,10 +15,12 @@ message bus and projections; nor the application language above it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
@@ -109,22 +111,21 @@ and refresh tokens are absent.
 
 ## 4. Typed routing and resume envelope
 
-[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) validates the pure paired-plan and finite-demand
-compiler that owns this envelope's generated location. Its six exact demand cells and 32-unit five-calculus
-projection are Register-1 facts. It does not execute WebSockets, Redis routing, resume, or cross-pod dispatch;
-those protocol/runtime claims remain UNVERIFIED until their later owning phases.
+[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) must eventually validate the pure paired-plan
+and finite-demand compiler that owns this envelope's generated location. Its controls and five-calculus
+projection require reconstruction as independently reviewed Haskell evidence. It cannot execute WebSockets,
+Redis routing, resume, or cross-pod dispatch. Phase 40 is **NOT VALIDATED**.
 
-[Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) observes the browser opening the one
-same-origin WebSocket path against a loopback fake server and uses an OS policy to deny a non-loopback attempt
-while preserving the browser's local IPC.
-It does not validate session registration, Redis routing, resume, durable receipts, or cross-pod dispatch;
-those protocol/runtime claims remain UNVERIFIED.
+[Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) is limited to hardware-free Haskell
+browser-interpreter semantics and lazy projection. It must not start a browser, fake server, network service,
+or OS-policy observer before the Phase-49 promotion barrier. Live same-origin WebSocket behavior belongs to a
+later phase. Phase 42 is **NOT VALIDATED**.
 
-[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) validates local server admission for the same
-path. A signed credential, same origin, fixed subprotocol, single-use session nonce, current program/ABI/scope,
-complete envelope, and available injected coordinator admit one registration; six paired twins refuse. The
-OS observer enforces loopback-only traffic for the boundary processes. Redis
-routing, resume, durable receipts, cross-pod dispatch, replica drain, and failover remain UNVERIFIED.
+[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) is limited to a Haskell server-boundary model
+and Haskell-owned fakes. Its eventual contract must admit the exact signed-credential/current-scope case and
+refuse minimally different twins without starting a browser, network service, or OS observer. Live server
+admission, Redis routing, resume, durable receipts, cross-pod dispatch, replica drain, and failover belong
+after the Phase-49 barrier. Phase 43 is **NOT VALIDATED**.
 
 Every routed frame carries an envelope equivalent to:
 
@@ -199,18 +200,19 @@ socket closure, cache loss, reauthentication, bounded reconnect, and cursor repa
 durable effect is not permitted. If Redis loss can change whether an application command was accepted, the
 command path is incorrectly designed.
 
-Phase 63 live-tested this platform boundary: one TLS-only primary, two TLS replication followers, and three
-mutually authenticated Sentinel voters used Vault-issued certificate and ACL material. A least-authority
-`realtime` identity wrote a TTL-bound `amoebius:*` challenge, read it from a replica, forced Sentinel
-promotion, and observed the challenge after failover. Live args and volume inventory showed finite memory,
-client, and output-buffer limits with no PVC/AOF/RDB/backup. This tests the coordination substrate only;
+**Phase-63 target coordination boundary — NOT VALIDATED.** One TLS-only primary, two TLS replication
+followers, and three mutually authenticated Sentinel voters must use Vault-issued certificate and ACL
+material. A least-authority `realtime` identity must write a TTL-bound `amoebius:*` challenge, read it from a
+replica, force Sentinel promotion, and observe the challenge after failover. Live args and volume inventory
+must show finite memory, client, and output-buffer limits with no PVC/AOF/RDB/backup. This targets the
+coordination substrate only;
 application-side WebSocket routing, durable cursor repair, and command receipts remain owned by their later
 UI-runtime phases.
 
-Phase 64 then live-tested the browser-edge residue independently of Redis routing. A valid Keycloak bearer,
+**Phase-64 target browser-edge boundary — NOT VALIDATED.** Independently of Redis routing, a valid Keycloak bearer,
 exact `https://phase32.amoebius.internal` Origin, fresh single-use nonce, and `amoebius.v1` subprotocol
-received HTTP 101 and the committed challenge. Replayed nonce, wrong Origin, wrong subprotocol,
-unauthenticated, and direct-Service attempts produced no backend challenge. This establishes the one-door
+must receive HTTP 101 and the committed challenge. Replayed nonce, wrong Origin, wrong subprotocol,
+unauthenticated, and direct-Service attempts must produce no backend challenge. This targets the one-door
 handshake and bypass denial; replicated UI-server ownership, reconnect, and durable receipt behavior remain
 later-phase obligations.
 
@@ -253,11 +255,12 @@ authoritative receipt/projection and return the same typed outcome. An unknown o
 socket write. "Effectively once" is earned only by the named idempotency/fold contract at the effect owner;
 Pulsar delivery and Redis routing do not provide a generic exactly-once side-effect guarantee.
 
-[Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md) validates this receipt primitive live.
-The original scoped command survives native CBOR publication, redelivery, workflow work-id/handle retention,
-and compacted receipt materialization. Only effect-owner accepted/terminal events can advance it; equal command
-and input is idempotent, while changed input conflicts before effect. Owner-keyed cursors repair a non-final
-resume, and stale scope epochs fail closed. Redis and WebSocket delivery are deliberately outside this gate.
+[Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md) must validate this receipt primitive live.
+The original scoped command must survive native CBOR publication, redelivery, workflow work-id/handle
+retention, and compacted receipt materialization. Only effect-owner accepted/terminal events may advance it;
+equal command and input must be idempotent, while changed input must conflict before effect. Owner-keyed
+cursors must repair a non-final resume, and stale scope epochs must fail closed. Redis and WebSocket delivery
+are deliberately outside this target gate.
 
 ---
 
@@ -274,10 +277,11 @@ connections, emits a reconnect control frame where possible, removes or expires 
 clients reconnect to any ready replica. Rolling overlap retains every plan/ABI and cursor decoder needed by
 the admitted compatibility window.
 
-[Phase 72](../../DEVELOPMENT_PLAN/phase_72_ui_program_release.md) validates the admission identity boundary:
-the paired plan pins the WebSocket subprotocol, routing-envelope schema, and cursor codec alongside program,
-content, contract, and authority identities, and stale or mixed tuples fail before effect. It does not exercise
-multiple UI-server replicas, socket drain, rolling overlap, or reconnect; those behaviors remain UNVERIFIED.
+[Phase 72](../../DEVELOPMENT_PLAN/phase_72_ui_program_release.md) must eventually validate the admission
+identity boundary: the paired plan pins the WebSocket subprotocol, routing-envelope schema, and cursor codec
+alongside program, content, contract, and authority identities, and stale or mixed tuples fail before effect.
+Its bounded target cannot establish multiple UI-server replicas, socket drain, rolling overlap, or reconnect.
+Phase 72 is **NOT VALIDATED**.
 
 During a planned gateway migration, the old edge forwards WebSocket upgrades and frames until the drain edge
 is observed or closes connections with a reconnect reason that causes same-hostname resolution. During forced
@@ -310,9 +314,9 @@ not only UI-server or Redis self-reports.
 The routing and failure semantics above are design intent until their phase gates run. Multiple replicas and
 Sentinel configuration are topology evidence, not availability proof. A live fault test may establish tested
 behavior for its declared envelope; it does not prove behavior for every network partition or Redis defect.
-Phase 56.1, sealed 2026-08-14, has established only that the pinned `redis-server` and `redis-cli` file bytes
+Phase 56.1 owns only the target acceptance criterion that the pinned `redis-server` and `redis-cli` file bytes
 are present, SBOM-joined, and executable by absolute path at their pinned archive version in **both**
-architectures of the published monocontainer; it does not establish Redis/Sentinel deployment, coordination,
+architectures of the published monocontainer; it cannot establish Redis/Sentinel deployment, coordination,
 failover, or realtime availability.
 
 Sequencing, implementation status, and acceptance commands are owned by the
@@ -327,41 +331,41 @@ session fanout into typed app/subject/scope/program envelopes and fenced instanc
 replay records and leases are not copied as authoritative receipts; amoebius requires the durable effect-owner
 rule in [§6](#6-durable-commands-receipts-and-replay). Sibling code is evidence, not an amoebius test result.
 
-Phase 92 supplies a deliberately narrower receipt result: the infernix adapter makes the server-derived
-command id the work id, folds the terminal state into the scoped durable receipt, and has a second loopback
-server origin recover that receipt from retained MinIO. Exact replay is effect-free and a compiled mutant that
-drops terminal correlation fails. Real browser and Keycloak sessions plus retained Pulsar/MinIO and a fresh
-reference-worker Job support the record, but no Redis or WebSocket failure was injected and neither mechanism
+Phase 92 owns a deliberately narrower receipt target: the infernix adapter must make the server-derived
+command id the work id, fold the terminal state into the scoped durable receipt, and have a second loopback
+server origin recover that receipt from retained MinIO. Exact replay must be effect-free and a mutant that
+drops terminal correlation must fail. The target challenge uses real browser and Keycloak sessions plus
+retained Pulsar/MinIO and a fresh reference-worker Job, but no Redis or WebSocket failure need be injected and neither mechanism
 participates in acceptance. Cross-pod routing, Kubernetes UI replicas, full edge delivery, native-CBOR UI
 events, and production inference therefore remain UNVERIFIED. There is always a `linux-cpu` execution option
 on each hardware substrate. For pristine Linux, use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on
 Windows.
 
-Phase 94 tests the corresponding jitML fold only at a scoped boundary. Its pure routing model sends a terminal
-receipt from replica identity B to socket identity A, deletes transient route state, and repairs exactly once
-from the durable receipt while the local-route and Redis-as-receipt mutants fail. Chrome repeats the loss and
-repair sequence across two loopback origins using an independent temporary durable-file record. No real Redis,
-WebSocket, Kubernetes replica, retained Pulsar/MinIO, or Envoy route participated, so those runtime claims and
+Phase 94 must test the corresponding jitML fold only at a scoped boundary. Its pure routing model must send a
+terminal receipt from replica identity B to socket identity A, delete transient route state, and repair exactly
+once from the durable receipt while the local-route and Redis-as-receipt mutants fail. Chrome must repeat the
+loss and repair sequence across two loopback origins using an independent temporary durable-file record. The
+target excludes real Redis, WebSocket, Kubernetes replicas, retained Pulsar/MinIO, and Envoy routes, so those runtime claims and
 HA remain UNVERIFIED.
 
-Phase 83's scoped result adds program-epoch registration drain and tenant/owner/stream-keyed cursor resume to
-the tested coordination kernel. An append-only local observer confirms watermark-before-shift ordering across
-A→B→A, and all four semantic mutants turn red. Real Redis registrations, Gateway API/Envoy traffic, Pulsar,
+Phase 83's scoped target must add program-epoch registration drain and tenant/owner/stream-keyed cursor resume
+to the coordination kernel. An append-only local observer must confirm watermark-before-shift ordering across
+A→B→A, and all four semantic mutants must turn red. Real Redis registrations, Gateway API/Envoy traffic, Pulsar,
 browser reconnect, Kubernetes, CNI, and provider fault observations remain UNVERIFIED.
 
-Phase 84's scoped result tests admission for one-primary/two-replica/three-Sentinel-shaped ephemeral Redis,
-rejects Redis as receipt authority, and preserves one durable receipt and cursor across a host-local role
-failure. No real Redis/Sentinel, complete provider zone, Kubernetes endpoint, or external observer was failed;
-online multi-zone HA remains UNVERIFIED.
+Phase 84's scoped target must test admission for one-primary/two-replica/three-Sentinel-shaped ephemeral Redis,
+reject Redis as receipt authority, and preserve one durable receipt and cursor across a host-local role
+failure. Real Redis/Sentinel, complete provider-zone, Kubernetes-endpoint, and external-observer failures are
+not covered; online multi-zone HA remains UNVERIFIED.
 
-Phase 85's scoped replay path physically drops a response after a durable SQLite effect/receipt commit,
-clears transient route state, and recovers the same receipt through another loopback UI endpoint. Exact retry
-does not duplicate the effect, and Redis-only acknowledgement remains inadmissible. Real Redis/Pulsar and
+Phase 85's scoped replay path must physically drop a response after a durable SQLite effect/receipt commit,
+clear transient route state, and recover the same receipt through another loopback UI endpoint. Exact retry
+must not duplicate the effect, and Redis-only acknowledgement remains inadmissible. Real Redis/Pulsar and
 provider observers remain UNVERIFIED.
 
-Phase 88's scoped campaign reconnects Chrome through a surviving host-local endpoint after stopping another,
-clears transient route state, and recovers cursor and receipts from SQLite with one effect per command. This
-tests non-sticky/durable-repair behavior but not provider zones or real Redis/Sentinel, which remain
+Phase 88's scoped campaign must reconnect Chrome through a surviving host-local endpoint after stopping
+another, clear transient route state, and recover cursor and receipts from SQLite with one effect per command.
+This targets non-sticky/durable-repair behavior but not provider zones or real Redis/Sentinel, which remain
 UNVERIFIED.
 
 ---

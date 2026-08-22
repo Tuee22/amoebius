@@ -1,347 +1,157 @@
-# Generated Artifacts: emitted from a source of truth, never committed
+# Generated Artifacts: emitted from Haskell, never committed
 
-> **Purpose**: State the semantic rule that every reproducible projection, compilation, resolution, test
-> result, and run record is emitted at build/check time and never committed; only authored inputs and reviewed
-> external source are version-controlled.
-> **Read this if**: it has to be settled whether an artifact is committed or produced.
+> **Purpose**: State the semantic rule that every non-Haskell behavioral artifact is emitted lazily from
+> Haskell and never committed.
+> **Read this if**: it has to be settled whether an artifact is tracked or materialized for a consumer.
 
-This document owns the semantic authored-versus-generated boundary. The complete path inventory, repository
-tree, ignore contracts, and enforcement rules are owned by
-[`repository_layout_doctrine.md`](./repository_layout_doctrine.md). Each generator's domain semantics remain
-with the doctrine that defines its output.
+This document owns the semantic generated-artifact boundary. The closed tracked-tree grammar, path inventory,
+ignore contracts, and enforcement rules belong to
+[`repository_layout_doctrine.md`](./repository_layout_doctrine.md). Generator-specific meaning remains with
+the doctrine that defines each output.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/validation_frame_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/validation_frame_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. What is generated (and from what)](#2-what-is-generated-and-from-what)
+- [3. The rule](#3-the-rule)
+- [4. What this buys](#4-what-this-buys)
+- [5. Authored vs generated: the committed source](#5-authored-vs-generated-the-committed-source)
+- [6. Planning ownership](#6-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
 ## 1. Why this doctrine exists
 
-A generated artifact that is committed to the repository becomes a **second source of truth**. It can be edited
-by hand, it drifts from the source it was rendered from, and a reader can no longer tell whether the committed
-copy or the generator is authoritative. The defect is the same one the manifest, DSL, and formal-model doctrines
-each remove in their own domain: two representations of one fact, kept in sync by hope.
+A committed generated artifact is a second source of truth. It can be edited independently of its generator,
+and both copies can remain well formed while disagreeing. Review cannot reliably determine whether the output
+or generator is authoritative.
 
-The obvious alternative — "commit the generated output but regenerate it carefully, and review the diff" — fails
-because the discipline is unenforceable and the failure is silent: a stale committed manifest, a hand-tweaked
-`.tla`, or an out-of-date schema type-checks and reads as authoritative while no longer matching its source.
+amoebius removes the second copy. A consumer obtains a fresh deterministic materialization from Haskell at the
+moment it is needed. The artifact is stamped, content-addressed where its lifecycle requires identity, written
+beneath `.build/**`, and reaped with its region. A generated file never moves back into an authored root.
 
-amoebius forecloses this by **not committing generated artifacts at all.** Each is emitted deterministically
-from its typed source by an `amoebius` subcommand, stamped as generated, and produced fresh at the moment it is
-needed (a build, a `--dry-run`, a model-check, a deploy). What this forecloses: a stale or hand-edited generated
-artifact, because there is no committed artifact to go stale — the source is the only thing under version
-control, and every consumer renders from it.
-
-**The rule has since generalised, and this doctrine has narrowed.** What began as a list of artifact classes is
-now a single rule with a closed exception list: *every artifact that is not Haskell source is generated from
-Haskell types, unless it must exist before the generator can run*
-([`jit_artifact_doctrine.md` §2](./jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list)). That
-document owns the calculus — targets, recipes, content-derived addresses, and the materialize/consume/reap
-region. **This document owns the repository half**: which paths emitted artifacts may occupy, how an authored
-oracle stays textually distinguishable from the output it checks, and the checks that keep a generated file out
-of version control. The two are read together, and neither restates the other.
-
----
+The stronger tracked-source rule belongs to
+[`repository_layout_doctrine.md` §1](./repository_layout_doctrine.md#1-classification-rule): all tracked
+behavioral source is `.hs`, with bounded Python under `pb/**` as the sole source-language exception. This
+document explains the generated side of that boundary.
 
 ## 2. What is generated (and from what)
 
-Each generated artifact names its typed source of truth and the deterministic renderer/compiler that emits it:
+| Generated artifact | Tracked Haskell source of truth | Lazy materialization |
+|---|---|---|
+| Dhall schema, prelude, examples, frame values, and test values | checked intermediate-representation and external-input projection types | `.build/dhall/**` |
+| Explicit-state, symbolic, and refinement-checker inputs | Haskell model, formula, and named-invariant declarations | `.build/checkers/**` |
+| TLA+ module and TLC configuration | reifiable `Model` and semantic renderer | `.build/tla/**` |
+| Kubernetes/provider objects | opaque checked and provisioned deployment values | `.build/manifests/**` |
+| Dockerfile and bake inputs | typed Haskell bake catalog and recipe renderer | `.build/docker/**` |
+| SQL schema, statements, constraints, and policies | scope-bearing Haskell transaction declarations | `.build/sql/**` |
+| Proto, generated bindings, and protocol fixtures | Haskell protocol declarations and recipes | `.build/proto/**` |
+| Pulumi programs and provider inputs | Haskell infrastructure declarations | `.build/pulumi/**` |
+| PureScript/JavaScript client runtime, codecs, CSS/HTML/assets, and bundle | Haskell client-runtime and public-contract declarations | `.build/ui/**` |
+| Objective-C/C Metal bridge and Metal shader source | Haskell host-worker ABI and shader declarations | `.build/metal/**` |
+| Test enumeration and encoded fixtures/oracles | Haskell declarations and separately reviewed Haskell expectations | `.build/test-surfaces/**`, `.build/test-corpora/**` |
+| Python outside `pb/**`, shell, and other external-language check helpers | Haskell checker/workflow declarations | `.build/tools/**` |
+| Mutated source and negative corpora | Haskell mutation operators and positive Haskell seeds | `.build/test-corpora/**` |
+| Rendered plans, reports, ledgers, receipts, and traces | Haskell execution and observation values | `.build/runs/**`, `.build/docs/**` |
 
-| Generated artifact | Source of truth (committed) | Renderer | Owning doctrine |
-|---|---|---|---|
-| Kubernetes objects (Deployment/Service/RBAC/NetworkPolicy/HTTPRoute/…) | the opaque post-bind, capacity/capability-checked whole-deployment `ProvisionedSpec` derived from `InForceSpec` + target inventory | `renderAll :: ProvisionedSpec -> [K8sObject]` (pure, total; private service/global projections merge by object identity) | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
-| TLA+ `.tla` + `.cfg` | the reifiable Haskell `Model` | `emitTLA :: Model -> (Tla, Cfg)` (built and semantic-oracle validated in [Phase 11](../../DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md)) | [formal_model_doctrine.md](./formal_model_doctrine.md) |
-| The Dhall dhall-typecheck schema, its prelude of smart constructors, and every `.dhall` example | the Haskell checked-IR types themselves | schema reflection from the Haskell types, so decoder and schema cannot disagree: there is no parity report because there is no second authored statement to compare | [dsl_doctrine.md](./dsl_doctrine.md) |
-| The relational schema, its constraints, composite keys, row-level policies, and closed statements | the scope-bearing row declarations and transaction GADT in `Amoebius.Transaction.Vocabulary`, delivered by [Phase 36](../../DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md) | one emission per private declaration, so schema, statement, and policy share a term; semantic oracles constrain the generated SQL | [extension_conformance_transactions.md](./extension_conformance_transactions.md) |
-| The repository's own checking tools and the build-flag mutant corpus | current mechanism/body bytes plus closed concern/operator metadata at the Phase-47 materialization seam; workflow declarations and positive seeds/operators at the Phase-49 replacement seam | Phase 47's deterministic corpus materializer, followed by Phase 49's per-kind gate-workflow derivation and consumer switch | [jit_artifact_doctrine.md](./jit_artifact_doctrine.md) |
-| Paired `ClientPlan`/serializable `UiServerPlan` manifests, resolved external-link subset, per-app public-contract/content manifest, route manifest, and sealed dispatch projection | authored `UiSource` plus the reified Haskell public contracts, bound handlers, policies, scopes, capability graph, and trusted external-link catalog | UI dhall-typecheck/gadt-decode/bind followed by the client/server/content projections from one private `BoundUiProgram` | [low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) |
-| Offline client/replay projections, record codecs, migration/compatibility table, local-store descriptors, and service-worker asset manifest | the checked `UiSource.continuity`, queue/blob contracts, runtime ABI catalog, and deployment `OfflinePolicy` | the offline projection of the same private `BoundUiProgram` and release-compatibility fold | [browser_offline_runtime_doctrine.md §§5, 11](./browser_offline_runtime_doctrine.md#5-one-bound-program-paired-online-and-offline-plans) |
-| PureScript public catalog types/codecs and the one immutable generic client bundle per runtime ABI/catalog | committed generic PureScript interpreter/component catalog plus reified public catalog contracts | deterministic catalog generation plus the pinned PureScript build | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
-| The reconcile plan / `--dry-run` preview | the `chain :: cfg -> [Step]` value whose amoebius config contains the whole opaque `ProvisionedSpec` | `renderChainPlan` | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
-| The image build recipe (`Dockerfile`, per identity) | the typed bake catalog — each stage's `NonEmpty BakeStep` | `renderDockerfile :: BakeCatalog -> Either CatalogError Dockerfile` (pure, total) | [image_build_doctrine.md](./image_build_doctrine.md) |
-
-The common shape is a deterministic projection or compiler-backed build from authored typed source. Pure
-renderers remain pure and total; a compiler-backed artifact additionally records the exact per-run resolved
-compiler/runtime ABI and component-catalog inputs. Repetition under the same recorded inputs must emit
-byte-identical output; changing a dynamically resolved input creates a distinct observation, not a committed pin.
-
-The paired UI artifacts have asymmetric visibility. `ClientPlan` is an allowlisted browser artifact;
-`UiServerPlan` is readable only by the UI-server service identity and has no client-asset route. A content
-address names bytes but does not make those bytes public or grant authority to fetch them.
-
-[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) supplies concrete build-boundary evidence: the
-paired plans, public contracts, and content manifest are produced in memory from `BoundUiProgram`, remain
-byte-identical across fresh randomized-order compiler processes, and leave all emitted output beneath
-`.build/**`. The four committed JSON files are regression fixtures, not independently authored semantic
-oracles; four logical projection rows supply the independent meaning check. No emitted per-application artifact
-is added to the authored source tree.
-
-[Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) supplies the complementary generic-bundle
-evidence. The pinned PureScript/Spago build emits the bundle only into ignored build directories, an independent
-scanner checks its allowlisted runtime surface, and two application plans execute without rebuilding or adding
-an application-authored browser artifact. The gate also projects nine bundle artifacts through the real
-five-calculus composition instead of substituting copied artifact counts.
-
-[Phase 46](../../DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md) makes that contract surface a concrete
-recipe. Sixteen public boundary rows deterministically emit three PureScript source recipes; two clean renders
-agree byte for byte, a strict contained Spago build emits the generic `ui-client-v1` bundle, and its SHA-256
-address is retained only as run evidence. An independent scanner and three production mutants distinguish the
-authored semantic expectation from the generated output.
-
-[Phase 72](../../DEVELOPMENT_PLAN/phase_72_ui_program_release.md) supplies the live release instance. Its
-deterministic projection writes paired client/server plans, public contracts, and release manifests as
-immutable content objects, while the repository scan keeps those per-application outputs absent from the
-committed generated tree. The serializable server plan contains handler/dispatch identities and codecs, never
-Haskell functions, and two program revisions retain the same generic runtime-image digest.
-
-**Why the `Dockerfile` belongs on this list.** The argument is the one
-[manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)
-already makes against Helm, one layer down. A Go-templated chart is text that becomes YAML only after string
-interpolation, so nothing inspects the result until the apiserver does; an `ARG`/`RUN` Dockerfile is text
-that becomes a *filesystem* only after interpolation, so nothing inspects the result until the image runs.
-amoebius refused the first and cannot consistently accept the second. With each stage's content a
-`NonEmpty BakeStep` ([image_build_doctrine.md §6](./image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)),
-the recipe becomes a projection of typed data and the committed artifact is the catalog, not the template.
-
----
+Operator-authored runtime values are a distinct case. They are external or untracked inputs supplied to the
+binary; they are not committed examples, fixtures, or application source within this repository. A gate may
+copy such a value into its run root, but that copy remains untracked input or run evidence.
 
 ## 3. The rule
 
-- **No generated artifact lives in the repository.** The rule is stated positively and once, by
-  [`jit_artifact_doctrine.md` §2](./jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list): every
-  artifact that is not Haskell source is generated, unless it must exist before the generator can run. The
-  repository therefore holds Haskell source, the generic PureScript interpreter, authored expectations (see
-  [§5](#5-authored-vs-generated-the-committed-source)), and the bootstrap exceptions — and nothing else. No
-  `.tla`, rendered manifest, reflected `*.dhall` schema, emitted `ClientPlan`/`UiServerPlan`, offline
-  codec or service-worker manifest, per-app content manifest, generated `*.purs` codec, compiled bundle,
-  emitted SQL, container recipe, or generated checking tool is committed.
+1. A Haskell value declares the complete semantic source of every generated artifact.
+2. Materialization occurs only when a typed workflow reaches a consumer that needs the artifact.
+3. Output is written beneath the owning `.build/**` subtree and never into a tracked root.
+4. A clean materialization is deterministic for the same declared and resolved inputs.
+5. An emitted external-language program has no authority to decide its own validation result.
+6. A separately reviewed Haskell oracle judges semantic properties of the output.
+7. A serializer or compiler round trip is a consistency check, not an independent oracle.
+8. The run records resolved compilers, dependencies, paths, and integrity observations without committing them.
+9. Materialized output is reaped at the end of its artifact region unless a typed retention grant transfers it.
+10. The tracked-source audit rejects an emitted copy regardless of its filename, location, or hand edits.
+
 ### 3.1 The retired image-recipe allowlist
 
-**This allowlist is retired.** It existed because the general rule had exceptions and the exceptions needed
-somewhere to live, so a per-file admitted set was authored here and keyed on the renderer input each entry
-pinned. The closed exception list replaces it with a *criterion* rather than a list — an artifact is exempt only
-if it must exist before the generator can run — and a per-file allowlist is exactly the mechanism that criterion
-removes: a list admits whatever somebody added to it, and its rows accumulate.
+There is no tracked image-recipe allowlist. A Dockerfile and every non-Haskell bake-catalog projection are
+generated beneath `.build/docker/**` from Haskell. Adding a digest, comment, or hand-maintained stanza does not
+make the recipe source.
 
-One tracked file was admitted under the old mechanism and did not meet the new criterion: the committed byte
-golden of the rendered container recipe. [Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md)
-retired that output copy on 2026-08-21. Its replacement is the independently authored twenty-two-row semantic
-recipe oracle plus the exact build-argv oracle; the renderer's Dockerfile is emitted only beneath `.build/**`.
-The gate also forbids the retired golden, so the closure cannot regress silently. A tracked file that reads as
-an emitted image recipe is now a finding, and an authored digest inside any catalog or recipe is a finding
-regardless.
-
-- **Each artifact is emitted by an `amoebius` subcommand** and stamped with a generated-by header ("do not edit
-  by hand; edit the source and re-emit"). The Dhall-generation pattern already proven in the siblings stamps
-  its output `-- GENERATED … Do not edit by hand`.
-- **An expectation is a semantic oracle, not a byte golden.** A byte golden of generated output tests a
-  renderer against a copy of its own past output: it cannot distinguish a correct change from an incorrect one,
-  and the usual response to a red golden is to regenerate it, which deletes the test one file at a time. Under
-  the artifact calculus it is also redundant, because a change in the rendered bytes is already a change in the
-  artifact's address ([`jit_artifact_doctrine.md` §4](./jit_artifact_doctrine.md#4-the-address-folds-in-the-rendered-text)).
-  What a phase commits instead is an **oracle**: an independently authored predicate over the rendered artifact,
-  asserting the property the artifact exists to have, written from the requirement rather than from the output
-  ([conformance_harness_doctrine.md](./conformance_harness_doctrine.md)). Copying the renderer's own output into
-  a fixture remains prohibited: that copy is a generated artifact and supplies no independent expectation.
-  Phase 33 applies this distinction to `renderAll`: the emitted `[K8sObject]` deployment is never committed.
-  Its eighteen `.json.golden` digest fixtures are retired; the authored
-  `test/oracle/render_manifest/semantic_projection.tsv` instead pins exact identity, kind, activation,
-  reconcile-mode, workload, policy, exposure, and accelerator meaning for all nine arms under both shapes.
-  It grants no authority to deploy. Phase 58 consumes the generated object values directly at
-  apply time and validates their live convergence without writing rendered manifests into the repository;
-  only independently authored fixtures are committed. Receipts are run evidence and remain outside Git.
-- **History must establish or review independence.** When a fixture and the implementation it tests first
-  appear in the same commit, Git establishes no before-implementation provenance. The fixture is a regression
-  fixture until a reviewer independently validates or replaces its expectation. A filename, `golden` label,
-  or same-commit manifest assertion cannot promote it to an independent oracle.
-- **Generated negative copies are not authored mutants.** A positive seed, mutation operator, and mutation
-  selection may be authored source. The materialized negative files produced from them are generated test
-  input and belong under `.build/test-corpora/` or `.build/tmp/`, even when committed copies would make a
-  checker convenient to run.
-- **One emitted path, one oracle location, one scan.** So that "generated" and "authored oracle" can never
-  be confused by a reader or a check, three conventions are normative and are stated **here**, not
-  re-derived per phase:
-  1. **Emitted artifacts are written only under the git-ignored `.build/` tree**, in a per-kind subdirectory
-     (`.build/tla/`, `.build/manifests/`, `.build/dhall/`, `.build/ui/`). No emitted artifact is written anywhere else,
-     and nothing under `.build/` is ever tracked.
-  2. **A committed oracle lives under `test/oracle/` and states semantic expectations in an authored table or
-     predicate.** It does not copy the generated artifact and does not use the generated artifact's natural
-     extension. Existing `.golden` snapshots of generated output are condemned legacy inputs owned by the
-     migration register, not a suffix convention for new work.
-  3. **The never-committed check is one command**: `git ls-files -- '.build/*'` plus a per-kind extension sweep
-     over tracked paths whose extension is *literally* the generated one — for TLA+,
-     `git ls-files -- '*.tla' '*.cfg'` — each returning empty. An actually emitted `.tla`/`.cfg` under version
-     control fails; an oracle table is distinguishable by both location and vocabulary.
-- **A semantic oracle is amended, never derived from a failing run.** When intended semantics change, the
-  expectation is updated under the oracle-amendment discipline of
-  [development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
-  which requires the amendment be authored from the intended property and reviewed as a change to the
-  expectation. Transcribing the failing run's actual output silently converts an oracle into a snapshot and
-  is prohibited at any phase.
-- **Run evidence is generated and never committed.** Ledgers, receipts, logs, traces, coverage, enumeration,
-  resolved toolchains, dependency graphs, screenshots, and machine observations are written beneath
-  `.build/runs/` and installed in the content-addressed `.build/evidence-store/`. Optional publication may
-  copy an attestation to a remote service, but no local evidence or staging path may live outside the checkout.
-- **Dependency resolution is generated and never committed.** Lock/freeze files, solver plans, package
-  checksum tables, resolved paths, and hard-coded library or package SHA values are prohibited in tracked
-  files. The current compatible graph and observed integrity data are resolved dynamically for every clean
-  run as specified by
-  [`repository_layout_doctrine.md` §4](./repository_layout_doctrine.md#4-dependency-and-toolchain-resolution).
-- **Python interpreter bytecode is the source-adjacent cache exception.** It is generated and never committed,
-  but the interpreter may cache it beside imported source. Both repository and container ignore contracts
-  cover the directory and suffix forms. Python commands use ordinary cache behavior; they do not suppress
-  cache writes merely to keep authored directories physically empty.
-
-The distinction is source-based rather than directory-based. An independently authored expected fixture may
-be committed; output copied from the subject, a reference program, a resolver, or a prior run may not.
-
----
+Image behavior is constrained by Haskell semantic expectations over stages, acquisition choices, parent
+identity, command structure, and outputs. A copied Dockerfile golden is prohibited because it compares the
+renderer with its own previous bytes.
 
 ## 4. What this buys
 
-- **Dry-run needs no cluster and no repository artifact.** Rendering the plan, the manifests, or the `.tla` is a
-  pure function of committed source, so it runs in-process (Register 1). The "rendering a plan MUST NOT require
-  live infrastructure" invariant of [conformance_harness_doctrine.md](./conformance_harness_doctrine.md) is a
-  direct consequence. Phase 34 validates this for the chain plan: emitted dry-run bytes remain uncommitted,
-  an independently authored nineteen-row semantic oracle constrains their meaning, canonical round trips
-  constrain their encoding, and the fake boundary losslessly relays a separate authored protocol input.
-- **The formal-model correspondence is mechanical.** Because the `.tla` is *only ever* emitted from the `Model`,
-  a stale or hand-edited spec cannot exist; the model↔code correspondence of
-  [formal_model_doctrine.md §5](./formal_model_doctrine.md#5-the-tlacfg-are-generated-never-committed) is
-  guaranteed by there being nothing else to check.
-  Phase 11 validates this discipline with the `amoebius dev model emit` path, 25 authored renderer-semantic
-  facts, an eight-case invariant truth table, four renderer mutants, and a tracked-file scan that rejects
-  generated `.tla`/`.cfg` artifacts.
-  Phase 17 applies the same path to `GatewayMigration`: the committed files under
-  `test/golden/formal/gateway/` are renderer oracles, while every executable TLC input remains under ignored
-  `.build/tla/`; the phase gate checks their byte equality before model checking.
-- **One place to change a shape.** Editing a manifest shape, an invariant, or a schema field is an edit to one
-  Haskell source; every rendering follows.
+- A generated schema cannot silently lag the Haskell decoder because no tracked schema copy exists.
+- A manifest or Dockerfile cannot receive an unreviewed hand edit because no tracked output exists to edit.
+- A toolchain refresh produces a new run observation instead of a permanent lock-table edit.
+- A new union arm regenerates the test-surface enumeration, exposing an unbound expectation rather than
+  relying on a hand-maintained inventory.
+- A generated client and its server plan can share one typed source without tracking either projection.
 
----
+These properties do not prove that a renderer is correct. Correctness depends on independent Haskell
+expectations, adversarial controls, and the gate-integrity contract. Content addressing proves which bytes an
+artifact name denotes; it does not prove that those bytes satisfy a requirement.
 
 ## 5. Authored vs generated: the committed source
 
-The rule is about *rendered* artifacts, not all non-Haskell files. The committed source of truth includes:
+The committed behavioral sources are Haskell only:
 
-- **Authored Dhall, now a much smaller class.** The dhall-typecheck schemas, the prelude of smart constructors,
-  and the hand-written examples are **no longer authored**: they are reflected from the Haskell checked-IR
-  types, so the schema and the decoder cannot disagree, and none of them is committed. What remains authored is
-  input that is not a rendering of anything amoebius holds — an operator's `InForceSpec` and an application's
-  bounded `UiSource`, both of which live in the deployment that owns them rather than in this tree — and the
-  independently authored positives of the DSL fixture corpus, which are oracles under `test/`. The negatives
-  are generated from those positives and a mutation operator, and are not committed.
-- **Haskell source** — the DSL and UI checked-IR types, trusted workflow/data/artifact adapters, binders,
-  `renderAll`/`emitTLA`/`chain` functions, and `Model` values.
-- **PureScript source** — the one generic client interpreter, offline browser-facility interpreter, and audited
-  trusted component catalog. Generated catalog/offline record codecs, migration tables, service-worker asset
-  manifests, and the compiled generic bundle are not source. An app contributes a checked
-  plan/content manifest, not PureScript source or an app-specific bundle.
-- **Documentation** — this doctrine suite.
-- **Phase contracts and policies** — human-authored requirements that contain no generated status view,
-  ledger copy, dependency resolution, or package integrity value.
+- product and runtime modules;
+- typed DSL, protocol, model, renderer, and client-runtime declarations;
+- test topology declarations and positive values;
+- independently reviewed oracle predicates and expected semantic values;
+- mutation operators and their expected failure identities; and
+- Haskell harnesses that observe the subject and external boundaries.
 
-The Phase-37 UI schema gate treats `UiSource` fixtures, exact diagnostic decisions, and independent
-program/graph semantic tables as authored inputs. Checked values, coverage reports, normalized wire bytes, and
-later client/server plans are derived outputs and remain untracked. The former normalized-wire byte golden is
-retired; the semantic table names tenant mode, module identities, qualified node identities, and external-link
-requirements instead. See [Phase 37](../../DEVELOPMENT_PLAN/phase_37_ui_program_schema.md).
+The sole source-language exception is Python beneath `pb/**`, bounded to the minimum platform distinction
+needed for contained toolchain establishment, source-bound Haskell build, and `exec` of that exact binary
+with every argument unchanged. `pb validate phase NN`, help, version, unknown verbs, and all future argv are
+opaque to Python; Haskell alone interprets them and owns every verdict. Governance Markdown and minimal
+build/repository metadata are non-source inputs.
 
-The line: a human-authored input or reviewed external source is version-controlled. An artifact projected,
-compiled, resolved, observed, or reported from another input is generated and is not version-controlled.
+There is no committed Dhall, PureScript, JavaScript, shell, Proto, Pulumi, Dockerfile, serialized fixture,
+golden, oracle table, expected diagnostic, mutant body, generated Markdown, or external-language checking
+tool. Independent authorship changes where the Haskell expectation comes from; it does not authorize a second
+tracked file format.
 
 ### 5.1 When the reflected schema changes under an operator's `.dhall`
 
-**The problem.** The two classes above are coupled in one direction that the rule above does not cover. The
-dhall-typecheck schema is **reflected from the Haskell types** and is not committed here; what is authored is
-an operator's own `InForceSpec` and an app's `UiSource`, which live in the deployment that owns them rather
-than in this repository. A change to the Haskell types — a field added, a union arm added, a field renamed or
-removed — changes the reflected schema, and therefore changes the meaning or admissibility of every operator
-value already written against it.
+An operator's `.dhall` is external input, not repository source. The Haskell types reflect the current schema
+on demand. An additive change may preserve the external value's meaning; a narrowing may require an explicit
+operator migration; an ambiguous semantic change is rejected.
 
-The failure is not a stale generated artifact, because there is no tracked copy to go stale. It is an
-*operator's* authored value that no longer type-checks against the new reflection, or worse, still type-checks
-and now means something else. It surfaces at the next `dhall update`, on a spec the operator did not touch,
-and amoebius cannot fix it by editing anything in this tree.
+amoebius never silently rewrites the operator's source value and never commits a migrated copy. A migration
+tool may emit a candidate beside the run's external-input staging area, but the operator retains authority to
+accept and store it outside Git.
 
-**Why the obvious alternative fails.** Versioning the schema and keeping N of them re-admits exactly what
-[§1](#1-why-this-doctrine-exists) removes: several concurrent descriptions of one type surface, kept in step by
-hope. Refusing ever to change the schema is not available either — the whole plan is a sequence of phases that
-widen them.
-
-**The chosen rule.** Schema evolution is classified by what it does to already-authored values, and only two
-of the three classes are admissible without an authored migration:
-
-- **Widening** — adding an *optional* field with a default, or adding a union arm no existing value inhabits.
-  Every committed `.dhall` still type-checks and still denotes what it denoted. Admissible.
-- **Narrowing** — removing a field or arm, or making an optional field required. Existing values may stop
-  type-checking. Admissible **only** as a `dhall update` that is rejected at dhall-typecheck with the operator holding
-  the authored value: the operator edits the source, because amoebius does not own it. There is no automatic
-  rewrite of an authored file, and there is deliberately no facility to produce one — a tool that silently
-  edited an operator's committed spec would make the authored/generated line meaningless.
-- **Reinterpretation** — keeping a field's name and type while changing its meaning. **Not admissible.** It is
-  the one change that cannot be caught by any gate, because the old value still type-checks and now denotes
-  something else. A meaning change is expressed as a *rename* (a narrowing plus a widening), so that dhall-typecheck
-  refuses the old value rather than accepting it under new semantics.
-
-**What it forecloses.** amoebius gives up in-place schema upgrades of operator-authored specs: a narrowing is
-an operator edit, and there is no migration tool to write. The honest residue is that the widening/narrowing
-classification is a property of the ADT change, checked by the Dhall typechecker on the corpus rather than
-proven — nothing forbids an author from making a reinterpretation change, and only review catches it.
-
-This is the DSL's own instance of the general migration law
-([migration_doctrine.md §3](./migration_doctrine.md#3-one-discipline-many-instances)); it is recorded there as
-an instance whose verification gate is the dhall-typecheck typecheck over the committed fixture corpus, followed by
-gadt-decode parity against the Haskell decoder mirror.
-
----
+Repository tests for schema evolution use Haskell values that render old and new Dhall inputs under
+`.build/test-corpora/**`. The expected compatibility classification is an independently reviewed Haskell
+value, not a committed `.dhall` corpus.
 
 ## 6. Planning ownership
 
-This document is normative only. Which phase builds each renderer is owned by
-[DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and [system_components.md](../../DEVELOPMENT_PLAN/system_components.md);
-the plan-standards requirement that a phase never register a generated artifact as a committed module path is
-owned by [development_plan_standards.md](../../DEVELOPMENT_PLAN/development_plan_standards.md). This doc states
-the target shape and links back for status; every statement here is design intent, never a tested amoebius
-result.
-
----
+This doctrine carries no implementation or validation status. The development plan owns which phases deliver
+each renderer, source migration, clean-room check, oracle, and sabotage control. A phase cannot close while an
+owned tracked copy remains in the single legacy register.
 
 ## Related Documents
 
-- [Repository Layout and Artifact Provenance](./repository_layout_doctrine.md) — complete tree, generated inventory, and ignore contracts
-
-Phase 41 emits deterministic `emit-client-offline-plan` and `emit-server-replay-plan` projections from one
-checked offline source. Independently pinned queue, cached-projection, and local-blob key sets match exactly;
-private fields and browser/Redis mechanisms remain absent; repeated compilation and all five production
-mutants pass. Browser persistence and live replay authority remain UNVERIFIED.
-
-Phase 45 pins the immutable public asset manifest and admits only public, content-digested, non-mutable cache
-entries. Its dynamically resolved PureScript/Spago build compiles the complete offline module graph into the
-generic client bundle beneath `.build/**`; two real Chrome processes preserve exactly those assets across
-restart and register the Service Worker. Server replay remains UNVERIFIED.
-
-Phase 87 emits `emit-offline-compatibility-manifest` and `emit-offline-migration-table` from the checked
-witness. The scoped gate checks complete key coverage, finite horizon, deterministic names, migration/retained
-paths, and incompatible refusal. Production PureScript and live provider rollout remain UNVERIFIED.
-
-- [Engineering Doctrine Index](./README.md)
-- [Formal Model Doctrine](./formal_model_doctrine.md) — the `.tla`/`.cfg` case
-- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — the k8s-object and `--dry-run` cases
-- [DSL Doctrine](./dsl_doctrine.md) — the Dhall surface reflected from the Haskell types, and the operator-owned `InForceSpec` written against it
-- [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) owns the complete UI generated-artifact set
-- [Browser Offline Runtime](./browser_offline_runtime_doctrine.md) — offline plans, codecs, migrations, and service-worker manifests are projections of checked source
-- [Lift and Compose Doctrine](./lift_and_compose_doctrine.md) — sibling UI contracts and flows are inputs to the generic checked runtime, not committed demo-shell output
-- [Conformance Harness Doctrine](./conformance_harness_doctrine.md) — golden rendering tests, no committed artifact
-- [Documentation Standards](../documentation_standards.md)
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md)
-- [Testing Doctrine](./testing_doctrine.md) — run-time enumeration, authored expectation, and repository-local evidence
+- [Repository Layout and Artifact Provenance](./repository_layout_doctrine.md) — the closed path/source grammar
+- [JIT Artifact Doctrine](./jit_artifact_doctrine.md) — typed targets, recipes, addresses, regions, and reaping
+- [Formal Model Doctrine](./formal_model_doctrine.md) — generated TLA+/TLC inputs
+- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — generated Kubernetes/provider objects
+- [Low-Code UI Runtime](./low_code_ui_runtime_doctrine.md) — generated client runtime and paired plans
+- [Testing Doctrine](./testing_doctrine.md) — independent Haskell expectations and generated test encodings
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — delivery and validation status

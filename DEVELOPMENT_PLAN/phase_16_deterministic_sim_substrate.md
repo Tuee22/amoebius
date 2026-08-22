@@ -1,34 +1,36 @@
 # Phase 16: Deterministic-simulation substrate
 
-> **Purpose**: Make one polymorphic reconcile program reproducible under a modeled, fault-injectable
-> environment while keeping live-substrate fidelity outside the claim.
+> **Purpose**: Specify the target Haskell capability to execute one polymorphic Haskell reconcile
+> program under deterministic modeled effects and fault schedules while making no claim of
+> live-substrate fidelity.
 > **Read this if**: a concurrent reconciler needs deterministic schedule evidence, or a modeled trace must be
 > distinguished from live-system proof.
 
-This phase owns the `io-classes` environment seam, its structural `IO` client interpreter, its `IOSim`
-interpreter, six modeled contracts, and the bounded replay gate. It validates a committed reference reconciler
-and a semantic projection from the five-calculus composition. Later phases must run their own production code
-through the same seam; this phase does not pre-validate them.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 16.1: Polymorphic environment and interpreters ✅](#sprint-161-polymorphic-environment-and-interpreters-)
-- [Sprint 16.2: Modeled contracts and semantic schedules ✅](#sprint-162-modeled-contracts-and-semantic-schedules-)
-- [Sprint 16.3: Determinism, exploration, and mutation ✅](#sprint-163-determinism-exploration-and-mutation-)
+- [Sprint 16.1: Polymorphic environment and interpreters ⏸️](#sprint-161-polymorphic-environment-and-interpreters-)
+- [Sprint 16.2: Modeled contracts and semantic schedules ⏸️](#sprint-162-modeled-contracts-and-semantic-schedules-)
+- [Sprint 16.3: Determinism, exploration, and mutation ⏸️](#sprint-163-determinism-exploration-and-mutation-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -36,96 +38,84 @@ through the same seam; this phase does not pre-validate them.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All twelve gate sides passed on natural `arm64`, untranslated. Both interpreters,
-six fake contracts, four schedules, the actual five-calculus projection, same-seed determinism, changed-seed
-sensitivity, four bounded POR replays, and the exact-reason mutant passed; all ten metrics matched and 28
-surfaces joined to 38 run-time items. Attestation
-`sha256:f532c640a409bca78bb309721749c314d7f57cebf76c795558da5e3a0eb72e7d` binds source
-`sha256:0e946733b9f1fb06…` over 2,186 files. Repository-conformance and documentation support gates passed on
-that snapshot. Model fidelity remains ASSUMED and live runtime remains UNVERIFIED.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 15, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`Env m` carries publish/consume, blob, object, DNS, Vault, and clock effects without fixing `m`. One reference
-reconciler runs through `Env IO` backed by injected client functions and through `Env (IOSim s)` backed by
-typed models. The gate uses `noOpRealClients` only to validate the structural `IO` interpretation; it does not
-contact a live service. Six fake-contract modules exercise Pulsar, MinIO, apiserver, route53, Vault, and clock
-semantics with enabled and disabled controls.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to execute one polymorphic Haskell reconcile program under deterministic
+modeled effects and fault schedules while making no claim of live-substrate fidelity.
 
-Four authored schedules cover delay, reorder, duplicate/redelivery, partition/heal, and crash/retry. A fixed
-seed must produce equal encoded traces in two independent replays, a changed seed must change the trace, and
-bounded `IOSimPOR` must uphold the reference invariant. This is a dynamic determinism assertion, not a
-committed byte snapshot. The authored expected-outcome table decides schedule semantics, while a separate
-five-row table fixes calculus order, component names, exact resource sum, published commands, and outcome for
-the actual Phase-10 composition projection.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
 
-**Phase scope:** One polymorphic effect interface, two interpreters, six modeled service contracts, four
-fault schedules, one five-calculus semantic projection, and one bounded replay/mutation gate; split if another
-simulation engine, another service-model family, or a production reconciler's domain semantics enter the
-substrate itself.
-**Substrate:** none
-**Lane:** none
-**Register:** 2 — boundary integration with modeled services
-**Depends on:** [Phase 10](phase_10_calculus_composition.md) — supplies the real indexed composition projected
-into the reference program; [Phase 15](phase_15_compile_fail_harness.md) — supplies the preceding validated
-compiler-evidence boundary and numeric opening condition.
-**Gate:** `python3 tools/run_phase_gate.py 16` passes toolchain and source-boundary checks, the two
-interpreters, six fake contracts, four schedule verdicts, five-calculus semantic projection, same-seed
-determinism, changed-seed sensitivity, four bounded `IOSimPOR` replays, the registry-backed
-dropped-partition mutant, ten metrics, complete surface join, containment, write guard, natural
-architecture, and source-bound attestation.
+This phase precedes Phase 49 and is confined to modeled Register-2 boundary behavior only. It cannot
+use host, hardware, live-service, or cluster observations to validate or promote its claim.
+
+**Phase scope:** Target capability only — execute one polymorphic Haskell reconcile program under
+deterministic modeled effects and fault schedules while making no claim of live-substrate fidelity.
+NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 2 — Haskell behavior against modeled boundaries only; no live correspondence claim. NOT VALIDATED.
+
+**Depends on:** [Phase 15](phase_15_compile_fail_harness.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 16`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set:** the four schedules collectively enable every typed fault axis, the six fake
-  contracts cover each modeled interface, and the actual five-calculus composition crosses the Phase-10/16
-  boundary without replacing either vocabulary.
-- **Independent oracles:** `expected_outcomes.tsv` fixes the invariant result for every schedule, and
-  `calculus_projection.tsv` fixes order, names, resource total, published command multiset, and outcome. The
-  suite reads both tables; neither is generated from its observations.
-- **Positive counterparts:** every fake fault has a disabled-knob control. The reference reconciler must also
-  uphold its invariant under the injected `IO` interpreter and every unmutated schedule.
-- **Specific-reason negative:** the committed mutant drops partition handling and must report
-  `NoActOnStaleRead`; a generic non-zero exit or another violated invariant cannot satisfy the gate.
-- **Determinism control:** equal same-seed bytes alone are insufficient. The gate also perturbs a seed and
-  requires a different trace, preventing an invariant constant trace from passing.
-- **Bounded exploration:** `IOSimPOR` uses explicit branching and schedule limits for each authored schedule.
-  The result is tested only inside those bounds and makes no exhaustive concurrency claim.
-- **Composition correspondence:** test-support code constructs real artifact, budget, lift, workflow, and
-  evidence components at one real request-scope index. Only plain projected facts cross into `sim-spec`,
-  avoiding the older duplicate module identities still exposed by `dsl-core`.
-- **Generated-artifact discipline:** encoded traces are compared during the run and are never committed.
-  Metrics, locus ledgers, surface enumerations, logs, and attestations remain beneath `.build/**`.
-- **Honesty boundary:** schedule invariants are tested against modeled services. Model fidelity remains
-  **ASSUMED**, the structural `IO` interpreter does not constitute service contact, and live runtime remains
-  **UNVERIFIED**.
-- **Observer controls:** no authenticated or live authority path exists in this Register-2 process. Disabled
-  knobs, independent semantic tables, changed-seed sensitivity, and the exact mutant locus are the applicable
-  anti-tautology controls.
-- **Fresh challenge:** not applicable. The phase has no live substrate; committed semantic schedules and the
-  independent mutant are the reproducible challenge.
-- **Extension conformance (§M.13).** Not applicable. Phase 16 declares no extension or domain member.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — execute one polymorphic Haskell reconcile program under deterministic modeled effects and fault schedules while making no claim of live-substrate fidelity. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 16` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 15 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`deterministic_simulation_doctrine.md` §2 — The io-classes environment abstraction](../documents/engineering/deterministic_simulation_doctrine.md#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole): one program is interpreted under `IO` and `IOSim`.
+- [`deterministic_simulation_doctrine.md` §2 — The io-classes environment abstraction — build it pure, lift it whole](../documents/engineering/deterministic_simulation_doctrine.md#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole): one program is interpreted under `IO` and `IOSim`.
 - [`deterministic_simulation_doctrine.md` §3 — The simulated environment and its fault model](../documents/engineering/deterministic_simulation_doctrine.md#3-the-simulated-environment-and-its-fault-model): the six modeled interfaces carry typed fault controls.
-- [`deterministic_simulation_doctrine.md` §5 — What DST establishes](../documents/engineering/deterministic_simulation_doctrine.md#5-what-dst-establishes-and-the-one-premise-it-buys): modeled-schedule evidence is tested while environmental fidelity stays assumed.
-- [`deterministic_simulation_doctrine.md` §4 — Register 2.5](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits): the phase gate is Register 2; Register 2.5 is the later activity this substrate serves, never this gate's register.
+- [`deterministic_simulation_doctrine.md` §5 — What DST establishes, and the one premise it buys](../documents/engineering/deterministic_simulation_doctrine.md#5-what-dst-establishes-and-the-one-premise-it-buys): modeled-schedule evidence is tested while environmental fidelity stays assumed.
+- [`deterministic_simulation_doctrine.md` §4 — Register 2.5 — where deterministic simulation sits](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits): the target contract is Register 2 modeled behavior only; the current gate is rejected and no Register-2.5 or live claim is admitted.
 
 ## Sprints
 
-## Sprint 16.1: Polymorphic environment and interpreters ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done.
-**Implementation**: `src/Amoebius/Sim/{Env,Reconcile}.hs`,
-`src/Amoebius/Sim/Interp/{Real,Sim}.hs`, and the `sim-spec` Cabal component.
-**Blocked by**: None.
-**Independent Validation**: one reference program returns `Upheld` under both injected-client `IO` and
-`IOSim`; a non-empty ten-module source scan rejects bare `IO` signatures and raw concurrency while requiring
-`MonadAsync`, `MonadSTM`, `MonadDelay`, and `IOSim`.
-**Docs to update**: `documents/engineering/{deterministic_simulation_doctrine,testing_doctrine}.md` and
-`DEVELOPMENT_PLAN/{README,overview,system_components}.md`.
+## Sprint 16.1: Polymorphic environment and interpreters ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -146,19 +136,11 @@ Keep concurrency-bearing reconcile code independent of the interpreter used to e
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 16.2: Modeled contracts and semantic schedules ✅
+## Sprint 16.2: Modeled contracts and semantic schedules ⏸️
 
-**Status**: Done.
-**Implementation**: `src/Amoebius/Sim/Fakes/**`, `test/spec/sim/FaultContracts.hs`,
-`test/fixture/deterministic_simulation/schedules/**`, `test/oracle/deterministic_simulation/{expected_outcomes,calculus_projection,validation_locus}.tsv`, and
-`test/harness/deterministic_simulation/CalculusProjection.hs`.
-**Blocked by**: Sprint 16.1's environment interface and interpreters.
-**Independent Validation**: authored service controls and four expected schedule verdicts are checked
-separately from the implementation; a five-row semantic table checks the real Phase-10 composition projection.
-**Docs to update**: `documents/engineering/{deterministic_simulation_doctrine,testing_doctrine}.md` and
-`DEVELOPMENT_PLAN/{legacy_tracking_for_deletion,system_components}.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -180,18 +162,11 @@ implementation snapshots.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 16.3: Determinism, exploration, and mutation ✅
+## Sprint 16.3: Determinism, exploration, and mutation ⏸️
 
-**Status**: Done.
-**Implementation**: `test/spec/sim/{SimSpec,DroppedPartitionMutant}.hs`,
-`test/mutant/registry.tsv`, `test/oracle/deterministic_simulation_surfaces.tsv`, and
-`tools/deterministic_simulation_gate.py`.
-**Blocked by**: Sprint 16.2's authored schedules and semantic oracles.
-**Independent Validation**: four two-run byte comparisons are paired with changed-seed sensitivity, four
-bounded POR replays, and one exact-reason mutation result.
-**Docs to update**: `DEVELOPMENT_PLAN/{README,overview,legacy_tracking_for_deletion,system_components}.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -213,15 +188,17 @@ Show that explored modeled faults are reproducible and that the gate rejects a m
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `deterministic_simulation_doctrine.md` — record the five-calculus projection and the dynamic-trace/no-golden distinction.
 - `testing_doctrine.md` — record the concrete Register-2 substrate instance and honesty boundary.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md`, `overview.md`, `system_components.md`, and
   `legacy_tracking_for_deletion.md` — reconcile order, evidence, implementation paths, and retired debt.
 

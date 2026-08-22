@@ -1,6 +1,7 @@
 cabal-version: 3.12
 name: amoebius
 version: 0.1.0.0
+synopsis: Haskell-owned infrastructure and validation runtime
 build-type: Simple
 license: Apache-2.0
 
@@ -1221,6 +1222,34 @@ flag offline-multizone-continuity-clear-state-release-mutant
 flag offline-multizone-continuity-duplicate-blob-dependency-mutant
   default: False
   manual: True
+
+library validation-kernel
+  visibility: public
+  exposed-modules:
+      Amoebius.Validation.Approval
+      Amoebius.Validation.Documentation
+      Amoebius.Validation.Dispatch
+      Amoebius.Validation.Evidence
+      Amoebius.Validation.Gate
+      Amoebius.Validation.Legacy
+      Amoebius.Validation.PhaseContract
+      Amoebius.Validation.SourceClosure
+      Amoebius.Validation.Types
+  hs-source-dirs:
+      src/validation-kernel
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      crypton ==1.0.6,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
 library
   exposed-modules:
@@ -2718,6 +2747,7 @@ executable amoebius
       base >=4.21 && <4.22,
       amoebius:formal-model,
       amoebius:dsl-core,
+      amoebius:validation-kernel,
       aeson ==2.2.5.0,
       base64-bytestring ==1.2.1.0,
       bytestring >=0.12 && <0.13,
@@ -2730,6 +2760,35 @@ executable amoebius
       text >=2.1 && <2.2
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -threaded
+
+test-suite validation-kernel-component
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      ApprovalOracle
+      DocumentationOracle
+      DispatchOracle
+      EvidenceOracle
+      LegacyOracle
+      PhaseContractOracle
+      QualificationOracle
+      SourceClosureOracle
+  hs-source-dirs:
+      test/validation-kernel
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:validation-kernel,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      crypton ==1.0.6,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      memory ==0.18.0,
+      process >=1.6 && <1.7,
+      temporary >=1.3 && <1.4,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
 
 test-suite formal-model-spec
   type: exitcode-stdio-1.0

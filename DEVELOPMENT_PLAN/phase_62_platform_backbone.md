@@ -3,36 +3,34 @@
 > **Purpose**: Stand up the platform backbone — MetalLB, MinIO, and Pulsar HA
 > (brokers/ZooKeeper/BookKeeper/offload) — on a
 > single-node linux-cpu cluster, each as its HA topology from Haskell-generated manifests and baked-binary
-> images, rehoming the `distribution` registry's blob store onto the MinIO S3 driver and proving a
+> images, rehoming Distribution `registry:2`'s blob store onto the MinIO S3 driver and proving a
 > size-triggered Pulsar offload bounds the hot tier.
 > **Read this if**: phase 62 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 62 delivers the platform backbone (MetalLB + MinIO + Pulsar HA); its design is owned by [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), [image_build_doctrine.md](../documents/engineering/image_build_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-The complete gate passed on 2026-08-10.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/migration_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, documents/engineering/migration_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 62.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming 🔄](#sprint-621-metallb-loadbalancer--minio-object-substrate--registry-s3-driver-rehoming-)
+- [Sprint 62.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming ⏸️](#sprint-621-metallb-loadbalancer--minio-object-substrate--registry-s3-driver-rehoming-)
 - [Sprint 62.2: Pulsar native-protocol backbone + size-triggered S3 offload drill ⏸️](#sprint-622-pulsar-native-protocol-backbone--size-triggered-s3-offload-drill-)
 - [Sprint 62.3: The backbone HA bring-up gate ⏸️](#sprint-623-the-backbone-ha-bring-up-gate-)
 - [Documentation Requirements](#documentation-requirements)
@@ -42,61 +40,41 @@ The complete gate passed on 2026-08-10.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-61 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 61, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — Phase 62's 2026-08-16 live validation proved that the Phase-56 image omitted Pulsar's separately published S3 offloader bundle. Phase 56 is reopened; Phases 37–40 must be revalidated in numerical order before this phase resumes. The registry executable correction and private-fixture containment hardening remain implemented.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Superseded active record:** opened 2026-08-16 after the amended Phase-61 Vault/PKI gate sealed as
-`sha256:4f029c9f8fe3fa35da3da2cd1a6b94cdc7f2d2a808a821540d290848d6130dcb`.
-The current work audits and migrates the backbone gate in sprint order, dynamically consumes the verified
-Phase-56 image handoff and exact Phase-61 predecessor, confines every generated/live byte to `.build/**` or
-the marker-owned `.test_data/**` run, and reruns the full Register-3 contract before Phase 63 opens.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Observed artifact migration — 2026-08-11:** `test/fixture/phase30/expected-base-digest.txt` duplicates the
-Phase-56 image observation. It must be removed. Image identity remains a live provenance check against the
-verified Phase-56 attestation and current in-cluster registry catalog, not a committed digest file.
-
-**Invalidated historical record:**
-
-Done (invalidated). The complete Register-3 gate passed on 2026-08-10 on a fresh single-node `kind` cluster. Live
-evidence records an externally reachable stable MetalLB VIP, a four-drive distributed MinIO byte round-trip,
-registry migration and cutover to the MinIO S3 driver, three ZooKeeper members, three BookKeeper bookies,
-two Pulsar brokers, native-protocol CBOR/dedup exercise, and 19 observed offload objects while the hot tier
-remained below its committed cap. All 53 SSA-owned live objects matched their desired fields byte-for-byte,
-and the 11 execution-unit projections matched a freshly executed
-`Amoebius.Platform.Backbone.renderBackbone` result. Every runtime image ID matched the Phase-56 baked digest,
-zero public pull was observed, all six seeded mutants went red, and the honesty ledger is
-`dynamically-resolved`.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase turns the storage-and-secrets-provisioned cluster of Phase 61 into an amoebius cluster carrying the
+**Target capability — NOT VALIDATED.** This phase must turn the future human-approved storage-and-secrets
+cluster of Phase 61 into an amoebius cluster carrying the
 platform backbone: the L4 LoadBalancer (MetalLB), the MinIO S3 object substrate, and the Pulsar
 native-protocol event/workflow backbone (brokers, ZooKeeper metadata members, BookKeeper bookies, and
-size-triggered S3 offload). Each is rendered as
-the byte-identical **HA topology even at `replicas=1`**, each emitted as typed Kubernetes objects by the
+size-triggered S3 offload). Each must be rendered as
+the byte-identical **HA topology even at `replicas=1`** and emitted as typed Kubernetes objects by the
 Phase-58 `renderAll` path (no Helm, no third-party charts, and the emitted manifests are generated from Haskell
-and never committed), each served from binaries **baked into the native-architecture base image** with no
-public-registry pull, and each on the Phase-60 `no-provisioner` retained PVs where it holds durable state.
+and never committed), served from binaries **baked into the native-architecture base image** with no
+public-registry pull, and placed on the Phase-60 `no-provisioner` retained PVs where it holds durable state.
 
-Two deferred gaps from earlier phases close here. First, the **registry→MinIO S3-driver rehoming**: the
-Phase-56 `distribution` registry ran against **interim node-local (filesystem-driver) blob storage** with the
-MinIO S3 driver named as this phase's target; Phase 62 moves the registry's blob store onto MinIO via the S3
-driver, so the registry holds no PV of its own and its bytes live in the object substrate. Second, the
+Two deferred gaps from earlier phases must close here. First, the **registry→MinIO S3-driver rehoming**: the
+future Phase-56 Distribution `registry:2` state uses **interim node-local (filesystem-driver) blob storage**
+with the MinIO S3 driver named as this phase's target; Phase 62 must move the registry's blob store onto MinIO
+via the S3 driver, so the target registry holds no PV of its own and its bytes live in the object substrate. Second, the
 **Pulsar size-triggered S3 offload**: a topic's hot tier (BookKeeper on retained PVs) is bounded by a size
-high-water mark that offloads closed ledgers to MinIO, and this phase drills that the offload actually fires
+high-water mark that offloads closed ledgers to MinIO, and the future gate must drill that the offload actually fires
 under sustained ingest and that the hot tier never exceeds its cap.
 
-The rehome is a verified migration, not a driver-only configuration edit, and it does not erase or replace the
-registry's capacity proof. Phase 62 preserves the artifact/upload
+The future rehome must be a verified migration, not a driver-only configuration edit, and must not erase or
+replace the registry's capacity obligation. Phase 62 must preserve the artifact/upload
 operands from Phase 56's canonical `RegistryStorageDemand` — every digest-keyed compressed
 layer/config/manifest extent, bounded model-derived concurrent-upload workspace, and finite failed-upload residue through
 observed GC — while the replacement demand changes only its backend arm from the interim volume to MinIO. The resulting private
@@ -105,23 +83,25 @@ upload/partial `objectStorePeak`, scalar interim `derivedPeak`, mutation-admissi
 its backend projection is intentionally different. A private `ProvisionedRegistryBackendMigration` derives an
 exact source-digest→target-object map, transfer/verification Job `PodResourceEnvelope`, workspace, and
 source+target per-backing high-water. Only the structured target peak enters MinIO's per-object
-erasure/healing geometry. Every pre-existing Phase-56 artifact is copied and independently digest-verified
+erasure/healing geometry. Every pre-existing Phase-56 artifact must be copied and independently digest-verified
 before atomic driver cutover, then pulled by its old digest through the registry. Source filesystem residents
 stay charged and readable until verification/cutover and remain charged with partial targets on failure; no
 cleanup/reclamation is credited before it is observed. The target gets no speculative cross-backing dedup
 credit.
 
-The scope deliberately stops at *standing the backbone up HA and proving its data-plane round-trips, the
+The target scope stops at *standing the backbone up HA and establishing its data-plane round-trips, the
 registry rehoming, and the offload bound*. The Percona-operator-managed per-consumer Patroni Postgres
 clusters, pgAdmin, Prometheus/Grafana, and the **full derived readiness-DAG bring-up of the whole standard stack** are [Phase 63](phase_63_platform_services_2.md). The **Keycloak-owned ingress edge** — Envoy/Gateway
 API terminating TLS and Keycloak owning all wild ingress so no workload publishes its own path — is
-[Phase 64](phase_64_keycloak_ingress.md); this phase brings the backbone up behind no public edge. The
+[Phase 64](phase_64_keycloak_ingress.md); this phase must bring the backbone up behind no public edge. The
 Deployment-`replicas=1` control-plane daemon that will eventually *own* this reconcile loop is
-[Phase 65](phase_65_live_dsl_deploy.md); here the reconciler is driven from the operator/host path against a
-fixed, hand-assembled service set so the backbone exists before the DSL and the control-plane daemon that will describe
+[Phase 65](phase_65_live_dsl_deploy.md); the future gate must drive the reconciler from the operator/host path
+against a fixed Haskell-declared service set so the backbone exists before the DSL and control-plane daemon that will describe
 it.
 
-**Phase scope:** one cohesive claim — *the backbone stands up as its HA topology from generated manifests, and the registry's blobs move onto it*. A size-triggered offload is what proves the tiering is real.
+**Phase scope:** one cohesive target claim — *the backbone must stand up as its HA topology from generated
+manifests, and the registry's blobs must move onto it*. A size-triggered offload must establish that the
+tiering path is exercised.
 
 **Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
 specialized hardware feature is required. Every hardware substrate can always run this `linux-cpu` lane. If
@@ -130,162 +110,45 @@ or WSL2 on Windows hardware.
 
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
-**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)); this is not a pure/golden or fake-tool check but a real bring-up
-on a real cluster, emitting a proven/tested/assumed ledger that names Register 3 and marks the runtime layer
-*tested*, never *proven*.
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed));
+the future contract requires real cluster bring-up and independent runtime observations. A candidate ledger
+may classify only that bounded observation as *tested*, never *proven*, and has no status authority.
 
-**Depends on:** [Phase 61](phase_61_vault_pki.md) — the root Vault and PKI, the secrets floor every backbone service reads its credentials through.
-
-**Gate:** `python3 tools/run_phase_gate.py 62` passes: the backbone comes up HA from generated
-manifests, both data planes round-trip, and the hot tier holds under its offload cap. Its apparatus is
-[Gate integrity](#gate-integrity).
-
-```mermaid
-flowchart LR
-  %% register: algebra
-  fx["committed fixtures"]:::intent
-  or["independently authored oracle"]:::intent
-  mu["seeded mutant"]:::intent
-  g{{"the phase 62 gate command"}}:::gate
-  ok((("phase seal: the ledger this gate emits"))):::seal
-  no>"the mutant must turn it red"]:::refuse
-  fx -->|"binds the corpus"| g
-  or -->|"binds the expectation"| g
-  mu -->|"binds the defect"| g
-  g -->|"fixtures green, oracle agrees"| ok
-  g -->|"mutant green means the gate is not one"| no
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
-  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
-  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
-```
-*Design intent. Phase 62's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
-
-```mermaid
-flowchart LR
-  %% register: orientation
-  registry["in-cluster registry"] -->|"stores blobs"| minio["retained MinIO"]
-  clients["typed platform clients"] -->|"objects and checkpoints"| minio
-  clients -->|"CBOR messages"| pulsar["Pulsar brokers"]
-  pulsar -->|"hot ledgers"| bookkeeper["BookKeeper"]
-  bookkeeper -->|"size-triggered offload"| minio
-```
-*Orientation. Phase 62 converges one retained MinIO backing for registry/content/offload while Pulsar keeps its bounded hot path through BookKeeper, as owned by the [platform-services doctrine](../documents/engineering/platform_services_doctrine.md).*
-
-**Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).**
-The gate is closed to a stub by seven cross-checks named in the Sprint 62.1–31.3 deliverables. Existing
-same-commit fixtures are regression fixtures until Phase 0 and the owning sprint record independent review or
-replacement; none inherits oracle status from the old manifest claim.
+**Depends on:** [Phase 61](phase_61_vault_pki.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 62`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The apparatus phase 62's gate closes over, in the slot
-[§D](development_plan_standards.md#d-the-per-phase-document-skeleton) reserves for it. Every clause it
-discharges is owned by
-[§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *the backbone stands up as its HA topology from generated manifests, and the registry's blobs move onto it*. A size-triggered offload is what proves the tiering is real. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 62` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 61 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-### Image-identity provenance (§M.5 OS-boundary observer)
+## Resource provision — UNRESOLVED
 
-"No public-registry pull" is not a self-emitted claim: every running container's `imageID` digest (`kubectl
-get pods -A -o jsonpath={..imageID}` over the amoebius-rendered namespaces) MUST equal the Phase-56 baked
-base-image digest resolved from the in-cluster `distribution` registry catalog; any digest not in that
-catalog, or any `docker.io`/`quay.io`/other public-registry image reference, fails the gate. This
-discriminates a genuine baked-binary bring-up from upstream images side-loaded onto the node (which `kind
-load` and a deny-all egress test cannot tell apart — only image identity can). The pull-observation window
-is the containerd/CRI image-pull event log on the kind node read from the OS boundary (not amoebius's own
-logging), covering the whole gate window. The accepted digest is read from the verified Phase-56 attestation
-and independently confirmed in the current in-cluster catalog; no expected-digest file is committed.
-
-### Render byte-identity (§M.3 independent provenance)
-
-At gate time the pure `renderAll` is re-run in-process and the SSA-applied object bytes under the `amoebius`
-field manager (`kubectl get ... -o yaml`, managedFields filtered) MUST be byte-identical to that fresh
-`renderAll` output — pinning applied manifests to the Phase-58 renderer, so hand-written or `helm
-template`-derived YAML embedded as string constants fails.
-
-### Exact resource-provision identity (§M.3 independent projection)
-
-For every amoebius-owned app, init, and sidecar container, the applied CPU/memory/ephemeral-storage requests
-and limits are byte-for-byte the projection of the opaque `ProvisionedServiceSpec`; every disk-backed
-`emptyDir` has a `sizeLimit` covered by that ephemeral-storage ceiling (a kubelet measurement/eviction
-boundary, not a synchronous quota); every cache owner also enforces its private admission bound, and every
-PVC/PV presentation and rounded size equals its uniform durable claim plan and the retained aggregate
-witness; and these linux-cpu services carry cache `None` and accelerator `None` with no device
-extended-resource claim. The checker independently recomputes the effective pod reservation/ceiling from the
-concurrent app/sidecar sum, ordinary sequential-init maxima, restartable init-sidecars accumulated according
-to their lifecycle, and pod/runtime overhead, then matches the provisioned placement witness. Merely
-declaring a subset of built-in resource fields does not pass.
-
-### Physical-storage geometry and write-peak identity (§M.3 independent projection, §M.2 committed mutants)
-
-An independent checker recomputes BookKeeper's per-bookie steady/re-replication maximum from its
-ensemble/write/ack quorums and finite bookie-fault policy, and MinIO's per-drive steady/healing maximum from
-logical object extents, stripe padding, data/parity shards, replacement drives, and finite drive-fault
-policy. It also reconstructs the closed six-arm app/content/registry/Pulsar-offload/Pulumi-checkpoint/
-control-plane-state source type, covers every arm in the capacity corpus, and requires the present source set
-to equal the producer set with exactly one resolved `StorageBudgetId`/owner and writer
-admission each, unions exact store/tenant/bucket/full-key resident identities, and retains all structural
-future/concurrent/deletion-lag/failed-orphan extents. The fault
-scenarios are the complete subsets derived from the policies, never caller-selected lists. The checked
-usable maps must equal the opaque geometry witnesses; then the checker applies each slot's
-`VolumePresentation` and backing allocation policy, groups compatible claim slots by StatefulSet template,
-recomputes `provisionedBytes = max rounded ordinal allocation`, and proves every rendered PVC/PV equals that
-uniform raw size, exposes at least the maximum required usable bytes, and debits
-`provisionedBytes × ordinalCount`. A fitting logical total, pre-presentation/unequal raw-map sum, or
-cluster-wide disk average does not pass. The committed mutants
-**`mutant/storage-logical-as-physical`**, **`mutant/storage-drop-required-fault-scenario`**,
-**`mutant/storage-sum-unequal-ordinals`**, and **`mutant/content-store-immediate-gc`** MUST each turn the
-boundary corpus red.
-
-### HA predicate (disambiguation)
-
-"Its HA topology even at `replicas=1`" means the rendered manifest is
-**byte-identical modulo the replica-count field(s)** to the same service rendered at `replicas=n` (MinIO in
-distributed erasure-set mode, Pulsar multi-broker/multi-ZooKeeper/multi-bookie) — asserted by a render-diff whose only
-tolerated difference is the replica count — NOT a standalone/single-drive or single-broker variant that
-merely avoids a bare Pod.
-
-### Registry rehoming (§M.3 independent oracle, §M.5 external observer, §M.2 committed mutant)
-
-The registry's storage backend is asserted to be the MinIO S3 driver against the committed independent
-oracle `test/fixture/platform_backbone/registry-storage-driver.golden` (the expected `distribution` storage stanza —
-S3 driver, MinIO endpoint, bucket — authored by hand, not read from the running config), and the rehoming is
-observed externally: every digest in a Phase-56 preexisting artifact is copied to its exact target object,
-independently verified, and remains pullable by the same digest after cutover; a newly pushed blob
-materializes only in the MinIO bucket. The source path remains charged/readable through verification and is
-reclaimed only after observed successful cleanup. The committed seeded mutant
-**`mutant/registry-fs-driver`** — the `distribution` config left on the interim node-local filesystem driver
-— MUST turn this assertion red (the pushed blob never appears in MinIO). The checker also requires every
-artifact/upload operand in `RegistryStorageDemand` and the private `objectSet`, `derivedPeak`, and
-upload/orphan witness to match Phase 56. It also independently derives the private
-`ProvisionedRegistryBackendMigration` source→target map, transfer/verify Job, workspace, and old+new
-per-backing high-water; only after verification does the active backend arm change from the interim volume
-to MinIO. It may not replace the digest map with a tag count or total. Resident/new digest overlap debits
-once within the target, a same-digest size conflict rejects, model-derived upload workspace and pre-GC
-partial residue overlap the stored union, and a target backing one byte under the resulting physical
-witness, a one-unit-short transfer executor, or an injected digest verification failure rejects before
-cutover. The failure keeps the source route and all old/partial-new commitments.
-
-### Pulsar offload bound (§M.5 external observer, §M.2 committed mutant, §M.7 concrete drill)
-
-The size-triggered offload is exercised, not merely configured: a named drill topic carries the hot-tier
-size cap committed in `test/fixture/platform_backbone/hot-tier-cap.golden`; sustained ingest past that cap MUST cause
-offloaded ledger objects to appear in MinIO (external observer on the object substrate) while
-BookKeeper/broker hot-tier occupancy (external observer on broker metrics, not an amoebius self-report)
-never exceeds the cap. The committed seeded mutant **`mutant/offload-time-only`** — a time-only offload
-policy with the size trigger removed — MUST turn this drill red (hot-tier occupancy exceeds the cap under
-the same ingest), since a time-only trigger cannot bound occupancy.
-
-**Representative service set (§M.7).** The gate's "platform backbone" is exactly: MetalLB, MinIO (distributed),
-and Pulsar (broker + ZooKeeper metadata member + BookKeeper bookie + size-triggered offload) — no more, no
-fewer. The registry (`distribution`, from
-Phase 56) is present as a rehoming consumer of MinIO, not re-delivered here.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) — the bytes platform backbone (MetalLB + MinIO + Pulsar HA) causes to exist are charged to a grant that carries its ceiling and concurrency together.
+- [`jit_budget_doctrine.md` §3 — A ceiling is inseparable from its concurrency](../documents/engineering/jit_budget_doctrine.md#3-a-ceiling-is-inseparable-from-its-concurrency) — the bytes platform backbone (MetalLB + MinIO + Pulsar HA) causes to exist are charged to a grant that carries its ceiling and concurrency together.
 - [`platform_services_doctrine.md §1 — the invariant: every cluster is the same cluster`](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)
   with [`§2 — HA always, including replicas=1`](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1):
   Phase 62 materializes the backbone slice of the fixed standard service set on linux-cpu, each service the
@@ -303,11 +166,13 @@ Phase 56) is present as a rehoming consumer of MinIO, not re-delivered here.
   and [`§9 — bring-up ordering: the registry chicken-and-egg dissolves`](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves):
   every backbone binary is baked into the Phase-56 native-architecture base image and resolved only in-cluster; the
   registry stores its blobs in MinIO via the S3 driver, so MinIO must be serving before the registry — the
-  thin ordering edge [§9](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves) names, and the rehoming Phase 62 delivers.
+  thin ordering edge [`image_build_doctrine.md` §9 — Bring-up ordering — the registry chicken-and-egg dissolves](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves) names, and the rehoming Phase 62 delivers.
 - [`manifest_generation_doctrine.md §5 — the apply/reconcile engine: snapshot-bound typed actions`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
   and [`§2 — the typed manifest model (`renderAll` is the sole public pure function to objects)`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects):
-  Phase 62 reuses the Phase-58 pure `renderAll :: ProvisionedSpec -> [K8sObject]` and typed-action reconciler whose **wait-for-ready is observed from the live object, never a `threadDelay`** to apply and sequence the backbone. - [`platform_services_doctrine.md §10 — every execution unit declares its complete resource envelope`](../documents/engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
-  and [`resource_capacity_types.md §3.1 — the systematic provision matrix`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix) / [`§5.1 — durable demand is logical first, physical only after geometry`](../documents/engineering/resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry):
+  Phase 62 reuses the Phase-58 pure `renderAll :: ProvisionedSpec -> [K8sObject]` and typed-action reconciler
+  whose **wait-for-ready is observed from the live object, never a `threadDelay`** to apply and sequence the backbone.
+- [`platform_services_doctrine.md §10 — every execution unit declares its complete resource envelope`](../documents/engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
+  and [`resource_capacity_types.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`; “The systematic provision matrix”](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix) / [`§5.1 — durable demand is logical first, physical only after geometry`](../documents/engineering/resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry):
   every rendered app/init/sidecar container carries the exact provisioned CPU, memory, and ephemeral-storage
   requests/limits; bounded pod-local volumes and durable presentation/usable/raw sizes are exact; and accelerator `None` is
   explicit alongside cache `None` for this linux-cpu service set. Kubernetes fields are a projection of the
@@ -329,44 +194,30 @@ Phase 56) is present as a rehoming consumer of MinIO, not re-delivered here.
   each stateful backbone service (MinIO, Pulsar's ZooKeeper members and bookies) lands its durable bytes on the Phase-60
   `no-provisioner` retained PVs, born only from a StatefulSet `volumeClaimTemplate`.
 - [`testing_doctrine.md §2 — the registers of amoebius testing`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing):
-  this phase's gate is a Register-3 live bring-up on linux-cpu, emitting the honesty ledger that
-  names Register 3, marks the runtime layer *tested* (not a proof claim), and marks the not-yet-built
-  Keycloak-edge and control-plane-owned reconcile layers UNVERIFIED.
+  this phase's future gate is a Register-3 live bring-up on `linux-cpu`; a candidate ledger may mark only its
+  bounded runtime observation *tested*, never proven, and must leave later edge/reconcile layers unverified.
 
 ## Sprints
 
-> **Current revalidation rule.** Sprint 62.1 is active; later sprints remain blocked by their preceding sprint. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-## Sprint 62.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming 🔄
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
-**Status**: Active; prior capability footprint retained for migration and current validation
-**Implementation**: `src/Amoebius/Platform/LoadBalancer.hs`,
-`src/Amoebius/Platform/Minio.hs`, `src/Amoebius/Platform/Registry.hs`,
-`tools/phase30_backbone_live.py`
-**Blocked by**: [Phase 61](phase_61_vault_pki.md) gate.
-**Independent Validation**: the numbered Validation list below, which needs nothing from Sprints 42.2–31.3:
-MetalLB advertising an address, a MinIO put/get through the gateway, the registry serving from the S3 driver
-with every Phase-56 digest copied and still pullable, the independent MinIO capacity corpus, and the exact
-resource projection of every rendered execution unit.
-**Docs to update**: `documents/engineering/platform_services_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`,
-`documents/engineering/storage_lifecycle_doctrine.md`, `documents/engineering/image_build_doctrine.md`
+## Sprint 62.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`platform_services_doctrine.md §9 — the LoadBalancer`](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
 (the MetalLB half), [`§4 — MinIO, the object substrate`](../documents/engineering/platform_services_doctrine.md#4-minio--the-object-substrate),
 and [`image_build_doctrine.md §9 — bring-up ordering`](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves):
 render and reconcile MetalLB as the linux-cpu L4 entry point and MinIO as the HA S3 object substrate, then
-rehome the Phase-56 `distribution` registry's blob store off the interim node-local filesystem driver onto the
+rehome the Phase-56 Distribution `registry:2` blob store off the interim node-local filesystem driver onto the
 MinIO S3 driver — closing the Phase-56 deferred gap.
 
 ### Deliverables
+
 - MetalLB rendered as a standard service that publishes a LoadBalancer address on the kind node, available
   before the (Phase 64) Envoy/Gateway edge needs one — the backbone's LoadBalancer root.
 - MinIO (HA / distributed) as the S3 object substrate on Phase-60 retained PVs, holding the content store,
@@ -380,7 +231,7 @@ MinIO S3 driver — closing the Phase-56 deferred gap.
   policy whose complete drive-failure subsets are derived by the solver; claim/backing/`VolumePresentation`
   per drive; and the uniform `volumeClaimTemplate` plan
   (`max rounded provisionedBytes × ordinal count`) that debits the retained backing.
-- The `distribution` registry's blob store rehomed onto the MinIO S3 driver — the registry holds no PV of its
+- The Distribution `registry:2` blob store rehomed onto the MinIO S3 driver — the registry holds no PV of its
   own, its bytes live in MinIO — asserted against the committed `test/fixture/platform_backbone/registry-storage-driver.golden`
   storage-stanza oracle, with the committed `mutant/registry-fs-driver` seeded mutant (registry left on the
   interim filesystem driver) named as the mutant this rehoming assertion MUST turn red. The logical tenant
@@ -406,6 +257,7 @@ MinIO S3 driver — closing the Phase-56 deferred gap.
   cache `None`; and accelerator `None` with no device claim on linux-cpu. Images resolve only in-cluster.
 
 ### Validation
+
 1. Apply through the Phase-58 reconciler; assert MetalLB advertises an address and MinIO reaches its Ready
    condition as a distributed StatefulSet on identity-named retained PVs.
 2. Round-trip an admitted object-gateway put/get; assert the bytes are unchanged, and assert the same writer
@@ -455,27 +307,22 @@ MinIO S3 driver — closing the Phase-56 deferred gap.
    Recompute the effective pod request/limit using app sums, largest-init semantics, and pod overhead, and
    require equality with the stored placement witness. Then assert
    the containerd/CRI image-pull event log on the kind node (§M.5 OS-boundary observer, not amoebius's own
-   logging) records no public-registry pull and every running `imageID` digest resolves to the Phase-56 baked
-   base digest in the in-cluster `distribution` catalog. A deny-all egress test to `docker.io`/`quay.io` must
+   logging) records no public-registry pull; every service image except Registry resolves to the Phase-56
+   baked-base digest, while Registry resolves to the exact separately pinned and preloaded Distribution
+   `registry:2` image digest. A deny-all egress test to `docker.io`/`quay.io` must
    break no startup, which shows the cluster does not reach outward — the digest check, not the egress test,
    is what discriminates a baked bring-up from a side-loaded upstream image.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 62.2: Pulsar native-protocol backbone + size-triggered S3 offload drill ⏸️
 
-**Status**: Blocked by Sprint 62.1; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Platform/Pulsar.hs`, `tools/phase30_backbone_live.py`
-**Blocked by**: Sprint 62.1.
-**Independent Validation**: the numbered Validation list below, which needs only the Sprint-56.1 MinIO
-substrate: an HA native-protocol bring-up that fails closed against a sealed Vault, a dedup round-trip
-exercised rather than configured, the size-triggered offload drill, the independent BookKeeper and ZooKeeper
-capacity corpora, and the exact resource projection of every rendered execution unit.
-**Docs to update**:
-`documents/engineering/platform_services_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`platform_services_doctrine.md §6 — Pulsar, the event and workflow backbone (new vs prodbox)`](../documents/engineering/platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)
 and [`pulsar_client_doctrine.md §6.1 — topic storage lifecycle`](../documents/engineering/pulsar_client_doctrine.md#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows):
 render and reconcile Pulsar as the cluster's HA native-protocol pub/sub backbone with ZooKeeper metadata and
@@ -484,6 +331,7 @@ rather than re-proving it, and
 drill that the mandatory size-triggered MinIO offload actually bounds the BookKeeper hot tier.
 
 ### Deliverables
+
 - Pulsar (HA broker + ZooKeeper metadata ensemble + BookKeeper bookie) rendered as typed objects on retained
   PVs, images baked, every app/init/sidecar
   and volume carrying its exact provisioned CPU/memory/ephemeral-storage, bounded pod-local storage, durable
@@ -507,6 +355,7 @@ drill that the mandatory size-triggered MinIO offload actually bounds the BookKe
 - A produce/consume round-trip demonstrating at-least-once delivery with broker-side dedup.
 
 ### Validation
+
 1. Apply Pulsar through the reconciler; assert the ZooKeeper metadata ensemble reaches Ready first and the
    broker/bookie set then reaches Ready on retained storage as an HA topology (never a single bare broker).
    Assert a secret-dependent Pulsar component that reaches a sealed Vault fails closed rather than starting
@@ -539,23 +388,15 @@ drill that the mandatory size-triggered MinIO offload actually bounds the BookKe
    plan and each mounted fsType/usable capacity matches its witness, not an ordinal-specific raw demand.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 62.3: The backbone HA bring-up gate ⏸️
 
-**Status**: Blocked by Sprint 62.2; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Platform/Backbone.hs`, `test/spec/platform/BackboneSpec.hs`,
-`test/spec/platform/BackboneLive.hs`, `tools/phase30_gate.py`
-**Blocked by**: Sprint 62.2.
-**Independent Validation**: the numbered Validation list below, run on a fresh single-node linux-cpu `kind`
-cluster: the whole set up, HA-shaped, and reachable in-cluster; both data planes round-tripping; the registry
-on the S3 driver; the offload holding the hot tier; no image request leaving for a public registry; and a
-Register-3 proven/tested/assumed ledger emitted.
-**Docs to update**:
-`documents/engineering/platform_services_doctrine.md`, `documents/engineering/image_build_doctrine.md`,
-`DEVELOPMENT_PLAN/README.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`manifest_generation_doctrine.md §5 — the apply/reconcile engine`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
 and [`image_build_doctrine.md §9 — bring-up ordering`](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves):
 assemble the Sprint 62.1–27.2 backbone services, bring them up event-driven behind the reconciler's
@@ -563,7 +404,8 @@ wait-for-ready with the MinIO-before-registry and Vault-unsealed-before-Pulsar e
 and close the phase with the backbone HA gate on a fresh cluster.
 
 ### Deliverables
-- A backbone bring-up that applies MetalLB, MinIO, the rehomed `distribution` registry, and Pulsar through the
+
+- A backbone bring-up that applies MetalLB, MinIO, the rehomed Distribution `registry:2` service, and Pulsar through the
   Phase-58 reconciler, each dependent starting on its dependency's observed-ready edge (MinIO serving before
   the registry's S3-driver blob store; Vault initialized-and-unsealed before Pulsar's secret-dependent startup —
   the fail-closed condition of [`vault_pki_doctrine.md §4`](../documents/engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)),
@@ -589,6 +431,7 @@ and close the phase with the backbone HA gate on a fresh cluster.
   `mutant/content-store-immediate-gc` are committed and re-run, not run once.
 
 ### Validation
+
 1. Bring the backbone up on a fresh cluster; assert MetalLB advertises an address, MinIO and Pulsar reach
    Ready as HA topologies, and the registry serves from the MinIO S3 driver — each dependent observed to start
    only on its dependency's observed-ready condition, with no timer standing in for a condition.
@@ -614,7 +457,7 @@ and close the phase with the backbone HA gate on a fresh cluster.
    that output, foreclosing hand-written or `helm template`-derived YAML embedded as string constants. **Image provenance (§M.5):** "no public-registry pull recorded" is read from the containerd/CRI image-pull event log
    on the kind node (the OS-boundary observer, never amoebius's own logging) over the whole gate window,
    **and** every running container's `imageID` digest (`kubectl get pods -A -o jsonpath={..imageID}`) MUST
-   equal the digest in the verified Phase-56 attestation and current in-cluster `distribution` catalog — any
+   equal the digest in the verified Phase-56 attestation and current in-cluster `registry:2` catalog — any
    other digest or public-registry reference (including
    an upstream image pre-side-loaded onto the node with `kind load`) fails. **Resource-provision identity:**
    independently compare every applied app/init/sidecar CPU/memory/ephemeral-storage request+limit, bounded
@@ -626,12 +469,14 @@ and close the phase with the backbone HA gate on a fresh cluster.
    reconcile marked UNVERIFIED.
 
 ### Remaining Work
+
 Remove `test/fixture/phase30/expected-base-digest.txt`, pass the verified Phase-56 digest into the run without
 copying it into Git, and rerun the gate under universal artifact hygiene.
 
 ## Documentation Requirements
 
-**Engineering docs updated with the completed gate:**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/platform_services_doctrine.md` — when this phase lands, its §2 HA-always and §4 MinIO
   notes flip from "design intent" to a Register-3-tested amoebius result on linux-cpu, and the §6 Pulsar
   honesty note gains its first live evidence (still *tested*, never *proven*).
@@ -639,7 +484,7 @@ copying it into Git, and rerun the gate under universal artifact hygiene.
   driver" edge is delivered; the Phase-56 interim filesystem-driver residue is discharged, recorded as the
   Phase-62 rehoming.
 - `documents/engineering/pulsar_client_doctrine.md` — the §6.1 size-triggered offload bound gains its first
-  live drill (the platform-side bring-up); the native-client CBOR round-trip proof stays owned by Phase 66.
+  live drill (the platform-side bring-up); the native-client CBOR round-trip proof stays owned by Phase 67.
 - `documents/engineering/resource_capacity_doctrine.md` — record the standard-backbone live assertion that
   every Kubernetes resource/volume field is the exact projection of its checked `ProvisionedServiceSpec`,
   including the logical→physical BookKeeper/MinIO folds and uniform StatefulSet claim-plan debit.
@@ -649,12 +494,14 @@ copying it into Git, and rerun the gate under universal artifact hygiene.
   `volumeClaimTemplate`s.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-62 status when the gate passes and link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 62's gate substrate (linux-cpu) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — reconcile the `src/Amoebius/Platform/*` target module paths named
   in each sprint against the component inventory once they become concrete.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker and phase ordering this document sits under
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants
@@ -665,7 +512,7 @@ copying it into Git, and rerun the gate under universal artifact hygiene.
 - [Manifest Generation & the Typed Reconciler](../documents/engineering/manifest_generation_doctrine.md) — the Phase-58 renderer + SSA wait-for-ready that applies and sequences the backbone
 - [Image Build & Registry](../documents/engineering/image_build_doctrine.md) — the baked-binary base image, pull-only-in-cluster, and the registry→MinIO S3-driver edge
 - [Storage Lifecycle](../documents/engineering/storage_lifecycle_doctrine.md) — the no-provisioner retained PVs the stateful backbone services land on
-- [phase_56](phase_56_base_image_registry.md) — the base image + `distribution` registry whose interim filesystem-driver blob store this phase rehomes onto MinIO
+- [phase_56](phase_56_base_image_registry.md) — the base image + Distribution `registry:2` service whose interim filesystem-driver blob store this phase rehomes onto MinIO
 - [phase_61](phase_61_vault_pki.md) — the root Vault/PKI whose unseal edge gates Pulsar's secret-dependent startup here
 - [phase_63](phase_63_platform_services_2.md) — the Percona/Patroni + pgAdmin + observability services and the full derived readiness-DAG gate that build on this backbone
 - [phase_64](phase_64_keycloak_ingress.md) — the Keycloak-owned ingress edge that fronts this backbone next

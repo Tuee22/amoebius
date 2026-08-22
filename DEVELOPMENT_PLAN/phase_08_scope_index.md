@@ -1,31 +1,34 @@
 # Phase 8: Scoped identity kernel
 
-> **Purpose**: Deliver the pure scope index and information-flow relation that prevent values and handles from
-> being forged, retagged, widened, or exchanged across request scopes.
+> **Purpose**: Specify the target Haskell capability to provide a constructor-private Haskell
+> request-scope index and total information-flow relation that reject forging, retagging, widening,
+> and cross-scope exchange.
 > **Read this if**: Phase 8 is the open contract, or a later phase needs the type-level scope boundary it
 > establishes.
 
-Phase 8 owns the standalone scope index below the UI language and every live identity or provider boundary.
-The tenant model belongs to [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md); the pure
-security mechanism belongs here, and provider enforcement remains later work.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/extension_conformance_security.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_tenancy.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/extension_conformance_security.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 8.1: Rank-2 scope index and total flow checking ✅](#sprint-81-rank-2-scope-index-and-total-flow-checking-)
+- [Sprint 8.1: Rank-2 scope index and total flow checking ⏸️](#sprint-81-rank-2-scope-index-and-total-flow-checking-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,79 +36,87 @@ security mechanism belongs here, and provider enforcement remains later work.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. `python3 tools/scoped_identity_gate.py` passes all thirteen sides on natural
-`arm64`: 45 surfaces join to 59 items, all eleven metrics match, five compile pairs hold, the mutant reddens,
-and containment is clean. Attestation `sha256:05f9c2f19d07c604d0ec425ae5761d36495e28e2bf034c4f0e71d84834e97ded`
-binds source snapshot `sha256:3783dab57707c462…` (2,149 files). Live layers remain `UNVERIFIED`.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 7, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase supplies a constructor-private request scope whose rank-2 eliminator introduces one fresh type
-index. Scoped values, resolved handles, labels, and flow witnesses retain that index. A total pure checker
-decides owner/grant joins and direct or transitive confidentiality and integrity flows with stable errors.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to provide a constructor-private Haskell request-scope index and total
+information-flow relation that reject forging, retagging, widening, and cross-scope exchange.
 
-**Phase scope:** One Register-1 scope-index/flow kernel, accepted by `python3 tools/scoped_identity_gate.py`;
-split if work needs a live identity, provider, runtime interpreter, second register, or substrate.
-**Substrate:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-**Register:** 1 — pure/golden
-**Depends on:** [Phase 7](phase_07_evidence_calculus.md) — its claim-to-fixture calculus binds every gate
-surface to an observed locus.
-**Gate:** `python3 tools/run_phase_gate.py 08` passes the committed representative corpus, independent
-predicates, exact compile pairs, generated coverage floors, network-observed pure run, seeded mutant, ledger,
-and universal artifact-hygiene checks described in [Gate integrity](#gate-integrity).
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
+
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — provide a constructor-private Haskell request-scope index
+and total information-flow relation that reject forging, retagging, widening, and cross-scope
+exchange. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 7](phase_07_evidence_calculus.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 08`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set:** tenants `t-a` and `t-b`; subjects Alice and Bob in `t-a` and Carol in `t-b`;
-  subject-owned, tenant-owned, actively granted, revoked, and absent-grant resources; direct, transitive,
-  subject-mismatched, cyclic, incomplete-member, and missing-path flow graphs.
-- **Oracle provenance:** the owner, swap, and flow decisions predate the replacement kernel. The diagnostic
-  and compile expectations transcribe the pre-existing phase contract and doctrine; they are authored from
-  intended errors, never copied from a failing run.
-- **Independent predicates:** `owner_join_table.tsv`, `owner_tenant_swaps.tsv`, and `flow_matrix.tsv` are read
-  as finite relations by tests that share no resolver, label relation, or graph traversal with production.
-  `flow_diagnostics.tsv` owns exact tags and paths.
-- **Specific negatives:** five legal/illegal twins separately pin raw identifier construction, scope
-  retagging, general declassification, request-index escape, and forged request scope. Each illegal twin must
-  fail at its own compiler reason while its legal twin compiles.
-- **Generator coverage:** QuickCheck forces tenant, subject, grant, audience, integrity, transitive,
-  subject-flow, cycle, and missing-member rejection classes to meet a 5% floor.
-- **External observation:** the pure suite runs with networking denied by macOS `sandbox-exec`, Linux network
-  namespaces, or injected Linux socket failure. No credential source is available to the contained process.
-- **Seeded mutant:** the registry-backed `drop_owner_equality` build flag removes subject-owner equality. Both
-  same-tenant and cross-tenant swap pins must redden it at its declared locus.
-- **Fresh challenge and authority pairing:** not applicable to this pure phase. Runtime identity, real
-  credentials, provider enforcement, and live noninterference remain `UNVERIFIED` for their later live gates.
-- **Extension conformance (§M.13).** Not applicable because the phase delivers a core index, not a domain,
-  provider, or hardware extension.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-The gate proves agreement with finite authored relations and compiler-enforced lexical scope separation. It
-does not prove identity-provider truth, persisted-value re-entry, provider row policy, browser behavior, or
-live handler noninterference.
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — provide a constructor-private Haskell request-scope index and total information-flow relation that reject forging, retagging, widening, and cross-scope exchange. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 08` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 07 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`extension_conformance_security.md` §3 — the skolem scope](../documents/engineering/extension_conformance_security.md#3-the-skolem-scope): a rank-2 eliminator mints one fresh request index and private constructors prevent a second introduction rule.
-- [`low_code_ui_runtime_doctrine.md` §10.3 — information-flow labels](../documents/engineering/low_code_ui_runtime_doctrine.md#103-information-flow-labels): labels preserve subject audience and integrity across direct and transitive pure flows.
-- [`tenancy_doctrine.md` §4 — the typed shapes](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding): tenant, subject, membership, owner, and grant distinctions are constructor-private.
-- [`illegal_state_security.md` §3.80 — foreign resource resolution](../documents/illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant): paired owner and tenant swaps exercise exact denial reasons.
-- [`illegal_state_security.md` §3.81 — incompatible UI value flow](../documents/illegal_state/illegal_state_security.md#381-a-ui-value-flowing-to-an-incompatible-tenant-subject-or-audience-scope): the finite flow relation and total graph diagnostics exercise the pure foreclosure layer.
-- [`illegal_state_tenancy.md` §3.94 — same-typed scope identifiers](../documents/illegal_state/illegal_state_tenancy.md#394-two-same-typed-scope-identifiers-exchangeable-at-a-call-site): distinct private identity types and the request skolem reject transposition and cross-scope reuse.
+- [`extension_conformance_security.md` §3 — The skolem scope](../documents/engineering/extension_conformance_security.md#3-the-skolem-scope): a rank-2 eliminator mints one fresh request index and private constructors prevent a second introduction rule.
+- [`low_code_ui_runtime_doctrine.md` §10.3 — Information-flow labels](../documents/engineering/low_code_ui_runtime_doctrine.md#103-information-flow-labels): labels preserve subject audience and integrity across direct and transitive pure flows.
+- [`tenancy_doctrine.md` §4 — The typed shapes: `TenantSpec` / `SubjectSpec` / `Membership` / `Owner` / `RoleBinding`](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding): tenant, subject, membership, owner, and grant distinctions are constructor-private.
+- [`illegal_state_security.md` §3.80 — A subject resolving or mutating another subject's resource without a grant](../documents/illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant): paired owner and tenant swaps exercise exact denial reasons.
+- [`illegal_state_security.md` §3.81 — A UI value flowing to an incompatible tenant, subject, or audience scope](../documents/illegal_state/illegal_state_security.md#381-a-ui-value-flowing-to-an-incompatible-tenant-subject-or-audience-scope): the finite flow relation and total graph diagnostics exercise the pure foreclosure layer.
+- [`illegal_state_tenancy.md` §3.94 — Two same-typed scope identifiers exchangeable at a call site](../documents/illegal_state/illegal_state_tenancy.md#394-two-same-typed-scope-identifiers-exchangeable-at-a-call-site): distinct private identity types and the request skolem reject transposition and cross-scope reuse.
 
 ## Sprints
 
-## Sprint 8.1: Rank-2 scope index and total flow checking ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done
-**Implementation**: `src/Amoebius/Scope/{Index,Flow}.hs`, the `scope-index` Cabal library,
-`test/spec/ui/ScopeSpec.hs`, `test/fixture/ui_scope/**`, `test/oracle/scoped_identity/**`, and
-`tools/scoped_identity_gate.py`.
-**Blocked by**: None.
-**Independent Validation**: Five finite tables and five compiler-positive twins provide expectations outside
-the subject. Nine generated reject classes and the real build-flag mutant exercise branches the tables alone
-cannot establish.
-**Docs to update**: `documents/engineering/{extension_conformance_security,low_code_ui_runtime_doctrine,tenancy_doctrine,testing_doctrine}.md` and `documents/illegal_state/{illegal_state_security,illegal_state_tenancy}.md`.
+## Sprint 8.1: Rank-2 scope index and total flow checking ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -135,11 +146,12 @@ and [`low_code_ui_runtime_doctrine.md` §10.3 — information-flow labels](../do
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/extension_conformance_security.md` — record the delivered lexical skolem mechanism and retain the persisted-value re-entry residue.
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record the pure label/index result without promoting live enforcement.
 - `documents/engineering/tenancy_doctrine.md` — distinguish the pure request index from later provider isolation.
@@ -147,6 +159,7 @@ None.
 - `documents/illegal_state/illegal_state_security.md` and `illegal_state_tenancy.md` — refresh the Phase-8 evidence at the type and pure-decision loci.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md`, `overview.md`, and `system_components.md` — reconcile status, sequence, and concrete module paths.
 - `DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md` — consume Phase 8 rather than present a reverse dependency.
 

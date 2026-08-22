@@ -1,18 +1,21 @@
 # Phase 4: The budget calculus
 
-> **Purpose**: The storage grant, a ceiling inseparable from its concurrency, admission, and the reaper.
+> **Purpose**: Specify the target Haskell capability to represent storage authority, concurrency,
+> admission, and reaping as one typed Haskell budget calculus in which no allocation lacks a prior
+> bound.
 > **Read this if**: a byte has to be accounted for before it is written, or this gate has to be read precisely.
 
-Before the generative re-baseline nothing in the plan owned this: make a byte unable to exist without a grant that carries both its ceiling and the concurrency it is shared across.
-Its first deliverable is a `Grant` value issued from a finite pool, specific to a location and purpose, with no unbounded constructor, and this phase sits where the vocabulary it consumes first exists.
-The rule behind the budget calculus is owned by [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md), which this contract implements rather than restates.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, documents/engineering/jit_budget_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, documents/engineering/jit_budget_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -20,12 +23,13 @@ The rule behind the budget calculus is owned by [`jit_budget_doctrine.md`](../do
 ---
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 4.1: The budget calculus ✅](#sprint-41-the-budget-calculus-)
+- [Sprint 4.1: The budget calculus ⏸️](#sprint-41-the-budget-calculus-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,73 +37,82 @@ The rule behind the budget calculus is owned by [`jit_budget_doctrine.md`](../do
 
 ## Phase Status
 
-✅ Done — built and sealed 2026-08-20, the second of the five inserted calculi to be built. `python3
-tools/budget_calculus_gate.py` passes all fifteen sides on substrate `none`, lane `none`, natural `arm64`,
-untranslated. The authored capacity table gives 24 demand vectors a verdict and a reason, names every reason
-admission can give and no other, and repeats no vector. The four calculus modules carry no ambient read and no
-partial token, and the suite reaches its acceptance token with ten checks green. Both refusals leave the store
-byte-identical when its image is read from a second process; the forged grant and the reaper-less retention
-each have no type while their legal twins compile; and all three seeded mutants redden their own locus and no
-other. Attestation
-`sha256:569236c8d48ed0bdc720562b5a00c9c11dd84faa3657c7124ccede8ea705ff86` binds to a 2,100-file source
-snapshot; as everywhere here, the reference names the run and this record follows it.
+⏸️ Blocked — NOT VALIDATED.
 
-**The run also builds `.build/grants/**`**, the output class
-[`repository_layout_doctrine.md` §3.1](../documents/engineering/repository_layout_doctrine.md#31-canonical-build-tree)
-reserves for per-region grant accounting and the generator registry named this phase as the owner of. Four
-regions are written, each holding within its own ceiling and concurrency, and the registry row stops naming a
-phase and starts naming a tool.
+Blocked by redesigned Phase 3, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-**Two decisions this phase took rather than inherited.**
-
-The budget calculus does not depend on the artifact calculus at the package level, and the reason is the
-divergence [Phase 3](phase_03_artifact_calculus.md) recorded rather than a preference: a library sharing
-`hs-source-dirs: src` with a sibling it also depends on recompiles that sibling's modules as home modules and
-does not build. The two calculi meet in the suite, whose own source directory is elsewhere, where a Phase-3
-rendering and its address become the placement a Phase-4 grant authorises. That is also the honest layering —
-a grant authorises bytes, and how those bytes got their name is the other calculus's question.
-
-`admit` has no store in its type, so an admission refusal cannot touch one and the contract's "byte-identical"
-claim is true of it by construction. A property true by construction cannot be broken by a seeded mutant,
-which means nothing would be holding it, so `materializeUnder` returns the store on both paths instead — and
-that is where the third mutant lands. The gate reports both refusals and says which of the two is the load
-bearing one.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-Make a byte unable to exist without a grant that carries both its ceiling and the concurrency it is shared across.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to represent storage authority, concurrency, admission, and reaping as one
+typed Haskell budget calculus in which no allocation lacks a prior bound.
 
-**Phase scope:** one cohesive claim — *no byte exists without an authority that bounded it in advance*. The grant, the concurrency inseparable from its ceiling, admission and the reaper are four faces of that single authority.
-**Substrate:** `none`
-**Lane:** `none`
-**Register:** 1
-**Depends on:** [Phase 3](phase_03_artifact_calculus.md) — the artifact calculus, whose materialize step is the operation a grant authorises.
-**Gate:** `python3 tools/run_phase_gate.py 04` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
+
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — represent storage authority, concurrency, admission, and
+reaping as one typed Haskell budget calculus in which no allocation lacks a prior bound.
+NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 3](phase_03_artifact_calculus.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 04`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Independent oracle.** A capacity table authored from the resource-capacity family, giving expected admission verdicts for demand vectors the implementation never sees.
-- **Committed mutants.** Mutants separate the ceiling from its concurrency, default a grant to unbounded, and admit after a partial write.
-- **Specific-reason negatives.** Each negative fixture asserts the reason it fails, paired with a positive differing only in a retention grant that has no constructor without a reaper.
-- **Fresh challenge.** Not applicable — this gate is pure, so the separately authored predicate stands in for it: a capacity table authored from the resource-capacity family, giving expected admission verdicts for demand vectors the implementation never sees.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — represent storage authority, concurrency, admission, and reaping as one typed Haskell budget calculus in which no allocation lacks a prior bound. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 04` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 03 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) — the rule behind the budget calculus.
+- [`jit_budget_doctrine.md` §2 — The grant is the authority to exist](../documents/engineering/jit_budget_doctrine.md#2-the-grant-is-the-authority-to-exist) — the rule behind the budget calculus.
 
 ## Sprints
 
-## Sprint 4.1: The budget calculus ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done — 2026-08-20.
-**Implementation**: `src/Amoebius/Calculus/Budget/{Grant,Admission,Store,Retention}.hs`,
-`tools/budget_calculus_gate.py`, `test/spec/calculus/BudgetCalculusSpec.hs`,
-`test/oracle/budget_calculus/admission_table.tsv`, `test/oracle/budget_calculus_surfaces.tsv`,
-`test/negative/compile_fail/budget_calculus/{retention_names_its_reaper,retention_omits_its_reaper,grant_comes_from_the_issuer,grant_forged_unbounded}.hs`
-**Blocked by**: None.
-**Independent Validation**: A capacity table authored from the resource-capacity family, giving expected admission verdicts for demand vectors the implementation never sees.
-**Docs to update**: `documents/engineering/jit_budget_doctrine.md`
+## Sprint 4.1: The budget calculus ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -132,25 +145,26 @@ arm rather than to whichever check happened to run first.
 
 ### Remaining Work
 
-None for this phase. Whether a composition's grant is the sum of its parts' is C5's claim over the lift
+The pre-reset `None` claim is permanently invalid; the phase remains blocked and NOT VALIDATED. Whether a composition's grant is the sum of its parts' is C5's claim over the lift
 calculus, which is the next phase's, and is recorded `UNVERIFIED` here; nothing in this register observes a
 running system, so the substrate's actual free space remains the live-effect observation
 [`jit_budget_doctrine.md` §7](../documents/engineering/jit_budget_doctrine.md#7-the-residue) says it is.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
-- [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) — **done 2026-08-20.** §7's
+- [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) — **historical pre-reset note from 2026-08-20 — permanently invalid for promotion.** §7's
   "nothing here is built" is replaced by what is: the grant, admission, the staging rule, and the reaper, as
   pure values in Register 1. What stays unbuilt is named rather than dropped — §6's additivity is stated over
   the lift calculus above this one, and §7's free-space observation is not a decision result at all.
 
 **Cross-references to add:**
 
-- `tools/generator_registry.tsv` — **done 2026-08-20.** The `grants/**` row named phase 4 as the owner of an
+- `tools/generator_registry.tsv` — **historical pre-reset note from 2026-08-20 — permanently invalid for promotion.** The `grants/**` row named phase 4 as the owner of an
   unbuilt output class; it now names `tools/budget_calculus_gate.py`, which writes it.
 
 ## Related Documents
+
 - [Development Plan](README.md)
 - [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) — the rule behind the budget calculus.

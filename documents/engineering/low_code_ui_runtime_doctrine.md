@@ -1,10 +1,10 @@
 # Low-Code UI Runtime
 
-> **Purpose**: Define the bounded Dhall language, checked Haskell intermediate representation, generic
-> PureScript client runtime, server responsibility, and security boundaries by which amoebius composes
+> **Purpose**: Define the bounded external Dhall language, checked Haskell intermediate representation,
+> Haskell-generated PureScript client runtime, server responsibility, and security boundaries by which amoebius composes
 > authenticated single-page applications with services, data, workflows, and ML artifacts without exposing
 > an escape hatch around authorization or tenant isolation.
-> **Read this if**: an application surface has to be authored, or the browser/server trust boundary has to be settled.
+> **Read this if**: an application value has to be supplied externally, or the browser/server trust boundary has to be settled.
 
 This document owns the bounded application language and its runtime: one checked value projected into a
 public client plan and a private server plan, typed effect ports, and the rule that a browser is never an
@@ -17,18 +17,16 @@ owned by [browser_offline_runtime_doctrine.md](./browser_offline_runtime_doctrin
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_workflow_lifting.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_workflow_lifting.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
-
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. Scope and single-source ownership](#2-scope-and-single-source-ownership)
 - [3. One checked value, two runtime plans](#3-one-checked-value-two-runtime-plans)
-- [4. The authored Dhall surface](#4-the-authored-dhall-surface)
+- [4. The external Dhall surface](#4-the-external-dhall-surface)
 - [5. gadt-decode and the checked Haskell IR](#5-gadt-decode-and-the-checked-haskell-ir)
 - [6. Modules and total composition](#6-modules-and-total-composition)
 - [7. State, events, and deterministic updates](#7-state-events-and-deterministic-updates)
@@ -57,19 +55,19 @@ and runtime contract; it does not assert that the contract is implemented.
 An application assembled from text fields, routes, callbacks, endpoint strings, and browser credentials can
 type-check as Dhall while still bypassing the gateway, omitting an authorization check, addressing another
 tenant's row, or invoking an ML artifact before its provenance and serving compatibility are established. The
-failure may first appear in a browser, a handler, or a live provider, after the authored configuration has
+failure may first appear in a browser, a handler, or a live provider, after the external configuration has
 already been accepted.
 
 Treating Dhall as a general programming language, or embedding JavaScript, HTML, CSS, SQL, URLs, and policy
 fragments inside it, cannot provide the required closure. Each embedded language introduces another authority
 surface and another way for client and server interpretation to diverge. Generating a bespoke frontend and a
-separately authored backend has the same desynchronization problem.
+separately hand-maintained non-Haskell backend has the same desynchronization problem.
 
 amoebius therefore accepts a **finite declarative UI program as data**, checks it into a typed Haskell
 representation, binds every effect to a server-side capability and authorization contract, and emits two
-projections of that one checked value: a client plan for a generic PureScript interpreter and a server plan for
-an amoebius UI-server worker. Dhall describes the program but never executes an effect; Haskell owns checking,
-binding, and server semantics; PureScript owns the fixed browser interpreter.
+projections of that one checked value: a client plan for a generic interpreter generated as PureScript and a
+server plan for an amoebius UI-server worker. Dhall describes the external program value but never executes an
+effect. Haskell owns checking, binding, server semantics, and the client-runtime source declaration.
 
 This choice forecloses arbitrary browser code and arbitrary web-platform access. A SPA is general only within
 the versioned UI type, component, expression, and effect algebras. A capability that those algebras cannot
@@ -82,12 +80,12 @@ escape arm in application Dhall.
 
 This document is the single source of truth for:
 
-- the authored `UiSource` shape and its bounded UI algebras;
+- the external `UiSource` shape and its bounded UI algebras;
 - the `CheckedUiProgram` invariants and client/server projections;
 - UI modules, component state, events, effects, routes, and typed port requirements;
 - the browser/server trust split and the UI-specific authorization and tenant-isolation protocol;
 - workflow and artifact presentation, including interactive infernix and jitML artifacts;
-- the generic PureScript runtime contract and the amoebius UI-server responsibility; and
+- the Haskell-declared, PureScript-materialized runtime contract and the amoebius UI-server responsibility; and
 - UI-specific high-availability, version-handshake, and rollout requirements.
 
 The following documents retain ownership of the adjacent rules. This doctrine depends on those rules and does
@@ -99,7 +97,7 @@ not redefine them.
 | Application logic versus deployment rules | [Application Logic vs Deployment Rules](./app_vs_deployment_doctrine.md) | UI behavior is application logic; replica count, placement, rollout, and failover remain deployment rules. |
 | Abstract capabilities and provider binding | [Service Capabilities](./service_capability_doctrine.md) | UI ports require capabilities; they cannot select MinIO, Pulsar, Postgres, Keycloak, Envoy, or an inference provider. |
 | Extension merge and linked infernix/jitML code | [The Capability-Extension Graph](./capability_extension_doctrine.md) | UI fragments consume the total, acyclic, anti-shadow extension graph; they do not load runtime plugins. |
-| Reuse of infernix, jitML, and PureScript assets | [Lift and Compose](./lift_and_compose_doctrine.md) | Existing domain behavior is adapted behind typed ports and trusted components rather than reimplemented. |
+| Re-derivation from infernix, jitML, and UI seed observations | [Lift and Compose](./lift_and_compose_doctrine.md) | Behavior is re-declared in amoebius-owned Haskell; no sibling PureScript or other non-Haskell source is imported. |
 | Tenant identities, memberships, roles, grants, and provider RBAC | [Tenancy](./tenancy_doctrine.md) | The UI receives opaque scope witnesses derived from that model and never authors tenant authority. |
 | One executable and daemon role taxonomy | [Daemon Topology](./daemon_topology_doctrine.md) | The UI server is a worker responsibility of the same amoebius executable, not a second privileged executable. |
 | Keycloak/Envoy ingress and platform HA | [Platform Services](./platform_services_doctrine.md) | Every browser and UI API path traverses the platform-owned authenticated edge. |
@@ -121,7 +119,7 @@ or provider operation. The trusted runtimes continue to carry all operational se
 The UI compilation boundary is fixed:
 
 ```text
-authored UiSource.dhall
+external/untracked UiSource.dhall
   -> Dhall normalization and type-check
   -> dhall-typecheck wire-shape decode
   -> gadt-decode semantic check
@@ -151,19 +149,10 @@ The client projection cannot contain provider coordinates, internal resource ide
 role-binding rules, raw policy, or handler implementation details. The server projection cannot trust a client
 claim merely because the matching client plan would normally emit it.
 
-[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) validates this projection boundary in Register
-1. One opaque bound value matches four independently stated logical projections and emits canonical client,
-private server, public-contract, and content-manifest JSON. Concrete SHA-256 identities include private
-authority and resolved-link sources; reversed insertion order in fresh cache-disabled processes preserves every
-byte; and the real five-calculus composition accounts for 32 units. The same-commit JSON files are regression
-fixtures, not independent semantic oracles. Both runtime interpreters remain UNVERIFIED.
-
-[Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) validates the client half in Register 2.
-One pinned generic PureScript bundle interprets two plan values in real Chrome; its transitions agree with an
-independent Haskell semantics, its DOM/focus/transport observations match authored pins, and CSP, artifact,
-fresh-challenge, OS-network, and nine mutant checks pass. The five real calculi project `9,5,45,4,9` units
-into resource vector `5,72,0,0`. The UI-server interpreter, real authority/provider
-enforcement, release behavior, and HA remain UNVERIFIED.
+The projection gate must compare the private Haskell value with independently reviewed Haskell semantic
+projections. JSON plans and manifests are generated under `.build/**`, never used as their own oracle, and
+removed for a clean-room rerun. The browser gate must compile freshly generated PureScript and compare its
+transitions and observations with a distinct Haskell reference semantics plus required red controls.
 
 ---
 
@@ -197,9 +186,15 @@ flowchart TD
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Design intent, Tier-1 decode-foreclosed at the gate. Four artifacts from one checked value is what makes a mixed client-and-server pair unrepresentable: they are not separately authored, so they cannot separately drift. The typed effect ports the server plan mediates are owned by [§8](#8-effects-are-typed-ports-not-network-operations). Vocabulary: [diagram_conventions.md](./diagram_conventions.md).*
+*Design intent, Tier-1 decode-foreclosed at the gate. Four artifacts derive from one Haskell-owned checked
+value, so there is no separately maintained client/server source pair to drift. The typed effect ports the
+server plan mediates are owned by [§8](#8-effects-are-typed-ports-not-network-operations). Vocabulary:
+[diagram_conventions.md](./diagram_conventions.md).*
 
-## 4. The authored Dhall surface
+## 4. The external Dhall surface
+
+The Dhall schema, constructors, and examples are generated lazily beneath `.build/**` from Haskell. An
+operator's `UiSource` is external or local-untracked input; no `.dhall` application source is committed.
 
 ### 4.1 A normalized graph, not recursive executable syntax
 
@@ -227,8 +222,9 @@ components, update rules, slots, and exported outputs. A table entry has a nomin
 cross-module reference uses a fully qualified `(AppName, ModuleName, LocalId)` identity. User-visible labels
 are never identities.
 
-The source schema contains no expression arm that evaluates Dhall at browser runtime. Dhall functions may be
-used while authoring and normalizing the finite source value, but no Dhall closure crosses dhall-typecheck.
+The accepted schema contains no expression arm that evaluates Dhall at browser runtime. Dhall functions may
+be used while an operator constructs and normalizes the external finite value, but no Dhall closure crosses
+dhall-typecheck.
 
 ### 4.2 The client-safe value universe
 
@@ -288,10 +284,9 @@ download location, form action, or same-origin transport target. A new browsing 
 and built-artifact gate test the canonical destination and absence of open-redirect or fetch reuse. Adding a
 destination requires review of the trusted catalog; changing application Dhall cannot add one.
 
-The authored subset is built and validated in
-[Phase 37](../../DEVELOPMENT_PLAN/phase_37_ui_program_schema.md). Its closed `UiSource` record admits named link
-requirements but no raw URL field; the Register-1 gate's exact diagnostics and paired raw-URL mutant check
-this representational boundary only.
+The closed `UiSource` record admits named link requirements but no raw URL field. Its gate must generate Dhall
+cases from Haskell, check the exact diagnostic with an independent Haskell expectation, and prove that a
+raw-URL mutant turns the gate red at this representational boundary.
 
 ---
 
@@ -351,10 +346,9 @@ The PureScript runtime does not reproduce these proofs. It receives a compact pl
 possible only from the sealed Haskell value, validates its plan envelope and digest, and interprets the same
 closed instruction set defensively.
 
-Phase 37 implements and validates the first checked graph with private `CheckedUiProgram` construction and
-total identity, reference, cycle, bound, port, event, and public-projection checks. Three authored program
-semantics and three graph rows constrain meaning; the generated normalized-wire bytes are not an oracle.
-Runtime interpretation, binding, scope, and authorization remain later-phase obligations.
+The checked-graph gate must exercise private `CheckedUiProgram` construction and total identity, reference,
+cycle, bound, port, event, and public-projection checks. Independently reviewed Haskell program semantics and
+graph expectations constrain meaning; normalized-wire bytes are generated observations, never an oracle.
 
 ---
 
@@ -492,12 +486,9 @@ request identifier, session epoch, and encoded public input. The authenticated e
 trusted subject, tenant scope, grants, authorization-policy version, and trace/audit context. A field duplicated
 inside the public input has no authority and is rejected when the contract forbids it.
 
-[Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md) validates this pure binding seam. Seven closed
-effect arms exact-join independently authored handler, codec, scope, capability, retry, and audit tuples; named
-links independently exact-join two canonical fixed-HTTPS catalog entries. Provider coordinates and using a link
-as effect transport reject before `BoundUiProgram` exists. Nineteen exact refusals, thirteen generated classes,
-and seven paired mutants pass; the real five-calculus projection composes `7,2,19,13,7` to `5,48,0,0`. Browser,
-handler, and provider enforcement remains UNVERIFIED.
+The pure binding gate must exact-join every closed effect arm to independently reviewed Haskell handler, codec,
+scope, capability, retry, and audit expectations. It must reject provider coordinates and effect-transport
+links before `BoundUiProgram` exists, and every paired production mutant must turn the intended check red.
 
 ---
 
@@ -548,26 +539,10 @@ That rendering decision is only presentation. Every port invocation is independe
 authorized by the server against current policy. A hidden button, disabled route, or client-side guard never
 confers or removes authority.
 
-[Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md) validates the pure kernel behind this
-rule. One constructor-private registry emits byte-equal client/server projections, and only current policy,
-membership, grant, and scope epochs plus a successful scope join can construct `AuthorizedAction`; the
-independent matrix includes hidden-but-invocable and absent-policy cases. Its thirteen-sided natural-`arm64`
-gate matches all 15 metrics, joins 46 surfaces to 63 items, and projects the real five calculi to `5,30,0,0`;
-the `default_allow` and `visibility_is_authorization` mutants redden at distinct loci. Live edge,
-identity-provider, UI-server, and provider enforcement remains UNVERIFIED.
-
-[Phase 68](../../DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md) discharges the live provider-enforcement
-slice for scoped actions. A private Haskell adapter accepts verified Keycloak credential context and ignores
-hostile caller tenant/subject fields; paired own/foreign requests are checked through Postgres RLS, derived
-MinIO keys, native Pulsar namespaces, and enforcing NetworkPolicy. Three real credentials, external provider
-readback, zero forbidden state/cursor effects, exact cleanup, and two red authority mutants pass in Register 3.
-Browser tenant switching remains Phase 82, and complete provider-audit-log correspondence remains `UNVERIFIED`.
-
-[Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md) validates the next private UI seam. Fresh
-Keycloak sessions become trusted request contexts; a server-sealed owner handle returns only its own challenged
-projection and watermark, while same-tenant foreign-owner, foreign-tenant, swapped-handle, guessed-id, forged-
-field, and stale-epoch variants return the same public denial. User credentials have no direct Pulsar path.
-This does not validate browser presentation, reconnect, or release rollout.
+The authorization gate must cover hidden-but-invocable and absent-policy cases with an independent Haskell
+relation. Default-allow and visibility-as-authorization mutants must fail at distinct loci. Later live checks
+must pair sanctioned effects with independent provider readback and prove zero foreign effect; they cannot be
+used to supply the earlier pure oracle.
 
 The generated client is served with a restrictive content-security policy, no inline script requirement,
 subresource integrity for immutable assets, strict MIME handling, clickjacking protection, and origin/CSRF
@@ -625,11 +600,9 @@ Confidentiality may be narrowed without new authority. Audience widening or cros
 closed named release/grant action with current authorization, declared purpose, target audience, audit class,
 and a server-issued result carrying the new label. There is no general declassification function.
 
-[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) builds and validates the standalone pure kernel behind
-this rule. A rank-2 eliminator introduces one fresh request index; opaque scoped values, handles, labels, and
-witnesses match six owner joins, two exact swaps, four flow decisions, four exact graph diagnostics, five
-compiler-negative pairs, nine generated reject classes, and one real build-flag mutant. Persisted-value
-re-entry, identity-provider truth, provider policy, and live noninterference remain `UNVERIFIED`.
+The standalone pure scope gate must exercise fresh request indices, owner joins, swaps, flow decisions, graph
+diagnostics, compiler-negative pairs, generated reject classes, and production-source mutants. Its expected
+relations are Haskell values reviewed independently of the implementation.
 
 Browser input and model output begin with untrusted integrity. They cannot flow to an authority-bearing sink,
 policy decision, provider coordinate, executable action identity, ownership field, or release decision until a
@@ -675,10 +648,9 @@ declared byte and media constraints, performs configured quarantine/validation s
 short-lived opaque handles. Dhall cannot request a bucket, key, filesystem path, pre-signed provider URL, or
 arbitrary content type. The browser never receives MinIO, SQL, Pulsar, Vault, or inference-engine credentials.
 
-The Phase-70 live fold realizes this rule for workflow read models: every row key and subscription retains
-`(AppId, TenantId, Owner, ProjectionId)`, every receipt retains the original scoped `CommandId`, workflow work
-id, and handle, and conflicting normalized input produces `IdempotencyConflict` with zero new effect. Update,
-tombstone, recreate, exact redelivery, and resume from a non-final cursor match the independent Phase-0 tables.
+The live read-model gate must verify that every row key, subscription, receipt, workflow identity, and handle
+retains its declared scope. Conflicting normalized input must produce `IdempotencyConflict` with zero new
+effect, judged against independent Haskell expectations and provider observations.
 
 ---
 
@@ -688,18 +660,8 @@ Owned by [low_code_ui_workflow_lifting.md](./low_code_ui_workflow_lifting.md), a
 
 ## 13. Generic PureScript client and amoebius UI server
 
-Phase 81's scoped result implements and tests the single-tenant authorization, Origin/CSRF, provider-edge, cross-replica routing, and durable-receipt kernels. A real local socket transfers a fresh challenge between distinct endpoint roles. Fresh OIDC/browser, Keycloak/Envoy, Kubernetes replicas, and retained provider observations remain UNVERIFIED.
-
-Phase 82's scoped result adds opaque tenant choices, current-membership selection, scope-epoch rotation, stale-handle invalidation, and tenant/subject/epoch-keyed routing. Phase 83 adds immutable A→B→A transition state, watermark-gated traffic shifts, stale-plan reload, tenant/owner/stream cursor isolation, and old-epoch registration drain. Their local contract, durability, and mutation evidence is tested; real Keycloak, Gateway API/Envoy, Pulsar, browser, Kubernetes, CNI, and provider observations remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when pristine Linux is needed, use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows.
-
-Phase 84's scoped result admits only three-zone hard-spread UI-server, projector, Redis, and Keycloak shapes; it also pins PDB, non-sticky, whole-zone fault, current-authority, and durable-repair rules. A three-role loopback process probe survives loss of one role with one durable effect. Real provider-zone failure and off-cluster identity/data/network observers remain UNVERIFIED, so this is not an HA claim.
-
-Phase 41 implements `OnlineOnly | Offline` and exact queue, cached-projection, and local-blob key parity at
-Register 1. The closed compiler requires finite count/byte/age bounds and all six replay semantics, permits
-only the two initial ML start operations, retains two deterministic artifact commands, and exposes no private,
-browser, or Redis mechanism. Browser persistence and live replay authority remain UNVERIFIED.
-
-The client is one generic PureScript interpreter, versioned with the UI language and component catalog. It
+The client is one generic interpreter declared in Haskell and lazily generated as PureScript beneath
+`.build/ui/**`, versioned with the UI language and component catalog. It
 loads an immutable `ClientPlan`, verifies its envelope and digest, decodes public values, renders only trusted
 components, applies deterministic transitions, and invokes opaque ports through the fixed same-origin HTTPS
 plus authenticated-WebSocket contract owned by
@@ -732,28 +694,10 @@ incompatible binding for a referenced identity refuses readiness; there is no re
 name-based fallback. The generic binary may link handlers unused by a particular app, but they are unreachable
 because they are absent from that app's sealed dispatch table.
 
-[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) validates this boundary locally in Register 2.
-The `serve-ui` responsibility derives request context from HMAC-signed credentials minted by a separate
-post-start authority process, refuses foreign/spoofed/revoked/origin/stale requests before a separate guarded
-handler sees bytes, and enforces startup exact-join, stable retry identity, fixed public headers/assets,
-private-plan non-disclosure, and scoped WebSocket admission. A sixth startup case links an unreferenced handler,
-reaches readiness, and leaves that handler outside the plan's dispatch set. The real five-calculus projection
-accounts for 80 units. Keycloak, the live edge, provider policy,
-deployment, replica loss, and HA remain UNVERIFIED.
-
-[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) composes the client and server halves in
-Register 2. Two Dhall-authored applications reuse one generic bundle and the same `serve-ui` responsibility;
-real Chrome carries a fresh nonce through workflow start, ready receipt, an owner-paired artifact handle, and
-result rendering against separate infernix-/jitML-shaped fakes. Foreign users, copied/non-ready handles, and a
-direct browser/backend probe remain effect-free. Real domain adapters and all live layers remain UNVERIFIED.
-The composed real five-calculus projection accounts for 55 units, and the Darwin observer confines the
-browser/server processes to loopback while preserving Chromium's local IPC.
-
-[Phase 68](../../DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md) validates the downstream live
-request-context-to-provider boundary used by this responsibility: real Keycloak password credentials are
-authenticated and introspected, authority is supplied through a constructor-private request value, and
-provider operations stay tenant/subject scoped under hostile body fields. It does not claim a browser,
-multi-replica UI-server deployment, rollout, reconnect, or HA result.
+The client/server boundary gate must derive request context from an independent post-start authority, refuse
+foreign, spoofed, revoked, wrong-origin, and stale requests before handler bytes are observed, and exact-join
+the dispatch set. A later browser boundary check must compile the generated client in a fresh `.build/**`
+tree, carry a fresh challenge through the server, and prove that no direct browser/backend path exists.
 
 The client and server responsibilities are intentionally asymmetric:
 
@@ -810,10 +754,10 @@ Every bound program records exact values for:
 - `ClientRuntimeAbi` and `UiServerAbi`; and
 - the application release identity.
 
-`ProgramDigest` covers the complete authority-bearing source set: normalized UI program, bound action registry,
+`ProgramDigest` covers the complete authority-bearing input set: normalized UI program, bound action registry,
 authorization policy graph and version, tenant-role/grant graph and epoch, public schemas, workflow/data
 contracts, component catalog, resolved external-link catalog subset, and referenced artifact provenance. Exact
-source-key equality rejects an omitted authority input. Cosmetic assets outside that declared source set may
+input-key equality rejects an omitted authority input. Cosmetic assets outside that declared input set may
 change without pretending to change authority.
 
 There is no `latest`, wildcard, or semantic-version range in a deployed plan. Every request includes the program
@@ -821,12 +765,10 @@ and contract identity required by its port. During a rolling release, the server
 only when a checked compatibility witness covers the accepted pair. Without that witness, a stale client
 receives a typed `ReloadRequired` response and no effect executes.
 
-[Phase 72](../../DEVELOPMENT_PLAN/phase_72_ui_program_release.md) validates the fail-closed base case with two
-immutable releases: only the exact A-client/A-server and B-client/B-server pairs dispatch, while stale
-authority/content digests, either missing half, either mixed pair, an omitted digest, and a hand-authored tuple
-all return `ReloadRequired` before effect. Both releases use the same Phase-56 generic runtime image; no
-per-program image is built. The gate does not establish arbitrary compatibility witnesses or rolling
-overlap/reconnect, which remain UNVERIFIED until their owning phases run.
+The release gate must exercise at least two immutable releases: only exact client/server pairs may dispatch;
+stale authority/content digests, missing halves, mixed pairs, omitted digests, and fabricated tuples must all
+return `ReloadRequired` before effect. The same generated runtime bundle is reused; no per-program source or
+image is tracked.
 
 The browser's digest is an observation, never a capability. Immediately before an effect, the server resolves
 the action in its currently sealed plan and compares the current policy, membership, grant, scope, handler,
@@ -843,8 +785,8 @@ schema. A release retains a total migration or old decoder/replay handler for th
 horizon; `ReloadRequired` cannot discard queued intent. The complete rule is owned by
 [Browser Offline Runtime §11](./browser_offline_runtime_doctrine.md#11-release-schema-and-compatibility-horizon).
 
-The committed sources are authored Dhall plus Haskell and PureScript runtime sources. The following are
-generated build/release artifacts and are never committed:
+The committed behavioral sources are Haskell only. External `UiSource` values are untracked inputs, and the
+PureScript runtime is generated lazily. The following build/release artifacts are never committed:
 
 - normalized and checked UI plans;
 - reflected Dhall schemas and public-contract manifests;
@@ -858,13 +800,11 @@ generated build/release artifacts and are never committed:
 Generation is deterministic for the same normalized source, linked binary, catalog, and contract inputs. Build
 or check commands regenerate and compare artifacts rather than accepting hand-edited output.
 
-[Phase 46](../../DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md) supplies the pure generator instance.
-Its Haskell recipe enumerates the closed public `ValueType` boundary while excluding `ServerHandle`, then emits
-the public types, total field codecs, and `ui-client-v1` bundle entry point only into a caller-owned build root.
-The gate independently projects the actual `ValueType`, `ClientPlan` encoder, and PureScript `Transition`
-surface, requires two byte-identical renders, scans generated source and the strict bundle for six forbidden
-tokens, and records the bundle's content address at run time. This is Register-1 evidence; protocol use and
-runtime behavior remain UNVERIFIED.
+The pure generator gate must enumerate the closed public `ValueType` boundary while excluding `ServerHandle`,
+then emit public types, total field codecs, and the bundle entry point only into a caller-owned `.build/**`
+root. It must compare semantic projections with independent Haskell expectations, require deterministic
+rerenders, scan generated source and the bundle for forbidden capabilities, and record a run-local content
+address.
 
 ---
 
@@ -913,15 +853,18 @@ fully type-foreclosed.
 
 ## 17. Verification obligations
 
-The implementation requires evidence at the repository's established verification registers. At minimum:
+The target requires evidence at the repository's established verification registers. The first four items
+form a hardware-free UI/DSL/generator barrier and must be accepted by the human user before items 5–8 begin:
 
-1. Golden and property tests cover Dhall normalization, dhall-typecheck decoding, gadt-decode checking, module merge,
+1. Haskell semantic expectations and properties cover Dhall normalization, dhall-typecheck decoding, gadt-decode checking, module merge,
    referential integrity, type equality, exhaustive decisions, bounds, transitive information-flow checking,
    action-registry projection parity, and deterministic plan generation.
-2. An illegal-state corpus covers every row in the preceding table with a rejected source or failed runtime
-   request at the stated layer.
-3. A small Haskell reference interpreter and the PureScript interpreter execute generated event traces and
-   must produce identical visible state, effect requests, cancellation behavior, and route transitions.
+2. Haskell negative-case declarations cover every row in the preceding table; any rejected Dhall, serialized
+   request, fixture, or mutant is rendered only beneath `.build/**` and never becomes its own oracle.
+3. A separately reviewed Haskell reference interpreter and the Haskell-declared production client generated
+   as PureScript execute Haskell-generated event traces and must produce identical visible state, effect
+   requests, cancellation behavior, and route transitions. The generator and generated client cannot supply
+   the reference expectation.
 4. Boundary tests with fakes exercise startup refusal for missing, duplicate, or incompatible referenced
    handler identities or server ABI; private server-plan non-disclosure; authorization denial; tenant switching;
    grant revocation; stale epochs; idempotent retry; upload limits; sanitized errors; subscription resume; and
@@ -942,12 +885,16 @@ The implementation requires evidence at the repository's established verificatio
    cross-tenant denial, and explicitly distinguish one-replica, one-node loss, and genuine redundant multi-zone
    deployment.
 
-Public contract generators, Haskell server decoders, and PureScript client codecs are tested from the same
-reified contract value. Hand-maintained correspondence tables do not satisfy the obligation.
+The future gate must derive public contract generators, Haskell server decoders, and generated PureScript
+client codecs from the same reified Haskell contract value, while semantic acceptance comes from the
+independent Haskell expectations above.
+Hand-maintained correspondence tables do not satisfy the obligation. Every generated input and report must
+remain under `.build/**`, and the barrier includes a clean-source audit plus targeted mutations proving that
+each claimed locus turns red without borrowing a browser, container, cluster, or hardware result.
 
-The adopted implementation and validation work is distributed across Phases 25–33, 47, 49, 51, 61, 72,
-57–60, and 24–64 in the [Development Plan](../../DEVELOPMENT_PLAN/README.md). That set identifies planning ownership; phase
-order, completion state, validation gates, and remaining work remain solely in the development-plan index.
+The [Development Plan](../../DEVELOPMENT_PLAN/README.md) alone assigns this contract to implementation and
+validation phases. It owns their numerical order, completion state, gates, and remaining work; this doctrine
+does not restate a phase map or claim that any part has been delivered.
 
 ---
 
@@ -963,23 +910,24 @@ identity, that a handler's implementation applies its scope correctly, that a pr
 a dependency has no vulnerability, or that the browser runtime contains no defect. Those facts require runtime
 checks, implementation review, boundary tests, and live evidence.
 
-The absence of raw HTML and JavaScript reduces the authored XSS surface; it is not a proof that the renderer or
+The absence of raw HTML and JavaScript from the accepted external language reduces its XSS surface; it is not a proof that the renderer or
 a trusted catalog component is free of XSS. Scope-indexed handles and server-derived tenancy prevent the DSL
 from expressing a direct cross-tenant reference; they are not a formal noninterference proof for all Haskell
 handlers and storage providers. Differential tests provide evidence that the two interpreters agree for tested
 traces; they do not prove agreement for every implementation state unless a separate proof is supplied.
 
 The HA shape is an architectural requirement. Availability is observed and tested under declared failure
-conditions; it is not inferred from a replica count. No security, isolation, correctness, or availability claim
-is reported as implemented, tested, or proven until the corresponding development-plan gate records that
-evidence.
+conditions; it is not inferred from a replica count. No security, isolation, correctness, or availability
+claim is reported as implemented, tested, or proven until the human user accepts independently observed
+evidence and records the corresponding development-plan status.
 
 ---
 
 ## 19. Extension rule and permanently absent escape hatches
 
-The trusted UI language grows by adding a constructor and its complete interpretation across Dhall reflection,
-dhall-typecheck, gadt-decode, Haskell reference semantics, client-plan encoding, PureScript interpretation, server binding
+The trusted UI language grows by adding a constructor and its complete interpretation across Haskell-owned
+Dhall reflection, dhall-typecheck, gadt-decode, reference semantics, client-plan encoding, the
+Haskell-declared client runtime generated as PureScript, server binding
 where applicable, illegal-state tests, and version compatibility. A partial implementation is not admitted.
 
 A trusted catalog component may wrap a browser library only when it has a bounded typed property/event

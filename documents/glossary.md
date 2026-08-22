@@ -23,7 +23,7 @@ as the set its first-use rule ranges over.
 </details>
 
 ## Contents
-- [1. The spine — from authored spec to running cluster](#1-the-spine--from-authored-spec-to-running-cluster)
+- [1. The spine — from accepted input to running cluster](#1-the-spine--from-accepted-input-to-running-cluster)
 - [2. Foreclosure, gates, and where a check lands](#2-foreclosure-gates-and-where-a-check-lands)
 - [3. Evidence, testing, and the plan](#3-evidence-testing-and-the-plan)
 - [4. Clusters, hosts, and topology](#4-clusters-hosts-and-topology)
@@ -37,9 +37,12 @@ as the set its first-use rule ranges over.
 
 ---
 
-## 1. The spine — from authored spec to running cluster
+<a id="1-the-spine--from-authored-spec-to-running-cluster"></a>
+## 1. The spine — from accepted input to running cluster
 
-- [`InForceSpec`](./engineering/cluster_lifecycle_doctrine.md#4-the-root-inforcespec-is-the-persistent-contract) — the typed whole-cluster desired-state value every effect is derived from; the central noun of the system.
+- [tracked source boundary](./engineering/repository_layout_doctrine.md#1-classification-rule) — behavioral/runtime/test/gate/generator source is Haskell; bounded Python under `pb/**` is the sole source-language exception and may only bootstrap, build, and `exec` Haskell.
+- [operator input](./engineering/repository_layout_doctrine.md#1-classification-rule) — an external or local-untracked value supplied at a trust boundary; it is not repository source and its format does not create a tracked-language exception.
+- [`InForceSpec`](./engineering/cluster_lifecycle_doctrine.md#4-the-root-inforcespec-is-the-persistent-contract) — the typed whole-cluster desired-state value decoded from external operator input and from which effects are derived; the central noun of the system.
 - [`renderAll`](./engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) — the sole public pure function from a sealed spec to Kubernetes objects.
 - [`ProvisionedSpec`](./engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) — the constructor-private seal that `renderAll` alone accepts.
 - [provision seal](./engineering/resource_capacity_folds.md#4-the-total-fold-fits-carve-place-and-the-nesting) — the whole-deployment fold that mints that seal or returns a typed rejection.
@@ -66,10 +69,10 @@ as the set its first-use rule ranges over.
 - [honesty (proven / tested / assumed)](./documentation_standards.md#6-honesty-the-proventestedassumed-discipline) — the rule that a claim names the verification layer it actually reaches.
 - [validation register](./engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — the tiers of evidence: pure, boundary-with-fakes, deterministic simulation, and live.
 - [the per-run ledger](./engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) — the artifact a validation run emits recording what each layer actually established.
-- [derivation](./engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) — the rule that the spec generates the coverage enumeration and a human authors the expectation.
-- [spoof-resistant gate](./engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect) — a gate observing an unforgeable post-start effect rather than a self-report.
-- [mutant](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — a committed seeded defect; a gate is trusted only once the mutant turns it red.
-- [gate integrity](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the twelve clauses ensuring a gate cannot be passed by a stub.
+- [derivation](./engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) — the rule that Haskell generates coverage enumeration while a separately reviewed Haskell module supplies the semantic expectation.
+- [spoof-resistant gate](./engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) — a gate observing an unforgeable post-start effect rather than a self-report.
+- [mutant](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — a Haskell-declared seeded transformation whose disposable materialization lives beneath `.build/**`; a gate is trusted only once the intended mutant turns it red while the clean control stays green.
+- [gate integrity](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the fixed eighteen-row contract ensuring a gate cannot authorize itself or pass through a stub.
 - [natural architecture](./engineering/substrate_doctrine.md#11-the-natural-architecture-rule) — the architecture a detected host executes without translation; the only one its lanes may be validated at.
 - [substrate](./engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob) — the detected hardware platform family; it always derives a `linux-cpu` execution lane at its natural architecture and may add an accelerator lane. A pristine Linux lane uses Incus on Linux, Lima on Apple, or WSL2 on Windows.
 - [status vocabulary](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — the five phase markers, and the rule confining status to the plan.
@@ -82,14 +85,14 @@ as the set its first-use rule ranges over.
 - [`Topology`](./engineering/cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction) — a cluster as a fold over its nodes, with cardinality fixed by construction.
 - [context and role](./engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) — the orthogonal grid of where the binary runs against what job it does.
 - [control-plane daemon](./engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon) — the single-replica pod holding cluster and secret authority under a lease.
-- [the bootstrap coordinator](./engineering/substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) — the pre-binary Python command that ensures a toolchain, builds the binary, and hands off.
+- [pre-binary handoff](./engineering/substrate_doctrine.md#6-the-pre-binary-handoff-contract) — the bounded `pb/**` Python path that makes only the minimal platform-adapter distinction, establishes a contained toolchain, builds the source-bound Haskell binary, and replaces itself with it using unchanged argv; it is never the Haskell `BootstrapCoordinator`, an operator runtime, a test oracle, or a validation authority.
 - [in-cluster role](./engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) — what job the one binary is doing in a pod: control-plane daemon, capacity scheduler, or a worker of some kind. Not the Kubernetes *node* role, and not an RBAC role; three unrelated senses share the word.
 - [worker kind](./engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected) — which worker a `Worker` role is, and the parameters that identify what it serves.
-- [validation frame](./engineering/validation_frame_doctrine.md#1-the-frame-one-environment-every-language) — the `amoebius-base` container every language-validation verb runs in, through `docker run --rm`. Unrelated to *frame config* below: two senses of "frame", one about where validation executes and one about what a running binary reads.
-- [`amoebius-base`](./engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) — the base image a consumer pulls rather than builds. Its published tags are a cache, not a supply authority: the tag is derived from the recipe's content address, so a pull either hits the exact bytes the repository implies or misses and the consumer rebuilds ([§2.1](./engineering/image_build_doctrine.md#21-a-published-tag-is-a-cache-warm-up-and-its-name-is-the-content-address)).
+- [validation frame](./engineering/validation_frame_doctrine.md#1-native-haskell-is-the-validation-environment) — native, hardware-free Haskell validation first; a later `amoebius-base` container replay checks portability only after that barrier is accepted and can never serve as its oracle. Unrelated to *frame config* below: two senses of "frame", one about where replay executes and one about what a running binary reads.
+- [`amoebius-base`](./engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) — the base image a consumer pulls rather than builds. Content-addressed tags are the target ([§2.1](./engineering/image_build_doctrine.md#21-a-published-tag-is-a-cache-warm-up-and-its-name-is-the-content-address)); until that phase is delivered, the four fixed published tags require the human rebuild/repush rule in [`AGENTS.md`](../AGENTS.md#image-rebuild-prompt).
 - [the Playwright image](./engineering/testing_doctrine.md#13-end-to-end-tests-run-in-the-playwright-image-against-three-browsers) — the test-only image carrying Chromium, Firefox, and WebKit, built on demand by the host binary and never published.
 - [Colima](./engineering/substrate_doctrine.md#41-colima-and-lima-on-apple-the-provider-follows-the-workload) — the Apple-host container-engine provider: an ephemeral VM for `docker build` and `docker run --rm`, and the provider for kind clusters. Lima is its sibling, used where a full Linux distribution is required.
-- [frame config](./engineering/dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) — the static local `amoebius.dhall` a running copy of the binary reads to learn which frame it inhabits and which role it holds; the second Dhall authority surface, and never the `InForceSpec`.
+- [frame config](./engineering/dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) — an external or local-untracked `amoebius.dhall` value a running copy of the binary reads to learn which frame it inhabits and which role it holds; never repository source and never the `InForceSpec`.
 - [ensure](./engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) — to probe for a tool, install it when absent, resolve its absolute path, and invoke it by that path.
 - [the floor](./engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply) — the per-substrate set of things only the operator can supply: the package-manager root, a hardware or firmware fact, and a credentialed account.
 - [a refusal](./engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply) — a floor check's failure carried as a value naming the prerequisite and the remedy, so a plan for one substrate stays decidable on another.
@@ -104,7 +107,8 @@ as the set its first-use rule ranges over.
 ## 5. Capabilities and platform services
 
 - [capability](./engineering/service_capability_doctrine.md#2-the-capability-set) — an abstract service role an application names instead of naming a product.
-- [canonical provider](./engineering/service_capability_doctrine.md#3-one-canonical-provider-the-type-admits-alternates) — the one implementation a capability binds to by default, with alternates typed.
+- [canonical provider](./engineering/service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific) — the implementation fixed for a capability; only a capability whose doctrine explicitly exposes an extension seam can admit alternates.
+- [Registry capability](./engineering/service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific) — the closed in-cluster Distribution `registry:2` provider; it has no alternate provider seam.
 - [namespace layout](./engineering/namespace_layout_doctrine.md#2-one-namespace-per-platform-capability--the-derived-set) — the derived one-namespace-per-capability set; a namespace is computed, never authored.
 - [`SecretRef`](./engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value) — a secret name carried in the spec; values live only in the secret store.
 - [bake versus build](./engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) — the rule fixing which third-party binaries are baked into the base image.

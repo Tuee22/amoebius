@@ -21,7 +21,7 @@ client that speaks to the bus, owned by [pulsar_client_doctrine.md](./pulsar_cli
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists: two ways to say "run this elsewhere"](#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)

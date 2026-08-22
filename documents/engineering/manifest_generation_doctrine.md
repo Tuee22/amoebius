@@ -19,12 +19,10 @@ owned by [namespace_layout_doctrine.md](./namespace_layout_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
-
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists: types render manifests, Helm does not](#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)
@@ -103,13 +101,11 @@ and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-
 
 ## 2. The typed manifest model: `renderAll` is the sole public pure function to objects
 
-> **Validated boundary (Phase 33, Register 1).** The pure whole-deployment renderer, canonical Aeson
-> encoding, eighteen exact capability/shape semantic projections, exact source-domain and namespace/API
-> projections, and output-safety battery pass
-> under `tools/render_manifest_gate.py` (ledger `external-run-reference`). This establishes rendered values only;
-> the [§5 live reconciler](#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is independently
-> validated by Phase 58; scheduler CAS/Binding is independently validated by Phase 59, and later
-> service-specific enforcement keeps its own phase boundary.
+The pure renderer gate must compare the production Haskell projection with independently reviewed Haskell
+semantic expectations for capability, shape, source-domain, namespace/API, and output safety. JSON/YAML
+renderings are generated beneath `.build/**` and cannot serve as their own oracle. Live reconcile, scheduler,
+and service enforcement are later correspondence checks, never evidence for the pure renderer. They may not
+begin until the human user accepts the hardware-free DSL/generator barrier and its source-boundary audit.
 
 The core is a per-projection renderer closed by one whole-deployment pure function:
 
@@ -118,14 +114,14 @@ type K8sObjectIdentity =
   (ApiGroup, ApiVersion, Kind, Maybe NamespaceId, KubernetesObjectName)
 type KubernetesObjectId = K8sObjectIdentity -- compatibility alias, not a second identity
 
--- Phase 31 seals one unique source per Kubernetes object identity.
+-- The binder seals one unique source per Kubernetes object identity.
 renderSourcePrivate :: ProvisionedRenderSource identity -> K8sObject
 
 -- Whole-deployment closure. KubernetesObjectId is (group/version/kind, namespace, name).
 renderAll :: ProvisionedSpec -> [K8sObject]
 ```
 
-Phase 31 constructs `ProvisionedRenderSourceSet` without depending on this Phase-33 object/Aeson model. Its
+The binder constructs `ProvisionedRenderSourceSet` independently of the private object/Aeson renderer. Its
 private `renderSourcePrivate` maps one already-owned source to one object and cannot independently apply a
 list. Deployment-level `renderAll` owns the **complete set of typed Kubernetes objects** — `Namespace` /
 `Node` /
@@ -139,7 +135,8 @@ exactly as prodbox already serializes its supporting objects ([§1](#1-why-this-
 and no `values.yaml`; the *record* is the manifest.
 
 `renderAll` is not an unchecked list concatenation. It traverses the unique
-`K8sObjectIdentity → ProvisionedRenderSource K8sObjectIdentity` map already sealed by Phase 31. Each key equals
+`K8sObjectIdentity → ProvisionedRenderSource K8sObjectIdentity` map already sealed by
+`provisionRenderSources`. Each key equals
 the source's embedded identity and has exactly one
 structural source owner; duplicate candidates or an omitted source-domain member fail
 `provisionRenderSources` before `ProvisionedSpec`, without depending on this later renderer. A deliberately
@@ -219,7 +216,12 @@ Three properties make this the right shape:
   chain/Step algebra gives the lifecycle ([dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
 - **Unit-testable without a cluster.** Because `renderAll` is pure, a test asserts properties of the *emitted
   objects* — "every container has resource requests and limits," "no Service is type `LoadBalancer` outside
-  the edge," "the rendered RBAC grants exactly these verbs" — by inspecting the returned `[K8sObject]`. No kind cluster, no apiserver, no golden-YAML diffing of templated strings. This is the manifest-layer face of the project's pure-FP testing posture. - **Composable per the dependency graph.** `renderAll` maps every service/global render source in the Phase-31-sealed unique source inventory. Ordering and connectivity are derived from the declared dependency graph, not hand-authored ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)). One spec value renders the
+  the edge," "the rendered RBAC grants exactly these verbs" — by inspecting the returned `[K8sObject]`. No kind
+  cluster, apiserver, or golden-YAML diff of templated strings is required.
+- **Composable per the dependency graph.** `renderAll` must map every service/global render source in the
+  unique source inventory that Phase 31 will eventually seal. Phase 31 is **NOT VALIDATED**. Ordering and
+  connectivity are derived from the declared dependency graph, not hand-authored
+  ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)). One spec value renders the
   whole cluster, and duplicate ownership cannot be hidden by list order.
 
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
@@ -333,18 +335,43 @@ because there was never a value to lint.
 
 ## 4. No third-party charts ≠ no third-party software: operators are *generated*
 
-prodbox today still consumes five upstream operator/platform charts — Harbor, MetalLB, Envoy Gateway,
-cert-manager, and the Percona PostgreSQL operator. amoebius eliminates all five **as charts** without
+The seed design consumes upstream operator/platform charts for MetalLB, Envoy Gateway, cert-manager, and the
+Percona PostgreSQL operator. amoebius eliminates those charts without
 eliminating the software. The distinction has three parts:
 
-- **The operator *binary* is baked, not pulled.** Every third-party service binary — including each
-  operator's controller — is baked into the amoebius base container per the supply-chain rule;
+- **The operator *binary* is baked, not pulled.** Every non-Registry third-party service binary — including
+  each operator's controller — is baked into the amoebius base container per the supply-chain rule;
   the build pipeline, the baked base container, and the resulting registry refs are owned by
   [image_build_doctrine.md](./image_build_doctrine.md). amoebius does not pull an upstream operator image
   from a public registry at steady state.
 - **The operator's *install manifests* are generated.** Instead of `helm install cert-manager`, `renderAll`
   emits the operator's `CustomResourceDefinition`s, its controller `Deployment`, and its RBAC as typed
-  objects — the same `object [...]` discipline prodbox already uses for `EnvoyProxy`, `GatewayClass`, `ClusterIssuer`, and friends in `Rke2.hs`. The install is amoebius's manifests running amoebius's baked binary. - **The operator's *CR instances* are generated too.** A `Certificate`, a `PerconaPGCluster`, a `Gateway`, an `IPAddressPool` is rendered from the typed service spec that needs it. prodbox already renders the Gateway-API and cert-manager CRs this way; amoebius extends the same treatment to the Postgres and LB operators' CRs. For every supported CR kind, its replica, pod-template resource, PVC-size, and rollout fields are an exact provider-specific projection of the provisioned child envelope; omitting a field to an operator default is not a projection. A CR kind for which amoebius cannot define that total projection has no supported binding. The operator binary then reconciles its own CRs as usual. - **Controller children are constrained before a CR can create them.** For every supported controller arm, the renderer first emits a dedicated `ControllerEnvelopeNamespace` that may belong to exactly one CR owner, an amoebius-owned child-envelope validating webhook, and namespace-scoped `ResourceQuota`/`LimitRange` derived from the same provision witness. The validating admission path requires the expected controller/CR owner identity, rejects missing requests/limits/PVC caps and any per-child or rollout value outside the envelope, and is Ready before the CR is applied. The namespace quota atomically enforces the cumulative aggregate while the webhook enforces exact typed fields. Two owner envelopes cannot share one namespace, and a child cannot target another owner's namespace. Thus a misbehaving operator receives an admission rejection before an over-bound Pod/PVC object or allocation exists. Post-ready child enumeration remains an independent drift check; it is not the first enforcement point. The webhook itself is not free: the binder's version-pinned child model derives its image, CPU/memory/ephemeral requests and limits, log/writable allowance, replicas, pod slots, and rollout overlap; `ProvisionedControllerChildren.admissionExecution` must place successfully before `renderAll` can emit the namespace/webhook/CR sequence. The rendered webhook Deployment is an exact projection of that private envelope, is observed live before the CR, and a topology where all children fit but the webhook does not yields no objects to apply.
+  objects — the same `object [...]` discipline prodbox already uses for `EnvoyProxy`, `GatewayClass`,
+  `ClusterIssuer`, and friends in `Rke2.hs`. The install is amoebius's manifests running amoebius's baked
+  binary.
+- **The operator's *CR instances* are generated too.** A `Certificate`, a `PerconaPGCluster`, a `Gateway`, an
+  `IPAddressPool` is rendered from the typed service spec that needs it. prodbox already renders the
+  Gateway-API and cert-manager CRs this way; amoebius extends the same treatment to the Postgres and LB
+  operators' CRs. For every supported CR kind, its replica, pod-template resource, PVC-size, and rollout
+  fields are an exact provider-specific projection of the provisioned child envelope; omitting a field to an
+  operator default is not a projection. A CR kind for which amoebius cannot define that total projection has
+  no supported binding. The operator binary then reconciles its own CRs as usual.
+- **Controller children are constrained before a CR can create them.** For every supported controller arm,
+  the renderer first emits a dedicated `ControllerEnvelopeNamespace` that may belong to exactly one CR owner,
+  an amoebius-owned child-envelope validating webhook, and namespace-scoped `ResourceQuota`/`LimitRange`
+  derived from the same provision witness. The validating admission path requires the expected controller/CR
+  owner identity, rejects missing requests/limits/PVC caps and any per-child or rollout value outside the
+  envelope, and is Ready before the CR is applied. The namespace quota atomically enforces the cumulative
+  aggregate while the webhook enforces exact typed fields. Two owner envelopes cannot share one namespace,
+  and a child cannot target another owner's namespace. Thus a misbehaving operator receives an admission
+  rejection before an over-bound Pod/PVC object or allocation exists. Post-ready child enumeration remains an
+  independent drift check; it is not the first enforcement point. The webhook itself is not free: the
+  binder's version-pinned child model derives its image, CPU/memory/ephemeral requests and limits,
+  log/writable allowance, replicas, pod slots, and rollout overlap;
+  `ProvisionedControllerChildren.admissionExecution` must place successfully before `renderAll` can emit the
+  namespace/webhook/CR sequence. The rendered webhook Deployment is an exact projection of that private
+  envelope, is observed live before the CR, and a topology where all children fit but the webhook does not
+  yields no objects to apply.
 
 Transition workers are rendered by the same rule. A private `ProvisionedStorageMigration`,
 `ProvisionedRegistryBackendMigration`, or `ProvisionedSchemaMigration` projects its exact replacement
@@ -357,12 +384,12 @@ So **"no third-party charts" is not "no third-party software."** cert-manager st
 the Percona operator still runs Patroni — amoebius simply owns every byte of YAML around them and pulls the
 binaries from its own registry.
 
-This is also where the registry itself changes shape. amoebius's image registry is the single-binary
-`distribution` OCI registry (`registry:2`) — baked like MinIO and Vault — which **replaces Harbor**: no
-Trivy scanning, no UI, no robot RBAC, no replication, by design. *Which* provider backs the Registry
-capability is owned by [service_capability_doctrine.md](./service_capability_doctrine.md); the generation
-consequence has one explicit bootstrap edge. Phase 56 cannot fabricate a minimal `ProvisionedServiceSpec` or
-call a service renderer before the whole deployment and its scheduler exist. Instead,
+The registry is the single-binary Distribution OCI registry (`registry:2`), pinned and preloaded as its own
+bootstrap image rather than baked into `amoebius-base` like MinIO and Vault. No
+alternate registry provider, UI, scanning layer, robot-RBAC layer, or replication layer is admitted. Provider
+selection is owned by [service_capability_doctrine.md](./service_capability_doctrine.md); the generation
+consequence has one explicit bootstrap edge. The bootstrap path cannot fabricate a minimal
+`ProvisionedServiceSpec` or call a service renderer before the whole deployment and its scheduler exist. Instead,
 `provisionBootstrapRegistry` constructs a resource-complete `ProvisionedBootstrapRegistry`; a fresh snapshot
 may mint one `BootstrapRegistryAction` that side-loads its image and initializes only its equal-keyed
 registry/proxy source domain through the same package-private `renderSourcePrivate`. This is a typed action,
@@ -395,11 +422,9 @@ specialized from "any resource the forest can create" down to "Kubernetes object
 [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon) —
 never by a CLI invocation racing another writer.
 
-Phase 65 delivers that role and this loop on linux-cpu. Its live gate records the exact seven-object
-first-pass SSA set under field manager `amoebius-live-dsl-deploy`, a second pass that re-runs discovery and
-emits zero mutating audit records, Lease-gated authority across replacement, and leak-free restoration of the
-retained stack. The control-plane daemon itself is a generated `Deployment replicas=1`, `Recreate`, with no PVC or
-amoebius election.
+The control-plane daemon itself is a generated `Deployment replicas=1`, `Recreate`, with no PVC or amoebius
+election. Its later live gate must observe exact first-pass SSA, a zero-mutation rediscovery, Lease-gated
+authority across replacement, and leak-free restoration without supplying the renderer's semantic oracle.
 
 Before any mutation, the engine runs `renderAll`, takes one read-only snapshot of live objects and resource
 inventory, constructs the typed diff and peak transition envelope, and validates the whole-deployment
@@ -539,23 +564,9 @@ flowchart TD
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
-*Phase-58/38/39 validation boundary. Phase 58 tested the generic reconciler. Phase 59 then tested the scheduler's five-state ledger, two readiness witnesses, whole-root reservation CAS, real Kubernetes Binding ordering, crash-gap recovery, execution-identity admission, and byte-stable live rerun. Phase 60 used that renderer/reconciler seam to apply the sole inert StorageClass and deterministic retained PVs, including fresh uid-less claimRefs after a real cluster recreate. Durable completion/rollback and the release ledger remain deferred.*
-
-> **Honesty.** Phase 58, sealed 2026-08-14, supplies amoebius evidence for the object-reconciler slice:
-> Register 3 observed the live Kubernetes mechanisms — convergence, a byte-stable zero-mutation re-run,
-> observed readiness, ordered `OnDelete` replacement, terminal-Job retention, child-envelope conformance, and
-> single admission under a one-Pod quota — and Register 2.5 exercised the same real action modules through
-> 2,048 deterministic schedules. The modeled-apiserver fidelity of Register 2.5 is assumed and bounded by that
-> separate live run, and the content-addressed release ledger and rollback stay deferred to the content-store
-> phase, carried UNVERIFIED. The scheduler CAS/Binding half (Phase 59) and the retained-storage arm (Phase 60)
-> are **UNVERIFIED**: both phases are open under the reopened numeric sequence, and their pre-amendment records
-> do not carry forward.
-
-[Phase 73](../../DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md) extends the same pure-render/reconcile boundary to host networking. Its committed two-peer inventory
-renders byte-for-byte to an independent WireGuard config golden containing only `SecretRef` names. Live
-enactment then reads effective state with `wg show`, and an unchanged second discover/diff pass emits zero
-mutations. Keyless peers are unconstructible; duplicate VPN addresses and out-of-fabric `AllowedIPs` return
-their pinned decode reasons before any `ip`, `wg`, `tc`, cgroup, log, or listener effect.
+*Design intent. The generic reconciler, scheduler, retained-storage arm, and network-fabric extension each
+require their own independent Haskell expectations and later live observer. No generated manifest, config
+golden, or earlier phase result supplies that independence.*
 
 ### 5.1 The `RolloutPlan`: ordered, readiness-gated phases on this same reconciler (tier (c))
 
@@ -609,24 +620,12 @@ flowchart TD
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
 ```
-*Design intent for Phase 70. The `RolloutPlan` is a Tier-1 typed value; each phase's enact/observe step and the rollback are effectful seams on the tier-(c) reconciler, and the readiness gating that orders them is runtime-checked, not proven here.*
+*Design intent. The `RolloutPlan` is a Tier-1 typed value; each enact/observe step and rollback is an
+effectful seam on the tier-(c) reconciler, and readiness ordering is runtime-checked, not proven here.*
 
-> **Sibling evidence (the PATTERN, not Helm; not an amoebius result).** jitML's
-> `~/jitML/src/JitML/Cluster/Helm.hs` carries exactly this shape: a closed
-> `data HelmPhase = HarborPhase | PlatformPhase | FinalPhase` and a `phasedReleases :: [HelmRelease]` whose > every element is tagged with a `releasePhase`, folded by `helmPhasedRolloutPlan` into an ordered plan; > `~/jitML/src/JitML/Cluster/Readiness.hs` supplies the between-phase gates (`postgresReadinessSubprocesses`, > `rolloutStatusSubprocess`, `runMinioBucketReadinessIO`); and `~/jitML/src/JitML/Bootstrap.hs` **splits its > rollout around a live schema grant** — `livePreGrantSubprocessesForPort` brings the operator and cluster up
-> *through readiness*, the typed Haskell schema grant then runs, and `livePostGrantSubprocessesForPort`
-> continues — the readiness-gated pre/post migration shape, LIVE in a sibling. But jitML enacts every phase
-> with `helm install`; amoebius keeps only the **phase-tagged ordered list + readiness gate**, renames
-> `HelmPhase` → `RolloutPhase`, and enacts each phase through fresh checked actions derived from an
-> owner-closed `renderAll(ProvisionedSpec)` projection with
-> **no Helm**. This is
-> sibling evidence, not an amoebius result.
-
-> **Honesty.** The `RolloutPlan` is **Phase-71 design intent** — it rides the tier-(c) typed-action reconciler,
-> whose generic action engine Phase 58 delivered; the DB-schema-migration `RolloutPhase` itself is part of
-> that unbuilt Phase-71 shape, proven
-> *only* as the Helm-driven pattern in the jitML sibling. Read as the contract amoebius intends, never as a
-> tested amoebius result.
+The seed supplies only the phase-tagged ordering pattern. amoebius re-derives it as `RolloutPhase` and enacts
+each phase through fresh checked actions from an owner-closed `renderAll(ProvisionedSpec)` projection. The
+development plan owns validation; sibling behavior is not an amoebius result.
 
 ---
 
@@ -779,9 +778,9 @@ replaying stored YAML.
 - **Still not a Helm release store.** Neither immutable record stores mutable rendered YAML. The environment
   pointer selects a `Release`; object derivation is recomputed; the application record is append-only evidence.
 
-> **Validated instance.** Phase 71 appends an immutable `AppliedGeneration` only after the final live
-> Deployment reports `Available`, distinct from the pre-promotion `Release`, and uses the Phase-58 tier-(c)
-> SSA/readiness engine for the ordered plan. The observed convergence and write are runtime-tested, not proven.
+The release gate must append an immutable `AppliedGeneration` only after final live readiness, distinct from
+the pre-promotion `Release`. Independent cluster observation must establish the ordering and write; no
+generated manifest or stored release record may serve as its own oracle.
 
 ---
 
@@ -798,19 +797,19 @@ three-replica Patroni — a difference of *object structure*, not merely of a `v
 This is precisely what a values-only Helm chart handles badly and a typed renderer handles cleanly. A single
 chart parameterized by a `replicas` value cannot, without templating contortions, emit a *different set and
 shape* of objects for "single-node" vs. "distributed"; a typed
-Phase 31's private `ProvisionedServiceObjectSource` constructors pattern-match the shape and enter the unique
-whole-deployment source map; Phase 33's `renderSourcePrivate` total-maps those sources before `renderAll`
+Private `ProvisionedServiceObjectSource` constructors pattern-match the shape and enter the unique
+whole-deployment source map; `renderSourcePrivate` total-maps those sources before `renderAll`
 returns the deployment set. Each shape remains independently type-checked. The
 capability abstraction — capabilities named by role (`ObjectStore`, `SecretStore`, `MessageBus`, `Sql`,
-`Identity`, `Observability`, `Registry`, `Edge`), one canonical provider each, the type *admitting* alternates
-later, and the per-cluster shapes — is owned by [service_capability_doctrine.md](./service_capability_doctrine.md);
+`Identity`, `Observability`, `Registry`, `Edge`), doctrine-fixed providers with only capability-specific
+extension seams, and per-cluster shapes — is owned by
+[service_capability_doctrine.md](./service_capability_doctrine.md); Registry is closed to Distribution
+`registry:2` and admits no alternate.
 **this doc owns only the rendering consequence**: generation, not templating, is what makes per-cluster
 structural shapes expressible while keeping each shape best-practice-by-construction ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)).
 
-> **Honesty.** Per-cluster structural shapes are design intent (the Phase 30 capability binder and Phase 33 per-cluster `renderAll` output), and the
-> reversal of prodbox's substrate-equivalence lint is a deliberate amoebius decision, not an inherited-proven
-> behaviour. prodbox's equivalence lint is the *evidence* that structural divergence is the thing worth
-> controlling; amoebius chooses to control it by typing rather than by forbidding it.
+Per-cluster structural shape is a target contract, not an inherited result. The plan must validate both the
+capability binding and each generated `renderAll` shape before reporting that contract as implemented.
 
 ---
 
@@ -818,7 +817,7 @@ structural shapes expressible while keeping each shape best-practice-by-construc
 
 Stating the boundary honestly, because most of this generalizes a sibling rather than inheriting a proof:
 
-| Capability | prodbox seed (evidence) | amoebius status |
+| Capability | prodbox seed observation | amoebius target |
 |---|---|---|
 | Render supporting objects from typed records to Aeson | `Rke2.hs` (`Secret`, RBAC, `GatewayClass`, `EnvoyProxy`, `SecurityPolicy`, `HTTPRoute`, `ClusterIssuer`, `IPAddressPool`), `Storage.hs` (`Namespace`, `PV`, `PVC`, `StorageClass`) | **Generalize** into one typed manifest library covering the *whole* object set |
 | Pure deployment planner with dependency/values orchestration | `ChartPlatform.hs` (`buildChartDeploymentPlan` → `ChartDeploymentPlan`/`ChartReleasePlan`) | **Repurpose** the planner; **drop** its Helm-release/`valuesJson` target |
@@ -826,7 +825,7 @@ Stating the boundary honestly, because most of this generalizes a sibling rather
 | Full **workload** renderer (Deployment/StatefulSet/Service from types) | prodbox still uses Helm charts for workloads | **New** — the gap [§1](#1-why-this-doctrine-exists-types-render-manifests-helm-does-not) closes |
 | Typed live actions: scoped SSA, scheduler CAS/Binding, authenticated delete, staged execution, wait, rollback | prodbox uses `kubectl apply -f` + Helm `--wait` | **New** — the engine [§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions) |
 | Generated operator installs + CR instances (no upstream charts) | prodbox consumes 5 upstream charts | **New** — [§4](#4-no-third-party-charts--no-third-party-software-operators-are-generated) |
-| Multi-arch baked binaries replacing public-registry pulls | prodbox caches via Harbor mirror (`ContainerImage.hs`, `DockerConfig.hs` no-`docker login`) | **New** ([image_build_doctrine.md](./image_build_doctrine.md)) |
+| Multi-arch baked binaries replacing public-registry pulls | the seed uses a registry mirror | **New** ([image_build_doctrine.md](./image_build_doctrine.md)) |
 
 ---
 
@@ -834,13 +833,9 @@ Stating the boundary honestly, because most of this generalizes a sibling rather
 
 This document is normative manifest-generation-and-reconcile doctrine only. Delivery sequencing, completion
 status, validation gates, and remaining work are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
-only (the plan is authoritative): the **typed manifest renderer and the server-side-apply reconciler** land
-in **Phases 33 and 58**; the **capability abstraction and per-cluster shapes** ride the Phase-30 binder and
-Phase-33 renderer; the **content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional))** composes with the
-Phase-69 content store; and the **`RolloutPlan` / `RolloutPhase`** enactment, including its
-DB-schema-migration phase ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c)),
-lands in Phase 71 on the tier-(c) reconciler. This doc states the target shape and links back for status.
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. This document
+states the target shape and links to the plan for numerical ownership. It neither restates a phase map nor
+implies delivery, validation, or permission to begin a hardware-dependent successor.
 
 ---
 
@@ -868,18 +863,3 @@ lands in Phase 71 on the tier-(c) reconciler. This doc states the target shape a
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — replica counts and topology are deployment rules, not app logic
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-
-> **Honesty.** The complete end-state in this doctrine remains design intent, but its foundations are no
-> longer wholly prospective: Phase 30 delivered the capability abstraction, Phase 31 the checked opaque
-> identity-keyed render-source set and four-stage activation classifier, Phase 33 the typed whole-set
-> renderer, Phase 58 the server-side-apply/staged-action reconciler, Phase 59 the scheduler seam, Phase 60
-> the retained StorageClass/PV/rebind application slice, Phases 40–43 the retained platform/edge stack, and
-> Phase 65 the Lease-held control-plane daemon's exact live reconcile/no-op loop. Later provider, rollout, and release-ledger subjects
-> remain unbuilt and must not inherit those results. The approach was **re-derived against the shape the `prodbox` seed shows**, which already renders a slice
-> of its object set from typed Haskell to Aeson and applies it with `kubectl`, stamps every object with an
-> owner label, and orchestrates a pure deployment planner — but prodbox still ships its workloads as Helm
-> charts and consumes five upstream charts, so the full workload renderer, typed live-action engine, the
-> generated-operator path, and the no-Helm/no-third-party-chart posture are **new and unproven**. Per
-> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive statement as the
-> contract amoebius intends to satisfy, never as a tested amoebius result; inherited prodbox behaviour is
-> evidence from a sibling system, not proof in amoebius.

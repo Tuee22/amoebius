@@ -16,12 +16,12 @@ misinterpreted payload impossible rather than silent. It does not own the topics
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, vendor/supernova/PROVENANCE.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. One client, one wire, no WebSockets](#1-one-client-one-wire-no-websockets)
@@ -63,9 +63,9 @@ Both transports are deleted. One native client replaces both, with four concrete
   contract in [§6](#6-the-declarative-topology-algebra) clean rather than a workaround.
 
 > **Honesty (per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).** "Performance via the
-> native protocol" remains a design rationale, not a benchmark result. Phase 67 did validate the native wire,
-> persistent producer/consumer sessions, and absence of WebSocket or second-language client transport; it did
-> not measure a speedup over the sibling paths.
+> native protocol" remains a design rationale, not a benchmark result. Phase 67 owns validation of the native
+> wire, persistent producer/consumer sessions, and absence of WebSocket or second-language client transport;
+> that target does not include measuring a speedup over the sibling paths.
 
 The no-WebSockets rule is a **locked invariant**, recorded as a standard-service fact in
 [platform_services_doctrine.md §6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox): lookup, produce, consume, subscribe,
@@ -104,7 +104,7 @@ It deliberately does **not** own, and only references:
 | Intra-cluster HA correctness (delegated to brokers/bookies) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 
 Phase order and status are owned only by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
-(the client lands in **Phase 67**); this doc states the target shape and links back, never a status ledger.
+(the client is assigned to **Phase 67**); this doc states the target shape and links back, never a status ledger.
 
 ---
 
@@ -124,10 +124,11 @@ The wire format (from the [Pulsar binary protocol spec](https://pulsar.apache.or
 - Maximum frame size is 5 MiB; larger application data must be a content-addressed reference, not an inline
   blob — see [content_addressing_doctrine.md](./content_addressing_doctrine.md).
 
-Implementation rules for `amoebius-pulsar`:
+Target implementation rules for `amoebius-pulsar`:
 
-- **`proto-lens` is the protobuf layer.** `BaseCommand` and message metadata are generated from
-  `PulsarApi.proto` via `proto-lens` (the same `Data.ProtoLens` codegen infernix already uses:
+- **`proto-lens` is the protobuf layer.** Haskell message declarations are authoritative and Phase 26 must
+  lazily render any required `PulsarApi.proto` plus generated bindings beneath `.build/proto/**`. `proto-lens`
+  consumes that run-local projection (using the same `Data.ProtoLens` interface infernix uses:
   `encodeMessage` / `decodeMessage` / `defMessage`). Hand-rolled wire parsing of the protobuf bodies is
   forbidden — only the *framing* (size prefixes, magic numbers, CRC32C) is hand-written.
 - **CRC32C is mandatory on payload frames** and checked on receive; a checksum mismatch is a structured
@@ -213,10 +214,11 @@ flowchart TD
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
 ```
 
-*Validated Phase-67 chain: the CBOR encode/frame path and total decoder are tested in process; the broker seam and running consumer are Register-3 runtime-checked, not proven.*
+*Phase-67 target chain — NOT VALIDATED: the CBOR encode/frame path and total decoder must be tested in
+process; the broker seam and running consumer remain Register-3 runtime obligations, not proof claims.*
 
-> **Honesty.** Phase 67 validates the typed producer/consumer API, a hand-authored API-surface golden, a raw
-> producer compile refusal, corrupt-body total refusal, and byte-preserving live CBOR round-trips. The
+> **Target validation boundary.** Phase 67 owns the typed producer/consumer API, a separately authored Haskell
+> API-surface oracle, a raw-producer compile refusal, corrupt-body total refusal, and byte-preserving live CBOR round-trips. The
 > produce-side raw-body arm is type/API-foreclosed; received bytes still cross a runtime broker boundary and
 > are accepted only through total `Either` decoding. No broader canonicalization or performance claim follows.
 
@@ -241,17 +243,17 @@ Forking — rather than depending on the published package — is the honest cho
 3. **Layering.** The topology algebra ([§6](#6-the-declarative-topology-algebra)) and the dedup contract ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) are amoebius doctrine, not generic
    client features; they live in the fork, above supernova's transport core.
 
-**The fork starts from a vendored copy, not from a resolved branch head.** Supernova sits under
-`vendor/supernova/**` as reviewed source with its provenance recorded there, on the terms
-[`repository_layout_doctrine.md` §4.1](./repository_layout_doctrine.md#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head)
-fixes: a package amoebius edits to compile is vendored rather than patched against source that moves between
-runs. The copy landed with
-[`phase_01_toolchain_spike.md` Sprint 1.8](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md#sprint-18-vendor-supernova-retire-patches-),
-which retired the `source-repository-package` stanza and the patch replayed into its checkout. Forking is
-therefore a change of ownership rather than of acquisition — the tree amoebius reviews is already the tree it
-builds — and this phase moves it to `src/vendor/**` when amoebius takes the maintenance obligation on.
+**The present top-level vendor tree is migration debt, not the target source layout.** Phase 1 removes
+`vendor/supernova/**` from the tracked tree. Any Haskell code amoebius elects to maintain is re-derived under
+`src/vendor/**/*.hs`; required upstream non-Haskell source, Cabal descriptions, generated bindings, and other
+build inputs are acquired at a recorded immutable identity beneath `.build/vendor/**`. Provenance and
+transformations are declared in reviewed Haskell values and rendered only as reader-facing diagnostics. This is
+the fixed-source rule in
+[`repository_layout_doctrine.md` §4.1](./repository_layout_doctrine.md#41-a-compatibility-edit-is-fixed-source-not-a-patch-against-a-moving-head),
+owned by
+[`phase_01_toolchain_spike.md` Sprint 1.8](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md#sprint-18-vendor-supernova-retire-patches-).
 
-> **Honesty.** Supernova remains provenance, not evidence. Phase 67 independently validates amoebius's
+> **Honesty.** Supernova remains provenance, not evidence. Phase 67 must independently validate amoebius's
 > generated framing, CONNECT/LOOKUP, produce/consume/subscribe/seek surface, broker dedup, redelivery, and
 > cleanup. Reconnection hardening beyond the exercised close/reopen paths remains unclaimed.
 
@@ -309,11 +311,11 @@ choice so the omissions are auditable, not silent.
   filter convention
   ([low_code_ui_runtime_doctrine.md §14](./low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability)).
   They are a *projection*, never a decision primitive: no ownership or election logic lives in a TableView.
-  [Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md) validates this application live: native
-  consumers observe eight keyed workflow events, seven owner-qualified projection messages, five original-
-  command-qualified receipt messages, and successful broker compaction for both derived topics. Equal-shaped
-  Alice/Bob/Carol rows remain isolated, and dropping the owner from either key or subscription turns the gate
-  red. Ledger `external-run-reference`.
+  [Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md) must eventually validate this application
+  live with independently observed keyed workflow events, owner-qualified projection messages,
+  original-command-qualified receipt messages, broker compaction, and equal-shaped tenant controls. Removing
+  the owner from either key or subscription must turn the qualified gate red. Phase 70 is **NOT VALIDATED**;
+  no prior ledger or external run reference is current evidence.
 - **Not exposed: exclusive-producer access mode** (`Exclusive` / `WaitForExclusive` / `ExclusiveWithFencing`).
   Pulsar's purpose-built single-writer-with-fencing primitive is deliberately absent from the client surface —
   it was evaluated and rejected as the control-plane election substrate (bootstrap/DR circularity; it fences
@@ -327,12 +329,13 @@ choice so the omissions are auditable, not silent.
 
 ## 6. The declarative topology algebra
 
-**Storage-fold status.** The [Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md)
-implements and Register-1 validates Pulsar's two independent ceilings: BookKeeper logical hot bytes expand
+**Storage-fold target — NOT VALIDATED.** The
+[Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) must implement and validate at
+Register 1 Pulsar's two independent ceilings: BookKeeper logical hot bytes must expand
 through write-quorum/reserve/re-replication geometry before fitting the bookie backing, and durable offload
 requires a finite size ceiling against its selected budget. The physically-hot-over-bookie and time-only
-cases reject, their twins fit, and the sampled equivalence property meets both coverage directions (ledger
-`dynamically-resolved`). Broker retention,
+cases must reject, their twins must fit, and the sampled equivalence property must meet both coverage
+directions. No current ledger is asserted here. Broker retention,
 BookKeeper recovery, tiered offload, and replay fidelity remain **UNVERIFIED** live effects.
 
 **Nobody writes a topic string by hand.** A topic name is a *derived* function of a typed
@@ -589,29 +592,30 @@ A derivation `infernix` also reaches, re-derived here: when a message has a caus
 64-bit `sequence_id` (both are monotonic per topic-partition); otherwise fall back to a stable hash of a
 generated request id, paired with a request-scoped producer name so unordered hashes never share a cursor.
 
-> **Honesty.** Phase 67 now validates the reusable Haskell client at Register 3: two distinct namespaces use
+> **Target validation boundary — NOT VALIDATED.** Phase 67 must validate the reusable Haskell client at
+> Register 3: two distinct namespaces must use
 > native command/event CBOR round-trips, broker-side duplicate collapse, all four subscription types,
 > unacknowledged redelivery, seek replay, and external cleanup readback. The 720-schedule Register-2.5 battery
-> validates the amoebius dedup fold under its modeled reorder/duplicate domain. Broker consensus and
+> must challenge the amoebius dedup fold under its modeled reorder/duplicate domain. Broker consensus and
 > cross-cluster correspondence remain UNVERIFIED.
 
-Phase 69 consumes this surface through native ranked `Failover` subscriptions. The protocol subset now carries
+Phase 69 must consume this surface through native ranked `Failover` subscriptions. The protocol subset must carry
 consumer priority, active-consumer change, and redeliver-unacknowledged frames; outbound frames are serialized
-per client. In two live namespaces, Pulsar selected `worker-a`, promoted `worker-b` after an abrupt kill, and
-redispatched the outstanding command while an independent subscription observed its own command exactly once.
-The content-addressed store made the promoted write a convergent no-op. This proves the client/runtime boundary,
+per client. In two live namespaces, Pulsar must select `worker-a`, promote `worker-b` after an abrupt kill, and
+redispatch the outstanding command while an independent subscription observes its own command exactly once.
+The content-addressed store must make the promoted write a convergent no-op. This targets the client/runtime boundary,
 not Pulsar broker/BookKeeper/ZooKeeper consensus.
 
-The tested backbone uses the universally available `linux-cpu` lane.
+The target backbone uses the universally available `linux-cpu` lane.
 
-Phase 91 adds a scoped infernix adapter and a separate native driver using typed CBOR command/event payloads,
+Phase 91 must add a scoped infernix adapter and a separate native driver using typed CBOR command/event payloads,
 one stable scope-qualified command/work id, and the linked sibling compacted-topic view. A fresh retained-
-Pulsar run records two producer attempts and one consumer delivery under broker dedup. It does not establish
+Pulsar run must record two producer attempts and one consumer delivery under broker dedup. It cannot establish
 the complete Pulsar-command-to-worker causal chain or migration of the full sibling inference engine; those
 remain UNVERIFIED.
 
-Phase 83's scoped UI rollout result tests cursor keys containing tenant, owner, and stream and preserves the
-same sequence through a host-local durable reconnect probe. It also gates simulated traffic shifts on
+Phase 83's scoped UI rollout target must test cursor keys containing tenant, owner, and stream and preserve the
+same sequence through a host-local durable reconnect probe. It must also gate simulated traffic shifts on
 projector watermarks. No real Pulsar broker or independently consumed broker message id participated, so live
 watermark and resume behavior remain UNVERIFIED.
 
@@ -648,7 +652,7 @@ infernix and jitML remain **ML extension libraries**; they stop shipping their o
 
 This document is normative client doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the native client,
-the topology algebra, and the round-trip gate landed in **Phase 67**, and the infernix/jitML migration onto it
+the topology algebra, and the round-trip gate are assigned to **Phase 67**, and the infernix/jitML migration onto it
 is **Phases 60 (infernix) and 52 (jitML)**. This doc never maintains a competing status ledger.
 
 ---

@@ -1,33 +1,35 @@
 # Phase 13: The amoebius symbolic checker
 
-> **Purpose**: Deliver an amoebius-owned SMT translation and induction schema over the supported Phase-11
-> `Model` fragment, with explicit unsupported and inconclusive results outside a proved claim.
+> **Purpose**: Specify the target Haskell capability to classify the supported Phase 11 model
+> fragment through a Haskell-owned SMT translation and induction schema, with any SMT-LIB or solver
+> products generated only beneath `.build/**` and no shell or Python verdict.
 > **Read this if**: a finite-state search bound must be replaced by an inductive safety argument, or the exact
 > limits of the symbolic result must be understood.
 
-This phase owns QF linear-integer/boolean translation, base-and-step obligation construction, and proof
-classification. It uses a dynamically resolved Z3 process as a decision procedure, but does not delegate the
-checker or discover the solver through ambient `PATH`; it does not claim completeness, liveness, code
-refinement, or runtime fidelity.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/formal_model_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_14_refinement_checker.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 13.1: Total symbolic boundary and inductive obligations ✅](#sprint-131-total-symbolic-boundary-and-inductive-obligations-)
-- [Sprint 13.2: Solver differential and mutation evidence ✅](#sprint-132-solver-differential-and-mutation-evidence-)
+- [Sprint 13.1: Total symbolic boundary and inductive obligations ⏸️](#sprint-131-total-symbolic-boundary-and-inductive-obligations-)
+- [Sprint 13.2: Solver differential and mutation evidence ⏸️](#sprint-132-solver-differential-and-mutation-evidence-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -35,100 +37,87 @@ refinement, or runtime fidelity.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All twelve gate sides passed on natural `arm64`, untranslated: 11 metrics
-matched, all three proof mutants were red at their own loci, and 21 surfaces joined to 23 enumerated items.
-Attestation `sha256:4cf08cabb41f3c66082d6e7458d5299c2773103779c5a1628fe3aef2a46cb2c4` binds source
-`sha256:0b10b77934700fda…` over 2,168 files. Repository-conformance and documentation support gates passed on
-that same snapshot.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 12, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`Amoebius.Checker.Symbolic` translates the QF linear-integer/boolean subset of the shared `Model` to SMT-LIB.
-For each named invariant it asks Z3 whether the initialized state violates the invariant, then whether the
-conjunction of all invariants and each enabled action can lead to a violating successor. Unsatisfiable base
-and step obligations produce an induction witness containing every obligation identity and query digest;
-satisfiable obligations produce a solver-backed base or step counterexample. Unsupported model syntax and
-solver `unknown` are first-class results, not proof successes.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to classify the supported Phase 11 model fragment through a Haskell-owned SMT
+translation and induction schema, with any SMT-LIB or solver products generated only beneath
+`.build/**` and no shell or Python verdict.
 
-**Phase scope:** One total symbolic-classification boundary, one QF_LIA/boolean induction schema, and one
-solver/explicit-state correspondence gate; split if work adds a new SMT theory, invariant synthesis,
-multi-step induction, liveness, implementation refinement, or a production protocol model.
-**Substrate:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-**Register:** 1 — pure/golden
-**Depends on:** [Phase 11](phase_11_formal_model_kernel.md) — the reified `Model` and interpreter semantics.
-The implementation does not depend on Phase 12; the gate compares both independent readings where their
-claims overlap.
-**Gate:** `python3 tools/run_phase_gate.py 13` passes the hand-authored induction/relationship oracle,
-absolute resolved-solver boundary, base/step proof suite, explicit-state comparison, three build mutants at
-specific loci, generated-result discipline, surface join, ledger, containment, write guard, natural
-architecture, and source-bound attestation.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
+
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — classify the supported Phase 11 model fragment through a
+Haskell-owned SMT translation and induction schema, with any SMT-LIB or solver products generated
+only beneath `.build/**` and no shell or Python verdict. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 12](phase_12_explicit_state_checker.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 13`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set:** seven authored models cover inductive success, initialization failure, reachable
-  step failure, a reachable-safe but one-step-non-inductive invariant, a proof requiring conjoined invariants,
-  a guard-sensitive boolean proof, and a set-valued model outside the supported theory.
-- **Independent oracle:** `test/oracle/symbolic_checker/models.tsv` fixes each model's explicit bound,
-  symbolic result class, exact failing invariant/action, explicit-state result, relationship class, and proof
-  obligation count. It distinguishes agreement, conservative incompleteness, and unsupported syntax.
-- **Owned checker boundary:** the dedicated-root implementation consumes `formal-model` but may import neither
-  the Phase-11 explorer nor another checker. It owns variable-sort classification, SMT-LIB translation,
-  parameter expansion, simultaneous transitions, induction hypotheses, and solver-result classification.
-- **Totality:** every `Expr` constructor is matched. Bool/int QF_LIA terms are translated; sets, functions,
-  finite quantifiers, constraints, expansion limits, and unsupported sorts return a named `Unsupported`
-  feature. A rejected fragment cannot accidentally become an unbounded result.
-- **Induction semantics:** base obligations assert the actual initialized state and negate one invariant.
-  Step obligations assume the conjunction of every invariant, assert one action guard and its simultaneous
-  transition, then negate the target invariant in the successor state.
-- **Independent comparison:** five models yield the same safety class from symbolic induction/counterexample
-  and Phase-12 enumeration. The safe-but-non-inductive model must be rejected conservatively, demonstrating
-  that failure to prove is not relabeled as a reachable violation.
-- **Solver boundary:** Z3 is an external decision procedure, dynamically ensured from the authored
-  `>=4.13 <6` compatibility range and injected by absolute path. The amoebius checker owns the query and classification;
-  the result still assumes Z3 correctly decides the submitted QF_LIA formula.
-- **Seeded defects:** three Cabal/CPP builds assume only the target invariant, negate every action guard, or
-  accept a satisfiable step obligation as proof. Each fails at a different registry-declared fixture/field.
-- **Identity and evidence:** the independently implemented model digest equals Phase 12's digest for all seven
-  fixtures. Successful witnesses bind all 14 obligation kinds to 64-hex query digests; counterexamples retain
-  the satisfying solver model.
-- **Generated-artifact discipline:** no SMT source is committed. The suite writes only
-  `.build/checkers/symbolic/results.tsv`; the gate compares all eleven metrics to authored values and requires
-  the result to remain outside the source snapshot.
-- **Honesty boundary:** successful one-step induction is unbounded for the submitted transition relation and
-  invariant within QF_LIA/boolean semantics. It does not prove that non-inductive properties are false, that
-  unsupported syntax is safe, that the model matches an intended protocol, or that runtime code refines it.
-- **Observer controls:** no authority-control apparatus applies to a pure SMT query. There is no service to
-  authenticate or bypass and no observer pair to compare; independence instead comes from the hand-classified
-  induction cases and a separately implemented bounded checker.
-- **Extension conformance (§M.13).** This clause has no subject here: the implementation introduces no
-  extension or domain declaration and returns only proof-engine results.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-The gate proves its three fixture invariants by one-step induction and tests translation sensitivity to the
-named defects. It neither establishes completeness of the supported theory nor treats a solver as the owner
-of the proof schema.
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — classify the supported Phase 11 model fragment through a Haskell-owned SMT translation and induction schema, with any SMT-LIB or solver products generated only beneath `.build/**` and no shell or Python verdict. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 13` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 12 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
 - [`formal_model_doctrine.md` §2 — The `Model` is data](../documents/engineering/formal_model_doctrine.md#2-the-model-is-data): symbolic obligations consume the same closed constructor tree as the other readings.
-- [`formal_model_doctrine.md` §4 — Single-source correspondence](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence): five overlap fixtures compare independent checker results over identical model digests.
-- [`formal_model_doctrine.md` §6 — What a green model-check proves](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): induction reach and solver/model premises remain explicit.
-- [`formal_model_doctrine.md` §6.1 — The proof stack is amoebius-owned](../documents/engineering/formal_model_doctrine.md#61-the-proof-stack-is-amoebius-owned): the corpus owns translation and induction while a dynamically resolved solver decides its formulas.
+- [`formal_model_doctrine.md` §4 — Single-source correspondence](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence): the target requires independently authored `.hs` overlap fixtures that compare checker results over identical model digests.
+- [`formal_model_doctrine.md` §6 — What a green model-check proves, and what it does not](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): induction reach and solver/model premises remain explicit.
+- [`formal_model_doctrine.md` §6.1 — The proof stack is amoebius-owned](../documents/engineering/formal_model_doctrine.md#61-the-proof-stack-is-amoebius-owned): Haskell must own translation, induction, and the verdict; a dynamically resolved solver may only return raw formula observations through lazy `.build/**` products.
 - [`testing_doctrine.md` §9 — Derivation: generated enumeration, authored expectation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation): every metric, check, and mutant joins to one authored Phase-13 surface.
 
 ## Sprints
 
-## Sprint 13.1: Total symbolic boundary and inductive obligations ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done
-**Implementation**: `lib:symbolic-checker`,
-`src/symbolic-checker/Amoebius/Checker/Symbolic.hs`, the three `symbolic-*-mutant` Cabal flags, and the `z3`
-entry in `tools/toolchain_requirements.json`.
-**Blocked by**: None.
-**Independent Validation**: The source boundary rejects imports of other checker algorithms; unsupported
-syntax is an exact result, and every proof is a list of solver-decided base/step obligations.
-**Docs to update**: `documents/engineering/formal_model_doctrine.md` and
-`DEVELOPMENT_PLAN/{README,overview,system_components}.md`.
+## Sprint 13.1: Total symbolic boundary and inductive obligations ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -154,19 +143,11 @@ dynamically resolved solver, and classify every input without promoting unsuppor
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 13.2: Solver differential and mutation evidence ✅
+## Sprint 13.2: Solver differential and mutation evidence ⏸️
 
-**Status**: Done
-**Implementation**: `test/spec/formal/symbolic/SymbolicCheckerSpec.hs`,
-`test/oracle/symbolic_checker/**`, `test/oracle/symbolic_checker_surfaces.tsv`,
-`test/mutant/registry.tsv`, and `tools/symbolic_checker_gate.py`.
-**Blocked by**: Sprint 13.1's total symbolic classification and induction schema.
-**Independent Validation**: A hand-authored relationship table distinguishes exact agreement from conservative
-non-induction and theory rejection, then three real builds attack different proof decisions.
-**Docs to update**: `documents/engineering/formal_model_doctrine.md` and
-`DEVELOPMENT_PLAN/{README,legacy_tracking_for_deletion,system_components}.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -194,15 +175,17 @@ expected conservative gap, and demonstrate sensitivity to hypotheses, guards, an
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `formal_model_doctrine.md` — settle the symbolic ownership choice and record the supported-theory,
   induction, solver, and model/runtime premises.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md`, `overview.md`, `substrates.md`, and `system_components.md` — reconcile status,
   lane, implementation paths, dynamically resolved solver, and evidence.
 - `DEVELOPMENT_PLAN/phase_14_refinement_checker.md` — open only after this phase seals; its code-refinement

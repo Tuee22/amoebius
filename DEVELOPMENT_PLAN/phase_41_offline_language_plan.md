@@ -4,28 +4,31 @@
 > public-client and private-server replay plans without exposing browser or Redis mechanisms in the DSL.
 > **Read this if**: the Phase-41 language boundary or a later offline-runtime dependency must be understood.
 
-Phase 41 owns the pure offline language, its validation relation, and deterministic paired-plan projection.
-Browser persistence, encryption, and authoritative replay are later runtime claims and remain UNVERIFIED here.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 41.1: Author the continuity language ✅](#sprint-411-author-the-continuity-language-)
-- [Sprint 41.2: Compile paired offline plans ✅](#sprint-412-compile-paired-offline-plans-)
-- [Sprint 41.3: Seal the pure boundary ✅](#sprint-413-seal-the-pure-boundary-)
+- [Sprint 41.1: Author the continuity language ⏸️](#sprint-411-author-the-continuity-language-)
+- [Sprint 41.2: Compile paired offline plans ⏸️](#sprint-412-compile-paired-offline-plans-)
+- [Sprint 41.3: Seal the pure boundary ⏸️](#sprint-413-seal-the-pure-boundary-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,69 +36,76 @@ Browser persistence, encryption, and authoritative replay are later runtime clai
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21 on natural `darwin/arm64`. The twelve-sided Register-1 gate passes 17 exact
-metrics, 52 surfaces joined to 76 enumerated items, normal and network-denied execution, a 40-unit real
-five-calculus projection, and five distinct production mutants. Attestation
-`sha256:7944511e6443a31dc21930a6709f44eaf88f80c75a1ff485f72aa0ab979c7cb8` binds source snapshot
-`sha256:0ef61fb8294d82f1…` over 2,266 files. Browser persistence and live replay authority remain UNVERIFIED.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 40, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase adds `UiSource.continuity = OnlineOnly | Offline OfflineSource`. Its closed source types name cached
+**Target capability — NOT VALIDATED.** Haskell is to add
+`UiSource.continuity = OnlineOnly | Offline OfflineSource`. Its closed source types name cached
 projections, queueable ports, local blob classes, and an offline view. Every queueable port carries finite
 count, byte, and age bounds plus local validation, idempotency, conflict, ordering, dependency, and current
-authority validation semantics. The compiler retains equal queue, projection, and blob key sets in the public
-client and private replay plans while keeping private policy and browser mechanisms out of authored source.
+authority semantics. The target compiler retains equal queue, projection, and blob key sets in the public
+client and private replay plans. Any browser-language projection is generated beneath `.build/**`; it is not
+tracked source.
 
-The representative product declarations permit only infernix workflow start and jitML training start to
+The target Haskell declarations permit only infernix workflow start and jitML training start to
 queue. Workflow progress is a cached projection; ML signals, workflow cancellation, and model invocation
 remain online-only.
 
-**Phase scope:** one cohesive claim — offline continuity is a bounded application contract compiled into
+**Phase scope:** one target claim — offline continuity is a bounded Haskell application contract compiled into
 deterministic paired plans, not a browser or server-storage mechanism.
 **Substrate:** `none` — the gate is pure and provisions no runtime resource.
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-**Register:** 1 — pure/type-level validation.
-**Depends on:** [Phase 40](phase_40_ui_plan_compiler.md) — the sealed UI plan compiler boundary extended here.
-**Gate:** `python3 tools/run_phase_gate.py 41` passes committed
-`test/fixture/offline_language_plan/`, `test/golden/offline_language_plan/`, and the calculus, isolation, and
-exact-locus mutation batteries in [Gate integrity](#gate-integrity).
+**Register:** 1 — pure Haskell/type-level target only.
+**Depends on:** [Phase 40](phase_40_ui_plan_compiler.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 41`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-Phase 0 pins three positive continuity rows, thirteen exact refusal rows, eight independent client/replay key
-rows, and five mutation bodies. A separate calculus oracle names all five real components and their exact
-resource projection. The run joins 38 validation loci plus five central registry entries to an independently
-authored surface expectation in both directions.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-The gate decodes one online-only and two offline Dhall products, compiles both products separately and together,
-and compares queue, cached-projection, and local-blob key sets. It repeats the pure compilation, asserts zero
-private fields and mechanism constructors, runs again under Darwin network denial, then requires each
-compile-time mutant to fail at its own token before restoring the all-flags-off baseline.
-
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
-- **Honesty boundary.** Decision semantics are proven for the model. Protocol and runtime layers are
-  UNVERIFIED; no browser persistence or live replay authority is inferred from this gate.
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — offline continuity is a bounded Haskell application contract compiled into deterministic paired plans; generated browser-language bytes remain beneath `.build/**`, and no browser/storage behavior is claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 41` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 40 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- Adopt [Browser Offline Runtime §3 — the authored continuity surface](../documents/engineering/browser_offline_runtime_doctrine.md#3-the-authored-continuity-surface): applications name offline semantics, not mechanisms.
-- Adopt [Browser Offline Runtime §4 — queueable ports are a stricter port class](../documents/engineering/browser_offline_runtime_doctrine.md#4-queueable-ports-are-a-stricter-port-class): queueability requires the complete bounded replay contract.
-- Adopt [Browser Offline Runtime §5 — one bound program, paired online and offline plans](../documents/engineering/browser_offline_runtime_doctrine.md#5-one-bound-program-paired-online-and-offline-plans): public and private plan key sets cannot drift.
+- Adopt [`browser_offline_runtime_doctrine.md` §3 — The external continuity surface](../documents/engineering/browser_offline_runtime_doctrine.md#3-the-external-continuity-surface): applications name offline semantics, not mechanisms.
+- Adopt [`browser_offline_runtime_doctrine.md` §4 — Queueable ports are a stricter port class](../documents/engineering/browser_offline_runtime_doctrine.md#4-queueable-ports-are-a-stricter-port-class): queueability requires the complete bounded replay contract.
+- Adopt [`browser_offline_runtime_doctrine.md` §5 — One bound program, paired online and offline plans](../documents/engineering/browser_offline_runtime_doctrine.md#5-one-bound-program-paired-online-and-offline-plans): public and private plan key sets cannot drift.
 
 ## Sprints
 
-## Sprint 41.1: Author the continuity language ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done
-**Implementation**: `dhall/amoebius/UiOffline.dhall`, `dhall/amoebius/ui/Types.dhall`,
-`src/offline-language-types/Amoebius/Ui/Offline/Types.hs`, `src/Amoebius/Ui/Source.hs`,
-`dhall/ui/{infernix,jitml}.dhall`
-**Blocked by**: [Phase 40](phase_40_ui_plan_compiler.md) gate
-**Independent Validation**: `offline-plan-spec` decodes three independently authored product rows and checks
-the exact six-operation, two-arm, four-field continuity shape.
-**Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`,
-`documents/engineering/low_code_ui_runtime_doctrine.md`
+## Sprint 41.1: Author the continuity language ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -114,18 +124,11 @@ Adopt the authored continuity surface and make its complete bounded queue terms 
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 41.2: Compile paired offline plans ✅
+## Sprint 41.2: Compile paired offline plans ⏸️
 
-**Status**: Done
-**Implementation**: `src/Amoebius/Ui/Offline/{Decode,Plan}.hs`,
-`test/spec/ui/OfflinePlanSpec.hs`, `test/golden/offline_language_plan/plan_keys.tbl`
-**Blocked by**: Sprint 41.1
-**Independent Validation**: the test compiles each product and their combined source, then compares eight
-authored rows and three independent key-set equalities.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/generated_artifacts_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -146,18 +149,11 @@ counterpart.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 41.3: Seal the pure boundary ✅
+## Sprint 41.3: Seal the pure boundary ⏸️
 
-**Status**: Done
-**Implementation**: `test/oracle/offline_language_plan/**`, `test/mutant/offline_language_plan/**`,
-`test/mutant/registry.tsv`, `tools/offline_language_plan_gate.py`
-**Blocked by**: Sprint 41.2
-**Independent Validation**: `python3 tools/offline_language_plan_gate.py` runs the clean, isolated, calculus,
-surface-join, artifact-hygiene, and five-mutant batteries.
-**Docs to update**: `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`,
-`DEVELOPMENT_PLAN/system_components.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -177,16 +173,18 @@ Seal the Register-1 claim with current gate infrastructure and no repository-res
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/browser_offline_runtime_doctrine.md` — record the concrete Register-1 language mirror.
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record continuity and paired-plan evidence.
 - `documents/engineering/generated_artifacts_doctrine.md` — record the two deterministic artifact commands.
 
 **Cross-references to add:**
+
 - The tracker, substrate map, component inventory, and calculus backlink identify the sealed compiler surface.
 
 ## Related Documents

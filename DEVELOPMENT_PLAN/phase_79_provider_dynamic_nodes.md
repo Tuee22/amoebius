@@ -3,35 +3,31 @@
 > **Purpose**: Make a provider child's worker-node set declarative and reactive — grown and shrunk by a typed
 > `ScalingPolicy` signal as *just another reconcile*, quota-bounded before any cloud mutation — and close the
 > provider arm with the phase gate that spins an EKS cluster up from a linux-cpu parent, provisions an extra node
-> by signal, verifies a zero-mutation no-op, and tears the per-run stack down **leak-free under a broadened, > run-owned OS-boundary cloud sweep** while the durable per-PV EBS is correctly retained.
+> by signal, verifies a zero-mutation no-op, and tears the per-run stack down **leak-free under a broadened,
+> run-owned OS-boundary cloud sweep** while the durable per-PV EBS is correctly retained.
 > **Read this if**: phase 79 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 79 delivers the dynamic node provisioning by signal + leak-free provider gate; its design is owned by [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [resource_capacity_types.md](../documents/engineering/resource_capacity_types.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu → provider` substrate.
-The scoped gate is implemented at the pure and retained-Kubernetes boundary. Actual EKS node provisioning,
-AWS audit, and provider leak-freedom remain UNVERIFIED because Phase 76 could not authenticate to AWS.
-Scoped seal: `python3 tools/provider_dynamic_nodes_gate.py --reuse-fresh-live` passed 22 checks
-on 2026-08-11; ledger `external-run-reference`,
-receipt `external-run-reference`.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 79.1: Dynamic node provisioning by signal ⏸️](#sprint-791-dynamic-node-provisioning-by-signal-)
@@ -43,46 +39,18 @@ receipt `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-78 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 78, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-🟡 **Scoped validation complete; AWS runtime incomplete.** The signal-to-target, quota/capability refusal,
-instance identity, receipt-bound materialization, fail-closed teardown, and broadened ownership-enumeration
-contracts are built. Seven independent oracles and eight separately compiled mutants are pinned, and every
-mutant turns red. A retained-Kubernetes drill observed workflow-completion and load signals independently
-create and remove two instance-scoped node shadows, a stable second pass with zero mutation, an Unreachable
-refusal with zero mutation, and an ownership-metadata sweep that catches two untagged run-owned objects missed
-by a tag-only sweep. It cleaned every Phase-79 object. This is a scoped Kubernetes/cloud-metadata analogue,
-**not EKS, EC2/managed-node, CloudTrail, AWS quota, root-EBS, or provider leak-freedom evidence**. Those external
-acceptance surfaces remain design intent. This phase runs on the **linux-cpu → provider**
-substrate in **Register 3** (live infrastructure): the parent amoebius cluster is a single-node `kind` cluster on
-linux-cpu (the [Phase 55](phase_55_bootstrap_coordinator_kind.md) bootstrap coordinator), from inside which the
-Deployment-`replicas=1` control-plane daemon issues the provider node-group mutations over the cloud API. `→ provider`
-names the *deploy target class* — a cloud-managed EKS cluster reached over the cloud API — not a fifth hardware
-substrate; the provider child has no host, so the gate stays single-substrate (`linux-cpu`) while exercising a
-provider target ([`development_plan_standards.md` §L](development_plan_standards.md#l-one-substrate-discipline)).
-This sub-phase **layers on** its three provider siblings — [Phase 76](phase_76_provider_deploy_checkpoint.md)
-(the provider-cluster Pulumi deploy + Vault-Transit-enveloped MinIO checkpoint + `observeProviderAccount`),
-[Phase 77](phase_77_provider_child_bringup.md) (the stateless hostless in-cluster control-plane daemon + capacity-scheduler roles + parent→child Lease handoff), and [Phase 78](phase_78_provider_ebs_credential.md) (per-PV EBS decoupled from the node lifecycle + the create-vs-delete credential + static EBS CSI) — and owns dynamic node provisioning
-and the composed phase gate. The reconcile-not-state-machine shape and a working EKS deploy are generalized from
-the sibling **prodbox** project — read as **sibling evidence, not an amoebius result** (honesty rule,
-[`development_plan_standards.md` §K](development_plan_standards.md#k-honesty-proven--tested--assumed)). Status
-transitions are recorded reverse-chronologically here once work begins.
-
-Every hardware substrate can always run the `linux-cpu` parent lane.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -127,7 +95,7 @@ implementation's own evidence — and this phase **broadens** that sweep from ta
 CloudWatch log group, auto-created ENIs, auto IAM roles, CCM/LoadBalancer-controller ELBs) are caught, not only
 those bearing the amoebius run tag. The retained durable per-PV EBS is the **sole** permitted survivor by class
 (a retained durable volume is not a leak — it is its class behaving correctly); its elevated-harness reclamation
-is [Phase 48](phase_48_test_workflow_algebra.md) work, deferred and never depended on here.
+is [Phase 90](phase_90_test_topology_live.md) work, deferred and never depended on here.
 
 Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_conventions.md).
 
@@ -141,179 +109,76 @@ flowchart LR
   join --> noop[/"re-run at stable target: zero mutating cloud-API calls"/]:::effect
   noop --> teardown[/"Amoebius.Pulumi.Teardown: reconcileAbsent over ephemeral subset"/]:::effect
   teardown --> sweep[/"independent run-owned OS-boundary sweep: run-tag + VPC id + eks:cluster-name / kubernetes.io/cluster"/]:::effect
-  sweep -->|zero ephemeral, durable EBS sole survivor| green((("gate green + proven/tested/assumed ledger"))):::seal
+  sweep -->|zero ephemeral, durable EBS sole survivor| candidate((("validation candidate + bounded ledger"))):::seal
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
 ```
-*Design intent for a Register-3 live gate. The ScalingPolicy signal value and the Phase 9/15/16 capacity fold reject over-quota in-process at Tier-1; the enact, live-join readback, no-op re-observe, teardown, and independent run-owned sweep are effect-boundary IO whose joined-node and leak-free residue is tested on the live EKS target, not proven here.*
+*Design intent for a Register-3 live gate. The ScalingPolicy signal value and the Phase 9/15/16 capacity fold reject over-quota in-process at Tier-1; the future gate must test enactment, live-join readback, no-op re-observe, teardown, and independent run-owned sweep on the live EKS target. No result is current, and a runtime observation is never proof.*
 
-**Phase scope:** one cohesive claim — *a node set is grown and shrunk by a typed signal as an ordinary reconcile*. The quota bound is checked before any cloud mutation, and the arm closes leak-free.
+**Phase scope:** one cohesive target claim — *a node set must be grown and shrunk by a typed signal as an ordinary
+reconcile*. The quota bound must be checked before any cloud mutation, and the arm must close leak-free.
 
-**Substrate:** linux-cpu → provider — the [§L](development_plan_standards.md#l-one-substrate-discipline)
-Parent-drives-provider escape form. The acceptance gate runs on exactly one hardware substrate, the linux-cpu
-parent `kind` cluster from inside which the control-plane daemon issues the deploy/node-group mutations; `→ provider` (EKS)
+**Substrate:** linux-cpu — the future acceptance gate must run on exactly one hardware substrate: the linux-cpu
+parent `kind` cluster from inside which the control-plane daemon issues the deploy/node-group mutations. EKS
 is the declared managed-engine deploy target, not a detected substrate
 ([`substrates.md` §2](substrates.md#2-substrate-inventory)).
 
-**Lane:** linux-cpu/amd64 → provider ([§L](development_plan_standards.md#l-one-substrate-discipline))
+**Lane:** provider — the canonical managed-provider target lane driven from the linux-cpu parent
+([§L](development_plan_standards.md#l-one-substrate-discipline)).
 
 **Register:** 3 (live infrastructure) — the gate spins up real provider resources, provisions a real node by a
 real signal, and tears them down under a real cloud-API sweep; no register-1/2 in-process check discharges it.
-The emitted ledger marks provider bring-up + signal-driven node join and per-run leak-freedom *tested* on the
-EKS target from a linux-cpu parent, durable-EBS retention *correct-by-class*, and the elevated-harness durable
-reclamation *explicitly deferred to [Phase 48](phase_48_test_workflow_algebra.md)*.
+A future candidate ledger must scope any *tested* claim to provider bring-up, signal-driven node join, and
+per-run leak-freedom on that EKS target, classify durable-EBS retention by lifetime, and defer elevated-harness
+reclamation to [Phase 90](phase_90_test_topology_live.md). The ledger cannot promote the phase.
 
-**Depends on:** [Phase 78](phase_78_provider_ebs_credential.md) — per-PV EBS decoupling + create-vs-delete credential, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 79` is green: `test/fixture/dhall/phase_69_provider_provision.dhall`
-spins a provider EKS cluster up from a linux-cpu parent, provisions an extra node by signal, verifies a
-zero-mutation no-op, and tears the per-run stack down leak-free. Its apparatus is
-[Gate integrity](#gate-integrity).
+**Depends on:** [Phase 78](phase_78_provider_ebs_credential.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 79`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The gate line above states one acceptance condition and delegates its apparatus here by anchor, which
-[`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-admits as a conforming form. What that one run must show, in order: from a **linux-cpu** parent the
-`InForceSpec` spins up a provider-managed EKS cluster and brings up its stateless hostless in-cluster control
-plane; it then **dynamically provisions an extra node by evaluating a declared `ScalingPolicy` signal**, not
-by an operator hand-editing the target, from a named CPU-only `ProviderNodeClass`, and observes it join
-already `ManagedCapacity`-tainted, past full supply/layout/device readback and scheduler-generation CAS, with
-allocatable capacity at least the declaration. The complete worst-case elastic envelope must provision inside
-the node-class maxima and the owner-distinct provider quota **before the first cloud mutation**, so the
-committed over-quota and missing-capability negatives are rejected with zero mutating AWS calls. The run then
-verifies a **zero-mutation** no-op reconcile against the still-standing stack and **tears the per-run cluster
-stack down leak-free**: VPC, control plane, node group, and the provisioned node all destroyed with **zero**
-surviving ephemeral-class resources under the broadened run-owned OS-boundary sweep defined below, and the
-durable per-PV EBS the sole permitted survivor by class. The gate turns **red** on ≥1 committed seeded mutant,
-minimally `mut-47.1-ignore-signal`, `mut-47.1-apply-over-quota`, `mut-47.2-skip-sweep`, and
-`mut-47-untagged-orphan`, the last of which leaves an *untagged* provider-spawned orphan a tag-only sweep
-would miss.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-> **Provider corpus split (by design).** `test/fixture/dhall/phase_69_provider_provision.dhall` and the
-> `mut-37.*` mutant family are this sub-phase's own Phase-0 corpus. The four provider sub-phases
-> (Phases 49–52; see [Phase 76](phase_76_provider_deploy_checkpoint.md)) share one provider topology
-> *shape* while each commits and gates its own slice — not accidental double-ownership.
-This section carries this sub-phase's **slice** of the provider gate apparatus, partitioned
-along the dynamic-node + leak-free-teardown seam (per
-[`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
-The deploy/checkpoint/execve apparatus (`test/golden/checkpoint_envelope.json`, `test/golden/engine_execve.txt`,
-`test/negative/host_shell_pulumi_up.sh`, and the `mut-44.1-static-key` / `mut-44.1-leak-path` /
-`mut-44.1-drop-parallel-executor` mutants) stays in [Phase 76](phase_76_provider_deploy_checkpoint.md); the bootstrap
-scheduler / add-on cutover / Lease-handoff apparatus (the `public-pull` and hostless-`LinuxHost`-foreclosure
-tags) stays in [Phase 77](phase_77_provider_child_bringup.md); the per-PV-EBS credential apparatus
-(`test/golden/ebs_credential_matrix.txt`, `test/fixture/provider_ebs_credential/ebs_csi_bake_expected.dhall`, and the
-`allow-delete` / `enable-dynamic-provisioner` / `credit-old-before-observed-delete` / `drop-copy-executor`
-mutants) stays in [Phase 78](phase_78_provider_ebs_credential.md). This phase inherits only the reactive-node
-and teardown slice below; the **composed** gate (Sprint 79.2) additionally re-runs the named sibling mutants and
-cites them to their owning sub-phase.
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *a node set is grown and shrunk by a typed signal as an ordinary reconcile*. The quota bound is checked before any cloud mutation, and the arm closes leak-free. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 79` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 78 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-```mermaid
-flowchart LR
-  %% register: orientation
-  s0["Sprint 79.1: Dynamic node provisioning by signal"]
-  s1["Sprint 79.2: Phase gate — spin a provider cluster, provision a node by…"]
-  gate["the phase 79 gate"]
-  s0 -->|"produces what the next consumes"| s1
-  s1 -->|"the last seam the gate closes over"| gate
-```
-*Orientation. The seams phase 79 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+## Resource provision — UNRESOLVED
 
-**Oracle-pinning (§M.1).** Every fixture, expected error/outcome tag, and reference table this gate checks
-against is hand-authored and **pinned in this phase's oracle-pinning sprint**, ahead of `Amoebius.Cluster.NodeProvisioner` /
-`Amoebius.Pulumi.NodeGroup` / `Amoebius.Pulumi.Teardown` exist — no oracle is regenerated from the
-implementation's own output, and it is authored independently of the code under test (§M.3):
-
-- **Representative set (§M.7)** — `test/fixture/dhall/phase_69_provider_provision.dhall`: one `Managed Eks` control
-  plane, one base managed node group (size 1), one dynamically provisioned **extra node from the same**
-  `ProviderNodeClass` driven by a **workflow-completion** `ScalingPolicy`, two named CPU-only provider node
-  classes (selected and fallback) whose exact allocatable CPU plus finite overcommit policy, memory, per-instance
-  raw root-disk backing, `ProviderUsableDiskCarveTemplate` system reserve and layout-indexed usable filesystem
-  carves, image content/snapshot model and pull concurrency, zones, prices, provider-vCPU costs, base/maximum
-  counts, pod-slot/`ebs.csi.aws.com` attach-slot policies, and explicit `accelerator = None` offerings are
-  committed. The selected class uses `EphemeralRootEbs` with a `Unified` layout (it cannot invent SKU-local
-  instance storage). A provider quota bounding maximum instances/vCPU, accelerator allocation, ephemeral
-  node-root EBS bytes/count, and durable EBS bytes/count; a checkpoint `StorageBudget`; one declared
-  Availability Zone shared by the node group and one per-PV EBS volume (durable class) attached to a
-  single-replica StatefulSet claim `<ns>/sts0/pv_0` through a static `ebs.csi.aws.com` PV; a run-unique marker
-  written through that claim; and the operational create-only credential are all in the fixture. Both exercised
-  signal classes (**workflow-completion**, **load**) are named committed corpus.
-- **Committed one-field negatives (§M.8), each paired with a positive differing only in the foreclosed dimension**: `test/fixture/dhall/phase_69_provider_over_quota.dhall` (elastic maximum count exceeds the pinned provider
-  instance/vCPU quota while every node-class field remains valid) and
-  `test/fixture/dhall/phase_69_provider_missing_capability.dhall` (the elastic class's explicit `accelerator = None`
-  paired with a CUDA workload demand and no CUDA offering). Companion one-field fixtures separately exhaust
-  node-root EBS count, node-root EBS bytes, durable bytes, pod slots, and live `CSINode` `ebs.csi.aws.com` attach
-  slots, and a replacement-overlap fixture that fits steady state but not old+new root volumes.
-- **Independent reference predicates (§M.3)** — authored by hand in Phase 0, never a re-derivation of the fold
-  under test:
-  - `test/golden/provider_ephemeral_sweep_expected.txt` — the expected result of the independent leak-free
-    sweep: **zero** ephemeral-class resources under the **broadened run-owned enumeration** (see below), with the
-    retained durable per-PV EBS the sole permitted survivor by class, enumerated by resource class rather than by
-    a single tag key.
-  - `test/golden/provider_two_instance_identity_map.txt` — the expected distinct-per-instance identity map for
-    two nodes materialized from one `ProviderNodeClass`: each `ProviderInstanceId { account, cluster, class,
-    ordinal }` × complete disk/carve/accelerator-slot template path maps to a distinct concrete backing/carve/
-    device id, and the capacity fold charges the per-instance bytes/devices twice.
-  - The expected outcome tags `RefuseOnUnreachable`, `NoPodSlotCover`, `NoCsiAttachSlotCover`,
-    `MissingCapability Cuda`, and the structured quota-overcommit / `SharedSupplyOvercommit` errors.
-
-**The broadened, run-owned OS-boundary sweep (§M.5) — the P30 confirmed C3 fix.** "No orphans / leak-free" means:
-after teardown, an **independent read-only cloud-API sweep** — direct AWS `Describe*` queries under a distinct
-read-only audit credential, explicitly **NOT** the emptied Pulumi checkpoint and **NOT** the managed-resource
-registry's own `discover` (both of which the teardown itself just drove, and neither of which can see
-provider-spawned out-of-registry orphans) — returns **zero** ephemeral-class resources. The pre-split provider
-sweep scoped enumeration to the run's unique test tag `amoebius:test-run=<run-id>` alone; a **tag-only** sweep
-cannot see resources the cloud/EKS control plane or in-cluster controllers spawn **without** that tag. This phase
-therefore **keys the enumeration additionally on the run's VPC id and the `eks:cluster-name` / `kubernetes.io/cluster/<name>` ownership tags**, so the sweep is *run-owned*, not *run-tagged*: it enumerates,
-by resource class and by cluster/VPC ownership, the EKS control-plane CloudWatch log group, auto-created ENIs,
-auto IAM roles/instance profiles, and CCM/LoadBalancer-controller-created ELBs/target groups **even though they carry no amoebius run tag**. Any non-empty run-owned enumeration (ephemeral-class) fails the run and its leak
-list is recorded in the ledger. "Converges as a no-op" applies only to the second reconcile against the
-still-standing stack: the OS-boundary cloud-API mutating-call audit trail (a CloudTrail-equivalent log external
-to the reconciler, §M.6) records **zero** mutating create/modify/delete calls — not exit 0, not the reconciler's
-self-reported empty diff.
-
-**Committed seeded mutants (§M.2), ≥1 must go red; re-run every gate, never hand-run once.** Owned by this seam:
-
-| Mutant | Operator | Must go red on |
-|--------|----------|----------------|
-| `mut-47.1-ignore-signal` | dropped effect | `ScalingPolicy` signal fields decoded but never consumed (a node moves only on a hand-edited target); under signal-only drive it never provisions — the closed-loop signal validation. |
-| `mut-47.1-apply-over-quota` | guard weakening | attempts any Pulumi/AWS create/modify after the pure quota fold has already rejected the over-quota fixture; the zero-mutating-call audit. |
-| `mut-47.1-unreachable-as-gone` | guard negation | treats an `Unreachable` node observation as `Absent` and prunes it; the `RefuseOnUnreachable` teardown-refusal assertion. |
-| `mut-47.1-ignore-live-csinode` | dropped guard | admits workload against the declared SKU attach policy while the live `CSINode` `ebs.csi.aws.com` residual is one attachment short; the `NoCsiAttachSlotCover` cover. |
-| `mut-47.1-dedup-distinct-pvcs` | quantifier flip | deduplicates old vs replacement PVCs as one attachment; the migration attach-slot cover. |
-| `mut-47.1-template-id-as-physical` | effect swap | reuses a class-local template id as both nodes' physical id; the two-instance identity map. |
-| `mut-47.2-skip-sweep` | dropped `UNCHANGED` | teardown that leaves one **tagged** provider-spawned ELB behind, invisible to the registry `discover` but visible to the tag-keyed sweep; the independent sweep (necessary but **not sufficient**). |
-| **`mut-47-untagged-orphan`** | dropped effect | teardown that leaves an **untagged** provider-spawned orphan — an EKS control-plane CloudWatch log group / auto ENI / auto IAM role / CCM-created ELB bearing **no** `amoebius:test-run` tag. A tag-only sweep passes it; it **MUST go red only on the broadened run-owned sweep** keyed on VPC id + `eks:cluster-name` / `kubernetes.io/cluster/<name>`. This is the C3-fix teeth: `mut-47.2-skip-sweep` alone would let a tag-only sweep look sufficient, and is thereby foreclosed. |
-
-The composed gate additionally re-runs (and requires red from) the sibling-owned `drop-parallel-executor`
-([Phase 76](phase_76_provider_deploy_checkpoint.md)), and `credit-old-before-observed-delete` / `allow-delete`
-([Phase 78](phase_78_provider_ebs_credential.md)) mutants against the full-stack fixture, cited to their owning
-sub-phase and never re-authored here.
-
-**Machine-derived ledger + validator (§M.6, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).** Each gate cycle emits a proven/tested/assumed ledger
-generated from the raw run record (the node-group `RunInstances` stack ids, the signal→scale correlation from the
-cloud-API audit trail, the joined-node capability readback, the no-op-reconcile mutating-call count, the
-run-owned sweep result and any leak list, the two-instance identity map, and the durable-EBS retention/identity/
-AZ), and a committed validator cross-checks every ledger figure against the raw run record and the OS-boundary
-observers, failing the gate on any mismatch or hand-edited field. Skipping an applicable teardown-observation
-move (including the broadened sweep) marks that layer **UNVERIFIED**, never green.
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6` for provisioning driven by a signal; negatives under `test/negative/provider_dynamic_nodes/` pin a node admitted without a teardown obligation, and the sealed verdict is what admits the target.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) — the bytes dynamic node provisioning by signal + leak-free provider gate causes to exist are charged to a grant that carries its ceiling and concurrency together.
-- [`cluster_lifecycle_doctrine.md §8`](../documents/engineering/cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning)
+- [`jit_budget_doctrine.md` §3 — A ceiling is inseparable from its concurrency](../documents/engineering/jit_budget_doctrine.md#3-a-ceiling-is-inseparable-from-its-concurrency) — the bytes dynamic node provisioning by signal + leak-free provider gate causes to exist are charged to a grant that carries its ceiling and concurrency together.
+- [`cluster_lifecycle_doctrine.md` §8 — Dynamic node provisioning](../documents/engineering/cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning)
   — *dynamic node provisioning* — with
-  [`§9`](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)
-  (*bring-up and teardown are a reconciler, not a state machine*): this phase makes the node set declarative so
+  [`cluster_lifecycle_doctrine.md` §9 — How bring-up and teardown are implemented: the reconciler, not a state machine](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)
+  (*bring-up and teardown are a reconciler, not a state machine*): this phase's target must make the node set declarative so
   provisioning a node is one more pass of the [Phase 58](phase_58_object_reconciler.md)
   `discover → diff → enact → re-observe`, `Unreachable → refuse` reconciler, and per-run teardown is one
   `reconcileAbsent` over the owned ephemeral subset with "cannot observe" never collapsed to "absent."
-- [`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)
-  and [`§3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
+- [`resource_capacity_doctrine.md` §6 — `Growable` / `ScalingPolicy`: the quota-bounded dynamic-provisioning arm](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)
+  and [`resource_capacity_types.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`; “The systematic provision matrix”](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
   — *`Growable` / `ScalingPolicy`: the quota-bounded dynamic-provisioning arm* and *the systematic provision
   matrix*: dynamic node provisioning is the runtime enaction of a typed `ScalingPolicy`; every provider node
   class declares its complete capacity/capability shape, the workload is provisioned against the worst-case
@@ -321,63 +186,44 @@ move (including the broadened sweep) marks that layer **UNVERIFIED**, never gree
   never to "unbounded"; failure of any CPU, memory, pod-ephemeral (including the in-cluster cache-owner
   `emptyDir` as a **[Phase 9](phase_09_resource_index.md) logical local-ephemeral debit** — see below),
   pod/CSI slot, durable-storage, accelerator, VRAM, or provider-quota obligation rejects before cloud mutation.
-- [`pulumi_iac_doctrine.md §4`](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)
+- [`pulumi_iac_doctrine.md` §4 — What Pulumi provisions (the resource catalog)](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)
   (*the resource catalog* — the dynamic-node entry) with
-  [`§3`](../documents/engineering/pulumi_iac_doctrine.md#3-state-lifetime-matches-resource-lifetime-per-class)
+  [`pulumi_iac_doctrine.md` §3 — State lifetime matches resource lifetime, per class](../documents/engineering/pulumi_iac_doctrine.md#3-state-lifetime-matches-resource-lifetime-per-class)
   (*state lifetime matches resource lifetime, per class*) and
-  [`§8`](../documents/engineering/pulumi_iac_doctrine.md#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated)
+  [`pulumi_iac_doctrine.md` §8 — How deploys are enacted: the reconciler, referenced not restated](../documents/engineering/pulumi_iac_doctrine.md#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated)
   (*deploys are enacted by the reconciler, not a global state machine*): `Amoebius.Pulumi.NodeGroup` realizes the
   catalog's dynamic-node entry as a Pulumi add/drain under the control-plane daemon against the encrypted MinIO backend; the
   ephemeral node (and its optional node-root EBS) is per-run class and dies with its run, while the durable per-PV
   EBS ([Phase 78](phase_78_provider_ebs_credential.md)) is a distinct retained class the per-run teardown never
   touches.
-- [`app_vs_deployment_doctrine.md §3`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
+- [`app_vs_deployment_doctrine.md` §3 — The deployment-rules surface — how the same app *runs*](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
   — *the deployment-rules surface*: node elasticity lives on the deployment-rules DSL surface; an app never asks
   for nodes.
-- [`daemon_topology_doctrine.md §3.1`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
+- [`daemon_topology_doctrine.md` §3.1 — "Exactly one pod" is a k8s/etcd property, not an amoebius election](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
   — *exactly one pod is a k8s/etcd property, not an amoebius election*: the `NodeProvisioner` enaction runs under
   the Deployment-`replicas=1` control-plane daemon whose single-instance is a k8s/etcd concern, so nothing in this phase
   runs a bespoke leadership election; scheduler reservation/Binding at node join is capacity authority
   ([Phase 59](phase_59_capacity_scheduler.md)), not control-plane daemon election.
-- [`storage_lifecycle_doctrine.md §5.1`](../documents/engineering/storage_lifecycle_doctrine.md#51-storage-is-independent-of-the-node-lifecycle)
-  and [`§7.1`](../documents/engineering/storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness)
+- [`storage_lifecycle_doctrine.md` §5.1 — Storage is independent of the node lifecycle](../documents/engineering/storage_lifecycle_doctrine.md#51-storage-is-independent-of-the-node-lifecycle)
+  and [`storage_lifecycle_doctrine.md` §7.1 — The single exception: the elevated test harness](../documents/engineering/storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness)
   — *storage is independent of the node lifecycle* / *the single exception — the elevated test harness*: a
   destroyed/replaced EC2 node detaches its EBS and the durable volume survives; the retained durable per-PV EBS
   is the sole permitted survivor of the leak-free sweep by class, and the *reclamation* of that durable
-  test-flagged EBS by the elevated harness is [Phase 48](phase_48_test_workflow_algebra.md) work, referenced and
+  test-flagged EBS by the elevated harness is [Phase 90](phase_90_test_topology_live.md) work, referenced and
   never invoked here.
-- [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
-  — *proven, tested, assumed*: each gate cycle emits a proven/tested/assumed ledger; skipping an applicable
-  teardown-observation move (including the broadened run-owned sweep) marks that layer UNVERIFIED, never green.
+- [`chaos_failover_doctrine.md` §12 — The moral core — proven, tested, assumed](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
+  — *proven, tested, assumed*: a future candidate ledger must leave the layer unverified when any applicable
+  teardown-observation move is skipped. A ledger never makes the gate green or promotes the phase.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 79.1: Dynamic node provisioning by signal ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Cluster/NodeProvisioner.hs`
-(declarative node-set reconcile), `src/Amoebius/Pulumi/NodeGroup.hs` (Pulumi add/drain of
-EC2/managed nodes), and `test/spec/provider/ContractSpec.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Requires**: `cloud-account` — the account whose node quota this gate scales against. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-61 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-operators-prompt-automated)).
-**Independent Validation**: a `.dhall`-declared load or workflow-completion rule drives the live node set to
-its desired shape, choosing only a `ProviderNodeClass` that fits the pending `ResourceEnvelope`; the node
-joins through a quarantined taint/readback/CAS sequence, an `Unreachable` observation refuses, and any shape
-the envelope cannot carry is rejected before cloud mutation. The `### Validation` list below carries the
-detail.
-**Docs to update**:
-`documents/engineering/cluster_lifecycle_doctrine.md` (§8), `documents/engineering/pulumi_iac_doctrine.md`
-(§4 — the dynamic-node catalog entry), `documents/engineering/app_vs_deployment_doctrine.md` (node
-elasticity as a deployment rule, never app logic), `documents/engineering/resource_capacity_doctrine.md`
-(§6/§3.1 — the live node-scaling enaction), [system_components.md](system_components.md).
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -453,25 +299,25 @@ cloud effect.
 3. Inject an `Unreachable` node observation during release and assert the reconciler **refuses** rather than
    pruning a node it cannot confirm absent, and assert the specific outcome tag `RefuseOnUnreachable` (§M.8),
    paired with the positive `Absent`-observation case that differs only in observability and *does* prune. The
-   committed mutant `mut-47.1-unreachable-as-gone` (treating `Unreachable` as `Absent`) MUST go red here.
+   run-local changed-subject mutant `mut-47.1-unreachable-as-gone` (treating `Unreachable` as `Absent`) MUST go red here.
    Join-race fixtures separately delay the launch taint, schedule a default-scheduler Pod before config
    extension, use a stale scheduler generation, omit the Node UID/provider-instance binding, or expose the node
    before full supply/layout/device readback. Each must quarantine/refuse before workload Binding. A positive
    audit trace proves the first non-bootstrap Pod on the node was custom-scheduled after reservation CAS and the
    node-scoped authority readback.
-4. Run the committed one-field negative `test/fixture/dhall/phase_69_provider_over_quota.dhall`, whose elastic maximum
+4. Generate from Haskell and run one one-field over-quota negative beneath `.build/test-corpora/**`, whose elastic maximum
    count exceeds the pinned provider instance/vCPU quota while every node-class field remains valid. From
    provider-stack-absent state, `planInfrastructure`/`validateInfrastructurePlan` must return the structured
    quota-overcommit error **before** invoking Pulumi; the external cloud-API mutating-call audit must remain
    empty. A paired positive differing only in maximum count provisions infrastructure, observes its
-   consumed-token materialization, and only then seals `ProvisionedSpec`; the committed `mut-47.1-apply-over-quota`
+   consumed-token materialization, and only then seals `ProvisionedSpec`; the applied run-local `mut-47.1-apply-over-quota`
    mutant MUST go red for issuing any create/modify call after that rejection. Paired one-field fixtures
    separately exhaust node-root EBS count and bytes while durable headroom remains, and exhaust durable bytes
    while node-root headroom remains; each rejects before mutation, proving the ledgers cannot substitute for one
-   another. A replacement-overlap fixture fits steady state but not old+new root volumes and must also reject.
+   another. A Haskell-declared replacement-overlap case fits steady state but not old+new root volumes and must also reject.
 5. Give two child-cluster demands the same `CloudAccountId` and per-cluster quotas that each fit alone but exceed
    the observed account quota together. `allocateForestSupply` must return `SharedSupplyOvercommit` before either
-   Pulumi stack mutates; independently treating both declarations as the full account ceiling is a committed
+   Pulumi stack mutates; independently treating both declarations as the full account ceiling is an applied Haskell
    mutant that must turn this red. Separately, make the declaration fit while AWS Service Quotas minus current
    `DescribeInstances`/`DescribeVolumes` usage is one unit short; the [Phase 76](phase_76_provider_deploy_checkpoint.md)
    `ObservedProviderAccount` refuses with zero mutating calls (this sprint re-reads that boundary and honors its
@@ -481,9 +327,9 @@ cloud effect.
    before cloud mutation. In a paired CSI fixture, keep pod slots ample but make one node's live `CSINode`
    `ebs.csi.aws.com` residual one attachment below the unique-PVC set while the SKU declaration is higher; it
    returns `NoCsiAttachSlotCover`. Repeated mounts of one PVC count once, whereas old and replacement PVCs in a
-   migration count twice. The committed `mut-47.1-ignore-live-csinode` and `mut-47.1-dedup-distinct-pvcs` mutants
+   migration count twice. The applied Haskell `mut-47.1-ignore-live-csinode` and `mut-47.1-dedup-distinct-pvcs` mutants
    MUST go red.
-7. Run the committed `test/fixture/dhall/phase_69_provider_missing_capability.dhall`: replace the elastic class's
+7. Generate from Haskell and run one missing-capability negative beneath `.build/test-corpora/**`: replace the elastic class's
    explicit `accelerator = None` with a CUDA workload demand without adding a CUDA offering. The provision fold
    must return `MissingCapability Cuda` with zero cloud effects; it may not provision a larger CPU class or
    silently select a CPU execution path.
@@ -537,22 +383,7 @@ first-Node taint, supply/layout/device, scheduler-generation, physical-identity,
 
 ## Sprint 79.2: Phase gate — spin a provider cluster, provision a node by signal, tear down leak-free ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/fixture/dhall/phase_69_provider_provision.dhall` (the gate topology),
-`src/Amoebius/Pulumi/Teardown.hs` (per-run `reconcileAbsent` over the ephemeral cluster +
-node subset), `tools/provider_dynamic_nodes_live.py` (scoped retained-Kubernetes analogue), and
-`tools/provider_dynamic_nodes_gate.py`. The AWS OS-boundary sweep remains an unrun acceptance surface.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: from a linux-cpu parent the gate `InForceSpec` seals the child `ProvisionedSpec`
-only through the observe-then-plan chain, composes the Phase 55–57 siblings, provisions an extra node by
-signal, verifies a zero-mutation no-op, and tears the per-run stack down leak-free with the durable per-PV EBS
-retained; a second full cycle re-reads its marker. The numbered `### Validation` list below carries the
-detail.
-**Docs to update**:
-`documents/engineering/pulumi_iac_doctrine.md` (§3, §8),
-`documents/engineering/cluster_lifecycle_doctrine.md` (§9), `documents/engineering/testing_doctrine.md` (the
-per-run ledger; the broadened run-owned sweep; durable-EBS reclamation deferred to
-[Phase 48](phase_48_test_workflow_algebra.md)), `DEVELOPMENT_PLAN/README.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -591,7 +422,7 @@ correctly left retained.
   the emptied Pulumi checkpoint or the registry's own `discover`. Its expected output is the committed Phase-0
   oracle `test/golden/provider_ephemeral_sweep_expected.txt`.
 - A per-run proven/tested/assumed ledger recording: provider bring-up + signal-driven node join as **tested on the EKS provider target from a linux-cpu parent**; per-run teardown leak-freedom **under the broadened run-owned sweep** as **tested**; durable EBS retention as **correct-by-class**; and the elevated-harness
-  durable-EBS *reclamation* as **explicitly deferred to [Phase 48](phase_48_test_workflow_algebra.md), not asserted here**.
+  durable-EBS *reclamation* as **explicitly deferred to [Phase 90](phase_90_test_topology_live.md), not asserted here**.
 
 ### Validation
 
@@ -642,10 +473,10 @@ correctly left retained.
    recording the independent run-owned-sweep leak result (and any leak list), the signal-driven scale
    correlation, and the durable-EBS retention as correct-by-class; skipping an applicable teardown-observation
    move (including the broadened run-owned sweep) marks that layer **UNVERIFIED**, never green. The
-   elevated-harness durable-EBS reclamation stays explicitly deferred to [Phase 48](phase_48_test_workflow_algebra.md)
+   elevated-harness durable-EBS reclamation stays explicitly deferred to [Phase 90](phase_90_test_topology_live.md)
    and is recorded as deferred, not asserted here.
-4. Run the committed over-quota (`test/fixture/dhall/phase_69_provider_over_quota.dhall`) and missing-capability
-   (`test/fixture/dhall/phase_69_provider_missing_capability.dhall`) negatives and assert both fail before the first
+4. Run the Haskell-declared over-quota and missing-capability negatives generated beneath `.build/test-corpora/**` and
+   assert both fail before the first
    cloud mutating call; the AWS audit trail is empty and no Pulumi checkpoint, EKS control plane, node group,
    node, or EBS volume is created. This is the live zero-effects witness that an impossible provider deployment is
    not represented as a cluster left waiting for capacity. The `mut-47.1-apply-over-quota` mutant MUST go red.
@@ -671,7 +502,7 @@ correctly left retained.
 > Kubernetes metadata analogue in which run-tag + VPC-id + cluster ownership catches two untagged objects that
 > tag-only enumeration misses. It does **not** prove the per-run provider teardown leak-free; the EKS and AWS
 > sweep layers remain UNVERIFIED. The full leak-free *test cycle* — reclaiming durable,
-> test-flagged EBS under the elevated credential — is [Phase 48](phase_48_test_workflow_algebra.md) and is **not** a
+> test-flagged EBS under the elevated credential — is [Phase 90](phase_90_test_topology_live.md) and is **not** a
 > dependency of this phase. Live AWS spend (EKS, EC2, EBS, NAT/ELB) is the *expected* outcome of asking the
 > harness to provision a provider cluster, exactly as in the prodbox sibling; it is not a separate gate. The EKS
 > reality is proven in prodbox; it remains sibling evidence rather than an amoebius AWS result.
@@ -684,7 +515,8 @@ remains Phase 48 work.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/cluster_lifecycle_doctrine.md` — record that §8 (dynamic node provisioning) and §9
   (reconciler teardown) gain an amoebius EKS reference: the node set is declarative and reactive, provisioning a
   node is one reconcile pass, and per-run teardown is one `reconcileAbsent` over the ephemeral subset with
@@ -711,6 +543,7 @@ remains Phase 48 work.
   [Phase 48](phase_48_test_workflow_algebra.md).
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/system_components.md` — register `Amoebius.Cluster.NodeProvisioner`,
   `Amoebius.Pulumi.NodeGroup`, and `Amoebius.Pulumi.Teardown` as Phase-79 design-first rows, each mapped to its
   owning doctrine; map the reused `amoebius-pulumi` Engine, EncryptedMinio backend, `observeProviderAccount`,

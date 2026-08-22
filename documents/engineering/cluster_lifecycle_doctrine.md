@@ -19,6 +19,8 @@ deliberately independent of a cluster's, owned by
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Two cluster kinds, one lifecycle shape](#1-two-cluster-kinds-one-lifecycle-shape)
 - [2. Bring-up and bootstrap](#2-bring-up-and-bootstrap)
@@ -43,7 +45,7 @@ There are exactly **two** kinds of cluster amoebius drives, and they share **one
 | | **Self-managed** (`kind` / `rke2`) | **Provider-managed** (EKS — prodbox's reality) |
 |---|---|---|
 | Host binary present? | **Yes** — the binary lives on the host and owns bring-up | **No** — there is no direct host access |
-| How it comes up | the bootstrap coordinator CLI on the host → `bootstrap --distro={kind,rke2}` ([§2](#2-bring-up-and-bootstrap)) | Provisioned **via cloud keys over the API, from inside an existing amoebius cluster** (Pulumi) |
+| How it comes up | the bounded pre-binary handoff execs unchanged argv; Haskell interprets `bootstrap --distro={kind,rke2}` ([§2](#2-bring-up-and-bootstrap)) | Provisioned **via cloud keys over the API, from inside an existing amoebius cluster** (Pulumi) |
 | Host-level worker daemons | Supported (e.g. Apple-Metal inference) | **Not** supported — no host or Apple substrate; the child still runs distinct in-cluster control-plane daemon and capacity-scheduler roles |
 | Typical role | Any tier, including the **root** (an admin's laptop kind, or a single-node rke2) | A **child** spawned by a parent; never the root |
 
@@ -51,7 +53,7 @@ The shared shape is what lets the rest of this document treat "a cluster" unifor
 EKS and a kind cluster on a laptop converge to the **same fungible shape** — the same nine standard
 services, wired the same way — owned by
 [platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster). The *substrate-specific* mechanics —
-substrate detection, the bootstrap coordinator CLI, the LoadBalancer choice, host worker nodes, and the
+substrate detection, the bounded pre-binary handoff, the LoadBalancer choice, host worker nodes, and the
 no-environment-variables / no-`PATH` lazy-tool-ensure contract — are owned by
 [substrate_doctrine.md](./substrate_doctrine.md). The Pulumi spawn mechanism and the cloud-credential
 model are owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). The **declared compute-engine axis** —
@@ -62,7 +64,7 @@ owns the **lifecycle verbs** that ride on top.
 **Self-managed clusters amoebius *builds*; provider-managed clusters amoebius *surfaces*.** The split in the
 table above is precisely a *build-vs-surface* axis, and it is the axis the stretched-cluster question — can a
 full member node hang off a provider-managed control plane? — rests on. A self-managed `kind`/`rke2` cluster
-is one amoebius **builds** end to end: the host binary owns bring-up from the bootstrap coordinator CLI through `bootstrap`
+is one amoebius **builds** end to end: the host binary owns bring-up after the pre-binary handoff through `bootstrap`
 ([§2](#2-bring-up-and-bootstrap)) and every node beneath it. A provider-managed cluster is one amoebius
 **surfaces** over the cloud provider's API — provisioned via Pulumi from inside an existing cluster, never
 touching a host amoebius does not have; amoebius wires up only what the provider itself exposes and **builds no capability the provider does not**, the same *surface, don't build* discipline owned by
@@ -82,12 +84,16 @@ own physical host (the host-worker row above), unaffected by the control plane's
 a host; every later cluster is *spawned* by a parent ([§3](#3-amoebic-spawning--the-recursive-forest)). Both end in the same place — a cluster running
 the standard service set, initialized, and reconciling toward its `.dhall`.
 
-- **The bootstrap coordinator CLI is a thin igniter, not the orchestrator.** Its only job is to ensure the package
-  manager, ensure `ghcup`, dynamically resolve/install a compatible toolchain under the
+- **The pre-binary handoff is a thin igniter, not the orchestrator.** Its only job is to make the minimal
+  OS/architecture distinction needed to select the direct establishment adapter, establish verified
+  `ghcup` and a compatible contained toolchain under the
   [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) policy,
-  build the binary, and call `bootstrap`. From that call onward the **binary** owns everything. The script
-  itself and substrate detection are owned by [substrate_doctrine.md](./substrate_doctrine.md);
-  this doc owns the lifecycle ordering the binary then drives. Bootstrap also establishes the
+  build the binary, and exec it with the user's argv unchanged. Haskell alone interprets `bootstrap`; from
+  that handoff onward the **binary** owns everything, including package-manager requirements, host-floor
+  decisions, user guidance, and substrate detection. Python neither probes nor prescribes a package-manager
+  root. The
+  Python adapter boundary is owned by [substrate_doctrine.md](./substrate_doctrine.md); this doc owns the
+  lifecycle ordering the binary then drives. The Haskell bootstrap command also establishes the
   binary-sibling `.dhall` configuration the rest of bring-up consumes — selecting the cluster distro and
   **naming** (never embedding) every credential the cluster needs to provision nodes: SSH keys for
   self-managed kind/rke2 nodes, cloud API keys for provider clusters.
@@ -109,9 +115,9 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   readiness-edge rule (a condition never a duration; the bootstrap tier's `discover`/`RuntimeWitness` gates)
   is owned by [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md).
 - **Bring-up is itself a reconcile.** "Come up" is not a one-shot script; it is the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) reconciler driving
-  the world toward the `.dhall`. Phase 55 now has pristine-Incus live evidence for empty-diff idempotence,
-  non-recreating repair, exact process/storage enforcement, complete inventory, six red mutants, and leak-free
-  teardown; its complete gate passed. The `linux-cpu` lane is always available on all hardware, natively or
+  the world toward the `.dhall`. Phase 55 owns the target pristine-Incus challenge for empty-diff idempotence,
+  non-recreating repair, exact process/storage enforcement, complete inventory, six mutants, and leak-free
+  teardown. The `linux-cpu` lane is always available on all hardware, natively or
   via Incus on Linux and through Lima on Apple or WSL2 on Windows when a pristine Linux host is required. The
   Phase-58 SSA reconciler, driven from the `.dhall` by the Phase-65 control-plane daemon, owns in-cluster convergence.
 - **A stretched rke2 agent joins only once it is reachable.** Growing a cluster with a **stretched** agent —
@@ -130,7 +136,7 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
 > owned by [bootstrap_sequence_doctrine.md §3](./bootstrap_sequence_doctrine.md#3-the-ordered-bootstrap-sequence):
 > the initial in-force manifest is supplied **separately**, via the admin control plane's `dhall update`
 > **after** the control-plane daemon is up (never embedded in the igniter config), and the transient root config is the
-> binary-sibling `.dhall` the bootstrap coordinator establishes. Every deeper **child-frame** config is delivered by
+> binary-sibling `.dhall` the Haskell host bootstrap coordinator establishes after handoff. Every deeper **child-frame** config is delivered by
 > in-place `stdin` streaming rather than a persistent file, per
 > [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness). (Whether the > root may ever be **multi-node** remains the one open sub-question, [§2](#2-bring-up-and-bootstrap) above.)
 
@@ -202,7 +208,7 @@ Two encapsulation rules make the forest safe to reason about:
   reaching across the boundary to pull a child's metrics is the synchronous cross-cluster RPC ruled actively
   anti-doctrinal ([network_fabric_doctrine.md](./network_fabric_doctrine.md)). Peer/sibling monitoring rides the
   existing async geo-replication a peer already consumes; the accepted cross-forest viewer is the out-of-forest
-  human operator reaching each cluster's own Grafana and `pb` admin plane through Keycloak — a privileged admin
+  human operator reaching each cluster's own Grafana and `amoebius` admin surface through Keycloak — a privileged admin
   path, not a forest data edge. The full parent-monitoring posture is owned by
   [monitoring_doctrine.md](./monitoring_doctrine.md).
 
@@ -366,12 +372,11 @@ not ambient implementation details.
   ([platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)) plus durable rebind is the
   precondition for ephemeral teardown being *safe*, not just *possible*.
 
-**Delivered lifecycle evidence.** Phase 60 exercised this lifecycle consequence on the universal
-`linux-cpu` lane: the real kind cluster, node container, and API endpoint were absent while independently
-inspected host images retained a run-unique Postgres row and MinIO object; recreation produced a new
-apiserver CA, cluster UID, PVs, and claim UIDs, and read both byte strings back without a post-recreate write.
-That Register-3 result is bounded to the two retained-host witnesses by ledger
-`dynamically-resolved`; it does not prove the later
+**Phase-60 target lifecycle evidence — NOT VALIDATED.** The gate must exercise this lifecycle consequence on
+the universal `linux-cpu` lane: the real kind cluster, node container, and API endpoint must be absent while
+independently inspected host images retain a run-unique Postgres row and MinIO object; recreation must produce
+a new apiserver CA, cluster UID, PVs, and claim UIDs, and read both byte strings back without a post-recreate
+write. That Register-3 contract is bounded to the two retained-host witnesses; it cannot prove the later
 multi-cluster handoff or provider-volume arms. Every hardware substrate can run the `linux-cpu` lane; when
 the check requires a pristine Linux host, use Incus on native Linux/Linux-CUDA, Lima on Apple, or WSL2 on
 Windows.
@@ -469,11 +474,11 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Validated boundary: the diagram mixes bounded Phase-18/19 results with later design intent.*
+*Target boundary: the diagram mixes Phase-18/19 obligations with later design intent; none is a current result.*
 
-Phase 18 checks a six-state reconcile-protocol model with four safety invariants and one fair-liveness
+Phase 18 must check a six-state reconcile-protocol model with four safety invariants and one fair-liveness
 property. Its actual-code projection distinguishes only the adjacent `Unreachable → RefuseOnUnreachable` and
-`Present → RemoveNode 1` decisions in `NodeProvisioner`. Phase 19 adds a standalone pure
+`Present → RemoveNode 1` decisions in `NodeProvisioner`. Phase 19 must add a standalone pure
 `ObservedInventory → DesiredIndex → Either Refusal ActionSet` core: nine actual/reference cases, two exact
 fixed points, four convergent modeled-store schedules, and a Delete constructor requiring an
 `Observation 'IsPresent`. Its snapshot-token race accepts one writer, and its actual scheduler reservation
@@ -519,8 +524,8 @@ against real infrastructure remain UNVERIFIED; prodbox remains corroborating sib
   control-plane daemon (total cluster + secret authority), whose single-instance delegation and worker-role model
   are owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md).
 
-> **Honesty.** Phase 18 proves only the bounded reconcile model; Phase 19 tests only the pure core and modeled
-> schedules named above. The whole effectful reconciler is not thereby proven in amoebius. AWS teardown results from
+> **Honesty.** Phase 18 owns only the bounded reconcile-model proof obligation; Phase 19 owns only the pure-core
+> and modeled-schedule test obligations named above. Neither can prove the whole effectful reconciler. AWS teardown results from
 > prodbox are evidence from a sibling system, not amoebius proof; read the remaining prescriptive statements
 > as design intent unless a later phase records its own gate
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -534,19 +539,19 @@ validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. This doc states
 the target shape and links back to the plan for phase sequencing and status.
 
-The Phase-74 Register-3 instance realizes the `kind` child specialization in
-`Amoebius.Multicluster.Spawn` and the opaque handoff in `Amoebius.Dsl.ChildInForceSpec`. A parent cluster ran
-two bounded Pulumi executor Jobs concurrently, projected each child and a grandchild without a sibling or
-ancestor branch, observed a byte-stable no-op second reconcile, and then removed both child stacks and all
-three test clusters through the same discover/diff/enact discipline. The compile corpus independently rejects
-sibling and ancestor fields. This is tested for two `kind` children; provider children and live rke2 joins
-remain UNVERIFIED. Every hardware substrate can always run the validated `linux-cpu` lane.
+The Phase-74 Register-3 target must realize the `kind` child specialization in
+`Amoebius.Multicluster.Spawn` and the opaque handoff in `Amoebius.Dsl.ChildInForceSpec`. A parent cluster must
+run two bounded Pulumi executor Jobs concurrently, project each child and a grandchild without a sibling or
+ancestor branch, observe a byte-stable no-op second reconcile, and then remove both child stacks and all three
+test clusters through the same discover/diff/enact discipline. The compile corpus must independently reject
+sibling and ancestor fields. This target is bounded to two `kind` children; provider children and live rke2
+joins remain UNVERIFIED. Every hardware substrate can run the `linux-cpu` target lane.
 
-Phase 75 realizes teardown policy in `Amoebius.Multicluster.Teardown` and `Pushback`. The gate distinguishes
+Phase 75 must realize teardown policy in `Amoebius.Multicluster.Teardown` and `Pushback`. The gate must distinguish
 lossless-by-synchronization from bounded-by-failover-budget, refuses CPU, memory, ephemeral, durable, cache,
 device, and unreachable-survivor deficits before teardown, and records a named failback on explicit override.
-Its live inventory proves removal of the three test clusters, network namespaces, DNS authority, and external
-journal roots while retaining the Phase-55 backing platform.
+Its outside inventory must observe removal of the three test clusters, network namespaces, DNS authority, and
+external journal roots while retaining the Phase-62–64 backing platform.
 
 ---
 
@@ -617,27 +622,28 @@ unassigned Phase-N gate. Phase 74's acceptance forest uses child `kind` clusters
 > **zero** rke2 code (its `HostTool` enum is Kubectl/Helm/Kind). Read this section as **design intent**, not
 > a tested amoebius result; the plan owns sequencing ([§10](#10-planning-ownership), > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
 
-Phase 76 adds a scoped cloud-keyed spawn boundary without claiming a provider child exists. The linux-cpu
-parent's live `replicas=1` Deployment and two concurrently placed provider-executor Jobs were read back; the
-provider plan, CPU-only SKU/account checks, fingerprint-CAS, checkpoint envelope, and receipt-only
-materialization constructor are built. Six checkpoint objects round-tripped through Vault Transit and MinIO,
-and a sealed Vault refused before PUT. The configured AWS identity is invalid, so the actual control-plane daemon
+**Phase-76 target cloud-keyed spawn boundary — NOT VALIDATED.** The `linux-cpu` parent's live `replicas=1`
+Deployment and two concurrently placed provider-executor Jobs must be read back; the provider plan, CPU-only
+SKU/account checks, fingerprint-CAS, checkpoint envelope, and receipt-only materialization constructor are
+required. Six checkpoint objects must round-trip through Vault Transit and MinIO, and a sealed Vault must
+refuse before PUT. The actual control-plane daemon
 `pulumi up`, EKS control plane, managed node, and cloud lifecycle remain UNVERIFIED.
 
-Phase 77 builds the provider-child bootstrap and authority protocol without converting that Phase-76 absence
-into an EKS claim. Pure contracts validate the finite add-on domain, readiness ordering, managed-authority
+**Phase-77 target provider-child bootstrap boundary — NOT VALIDATED.** The phase must build the bootstrap and
+authority protocol without converting Phase-76 provider absence into an EKS claim. Pure contracts must
+validate the finite add-on domain, readiness ordering, managed-authority
 mint, private immutable scheduler image, same-Lease freshness rules, exact standard-service set, and no-op
-refusal. A retained-kind Kubernetes drill externally observed four old-UID release/replacement joins and the
-parent-holder → fresh absence → child-holder sequence on one Lease UID with three resource versions; the child
-was non-Serving before acquire and zero parent/child out-of-order mutations occurred. That drill emulates the
+refusal. A retained-kind Kubernetes drill must externally observe four old-UID release/replacement joins and
+the parent-holder → fresh absence → child-holder sequence on one Lease UID with three resource versions; the
+child must be non-Serving before acquire with zero parent/child out-of-order mutations. That drill emulates the
 managed-child Kubernetes object shape: it does not prove EKS, a managed node, provider add-ons, or full service
 convergence. Those runtime layers remain UNVERIFIED until valid AWS authority exists.
 
-Phase 79 implements the declarative provider-node contract in `Amoebius.Cluster.NodeProvisioner` and the
+**Phase-79 target provider-node boundary — NOT VALIDATED.** Phase 79 must implement the declarative provider-node contract in `Amoebius.Cluster.NodeProvisioner` and the
 receipt-gated join/teardown boundary in `Amoebius.Pulumi.NodeGroup` and `Amoebius.Pulumi.Teardown`. Pure tests
-cover workflow-completion/load target derivation, quota and capability refusal before permission, distinct
+must cover workflow-completion/load target derivation, quota and capability refusal before permission, distinct
 physical identities, taint/supply/layout/device/scheduler-authority gates, and `Unreachable → refuse`. A
-retained-Kubernetes drill observes the signal and ownership-metadata analogues with exact cleanup. It is not
+retained-Kubernetes drill must observe the signal and ownership-metadata analogues with exact cleanup. It is not
 EKS, managed-node, or AWS leak-freedom evidence; those layers remain UNVERIFIED until valid AWS authority is
 available. Every hardware substrate can always supply the `linux-cpu` parent lane.
 

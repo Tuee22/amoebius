@@ -5,36 +5,27 @@
 > training receipt recoverable across UI-server, Redis, and WebSocket loss.
 > **Read this if**: phase 94 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 94 does for jitML's numerics-facing surface what phase 92 did for infernix, and is the second and last such lift; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), and the plan for reaching it is owned here.
-Register 3, scoped live evidence, on the `linux-cuda` substrate. The typed adapter, bounded Dhall program,
-pure denial/idempotency/repair contract, five compiled mutants, Chrome/physical-CUDA record, and sealed reader
-passed their 17-check scoped gate on 2026-08-11. The ledger is
-`external-run-reference`; the receipt is
-`dynamically-resolved`. Retained-provider and
-Kubernetes/Envoy paths remain UNVERIFIED.
-Every hardware substrate can always execute `linux-cpu`. For a pristine Linux host, use Incus on Linux or
-Linux-CUDA hardware, Lima on Apple hardware, and WSL2 on Windows hardware.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, documents/engineering/content_addressing_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — bounded jitML realtime envelope](#resource-provision--bounded-jitml-realtime-envelope)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 94.1: Bind the jitML training-to-ready-model UI adapter ⏸️](#sprint-941-bind-the-jitml-training-to-ready-model-ui-adapter-)
@@ -45,29 +36,18 @@ Linux-CUDA hardware, Lima on Apple hardware, and WSL2 on Windows hardware.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-93 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 93, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-🟡 Scoped gate passed 2026-08-11. The constructor-hidden adapter accepts only a scope- and
-owner-matched Phase-93 committed artifact, preserves command/work identity into the Phase-70 receipt shape,
-and models durable repair independently of the transient route. Pure and browser cases cover Ready,
-in-flight, failed, same-tenant non-owner, and foreign-tenant outcomes with five red mutants. The live record
-uses Chrome, two loopback origins, three scoped identity fixtures, an independent temporary durable-file
-observer, and physical host CUDA. Fresh Keycloak sessions, retained MinIO/Pulsar/Redis, Envoy, Kubernetes UI
-replicas, the full sibling serving engine, and the same-flow Phase-93 train/commit chain remain UNVERIFIED.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -86,7 +66,7 @@ authority.
 
 `JitML.UiAdapter` cannot mint request or workflow identity. The generic server first admits the browser's
 opaque `RequestId` against current app, tenant, owner, and port authority, then deterministically qualifies it
-as the `CommandId` supplied to Phase 92. That value remains the work-id in all native-CBOR training events.
+as the `CommandId` supplied to Phase 93. That value remains the work-id in all native-CBOR training events.
 Phase 70 projects a terminal event into an owner/command-keyed receipt containing the normalized training
 digest, `WorkflowHandle`, checkpoint disposition, and ready-model result. Replicas read that durable projection;
 Redis fanout and the authenticated socket merely accelerate presentation. The jitML training-start port is
@@ -96,75 +76,47 @@ contract in
 progress is a cursor-backed cached projection, while training signals,
 cancellation, and model invocation remain online-only in the initial adapter contract.
 
-**Session scope:** In one uninterrupted engineering session, implement only the jitML UI adapter/program and
-accept it with `cabal test jitml-ui-lift-live-gate`. Split if the work changes Phase-93 training/commit,
+**Supporting observation:** the `jitml-ui-lift-live-gate` Haskell component suite may exercise the Haskell adapter/program, but
+the sole acceptance command is `pb validate phase 94`. Split if the work changes Phase-93 training/commit,
 reopens Phase-69 failover, adds a generic UI
-constructor, introduces another runtime image, or needs a second acceptance command.
+constructor, introduces another runtime image, or needs a second independently useful claim.
 **Phase scope:** one cohesive claim — *only an owned, committed, Ready model can be invoked*. The terminal receipt survives the loss of the UI server, the cache and the socket that delivered it.
 
 **Substrate:** linux-cuda
 **Lane:** cuda ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/run_phase_gate.py 94` passes on linux-cuda: a browser reaches an owned,
-committed, Ready jitML model and recovers its terminal training receipt across replica, Redis, and socket
-loss. Its denial matrix, fixtures, observers, oracle, and mutants are delegated to
-[Gate integrity](#gate-integrity).
-
-**Depends on:** [Phase 93](phase_93_jitml_rederivation.md) — the re-derived numerical core whose training and checkpoint contracts this phase carries into the UI runtime.
+**Depends on:** [Phase 93](phase_93_jitml_rederivation.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 94`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Phase-0 representative set.** Before implementation, Phase 0 commits
-  `test/fixture/dhall/apple_metal_host_daemon/jitml_ui.dhall`,
-  `test/fixture/jitml_ui_lift/readiness_owner_scope_matrix.tsv`,
-  `test/fixture/jitml_ui_lift/public_contract.golden`,
-  `test/fixture/jitml_ui_lift/expected_interaction.tsv`,
-  `test/fixture/jitml_ui_lift/cross_pod_receipt_timeline.tsv`, and fixed bounded training/model-input fixtures. The
-  UI uses trusted `WorkflowProgress`, `ArtifactProvenance`, and `ModelInteractor` components.
-- **Fresh authority and challenge.** After Keycloak/Envoy, at least two UI-server replicas, Redis, and the
-  Phase-93 jitML workers are Ready, the harness obtains least-privilege sessions for tenant A's artifact owner,
-  a tenant-A non-owner, and tenant B's foreign owner, then generates an unpredictable client request id and
-  model input. The server-derived scoped command id, command, progress/terminal events, durable receipt,
-  training result, and model invocation must retain the command/workflow identities and carry the challenge to
-  the external execution/result evidence.
-- **Cross-pod receipt routing and repair.** The harness proves from edge/backend identity that the authenticated
-  socket is owned by replica A while replica B handles the terminal receipt notification. It then flushes Redis
-  and drops the socket between durable receipt materialization and delivery. Reconnect to a current replica
-  must recover the exact scoped receipt and terminal model handle from Phase 70 once, without sticky routing,
-  pod-local truth, a second Pulsar start, another trainer/CUDA execution, or another pointer advance.
-- **Paired ready/owner/scope cases.** The subject-owned committed Ready model succeeds. The exact same handle
-  and input under tenant A's non-owner and tenant B's owner differ only by authenticated authority and must be
-  denied. Under the owning subject, handles referring to an in-flight checkpoint and a failed checkpoint differ
-  only by readiness state and must also be denied.
-- **Zero forbidden effect and bypass check.** Each denial produces no inference dispatch, GPU execution,
-  Pulsar command, checkpoint/object read, cache materialization, or result write. A direct browser-origin probe
-  to the jitML worker must fail at the platform boundary.
-- **Observer outside the SUT.** Playwright observes the browser; Envoy and Keycloak establish request/session
-  provenance and backend identity; Pulsar offsets, MinIO audit/manifests, the checkpoint pointer history, and
-  the accelerator-owner device-hold/kernel-launch trace establish training and invocation. A Redis-side
-  observer establishes route loss only; adapter/UI-server/Redis self-report cannot establish the receipt or
-  accepted effect.
-- **Committed mutants.** Phase 0 commits
-  `test/mutant/jitml_ui_lift/mut-52-mint-ready-from-checkpoint-path.patch` (guard weakening) and
-  `test/mutant/jitml_ui_lift/mut-52-ignore-artifact-scope.patch`, plus
-  `test/mutant/jitml_ui_lift/mut-52-ignore-artifact-owner.patch`,
-  `test/mutant/jitml_ui_lift/mut-52-local-only-websocket-route.patch`, and
-  `test/mutant/jitml_ui_lift/mut-52-redis-as-receipt.patch`. Each must turn its readiness, tenant-scope,
-  same-tenant-owner, cross-pod route, or durable-repair row red.
-- **Independent oracle.** The readiness/owner/scope matrix and public result are hand-authored from the public model
-  contract and an off-adapter reference computation. They do not call the adapter, UI renderer, checkpoint
-  pointer helper, or serving handler under test.
-- **Information-flow check.** Model output remains untrusted tenant-scoped presentation. A committed
-  authority-shaped output string must render escaped and cannot become a route, port, grant, policy, or model
-  handle.
-- **Honesty.** This gate tests one bounded linux-cuda workflow, one ready model, two readiness failures, one
-  same-tenant non-owner, one foreign tenant, and one Redis/socket-loss timeline across two UI replicas. It
-  inherits Phase-93 training/commit and Phase-69 failover evidence without retesting either boundary or
-  claiming general noninterference, Redis availability, or multi-zone HA.
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`, `P1`–`P6` over training and checkpoint storage; negatives under `test/negative/jitml_ui_rederivation/` pin a run record readable outside the scope that produced it.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-## Resource provision — bounded jitML realtime envelope
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *only an owned, committed, Ready model can be invoked*. The terminal receipt survives the loss of the UI server, the cache and the socket that delivered it. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 94` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 93 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
+
+## Resource provision — UNRESOLVED
+
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 The live provision seal includes at least two UI-server replicas, their WebSocket/frame/heartbeat buffers,
 Redis connections/keys/fanout, receipt retention and lookup concurrency, cursor repair, reconnect overlap, the
@@ -179,7 +131,10 @@ unbounded Redis/output-buffer, or one-short post-fault lookup shape refuses befo
   constrain checkpoint, model, input, and output flow by derived tenant/audience/integrity witnesses.
 - [Low-Code UI Runtime §18 — Honesty boundary](../documents/engineering/low_code_ui_runtime_doctrine.md#18-honesty-boundary):
   keep runtime readiness, provider enforcement, and tested isolation explicit.
-- [UI Realtime Coordination §§3–6](../documents/engineering/ui_realtime_coordination_doctrine.md#3-one-browser-transport-contract):
+- [UI Realtime Coordination §3 — One browser transport contract](../documents/engineering/ui_realtime_coordination_doctrine.md#3-one-browser-transport-contract),
+  [UI Realtime Coordination §4 — Typed routing and resume envelope](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope),
+  [UI Realtime Coordination §5 — Redis is ephemeral platform-internal coordination](../documents/engineering/ui_realtime_coordination_doctrine.md#5-redis-is-ephemeral-platform-internal-coordination),
+  and [UI Realtime Coordination §6 — Durable commands, receipts, and replay](../documents/engineering/ui_realtime_coordination_doctrine.md#6-durable-commands-receipts-and-replay):
   preserve the scoped command receipt outside Redis, route across UI replicas, and repair delivery after
   Redis/socket loss.
 - [Lift and Compose Doctrine §5 — The re-derivation map](../documents/engineering/lift_and_compose_doctrine.md#5-the-re-derivation-map):
@@ -189,27 +144,13 @@ unbounded Redis/output-buffer, or one-short post-fault lookup shape refuses befo
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 94.1: Bind the jitML training-to-ready-model UI adapter ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/JitML/UiAdapter.hs`, `jitml-ui/jitml-ui-lift.cabal`,
-`dhall/ui/jitml.dhall`, `test/spec/ui/JitMLUiContractSpec.hs`,
-`test/spec/live/JitMLUiLift.hs`, and `tools/phase52_{jitml_ui_live,gate}.py`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the live harness checks the
-ready/failed/in-flight/non-owner/foreign matrix against Keycloak, Envoy, Pulsar, MinIO, checkpoint, GPU,
-Redis-route, durable-receipt, and browser evidence; all five committed mutants must turn red.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/lift_and_compose_doctrine.md`, `documents/engineering/tenancy_doctrine.md`, and
-`documents/engineering/ui_realtime_coordination_doctrine.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -228,7 +169,7 @@ reimplementing training, or turning a checkpoint identifier into browser authori
 
 ### Validation
 
-1. Run `python3 tools/jitml_ui_lift_gate.py --reuse-fresh-live` on linux-cuda.
+1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-94 supporting suite must run on linux-cuda.
 2. Drive training to a committed successful checkpoint, verify Ready-handle issuance, invoke it, and compare
    the UI result and external GPU execution with the independent oracle; require the durable receipt to retain
    the exact original command/workflow identities.
@@ -248,7 +189,8 @@ commit, direct-worker policy, general noninterference, and multi-zone availabili
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record only the tested
   training/checkpoint-to-ready-model UI interaction and exact denial matrix.
 - `documents/engineering/lift_and_compose_doctrine.md` — keep the sibling SPA a UX fixture and Phase-93's
@@ -259,9 +201,10 @@ commit, direct-worker policy, general noninterference, and multi-zone availabili
   jitML receipt-routing and Redis/socket-repair envelope without promoting it to an HA claim.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` and `DEVELOPMENT_PLAN/overview.md` — link the phase and flip status only after
   the linux-cuda Register-3 ledger is green.
-- `DEVELOPMENT_PLAN/system_components.md` — register the jitML UI adapter and Dhall module under Phase 93.
+- `DEVELOPMENT_PLAN/system_components.md` — register the jitML UI adapter and its generated Dhall projection under Phase 94.
 
 ## Related Documents
 

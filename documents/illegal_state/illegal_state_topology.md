@@ -15,10 +15,12 @@ pairing simply has no constructor, so nothing needs to reject it. The numbering 
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -174,8 +176,9 @@ surface-provider-vs-build discipline owned by [`cluster_lifecycle_doctrine.md`](
 arm is surfaced; runtime-checked residue — that the provider's hybrid mechanism actually joins the node.
 **Validation-locus:** `dhall-typecheck` (the closed provider-arm union — the hybrid arm is absent, so a full member node on a hostless `Managed Eks` control plane has no constructor and fails `dhall type`) + `live-effect` (that the provider's hybrid mechanism actually joins the node, once a provider-native arm is surfaced).
 
-The Phase-77 paired pure contract and retained-kind object inventory exercise the closed managed/self-managed
-shape and the `NoHostSubstrateOnManagedEks` refusal without claiming provider runtime proof. Actual Managed EKS
+The Phase-77 target must pair a pure contract with a retained-kind object inventory to exercise the closed
+managed/self-managed shape and the `NoHostSubstrateOnManagedEks` refusal without claiming provider runtime
+proof. Actual Managed EKS
 host-foreclosure readback remains a `live-effect` obligation because AWS authority could not create the child.
 
 ### 3.39 A split-Site etcd quorum

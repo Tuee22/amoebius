@@ -8,29 +8,27 @@
 > storage fit without double counting.**
 > **Read this if**: phase 89 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 89 delivers the Apple-Metal host compute daemon; its design is owned by [host_cluster_comms_doctrine.md](../documents/engineering/host_cluster_comms_doctrine.md), [substrate_doctrine.md](../documents/engineering/substrate_doctrine.md), [resource_capacity_types.md](../documents/engineering/resource_capacity_types.md), and the plan for reaching it is owned here.
-Register 3, scoped live, on the `apple` substrate.
-The scoped gate passed on 2026-08-11; physical Apple/Lima/Metal and provider observations remain `UNVERIFIED`.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/apple_metal_headless_builds.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/apple_metal_headless_builds.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — the host worker and its transitions](#resource-provision--the-host-worker-and-its-transitions)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 89.1: Apple substrate management — Lima Linux VM + brew lazy tool-ensure ⏸️](#sprint-891-apple-substrate-management--lima-linux-vm--brew-lazy-tool-ensure-)
@@ -45,40 +43,22 @@ The scoped gate passed on 2026-08-11; physical Apple/Lima/Metal and provider obs
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-88 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 88, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Observed artifact migration — 2026-08-11:** `job_A.expected` and `job_B.expected` are exact output of
-`metal_job_ref.py` for the tracked inputs. They are generated files and must be removed. The reference program
-and reviewed inputs remain source; all A/B/C expectations are computed in the run bundle. The old golden-replay
-mutant is replaced by a CPU-reference-bypass mutant that numerical equality alone would miss.
-
-**Invalidated historical record:**
-
-🟡 **Scoped gate passed 2026-08-11.** Phase-0 custody, the constructor-hidden disk/capacity fold, exact
-Metal-owner arithmetic, loopback-only host comms, fixed MSL numerical kernel, absolute-path closed build,
-managed lifecycle, reactive supervisor, Vault-by-name auth, peer contract, and six semantic mutants are
-tested. Two real Linux loopback listeners, an environment-empty managed subprocess, two pinned numerical
-jobs, and a never-committed challenge provide the portable live slice. The executing host is Linux `x86_64`,
-so physical Apple Silicon, Lima/brew, Metal, native Pulsar, gateway/MinIO, live Vault resolution, a second LAN
-host, and Apple VM/storage/supervisor observers remain **UNVERIFIED**. This is not an Apple Register-3 pass;
-ledger `external-run-reference` records the scoped boundary.
-There is no amoebius Tart path.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase delivers the one class of amoebius compute that lives **outside a cluster pod**: the same binary under the host-daemon context, holding the `Worker` arm of `HostRole` ([daemon_topology_doctrine.md §2](../documents/engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)) — a long-running
+This phase's target is the one class of amoebius compute that lives **outside a cluster pod**: the same binary under the host-daemon context, holding the `Worker` arm of `HostRole` ([daemon_topology_doctrine.md §2](../documents/engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)) — a long-running
 host subprocess that reaches hardware which refuses to be performantly contained — Apple-Metal needs Apple
 Silicon unified memory, so it cannot run in a Linux container or a Linux VM. The phase does four things and
 stops there. Its prerequisite is one complete physical-host provision: the observed Apple host advertises CPU,
@@ -96,7 +76,7 @@ non-Metal runtime memory, and an unprovisioned `MetalOwnerDemand` with exact equ
 source and workload maps plus finite class-based coexistence policy. Provision derives every permitted
 unified-memory epoch and privately aggregates its peak; only that private claim renders. The worker also declares its
 bounded host-cache demand. The fold charges the VM reservation, host/runtime headroom, worker non-Metal runtime, and
-the provisioned Metal epoch peak once against physical memory. Inside the VM disk it proves
+the provisioned Metal epoch peak once against physical memory. Inside the VM disk the gate must test
 `guest usable system reserve + Σ(unique layout usable carves) = requiredUsableBytes`; presentation/allocation
 then derive the raw sparse-disk high-water `provisionedBytes`. That high-water is charged **once** beside
 disjoint durable backing and host-cache pools on the physical disk, never again as the nodefs/imagefs
@@ -108,9 +88,10 @@ and rooting every host tool in **brew** through the no-environment / no-`PATH` l
 probe, install-if-absent, resolve the absolute path from the package manager, invoke by full path. Second, it
 binds the in-cluster Phase-69 content-mutation gateway and Pulsar service to **host-only loopback NodePorts** reachable only
 from the host (`127.0.0.1:<nodeport>`), with no LoadBalancer, no Envoy route, and no path from LAN/WAN — the
-sanctioned localhost carve-out from Keycloak-owns-all-wild-ingress. Third, it builds the native Apple-Metal
+sanctioned localhost carve-out from Keycloak-owns-all-wild-ingress. Third, it must build the native Apple-Metal
 worker **headless, directly on the host — no VM (no Tart)** — via a fixed Objective-C/C Metal bridge
-source-built with `/usr/bin/clang` by absolute path, with generated MSL compiled at runtime through the OS
+generated lazily from Haskell declarations beneath `.build/metal/**` and compiled with `/usr/bin/clang` by absolute path,
+with generated MSL compiled at runtime through the OS
 Metal framework. Fourth, it runs that worker as a managed subprocess of the host binary and wires it as an
 **ordinary Pulsar + content-store peer over host-only NodePorts with no mTLS**: commands arrive as Pulsar
 messages, mutations pass only through the Phase-69 gateway into the content-addressed MinIO store, and there is
@@ -129,8 +110,9 @@ that store lives in the
 Vault-enveloped MinIO bucket that is the stateless Deployment-`replicas=1` control-plane daemon's only
 durable state (single-instance delegated to k8s/etcd, **no election**). The windows-CUDA host worker is the
 structurally identical case on a different substrate and is named throughout as target shape, but it is **not**
-part of this phase's single-substrate gate. This phase consumes earlier phases rather than re-implementing
-them: Phase 55's substrate detection, `pb` bootstrap coordinator handoff, and no-`PATH` tool-ensure kernel; Phase 62's MinIO
+part of this phase's single-substrate gate. This phase's target must consume only future human-approved
+predecessor capabilities rather than re-implement them: Phase 55's substrate detection, `pb` bootstrap
+coordinator handoff, and no-`PATH` tool-ensure kernel; Phase 62's MinIO
 and Pulsar standard services; Phase 67's native Pulsar client; Phase 69's content-addressed store and workflow
 runtime; Phase 80's determinism kernel; Phase 80's jit-build engine cache; and Phase 61's Vault secrets-by-name.
 
@@ -147,9 +129,13 @@ flowchart LR
   daemon --> peer[Channel-2 peer: Pulsar consume plus gateway content put and get]
   peer --> gate[Gate: Apple daemon runs a Metal workload as a cluster peer]
 ```
-*Orientation. Design intent. The Apple-Silicon topology this phase stands up, with the two host-only NodePorts as the only route between the on-host daemon and its in-cluster peers; the gate's apparatus is owned by [Gate integrity](#gate-integrity). No part of it has run.*
+*Orientation. Design intent. The target Apple-Silicon topology must stand up with the two host-only NodePorts as
+the only route between the on-host daemon and its in-cluster peers; the future gate's apparatus is owned by
+[Gate integrity](#gate-integrity). No part of it has run.*
 
-**Phase scope:** one cohesive claim — *a Metal workload is an ordinary cluster peer over host-only loopback*. The native worker is built headless on the host, and the content endpoint is the single mutation gateway.
+**Phase scope:** one cohesive target claim — *a Metal workload must be an ordinary cluster peer over host-only
+loopback*. The target must build the native worker headless on the host and must use the content endpoint as the
+single mutation gateway.
 
 **Substrate:** apple — the whole gate runs on an Apple-Silicon host whose Lima-synthesized Linux VM carries a
 single-node cluster in Register 3 (live infrastructure); no linux-cpu, linux-cuda, or windows substrate is
@@ -159,107 +145,41 @@ touched by the gate, and the windows-CUDA host worker is named only as the struc
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 53](phase_53_apple_engine_bringup.md) — the Apple engine this daemon runs on, and [Phase 69](phase_69_content_store_workflow.md), the content store it fronts.
-
-**Gate:** one `InForceSpec` in Register 3 runs an Apple-Silicon host daemon's Metal ML workload as a cluster
-Pulsar/content-store peer over host-only NodePorts, then tears the worker and cluster down leak-free. Its
-apparatus and the provision witness it presupposes are delegated to [Gate integrity](#gate-integrity).
-
-**Gate-integrity clauses ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate passes only when all of the following hold; each is authored under
-the [§M gate-integrity standard](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation](#gate-integrity).
-
-- **Input-dependent output oracle (§M.1/§M.3).** The artifact retrieved from MinIO must equal a fresh output
-  from the independent NumPy reference at `test/golden/apple_metal_host_daemon/metal_job_ref.py`. The reviewed A/B inputs
-  remain under `test/golden/apple_metal_host_daemon/`; their expected bytes and content identities are generated under
-  `.build/runs/phase_86/`. A nonce-derived challenge input C is also generated per run. A, B, and C must produce
-  distinct expected results where specified, and the worker must match each without a committed expected file.
-  Numerical equality is necessary but insufficient: an external Metal observer must recover the real
-  `MTLDevice`, compiled `MTLLibrary`, pipeline reflection, and the `MTLBuffer` written by the dispatch.
-- **Committed seeded mutant (§M.2).** The committed mutant set `test/mutant/apple_metal_host_daemon/` includes at minimum
-  `const_output.patch` (worker writes a fixed constant regardless of job payload — an effect-swap operator),
-  `cpu_reference_bypass.patch` (worker computes the correct bytes on CPU without a Metal dispatch), and
-  `lb_nodeport.patch` (the host-comms spec re-typed `LoadBalancer` — a union-arm
-  addition), plus `omit_metal_work_item.patch`, `favorable_metal_epoch.patch`, and `drop_metal_overlap_debit.patch`;
-  the gate is re-run against each and **must go red** (`const_output.patch` fails the input-dependent oracle,
-  `cpu_reference_bypass.patch` fails the external Metal-dispatch observation, `lb_nodeport.patch` fails the
-  wild-exposure type-check, and the owner mutants fail exact source equality or
-  the independently derived coexistence-epoch oracle). A green gate against any committed mutant fails the
-  phase.
-- **Representative set (§M.7).** The gate's representative set is exactly: one apple substrate (Apple-Silicon
-  host + Lima Ubuntu-24.04 VM), the exact oracle-pinned physical-host/VM/node/worker/cache resource fold (the
-  VM carve is 4 vCPU, 8 GiB memory, and a private rounded raw-disk result of 40 GiB derived from the pinned
-  guest-usable/presentation/allocation operands; all other numeric demands/supplies live in the pinned resource
-  oracle), the two host-only NodePort Services {ContentMutationGateway, Pulsar} (raw MinIO absent), the two
-  reviewed dispatch inputs {`job_A`, `job_B`} plus the run-time-generated challenge job `job_C` (nonce/seed-
-  derived input; every expected output is computed at run time by the independent NumPy reference),
-  and the four wild-exposure negatives enumerated in Sprint 89.5. No other shape is claimed.
-- **VM-disk geometry is materialized and observed (§M.3/§M.4).** Before create, the independent oracle
-  rederives `requiredUsableBytes` from guest-system plus unique layout carves, applies the pinned presentation
-  and backing minimum/quantum, and compares the private `ProvisionedVmDiskCarve`, including
-  `provisionVmDisk(raw).id == raw.id`. The parent-disk debit and live observation are keyed by that same id.
-  After create, an external observer checks Lima's raw virtual size, mounted usable bytes/fs type, and sparse
-  host allocation against that witness. A dropped or swapped id, a debit against the wrong parent, a one-byte-
-  short raw disk, omitted filesystem/sparse overhead, or one-byte-across-quantum boundary turns the gate red;
-  no check may substitute the authorable guest-usable sum for the raw disk or charge the sparse high-water
-  twice.
-- **Leak-free, defined ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** "Tears down leak-free" at Phase 89 means, asserted by the postflight probe:
-  after teardown (a) `limactl list` shows the named VM absent; (b) no worker/bridge subprocess of the host
-  binary survives (checked by pgrep of the recorded child PIDs); and (c) the host-side residue set — the
-  bridge dylib path, the jit MSL cache dir, and any brew-installed `limactl` marked ephemeral by this run — is
-  swept to its pre-run state. Phase 48's general postflight sweep runs earlier in the sequence, but it is written for the cluster-side residue and does not reach a host subprocess's Metal state, so this phase pins its
-  own explicit three-part residue check rather than deferring to it.
+**Depends on:** [Phase 88](phase_88_offline_multizone_continuity.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 89`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-**The run the gate command performs.** One `InForceSpec` brings up the apple-substrate cluster on Lima,
-exposes the sole Phase-69 content-mutation gateway and Pulsar (not raw MinIO) on loopback NodePorts, builds
-the native worker **headless on-host via the fixed Metal bridge (no VM)**, starts the daemon as a managed
-subprocess, dispatches a Metal inference job over Pulsar with **no mTLS**, lands its output in the
-content-addressed MinIO store by content address, and tears the worker and cluster down leak-free.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-**What must hold before any of those effects.** The gate constructs the physical-host → VM/node + host-worker
-+ cache placement/carve witness: the VM's pinned 4-vCPU/8-GiB carve and the current oracle's
-presentation/allocation-derived **40-GiB raw virtual-disk result**, every pod's CPU/memory/ephemeral-storage
-envelope, the worker's CPU/non-Metal-runtime-memory and identity-complete `MetalOwnerDemand`, every
-structurally derived unified-memory coexistence epoch, and the bounded cache/durable-storage pools. The live
-inventory must meet or exceed every declared supply.
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *a Metal workload is an ordinary cluster peer over host-only loopback*. The native worker is built headless on the host, and the content endpoint is the single mutation gateway. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 89` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 88 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**What the run's ledger must record.** Host-only reachability is *tested* — reachable from `127.0.0.1`,
-unreachable from the LAN — and no mTLS or bespoke RPC was introduced on channel 2, with Apple-Metal physics
-marked *assumed*: sibling evidence, not an amoebius measurement.
+## Resource provision — UNRESOLVED
 
-Under [§M.1 oracle provenance](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
-same-commit fixtures remain regression fixtures until independently reviewed or replaced. The reference side
-contains source and expectations, never copied program output:
-
-- `test/golden/apple_metal_host_daemon/metal_job_ref.py` — the independently reviewed CPU/NumPy reference for the kernel.
-  It generates A/B/C expected bytes and identities only at gate-run time beneath `.build/runs/phase_86/`.
-- `test/golden/apple_metal_host_daemon/job_A.input`, `job_B.input` — the two reviewed job inputs, differing only in their
-  tensor payload.
-- `test/golden/apple_metal_host_daemon/resource_fold.json` — the independently authored physical-host inventory and exact
-  Lima-VM, Kubernetes-node, host-worker, Apple-unified-memory, cache, and durable/local-storage demands. For
-  the VM it pins guest-system/unique-layout usable carves, `FilesystemPresentation`, backing minimum/quantum, the
-  expected private `requiredUsableBytes`/40-GiB `provisionedBytes` result, and the single physical-disk
-  high-water debit; it fixes the disjoint pool ownership and expected headroom witness before the provision
-  fold exists.
-- `test/golden/apple_metal_host_daemon/vm_disk_boundaries.csv` — independently computed minimum/quantum boundary pairs,
-  including an accepted exact-boundary operand, a one-byte-higher operand that rounds to the next quantum and
-  exhausts its parent, and the expected one-byte-short-live-disk/fs-type failure reasons.
-- `test/fixture/dhall/phase_75_illegal/` — the four wild-exposure negatives (see Sprint 89.5), each a one-field
-  mutation of the committed green host-comms spec, each carrying its validation-locus tag and its expected
-  `dhall type` error string, registered in the Phase-27 illegal-state corpus.
-- `test/mutant/apple_metal_host_daemon/const_output.patch`, `cpu_reference_bypass.patch`, `lb_nodeport.patch`, `omit_metal_work_item.patch`,
-  `favorable_metal_epoch.patch`, `drop_metal_overlap_debit.patch` — the committed seeded mutants the gate must
-  turn red. The CPU-reference bypass returns numerically correct bytes but is caught by the independent Metal
-  dispatch observer.
-- `test/mutant/apple_metal_host_daemon/resources/` — one-short provider/compiler/worker/harness cases and dropped-envelope/
-  premature-replacement mutants, paired with the complete `resource_fold.json` positive.
-
-## Resource provision — the host worker and its transitions
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 The physical-host fold retains complete envelopes for every new execution unit, not just the Metal working
-set. The `pb`/brew probe-install-resolve bootstrap, Lima/provider process, fixed-bridge compiler invocation,
+set. The contained `pb` toolchain establishment, the post-handoff Haskell brew probe/install/resolve step,
+Lima/provider process, fixed-bridge compiler invocation,
 long-lived host supervisor+worker child, and host gate/probe process each name an executable content digest
 and installed bytes, CPU/memory reservation and ceiling under the finite Apple supervisor policy, bounded
 stdout/stderr/rotated logs, writable/temp/scratch bytes on a named host backing, cache participation, process
@@ -309,11 +229,12 @@ dispatches and current allocated unified memory to that witness. Omitting a work
 policy domain, supplying a favorable epoch list, or dropping a co-resident overlap so the host fits by one byte
 rejects before bridge/cache/worker effects.
 
-This phase applies the exhaustive desired-object and etcd-capacity protocol established in Phase 73 to the
+This phase must apply the exhaustive desired-object and etcd-capacity protocol that human-approved Phase 73 must supply to the
 Metal worker's complete expanded object set. The private logical witness accounts for revision, Lease, and Event
 churn under the backend quota, while the physical witness separately covers the quota-sized backend, WALs,
-snapshots, and defrag overlap; live readback must equal both. One-byte logical/physical shortages and `drop_api_object_demand.dhall`,
-`drop_etcd_churn.dhall` or `drop_etcd_model.dhall` reject before Lima workload/NodePort apply.
+snapshots, and defrag overlap; live readback must equal both. Haskell one-byte logical/physical shortage and
+drop-API-object/churn/model operators must reject before Lima workload/NodePort apply; any serialized cases
+are generated beneath `.build/test-corpora/**`.
 
 Only the snapshot-bound private provision projections authorize `brew`, Lima, clang, bridge/cache writes,
 NodePort mutation or worker acquire. Live readback compares the executable digests, supervisor/child process
@@ -322,48 +243,48 @@ Lima VM/root geometry, Kubernetes survivor images/resources/slots, the exact
 `{ContentMutationGateway, Pulsar}` NodePort identities/listeners/firewall and raw-MinIO-backend absence (or the
 separately provisioned read-only Service identity/credential/route set in its optional arm), exact Pulsar
 topic/cursor/backlog/offload, content-gateway/collector execution/admission, and MinIO resident/transient
-objects to that witness. Besides the existing VM/Metal boundaries, Phase 0 supplies
-one-unit/one-byte-short fixtures for bootstrap/tool install, provider, compiler, supervisor/worker and harness
-CPU/memory,
-process slots, logs/writable/scratch/cache, client buffers, Pulsar topic/backlog/offload, output-object overlap,
-content-gateway/collector execution, and every surviving pod/IP/
-CSI/image/storage commitment. Dropped-envelope mutants that launch clang, the worker, or the host probe with
-no row live under `test/mutant/apple_metal_host_daemon/resources/`; `early_worker_replacement.dhall` replaces before observed
-release and `drop_pulsar_topic_demand.dhall` omits the work-topic row. Each must turn the gate red before any
-lasting effect. `drop_content_gateway_collector.dhall` and `direct_minio_backend_put.dhall` must likewise fail
-before any output mutation.
+objects to that witness. Besides the VM/Metal boundaries, separately authored Haskell cases owned by this
+phase must supply one-unit/one-byte-short observations for bootstrap/tool install, provider, compiler,
+supervisor/worker and harness CPU/memory, process slots, logs/writable/scratch/cache, client buffers, Pulsar
+topic/backlog/offload, output-object overlap, content-gateway/collector execution, and every surviving
+pod/IP/CSI/image/storage commitment. Phase 0 supplies only the generic validation kernel. Haskell
+dropped-envelope operators launch clang, the worker, or the host probe with no row; other
+Haskell operators replace the worker before observed release, omit the Pulsar work-topic or content
+gateway/collector, or attempt a direct MinIO backend put. Each must turn the gate red before any lasting effect,
+and every external mutation form is generated beneath `.build/test-corpora/**`.
 
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/apple_metal_host_daemon/`.
+- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; Haskell negatives may render external forms only beneath `.build/test-corpora/**`.
 
 ## Doctrine adopted
 
-- [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — apple-Metal host compute daemon is admitted by satisfying the contract, not by appearing on a list.
-This phase is the first live amoebius realization of three doctrines; individual sprints cite the same sections
-where they adopt them.
+- [`extension_conformance_doctrine.md` §5 — The conformance gate is generated, not authored](../documents/engineering/extension_conformance_doctrine.md#5-the-conformance-gate-is-generated-not-authored) — apple-Metal host compute daemon is admitted by satisfying the contract, not by appearing on a list.
+This phase's target is to become the first live amoebius realization of three doctrines; individual sprints
+cite the same sections where they must adopt them.
 
-- [`host_cluster_comms_doctrine.md §2`](../documents/engineering/host_cluster_comms_doctrine.md#2-the-decision-that-was-open-and-is-now-resolved)
-  — *the decision that was open, and is now resolved*: this phase builds the resolved channel-2 design — a host
+- [`host_cluster_comms_doctrine.md` §2 — The decision that was open, and is now resolved](../documents/engineering/host_cluster_comms_doctrine.md#2-the-decision-that-was-open-and-is-now-resolved)
+  — *the decision that was open, and is now resolved*: this phase's target must implement the resolved channel-2 design — a host
   compute daemon as a plain Pulsar + gateway-backed-MinIO peer over host-only NodePorts with **no mTLS**; the
   gateway is the sole mutation endpoint and the raw MinIO backend is not exposed — taking the two
-  localhost-only channels of [`§1`](../documents/engineering/host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only),
-  the no-bespoke-control-channel rule of [`§3`](../documents/engineering/host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)
+  localhost-only channels of [`host_cluster_comms_doctrine.md` §1 — The host-origin surface: two channels, both localhost-only](../documents/engineering/host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only),
+  the no-bespoke-control-channel rule of [`host_cluster_comms_doctrine.md` §3 — There is no bespoke control channel — coordination *is* Pulsar + MinIO](../documents/engineering/host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)
   (*coordination is Pulsar + MinIO*, with MinIO mutation mediated by the Phase-69 gateway), the
-  network-restriction threat model of [`§5`](../documents/engineering/host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)
-  (*why no mTLS is safe here*), the loopback-NodePort realization and prodbox precedent of [`§6`](../documents/engineering/host_cluster_comms_doctrine.md#6-the-host-only-restriction-in-practice-and-its-sibling-precedent),
-  and the type-excluded illegal states of [`§7`](../documents/engineering/host_cluster_comms_doctrine.md#7-what-the-dsl-makes-unrepresentable-here)
+  network-restriction threat model of [`host_cluster_comms_doctrine.md` §5 — Why no mTLS is safe here: the network restriction *is* the security boundary](../documents/engineering/host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)
+  (*why no mTLS is safe here*), the loopback-NodePort realization and prodbox precedent of [`host_cluster_comms_doctrine.md` §6 — The host-only restriction in practice (and its sibling precedent)](../documents/engineering/host_cluster_comms_doctrine.md#6-the-host-only-restriction-in-practice-and-its-sibling-precedent),
+  and the type-excluded illegal states of [`host_cluster_comms_doctrine.md` §7 — What the DSL makes unrepresentable here](../documents/engineering/host_cluster_comms_doctrine.md#7-what-the-dsl-makes-unrepresentable-here)
   (*what the DSL makes unrepresentable here*).
-- [`substrate_doctrine.md §5`](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)
-  — *host worker nodes: substrate-specific hardware that refuses to be contained*: this phase implements the
+- [`substrate_doctrine.md` §5 — Host worker nodes: substrate-specific hardware that cannot be containerized](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)
+  — *host worker nodes: substrate-specific hardware that refuses to be contained*: this phase's target must implement the
   apple host worker (Apple-Metal on unified memory) as a managed subprocess of the host binary with the
   Load → Prereq → Acquire → Ready → Serve → Drain → Exit role lifecycle, built via the virtualized-substrate
-  provider of [`§4`](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
-  ([`§4.1 — Colima and Lima on Apple`](../documents/engineering/substrate_doctrine.md#41-colima-and-lima-on-apple-the-provider-follows-the-workload) for the Linux VM),
-  all under the [`§3`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
-  *no-environment / no-`PATH` lazy tool-ensure contract* rooted in brew, handed off by the Python `pb` bootstrap coordinator
-  of [`§6`](../documents/engineering/substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)
-  (*the bootstrap coordinator contract*), never a shell script.
-- [`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
-  and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
+  provider of [`substrate_doctrine.md` §4 — Virtualized substrates: synthesizing a Linux host where the host is not Linux](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
+  ([`substrate_doctrine.md` §4.1 — Colima and Lima on Apple: the provider follows the workload](../documents/engineering/substrate_doctrine.md#41-colima-and-lima-on-apple-the-provider-follows-the-workload) for the Linux VM),
+  all under the [`substrate_doctrine.md` §3 — The no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
+  *no-environment / no-`PATH` lazy tool-ensure contract* rooted in the Haskell host path after the bounded
+  Python `pb` pre-binary handoff of
+  [`substrate_doctrine.md` §6 — The pre-binary handoff contract](../documents/engineering/substrate_doctrine.md#6-the-pre-binary-handoff-contract),
+  never a shell script or Python-owned host-policy path.
+- [`resource_capacity_types.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`; “The systematic provision matrix”](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
+  and [`resource_capacity_doctrine.md` §4 — The total fold: `fits`, `carve`, `place`, and the nesting](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
   — *the systematic provision matrix* / *the total provision fold*: the Apple physical host is the single
   supply owner. The Lima VM carves CPU/memory plus a presentation/allocation-derived private raw disk whose
   guest-usable layout and sparse physical high-water are distinct; the VM node and pods consume net
@@ -372,52 +293,31 @@ where they adopt them.
   epoch; and the jit cache carves one
   bounded host-cache pool. Unified memory and storage are each charged once, with disjoint pool witnesses,
   before any live effect.
-- [`apple_metal_headless_builds.md §1`](../documents/engineering/apple_metal_headless_builds.md#1-the-commitment-headless-on-host-no-vm)
+- [`apple_metal_headless_builds.md` §1 — The commitment: headless, on-host, no VM](../documents/engineering/apple_metal_headless_builds.md#1-the-commitment-headless-on-host-no-vm)
   — *the commitment: headless, on-host, no VM* — with [`§3 — Architecture`](../documents/engineering/apple_metal_headless_builds.md#3-architecture)
   (the fixed host Metal bridge), [`§4 — Build and prerequisite model`](../documents/engineering/apple_metal_headless_builds.md#4-build-and-prerequisite-model),
-  and [`§6 — Why Tart is not viable`](../documents/engineering/apple_metal_headless_builds.md#6-why-tart-is-not-viable-the-no-vm-rationale):
-  this phase builds the Apple-Metal worker **headless on the host — no Tart, no macOS VM** — source-building the
+  and [`apple_metal_headless_builds.md` §6 — Why Tart is not viable (the no-VM rationale)](../documents/engineering/apple_metal_headless_builds.md#6-why-tart-is-not-viable-the-no-vm-rationale):
+  this phase's target must build the Apple-Metal worker **headless on the host — no Tart, no macOS VM** — source-building the
   fixed Objective-C/C Metal bridge with `/usr/bin/clang` by absolute path and compiling generated MSL at
   runtime through the OS Metal framework, so a cache miss never starts a VM, invokes SwiftPM, or depends on a
   login keychain.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 89.1: Apple substrate management — Lima Linux VM + brew lazy tool-ensure ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Substrate/Apple.hs`, `src/Amoebius/Substrate/Lima.hs`,
-`src/Amoebius/Substrate/Brew.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: on a detected apple substrate, `ensure lima` is `brew install lima` when
-`limactl` is absent and a verified no-op otherwise; before installation or VM creation, the physical-host
-provision fold checks the pinned **4-vCPU, 8-GiB-memory Lima carve** and derives the current oracle's
-**40-GiB raw virtual disk** from guest-usable carves, `FilesystemPresentation`, filesystem/sparse overhead,
-and backing minimum/quantum. Only the private `ProvisionedVmDiskCarve.provisionedBytes` is passed to Lima
-and charged once as the sparse physical-allocation high-water, together with host/runtime headroom, the
-host-worker CPU/non-Metal-runtime-memory plus identity-complete Metal-owner demand and derived private
-unified- memory epoch peak, the VM node/pod CPU/memory/ephemeral-storage envelopes, and the
-cache/durable/local-storage pool carves. A fitting shape starts and carries a single-node cluster; any
-overcommit rejects before mutation. Live observation checks raw virtual size, mounted usable bytes/fs type,
-and sparse host allocated high-water. Every host tool used is resolved to an absolute path via the package
-manager, and **no bare command name and no environment variable (including `PATH`) is ever read** on the
-host surface, asserted from the execution-boundary argv/env trace of Validation 6 (not a source grep).
-**Docs to update**: `documents/engineering/substrate_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`substrate_doctrine.md §4.1 — Colima and Lima on Apple`](../documents/engineering/substrate_doctrine.md#41-colima-and-lima-on-apple-the-provider-follows-the-workload)
 and [`substrate_doctrine.md §3`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
-— the no-environment / no-`PATH` lazy tool-ensure contract — handed off by the Python `pb` bootstrap coordinator of
-[`substrate_doctrine.md §6`](../documents/engineering/substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off):
+— the no-environment / no-`PATH` lazy tool-ensure contract — reached after the bounded Python `pb` pre-binary handoff of
+[`substrate_doctrine.md` §6 — The pre-binary handoff contract](../documents/engineering/substrate_doctrine.md#6-the-pre-binary-handoff-contract):
 synthesize the Linux host the apple substrate's cluster runs on via Lima, with every host tool ensured and
 invoked by absolute path through brew — the substrate foundation every later Phase-89 sprint stands on. The
 physical-host provision fold this sprint builds adopts [`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
@@ -425,6 +325,7 @@ and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-f
 — the systematic provision matrix and the total provision fold.
 
 ### Deliverables
+
 - An apple-substrate manager that drives Lima (`limactl`) to start a named, budget-sized Ubuntu-24.04 VM and
   re-invokes amoebius subcommands inside it via `limactl shell <vm> -- <amoebius> <subcmd>` (the composition
   lift is owned elsewhere and only consumed here).
@@ -464,6 +365,7 @@ and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-f
   non-apple substrate, with a one-line diagnostic.
 
 ### Validation
+
 1. With `limactl` absent, the reconciler installs it via brew, re-resolves it to an absolute path, and starts
    the VM; with it present, the same call is a verified no-op (idempotent).
 2. A unit test exercises the pure install plan for apple without invoking brew.
@@ -504,41 +406,26 @@ and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-f
    spawned subprocesses and library-issued execs, which a grep of the author's modules cannot see.
 
 ### Remaining Work
+
 Physical Apple/Lima/brew and live VM-disk observations remain UNVERIFIED on the current Linux host.
 
 ## Sprint 89.2: Host-only loopback NodePort exposure of the content-mutation gateway + Pulsar ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/HostComms/NodePort.hs`,
-`src/Amoebius/HostComms/Loopback.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: after bring-up, the Phase-69
-content-mutation gateway and Pulsar are reachable from the host at `127.0.0.1:<nodeport>` and
-**unreachable** from (a) a second physical machine on the same LAN and (b) the host's own primary
-non-loopback interface address (`<lan-ip>:<nodeport>`, the WAN-equivalent probe — dialing the routable
-interface stands in for an off-LAN client without requiring a real WAN peer). The representative fixture has
-exactly those two counted NodePort Services and no raw MinIO backend endpoint. "Unreachable" is defined as
-either an immediate `connection refused`/`no route` **or** a connect that does not complete within a 5s
-timeout (a silent drop counts as unreachable, an established TCP session does not); there is no
-`LoadBalancer`-typed Service, no Envoy route, and no wild listener for either port; the loopback binding
-holds even though the Lima VM's node network does not bind NodePorts to loopback by default. If a future
-topology selects the closed optional raw-GET arm, it provisions a third, separately counted read-only
-Service identity with read-only credentials and proves that identity has no PUT, DELETE, multipart-upload,
-or other mutation authority/route; it can never replace or share the mutation-gateway Service.
-**Docs to update**: `documents/engineering/host_cluster_comms_doctrine.md`,
-`documents/engineering/substrate_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`host_cluster_comms_doctrine.md §6 — the host-only restriction in practice`](../documents/engineering/host_cluster_comms_doctrine.md#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)
 and [`§1 — two channels, both localhost-only`](../documents/engineering/host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only):
 realize channel 2's transport — a NodePort bound to the host's loopback so the daemon connects to
-`127.0.0.1:<nodeport>` with no path from LAN/WAN — generalizing the prodbox `127.0.0.1:30080` Harbor precedent
+`127.0.0.1:<nodeport>` with no path from LAN/WAN — applying the sibling project's loopback-only precedent
 (sibling evidence, not an amoebius result) onto the Lima-backed apple substrate, whose Lima VM node network —
 per [`substrate_doctrine.md §4.1 — Colima and Lima on Apple`](../documents/engineering/substrate_doctrine.md#41-colima-and-lima-on-apple-the-provider-follows-the-workload)
 — this sprint's substrate-layer loopback binding constrains. The rendered manifests are
 emitted from Haskell and never committed.
 
 ### Deliverables
+
 - Exactly two rendered host-only NodePort Services in the representative arm —
   `{ContentMutationGateway, Pulsar}` — whose reachability is restricted to host-origin traffic, plus the
   substrate-layer loopback binding / host-only firewalling that makes the
@@ -555,6 +442,7 @@ emitted from Haskell and never committed.
   target shape (not exercised by the apple gate).
 
 ### Validation
+
 1. Connect to the content-mutation gateway and Pulsar from the host at `127.0.0.1:<nodeport>` and succeed;
    attempt the same from a second physical host on the LAN and from the host's routable
    `<lan-ip>:<nodeport>` (WAN-equivalent probe) and fail — where fail means `connection refused`/`no route` or
@@ -568,22 +456,15 @@ emitted from Haskell and never committed.
 3. Tear the cluster down and back up; the loopback binding is re-established idempotently.
 
 ### Remaining Work
+
 The portable and Linux loopback boundary is tested; Lima NodePort realization and a second physical LAN-host probe remain UNVERIFIED.
 
 ## Sprint 89.3: Headless host-native Metal bridge + native worker build (no Tart) ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/HostWorker/MetalBridge.hs` (fixed ObjC/C bridge
-install + probe + runtime MSL dispatch), `src/Amoebius/HostWorker/AppleMetalBuild.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the fixed Objective-C/C Metal bridge is source-built on the host with
-`/usr/bin/clang`, `dlopen`'d, and probed; generated MSL then compiles and dispatches at runtime with an
-observed `MTLDevice`/`MTLLibrary` artifact behind the numbers, and no VM, SwiftPM, or keychain unlock is
-involved. The `### Validation` list below states each check and its mutants.
-**Docs to update**: `documents/engineering/apple_metal_headless_builds.md`,
-`documents/engineering/substrate_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`apple_metal_headless_builds.md §1 — the commitment: headless, on-host, no VM`](../documents/engineering/apple_metal_headless_builds.md#1-the-commitment-headless-on-host-no-vm),
 [`§3 — Architecture`](../documents/engineering/apple_metal_headless_builds.md#3-architecture),
 [`§4 — Build and prerequisite model`](../documents/engineering/apple_metal_headless_builds.md#4-build-and-prerequisite-model),
@@ -595,6 +476,7 @@ headless fixed-bridge shape is proven in the sibling jitML project (sibling evid
 this sprint realizes it in amoebius for the first time.
 
 ### Deliverables
+
 - A one-stage host `BuildExecutionEnvelope` for the fixed bridge: `/usr/bin/clang` CPU/memory envelope,
   object/dylib intermediate bytes, compiler-cache write delta, named `BuildScratch`/cache backings, and serial
   architecture/stage policies. The bridge-build action consumes the unchanged Apple-host snapshot token and
@@ -615,6 +497,7 @@ this sprint realizes it in amoebius for the first time.
   a VM.
 
 ### Validation
+
 1. Build the fixed bridge with `/usr/bin/clang`, `dlopen` it, and pass its probe; assert (from the
    Sprint-80.3 exec trace, not a self-report) no `tart`/VM process was started and no `security`/keychain
    unlock call was made.
@@ -637,29 +520,24 @@ this sprint realizes it in amoebius for the first time.
    build/dispatch path spawns has an absolute-path `argv[0]`, every spawn env is the fixed closed allow-set with `PATH` absent, and the trace contains no `tart`, `swift build`, or offline `metal` compiler `execve` on the core path — covering transitively spawned processes a module grep cannot observe.
 
 ### Remaining Work
+
 Remove the tracked A/B expected files, retain the reviewed reference script and inputs, replace the replay
 mutant, and generate expectations at run time. Physical bridge compilation,
 `MTLDevice`/`MTLLibrary` observation, and GPU dispatch remain UNVERIFIED.
 
 ## Sprint 89.4: Host compute daemon lifecycle as a managed subprocess ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/HostWorker/Lifecycle.hs`,
-`src/Amoebius/HostWorker/Supervise.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the worker runs as a subprocess of the host binary with a defined Load
-→ Prereq → Acquire → Ready → Serve → Drain → Exit lifecycle; a `Drain` runs **even if serving throws**; a
-missing prerequisite fails fast before `Serve`; killing the host binary tears the worker down with it (no
-unmanaged orphan process).
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`substrate_doctrine.md §5 — host worker nodes: substrate-specific hardware that refuses to be contained`](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized):
 run the Apple-Metal worker as a **managed subprocess of the host binary** — the one place amoebius compute
 lives outside a cluster pod — with the stateless-role lifecycle and a guaranteed drain, so the worker has a
 defined startup and a clean shutdown rather than an unmanaged background process.
 
 ### Deliverables
+
 - A supervised host-worker lifecycle implementing Load → Prereq → Acquire → Ready → Serve → Drain → Exit, with
   the drain guaranteed via bracket-style resource handling even when `Serve` raises.
 - `Acquire` consumes only the opaque host placement/cache witness produced by the physical-host fold and applies
@@ -679,6 +557,7 @@ defined startup and a clean shutdown rather than an unmanaged background process
   drains and reaps the worker; no orphaned process survives.
 
 ### Validation
+
 1. Start the worker, force `Serve` to throw, and assert `Drain` still runs and resources are released.
 2. Remove a prerequisite and assert a fast, pre-`Serve` failure with an actionable message.
 3. Kill the host binary mid-`Serve` and assert the worker subprocess is drained and gone.
@@ -698,24 +577,15 @@ defined startup and a clean shutdown rather than an unmanaged background process
    artifacts only by a new CAS.
 
 ### Remaining Work
+
 The lifecycle and finite policy are tested; macOS process/Metal observers and crash-repair CAS remain UNVERIFIED.
 
 ## Sprint 89.5: Channel-2 peer + wild-exposure unrepresentable + the Apple-Metal peer gate ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/HostWorker/Peer.hs`,
-`src/Amoebius/HostWorker/Auth.hs`, `src/Amoebius/HostComms/Illegal.hs`, `test/spec/live/AppleMetalPeerSpec.hs`
-(the authored harness and scoped evidence reader)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the worker consumes its work topic over the native Pulsar protocol and writes
-through the Phase-69 mutation gateway on `127.0.0.1:<nodeport>` with no mTLS and no bespoke RPC, its Vault
-credentials resolved by name; each of the four one-field wild-exposure negatives fails `dhall type` at its
-pinned error. The `### Validation` list below states each check and its fixtures.
-**Docs to update**:
-`documents/engineering/host_cluster_comms_doctrine.md`, `DEVELOPMENT_PLAN/README.md`,
-`DEVELOPMENT_PLAN/substrates.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`host_cluster_comms_doctrine.md §3 — coordination is Pulsar + MinIO`](../documents/engineering/host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)
 with the resolution of [`§2`](../documents/engineering/host_cluster_comms_doctrine.md#2-the-decision-that-was-open-and-is-now-resolved),
 the threat model of [`§5 — why no mTLS is safe here`](../documents/engineering/host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary),
@@ -726,6 +596,7 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
 — an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/gateway-backed-content-store peer.
 
 ### Deliverables
+
 - A channel-2 peer that consumes its work topic via the shared native-protocol Pulsar client (at-least-once +
   dedup preserved; broker ids/timestamps are never part of any content address) and writes results to
   `blobs/<sha256>` + a content-addressed manifest through the sole mutation gateway into MinIO — the same coordination shape an
@@ -736,9 +607,9 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
   wild ingress — its only inbound coordination is Pulsar plus the provisioned content endpoint. Raw MinIO
   mutation authority is unrepresentable; an optional raw-GET Service is a distinct read-only arm.
 - The gate `.dhall` (`test/fixture/dhall/phase_75_apple_metal_peer.dhall`) is a **generated artifact emitted from Haskell at gate-run time and never committed** — its byte-authority is the authored Haskell emitter in
-  `src/Amoebius/HostWorker/Peer.hs` / `HostComms/Illegal.hs`, per development_plan_standards [§B](development_plan_standards.md#b-canonical-file-layout-snake_case) (Implementation names authored source, never a generated artifact). The committed byte-authority for the type-check negatives is
-  instead the green host-comms spec and the four one-field-mutant illegal fixtures under
-  `test/fixture/dhall/phase_75_illegal/` (authored, committed in this phase's oracle-pinning sprint). The gate `.dhall`, once emitted, drives:
+  `src/Amoebius/HostWorker/Peer.hs` / `HostComms/Illegal.hs`, per development_plan_standards [§B](development_plan_standards.md#b-canonical-file-layout-snake_case) (Implementation names authored source, never a generated artifact). The authority for the type-check negatives is
+  instead a separately authored Haskell host-comms oracle plus four Haskell one-field mutation operators; all
+  serialized illegal cases are emitted beneath `.build/test-corpora/**`. The gate `.dhall`, once emitted, drives:
   derive and verify the complete physical-host → Lima-VM/node + host-worker + cache provision witness —
   including the private presentation/allocation-rounded `ProvisionedVmDiskCarve` and its once-charged sparse
   high-water; bring up the apple cluster on Lima; expose the content-mutation gateway and Pulsar on the
@@ -755,6 +626,7 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
   contract. Native clients are charged to the worker and the NodePort introduces no imaginary Pod.
 
 ### Validation
+
 1. Each of the four committed wild-exposure negatives in `test/fixture/dhall/phase_75_illegal/` (NodePort as
    `LoadBalancer`; Envoy/HTTPRoute route on the port; wild listener on the port; daemon wild ingress) — each a
    one-field mutation of the committed green host-comms spec, differing only in the foreclosed field — fails
@@ -791,12 +663,14 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
    control live-readbacks equal the private provision projection.
 
 ### Remaining Work
+
 Remove the tracked expected outputs and old replay mutant as part of Sprint 89.3. The pure peer/auth and
 illegal-state boundaries are tested; the physical Apple Pulsar/gateway/MinIO/Vault workflow remains UNVERIFIED.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/host_cluster_comms_doctrine.md` — its §9 planning-ownership pointer resolves to
   delivered Phase-89 sprints, and the §2/§5/§6 honesty notes flip from "resolved design decision / sibling
   evidence" to a delivered, apple-tested channel-2 peer (status recorded here in the plan, never as doctrine
@@ -807,13 +681,14 @@ illegal-state boundaries are tested; the physical Apple Pulsar/gateway/MinIO/Vau
 - `documents/engineering/substrate_doctrine.md` — its §9 planning-ownership pointer resolves to delivered
   Phase-89 sprints; the §4.3 "no macOS build VM" note and the §5 host-worker description gain their first
   amoebius datapoint on apple; record that the Lima provider, the headless on-host Metal-bridge build, and the
-  brew lazy-tool-ensure were exercised by full-path subprocess with no env/`PATH`; record the live
+  Haskell-owned brew lazy-tool-ensure were exercised by full-path subprocess with no env/`PATH`; record the live
   raw-virtual/usable/fs-type/sparse-high-water observations for the materialized VM disk.
 - `documents/engineering/resource_capacity_doctrine.md` — record the Phase-89 live check for private
   `ProvisionedVmDiskCarve` derivation, minimum/quantum boundaries, and the once-only sparse physical-disk
   high-water debit without changing the canonical type or arithmetic owned there.
 
 **Cross-references to add:**
+
 - [README.md](README.md) — flip the Phase-89 row status once the gate passes and link this document.
 - [substrates.md](substrates.md) — record Phase 89's gate substrate (apple) in the per-phase substrate map, and
   note the windows-CUDA host worker as the structurally identical non-gate case.
@@ -823,6 +698,7 @@ illegal-state boundaries are tested; the physical Apple Pulsar/gateway/MinIO/Vau
   as Phase-89 design-first rows.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker; the Phase 89 row is the authoritative one-line gate and status
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the Register-3 honesty token: a passed gate is a live-substrate result, never a compile claim)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (the host-only NodePort carve-out, host worker nodes, the stateless `replicas=1` control-plane daemon, and jit-resolved engine payloads)
@@ -832,7 +708,8 @@ illegal-state boundaries are tested; the physical Apple Pulsar/gateway/MinIO/Vau
 - [Apple Metal Headless Builds](../documents/engineering/apple_metal_headless_builds.md) — the headless,
   on-host, no-Tart fixed-Metal-bridge build/run shape this phase implements
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the apple host worker, the Lima
-  provider, the no-env/no-`PATH` tool-ensure, and the `pb` bootstrap coordinator contract this phase implements
+  provider and the Haskell no-env/no-`PATH` tool-ensure; the earlier `pb` pre-binary handoff is a dependency,
+  not a Phase-89 implementation surface
 - [Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) — the native-protocol CBOR
   client the peer rides on (cross-reference, not adopted here)
 - [Vault / PKI Doctrine](../documents/engineering/vault_pki_doctrine.md) — the secrets-by-name client auth the

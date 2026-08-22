@@ -18,7 +18,7 @@ knowledge of amoebius; every term it uses about amoebius itself is routed throug
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -42,8 +42,8 @@ knowledge of amoebius; every term it uses about amoebius itself is routed throug
 - [16. The illegal-state catalogue is a covering, not a list](#16-the-illegal-state-catalogue-is-a-covering-not-a-list)
 - [Related Documents](#related-documents)
 
-The conventions adapt those proven in the sibling `prodbox` project. The Phase 0 documentation suite, and all
-later doctrine, conforms to them.
+The conventions draw on the sibling `prodbox` project. The Phase 0 documentation suite and all later doctrine
+must conform to them; this sentence is a requirement, not validation evidence.
 
 ---
 
@@ -58,6 +58,40 @@ it. SSoT ownership, bidirectional links, and non-duplication are mandatory for a
 status, and remaining work. Each phase document owns its human-authored validation contract. Documents under
 `documents/` explain architecture, doctrine, and verification boundaries and link back to the plan rather
 than maintaining competing status ledgers.
+
+### Repository-source authority
+
+[`engineering/repository_layout_doctrine.md`](./engineering/repository_layout_doctrine.md) is the single
+source of truth for what may be version-controlled. Any document that mentions implementation, test, gate,
+generator, fixture, oracle, mutant, or generated source must classify it unambiguously as one of:
+
+- version-controlled Haskell (`.hs`) behavioral source;
+- the bounded `pb/**` Python bootstrap exception, which may only make the minimum platform distinction needed
+  to establish the pinned toolchain, build the source-bound binary, and `exec` Haskell with every user
+  argument unchanged; Haskell owns host-floor policy, help, version, validation, and every public command;
+- governed non-source input such as Markdown or minimal build/repository metadata;
+- external or local-untracked operator input; or
+- a lazy Haskell-generated materialization beneath `.build/**`.
+
+An external-language value must never be called merely "authored" when that wording could imply it is
+tracked. Name it **external/untracked** or **generated beneath `.build/**`**. A serialized fixture, oracle,
+expected output, or mutant is a transport artifact rather than an independently maintained source of truth;
+the semantic expectation and mutation intent are separately reviewed Haskell.
+
+### Markdown is never a behavioral input
+
+Governed Markdown is a reader-facing normative explanation, not an executable policy language. Automated
+documentation checks may parse only closed structural facts: governed path inventory, orientation metadata,
+headings, links, anchors, backlinks, exact status syntax, numerical dependencies, and fixed gate-table shape.
+They must not derive a product choice, source classification, provider selection, semantic expectation,
+coverage verdict, generator input, legacy closure, or validation result from prose, a table cell, or keyword
+occurrence.
+
+Cross-cutting executable decisions live in a reviewed Haskell `PolicyContract`; subsystem decisions live in
+their named reviewed Haskell declarations and independently authored Haskell oracles. A human reviewer owns
+the correspondence between those values and their prose explanation. A keyword-only prose decoy must never
+change a behavioral verdict, and any machine-oriented table projection is generated lazily beneath
+`.build/docs/**`.
 
 ### DRY + link liberally
 Never copy-paste between documents. Use relative links with section anchors; prefer deep links
@@ -104,6 +138,11 @@ and the one prerequisite.
 
 </details>
 ```
+
+`CLAUDE.md` is the sole mechanical-routing exception: it contains exactly `@AGENTS.md` (plus a final
+newline) so the consumer imports the canonical agent policy instead of copying it. It is still required in
+the governed corpus, and the documentation checker verifies that exact import, but it has no independent
+orientation or link-graph metadata. `AGENTS.md` itself follows the complete header contract above.
 
 The four fields stay at column zero and within the document's first forty lines, which is what
 [§11](#11-the-orientation-block) explains and what the documentation lint reads.
@@ -201,13 +240,19 @@ about existing code or a prior run is permitted only when it is labelled **Obser
 **Historical result (invalidated)** and links to the dated progress audit in
 [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md). File presence establishes only an observed
 footprint. A historical pass remains diagnostic after reopening and cannot be phrased as current validation.
+Historical text is permanently invalidated: it must not contain a condition such as “unless the phase is
+Done” that could reactivate it. Doctrine never records a current pass, seal, attestation, completion hash,
+green count, or validation ledger. Those belong to retrievable run evidence and the human-controlled plan
+status projection.
 Every discovered mismatch between doctrine, plan, tests, and code is recorded in
 [`legacy_tracking_for_deletion.md`](../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) under the
 reconciliation policy in
 [`development_plan_standards.md` §T](../DEVELOPMENT_PLAN/development_plan_standards.md#t-plan-to-implementation-reconciliation).
 
-**A claim of unrepresentability cites the fixture that proves it.** A document may state *in the indicative*
-that some illegal state has no inhabitant only where it names the compile-fail fixture establishing that.
+**A claim of unrepresentability cites the Haskell declaration that proves it.** A document may state *in the
+indicative* that some illegal state has no inhabitant only where it names the separately reviewed `.hs`
+fixture/oracle declaration that generates and checks the compile-fail case; any serialized compiler input or
+expected diagnostic is a lazy `.build/**` product, not a tracked fixture.
 Without one the sentence records an intention rather than a result: the type may have admitted the state from
 the day it was written, and nothing in the corpus would have said so. This is the type-level twin of the rule
 above, because an unproven foreclosure claim is precisely the argued result reported as proven that this
@@ -220,6 +265,11 @@ is specified to admit no *X*; the compile-fail fixture is owed by Phase *N*". Th
 everywhere the indicative is not. What remains forbidden in every mood is the unqualified present tense — "*X*
 does not compile", "there is no back door" — about machinery no gate has run against, because a reader cannot
 tell it from a result.
+
+Only the human user may promote a phase or sprint to Done or Validated. Documentation authored by an LLM may
+describe a target contract, candidate evidence, or an observed footprint, but it cannot turn any of them into
+validation status. The development-plan standards own the promotion procedure; this rule prevents doctrine
+prose from bypassing it.
 
 ---
 
@@ -654,22 +704,25 @@ illegal set extensionally, by being itself, so the claim reduces to the list agr
 
 **The rule.** The catalogue is a **covering over a declared taxonomy**.
 
-1. **The taxonomy is declared** in `illegal_state/README.md` as a product of named axes, each a closed set —
+1. **The taxonomy is specified** in `illegal_state/README.md` as a product of named axes, each a closed set —
    the foreclosure layer, the validation locus, and whichever structural axes the doctrine owning them fixes.
-   The product of the axes is the cell set.
+   The product of the axes is the cell set. The executable representation is a separately reviewed Haskell
+   declaration; no checker or generator may parse Markdown into a behavioral value.
 2. **Every cell is occupied, inadmissible, or justified.** A cell holds at least one catalogue entry, is
    ruled out by a declared relation between two axes, or carries a one-line statement of why no illegal state
    lives there. **An unjustified empty cell is a defect**, reported like any other. The middle state exists
    because axes that classify different questions need not have an inhabited product: where the emptiness of a
    whole row or column follows from what the axes *mean*, the relation is declared once beside them rather
    than restated per cell.
-3. **An entry declares which cells it occupies.** A cell is a tuple of axis members, so an entry that names
+3. **An entry specifies which cells it occupies.** A cell is a tuple of axis members, so an entry that names
    several members of one axis and several of another does not thereby claim their product — and a generator
-   that credits it with one measures nothing. The entry pairs them, and the covering counts what it paired.
-4. **The grid is generated; the entries, the relation, and the justifications are authored.** The cell set
+   that credits it with one measures nothing. Reader-facing doctrine states the pairing; the generator consumes
+   only the corresponding Haskell declaration, checked against a separately authored Haskell expectation.
+4. **The grid is generated; the semantic inputs and expectations are Haskell.** The cell set
    follows from the axes, so widening an axis reports its own new empty cells rather than waiting to be
-   noticed. The three authored inputs stay human-authored, because each is an independent expectation and
-   deriving one from the thing it checks would turn a test into a description
+   noticed. Taxonomy, pairings, relations, and justifications are reviewed Haskell values, and the oracle is
+   separately authored rather than derived from the subject; deriving one from the thing it checks would turn
+   a test into a description
    ([§6](#6-honesty-the-proventestedassumed-discipline)). Generated views go to `.build/docs/` under
    [`development_plan_standards.md` §I](../DEVELOPMENT_PLAN/development_plan_standards.md#i-generated-documentation-remains-untracked).
 5. **The residue is stated, never implied.** A complete covering proves exhaustiveness *relative to the

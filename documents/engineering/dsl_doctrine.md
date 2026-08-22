@@ -17,12 +17,10 @@ into, owned by [manifest_generation_doctrine.md](./manifest_generation_doctrine.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
-
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
@@ -72,11 +70,6 @@ Phase order and status live only in [../../DEVELOPMENT_PLAN/README.md](../../DEV
 
 ## 2. Two languages, one system: Dhall carries params, Haskell carries logic
 
-> **Validated boundary (Phase 34, Registers 1/2).** The opaque counted `Step`, whole-deployment `chain`, pure
-> descent, canonical plan renderer, absolute-path tool seam, and extension-astcheck checked-source seal pass under
-> `tools/chain_boundary_gate.py` (2026-08-21 attestation `sha256:c7da6c817733030e…`; 29 exact metrics, seven red
-> mutants, and 45 surfaces joined to 58 items). Live apply and checked-source runtime behavior remain UNVERIFIED.
-
 The amoebius DSL is not a scripting language, and it does not contain the deployment logic. Templating
 puts the *how* in the config — loops, conditionals, string-built commands — placing untyped control flow
 in configuration that the type-checker cannot inspect. amoebius excludes that, per the recorded operator
@@ -97,25 +90,26 @@ dhall"*. It gets there by a hard split between two languages:
   frame relation *total*, which the reference's fallback arm is not
   ([`lift_and_compose_doctrine.md` §5](./lift_and_compose_doctrine.md#5-the-re-derivation-map)).
 
-**The schema is generated; the value is authored.** The split above says Dhall carries the data, and it leaves
+**The schema is generated; the value is external.** The split above says Dhall carries the data, and it leaves
 open where the *type* of that data comes from. It is reflected from the Haskell checked-IR types rather than
 authored beside them: the schema, the prelude of smart constructors, and the examples are all rendered from the
 same types the decoder is written against, so the two cannot disagree and there is no parity report because
 there is no second statement to compare
 ([`generated_artifacts_doctrine.md` §2](./generated_artifacts_doctrine.md#2-what-is-generated-and-from-what),
-[`jit_artifact_doctrine.md`](./jit_artifact_doctrine.md)). What stays authored is an operator's `InForceSpec`
-and an application's `UiSource` — values, not types, and neither is a rendering of anything amoebius holds.
+[`jit_artifact_doctrine.md`](./jit_artifact_doctrine.md)). An operator's `InForceSpec` and an application's
+`UiSource` are external or untracked inputs. Repository tests construct Haskell values and render temporary
+Dhall beneath `.build/**`; no `.dhall` source or fixture is version-controlled.
 
 The UI surface is the bounded refinement of this rule. A normalized `UiSource` is a finite declarative program
 **description as data**: it contains no executable callback or effect implementation. gadt-decode checks that value
-into `CheckedUiProgram`; Haskell binds its effects and owns server semantics; the generic PureScript runtime
-interprets the sealed client projection. The complete boundary is owned by
+into `CheckedUiProgram`; Haskell binds its effects and owns server semantics. Haskell client-runtime
+declarations lazily generate the PureScript interpreter that consumes the sealed client projection. The
+complete boundary is owned by
 [low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans).
 
-[Phase 37](../../DEVELOPMENT_PLAN/phase_37_ui_program_schema.md) builds this specialization: authored Dhall
-decodes into the closed UI wire, and the total Haskell checker alone can construct `CheckedUiProgram`. Its
-semantic oracle constrains tenant/module/node/link meaning rather than copying normalized bytes. The gate does
-not claim browser, handler, authorization, or provider enforcement.
+The owning phase must validate this specialization without a tracked Dhall corpus: Haskell fixtures render
+the closed UI wire beneath `.build/**`, and a separately reviewed Haskell oracle constrains
+tenant/module/node/link meaning rather than copying normalized bytes.
 
 That split is load-bearing in three ways:
 
@@ -211,14 +205,13 @@ The point of separating these three is that the orchestration surface is **self-
 confirm the binary is actually standing where the context claims. All three are typed Dhall, none is a secret
 ([§6](#6-secrets-are-names-never-values)), and none is logic ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
 
-Phase 55 is the first amoebius implementation to carry the host-side slice of this shape: its `BinaryContext`
-combines bootstrap parameters, the physical-host context, and locally observed file/socket/resource witnesses
-before kind creation. The Step/Chain kernel beneath it was delivered pre-cluster. The complete pristine-Incus
-`linux-cpu` gate exercises this context, exact process/storage enforcement, the observed-inventory
-cross-check, idempotence, repair, mutation oracles, and teardown. Every detected hardware substrate always
-supplies that lane: Linux natively or through Incus, Apple through Lima, and Windows through WSL2 when a
-pristine Linux host is required. The full typed-Dhall
-`FrameConfig`/`InForceSpec` surface described here remains assigned to later phases.
+The host-side slice of this shape combines bootstrap parameters, the physical-host context, and locally
+observed file/socket/resource witnesses before cluster creation. Its first acceptance barrier is
+hardware-free: Haskell construction, decoding, witness semantics, source-boundary checks, and independent
+Haskell expectations. A later pristine-guest gate may exercise process/storage enforcement, inventory
+cross-checks, idempotence, repair, negative controls, and teardown on exactly one natural lane. That later
+gate cannot substitute for or precede the language barrier. Phase ownership and current delivery state live
+only in the development plan.
 
 The uploaded value is also a storage producer; “it lives in MinIO” is not a capacity exemption. After
 resolve/freeze/typecheck/decode, the binder derives its canonical serialized byte identity as the
@@ -232,30 +225,27 @@ persist the candidate or advance the pointer. A one-byte-short backing, omitted 
 capacity, or changed live snapshot yields zero object writes. There is no open “other control-plane bytes”
 constructor.
 
-**How the minted context reaches each frame.** The child `amoebius.dhall`/`FrameConfig` of the Context
-bullet is not written to a host file and bind-mounted in; it is **delivered in place, on the lift's `stdin` channel**. At each frame
-handoff the parent streams the *narrowed child projection* into the descending self-invocation, whose
-entrypoint writes it to that frame's own sibling `amoebius.dhall` and then `exec`s the binary —
-hostbootstrap's
-`ConfigDelivery` (`{ cdWritePath, cdExecPath, cdPayload }`) carried by `liftStdin` through the recursive
-`runChainFromFrame`
-(`hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Lift.hs`,
-`.../Chain.hs`); the container handoff keeps stdin open and overrides the entrypoint to
-`sh -c "cat > <sibling>.dhall && exec <binary>"`. Two invariants fall out, and [§5](#5-the-illegal-state-unrepresentable-contract) leans on both:
+**How the minted context reaches each frame.** The child `FrameConfig` is **delivered in place on the lift's
+`stdin` channel**. At each frame handoff the parent streams the narrowed child projection into the descending
+Haskell self-invocation. That invocation writes the generated Dhall value to its contained
+`.build/dhall/frames/<frame-id>/amoebius.dhall` staging path and continues in the same Haskell runtime. No tracked or
+embedded shell program performs the handoff. The `hostbootstrap` `ConfigDelivery`/`liftStdin` pattern is seed
+evidence for this shape, not a source dependency or an amoebius validation result. Two invariants follow, and
+[§5](#5-the-illegal-state-unrepresentable-contract) leans on both:
 
 - **Only the projection crosses.** The narrowed child config travels on `stdin` alone — never in `argv`,
   never as a bind-mount, and never as a host-side file at rest. The parent's *full* config never crosses the
   boundary, only the child's own frame projection.
-- **The parent mints; the child never rewrites.** A frame receives its `amoebius.dhall` read-only at entry
+- **The parent mints; the child never rewrites.** A frame receives its generated `amoebius.dhall` read-only at entry
   and has
   no verb that edits its own config — minting is exclusively a parent act (the `context-init` step, one frame
   up). This is the doctrine answer to the standing question *"can a host binary's `amoebius.dhall` ever change? only
   the parent should do that"*: a frame cannot rewrite its own config; only its parent mints it.
 
-The one exception is the terminal **in-cluster pod** frame, whose config is delivered as a rendered
-`ConfigMap` mount ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)) rather than on
-`stdin`; the `stdin` mechanism covers the VM/container bootstrap-lift frames. Like the rest of [§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)–[§3](#3-the-orchestration-surface-parameters-context-witness), this
-delivery is **proven in hostbootstrap and inherited as evidence** — not an amoebius-built result
+The terminal **in-cluster pod** frame receives the same generated value through a rendered `ConfigMap` mount
+([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)) rather than direct `stdin`; the
+`stdin` mechanism covers VM/container bootstrap-lift frames. Seed behavior motivates the design but
+establishes no amoebius implementation or validation claim
 ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
@@ -274,20 +264,19 @@ at decode time — so an unrestricted uploaded `InForceSpec` would make gadt-dec
 ([§5](#5-the-illegal-state-unrepresentable-contract)) an effectful surface, colliding with the no-env-vars /
 no-`PATH` invariant ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic), owned by [substrate_doctrine.md](./substrate_doctrine.md)) and the no-arbitrary-URL invariant
 ([illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
-amoebius therefore **forbids** `env:` and remote (`http(s):`) imports in any authored or uploaded spec, and
+amoebius therefore **forbids** `env:` and remote (`http(s):`) imports in any external or uploaded spec, and
 **resolves-and-freezes** every spec to a fully-local, semantic-integrity-hashed (Dhall `sha256:…`) expression
 at `dhall update` upload time, before decode. The effect-free/total claim of
 [§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) holds for this *resolved, frozen*
-expression — never for arbitrary unresolved Dhall — and the policy is enforced at the Phase-25/12 gate
-([§5](#5-the-illegal-state-unrepresentable-contract)).
+expression — never for arbitrary unresolved Dhall — and the hardware-free language gate must enforce the
+policy before any live phase may consume the value.
 
 Total composability runs along four concrete axes, each owned in detail by a sibling doc:
 
-- **App-in-cluster.** An app is *"a container … and a `.dhall` for that app"*.
-  The app spec — its LB services, Keycloak-backed auth rules, durable storage (MinIO buckets, block
-  storage, Postgres), and Pulsar topic lifecycles — is a typed fragment that nests inside the cluster
-  spec. The generic reusable app chart is populated *from* that fragment, so an operator never writes Helm
-  values by hand.
+- **App-in-cluster.** An app value is an external, untracked typed fragment nested inside the cluster value.
+  It carries its LB services, Keycloak-backed auth rules, durable storage (MinIO buckets, block storage,
+  Postgres), and Pulsar topic lifecycles. Haskell consumes that value and lazily renders required artifacts;
+  there is no per-app tracked external-language source tree, bespoke image, chart, or handwritten Helm values.
 - **Two surfaces per app: logic vs rules.** A locked invariant: **application logic and deployment rules are separate DSL surfaces** (DEVELOPMENT_PLAN cross-cutting invariants). The app
   is written once; HA replica count, chaos testing, geo-replication, and failover are an *orthogonal*
   deployment-rules surface that composes over it. That split is owned by
@@ -302,8 +291,8 @@ Total composability runs along four concrete axes, each owned in detail by a sib
   presents those workflows through bounded `UiSource` modules and typed port requirements, composed by the
   total module graph owned by
   [low_code_ui_runtime_doctrine.md §6](./low_code_ui_runtime_doctrine.md#6-modules-and-total-composition).
-  The siblings' handwritten demo shells are UX evidence and migration fixtures, not amoebius's application
-  architecture.
+  The siblings' handwritten demo shells are external UX observations only; they are never imported or
+  tracked as amoebius application source, fixtures, or oracles.
 - **Child-cluster-in-parent.** The name *amoebius* is the recursion: a cluster spawns children, which
   spawn their own. A child receives only its own scoped `InForceSpec` — *"including
   their childrens'"* but nothing about siblings — and the whole tree is rolled out from the root. The
@@ -311,7 +300,7 @@ Total composability runs along four concrete axes, each owned in detail by a sib
   [vault_pki_doctrine.md](./vault_pki_doctrine.md) and the cluster-lifecycle doctrine; here the point is
   that an entire child cluster spec is itself a composable fragment of the parent's.
 
-A fifth axis is the **test topology**: a test is a Dhall-authored `InForceSpec` that spins up resources,
+A fifth axis is the **test topology**: a Haskell test declaration lazily renders an `InForceSpec` that spins up resources,
 runs a workflow, and tears down resources — the same composition, with a teardown
 obligation. The testing surface is owned by the testing doctrine; it is named here only as proof that even
 *testing* is expressed in the one composable DSL rather than a parallel harness language.
@@ -412,7 +401,8 @@ must hold apart — and, per [§1](#1-why-this-doctrine-exists), *carries but do
   operator-supplied address. The **identity** is fixed the moment the spec type-checks; the **payload** is not
   baked into the image — it is jit-resolved on first miss into the `CacheBudget`-bounded per-node cache
   ([`content_addressing_determinism.md` §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
-  which is the deliberate exception to the bake-every-third-party-binary rule
+  which is the separate non-service exception to the bake-every-non-Registry-service-binary rule. The service
+  exception is the separately pinned and preloaded Distribution `registry:2` image
   ([`image_build_doctrine.md`](./image_build_doctrine.md)). What this surface forecloses is the *arbitrary
   address*, not the deferred materialization.
 - **`ModelArtifact`** — a by-name / content-address **reference** into the content store. Its `ArtifactRef`
@@ -500,15 +490,10 @@ authoring time, in the operator's editor, in `dhall type`, in CI. A union with n
 ingress" gives the author no syntax to request insecure ingress; a record that requires a PV reference for
 every PVC gives no way to omit it. The schema is the boundary, and the boundary is mechanical.
 
-**amoebius validation status.** Phase 25 supplies this dhall-typecheck boundary as eighteen authored Dhall
-modules, four wired positive surfaces, eight catalog negatives, three image/process negatives, one
-secret-policy negative, two import-policy negatives, and independent closed-union/required-field/nested-type
-oracles with seeded mutations. Its 2026-08-21 Register-1 gate records twenty exact metrics. It also consumes
-the Phase-24 generator for one bounded `dhall-schema` declaration: all nineteen derived L/C/compile/S
-obligations match an independently authored projection, all remain explicitly `UNVERIFIED`, and the test
-must receive `CasesFailed 19` rather than a conformance verdict. This establishes the recorded structural
-spec-composition claims only. gadt-decode is separately validated below; extension-law semantics,
-bind/provision arithmetic, and live runtime enforcement remain **UNVERIFIED** here.
+The dhall-typecheck gate must generate every positive and negative Dhall value from Haskell into `.build/**`.
+Its oracle is an independently reviewed Haskell classification of the required closed unions, fields, nested
+types, and diagnostics. Missing generated cases, a no-op typecheck, or a retained tracked `.dhall` copy must
+make the gate fail.
 
 ### gadt-decode — the Haskell typed decoder
 
@@ -527,20 +512,10 @@ things happen here:
   can reject constructible values. gadt-decode produces only decoded, unprovisioned declarations. It does not
   decide whole-deployment placement, storage peaks, live target compatibility, or inventory sufficiency.
 
-**amoebius validation status.** Phase 26 implements the `dsl-core` library and fail-closed decoder. Its
-bounded Register-1 `gadt-decode-spec` gate decodes five independently semantic-hash-pinned positive surfaces
-while retaining 5,527 normalized structural rows; four named gadt-decode classes reach distinct constructors
-after a dhall-typecheck-green precondition; and tenant/state/owner compile pairs reject at their pinned
-indices. The five decoded positives also enter an independently authored Phase-10 calculus projection in
-artifact/budget/lift/workflow/evidence order without changing the retained-row total. The decoder rejects
-direct and nested environment/remote imports, catches thrown failures, and deeply forces the accepted IR.
-The shared `dsl-spec` remains the later umbrella and is not Phase-26 evidence. Phase 27 then exhausts the
-reached catalog seam through its own bounded suite: all 97 entries reconcile to 121 subcases; 43 reached
-Dhall/GADT rows discharge through 17 typecheck negatives, 13 decode negatives, five local compiler pairs,
-and seven explicit Phase-8/9 predecessor joins. Four coverage-checked properties pass, all three finite
-`Rke2Servers` arms are exhausted, and the actual five-calculus corpus/ledger projection matches its authored
-oracle. The remaining 78 subcases are deferred to their exact owners. Capacity feasibility, binding/provisioning, rendered
-outputs, and runtime enforcement remain UNVERIFIED.
+The gadt-decode gate must exercise the production decoder against separately reviewed Haskell positives,
+negative classifications, and compile-fail pairs. It must prove that each negative reaches the intended
+constructor after a valid generated Dhall precondition, and that no normalized byte snapshot or legacy
+Python gate decides the result.
 
 ### extension-astcheck — the extension AST checker
 
@@ -600,10 +575,11 @@ InfrastructurePlanningResult` derives the whole demand from that value and the d
 opaque forest-member budget; it never accepts a second caller-authored demand vector. The result is a closed
 choice:
 
-The [Phase-30 gate](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) validates the first sentence: all nine
-closed needs pass the total binder under both shapes, the product/URL/shape authoring escapes fail dhall-typecheck, and
-unbuilt/unbound/cyclic/shadowing values fail gadt-decode. It does not validate the infrastructure or provision
-steps described below.
+The eventual [Phase-30 gate](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) must establish the first
+sentence with independently authored Haskell controls: every closed need must pass the total binder under both
+shapes, while product/URL/shape authoring escapes and unbuilt, unbound, cyclic, or shadowed values must fail at
+their named Haskell boundary. Phase 30 is **NOT VALIDATED** and cannot establish the infrastructure or
+provision steps described below.
 
 - `NoInfrastructureRequired` supplies the witness for an explicit
   `ObservedInfrastructureMaterialization.AlreadyMaterialized` state and proves that no initial provider or
@@ -633,7 +609,7 @@ claim.
 ```mermaid
 flowchart TD
 %% register: algebra
-  author["Operator authors typed InForceSpec"]:::intent
+  author["External operator InForceSpec input"]:::intent
   g1{{"dhall-typecheck: Dhall typecheck, total and pure"}}:::gate
   typed["Well-typed Dhall value"]:::provenPB
   g2{{"gadt-decode: Haskell GADT decode, fail-fast"}}:::gate
@@ -658,7 +634,7 @@ flowchart TD
   prov -->|"remaining incompatible demand"| rej3
   prov -->|"success"| sealed
   sealed --> render
-  render -->|"Phase 65 live apply/readback"| live
+  render -->|"later live apply/readback"| live
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef provenPB fill:#dbeafe,stroke:#1e5fa8,color:#0b2f57,stroke-width:2px
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
@@ -669,19 +645,18 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Delivered boundary. Phases 11–21 validate the Tier-1 Dhall/decode/bind/provision/render path in amoebius; Phase 65 validates its Tier-2 live apply/readback through the control-plane daemon. Provider and cross-cluster arms remain owned by their later phases.*
+**Where the contract must be discharged.** The first tier is hardware-free: Dhall typechecking over a
+Haskell-rendered schema, Haskell decoding and binding, pure infrastructure-plan construction, modeled
+materialization, whole-deployment provisioning, and the opaque `ProvisionedSpec -> renderAll` boundary. Its
+expectations and negative controls are independently reviewed Haskell, and its generated Dhall/manifests live
+only beneath `.build/**`. This tier must be accepted before any container, cluster, provider, browser, or
+accelerator replay begins.
 
-**Where the contract shape is discharged: front-loaded to Phases 11–20 (Tier 1).** dhall-typecheck is
-`dhall type` at authoring time; gadt-decode is the in-process `Dhall.inputFile auto` decode and its focused
-properties (Phases 11–16); Phase 30 owns binding, pure infrastructure-plan construction, modeled/fixture
-materialization validation, and the opaque provision seal; Phase 33 proves the sole public `renderAll`
-boundary and its goldens. These contract/golden checks are pure or in-process and need no cluster. Live CAS
-enaction and provider/host readback of an `InfrastructureRequired` plan are exercised only by the later live
-infrastructure phases; they are not silently claimed by the Phase-30 type gate. Phase 65 now discharges the
-**Tier-2 runtime-enforcement residue** for its pinned linux-cpu platform-plus-trivial-app fixture: the running
-cluster enforces what the sealed spec composes, with exact audit-attributed enact and no-op evidence. A green
-typecheck or decode alone still proves neither target feasibility nor live enforcement for later provider,
-tenant, or cross-cluster surfaces.
+Live compare-and-swap enactment and provider/host readback form a later runtime-enforcement tier. They can
+show that a particular admitted plan was enacted on the observed target; they cannot retroactively validate
+the parser, decoder, generator, or expectation that produced it. Conversely, a green typecheck or decode
+proves neither target feasibility nor live enforcement for provider, tenant, or cross-cluster surfaces. Phase
+ownership and current status live only in the development plan.
 
 ### Recursion: a child's spec is a typed subtree projection
 
@@ -718,9 +693,9 @@ its building phase, not yet built.
 > plus provision-seal mechanism; it does **not** claim every illegal state is excluded by type inhabitance —
 > each catalog entry states whether its foreclosure is type-, decode-, provision-, or runtime-checked. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
-> tested or proven result: the pure contract is front-loaded to the pre-cluster gates, Phases 11–20 (Tier 1), while
-> runtime enforcement — that the running cluster enforces what the spec composed — stays the Tier-2 residue
-> deferred to Phase 64.
+> tested or proven result. The pure contract belongs to the hardware-free promotion barrier. Runtime
+> enforcement — that one running target enforces what the spec composed — is later, scoped evidence and may
+> neither precede nor stand in for that barrier.
 
 ---
 
@@ -764,7 +739,7 @@ the *helm* part — the DSL compiles to **typed Kubernetes manifests**, rendered
 typed reconciler with no Helm and no third-party charts
 ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)). An operator does not get to choose
 *which products* realize the platform — whether object storage is MinIO, whether the registry is
-`distribution`, whether Postgres is Patroni-backed, or whether ingress flows through Keycloak: those are the
+Distribution `registry:2`, whether Postgres is Patroni-backed, or whether ingress flows through Keycloak: those are the
 canonical providers behind the **capabilities** owned by
 [service_capability_doctrine.md](./service_capability_doctrine.md), over the fixed standard service set owned
 by [platform_services_doctrine.md](./platform_services_doctrine.md). The DSL *parameterizes a fixed shape*;
@@ -821,13 +796,12 @@ Haskell carries the logic, and extension-astcheck bounds what that Haskell may r
 
 ## 9. Toolchain note
 
-amoebius decodes Dhall in-process under a dynamically resolved compatible GHC and library graph. Authored
-project policy records required APIs and compatibility constraints, while the Phase-1 resolver records the
+amoebius decodes Dhall in-process under a dynamically resolved compatible GHC and library graph. Haskell and
+minimal build metadata record required APIs and compatibility constraints, while the bootstrap resolver records the
 selected compiler, packages, compatibility adjustments, and observed integrity data only in the generated
 run bundle. No permanent compiler pin, `allow-newer` resolution, lock/freeze file, or package SHA is copied
-into Git. The exact in-process decoder graph and positive/negative fixture pair are re-established by the
-[Phase 1 toolchain gate](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md); Phase 26 then validates the
-focused gadt-decode semantics recorded above. There is **no**
+into Git. The exact in-process decoder graph and positive/negative Haskell values must be re-established by
+the owning toolchain and decoder gates. There is **no**
 intermediate JSON projection on the supported path: file-backed frame config is the typed `amoebius.dhall`
 expression, and uploaded desired state is the decrypted `InForceSpec` Dhall expression decoded in-process
 ([§5](#5-the-illegal-state-unrepresentable-contract)).
@@ -843,33 +817,14 @@ does not serve as a message-payload format).
 ## 10. Planning ownership
 
 This document is normative DSL doctrine only. Delivery sequencing, completion status, validation gates, and
-remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The
-orchestration Dhall DSL's **in-process contract validation** — the three typed gates of
-[§5](#5-the-illegal-state-unrepresentable-contract), followed by bind/expand, conditional infrastructure
-planning/materialization fixtures, and the opaque provision seal (Tier 1: Dhall typecheck + decoder +
-QuickCheck + whole-deployment plan/provision + `renderAll` goldens) — is **front-loaded to Phases 11–20**,
-while live enaction/readback of a required initial-infrastructure batch belongs to the later live
-infrastructure phase that owns that substrate. The DSL's
-**runtime-enforcement** half (the live deploy + control-plane daemon reconcile that makes the running cluster
-enforce what the spec composed, Tier 2) is delivered by **Phase 65**, atop the Phase 34 `dsl-step`/`chain` kernel
-seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
-links back for status.
+remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). In-process,
+hardware-free validation must cover Dhall generation/typecheck, decode, bind/expand, provision, `renderAll`,
+and dry-run planning before any hardware or container-engine phase can begin. Live enaction and provider
+readback are later correspondence checks and cannot validate the earlier DSL semantics.
 
-> **Honesty.** amoebius has built and validated the Phase 11–21 Tier-1 DSL path and the Phase-65 Tier-2 live
-> control-plane daemon runtime-enforcement slice. Full tenant projection, provider materialization, recursive children,
-> and cross-cluster correspondence remain owned and UNVERIFIED in later phases. Behaviour borrowed from
-> prodbox or hostbootstrap remains sibling-system evidence, not proof in amoebius. Read prescriptive statements
-> outside the explicitly validated slices as the contract amoebius
-> intends to satisfy, never as a tested amoebius result
-> ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
-
-Phase 18 adds a deliberately bounded semantic reading, not a claim that the whole DSL has been model-checked.
-It runs five positive and four negative decoder fixtures, all 6,561 demand/capacity pairs in the declared
-four-axis `0..2` domain, and two provision/render/chain fixtures through actual code. Acceptance uses decoded
-surface and structure, exact error tags, componentwise capacity semantics, and rendered object/step identity
-and activation frames. Generated normalization hashes and fingerprints are excluded because they detect byte
-change rather than explain DSL meaning. Lease, reservation, node-observation, and temporal-model evidence is
-bounded separately by the phase contract; live daemon correspondence remains UNVERIFIED.
+Every DSL gate consumes Haskell subjects and independently reviewed Haskell expectations. Non-Haskell inputs
+are materialized into a fresh `.build/**` tree during the gate. This document records no current validation
+result; sibling implementations remain design evidence only.
 
 ---
 

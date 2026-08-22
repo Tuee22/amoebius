@@ -8,34 +8,27 @@
 > resident handle to a second client pod, fits budget/volume/pod-request, and rejects every overflow/deletion/conflict.
 > **Read this if**: phase 80 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 80 delivers the determinism kernel + jit-build CacheBudget cache; its design is owned by [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-The gate is implemented across pure contracts and a retained-Kubernetes/MinIO/registry live run. Cross-
-substrate byte equality, cross-node reuse, and the Phase-91/71 model/kernel tiers remain UNVERIFIED by design.
-
-Seal: `python3 tools/determinism_jitcache_gate.py --reuse-fresh-live` passed 23 checks on
-2026-08-11; ledger `external-run-reference`,
-receipt `external-run-reference`.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — the recompute runs, the cache owner, and its clients](#resource-provision--the-recompute-runs-the-cache-owner-and-its-clients)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 80.1: `ContentAddress` typeclass kernel primitive ⏸️](#sprint-801-contentaddress-typeclass-kernel-primitive-)
@@ -53,50 +46,23 @@ receipt `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-79 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 79, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-**Validated on linux-cpu.** Constructor-hidden content names, resolved-program/substrate identity,
-worker-independent SplitMix derivation, seeded recompute, the derived cache-peak fold, closed resolver catalog,
-single-owner reuse, and pin-aware pruning are implemented. Twenty-three independent oracles and nineteen
-mutants are in Phase-0 custody; all seven compiled production mutants turn red and all twelve resource mutants
-retain their specific refusal tags. Four fresh Pods wrote separate retained MinIO prefixes; the harness fetched
-both base outputs out-of-band and observed byte equality while alternate seed/input outputs differed. A real
-Recreate owner and two same-node clients exercised forced overlapping first misses, one atomic materialization,
-unchanged inode/mtime reuse, an in-cluster distribution download, and measured pruning within budget. Exact
-Kubernetes, MinIO, and registry-key cleanup passed. This phase merges the determinism kernel and the
-jit-build engine cache into one gate because the cache keys its resolved engine payloads by the kernel's own
-`ContentAddress` primitive — the cache is `sha256(bytes)` content addressing applied to the ephemeral per-node
-owner, so the kernel must land before the cache rides it, and both are proven together on one substrate. The
-phase runs on the **linux-cpu** substrate in **Register 3** (live infrastructure): a single-node `kind` cluster
-brought up by the Phase 55 bootstrap coordinator, whose base image (Phase 56) already bakes the shared **jit-build resolver and its build toolchain** but **no** ML engine payload, using the content-addressed store and workflow runtime
-landed in Phase 68. The `experimentHash`/SplitMix shapes are already exercised in the sibling `jitML` project
-(`jitML/src/JitML/Checkpoint/Format.hs`, `jitML/src/JitML/Engines/Rng.hs`) and jitML's `Engines/Loader.hs` (the
-lazy per-kernel JIT: cache HIT → handle, MISS → compile-then-store) is the shape this round generalizes; read
-those as prior sibling evidence; the amoebius kernel and cache layer are now independently implemented and
-validated here.
-infernix's `docker/Dockerfile` `curl`-tar-at-image-build and its `model_cache.py` `minioadmin` fallback are the
-baked/URL/second-secret-store anti-patterns this phase deliberately **replaces**, not inherits. Status
-transitions are recorded reverse-chronologically here once work begins.
-
-Every hardware substrate can always run the `linux-cpu` lane.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase turns the content-addressed store delivered in Phase 69 into one cohesive **reproducible resolved- asset lifecycle**. Its ordered sprint seams first establish the shared determinism identity and then use that
+This phase must extend the future human-approved Phase-69 content-addressed store into one cohesive
+**reproducible resolved-asset lifecycle**. Its ordered sprint seams first target the shared determinism identity and then use that
 identity in the first live ML-engine cache; the integrated claim is that a named engine is reproducibly
 identified, bounded, materialized once, and reused by content address. The phase stops before model/kernel
 artifact lifts.
@@ -106,9 +72,9 @@ gate; split if work adds another asset tier, substrate, final register, or indep
 
 **The determinism kernel.** First, it lifts Phase 69's concrete blob/manifest key renderers into a kernel-level
 `ContentAddress` typeclass, so the rule that *a content-derived name cannot be forged* is one reusable primitive
-rather than a per-store copy. Second, it implements the `experimentHash` run identity — a total function of the
+rather than a per-store copy. Second, it must implement the `experimentHash` run identity — a total function of the
 resolved `.dhall` normal form and the live linux-cpu substrate fingerprint — so two runs share a store namespace
-only when they are genuinely the same experiment on the same substrate. Third, it implements the SplitMix seed
+only when they are genuinely the same experiment on the same substrate. Third, it must implement the SplitMix seed
 derivation that gives every stream a seed that is a pure function of `(masterSeed, streamIndex)` alone,
 independent of worker count, scheduling, and assignment. These seams are shared, not ML-specific: the SplitMix
 seed derivation and the `MonadTime`/`MonadTimer` clock injection that make an ML run bit-reproducible are the
@@ -118,7 +84,7 @@ uses to make a simulation deterministically replayable — one determinism subst
 folded into identity precisely because cross-substrate bit-equality is not guaranteed; this phase asserts
 same-substrate reproducibility and refuses to claim cross-substrate byte-equality.
 
-**The jit-build engine cache.** On top of the kernel, this phase builds the **`CacheBudget`-bounded content-addressed cache**: a bounded typed pool with one per-node owner, content-addressed by the resolved
+**The jit-build engine cache.** On top of the kernel, this phase must build the **`CacheBudget`-bounded content-addressed cache**: a bounded typed pool with one per-node owner, content-addressed by the resolved
 asset's SHA (the kernel's `ContentAddress`), carrying an explicit `CacheBudget` nested inside the owner pod's
 node-ephemeral provision, with pin-aware pruning. The pure input is a `CachePopulationDemand`, not a
 caller-authored cache peak: each selected closed-catalog identity resolves to catalog-owned
@@ -129,7 +95,7 @@ observed entries charged until deletion is observed, and adding the exact larges
 temporary materializations. It builds the **jit-build resolver** — `resolve = {download | build}` on first miss
 — that takes a named `EngineRuntime` catalog identity, returns a handle on a cache HIT, and on a MISS downloads
 a prebuilt engine or builds it from source (using the Phase-56 baked toolchain) into the cache; there is no arm
-to author a URL, because the identity is drawn from the closed catalog. And it proves **node-level reuse through the one cache owner**: a second client pod on the same node that names the same identity receives the
+to author a URL, because the identity is drawn from the closed catalog. The gate must test **node-level reuse through the one cache owner**: a second client pod on the same node that names the same identity receives the
 cache-resident handle and pays no re-materialization, without mounting one pod's ephemeral volume into another.
 "More cached than fits" is rejected at the post-bind `provision-seal` by the Phase-9 capacity fold, not
 discovered as a runtime disk-full.
@@ -176,129 +142,45 @@ flowchart LR
 Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched, and cross-substrate
 behaviour is explicitly out of contract. Nothing about deriving `experimentHash`, a SplitMix seed, or the
 provision-derived peak `≤ CacheBudget` rejection requires live infrastructure — those stay pure (Registers 1–2)
-— but the phase gate is the live linux-cpu proof.
+— but the phase gate requires a bounded live `linux-cpu` observation, never a proof.
 
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
-**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)): the reproducibility recomputes, the first-miss materialization, and
-the second-pod reuse run against real pods on the live cluster, and the run emits a proven/tested/assumed ledger
-naming that register.
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)):
+the future contract must independently observe recomputation, first-miss materialization, and second-pod reuse
+against real pods. Its candidate ledger names the bounded register and has no promotion authority.
 
-**Depends on:** [Phase 56](phase_56_base_image_registry.md) — the jit-build resolver and the in-cluster registry this cache is keyed against, and [Phase 69](phase_69_content_store_workflow.md), the content store it retains through.
-
-**Gate:** `python3 tools/run_phase_gate.py 80` is green: the two-part determinism and cache-owner acceptance
-condition holds on the live linux-cpu `kind` cluster against every oracle-pinned fixture, independent oracle,
-external observer, and committed mutant in [Gate integrity](#gate-integrity).
+**Depends on:** [Phase 79](phase_79_provider_dynamic_nodes.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 80`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The gate's committed apparatus is the **union** of both seams' oracle-pinned corpora, authored and committed
-in Phase 0 **before any `src/Amoebius/Kernel/*` or `src/Amoebius/Jit/*` module exists**, partitioned along the
-two-part gate. No golden output *bytes* are pre-committed for the determinism part (they are substrate-specific),
-so its byte-equality legs compare **two fresh runs against each other**, never against a regenerated golden;
-every other oracle is a hand-authored table independent of the code under test (§M.1, §M.3).
+**Contract review**: REJECTED — NOT VALIDATED.
 
-**The two-part acceptance condition.** The run happens on the single-node linux-cpu `kind` cluster — Phase 55
-bootstrap coordinator, Phase 56 base image plus baked resolver/toolchain plus in-cluster `distribution` registry,
-Phase 69 content store plus workflow runtime. Every *how-it-behaved* claim is read from an OS-boundary observer
-(§M.5), and every byte comparison is performed **out-of-band by the harness** on blobs it fetched itself, never
-inferred from a `412`/`If-None-Match` response (§M.6). **(a) Determinism** — the seeded workload runs twice under
-one unchanged `experimentHash` as an **independent fresh recomputation**, each fresh Pod writing a distinct
-`<experimentHash>/<runId>` staging prefix whose output key is provably absent, and run 2 unable to read run 1's
-retained prefix until its pure stage writes. The two retained output blobs are byte-identical; a changed
-`masterSeed`, `streamIndex`, or pinned input yields **different** output bytes; and a changed resolved `.dhall`
-or substituted substrate fingerprint yields a **different** `experimentHash` and namespace. **(b) Cache owner** —
-the one named identity `EngineRuntime.LlamaCppCpu@<pinned-ver>` resolves on **first miss** into the
-`CacheBudget`-bounded content-addressed cache, with bytes sha256-matching the `test/oracle/determinism_jitcache/oracle.dhall`
-pin, the named arm attested to have actually run, the handle live at the pinned `--version`, and zero
-public-registry pull by live egress/CNI capture. A **second client pod** on the same node reuses the
-cache-resident handle with no re-materialization (unchanged resident inode/mtime, zero new pull). The owner's
-derived peak fits `derived peak ≤ CacheBudget ≤ emptyDir.sizeLimit` and its ephemeral request covers that volume
-bound plus writable/log headroom. An over-budget peak, digest-size conflict, deletion credited before
-observation, or bounded-parallel-derived overflow is rejected by the Phase-9 fold at the Phase-31
-**`provision-seal`** before any resolve. The run emits a Register-3 proven/tested/assumed ledger.
+| Key | Contract |
+|---|---|
+| `Claim` | the reproducible resolved-engine lifecycle on one linux-cpu cluster, ending in one Register-3 gate; split if work adds another asset tier, substrate, final register, or independently useful live capability. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 80` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 79 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-```mermaid
-flowchart LR
-  %% register: orientation
-  s0["Sprint 80.1: ContentAddress typeclass kernel primitive"]
-  s1["Sprint 80.2: experimentHash identity over the live substrate fingerprint"]
-  s2["Sprint 80.3: SplitMix seed derivation, worker-count-independent"]
-  s3["Sprint 80.4: The live same-substrate reproducibility gate"]
-  s4["Sprint 80.5: The CacheBudget-bounded content-addressed cache…"]
-  s5["Sprint 80.6: The jit-build resolver — resolve = {download | build} on…"]
-  s6["Sprint 80.7: Per-node cache-owner reuse across client pods"]
-  s7["Sprint 80.8: The live first-miss / reuse / resource-admission gate…"]
-  gate["the phase 80 gate"]
-  s0 -->|"produces what the next consumes"| s1
-  s1 -->|"produces what the next consumes"| s2
-  s2 -->|"produces what the next consumes"| s3
-  s3 -->|"produces what the next consumes"| s4
-  s4 -->|"produces what the next consumes"| s5
-  s5 -->|"produces what the next consumes"| s6
-  s6 -->|"produces what the next consumes"| s7
-  s7 -->|"the last seam the gate closes over"| gate
-```
-*Validated orientation. The seams Phase 80 built in order; [Gate integrity](#gate-integrity) owns the apparatus.*
+## Resource provision — UNRESOLVED
 
-**Part (a) — the determinism corpus (§M.1, §M.6).** The representative set is the positive
-`test/fixture/dhall/phase_70_determinism_repro.dhall` (one pinned content-addressed input blob, one pure seeded stage,
-one `masterSeed`) and its three committed negative siblings differing in exactly one dimension each —
-`..._flipped_metric.dhall` (a resolved-`.dhall` change), `..._alt_seed.dhall` (a changed `masterSeed`), and
-`..._alt_input.dhall` (a changed pinned input), each a specific-reason negative (§M.8). Supporting oracles: the
-hand-authored fingerprint schema `test/golden/determinism_jitcache/substrate_fingerprint.schema.json` pinning the minimum
-witness set (substrate lane `linux-cpu` + GHC / RTS / ISA / libc-ABI witnesses, **each with its absolute probe path**, §M.3); the hand-computed SplitMix golden `test/golden/determinism_jitcache/splitmix_seeds.json` (streams `0`, `1`,
-`37` worked by hand under gamma `0x9E3779B97F4A7C15`, never regenerated from `Rng.hs`); the committed compile-fail
-fixture `test/negative/compile_fail/phase_70_forge_blobsha.hs` (constructing `BlobSha "deadbeef"` from a `Text` literal,
-which MUST fail at the "`BlobSha` constructor not in scope / not exported" locus, §M.8); the committed fake probe
-`test/harness/fake/phase_70_fake_ghc` (emits a different version, used by the fingerprint sensitivity check); and the
-resource witness `test/golden/determinism_jitcache/resource_shape.json`. The committed seeded mutants this part must turn red
-(§M.2): `test/mutant/determinism_jitcache/const_output.hs` (the pure stage rewritten to return a constant byte string
-ignoring seed and input; **operator: dropped-effect**) turns the seed-sensitivity and input-sensitivity legs red;
-`test/mutant/determinism_jitcache/content_order_leak.hs` (a canonical-encoder preserving field order rather than sorting;
-dropped-effect) turns the canonical-encoding property red; `test/mutant/determinism_jitcache/const_fingerprint.hs`
-(fingerprint hardcoded to `"linux-cpu"`; dropped-effect) turns the schema and sensitivity checks red;
-`test/mutant/determinism_jitcache/rng_workerid.hs` (seed folds in a worker id in addition to `streamIndex`; effect-swap) turns
-the worker-count-independence property red. The independent reference predicates are the harness's **out-of-band byte compare** of two fetched blobs (§M.6, never a `412` on a second PUT), the hand-authored logical-equivalence
-oracle for `ContentAddress` (permuted map order, reordered fields, equivalent integer encodings — defined
-independently of the canonical bytes under test, §M.3, with a `cover` obligation forcing ≥30% distinct byte
-pre-images, §M.4), and the hand-computed SplitMix golden.
-
-**Part (b) — the cache corpus (§M.2, §M.7).** The **live** representative set is **exactly one** closed-catalog
-identity: `EngineRuntime.LlamaCppCpu@<pinned-ver>` (a linux-cpu `llama.cpp` engine arm), exercised on **both**
-resolve arms — `build` (from the pinned source recipe compiled by the baked toolchain, attested by an
-`strace`/argv-shim record of the absolute-path `g++` invocation, §M.5) and `download` (the same bytes served by
-the in-cluster `distribution` registry, attested by its access log). Its oracle is the hand-authored
-`test/oracle/determinism_jitcache/oracle.dhall` (independent of the SUT, never regenerated from the resolver's output, §M.3),
-carrying per identity the expected `ContentAddress` (`sha256` of the materialized bytes), the catalog-owned
-final-resident and peak-temporary byte `Quantity` operands for both arms, and the expected `--version` string
-the live binary reports; raw deployment input selects that identity but cannot override those
-`AssetMaterializationDemand` operands. The committed negative fixtures (specific-reason, §M.8):
-`test/negative/determinism_jitcache/cache_over_budget.dhall`, `test/negative/determinism_jitcache/cache_digest_size_conflict.dhall`,
-`test/negative/determinism_jitcache/cache_deletion_credit.dhall`, `test/negative/determinism_jitcache/cache_concurrency_overflow.dhall`,
-`test/negative/determinism_jitcache/ephemeral_under_reserved.dhall`, plus the compile-fail negatives
-`test/negative/determinism_jitcache/freestring_key.hs` (cache key from a free `String`/`Text`/`Url`) and
-`test/negative/determinism_jitcache/url_arm.hs` (a free-`Url` resolver arm), each failing *at its constructor locus* with
-its named error and paired with a positive that differs only in the foreclosed dimension. The independent
-owner+two-client image/resource/slot/transition witness is `test/oracle/determinism_jitcache/resource_shape.json`; the pinned
-source recipe is committed alongside. The committed seeded mutants under `test/mutant/determinism_jitcache/cache/` this part must
-turn red (§M.2), drawn from the operator set: **(a)** `resolve _ = <fixed 16-byte marker>` (**effect swap** — the
-resolver does no real work; turns the stored-`ContentAddress`/sha256/version/arm-executed assertions red);
-**(b)** `prune = pure ()` (**dropped effect** — pruning is dead code; the pin-eviction assertion and postflight
-on-disk peak/final measurement fail); **(c)** an identity-resolver whose stored bytes are one byte short of the
-pin (**guard weakening**). The reference predicate for the capacity legs is the fixture's hand-authored expected
-verdict table plus an independent recomputation of the digest union and largest finite first-miss temporary set
-(never the fold's own output). The **pure capacity subcorpus** may select additional members of the
-already-closed catalog solely to exercise distinct-digest `BoundedParallel n` arithmetic; those members are not
-claimed as live-resolved evidence.
-
-**Shared resource-envelope mutants.** The live recompute/cache workloads are one workload proof, not only the
-byte/cache proofs above; the resource-shape witnesses (`test/golden/determinism_jitcache/resource_shape.json`,
-`test/oracle/determinism_jitcache/resource_shape.json`) and the mutants under `test/mutant/determinism_jitcache/determinism/` and
-`test/mutant/determinism_jitcache/cache/` are enumerated in [Resource provision](#resource-provision--the-recompute-runs-the-cache-owner-and-its-clients).
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
-
-## Resource provision — the recompute runs, the cache owner, and its clients
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
@@ -334,8 +216,8 @@ ConfigMap/Secret/projected/token payloads, durable claims and attachment classes
 fixture), the owner's one `InClusterCacheDemand` or a client's `cache = None`, and `accelerator = None`. Resolver
 download/build/unpack, compiler subprocess CPU/RSS, import workspace, pipe/network buffers, and temporary files
 execute inside the owner container and are included in that owner's runtime and cache-temporary operands; the
-typed client handle is a library protocol and creates no client-service Pod. The in-cluster `distribution`
-registry and standing platform Pods remain charged as live survivors; the download endpoint is never free
+typed client handle is a library protocol and creates no client-service Pod. The in-cluster Distribution
+`registry:2` service and standing platform Pods remain charged as live survivors; the download endpoint is never free
 supply. The live race epoch is exact: one owner plus two overlapping clients consume three pod/IP slots on the
 selected node, while same-digest requests share one in-flight materialization and distinct digests obey the
 finite semaphore. Image content/snapshots/import workspace for all three selected images fold once by
@@ -351,9 +233,9 @@ serializes exhaustive `desiredObjects` for all rendered and derived Kubernetes o
 joins observed survivors with old/new/apply-before-prune. `EtcdLogicalDemand { desiredObjects, churn, model }`
 includes revisions, Leases, and Events; only private `ProvisionedEtcdLogicalDemand.derivedPeak <=
 backendQuotaBytes` may continue, and physical capacity separately fits backend-at-quota plus WALs,
-retained/saving snapshots, and defrag old+new workspace. One-byte logical/physical shortages and
-`drop_api_object_demand.dhall`, `drop_etcd_churn.dhall`, or `drop_etcd_model.dhall` reject before any Pod
-creation. `provision` derives one `KubeletRuntimeMetadataShape` per planned Pod slot from that Pod's exact
+retained/saving snapshots, and defrag old+new workspace. Haskell one-byte logical/physical shortage and
+drop-API-object/churn/model operators reject before any Pod creation; any serialized cases are generated
+beneath `.build/test-corpora/**`. `provision` derives one `KubeletRuntimeMetadataShape` per planned Pod slot from that Pod's exact
 runtime-metadata source and container/volume graph under the selected node's pinned `kubeletMetadataModel`.
 The canonical role/layout projection maps those components to named carves and collapses aliases before the
 capacity check; its physical debit remains separate from logical Pod ephemeral storage. The gate harness and its filesystem/network/argv observer are a bounded
@@ -361,15 +243,14 @@ capacity check; its physical debit remains separate from logical Pod ephemeral s
 probe concurrency, no cache or accelerator); the absolute-path substrate-fingerprint probes, `strace`, and
 egress/CNI capture execute within that envelope, never in sidecar Pods or as resource-free subprocesses.
 
-**The committed resource mutants (must reject before any effect, §M.2).** For the determinism runs,
-`test/mutant/determinism_jitcache/determinism/drop_run_resource_envelope.dhall` (omits one run's Pod row),
-`drop_host_harness_envelope.dhall` (omits the probe/harness host row), `early_fresh_run.dhall` (launches the
-successor before the predecessor is observed gone), and `drop_workflow_gateway_collector.dhall` (omits one
-Phase-69 runtime/mutation unit) must each turn the resource gate red even if the output bytes match. For the
-cache workload, `test/mutant/determinism_jitcache/cache/drop_client_envelope.dhall`, `drop_owner_envelope.dhall`,
-`drop_owner_image.dhall` (erases the owner image demand), `early_owner_replacement.dhall` (starts a replacement
-owner before old-cache absence is observed), and `drop_host_observer_envelope.dhall` must turn the gate red
-before materialization. The Phase-0 negative bundle additionally lowers CPU, memory, logical ephemeral, each
+**The applied Haskell resource mutants (must reject before any effect, §M.2).** For the determinism runs,
+the Haskell operators `drop_run_resource_envelope`, `drop_host_harness_envelope`, `early_fresh_run`, and
+`drop_workflow_gateway_collector` lazily generate any required external form beneath `.build/test-corpora/**`;
+they omit one run's Pod row, the probe/harness host row, the predecessor-absence wait, or one Phase-69
+runtime/mutation unit and must each turn the resource gate red even if the output bytes match. For the cache
+workload, Haskell operators drop the client envelope, owner envelope, owner image demand, or host-observer
+envelope, or start a replacement owner before old-cache absence is observed; each must turn the gate red
+before materialization. The Haskell negative bundle additionally lowers CPU, memory, logical ephemeral, each
 routed physical backing, image/pull workspace, pod/IP slots, CSI slots (on a matched PVC-bearing fixture), each
 resident output object and object-store workspace, and host-harness CPU/memory/capture/log/scratch by one
 unit/byte and expects a tagged pre-effect `Left`. Each unique CSI PVC spends one driver attachment slot; both
@@ -377,94 +258,81 @@ representative fixtures declare no PVC and therefore spend zero CSI slots, never
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact determinism kernel + jit-build CacheBudget cache emits is a recipe over a content address, never an authored file.
-This phase is the first live amoebius realization of the content-addressing/determinism contract and of the
-ML-asset lifecycle's Tier-1 engine cache. Each bullet names the section it implements; individual sprints cite
-the same sections where they adopt them.
+- [`jit_artifact_doctrine.md` §2 — The rule, and the closed exception list](../documents/engineering/jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list) — every artifact determinism kernel + jit-build CacheBudget cache emits is a recipe over a content address, never an authored file.
+This phase's target is to become the first live amoebius realization of the content-addressing/determinism
+contract and of the ML-asset lifecycle's Tier-1 engine cache. Each bullet names the section the target must
+implement; individual sprints cite the same sections where they must adopt them.
 
-- [`content_addressing_doctrine.md §2`](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
+- [`content_addressing_doctrine.md` §2 — The three-tier store: blobs ← manifests ← pointers](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
   — *the three-tier store (blobs ← manifests ← pointers)*: the `ContentAddress` typeclass lifts Phase 69's
   `blobs/<sha256>` / `manifests/<sha256>` key renderers into a kernel primitive (keeping the `If-None-Match: *` /
   `412 = success` write protocol owned by the store), and the engine cache reuses the same self-naming discipline
   — a MISS-then-store and a HIT are write-once content addressing applied to the ephemeral per-node cache owner
   rather than the durable MinIO bucket.
-- [`content_addressing_doctrine.md §3`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
+- [`content_addressing_doctrine.md` §3 — `experimentHash`: identity is *what was requested* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
   — *`experimentHash`: identity is what was requested ‖ where it ran*: the run identity folds the resolved
   `.dhall` normal form and the substrate fingerprint into one digest, so a flipped metric direction or a
   different substrate is a different experiment in a different namespace.
-- [`content_addressing_determinism.md §4`](../documents/engineering/content_addressing_determinism.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
+- [`content_addressing_determinism.md` §4 — Determinism by construction: pinned inputs + pure stages + derived seed](../documents/engineering/content_addressing_determinism.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
   — *determinism by construction: pinned inputs + pure stages + derived seed*, with its pinned-input leg
-  ([§4.1](../documents/engineering/content_addressing_determinism.md#41-leg-one--pinned-content-addressed-inputs)),
-  its derived-seed leg ([§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)), and the totality argument
-  ([§4.4](../documents/engineering/content_addressing_determinism.md#44-what-the-types-make-these-total-cashes-out-to)):
-  this phase implements the three legs as kernel primitives and wires them through one live workload.
-- [`content_addressing_determinism.md §4.5`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
+  ([`content_addressing_determinism.md` §4.1 — Leg one — pinned content-addressed inputs](../documents/engineering/content_addressing_determinism.md#41-leg-one--pinned-content-addressed-inputs)),
+  its derived-seed leg ([`illegal_state_techniques.md` §4.3 — GADT-indexed state machines — only legal transitions are typed](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)), and the totality argument
+  ([`content_addressing_determinism.md` §4.4 — What "the types make these total" cashes out to](../documents/engineering/content_addressing_determinism.md#44-what-the-types-make-these-total-cashes-out-to)):
+  this phase's target must implement the three legs as kernel primitives and wire them through one live workload.
+- [`content_addressing_determinism.md` §4.5 — The ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
   — *the ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss*: Tier 1's
   `EngineRuntime` is a **named, jit-resolved** identity (never baked, never URL-fetched), the cache is a bounded
   typed pool with an explicit `CacheBudget` and pin-aware pruning, and the trade is stated plainly (baking gave
   no-network-at-boot; the cache pays a first-miss materialization amortized across every later use).
-- [`content_addressing_doctrine.md §6`](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)
+- [`content_addressing_doctrine.md` §6 — The honest ceiling: types make the bookkeeping total, not the physics deterministic](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)
   — *the honest ceiling: types make the bookkeeping total, not the physics deterministic*: the contract stays at
   same-substrate reproducibility; cross-substrate bit-equality is deliberately not asserted and the ledger never
   marks it green.
-- [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)
+- [`service_capability_doctrine.md` §4.1 — The InferenceEngine capability — the engine is target-offering-selected and jit-resolved, never authored](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)
   — *the `InferenceEngine` capability — the engine is substrate-selected and jit-resolved, never authored*: the
   closed `EngineRuntime` union has **no arbitrary-`Url`/`Download` arm**; the `.dhall` *selects* an arm by the
   detected substrate and can never *author* a fetch, and the shared jit-build resolver materializes the named
   identity on first miss.
-- [`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
-  / [`§3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
-  and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
+- [`resource_capacity_doctrine.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
+  / [`resource_capacity_types.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`; “The systematic provision matrix”](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
+  and [`resource_capacity_doctrine.md` §4 — The total fold: `fits`, `carve`, `place`, and the nesting](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
   — *the `Quantity` types, the canonical provision matrix, and the total `fits`/`carve`/`place` fold*: the live
   recompute runs and the cache owner/clients instantiate the resource matrix and the sealed whole-deployment
   provision boundary; `CacheBudget` is nested inside the cache-owner pod's bounded `emptyDir` and
-  ephemeral-storage envelope, and the derived peak bound is the **same** checked capacity fold Phase 9 built and
-  Phase 31 invokes at `provision-seal` — "more cached than fits" is rejected by that fold, not discovered as a
+  ephemeral-storage envelope, and the derived peak bound is the **same** checked capacity fold Phase 9 must
+  establish and Phase 31 must invoke at `provision-seal` — "more cached than fits" is rejected by that fold, not discovered as a
   runtime disk-full.
-- [`image_build_doctrine.md §7`](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
+- [`image_build_doctrine.md` §7 — What amoebius bakes vs builds — the base container is the supply chain](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
   — *what amoebius bakes vs builds*: the base image bakes the jit-build **resolver + toolchain** (the
   build-from-source path this phase drives on a MISS) but holds the ML **engine payloads** out as named cache
   identities — the Phase-56 split this phase exercises live for the first time.
-- [`substrate_doctrine.md §3`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
+- [`substrate_doctrine.md` §3 — The no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
   — *the no-env / no-`PATH`, full-path-probe substrate contract*: the linux-cpu substrate fingerprint consumed by
   `experimentHash` and every subprocess the resolver spawns is gathered/invoked by absolute-path only, never from
   `PATH` or environment variables.
-- [`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md) [§4.5](../documents/illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) — *the totality
+- [`illegal_state_catalog.md` §3 — The catalog — states a valid spec cannot represent](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) [`illegal_state_techniques.md` §4.5 — Content-address totality — names are total functions of content](../documents/illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) — *the totality
   technique*: there is no constructor for a store or cache key from a free string and no inhabitant of "a seed
   read from ambient entropy"; these are states that cannot be written down, not states fixed at runtime.
-- [`illegal_state_catalog.md §3.25`](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)
+- [`illegal_state_ml_asset.md` §3.25 — An ML asset named by arbitrary URL (or an unready / unlanded model)](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)
   — *an ML asset named by arbitrary URL is unrepresentable*: the engine identity has no URL syntax
   (type-foreclosed, dhall-typecheck); an over-budget cache is constructible input rejected at the post-bind
   `provision-seal`.
-- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
-  — *the registers of amoebius testing*: this phase's gate reaches **Register 3** (live infrastructure) and
-  emits a proven/tested/assumed ledger naming that register, with the model/kernel tiers (Phases 60/71) marked
-  deferred.
+- [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+  — *the registers of amoebius testing*: this phase's future gate targets **Register 3**; its candidate ledger
+  must name the bounded live register, preserve predecessor evidence, and leave every deferred tier unverified.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 80.1: `ContentAddress` typeclass kernel primitive ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Kernel/ContentAddress.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: pure and in-process, no cluster. That a content name cannot be forged from a free
-string is a **compile-fail** obligation asserted by locus (§M.8), never a runtime check; the canonical-encoding
-property is judged against a hand-authored equivalence independent of the bytes under test (§M.3). The numbered
-validation list below carries both.
-**Docs to update**:
-`documents/engineering/content_addressing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`, this
-document.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`content_addressing_doctrine.md §2 — the three-tier store`](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
 and the totality argument in [`§4.4`](../documents/engineering/content_addressing_determinism.md#44-what-the-types-make-these-total-cashes-out-to):
 lift Phase 69's concrete blob/manifest key renderers into a kernel-level `ContentAddress` typeclass so that
@@ -472,6 +340,7 @@ lift Phase 69's concrete blob/manifest key renderers into a kernel-level `Conten
 (Sprint 80.5) and by both infernix (Phase 91) and jitML (Phase 93), not a per-store copy.
 
 ### Deliverables
+
 - A `ContentAddress a` typeclass whose only key-producing operation is `sha256(canonical-bytes a)`, with a
   canonical-encoder requirement so equal logical content yields byte-identical keys.
 - Newtyped `BlobSha` / `ManifestSha` carriers with no public constructor from a free `Text`.
@@ -482,6 +351,7 @@ lift Phase 69's concrete blob/manifest key renderers into a kernel-level `Conten
   `test/mutant/determinism_jitcache/content_order_leak.hs` — authored before `ContentAddress.hs` exists (§M.1–M.3).
 
 ### Validation
+
 1. Type-level, verified by the committed compile-fail fixture `test/negative/compile_fail/phase_70_forge_blobsha.hs`
    (§M.8): its attempt at `BlobSha "deadbeef"` — constructing a `BlobSha`/`ManifestSha` carrier from a free
    `Text` literal — MUST fail to compile with "`BlobSha` constructor not
@@ -495,43 +365,38 @@ lift Phase 69's concrete blob/manifest key renderers into a kernel-level `Conten
    sorting; operator: dropped-effect) MUST turn this property red (§M.2).
 
 ### Remaining Work
+
 None in this sprint.
 
 ## Sprint 80.2: `experimentHash` identity over the live substrate fingerprint ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Kernel/ExperimentHash.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: fingerprint conformance is judged against the oracle-pinned schema (§M.3), and that
-every probe ran by absolute path with no `PATH` or environment read is read from an **OS-boundary observer**
-(§M.5), never a self-emitted compliance trace. The numbered validation list below carries the schema, observer,
-and fake-probe sensitivity checks.
-**Docs to update**:
-`documents/engineering/content_addressing_doctrine.md`, `documents/engineering/substrate_doctrine.md`,
-`DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`content_addressing_doctrine.md §3 — experimentHash: identity is what was requested ‖ where it ran`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran):
 implement the run identity that folds the resolved program and the substrate fingerprint into one digest,
 consuming the Phase-25 normal form and the Phase-55 full-path substrate probe, per the substrate doctrine's
 no-env/no-`PATH` contract.
 
 ### Deliverables
+
 - `deriveExperimentHash :: ResolvedDhall -> SubstrateFingerprint -> ExperimentHash` =
   `sha256(resolved-dhall ‖ substrate-fingerprint)`, with the fingerprint gathered by full-path subprocess probes,
   never from environment or `PATH`.
 - The store namespace key `<experimentHash>/…` wired so two genuinely different runs — including a flipped metric
   direction (part of the resolved `.dhall`) or a different substrate fingerprint — cannot collide.
-- The oracle-pinned fingerprint schema `test/golden/determinism_jitcache/substrate_fingerprint.schema.json` (minimum
-  witness set + each witness's absolute probe path) and the committed fake probe `test/harness/fake/phase_70_fake_ghc`
-  used by the sensitivity check — both authored before `ExperimentHash.hs` exists (§M.1, §M.3).
+- A separately authored Haskell fingerprint oracle (minimum witness set plus each witness's absolute probe
+  path) and a Haskell-declared fake probe generated beneath `.build/test-corpora/**` for the sensitivity check — both
+  reviewed before `ExperimentHash.hs` exists (§M.1, §M.3).
 
 ### Validation
+
 1. `experimentHash` is a pure function of `(resolved-dhall, substrate-fingerprint)`: it changes when either the
-   resolved `.dhall` (the committed `..._flipped_metric.dhall` sibling, differing only in metric direction) or the
+   resolved `.dhall` (a Haskell-declared flipped-metric case generated beneath `.build/**`) or the
    substrate fingerprint changes, and re-derives identically across re-evaluation of the same inputs. Asserted
    against the oracle-pinned fixtures, not values regenerated from the SUT.
-2. The fingerprint carries every witness required by `test/golden/determinism_jitcache/substrate_fingerprint.schema.json`
+2. The fingerprint carries every witness required by the independent Haskell fingerprint oracle
    (substrate lane `linux-cpu` + the named GHC-version, RTS/runtime-version, ISA, and libc/ABI witnesses, each
    with its absolute probe path); a fingerprint missing a required witness FAILS, and a hardcoded constant such
    as `"linux-cpu"` FAILS the schema check. The linux-cpu fingerprint is gathered only by absolute-path probes —
@@ -544,33 +409,29 @@ no-env/no-`PATH` contract.
    dropped-effect) MUST turn the schema and sensitivity checks red (§M.2).
 
 ### Remaining Work
+
 None in this sprint.
 
 ## Sprint 80.3: SplitMix seed derivation, worker-count-independent ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Kernel/Rng.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: unit tests prove
-`deriveSplitMixSeed` returns the same stream seed for a given `(masterSeed, streamIndex)` regardless of how
-many workers or in what order they are simulated, and that no seed reads wall-clock, a worker id, or ambient
-entropy (pure, in-process, no cluster).
-**Docs to update**:
-`documents/engineering/content_addressing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt the derived-seed leg of [`content_addressing_determinism.md §4 — determinism by construction`](../documents/engineering/content_addressing_determinism.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
 ([§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)) and its totality argument in [`§4.4`](../documents/engineering/content_addressing_determinism.md#44-what-the-types-make-these-total-cashes-out-to):
 implement the SplitMix seed derivation that is independent of worker count, scheduling, and assignment, with a
 per-stream seed reachable only through one total function.
 
 ### Deliverables
+
 - `deriveSplitMixSeed :: SplitMixSeed -> Word64 -> SplitMixSeed` with SplitMix64 mixing and the golden-ratio
   gamma (`0x9E3779B97F4A7C15`), exposing a per-stream seed reachable only through this total function.
 - A type discipline in which "a stream with no seed" and "a seed read from ambient entropy" have no inhabitant —
   a seed is reachable only from a typed `(SplitMixSeed, Word64)`.
 
 ### Validation
+
 1. A simulated 1-worker vs 100-worker dispatch in arbitrary order seeds stream `37` identically every time. The
    generator carries a `cover` obligation (§M.4) forcing ≥25% of cases into the high-worker-count/shuffled-order
    branch, so the property is not satisfied by a near-constant single-worker generator. Expected seed values for
@@ -582,25 +443,15 @@ per-stream seed reachable only through one total function.
    worker id in addition to `streamIndex`; operator: effect-swap) MUST turn validation 1 red (§M.2).
 
 ### Remaining Work
+
 None in this sprint.
 
 ## Sprint 80.4: The live same-substrate reproducibility gate ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Kernel/Determinism.hs`,
-`test/fixture/dhall/phase_70_determinism_repro.dhall`, `tools/determinism_jitcache_live.py`, and
-`test/spec/live/DeterminismLiveSpec.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: run 2 is an **independent fresh recomputation**, not a store hit (§M.6): the harness
-fetches both retained blobs itself and compares bytes out of band, while an OS-boundary observer (§M.5)
-witnesses the fresh compute. A `412`/`If-None-Match` on the second PUT proves store dedup, never reproduction.
-The numbered validation list below carries all five legs.
-**Docs to update**:
-`documents/engineering/content_addressing_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/README.md`,
-`DEVELOPMENT_PLAN/substrates.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`content_addressing_determinism.md §4 — determinism by construction`](../documents/engineering/content_addressing_determinism.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
 end-to-end and hold the honest ceiling in [`§6`](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic):
 wire the three legs — a pinned content-addressed input
@@ -611,6 +462,7 @@ Phase-91 lift), and prove same-substrate reproducibility as one half of the phas
 cross-substrate equality.
 
 ### Deliverables
+
 - A pure seeded compute stage (`Determinism.hs`) taking a content-addressed input, a request, and a derived
   SplitMix seed, with all I/O at the interpreter boundary.
 - The gate `.dhall` (`test/fixture/dhall/phase_70_determinism_repro.dhall`) that spins up the Phase-69 workflow, runs the
@@ -627,6 +479,7 @@ cross-substrate equality.
   (§M.5, §M.6).
 
 ### Validation
+
 1. Two runs with the same `experimentHash` on linux-cpu produce byte-identical output, where both fresh Pods
    write distinct `<experimentHash>/<runId>` prefixes with initially absent keys and run 2 cannot read run 1's
    retained prefix until its stage writes. The OS-boundary observer (§M.5) confirms that boundary. The comparison
@@ -647,24 +500,15 @@ cross-substrate equality.
    *tested on linux-cpu*, identity/seed totality *proven-in-types*, cross-substrate bit-equality UNVERIFIED.
 
 ### Remaining Work
+
 Cross-substrate bit equality remains deliberately UNVERIFIED; no later phase may infer it from this same-host run.
 
 ## Sprint 80.5: The `CacheBudget`-bounded content-addressed cache + peak-occupancy provision fold ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Jit/Cache.hs` (the bounded typed pool —
-content-addressed by resolved-asset SHA, pin-aware pruning, HIT/MISS lookup) and
-`src/Amoebius/Jit/CacheBudget.hs` (the `CacheBudget` as a `Quantity` nested inside the cache-owner pod's
-bounded node-ephemeral allocation + the peak-occupancy provision fold)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a property and boundary suite; no cluster required. The free-string foreclosure is a
-**compile-fail** obligation asserted by locus, the HIT/MISS and capacity properties carry `cover` obligations,
-and every capacity verdict is judged against the committed fixture's hand-authored expected table rather than
-the fold's own output. The numbered validation list below carries each case.
-**Docs to update**: `documents/engineering/content_addressing_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`content_addressing_determinism.md §4.5`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)'s
 bounded-typed-pool and [`resource_capacity_doctrine.md §3/§4`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
 build the `CacheBudget`-bounded content-addressed cache so that "more cached than fits" is rejected at the
@@ -672,6 +516,7 @@ post-bind **`provision-seal`** — the same checked capacity fold that bounds ev
 over-budget derived peak before the resolver ever materializes an asset.
 
 ### Deliverables
+
 - `Amoebius.Jit.Cache` — a bounded typed pool keyed by `sha256(resolved-bytes)` (the Sprint-75.1 `ContentAddress`),
   with a total HIT/MISS lookup and pin-aware pruning (a pinned resident is never evicted; unpinned residents are
   pruned to keep under budget).
@@ -695,6 +540,7 @@ over-budget derived peak before the resolver ever materializes an asset.
   resolves is the runtime residue deferred to the live gate.
 
 ### Validation
+
 1. There is no exported path to a cache key from a free string; the only path to a resident entry is content
    addressing — asserted by the committed compile-fail negative `test/negative/determinism_jitcache/freestring_key.hs`
    (registered in the Phase-27 negative corpus, authored in this phase's oracle-pinning sprint) failing to
@@ -724,25 +570,15 @@ over-budget derived peak before the resolver ever materializes an asset.
    the property cannot be satisfied by a generator that only ever misses.
 
 ### Remaining Work
+
 None in this sprint.
 
 ## Sprint 80.6: The jit-build resolver — `resolve = {download | build}` on first miss, no URL arm ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Jit/Resolver.hs` (the shared resolver: a named
-`EngineRuntime` catalog identity → cache HIT → handle, or MISS → download-a-prebuilt-engine /
-build-from-source → store → handle)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a boundary suite. The backend fixture is oracle-pinned, so a resolver
-that stores fixed marker bytes cannot pass; the warm-path no-resolve claim is read from an OS-boundary argv shim
-(§M.5), never a resolver-emitted counter; and the URL foreclosure is a **compile-fail** obligation asserted by
-locus. The numbered validation list below carries each.
-**Docs to update**:
-`documents/engineering/content_addressing_doctrine.md`,
-`documents/engineering/service_capability_doctrine.md`, `documents/engineering/image_build_doctrine.md`,
-`DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`content_addressing_determinism.md §4.5`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)'s
 Tier-1 resolve-on-miss, [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored),
 and [`image_build_doctrine.md §7`](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)'s
@@ -752,6 +588,7 @@ miss into the bounded cache — downloaded prebuilt or built from source with th
 path.
 
 ### Deliverables
+
 - `Amoebius.Jit.Resolver` — `resolve :: EngineRuntime -> IO EngineHandle` that returns a handle on a cache HIT
   and, on a MISS, runs `download | build` (the recipe carried by the closed-catalog identity, never an authored
   URL), stores the result content-addressed into `Amoebius.Jit.Cache`, then returns the handle.
@@ -762,6 +599,7 @@ path.
   model (Tier 2) and kernel (Tier 3) tiers reuse this resolver but land in Phases 60/61.
 
 ### Validation
+
 1. The suite drives the resolver against an oracle-pinned backend fixture whose served or compiled bytes
    **sha256-match the `test/oracle/determinism_jitcache/oracle.dhall` pin** — not an arbitrary "fake" blob, so a backend
    returning unpinned bytes must fail the suite. A cold cache triggers exactly one `resolve`
@@ -777,29 +615,22 @@ path.
    an OS-boundary argv-recording shim capturing the full absolute `argv[0]`, not a resolver self-report.
 
 ### Remaining Work
+
 Production model inference through the resolved engine is Phase 91, not a hidden acceptance claim here.
 
 ## Sprint 80.7: Per-node cache-owner reuse across client pods ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Jit/CacheOwner.hs` (the typed per-node cache owner,
-bounded ephemeral volume, client-handle protocol, and concurrency discipline that makes a second client
-pod's lookup a HIT against the owner's resolved copy), plus `tools/determinism_jitcache_live.py`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: live on the single-node `kind` cluster. Reuse is proven by an **OS-boundary
-observer**, never by a resolver counter, and the concurrent-first-miss race is **operationalized** so both
-clients provably observe MISS before either store commits; a race that never overlaps (serialized by accident)
-does not satisfy the clause. The numbered validation list below carries each.
-**Docs to update**:
-`documents/engineering/content_addressing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`content_addressing_determinism.md §4.5`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)'s
 "every later pod on that host reuses the cache-resident copy": make the bounded cache **single-owner per node**,
 so the first-miss materialization cost is paid once per node per identity and amortized across every client pod
 that later names it, without a shared writable host mount.
 
 ### Deliverables
+
 - `Amoebius.Jit.CacheOwner` — the per-node cache-owner location, bounded volume, client-handle protocol, and
   read/write discipline that lets a second client HIT the owner's resident copy, with two concurrent first-misses
   converging to one stored, content-addressed copy (idempotent write-once, the store's confluence applied to the
@@ -812,11 +643,12 @@ that later names it, without a shared writable host mount.
   host is a legitimate first miss).
 
 ### Validation
+
 1. One cache-owner pod and two client pods scheduled to the same node name the same `EngineRuntime` identity.
    Client A's first `resolve` is a MISS that the owner materializes into its bounded disk-backed `emptyDir`, to
    bytes sha256-matching the `test/oracle/determinism_jitcache/oracle.dhall` pin; Client B on the same node HITs the resident
    handle with no re-materialization, proven by the OS-boundary observer — unchanged resident inode/mtime, and
-   the in-cluster `distribution` registry access log plus an egress capture recording zero new pull or build
+   the in-cluster `registry:2` access log plus an egress capture recording zero new pull or build
    subprocess for Client B — never by a resolver-emitted counter. The owner's rendered manifest carries exact
    provision-derived CPU/memory/`ephemeral-storage` requests+limits, its `emptyDir.sizeLimit`, and no writable
    `hostPath`, with the applied ephemeral request at least the volume bound plus writable/log headroom.
@@ -831,23 +663,15 @@ that later names it, without a shared writable host mount.
    old inode absent; the unchanged snapshot can never mint capacity credit from intent alone.
 
 ### Remaining Work
+
 Cross-node reuse remains out of contract; a different node legitimately starts cold.
 
 ## Sprint 80.8: The live first-miss / reuse / resource-admission gate + Register-3 ledger ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/fixture/dhall/phase_70_engine_cache.dhall` (the gate workflow naming a
-linux-cpu engine identity), `tools/determinism_jitcache_gate.py`, and `test/spec/live/DeterminismLiveSpec.hs`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: live on the single-node `kind` cluster. Every behavioural claim — arm executed,
-handle live, zero public-registry pull, cross-pod reuse, on-disk peak and eviction — is read from an OS-boundary
-observer or a postflight disk measurement, never a self-report, and each capacity refusal is tagged and
-pre-effect. The numbered validation list below carries each.
-**Docs to update**:
-`documents/engineering/content_addressing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-80
-status when the gate passes), `DEVELOPMENT_PLAN/substrates.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`content_addressing_determinism.md §4.5`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
 end-to-end under [`testing_doctrine.md §2 — Register 3`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing):
 wire the resolver, the bounded per-node cache owner, and client reuse through one live linux-cpu workload and
@@ -856,6 +680,7 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
 (Phases 60/71).
 
 ### Deliverables
+
 - The gate `.dhall` naming exactly the one representative identity `EngineRuntime.LlamaCppCpu@<pinned-ver>`
   ([Gate integrity](#gate-integrity) concrete corpus), driving one cache-owner pod, two client pods on the same
   node, and the oracle-pinned resident-plus-temp over-budget, digest-size-conflict, deletion-credit,
@@ -866,7 +691,7 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
   `src/Amoebius/Jit/*` exists.
 - The gate harness asserting: (i) first-miss materialization whose stored bytes sha256-match the committed pin,
   the named arm actually ran (OS-boundary argv-shim/`strace` or registry audit log), the handle is live (reports
-  the pinned `--version`), and **zero public-registry pull** by live egress/CNI capture plus the `distribution`
+  the pinned `--version`), and **zero public-registry pull** by live egress/CNI capture plus the `registry:2`
   audit log; (ii) exact provision-derived CPU/memory/`ephemeral-storage` and `emptyDir.sizeLimit` on the owner,
   with the ephemeral request covering that volume bound plus writable/log headroom and no writable `hostPath`;
   (iii) a second-client cache HIT with no re-materialization, proven by unchanged resident inode/mtime and zero
@@ -881,13 +706,14 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
   **deferred** (Phases 60/71), with cross-node and cross-substrate reuse explicitly not asserted.
 
 ### Validation
+
 1. On the live linux-cpu `kind` cluster, the first client resolves `EngineRuntime.LlamaCppCpu@<pinned-ver>`
    through the cache owner on first miss into its `CacheBudget`-bounded `emptyDir`, the stored bytes sha256-match
-   the committed `test/oracle/determinism_jitcache/oracle.dhall` pin, the named arm actually ran (attested by the OS-boundary
-   argv-shim/`strace` recording the absolute-path `g++` compile on `build`, or the `distribution` registry audit
+   a separately authored Haskell content-identity expectation, the named arm actually ran (attested by the OS-boundary
+   argv-shim/`strace` recording the absolute-path `g++` compile on `build`, or the `registry:2` audit
    log recording the in-cluster serve on `download`), and the handle is live (reports the pinned `--version`).
    "Zero public-registry pull authored by URL" is discharged by live network observation — a CNI/egress capture
-   plus the `distribution` audit log showing no request to any public registry host — **in addition to** the
+   plus the `registry:2` audit log showing no request to any public registry host — **in addition to** the
    dhall-typecheck type-level foreclosure; the type check alone does not satisfy this clause. The owner has exact
    provision-derived CPU/memory/`ephemeral-storage` requests+limits and `emptyDir.sizeLimit` matching its pure
    provision, its request covers those bounds plus writable/log headroom, and it has no writable `hostPath`. A second
@@ -909,11 +735,13 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
    cross-node/cross-substrate reuse as **UNVERIFIED**.
 
 ### Remaining Work
+
 The Tier-2 model and Tier-3 CUDA kernel reuse remain assigned to Phases 91 and 93 respectively.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/content_addressing_doctrine.md` — the §6 proven/tested/assumed table gains an
   amoebius-tested linux-cpu same-substrate reproducibility datapoint, and §4.5's Tier-1 engine cache gains its
   first amoebius live datapoint (first-miss resolve + per-node owner reuse on linux-cpu), both alongside the
@@ -928,9 +756,9 @@ The Tier-2 model and Tier-3 CUDA kernel reuse remain assigned to Phases 91 and 9
 - `documents/engineering/resource_capacity_doctrine.md` — record that the §3/§4 `Quantity`/`fits` fold is reused
   as the provision-derived peak `≤ CacheBudget` bound, keeping "more cached than fits" a checked `provision-seal`
   rejection, and that the canonical provision matrix and sealed whole-deployment provision boundary are
-  instantiated by the live recompute runs and the cache owner/clients (gate-validated by the Phase-0 resource
-  witnesses `test/golden/determinism_jitcache/resource_shape.json` and `test/oracle/determinism_jitcache/resource_shape.json` and the
-  resource mutants `test/mutant/determinism_jitcache/determinism/*`, `test/mutant/determinism_jitcache/cache/*`); record that linux-cpu datapoint here in
+  instantiated by the future live recompute runs and the cache owner/clients (the future Phase-80 gate must use
+  separately authored Haskell resource witnesses and Haskell mutation operators, materializing any serialized
+  observations beneath `.build/test-corpora/**`); record that linux-cpu datapoint here in
   the plan, never as doctrine status.
 - `documents/engineering/substrate_doctrine.md` — record that the linux-cpu substrate fingerprint consumed by
   `experimentHash`, and every subprocess the resolver spawns, are first exercised here, gathered/invoked by
@@ -943,6 +771,7 @@ The Tier-2 model and Tier-3 CUDA kernel reuse remain assigned to Phases 91 and 9
   technique) that a forged content/cache name and an ambient-entropy seed remain unrepresentable.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-80 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 80's gate substrate (linux-cpu) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Kernel/ContentAddress.hs`,
@@ -955,6 +784,7 @@ The Tier-2 model and Tier-3 CUDA kernel reuse remain assigned to Phases 91 and 9
   design-first rows.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker and phase ordering this document sits under
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (content-addressed names, the substrate folded into identity, the honest reproducibility ceiling, and ML engines jit-resolved into a bounded cache, never baked or URL-fetched)

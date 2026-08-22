@@ -5,29 +5,31 @@
 > **Read this if**: the paired-plan compiler, its canonical artifact boundary, or its Register-1 evidence has
 > to change.
 
-This phase owns the pure compilation decision from one constructor-private bound program to one inseparable
-artifact set. It does not interpret either plan, serve HTTP, publish a release, enforce current authority at
-runtime, or prove browser, provider, or edge behavior.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 40.1: Paired semantic projection ✅](#sprint-401-paired-semantic-projection-)
-- [Sprint 40.2: Canonical artifacts, digests, and demand ✅](#sprint-402-canonical-artifacts-digests-and-demand-)
-- [Sprint 40.3: Calculus projection and phase seal ✅](#sprint-403-calculus-projection-and-phase-seal-)
+- [Sprint 40.1: Paired semantic projection ⏸️](#sprint-401-paired-semantic-projection-)
+- [Sprint 40.2: Canonical artifacts, digests, and demand ⏸️](#sprint-402-canonical-artifacts-digests-and-demand-)
+- [Sprint 40.3: Calculus projection and phase seal ⏸️](#sprint-403-calculus-projection-and-phase-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -35,103 +37,89 @@ runtime, or prove browser, provider, or edge behavior.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. The complete twelve-sided gate passes on natural `darwin/arm64`, untranslated.
-Four logical projections match an independent relation; four canonical regression artifacts and their four
-run-time-derived digests are byte-exact; six demand cells, four pinned negatives, two fresh-process runs, and
-all six exact-locus mutants pass. The real five-calculus composition projects counts `4,6,14,2,6` to resource
-vector `5,32,0,0`. All 17 metrics match and 61 surfaces join to 72 enumerated items. Attestation
-`sha256:9dde7747671bfbc30e18c84853a2c940e91bd01ad0ee2c314da6891433ab4010` binds source
-`sha256:6fdf9fdecbff0cb8…` over 2,263 files.
+⏸️ Blocked — NOT VALIDATED.
 
-**Activated 2026-08-21** when Phase 39 sealed. The generative re-baseline invalidated the earlier result because
-it had no calculus projection or natural-architecture record.
+Blocked by redesigned Phase 39, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
 ---
 
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+
 ## Phase Summary
 
-One private `BoundUiProgram` produces public client instructions, a serializable private server dispatch
+**Target capability — NOT VALIDATED.** One private Haskell `BoundUiProgram` is to produce public client instructions, a serializable private server dispatch
 manifest, public contracts, a content manifest, complete authority/content identities, and finite client/server
 runtime demand together. Exact action, route, contract, audit, handler, and resolved-link projections cannot
 drift between halves. Public output excludes private fields, handles, policies, provider coordinates, and raw
 effect destinations.
 
-The compiler exposes no client-only or server-only entry point. Canonical ordering and encoding make repeated
+The target compiler exposes no client-only or server-only entry point. Canonical ordering and encoding make repeated
 fresh compilation stable, while changing or omitting an authority-bearing source changes the authority digest.
-The outputs remain generated release/content artifacts; the four committed JSON files are regression fixtures,
-not independently authored statements of intended semantics.
+All serialized plans, manifests, cases, and mutations are generated lazily beneath `.build/**`. Separately
+reviewed Haskell semantics, never committed JSON or renderer-produced bytes, constrain the projection.
 
-**Phase scope:** one cohesive claim — one sealed program compiles purely and deterministically to one matching,
+**Phase scope:** one target claim — one sealed Haskell program compiles purely and deterministically to one matching,
 finite artifact set. Interpretation, publication, serving, and live freshness split out.
 
-**Substrate:** `none` — compilation, reference comparison, calculus composition, and mutants are pure host
-processes with credentials scrubbed and networking denied.
+**Substrate:** `none` — compilation, reference comparison, calculus composition, and generated mutations are
+pure; the canonical Haskell gate has no credentials or network.
 
 **Lane:** `none` ([§L](development_plan_standards.md#l-one-substrate-discipline)).
 
-**Register:** 1 — pure/golden. Logical projection is independently constrained; interpreter fidelity, release
+**Register:** 1 — pure/semantic-oracle. Logical projection is independently constrained; interpreter fidelity, release
 publication, edge enforcement, and live authority freshness remain UNVERIFIED.
 
-**Depends on:** [Phase 10](phase_10_calculus_composition.md) — actual five-calculus composition; [Phase
-39](phase_39_ui_effect_binding.md) — the sealed `BoundUiProgram` accepted by the compiler.
-
-**Gate:** `python3 tools/run_phase_gate.py 40` passes the independent semantic projection, canonical
-regression, digest, demand, refusal, fresh-process, five-calculus, paired-mutant, network-observer,
-natural-architecture, surface, containment, and attestation checks in [Gate integrity](#gate-integrity).
-
----
+**Depends on:** [Phase 39](phase_39_ui_effect_binding.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 40`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-`projection_rows.tsv` states four logical client/server/route/contract projections. The Haskell suite compares
-production output with `PlanCompilerReference`, which imports neither the production binder nor compiler.
-Client/server action key parity is checked directly, and authority inputs are assembled independently.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-The four canonical JSON goldens were committed with the implementation. They therefore detect byte drift but
-do not establish preimplementation semantic intent; the gate credits the independent logical rows for meaning
-and the goldens only for regression and canonical encoding. Concrete digest values are not committed: the gate
-hashes the goldens at run time through the distinct reference adapter, records the observations beneath
-`.build/**`, and rejects a second tracked digest table.
-
-Four specific negatives cover private-field projection, link-as-effect escape, changed authority input, and
-omitted authority input. Two cache-disabled fresh processes compile opposite insertion orders and must emit
-identical bytes. Each of six mutants reports its exact locus: dropped server action, swapped action targets,
-private-field emission, client-only authority digest, link navigation treated as fetch, or preserved insertion
-order. A generic non-zero exit is insufficient.
-
-Artifact, budget, lift, workflow, and evidence components carry the `4,6,14,2,6`
-artifact/demand/check/workflow/mutant counts and compose to resource vector `5,32,0,0`. Normal and Darwin
-network-denied executions report both acceptance tokens. Generated plans, results, ledgers, traces, and Cabal
-state remain beneath `.build/**`.
-
-Passing proves pure paired projection, canonical regression stability, finite demand, and determinism for this
-bounded corpus. Browser and server interpretation, release publication, edge enforcement, provider behavior,
-and request-time freshness remain UNVERIFIED.
-
-- **Extension conformance (§M.13).** Not applicable. This core paired-plan compiler declares no extension or
-  linked set.
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — one sealed Haskell program compiles purely to a matching finite artifact set; serialized output and mutations are lazy `.build/**` products, not tracked authority. Interpretation and live freshness are not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 40` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 39 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md` §3 — targets and recipes](../documents/engineering/jit_artifact_doctrine.md#3-targets-and-recipes): each emitted plan is generated from typed source rather than authored as product input.
-- [`low_code_ui_runtime_doctrine.md` §3 — one checked value, two runtime plans](../documents/engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans): both plan halves are inseparable projections of one bound value.
-- [`low_code_ui_runtime_doctrine.md` §9 — routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge): route and action projections retain mandatory policy references.
-- [`low_code_ui_runtime_doctrine.md` §15 — versioning, rollout, and generated artifacts](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): complete authority/content identities and immutable per-app plans are derived.
-- [`ui_realtime_coordination_doctrine.md` §4 — typed routing and resume envelope](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): both halves carry the scoped routing identity while Redis remains platform-internal.
-- [`generated_artifacts_doctrine.md` §2 — what is generated](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what): plan and manifest output remains generated and uncommitted.
-- [`illegal_state_security.md` §3.83](../documents/illegal_state/illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed): complete freshness identity is mandatory.
+- [`jit_artifact_doctrine.md` §3 — Targets and recipes](../documents/engineering/jit_artifact_doctrine.md#3-targets-and-recipes): each emitted plan is generated from typed source rather than authored as product input.
+- [`low_code_ui_runtime_doctrine.md` §3 — One checked value, two runtime plans](../documents/engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans): both plan halves are inseparable projections of one bound value.
+- [`low_code_ui_runtime_doctrine.md` §9 — Routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge): route and action projections retain mandatory policy references.
+- [`low_code_ui_runtime_doctrine.md` §15 — Versioning, rollout, and generated artifacts](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): complete authority/content identities and immutable per-app plans are derived.
+- [`ui_realtime_coordination_doctrine.md` §4 — Typed routing and resume envelope](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): both halves carry the scoped routing identity while Redis remains platform-internal.
+- [`generated_artifacts_doctrine.md` §2 — What is generated (and from what)](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what): plan and manifest output remains generated and uncommitted.
+- [`illegal_state_security.md` §3.83 — A UI plan executed after an authority-bearing source changed](../documents/illegal_state/illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed): complete freshness identity is mandatory.
 
 ---
 
 ## Sprints
 
-## Sprint 40.1: Paired semantic projection ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done
-**Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest}.hs`, `test/fixture/ui_plan_compiler/projection_rows.tsv`, `test/spec/ui/PlanCompilerReference.hs`
-**Blocked by**: [Phase 39](phase_39_ui_effect_binding.md) gate
-**Independent Validation**: four normalized production projections equal the separately authored logical relation, and client/server action keys agree exactly
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/illegal_state/illegal_state_security.md`
+## Sprint 40.1: Paired semantic projection ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -151,15 +139,11 @@ Adopt one compiler entry point whose only successful result contains both public
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 40.2: Canonical artifacts, digests, and demand ✅
+## Sprint 40.2: Canonical artifacts, digests, and demand ⏸️
 
-**Status**: Done
-**Implementation**: `src/Amoebius/Ui/Compile/{Manifest,Demand}.hs`, `test/fixture/ui_plan_compiler/{client_plan,ui_server_plan,public_contracts,content_manifest}.golden.json`, `test/spec/ui/UiPlanCompilerSpec.hs`
-**Blocked by**: Sprint 40.1
-**Independent Validation**: four regression artifacts are canonical and byte-stable, four digests are derived independently at run time, six demand cells are exact, and opposite insertion orders agree across fresh processes
-**Docs to update**: `documents/engineering/generated_artifacts_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -181,15 +165,11 @@ semantic intent.
 
 ### Remaining Work
 
-None. The same-commit goldens remain regression fixtures and are not credited as independent semantic oracles.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The same-commit goldens remain regression fixtures and are not credited as independent semantic oracles.
 
-## Sprint 40.3: Calculus projection and phase seal ✅
+## Sprint 40.3: Calculus projection and phase seal ⏸️
 
-**Status**: Done
-**Implementation**: `test/oracle/ui_plan_compiler/{calculus_projection,validation_locus}.tsv`, `test/oracle/ui_plan_compiler_surfaces.tsv`, `test/mutant/ui_plan_compiler/**`, `tools/ui_plan_compiler_gate.py`
-**Blocked by**: Sprint 40.2
-**Independent Validation**: real five-calculus values match all four projection rows; normal and Darwin network-denied executions report both acceptance tokens; six mutant processes report exact loci
-**Docs to update**: `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, `DEVELOPMENT_PLAN/system_components.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -210,13 +190,13 @@ evidence.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ---
 
 ## Documentation Requirements
 
-**Engineering docs updated with this seal:**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — pure paired projection, calculus evidence, and
   honest runtime residues.
@@ -226,7 +206,7 @@ None.
   runtime claims.
 - `documents/illegal_state/illegal_state_security.md` — authority/refusal evidence and exact mutants.
 
-**Cross-references updated:**
+**Cross-references to add:**
 
 - `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, and
   `DEVELOPMENT_PLAN/system_components.md` — seal, substrate, gate, and owned modules.

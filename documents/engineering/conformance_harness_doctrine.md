@@ -1,204 +1,192 @@
 # The No-Cluster Conformance Harness
 
-> **Purpose**: Single source of truth for the discipline that lets amoebius validate the overwhelming majority
-> of its behaviour **before any cluster exists** — the pre-cluster conformance spine that exercises
-> decode → bind/expand → plan/resolve infrastructure → provision → `renderAll` → plan → dry-run end to end in Registers 1 and 2, and the
-> load-bearing invariant that **rendering a plan must never require live infrastructure**.
-> **Read this if**: the evidence a claim rests on has to be located, or a new claim has to be attached to a register.
+> **Purpose**: Define the hardware-free Haskell harness that validates the complete DSL pipeline before any
+> host, image, registry, cluster, accelerator, or cloud work may open.
+> **Read this if**: a language, generator, planner, renderer, or dry-run claim must be validated without using
+> later infrastructure as a proxy.
 
-This document owns the harness that ties a claim to the register that establishes it, and the ledger rows a
-run emits. It does not own the registers themselves, owned by
-[testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing), nor the honesty
-vocabulary the rows are phrased in, owned by
-[documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
+This document owns the pre-hardware spine and its promotion barrier. Register definitions belong to
+[`testing_doctrine.md`](./testing_doctrine.md); gate qualification and human promotion belong to the
+[development-plan gate standard](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md).
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/workflow_calculus_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/workflow_calculus_doctrine.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+## Contents
+
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. The registers, as amoebius uses them for pre-cluster validation](#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
+- [3. The load-bearing invariant: rendering never touches live infrastructure](#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
+- [4. The spine: decode → legality → bind/expand → plan/resolve → provision → renderAll → plan → dry-run → fake apply](#4-the-spine-decode--legality--bindexpand--planresolve--provision--renderall--plan--dry-run--fake-apply)
+- [5. The pre-hardware promotion barrier](#5-the-pre-hardware-promotion-barrier)
+- [6. Honesty: what the harness does and does not establish](#6-honesty-what-the-harness-does-and-does-not-establish)
+- [7. Planning ownership](#7-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
 ## 1. Why this doctrine exists
 
-A deployment system is tempting to treat as untestable without the thing it deploys — the position that the
-manifests cannot be known correct until a cluster admits them. Taken at face value that defers almost all
-validation to the one setting that is slowest, most expensive, and least reproducible — a live cluster — and
-leaves the design unverifiable until late.
+A deployment language becomes hard to validate when its first complete execution requires the platform it is
+supposed to describe. That dependency invites a dangerous shortcut: a container, cluster, or GPU comes up, so
+the language is described as valid even though decode, legality, binding, planning, rendering, or dry-run was
+never independently challenged.
 
-That framing is false for amoebius because amoebius's behaviour is, by construction, **a pure value that is rendered**: the reconcile plan is `chain :: cfg -> [Step]`, the manifests are deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`, the DSL is decoded and then fully provisioned against its target by total functions, and the formal model is a `Model` value. Everything up to the point of *applying* an effect is a pure function of committed source plus an explicit authenticated observation fixture; no pure test contacts infrastructure. The seed projects show it is reachable at scale — `prodbox` validates on the order of a thousand behaviours in a pure, no-process suite with a single thin IO seam. That is evidence about a seed and proves nothing about amoebius ([`lift_and_compose_doctrine.md` §3](./lift_and_compose_doctrine.md#3-a-seed-is-a-reference-implementation)).
+amoebius instead makes every pre-effect stage a Haskell value and validates their composition before any
+hardware-specific work. The live platform later tests fidelity and real effects; it does not supply first
+evidence that the language means what its contract says.
 
-amoebius states it as a rule: **build so that decode → bind/expand → `planInfrastructure` → either
-semantically lock the non-renderable infrastructure batch or supply its authenticated materialization fixture →
-provision → `renderAll` → plan → dry-run is exercised in-process against independently authored semantic
-oracles before any
-live-infrastructure work, for every feature.** What this forecloses is
-a design whose correctness is unknown until a cluster is stood up; the cluster is reserved for the residue that
-genuinely requires it (that pods schedule, that the LB comes up, that a partition heals).
-
-The register *definitions* — Pure, Boundary-integration, Test-`.dhall`-topology — are owned by
-[testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing). This document owns the
-**pre-cluster spine**: how Registers 1 and 2 are composed into a conformance harness, and the invariant that
-keeps them honest.
+The tracked source boundary is closed. Product, DSL, generator, test, oracle, fake, and harness logic is
+Haskell. `pb/**` exists only to ensure/build/exec the binary. Any Dhall, PureScript, JavaScript, shell, Proto,
+Pulumi program, manifest, fixture, golden, inventory, or other serial form used by the harness is generated
+when consumed beneath `.build/**`. Operator-authored runtime input is external data, not repository source.
 
 ---
 
 ## 2. The registers, as amoebius uses them for pre-cluster validation
 
-Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)):
+The conformance harness uses two final registers and one supporting activity:
 
-- **Register 1 — pure / golden (no cluster, no live infrastructure).** A **pinned, hermetic, deterministic checker over committed source is Register 1 even though it is a separate process** — TLC through the pinned
-  `tla2tools.jar` is the case in point, and a verb lifted into the validation frame — the same checker run through `docker run --rm` into `amoebius-base` — is Register 1 on the same grounds ([validation_frame_doctrine.md §3](./validation_frame_doctrine.md#3-why-a-frame-lifted-gate-is-still-substrate-none)). What distinguishes Register 2 is neither process nor container count but a **fake tool standing in for infrastructure**; TLC fakes nothing, and the frame carries real compilers. DSL decode and every illegal-state foreclosure the
-  decoder enforces; whole-deployment `renderAll` and the correctness of the emitted objects (a hardened `securityContext`, a route
-  from a live service handle, a derived NetworkPolicy — golden-tested on the *rendered* output); the `[Step]`
-  plan and its `--dry-run`; the capability→provider→shape binder; the capacity/topology folds; the formal
-  `Model` explorer + the emitted `.tla` checked by TLC ([formal_model_doctrine.md](./formal_model_doctrine.md));
-  the Phase-11 instance is built and validated over `ToyModel` with resolved compatible TLC, 25 authored
-  renderer-semantic facts, an eight-case invariant truth table, 200 differential models, and no live
-  infrastructure; the Phase-17 instance is built and validated over both branches of `GatewayMigration`
-  with exact explorer/TLC state-set agreement, bounded IOSimPOR safety schedules, mutation sensitivity, and a
-  structural-cutoff property, also with no live infrastructure;
-  the bounded `UiSource` algebra, scoped identity/authorization checks, binding, and deterministic
-  `ClientPlan`/`UiServerPlan` compilation.
-- **Register 2 — boundary integration with fakes (no cluster).** The real amoebius binary run with fake
-  `helm`/`kubectl`/`docker`/`pulumi` (or a fake interpreter over the `[Step]`/effect data) that record their
-  argv and applied bytes, asserting the exact commands and manifests — plus the generic PureScript UI
-  interpreter and UI-server responsibility run locally against fake identity/workflow/storage boundaries,
-  driven end to end with fresh challenges and OS-boundary HTTP transcripts.
-- **Register 2.5 — deterministic simulation (no cluster).** The *real* daemon/reconciler code, lifted onto
-  `io-classes`, run under `IOSim`/`IOSimPOR` against a modeled, fault-injectable environment (fake
-  Pulsar/MinIO/apiserver/route53/Vault/clock) — concurrent schedules and injected partition/reorder/redelivery/
-  crash, deterministically replayable. This exercises the daemon's real *schedule* under faults, which Registers
-  1 and 2 structurally cannot reach; owned by
-  [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md) (register definition in [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)).
-  The substrate serving this activity is built and gated at Register 2 in
-  [Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md); later phases replay their own
-  production reconcilers on it.
-- **Register 3 — live infrastructure only.** The residue that cannot be settled by inspecting source or by
-  simulation: the apiserver admitting and the scheduler placing pods, the LoadBalancer coming up, etcd forming
-  quorum, a VM interposing, a broker offloading, geo-replication lag, DNS propagation, chaos/partition healing —
-  and that the real substrates behave as Register 2.5 models them.
+- **Register 1** runs the real Haskell value pipeline with separately reviewed Haskell semantic oracles. It
+  uses no live service, container, registry, cluster, credential, or hardware-specific tool.
+- **Register 2** runs the real Haskell binary against fake effect boundaries observed outside the subject. The
+  fakes record argv, request bytes, ordering, and cleanup; they do not decide the expected behaviour.
+- **Register 2.5** may run real concurrent Haskell code under a deterministic modeled environment. It is a
+  supporting activity, never a phase's final register and never evidence of real-provider fidelity.
 
-The conformance harness is Registers 1, 2, and 2.5. Register 3 is the acceptance gate of each live phase, not
-part of the harness.
+Register 3 is deliberately absent. Live infrastructure is the residue tested by later phases only after the
+pre-hardware promotion barrier is human-approved.
+
+A compiler or model checker invoked as a deterministic tool does not by itself make a run Register 2. What
+matters is the claim: a fake standing in for an effect boundary is Register 2; a pure semantic check remains
+Register 1. Neither register requires `amoebius-base` or any other published image.
+
+---
 
 ## 3. The load-bearing invariant: rendering never touches live infrastructure
 
-**Rendering a plan, a manifest set, a `--dry-run`, or a `.tla` MUST NOT require, contact, or depend on live infrastructure.** A render is a pure function of committed source and completes in-process with no apiserver, no
-cloud credentials, no broker, no Vault. This is the invariant that makes Register 1 possible at all, and the
-sibling prodbox enforces it explicitly ("rendering a plan must not require live infrastructure — `charts
-reconcile --dry-run` renders without a cluster"). Prerequisite checks (is a cluster reachable, are credentials
-present) belong on the *apply* path, never the *render* path.
+Decode, legality, bind/expand, infrastructure planning, provision from explicit observations, `renderAll`,
+plan construction, and `--dry-run` must complete without contacting a container engine, registry, cluster,
+provider, broker, Vault, DNS authority, GPU, or other live service.
 
-Two consequences follow directly:
+Every ambient fact is either:
 
-- The `--dry-run` preview is **byte-for-byte** what a live apply would submit, because both consume the same
-  rendered value ([generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md)); the preview is a golden
-  fixture of the renderer, not a committed artifact.
-- A large share of the illegal-state catalog is caught here, not at runtime: the **rendered-artifact-oracle**
-  validation locus ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)) — an unsafe manifest is not a value
-  `renderAll` can return, and a golden test over the emitted objects proves it without a cluster.
+1. an authored Haskell input to the pure claim;
+2. an authenticated observation represented by a Haskell value at a named boundary; or
+3. an effect deferred to the apply interpreter and marked `UNVERIFIED` by the pre-hardware result.
+
+No render path probes credentials or availability. The live apply consumes the same rendered value that
+dry-run exposes. A later image replay may confirm environmental parity, but it cannot change or authorize the
+language semantics established here.
 
 ---
 
 <a id="4-the-spine-decode--validate--render--plan--dry-run"></a>
 
-## 4. The spine: decode → bind/expand → plan/resolve infrastructure → provision → `renderAll` → plan → dry-run
+## 4. The spine: decode → legality → bind/expand → plan/resolve → provision → `renderAll` → plan → dry-run → fake apply
 
-For every feature, the harness exercises the full pure pipeline and locks it:
+One cleanroom run exercises every stage, in order, through production entry points:
 
-1. **Decode** — an authored `InForceSpec` fixture passes dhall-typecheck (`dhall type`) and gadt-decode (the total decoder),
-   or a negative fixture is rejected at its tagged locus.
-2. **Bind and source-expand** — capability/provider/shape selection emits every app/init/sidecar, standard
-   platform service, volume/cache owner, and accelerator need into one `BoundDeployment`. Each ordinary
-   runnable remains an unprovisioned `BoundExecutionUnit` with stable id/revision and arm-specific
-   cardinality/rollout; no replica/per-node identity or epoch is materialized yet.
-3. **Plan or resolve infrastructure** — `planInfrastructure` derives the exact demand from that
-   `BoundDeployment` and the declared standalone supply or forest budget. `InfrastructureRequired` yields one
-   non-renderable `ProvisionedInfrastructurePlan` whose `ProvisionedProviderActionBatch` owns the closed
-   cloud-provider/SSH-host actions, Pulumi graph, checkpoints, dependencies, concurrency, and
-   cloud-quota/SSH-child-budget partition; those bytes are golden-locked. The Kubernetes branch supplies a
-   committed authenticated-materialization fixture (including a consumed receipt for the required-plan case),
-   constructing the exact `ProvisionContext`; the explicit already-materialized arm covers fixtures needing
-   no initial provider or SSH-host mutation.
-4. **Provision** — topology/distinctness, placement, reservation/finite-limit/physical-peak,
-   named-storage-pool, quota,
-   accelerator, and per-device-memory folds first materialize exact source/revision/ordinal
-   `MaterializedExecutionInstance`s and every planned steady/rollout `ExecutionEpoch`, each keyed by
-   `PlannedExecutionSlotId`. A separate normalized-observation fixture algebra is keyed by
-   `ObservedExecutionId = PodUid | HostProcessInstanceId | HostReservationId`; it never turns live UIDs or
-   ledger-only host reservations into planned slots. Provision derives one model-pinned
-   `KubeletRuntimeMetadataDemand` per applicable planned or observed identity and then runs over the complete
-   expansion. Failure returns a structured `Left`; success alone constructs the opaque whole
-   `ProvisionedSpec` and its sealed identity-keyed `ProvisionedRenderSourceSet`.
-5. **`renderAll`** — the sole public manifest function,
-   `renderAll :: ProvisionedSpec -> [K8sObject]`, privately total-maps that equal-keyed source set; an independently authored semantic oracle pins the complete identity/kind/activation/reconcile/workload projection and asserts the by-construction safety properties on the output. The root-ledger CAS state and Lease holder/renewal state are absent from the generic SSA projection and remain typed-action fields. `renderAll` contains all four `RenderActivation` classes; the plan preserves their disjoint identity partition so later-stage objects are visible in desired output without becoming early-stage apply actions. 6. **Plan** — `chain` receives a checked plan config containing the whole `ProvisionedSpec`, produces the `[Step]` value, and `--dry-run` renders it; a golden test pins the plan. 7. **Fake apply (Register 2)** — the binary runs the plan against fake tools; the recorded commands and applied bytes are asserted. 8. **Simulate (Register 2.5)** — where a feature carries real concurrency (a reconcile loop, a failover
-   takeover, a dedup fold), the real code runs under `IOSim`/`IOSimPOR` against the modeled faulty environment,
-   asserting its invariants under injected schedules and faults ([deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md)).
+1. **Decode.** A Haskell-authored source value is encoded through the production codec where serialization is
+   part of the contract and decoded through the production entry point. Paired negatives pin exact diagnostic
+   code and locus. No checked-in serialized fixture is read.
+2. **Legality.** The decoded value passes the complete illegal-state and extension-law checks. Each
+   unrepresentability claim has a minimally different positive/compile-fail pair, and runtime refusals have
+   exact tags rather than generic failure.
+3. **Bind and expand.** Capability, provider, shape, identity, service, storage, and accelerator declarations
+   expand into the closed bound vocabulary. The oracle independently enumerates the expected semantic facts;
+   it does not reuse the binder's fold.
+4. **Plan or resolve infrastructure.** Demand, supply, provider actions, dependencies, concurrency, and
+   materialization requirements become an explicit Haskell plan. A non-renderable requirement remains typed
+   as such; no live probe resolves it during rendering.
+5. **Provision.** Explicit, authenticated observation values satisfy the plan and produce the opaque
+   provisioned specification. Missing, stale, mismatched, over-capacity, or foreign observations are paired
+   negatives.
+6. **`renderAll`.** The sole public renderer maps the complete provisioned specification to semantic objects.
+   Independently reviewed predicates check identity, kind, activation, reconcile mode, safety fields, routes,
+   storage, isolation, and completeness. Serialized manifests are lazy `.build/**` outputs only.
+7. **Plan.** The production planner consumes the provisioned value and produces the complete ordered effect
+   program. A separate Haskell oracle checks operations, dependencies, absolute-tool requirements, and
+   teardown obligations.
+8. **Dry-run.** The real binary renders that plan without executing effects. The run proves zero effect
+   boundary calls through an external observer and checks semantic equality with the plan from step 7.
+9. **Fake apply.** The same plan runs through observed fake boundaries. Fresh challenges, exact argv/request
+   observations, paired failures, bypass probes, and cleanup show which effects the binary attempted. This
+   establishes boundary protocol, not live-provider fidelity.
 
-Nothing in steps 1–8 requires a cluster. The single IO seam (the step that would actually invoke a real tool or
-the real apiserver) is the only thing deferred to Register 3 — and even its *behaviour under faults* is
-exercised against modeled substrates in step 8, so what Register 3 uniquely adds is **fidelity** (that the real
-substrates behave as modeled), not first exposure.
+The run starts with `.build/**`, `.data/**`, `.test_data/**`, generated formats, and condemned legacy copies
+absent. It generates everything it consumes lazily, records actual read paths, and fails if discovery is empty
+or a stage is skipped. Each stage has a changed-production-subject mutant whose applied change is witnessed and
+whose named oracle row turns red while unrelated controls stay green.
 
 ---
 
-## 5. Honesty: what the harness does and does not establish
+## 5. The pre-hardware promotion barrier
 
-Phase 33 realizes the `renderAll` step in Register 1: eighteen exact semantic rows cover 164 objects, canonical
-Aeson round trips, four activations, all reconcile modes, derived namespaces/API versions, and the non-vacuous
-hardened-resource, ingress, and independently rederived NetworkPolicy predicates. Its twelve paired seeded
-mutants fail only at their named properties. This is rendered-output evidence, not evidence that a
-live apiserver, admission stack, kubelet, or CNI enforces the values.
+[Phase 49](../../DEVELOPMENT_PLAN/phase_49_self_referential_gates.md) owns the integrated no-hardware barrier.
+Its candidate is admissible only when one qualified Haskell harness run demonstrates all nine stages from an
+empty generated tree and joins the complete earlier DSL/capability surface in both directions.
 
-Phase 34 realizes the Plan and fake-apply steps. Register 1 consumes two authored cases, checks all nineteen
-ordered Plan semantics, and establishes canonical generated encodings with zero actions executed; Register 2
-drives the real executable against absolute-path fake tools and pins argv plus exact relayed input bytes. These
-checks establish the emitted boundary protocol, not real-tool fidelity or cluster convergence.
+The barrier additionally requires:
 
-Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)
-and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md):
+- qualification against constant-success, no-op, wrong-output, empty-discovery, missing-oracle, skipped/no-op
+  mutant, stale-evidence, self-observer, bypass, and residue sabotage;
+- separately reviewed Haskell oracles for every stage and recorded reviewer provenance;
+- a subject-change witness and intended red locus for every required mutant;
+- explicit `UNVERIFIED` live/runtime residue;
+- zero active legacy findings owned by Phases 0–49; and
+- an external human approval bound to the source, contract, harness, and raw observations.
 
-- A green harness establishes that the spec **decodes, fully expands, produces the exact infrastructure plan or validates
-  its materialization fixture, provisions, renders coherently, and produces an
-  exact plan** — the
-  spec-composition and rendered-output layers.
-- It establishes **nothing** about whether the physical effects converge (Register 3). A green harness is quoted as
-  "decodes + provisions + renders coherently + plan is exact," never as "the cluster is correct."
-- A green **Register 2.5** run tests that the *real code upholds its invariants under the modeled schedules and
-  faults* — a genuinely stronger claim than the fake-tool boundary — but says **nothing** about whether the real
-  Pulsar/apiserver/route53 behave as modeled; that fidelity is an assumed premise, discharged by a narrow
-  Register-3 conformance check ([deterministic_simulation_doctrine.md §5](./deterministic_simulation_doctrine.md#5-what-dst-establishes-and-the-one-premise-it-buys)).
-- The blindness between registers is load-bearing: a green Register-1 suite says nothing about what Register 3
-  would find, a fake-tool Register-2 run says nothing about a real broker's behaviour, and a green Register-2.5
-  run says nothing about whether the modeled broker matches the real one.
+The self-referential workflow representation is itself a subject of this barrier, not its authority. It must
+agree with the independently reviewed runner under clean and sabotaged cases, and neither representation may
+promote status.
+
+Phase 50 and all later work remain blocked until the human approval exists. A successful container build,
+registry push/pull, host setup, accelerator calculation, kind cluster, or live deployment cannot substitute
+for or backfill this barrier.
 
 ---
 
-## 6. Planning ownership
+## 6. Honesty: what the harness does and does not establish
 
-This document is normative. Its Phase-11 Register-1 explorer/TLC instance is built; the remaining harness is
-stood up across later pre-cluster phases, and each live phase adds its
-Register-3 gate. Phase order, status, and gates live only in
-[DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); the requirement that every phase's ledger records
-which register it reached is owned by [development_plan_standards.md](../../DEVELOPMENT_PLAN/development_plan_standards.md).
-Only that Phase-11 instance is a tested amoebius result here; later register instances remain design intent.
+A human-approved barrier establishes that, for the reviewed corpus and source snapshot, the complete Haskell
+pipeline produced the independently expected semantic values and boundary requests, caught its specified
+mutants, refused its sabotage cases, and left no observed residue.
+
+It does not establish:
+
+- that a live API admits or enforces the generated requests;
+- that a provider, cluster, network, storage system, browser, or accelerator behaves as modeled;
+- correctness beyond the reviewed oracle and corpus;
+- future repeatability or another architecture; or
+- that compiler, kernel, reviewer, or human approval key is uncompromised.
+
+Those layers remain explicit assumptions or `UNVERIFIED` and are discharged only by their later numerical
+owners. Hardware work adds fidelity evidence; it never upgrades an omitted language claim.
+
+---
+
+## 7. Planning ownership
+
+This doctrine is normative. The development plan owns current status and the exact phase contracts. All
+numbered phases are presently NOT VALIDATED. Earlier scoped runs, attestations, seals, hashes, or implementation
+claims are invalidated and are not current instances of this doctrine.
 
 ---
 
 ## Related Documents
-- [Engineering Doctrine Index](./README.md)
-- [Testing Doctrine](./testing_doctrine.md) — owns the register definitions ([§2](./testing_doctrine.md#2-the-registers-of-amoebius-testing))
-- [Generated Artifacts Doctrine](./generated_artifacts_doctrine.md) — why the render is pure and its output uncommitted
-- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — `renderAll` and the reconcile/apply seam
-- [Formal Model Doctrine](./formal_model_doctrine.md) — the in-process `Model` explorer that mirrors TLC
-- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the rendered-artifact-oracle validation locus
-- [Documentation Standards](../documentation_standards.md)
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md)
+
+- [Testing doctrine](./testing_doctrine.md)
+- [Testing spoof resistance](./testing_spoof_resistance.md)
+- [Evidence calculus](./evidence_calculus_doctrine.md)
+- [Generated artifacts doctrine](./generated_artifacts_doctrine.md)
+- [Validation execution doctrine](./validation_frame_doctrine.md)
+- [Development-plan phase model](../../DEVELOPMENT_PLAN/development_plan_phase_model.md)
+- [Development-plan gate integrity](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md)

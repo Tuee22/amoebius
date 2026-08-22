@@ -1,22 +1,22 @@
 # Phase 24: The generated conformance gate
 
-> **Purpose**: Derive a finite suite manifest and coverage grid from an extension declaration, then bind a
-> passing observation to the only verdict admitted by the pure link-set API.
+> **Purpose**: Specify the target Haskell capability to derive conformance suite manifests and
+> coverage grids lazily beneath `.build/**` from Haskell extension declarations, then bind
+> observations to a Haskell link-set verdict.
 > **Read this if**: declaration-derived gate cases, suite content addressing, verdict verification, or the
 > transaction-family deferral must change.
 
-This phase owns the pure derivation and sealing boundary over the declaration and law values delivered in
-Phases 20–23. It does not execute extension behavior, authenticate a result observer, implement the Phase-36
-transaction vocabulary, prove C1, or establish runtime conformance. The normative generated-gate and verdict
-shapes remain owned by
-[`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md).
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md
 **Generated sections**: none
 
 </details>
@@ -24,12 +24,13 @@ shapes remain owned by
 ---
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 24.1: The generated conformance gate ✅](#sprint-241-the-generated-conformance-gate-)
+- [Sprint 24.1: The generated conformance gate ⏸️](#sprint-241-the-generated-conformance-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,98 +38,83 @@ shapes remain owned by
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All thirteen gate sides passed on natural `arm64`, untranslated: fifteen exact
-metrics matched and 23 surfaces joined to 29 run-time items. Attestation
-`sha256:409bc8a3b8ef295e3e35b6d3a079b4a7ae6b2b15cb0d5eced39ceca40b8c03b7` binds source
-`sha256:50cd1986a0f74ba7…` over 2,257 files. Repository-conformance attestation
-`sha256:9b1cc0d542aa18d8e6c474111892921d83d47443f06da72259ced24609e9aa65` and documentation lint passed on
-that snapshot. Transaction instances, observer authenticity, semantic execution, C1 proof, collision absence,
-and runtime correspondence remain UNVERIFIED.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 23, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`lib:extension-conformance-gate` derives five suite manifests from a complete Phase-20 declaration and a
-same-request peer list. The property manifest instantiates L1–L5 over the exact Phase-21 vocabulary axes; the
-composition manifest pairs one row per C1–C7 law with every named peer; the compile-fail manifest follows the
-declared evidence claims; and S1–S6 always name the security boundary. The transaction manifest is empty
-because the current declaration cannot name a Phase-36 transaction seam. P1–P6 remain present in the coverage
-grid as explicitly not applicable for that reason rather than disappearing.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to derive conformance suite manifests and coverage grids lazily beneath
+`.build/**` from Haskell extension declarations, then bind observations to a Haskell link-set
+verdict.
 
-Five suite files and the coverage grid are canonical byte values. Their length-framed SHA-256 digest, the
-declaration digest, the core-law version, and the passing result determine an opaque verdict digest. A run must
-present exactly those generated bytes and exactly one passing observation for every derived case. The opaque
-link set accepts a declaration only with a same-request verdict that verifies against its plan. This is a pure
-modeled runner: callers supply observations, so it does not authenticate who executed a case or establish that
-the named semantic test ran.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
 
-**Phase scope:** one Infernix declaration, one JitML peer, nineteen executable case identities (five L, seven
-C, one compile, and six S), five canonical suite files, 24 coverage cells (eighteen required and six P-family
-not-applicable rows), one independently recomputed suite digest, one independently recomputed verdict digest,
-one passing modeled seal/admission, three exact compiler barriers, one finite source scan, and three executable
-mutants. Transaction execution, arbitrary vocabulary cardinalities and link sets, result-observer authenticity,
-law semantics, C1 proof, cryptographic collision absence, and runtime correspondence remain outside the claim.
-**Substrate:** `none`
-**Lane:** `none`
-**Register:** 1
-**Depends on:** [Phase 20](phase_20_extension_declaration.md) — the complete same-request declaration and its
-digest; [Phase 21](phase_21_extension_laws_per_extension.md) — L1–L5 and their declaration vocabulary;
-[Phase 22](phase_22_extension_laws_compositional.md) — C1–C7 and same-request peer identity; and
-[Phase 23](phase_23_extension_security_laws.md) — S1–S6. Phase 36 later supplies the transaction vocabulary
-whose P instances cannot yet be applicable.
-**Gate:** `python3 tools/run_phase_gate.py 24` requires fifteen metrics, L1–L5/C1–C7 fixtures
-`test/oracle/extension_conformance/{suite_inventory,coverage_grid}.tsv`, Python digests, three compiler failures
-and mutants, surface join, architecture, containment, write guard, ledger, and attestation; see [Gate integrity](#gate-integrity).
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — derive conformance suite manifests and coverage grids
+lazily beneath `.build/**` from Haskell extension declarations, then bind observations to a Haskell
+link-set verdict. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 23](phase_23_extension_security_laws.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 24`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set (§M.7):** the bounded derivation uses Infernix as the declaration and JitML as one
-  same-request peer. Each declaration contributes one artifact, budget, workflow, and evidence vocabulary
-  name, yielding nineteen cases and all 24 L/C/S/P law cells.
-- **Independent oracle (§M.1/§M.3):** authored TSVs state all nineteen semantic suite rows and all 24 coverage
-  cells. Python decodes the emitted hexadecimal axes, recomputes every length-framed case id, recomputes the
-  digest over all six generated files, and recomputes the verdict digest from declaration, core, suite, and
-  result fields.
-- **Mutation quota (§M.2):** deleting an L-law row must fail the generated-inventory binding; replacing
-  observed bytes with canonical bytes demonstrates the exact suite-digest bypass; and directly appending a
-  declaration demonstrates the unsealed-admission bypass. Each reddens its named property.
-- **Specific-reason negatives (§M.8):** the legal verdict-gated admission signature compiles. A direct verdict
-  constructor fails at GHC-01928, admission without its verdict fails at GHC-83865, and a verdict from another
-  request fails at GHC-25897.
-- **Finite coverage honesty (§M.4):** one declaration and one peer do not establish arbitrary cardinalities.
-  P1–P6 have explicit not-applicable cells because no transaction axis exists before Phase 36. SHA-256
-  collision absence is ASSUMED, and the finite source scanner is not complete.
-- **External observation (§M.5/§M.10):** authored inventories, a separate Python decoder/digest implementation,
-  GHC diagnostics, and executable mutant modes observe the library. The production module does not contain
-  the expected Infernix/JitML inventory.
-- **Authority/bypass (§§M.11–M.12):** plan, core version, verdict, and link-set constructors are private; only
-  an exact all-passing observation reaches `ConformanceVerdict`. Observation authenticity is not enforced in
-  this pure register and remains UNVERIFIED rather than being mistaken for verdict unforgeability.
-- **Fresh challenge (§M.9):** not applicable because derivation is deterministic. The handwritten inventory,
-  separately implemented byte decoder/digests, compiler diagnostics, and bypass mutations provide independent
-  disagreement paths.
-- **Extension conformance (§M.13).** The generated grid enumerates L1–L5 and C1–C7 from the declaration and
-  peer, binds S1–S6, retains all P cells explicitly, and reddens suite/admission bypasses. The opaque verdict
-  admits only this modeled all-pass observation; `test/negative/compile_fail/extension_conformance/` pins its
-  authority boundary. No actual extension receives a conformance claim.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — derive conformance suite manifests and coverage grids lazily beneath `.build/**` from Haskell extension declarations, then bind observations to a Haskell link-set verdict. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 24` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 23 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — the rule behind the generated conformance gate.
+- [`extension_conformance_doctrine.md` §5 — The conformance gate is generated, not authored](../documents/engineering/extension_conformance_doctrine.md#5-the-conformance-gate-is-generated-not-authored) — the rule behind the generated conformance gate.
 
 ## Sprints
 
-## Sprint 24.1: The generated conformance gate ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done.
-**Implementation**: `src/extension-conformance-gate/Amoebius/Extension/Conformance/Gate.hs`,
-`test/mutant/extension_conformance/ConformanceGateMutants.hs`,
-`test/negative/compile_fail/extension_conformance/ConformanceCompile.hs`,
-`test/spec/extension/ExtensionConformanceGateSpec.hs`, `test/oracle/extension_conformance/*.tsv`,
-`test/oracle/extension_conformance_gate_surfaces.tsv`, and `tools/conformance_gate_generator_gate.py`.
-**Blocked by**: None.
-**Independent Validation**: authored nineteen-row suite and 24-cell coverage tables; Python file/case/verdict
-digest recomputation; legal/illegal compiler twins; finite source scan; and three exact mutants.
-**Docs to update**: `documents/engineering/extension_conformance_doctrine.md`
+## Sprint 24.1: The generated conformance gate ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -155,17 +141,22 @@ pre-transaction applicability boundary honestly.
 
 ### Remaining Work
 
-None. Transaction instances, observer authenticity, executable semantic harness generation, C1 proof,
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Transaction instances, observer authenticity, executable semantic harness generation, C1 proof,
 collision absence, and runtime correspondence remain later work rather than Phase-24 completion criteria.
 
 ## Documentation Requirements
 
-**Engineering docs to update after the capability gate passes:**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — record
   the bounded generator/verdict boundary without upgrading transaction applicability, observer authenticity,
   semantic execution, closure, or runtime fidelity.
 
+**Cross-references to add:**
+
+- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+
 ## Related Documents
+
 - [Development Plan](README.md)
 - [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — the rule behind the generated conformance gate.

@@ -17,10 +17,12 @@ entries and their loci are owned here; the numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Scope](#1-scope)
@@ -69,7 +71,7 @@ flowchart LR
   g2 -->|"linked extension source only"| g3
   g2 -->|"anything the decoder admits"| ps
   ps -->|"anything the seal admits"| rg
-  rg -->|"anything the golden admits"| le
+  rg -->|"anything the Haskell semantic predicate admits"| le
 ```
 *Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Capacity is the slice where foreclosure is weakest: most entries are a sum, so the seal catches what no type can. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
@@ -205,9 +207,10 @@ field at all — a toleration is not a spellable input but a projection from a d
 Haskell render layer, so a free-text toleration is unwritable at authoring) + `gadt-decode` (the
 `Toleration` handle's constructor opacity is Haskell module-opacity, which Dhall cannot provide — Dhall has no
 opaque types ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)) — so the projection-only discipline's full teeth land
-at the GADT decoder) + `rendered-artifact-oracle` (the derived toleration must appear correctly in the emitted
-pod spec, exactly as a golden test checks the derived
-NetworkPolicy, [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)).
+at the GADT decoder) + `rendered-artifact-oracle` (a separately reviewed Haskell predicate requires the
+derived toleration in the emitted pod spec, using the same independent semantic discipline as the derived
+NetworkPolicy [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)).
+No expected pod-spec bytes are tracked; serialized projections exist only beneath `.build/test-corpora/**`.
 
 <a id="327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing"></a>
 

@@ -1,21 +1,22 @@
 # Phase 22: The compositional laws C1-C7
 
-> **Purpose**: Mechanically evaluate C1–C7 over scope-preserving composites of complete extension
-> declarations, with bounded counterexample evidence.
+> **Purpose**: Specify the target Haskell capability to evaluate C1–C7 over bounded scope-preserving
+> composites of Haskell extension declarations using independently authored `.hs` controls, oracles,
+> paired negatives, and mutants.
 > **Read this if**: the composite declaration value, its seven law predicates, or their finite evidence boundary
 > must change.
 
-This phase owns a composite value distinct from Phase 20's exactly-five-component declaration and a bounded
-Register-1 evaluator for C1–C7. It samples closure; it does not prove universal C1, generate an arbitrary
-extension's gate, seal conformance, or certify runtime behavior. The normative laws remain owned by
-[`extension_conformance_laws.md`](../documents/engineering/extension_conformance_laws.md).
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md, documents/engineering/extension_conformance_laws.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_23_extension_security_laws.md, documents/engineering/extension_conformance_laws.md
 **Generated sections**: none
 
 </details>
@@ -23,12 +24,13 @@ extension's gate, seal conformance, or certify runtime behavior. The normative l
 ---
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 22.1: The compositional laws C1-C7 ✅](#sprint-221-the-compositional-laws-c1-c7-)
+- [Sprint 22.1: The compositional laws C1-C7 ⏸️](#sprint-221-the-compositional-laws-c1-c7-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -36,96 +38,83 @@ extension's gate, seal conformance, or certify runtime behavior. The normative l
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All thirteen gate sides passed on natural `arm64`, untranslated: thirteen exact
-metrics matched and 26 surfaces joined to 28 run-time items. Attestation
-`sha256:493b4b435a75e526c73d21e5c9500d29b00f837dad867911284ea940752c1ac7` binds source
-`sha256:36c615a921ed637b…` over 2,235 files. Repository-conformance attestation
-`sha256:7d871c2f645375aa19d0b434a16b8da58438f53941ec4ecb21e2aa72fe203200` and documentation attestation
-`sha256:1ac8bac150916e6f2226ee55a976ca0254c117062ab8a123c109fd4147eb3716` passed on that snapshot. Universal
-C1, arbitrary link sets, scanner completeness, SHA-256 collision absence, runtime correspondence, and a
-conformance verdict remain UNVERIFIED.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 21, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`lib:extension-laws-compositional` stores a normalized multiset of complete `ExtensionDeclaration scope`
-values. Its private constructor preserves Phase 20's introduction rule, and the shared phantom index prevents
-declarations minted by different requests from composing. The empty composite is an identity; composition
-sorts concatenated declaration keys, making grouping equal by value. Vocabulary is the Phase-21 set union and
-resources are the exact natural-number fold of the member declarations.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to evaluate C1–C7 over bounded scope-preserving composites of Haskell
+extension declarations using independently authored `.hs` controls, oracles, paired negatives, and
+mutants.
 
-The evaluator consumes explicit composite, isolated-part, algebra, resource, flow, and content-address
-observations. C1 reruns L1–L5 over each operand and the union vocabulary; C2 and C3 compare observed operator
-results by composite value; C4 compares each part's operation/artifact/budget/flow projection with its isolated
-run; C5 checks the exact resource sum; C6 rejects a wider sink; and C7 requires exact SHA-256 derivation while
-allowing byte-identical outputs to share an address. Collision resistance is ASSUMED.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
 
-The bounded corpus contains seven ordered identity/link cases over `none`, `infernix`, and `jitml`, yielding 49
-green pair-law cells. A separate 9-by-7 verdict grid has two lawful controls—distinct content and shared
-content—and seven seeded defects. The cross-scope defect correctly reddens C1, C4, and C6 because scope
-widening both breaks closure and changes one part's projected behavior. This is a finite counterexample search,
-not the universal closure proof the doctrine still says is owed.
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
 
-**Phase scope:** seven composition cases, 49 green pair-law verdicts, 63 authored subject verdicts, fourteen
-identity and seven association equalities, seven exact resource folds, four independently recomputed content
-addresses, one request-scope compiler barrier, one finite shared-authority scan, and seven executable mutants.
-Universal C1, arbitrary link sets, SHA-256 collision absence, runtime correspondence, gate generation, and a
-conformance verdict remain outside the claim.
-**Substrate:** `none`
-**Lane:** `none`
-**Register:** 1
-**Depends on:** [Phase 21](phase_21_extension_laws_per_extension.md) — L1–L5, whose conjunction over a composite is exactly what C1 asserts.
-**Gate:** `python3 tools/run_phase_gate.py 22` rebuilds both suites and requires thirteen
-metrics, independently checked pair and verdict tables, Python SHA-256 recomputation, the cross-request type
-barrier, seven exact mutants, a 26-surface join, architecture, containment, write guard, ledger, and source-
-bound attestation; [Gate integrity](#gate-integrity) owns the anti-tautology apparatus.
+**Phase scope:** Target capability only — evaluate C1–C7 over bounded scope-preserving composites of
+Haskell extension declarations using independently authored `.hs` controls, oracles, paired
+negatives, and mutants. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 21](phase_21_extension_laws_per_extension.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 22`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set (§M.7):** seven authored cases exercise empty/left/right identity and both orders of the
-  two-declaration link. The separate controls cover different bytes/different addresses and identical
-  bytes/shared address.
-- **Independent oracle (§M.1/§M.3):** `composition_cases.tsv` states normalized part names and four-coordinate
-  resource totals. Python re-adds each operand independently. `composition_law_verdicts.tsv` states all 63
-  verdicts, and Python recomputes four observed SHA-256 addresses from emitted content.
-- **Mutation quota (§M.2):** omitted claim, broken left identity, regrouped association, process-global shared
-  state, non-additive budget, widened cross edge, and forced address collision redden their exact declared law
-  sets. C4's control uses a real global `IORef` introduced through `unsafePerformIO` only in mutant source.
-- **Specific-reason negatives (§M.8):** the same-request composite runs; its adjacent cross-request sibling
-  fails at GHC-25897 and the `CompositeDeclaration` index. Different bytes forced to one address fail first as
-  `AddressCollision`, while the byte-identical shared-address control remains green.
-- **Finite coverage honesty (§M.4):** the link set has two declarations, association uses seven triples, and
-  the shared-authority scanner recognizes a finite token list. No universal closure or scanner completeness is
-  inferred; SHA-256 collision resistance is ASSUMED.
-- **External observation (§M.5/§M.10):** authored TSVs, a separately implemented Python address/resource
-  oracle, GHC diagnostics, and executable mutant modes observe the library. The production module cannot write
-  its own verdict.
-- **Authority/bypass (§§M.11–M.12):** the composite constructor is private and accepts only complete,
-  same-request declarations. Observation bundles are evidence inputs, not authority to generate or seal a
-  Phase-24 conformance verdict.
-- **Fresh challenge (§M.9):** not applicable. This gate is pure; independently authored pair/verdict tables,
-  the compiler twin, address recomputation, and mutation controls provide its challenge apparatus.
-- **Extension conformance (§M.13).** Not applicable. This phase samples C1–C7 over the bounded corpus; it does
-  not produce the generated L/C/S/P gate or its sealed verdict.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — evaluate C1–C7 over bounded scope-preserving composites of Haskell extension declarations using independently authored `.hs` controls, oracles, paired negatives, and mutants. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 22` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 21 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`extension_conformance_laws.md`](../documents/engineering/extension_conformance_laws.md) — the rule behind the compositional laws C1-C7.
+- [`extension_conformance_laws.md` §4 — C1–C7: the compositional laws](../documents/engineering/extension_conformance_laws.md#4-c1c7-the-compositional-laws) — the rule behind the compositional laws C1-C7.
 
 ## Sprints
 
-## Sprint 22.1: The compositional laws C1-C7 ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done.
-**Implementation**: `src/extension-laws-compositional/Amoebius/Extension/Laws/Compositional.hs`,
-`test/{harness,mutant}/extension_laws/*.hs`,
-`test/negative/compile_fail/extension_laws_compositional/CompositionScopeCompile.hs`,
-`test/spec/extension/ExtensionLawsCompositionalSpec.hs`, `test/oracle/extension_laws/composition_*.tsv`,
-`test/oracle/extension_laws_compositional_surfaces.tsv`, and `tools/extension_laws_compositional_gate.py`.
-**Blocked by**: None.
-**Independent Validation**: authored pair and 63-cell verdict tables, Python resource/address recomputation,
-same/cross-request compiler twins, shared-authority scan, shared-content control, and seven exact mutants.
-**Docs to update**: `documents/engineering/extension_conformance_laws.md` and
-`DEVELOPMENT_PLAN/{README,overview,system_components}.md`.
+## Sprint 22.1: The compositional laws C1-C7 ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -150,16 +139,21 @@ honestly.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update after the capability gate passes:**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - [`extension_conformance_laws.md`](../documents/engineering/extension_conformance_laws.md) — record the
   bounded C1–C7 evaluator without upgrading sampled closure, finite scanning, collision resistance, generated
   conformance, or runtime fidelity.
 
+**Cross-references to add:**
+
+- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+
 ## Related Documents
+
 - [Development Plan](README.md)
 - [`extension_conformance_laws.md`](../documents/engineering/extension_conformance_laws.md) — the rule behind the compositional laws C1-C7.

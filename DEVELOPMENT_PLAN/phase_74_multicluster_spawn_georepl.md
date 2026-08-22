@@ -6,15 +6,10 @@
 > over which [Phase 75](phase_75_gateway_migration_drills.md) drives the gateway-migration runtime.
 > **Read this if**: phase 74 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 74 delivers the multi-cluster spawn + geo-replication; its design is owned by [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), [vault_pki_doctrine.md](../documents/engineering/vault_pki_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-11 with `python3 tools/multicluster_spawn_georepl_gate.py --reuse-fresh-live`;
-ledger `external-run-reference`.
-Every hardware substrate can always run `linux-cpu`.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -27,9 +22,11 @@ Every hardware substrate can always run `linux-cpu`.
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 74.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection ⏸️](#sprint-741-amoebic-spawn--projectsubtree-handoff--per-child-unseal--transit-key--secret-injection-)
@@ -41,40 +38,18 @@ Every hardware substrate can always run `linux-cpu`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-73 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 73, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-Done (invalidated). The Register-3 gate created a parent and two real child `kind` clusters with bounded Pulumi Jobs
-running inside the parent. It validated opaque subtree projection, grandchild composition, distinct Transit
-keys, named-secret injection, exact forest/checkpoint demand, a zero-mutation second pass, the independent
-invariant-confluence table, native Pulsar/MinIO/Patroni workflow readback, and exact stack/cluster cleanup.
-All three committed mutants went red at their pinned loci. There is **no**
-First-Axis / control-plane-election work here: single-instance of the control-plane daemon is a Deployment
-`replicas=1` delegated to k8s/etcd. The cross-cluster gateway-migration obligation amoebius owns is discharged
-in [Phase 75](phase_75_gateway_migration_drills.md); this phase stands up the geo-replicated forest that
-obligation runs over.
-
-The evidence boundary is explicit: the two child clusters are real, while the native-protocol data plane is
-the retained HA Phase-55 platform. A physically independent Pulsar broker set and a Vault server inside each
-child remain UNVERIFIED, as do provider-managed and rke2 children. Those statements are not inferred from the
-validated projection and classifier.
-
-The design prerequisite is already sealed: [Phase 17](phase_17_gateway_migration_model.md) validated the shared
-`GatewayMigration` value with TLC/explorer/IOSimPOR at Register 1. This phase does not reopen that design proof;
-Phase 75 still owns correspondence to the live forest and remains UNVERIFIED until its Register-3 gate.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -117,30 +92,34 @@ The first absent→present spawn takes `InfrastructureRequired`. A converged rer
 `NoInfrastructureRequired` only with the explicit already-materialized child state and performs no child,
 checkpoint, or executor mutation.
 
-This phase consumes earlier phases and does not re-implement them: Phase 55's `pb` bootstrap of a `kind`
-cluster, Phase 61's root Vault/PKI trust anchor, Phases 41–42's platform services (MinIO, Pulsar, Patroni Postgres),
+This phase consumes only future human-approved predecessors and does not re-implement them: Phase 55's
+Haskell coordinator bootstrap of a `kind` cluster after the bounded `pb` handoff, Phase 61's root Vault/PKI
+trust anchor, Phases 62–64's platform services and authenticated edge (including MinIO, Pulsar, and Patroni Postgres),
 Phase 65's live DSL deploy via the `replicas=1` control-plane daemon, Phase 67's native Pulsar client, and Phase 69's
 content-addressed store + workflow runtime. A **stretched cluster is not geo-replication**: one etcd, one
 boundary, one `Topology` whose nodes merely span network `Site`s owes no R9 budget and no Second-Axis obligation
 and is out of scope here.
 
-The pure `Rke2ServerNode`/`Rke2AgentNode` and reserve/template folds exist in Phases 11–16, but no live
+The pure `Rke2ServerNode`/`Rke2AgentNode` and reserve/template folds are predecessor obligations in Phases 11–16, but no live
 multi-node rke2 acceptance gate is assigned. This phase does not silently supply one: its only child-engine
 fixture is `kind`, and the rke2 mutation continuation remains unavailable until a future Phase-N host-
 admission/join/enforcement gate is promoted.
 
-**Phase scope:** one cohesive claim — *a parent hands each child only its own subtree, and the boundary between them is asynchronous*. The confluence classifier is what makes that boundary reasoned about rather than assumed.
+**Phase scope:** one cohesive target claim — *a parent must hand each child only its own subtree, and the boundary
+between them must be asynchronous*. The future confluence classifier must make that boundary reasoned about
+rather than assumed.
 
-**Substrate:** linux-cpu — the gate spins up the parent and both child clusters as `kind` clusters on a
+**Substrate:** linux-cpu — the future gate must spin up the parent and both child clusters as `kind` clusters on a
 single linux-cpu host; no accelerator and no provider cluster is in scope (provider-managed clusters are
-[Phase 76](phase_76_provider_deploy_checkpoint.md)). Before either child is created, the parent-owned
-`SharedSupplyLedger` carves disjoint cluster-engine/VM and named physical-backing budgets from that one host;
-each child then derives its logical pod-ephemeral demand and routes pod/image/content/snapshot/workspace bytes
+[Phase 76](phase_76_provider_deploy_checkpoint.md)). Before either child may be created, the target parent-owned
+`SharedSupplyLedger` must carve disjoint cluster-engine/VM and named physical-backing budgets from that one host;
+each child must then derive its logical pod-ephemeral demand and route pod/image/content/snapshot/workspace bytes
 through its closed kubelet filesystem layout. Independent child `place` proofs cannot reuse the same host
 bytes. The parent cluster also places the Pulumi executor Jobs and debits their plugin/workspace volumes and
 checkpoint object peaks; proving the child VMs fit does not pay those parent-side resources. Partition
 tolerance is exercised at the boundary by the
-[Phase 75](phase_75_gateway_migration_drills.md) drills; here the boundary is established and classified.
+[Phase 75](phase_75_gateway_migration_drills.md) drills; the future Phase-74 gate must first establish and
+classify the boundary here.
 This CPU-only Linux lane is always available on every hardware substrate.
 
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
@@ -148,160 +127,86 @@ This CPU-only Linux lane is always available on every hardware substrate.
 **Register:** 3 — live infrastructure: a real parent and two real child clusters and a real geo-replicated
 workflow crossing an asynchronous boundary.
 
-**Depends on:** [Phase 73](phase_73_network_fabric_wireguard.md) — the WireGuard fabric over which a parent reaches the children it spawns.
-
-**Gate:** `python3 tools/run_phase_gate.py 74` is green: a parent spawns two children, exercises the classified
-geo-replicated workflow across the boundary, and tears the forest down leak-free — under the pre-effect
-capacity proof, oracles, observers, and mutants of [Gate integrity](#gate-integrity).
-
-Concretely:
-- each child's delivered value is `project(subtree)` — discharged as a **committed compile-fail corpus**
-  ([Gate integrity](#gate-integrity): `test/negative/compile_fail/ChildInForceSpec/`, ≥ 2 negatives asserting a specific compile-fail locus + a paired positive) plus a runtime subtree-inspection assertion that the
-  delivered `ChildInForceSpec` carries no sibling branch
-- each child unseals in **both** sanctioned modes and child A's subtree ciphertext fails to decrypt under
-  child B's Transit key even with the parent unsealed
-- a named `SecretRef` resolves to parent-injected bytes, never a Dhall fragment or env var
-- the two siblings round-trip a workflow and a **duplicate or reordered cross-cluster batch produces the identical fold result and identical blob keys** (a committed content-addressed golden,
-  [Gate integrity](#gate-integrity))
-- the invariant-confluence classifier sorts every crossing mutable invariant against a **committed independent classification table** ([Gate integrity](#gate-integrity)) with an unclassified invariant
-  defaulting to non-confluent and active-active wiring on a non-confluent invariant **refused**
-- the gate turns red on **at least one committed seeded mutant** ([Gate integrity](#gate-integrity): the `classifier-default-confluent` and `project-identity` mutants)
-- teardown is **leak-free by the OS-boundary observer of [Gate integrity](#gate-integrity)** (`pulumi stack ls` and kubeconfig-context enumeration, read outside the forest, report zero surviving child stacks and zero surviving child clusters, retained backing stores exempt)
-- and the run emits a **machine-derived honesty ledger** ([Gate integrity](#gate-integrity)) that marks the
-  spawn and geo-replication *tested* (drilled) on the linux-cpu runtime — not a proof claim — the projection
-  type-safety a successful decode/type result, and every layer outside Register 3 UNVERIFIED.
+**Depends on:** [Phase 73](phase_73_network_fabric_wireguard.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 74`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-This phase's gate binds to
-the following named, committed artifacts so no self-authored harness or post-hoc fixture can pass it:
-- **Pre-effect capacity proof.** Before either child exists the parent observes the physical host's residual
-  and proves `parent engine carve + child-A carve + child-B carve + non-cluster commitments ≤ host` for CPU,
-  memory, VM/node disk, logical pod-ephemeral capacity, and every layout-routed nodefs/imagefs backing. A
-  one-byte or one-millicore overdraw in a child, an executor Job, a plugin or workspace volume, or a
-  checkpoint budget creates neither child. The private provisioned execution and checkpoint witnesses live
-  under the one `ProvisionedInfrastructurePlan.batch` before the first Pulumi, SSH, or object-write effect,
-  and the exact rendered Job resources and live MinIO revision objects must read back to that same witness.
-- **Compile-fail corpus (independent of the SUT).** `test/negative/compile_fail/ChildInForceSpec/` holds **≥ 2** negative
-  fixtures that each attempt to construct a `ChildInForceSpec` carrying a sibling or ancestor-only branch and
-  **must fail to typecheck**, each asserting its **specific expected compile-fail locus/message** (the type
-  error naming the absent constructor/field), paired with a positive fixture that differs only in projecting the
-  child's own subtree and **must** compile — authored and committed in this phase's oracle-pinning sprint before `ChildInForceSpec.hs`
-  exists. A grandchild path proves the projection composes to arbitrary depth.
-- **Confluence-classification oracle (independent of the SUT).** `test/fixture/inject/confluence/expected_classes.dhall`
-  — a committed, hand-authored table classifying every crossing mutable invariant of the gate workflow as
-  *confluent* or *non-confluent*, authored in this phase's oracle-pinning sprint. The classifier's output is checked against this table,
-  never against its own re-derivation; an invariant absent from the table (unclassified) **must default to non-confluent** and be refused active-active wiring.
-- **Idempotent-write golden.** A committed content-addressed golden: replaying a duplicate or reordered
-  cross-cluster batch yields the **identical fold result and identical blob keys** (exactly-once for
-  replicated-or-recovered effects), authored in this phase's oracle-pinning sprint.
-- **Committed seeded mutants (≥ 1 must go red).** From the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) operator set: (a) `classifier-default-confluent` —
-  the unclassified default flipped from non-confluent to confluent (union-arm addition / guard weakening); the
-  committed unclassified fixture is then wrongly admitted for active-active wiring and the classification oracle
-  must go red. (b) `project-identity` — the `project(subtree)` projection weakened toward identity so a child's
-  delivered `ChildInForceSpec` carries a sibling branch (dropped-guard); the runtime subtree-inspection
-  assertion must go red. (c) `drop-parallel-executor` — the capacity peak drops one of two
-  simultaneously runnable Pulumi executor Jobs (or admits parallel demand and serializes it afterward); a
-  parent that fits one executor but not both is wrongly admitted, and the pre-effect provision oracle must go
-  red. All mutants are committed under `test/mutant/gateway_migration_drills/` and re-run every gate, not hand-run once.
-- **External-observer teardown check.** "Tears down leak-free" is scoped for Phase 74 (the flagged-credential +
-  postflight tag-sweep machinery of testing_doctrine [§6](../documents/engineering/testing_doctrine.md#6-flagged-test-credentials)–[§7](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles) is Phase 48) to: after teardown, an **OS-boundary observer** — `pulumi stack ls` and kubeconfig-context enumeration, read outside the forest — reports zero
-  surviving child stacks and zero surviving child clusters, while the retained backing stores the gate
-  deliberately preserves are explicitly exempt (named in the fixture as the retained set).
-- **Machine-derived ledger + validator.** The ledger is generated from the run record (spawn stack IDs, the
-  delivered-subtree inspection result, the emitted confluence classes, the idempotent-write golden result, the
-  executor-Job and checkpoint-object readback, the teardown-observer result, drill seeds, timestamps), and a
-  committed validator cross-checks every ledger figure
-  against the raw run record and the OS-boundary observer, failing the gate on any mismatch or hand-edited
-  field.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-```mermaid
-flowchart LR
-  %% register: algebra
-  fx["committed fixtures"]:::intent
-  or["independently authored oracle"]:::intent
-  mu["seeded mutant"]:::intent
-  g{{"the phase 74 gate command"}}:::gate
-  ok((("phase seal: the ledger this gate emits"))):::seal
-  no>"the mutant must turn it red"]:::refuse
-  fx -->|"binds the corpus"| g
-  or -->|"binds the expectation"| g
-  mu -->|"binds the defect"| g
-  g -->|"fixtures green, oracle agrees"| ok
-  g -->|"mutant green means the gate is not one"| no
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
-  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
-  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
-```
-*Design intent. Phase 74's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *a parent hands each child only its own subtree, and the boundary between them is asynchronous*. The confluence classifier is what makes that boundary reasoned about rather than assumed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 74` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 73 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
+
+## Resource provision — UNRESOLVED
+
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — multi-cluster spawn + geo-replication provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
-- [`cluster_lifecycle_doctrine.md §3`](../documents/engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)
-  and [`§9`](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)
+- [`workflow_calculus_doctrine.md` §3 — Teardown is a type obligation](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation) — multi-cluster spawn + geo-replication provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
+- [`cluster_lifecycle_doctrine.md` §3 — Amoebic spawning — the recursive forest](../documents/engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)
+  and [`cluster_lifecycle_doctrine.md` §9 — How bring-up and teardown are implemented: the reconciler, not a state machine](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)
   — the `project(subtree)` handoff of amoebic spawning, enacted as `discover → diff → enact → re-observe`
   reconciles over a managed-resource registry (never a bespoke lifecycle state machine), so the leak-free child
   teardown of this phase's gate is one `reconcileAbsent` loop with "cannot observe" never collapsed to "absent."
-  The teardown-with-cleanup-vs-chaos distinction ([§5](../documents/engineering/cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) and the unsatisfiable-`.dhall` push-back ([§6](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)) belong to the
+  The teardown-with-cleanup-vs-chaos distinction ([`cluster_lifecycle_doctrine.md` §5 — Teardown-with-cleanup vs chaos-failover (the central distinction)](../documents/engineering/cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) and the unsatisfiable-`.dhall` push-back ([`cluster_lifecycle_doctrine.md` §6 — Push-back when teardown would break the root `InForceSpec`](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)) belong to the
   gateway-migration drills of [Phase 75](phase_75_gateway_migration_drills.md).
-- [`pulumi_iac_doctrine.md §1`](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster),
-  [`§2`](../documents/engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio), and
-  [`§7`](../documents/engineering/pulumi_iac_doctrine.md#7-applicative-parallelism-for-independent-deploys)
+- [`pulumi_iac_doctrine.md` §1 — Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster),
+  [`pulumi_iac_doctrine.md` §2 — The backend: every byte of state is a Vault-enveloped object in MinIO](../documents/engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio), and
+  [`pulumi_iac_doctrine.md` §7 — Applicative parallelism for independent deploys](../documents/engineering/pulumi_iac_doctrine.md#7-applicative-parallelism-for-independent-deploys)
   — the in-cluster-only engine, exact Vault-enveloped checkpoint objects, and finite applicative fan-out:
   checkpoint state fields/revisions and failed-partial/orphan extents consume an attached `StorageBudgetId`
   through the sole mutation gateway, while the parent places complete executor-Job envelopes and typed
   plugin/workspace peaks before either independent child deploy may mutate.
-- [`vault_pki_doctrine.md §6`](../documents/engineering/vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes)
-  and [`§7`](../documents/engineering/vault_pki_doctrine.md#7-parent-injects-secrets-into-the-childs-vault)
+- [`vault_pki_doctrine.md` §6 — Parent/child unseal: two sanctioned modes](../documents/engineering/vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes)
+  and [`vault_pki_doctrine.md` §7 — Parent injects secrets into the child's Vault](../documents/engineering/vault_pki_doctrine.md#7-parent-injects-secrets-into-the-childs-vault)
   — the recursive parent/child spawn unseal (self-unseal from a k8s secret, or parent-held unlock with the brick
   cascading down a sealed subtree), the per-child Transit key (`transit/amoebius-<child-id>-config`) that makes a
   sibling's subtree cryptographically undecryptable even under an unsealed parent, and the
   parent-injects-named-secrets path (Dhall names only; the parent materializes the bytes).
-- [`content_addressing_doctrine.md §5`](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)
+- [`content_addressing_doctrine.md` §5 — Confluence: content-addressed data crosses cluster boundaries safely](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)
   — the confluent data plane: content-addressed write-once blobs (identical content ⇒ identical key ⇒ idempotent
   cross-cluster write) and the work-id-keyed Pulsar fold land in bucket (i) and cross freely, leaving only the
   gateway authority and any CAS "latest" pointer in bucket (ii) for the [Phase 75](phase_75_gateway_migration_drills.md) migration runtime.
-- [`chaos_failover_second_axis.md §16`](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
-  and [`§17`](../documents/engineering/chaos_failover_second_axis.md#17-the-boundary-and-its-classifier)
-  — the Second Axis (one cluster becomes a forest) and the invariant-confluence classifier (R1/[§17](../documents/engineering/chaos_failover_second_axis.md#17-the-boundary-and-its-classifier)) that sorts
+- [`chaos_failover_second_axis.md` §16 — The Second Axis — when one cluster becomes a forest](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
+  and [`chaos_failover_second_axis.md` §17 — The boundary and its classifier](../documents/engineering/chaos_failover_second_axis.md#17-the-boundary-and-its-classifier)
+  — the Second Axis (one cluster becomes a forest) and the invariant-confluence classifier (R1/[`chaos_failover_second_axis.md` §17 — The boundary and its classifier](../documents/engineering/chaos_failover_second_axis.md#17-the-boundary-and-its-classifier)) that sorts
   every crossing mutable invariant into confluent (crosses freely) or non-confluent (held by bounded authority),
   the unclassified default = non-confluent — with the
-  [proven/tested/assumed ledger (§12)](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed) kept
-  honest. The R7/R8/R9 boundary rules and the [§19](../documents/engineering/chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows) cross-boundary ledger are consumed by [Phase 75](phase_75_gateway_migration_drills.md).
-- [`testing_doctrine.md §3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
+  [`chaos_failover_doctrine.md` §12 — The moral core — proven, tested, assumed](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed) kept
+  honest. The R7/R8/R9 boundary rules and the [`chaos_failover_second_axis.md` §19 — The cross-boundary ledger and conformance rows](../documents/engineering/chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows) cross-boundary ledger are consumed by [Phase 75](phase_75_gateway_migration_drills.md).
+- [`testing_doctrine.md` §3 — The test-topology contract: spin up → run → always tear down](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
   (the test-as-`InForceSpec` spin-up → run → always-tear-down contract) and
-  [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
+  [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
   (the per-run proven/tested/assumed ledger): the register this gate reaches and the ledger it emits.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 74.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Multicluster/Spawn.hs`,
-`src/Amoebius/Dsl/ChildInForceSpec.hs`, `src/Amoebius/Pulumi/Engine.hs`,
-`src/Amoebius/Pulumi/Backend/EncryptedMinio.hs`, `pulumi/child-cluster/Pulumi.yaml`,
-`src/Amoebius/Multicluster/ChildUnseal.hs`, `src/Amoebius/Vault/TransitChildKey.hs`,
-`src/Amoebius/Multicluster/SecretInjection.hs` — delivered and gate-covered.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the read-only supply, checkpoint, and executor prefix is provisioned before any
-child, Pulumi, or object-write effect exists, and every claim is read back from an external runtime observer
-rather than from the spawn itself; the numbered Validation list below carries the fixtures, the error tags,
-and the mutant.
-**Docs to update**:
-`documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/vault_pki_doctrine.md`,
-`documents/engineering/pulumi_iac_doctrine.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -642,16 +547,7 @@ None inside the sealed `kind`-child boundary. Child-local Vault processes remain
 
 ## Sprint 74.2: Geo-replication of two siblings + invariant-confluence classification ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Multicluster/GeoReplication.hs`,
-`src/Amoebius/Multicluster/ConfluenceClass.hs` — delivered and gate-covered.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: two sibling children replicate a `command → event* → result` workflow across the
-boundary; the duplicate-write result is checked against the committed content-addressed golden and every
-crossing invariant against the committed classification table, never against the classifier's own
-re-derivation. The numbered Validation list below carries the cases.
-**Docs to update**:
-`documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -690,7 +586,8 @@ Pulsar brokers are UNVERIFIED and must not be inferred from this phase.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/cluster_lifecycle_doctrine.md` — §3/§9 gain the realized module paths for the spawn,
   the `project(subtree)` handoff, and the reconciler/registry (the teardown-vs-chaos distinction and push-back
   land with [Phase 75](phase_75_gateway_migration_drills.md)).
@@ -707,6 +604,7 @@ Pulsar brokers are UNVERIFIED and must not be inferred from this phase.
   this phase emits.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-74 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/system_components.md` — register the `src/Amoebius/Multicluster/Spawn.hs`,
   `GeoReplication.hs`, `ConfluenceClass.hs`, `ChildUnseal.hs`, `SecretInjection.hs` modules,

@@ -4,35 +4,34 @@
 > `arm64` image — and prove the steps that run inside were lifted rather than written a second time.
 > **Read this if**: an apple host has to reach an image build or a kind cluster, or the frame a workload selects has to change.
 
-This phase owns the apple half of engine bringup: what the floor verifies before anything is resolved, which
-frame a workload selects, how large that frame may be, and what survives it. It does not own the ensure
-algebra its steps are written in — that is [Phase 51](phase_51_host_ensure_kernel.md)'s — and it does not own
-the Apple-Metal host worker, which is built headless on the host and never enters a VM at all
-([`substrate_doctrine.md` §4.4](../documents/engineering/substrate_doctrine.md#44-no-macos-build-vm-apple-builds-are-headless-on-host),
-[Phase 89](phase_89_apple_metal_host_daemon.md)). Its prerequisite is Phase 52, which proved this same claim on
-the linux substrate.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 53.1: The Homebrew floor is verified, never installed 📋](#sprint-531-the-homebrew-floor-is-verified-never-installed-)
-- [Sprint 53.2: Colima ensured, and a frame sized from the carve 📋](#sprint-532-colima-ensured-and-a-frame-sized-from-the-carve-)
-- [Sprint 53.3: The provider follows the workload 📋](#sprint-533-the-provider-follows-the-workload-)
-- [Sprint 53.4: The ephemeral one-off and the frame that persists 📋](#sprint-534-the-ephemeral-one-off-and-the-frame-that-persists-)
-- [Sprint 53.5: The lifted step list and the native image 📋](#sprint-535-the-lifted-step-list-and-the-native-image-)
+- [Sprint 53.1: The Homebrew floor is verified, never installed ⏸️](#sprint-531-the-homebrew-floor-is-verified-never-installed-)
+- [Sprint 53.2: Colima ensured, and a frame sized from the carve ⏸️](#sprint-532-colima-ensured-and-a-frame-sized-from-the-carve-)
+- [Sprint 53.3: The provider follows the workload ⏸️](#sprint-533-the-provider-follows-the-workload-)
+- [Sprint 53.4: The ephemeral one-off and the frame that persists ⏸️](#sprint-534-the-ephemeral-one-off-and-the-frame-that-persists-)
+- [Sprint 53.5: The lifted step list and the native image ⏸️](#sprint-535-the-lifted-step-list-and-the-native-image-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -40,16 +39,27 @@ the linux substrate.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-52 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 52, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
 ---
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
 An apple host supplies no Linux kernel and no container engine, so every workload amoebius actually wants
-runs one boundary away from the host it started on. This phase closes that distance: it verifies the one
-prerequisite Homebrew is, ensures Colima through it, provisions a frame whose size came from the carve
-arithmetic rather than from a default, and runs the linux step list inside it. The frame is plumbing; what
+runs one boundary away from the host it started on. The target gate must close that distance: it must verify
+the one prerequisite Homebrew is, ensure Colima through it, provision a frame whose size came from the carve
+arithmetic rather than from a default, and run the linux step list inside it. The frame is plumbing; what
 the cluster sees is a CPU-only Linux host at `arm64`.
 
 What makes this phase cheap is that the step list is Phase 51's, lifted into the Colima frame rather than
@@ -69,71 +79,51 @@ appears.
 
 **Register:** 3 — live: a frame is created, used, and destroyed on physical hardware ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 52](phase_52_linux_engine_bringup.md)
-
-**Requires**: `host-floor`
-
-**Gate:** `python3 tools/run_phase_gate.py 53` runs on an Apple Silicon host and passes
-every check named in [Gate integrity](#gate-integrity). Phase 54 does not open until it is green.
-
----
+**Depends on:** [Phase 52](phase_52_linux_engine_bringup.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 53`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The gate is `python3 tools/apple_engine_bringup_gate.py --execute`, it runs on physical Apple Silicon, and it
-is re-runnable: every frame it creates it also destroys, so a second run starts from the state the first one
-found. It decides four things.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *an apple host reaches a container engine, a budget-sized frame, and a native `arm64` image, using the linux step list unchanged*. Its sprint seams are the floor, the frame, the selection, the lifecycle, and the lift. It splits if a second substrate or a second acceptance register appears. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 53` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 52 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**The floor is decided before the frame, and both outcomes are recorded.** The transcripts in
-`test/fixture/apple_engine_bringup/floor/` drive the check with `brew` present and with `brew` absent. The
-first must be a verified no-op, the second must be a refusal carrying the install instruction, and neither
-may issue an install argv for Homebrew itself — a package-manager root cannot be acquired through a tool the
-package manager resolves.
+## Resource provision — UNRESOLVED
 
-**Provider selection is joined against an independently authored oracle.**
-`test/oracle/apple_frame_selection.tsv` enumerates each workload, the provider it selects, and whether its
-frame outlives the invocation. The gate joins the selector's own enumeration against that table in both
-directions, so a workload the oracle does not name and an oracle row the selector cannot answer are both
-failures.
-
-**The lift is compared, not asserted.** The gate emits the step list the Colima frame executes and diffs it
-against the list the linux frame executes, byte for byte, into
-`test/golden/apple_engine_bringup/frame_delta.txt`. An empty delta is the property; a non-empty one passes
-only for a line the golden already registers as frame friction, because unregistered divergence is exactly
-the second deployment path this phase exists to foreclose.
-
-**Five committed mutants** — `test/mutant/registry.tsv` carries them — must each fail this gate, and each
-must fail it at a different place:
-
-- a floor check that installs Homebrew when it is absent instead of refusing — reddens the absent-host
-  transcript, which then records an install argv the apple floor never issues;
-- a selector keyed on the substrate alone, answering Colima for a workload that needs a full distribution —
-  reddens the oracle join in the selector-cannot-answer direction;
-- a one-off invocation whose frame outlives it — reddens the post-invocation inventory, which the provider
-  itself must report empty;
-- a frame requested past the admitted carve — reddens the capacity admission, because a VM is a debit against
-  the host's supply and never a source of new capacity;
-- a step re-authored for the Colima frame — reddens the frame delta, which is the only place a Colima-only
-  step is visible.
-
----
-
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/apple_engine_bringup/`.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — apple: Homebrew, Colima, and the native image is admitted by satisfying the contract, not by appearing on a list.
+- [`extension_conformance_doctrine.md` §5 — The conformance gate is generated, not authored](../documents/engineering/extension_conformance_doctrine.md#5-the-conformance-gate-is-generated-not-authored) — apple: Homebrew, Colima, and the native image is admitted by satisfying the contract, not by appearing on a list.
 - [`substrate_doctrine.md` §4.1 — Colima and Lima on Apple: the provider follows the workload](../documents/engineering/substrate_doctrine.md#41-colima-and-lima-on-apple-the-provider-follows-the-workload):
   the selection is a function of the workload and the substrate together, the two providers are one family
   with one extra capability, and the logic that runs inside is the same logic in both.
-- [`substrate_doctrine.md` §3.1 — the per-substrate floor](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply):
+- [`substrate_doctrine.md` §3.1 — The per-substrate floor: what only the operator can supply](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply):
   Homebrew is the apple package-manager root, which is verified rather than ensured, and a failed floor check
   is a value naming its own remedy.
 - [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract):
   Colima is probed, installed when absent, resolved to an absolute path from the package manager, and invoked
   by that path.
-- [`resource_capacity_doctrine.md` §4 — the total fold](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting):
+- [`resource_capacity_doctrine.md` §4 — The total fold: `fits`, `carve`, `place`, and the nesting](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting):
   the frame's CPU, memory, and disk are a demand the host's supply must admit, so an oversized frame is a
   rejection at authoring rather than a failure at creation.
 
@@ -141,14 +131,11 @@ must fail it at a different place:
 
 ## Sprints
 
-## Sprint 53.1: The Homebrew floor is verified, never installed 📋
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Floor/Apple.hs`, `tools/toolchain_requirements.json`
-**Blocked by**: none within the phase
-**Requires**: `host-floor`
-**Independent Validation**: a host carrying `brew` yields a verified no-op; a host without it yields a refusal naming the install instruction, and neither run issues an install argv for Homebrew
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+## Sprint 53.1: The Homebrew floor is verified, never installed ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -176,13 +163,9 @@ supply.
 
 The whole sprint.
 
-## Sprint 53.2: Colima ensured, and a frame sized from the carve 📋
+## Sprint 53.2: Colima ensured, and a frame sized from the carve ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Frame/Colima.hs`
-**Blocked by**: Sprint 53.1
-**Independent Validation**: the frame is created at the CPU, memory, and disk the carve admitted; a request exceeding the host's supply is rejected before any provider call
-**Docs to update**: `documents/engineering/substrate_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -210,13 +193,9 @@ ensure Colima through the verified root and provision a frame whose size is a ch
 
 The whole sprint.
 
-## Sprint 53.3: The provider follows the workload 📋
+## Sprint 53.3: The provider follows the workload ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Frame/Select.hs`, `src/Amoebius/Host/Frame/Lima.hs`
-**Blocked by**: Sprint 53.2
-**Independent Validation**: the selector's enumeration joins to `test/oracle/apple_frame_selection.tsv` in both directions
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -243,13 +222,9 @@ make the frame a consequence of what the run needs, and make the substrate-only 
 
 The whole sprint.
 
-## Sprint 53.4: The ephemeral one-off and the frame that persists 📋
+## Sprint 53.4: The ephemeral one-off and the frame that persists ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Frame/Lifecycle.hs`
-**Blocked by**: Sprint 53.3
-**Independent Validation**: after a one-off invocation the provider reports no frame; after a kind cluster is created it reports exactly one, and that one is destroyed with the cluster
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -276,13 +251,9 @@ tie each frame's lifetime to the thing it backs, so nothing outlives its reason 
 
 The whole sprint.
 
-## Sprint 53.5: The lifted step list and the native image 📋
+## Sprint 53.5: The lifted step list and the native image ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Frame/Lift.hs`, `test/golden/apple_engine_bringup/`
-**Blocked by**: Sprint 53.4
-**Independent Validation**: the frame delta against the linux step list is empty but for registered friction, and the image the frame builds is `linux/arm64` with no emulation
-**Docs to update**: `documents/engineering/substrate_doctrine.md`, `documents/engineering/image_build_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -312,13 +283,15 @@ The whole sprint.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/substrate_doctrine.md` — §4 records Colima as an implemented provider, and §4.4's
   honesty note drops the live Apple/Lima/brew clause for exactly what this gate observed and no more.
 - `documents/engineering/resource_capacity_doctrine.md` — §4 records the engine frame as a debited demand
   once the live fit has actually run.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/development_plan_standards.md` — add this phase to the `Declared by` column of the
   `host-floor` row in §F, because that column is joined in both directions.
 - `DEVELOPMENT_PLAN/substrates.md` — record Colima beside Lima in the apple row, with the workload that
@@ -327,6 +300,7 @@ The whole sprint.
 ---
 
 ## Related Documents
+
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md)
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md)
 - [Phase 51](phase_51_host_ensure_kernel.md)

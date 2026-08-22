@@ -18,10 +18,12 @@ and the algebra it rests on belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_23_extension_security_laws.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_23_extension_security_laws.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, documents/README.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Scope](#1-scope)
@@ -37,17 +39,17 @@ and the algebra it rests on belongs to
 
 This document is a **family slice**. It owns S1–S6 and the skolem-scope mechanism they share. It does not own
 the tenant model, the gateway and identity edge, the offline runtime, or the relational data plane; each S-law
-names the doctrine that does. [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) supplies the lexical
+names the doctrine that does. [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) owns the target lexical
 pure mechanism; the laws and live boundaries retain their own delivery owners, and status lives only in the
 [tracker](../../DEVELOPMENT_PLAN/README.md).
 
-The bounded pure implementation is `Amoebius.Extension.Laws.Security`. It distinguishes claimed and attested
-identities, eliminates an attested identity through Phase 8's fresh request scope, requires that scope at the
+The target bounded pure implementation is `Amoebius.Extension.Laws.Security`. It must distinguish claimed and
+attested identities, eliminate an attested identity through Phase 8's fresh request scope, require that scope at the
 operation and derived-key boundaries, represents only revocation-edge or positive-staleness-bound authority
-layers, and evaluates S1–S6 over explicit observations. Its evidence covers one valid and one tampered fixture
+layers, and evaluate S1–S6 over explicit observations. Its target corpus covers one valid and one tampered fixture
 envelope, fifteen operations in a two-tenant/two-subject store, five foreign/absent refusal pairs, five
 namespace transpositions, two authority layers, 42 authored verdicts, four compiler negatives, and six exact
-mutants. This is bounded Register-1 evidence: the fixture SHA-256 check is not production cryptographic
+mutants. This targets bounded Register-1 evidence: the fixture SHA-256 check is not production cryptographic
 verification, equal modeled steps are not wall-clock timing, the layer pair is not a runtime inventory, and no
 compositional S-law or persisted-value re-entry path is thereby discharged.
 
@@ -103,7 +105,7 @@ Two properties are specified to make this work rather than merely look elegant. 
 constructor, so authentication is the sole introduction rule and no test, migration, or admin path has a second
 one. And the escape argument that makes the region pattern safe in its original setting carries: a scoped value
 cannot outlive the continuation that minted it, so it cannot be stashed and reused under another identity.
-Phase 8 exercises those claims with legal/illegal compiler pairs for constructor forgery, retagging, and
+Phase 8 must exercise those claims with legal/illegal compiler pairs for constructor forgery, retagging, and
 request-index escape, plus a constructor-closure scan. The bounded security-law kernel reuses that eliminator;
 its adjacent compiler twins additionally reject claimed-as-attested use, an explicit promotion, a missing
 scope argument, and a key minted by another request.
@@ -218,10 +220,11 @@ another's bytes, and it needs no privilege to trigger.
 the key; it takes the scope context and the domain identity and returns a scope-indexed key type. If you need a
 new keyspace, add it to the renderer rather than beside it.
 
-**Discharge.** Five authored component-transposition pairs—one per bounded keyspace—require length-framed
-rendering to remain distinct and parsing to invert it; Python independently recomputes the emitted renderings.
-A lookup typed at one request cannot consume a key minted by another. This finite corpus is not a proof of
-injectivity over all text and no production emitted-output scanner is claimed. Foreclosed states:
+**Discharge.** Five Haskell-declared component-transposition pairs—one per bounded keyspace—require
+length-framed rendering to remain distinct and parsing to invert it. A separately authored Haskell oracle
+recomputes each rendering from the raw components without consuming the subject projection. A lookup typed at
+one request cannot consume a key minted by another. This finite corpus is not a proof of injectivity over all
+text and no production emitted-output scanner is claimed. Foreclosed states:
 [§3.95](../illegal_state/illegal_state_tenancy.md#395-a-replay-key-that-does-not-name-its-scope),
 [§3.97](../illegal_state/illegal_state_tenancy.md#397-a-scope-key-whose-rendering-is-not-injective).
 

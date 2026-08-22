@@ -18,17 +18,19 @@ never names a product. It does not own how those providers are deployed, owned b
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every pre-reset phase-run and implementation-result statement is
+> diagnostic only and never current validation evidence. Target doctrine remains normative; current state is
+> owned exclusively by the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why capabilities, not products](#1-why-capabilities-not-products)
 - [2. The capability set](#2-the-capability-set)
-- [3. One canonical provider; the type admits alternates](#3-one-canonical-provider-the-type-admits-alternates)
+- [3. Canonical providers; extension is capability-specific](#3-canonical-providers-extension-is-capability-specific)
 - [4. Capability → provider → shape: the binding](#4-capability--provider--shape-the-binding)
 - [5. Per-cluster structural shapes — beyond values](#5-per-cluster-structural-shapes--beyond-values)
 - [6. Fungibility, reconciled: app surface invariant, shape deployment-ruled](#6-fungibility-reconciled-app-surface-invariant-shape-deployment-ruled)
@@ -121,27 +123,30 @@ capability and reference a policy, but it cannot construct a permission, provide
 or resource handle. The UI-specific port and request-context contract is owned by
 [low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations).
 
-[Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md) supplies Register-1 evidence for that consumer:
-all seven fixture ports bind exactly once to closed semantic capabilities through independently checked
-handler/codec/scope/retry/audit tuples, while an absent capability and a raw provider coordinate fail at
-distinct loci. Thirteen generated classes, seven paired mutants, all 16 metrics, and the 48-unit real
-five-calculus projection pass on natural `arm64`. Actual handler behavior and provider state remain UNVERIFIED.
+[Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md) owns the future Register-1 contract for that
+consumer; it is **NOT VALIDATED**. The contract must bind every closed fixture port exactly once through
+independently checked handler/codec/scope/retry/audit tuples and must reject an absent capability and raw
+provider coordinate at distinct loci. All controls, generated classes, paired mutants, metrics, and
+five-calculus projections require reconstruction as Haskell-owned, independently reviewed evidence. Handler
+behavior and provider state remain outside this pure target.
 
 ---
 
-## 3. One canonical provider; the type admits alternates
+## 3. Canonical providers; extension is capability-specific
 
-Each capability maps to **exactly one canonical provider today**. The mapping is fixed doctrine, not an
-operator choice:
+Each capability maps to **exactly one canonical provider today**. Provider extensibility is not universal:
+the provider type for a capability contains only the arms this section explicitly admits. The mapping is fixed
+doctrine, not an operator choice:
 
 | Capability | Canonical provider (today) | Provider notes |
 |---|---|---|
 | ObjectStore | **MinIO** | distributed/erasure-coded at steady state; single-node shape on small clusters ([§5](#5-per-cluster-structural-shapes--beyond-values)) |
 | SecretStore | **Vault** | the fail-closed secrets root; owned in full by [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | MessageBus | **Pulsar** (with ZooKeeper + BookKeeper) | native binary protocol, no WebSockets |
-| Sql | **Patroni**, via the Percona operator | one Patroni cluster *per consuming capability instance*, never a shared mega-DB. Patroni is the fixed failover engine amoebius depends on; the operator that stands it up is a swappable deployment-rules default — a Zalando/CloudNativePG substitution preserves the same capability/shape contract and ultimately reaches Kubernetes only through deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`; it is not app-visible | | Identity | **Keycloak** | owns all wild ingress through the Edge ([§7](#7-expressing-a-capability-in-the-dsl)); the single baked, offline-capable OSS identity provider that both **issues and validates** the OIDC/JWT tokens the Envoy ext-authz path enforces on every wild route, and performs realm/user-federation/RBAC administration in one binary — lighter proxies (Dex/oauth2-proxy) validate but do not manage identities, forcing a second identity store |
+| Sql | **Patroni**, via the Percona operator | one Patroni cluster *per consuming capability instance*, never a shared mega-DB. Patroni is the fixed failover engine amoebius depends on; the operator that stands it up is a swappable deployment-rules default — a Zalando/CloudNativePG substitution preserves the same capability/shape contract and ultimately reaches Kubernetes only through deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`; it is not app-visible |
+| Identity | **Keycloak** | owns all wild ingress through the Edge ([§7](#7-expressing-a-capability-in-the-dsl)); the single baked, offline-capable OSS identity provider that both **issues and validates** the OIDC/JWT tokens the Envoy ext-authz path enforces on every wild route, and performs realm/user-federation/RBAC administration in one binary — lighter proxies (Dex/oauth2-proxy) validate but do not manage identities, forcing a second identity store |
 | Observability | **Prometheus / Grafana** | reachable only through the Identity-owned edge; its pull/scrape model matches the no-wild-ingress posture (targets sit behind the Identity edge, nothing is pushed outward), and amoebius must run identically on an offline laptop kind cluster, which rules out any SaaS/push-agent stack |
-| Registry | **`distribution`** (the `registry:2` single-binary OCI registry) | **replaces Harbor** — see below |
+| Registry | **Distribution (`registry:2`)** | fixed single arm; no provider-selection surface |
 | Edge | **Envoy + Gateway API** | the L4 backend is derived from the materialized target: MetalLB for self-managed engines, provider LB for `Managed Eks`; detected substrate alone does not choose it |
 
 Canonical does not mean capacity-free. Binding `MessageBus` expands brokers, BookKeeper, offload, and the
@@ -152,57 +157,55 @@ storage. Neither capability can contribute a private `ProvisionedServiceSpec` pr
 whole-deployment provision when only the headline provider pods fit;
 every derived execution unit, pod/CSI slot, and physical backing participates in whole-deployment provision.
 
-The concrete provider/service **set** — what each provider is and how it is deployed at the platform level —
-is owned by [platform_services_doctrine.md](./platform_services_doctrine.md), not duplicated here. This
-doctrine owns only the *capability → provider* indirection over that set, plus two locked substitutions:
+The runtime description of each selected provider and how it is deployed is owned by
+[platform_services_doctrine.md](./platform_services_doctrine.md), not duplicated here. This doctrine owns the
+*capability → provider* binding itself, including these two locked bindings:
 
-- **Registry is `distribution`, not Harbor.** The canonical Registry provider is the `distribution`
-  single-binary OCI registry (`registry:2`) — a single baked binary on the same footing as MinIO and Vault —
-  and **Harbor is retired**. amoebius drops Harbor's scanning, web UI, robot RBAC, and replication as separate
-  concerns to be revisited only if ever needed, not steady-state requirements. The build pipeline, the
-  registry image refs, and the supply-chain rule that every third-party service binary is **baked into the amoebius base container** (multi-arch `amd64`+`arm64`, no public-registry pulls at steady state) are owned
-  by [image_build_doctrine.md](./image_build_doctrine.md); this doctrine owns only that the Registry
-  capability now binds to `distribution`.
+- **Registry has exactly one legal binding.** `Registry` binds only to Distribution's `registry:2` image.
+  **Harbor is prohibited:** it is not an alternative, fallback, compatibility target, migration destination,
+  or future option. The Registry provider type has exactly one arm and no generic provider escape. Runtime
+  topology is owned by [platform_services_doctrine.md](./platform_services_doctrine.md); build, publication,
+  and image-reference flow are owned by [image_build_doctrine.md](./image_build_doctrine.md). Neither owner may
+  introduce another provider choice.
 - **JVM providers are baked, not pulled.** Keycloak (Identity) and Pulsar+ZooKeeper+BookKeeper (MessageBus)
   are JVM services; the one new build toolchain they require — a multi-arch Temurin JRE/JDK — and the
   prefer-`apt` → official-binary → build-from-source supply chain are owned by
   [image_build_doctrine.md](./image_build_doctrine.md). The capability model is indifferent to the runtime; it
   is named here only so "Identity is a JVM service" is not mistaken for a capability fact.
 
-**The type leaves room for alternates; amoebius builds none it does not need.** The indirection makes a
-capability's provider a typed *union with one arm today* — `ObjectStore` could later admit an `S3`
+**Only explicitly open capability types leave room for alternates; Registry does not.** The indirection makes
+an open capability's provider a typed *union with one arm today* — `ObjectStore` could later admit an `S3`
 arm, `Sql` could admit a managed cloud Postgres — without any app spec changing, because the app never named
 the provider. But a union arm is not an adapter. amoebius **does not build a provider adapter it does not yet need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
 would be reporting a designed extension point as a built one.
 
-> **Validated representation.** [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) implements the
-> one-built-arm `CanonicalProvider` representation and rejects an unbuilt alternate with a distinct gadt-decode
-> tag. Alternate arms remain deliberately unbuilt; this validation proves binding composition, not provider
-> realization.
+> **Target representation — NOT VALIDATED.** [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md)
+> owns the one-built-arm `CanonicalProvider` representation and the distinct rejection of an unbuilt alternate.
+> Existing source is an observed footprint only; no current evidence establishes binding composition or
+> provider realization.
 
 ---
 
 ## 4. Capability → provider → shape: the binding
 
-[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) realizes this representational seam in
-`Amoebius.Capability.{Types,Binding}`. Its gate binds all nine arms under both shapes, checks 18 exact graph
-semantics against an authored product/object/controller/execution/intent projection, and proves normalized app
-bytes remain invariant while an independent object-node-multiset oracle observes structural graph differences.
-The generated-byte snapshots and their test-only renderer are retired. Provision and runtime provider health
-remain outside that result. [Phase 31](../../DEVELOPMENT_PLAN/phase_31_provision_seal.md) now realizes the
-post-bind planner/seal in `Amoebius.Capacity.{Provision,RuntimeStorage,RenderSource}`: its Register-1 gate
-provisions all 18 bound shapes, exercises both planner arms, checks the opaque identity-keyed source set and
-four activation stages, and rejects ten exact seal-locus failures. Live provider health remains outside both
-pure results.
+[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) owns this representational seam in
+`Amoebius.Capability.{Types,Binding}`. Its NOT-VALIDATED contract requires all nine arms under both shapes, 18
+exact graph semantics, app-byte invariance, and an independent object-node-multiset oracle. Provision and
+runtime provider health remain outside that contract. [Phase 31](../../DEVELOPMENT_PLAN/phase_31_provision_seal.md)
+owns the post-bind planner/seal in `Amoebius.Capacity.{Provision,RuntimeStorage,RenderSource}`; its
+NOT-VALIDATED contract requires all 18 bound shapes, both planner arms, the opaque identity-keyed source set,
+four activation stages, and ten distinct seal-locus failures. Existing modules and tests are observed
+footprints, not current validation evidence.
 
 A capability becomes a running service through a **three-part binding**, and the three parts live on different
 surfaces:
 
 1. **The capability** is chosen by **application logic** — the app declares *that* it needs an ObjectStore, a
    Sql database, a set of MessageBus topics. This is the app's identity; it is written once and travels.
-2. **The provider** is chosen by **deployment rules** — and defaults to the [§3](#3-one-canonical-provider-the-type-admits-alternates) canonical provider. An operator
+2. **The provider** is chosen by **deployment rules** — and defaults to the [§3](#3-canonical-providers-extension-is-capability-specific) canonical provider. An operator
    does not pick a provider per app in the common case; the canonical binding *is* the default. The provider
-   slot exists so that a future alternate ([§3](#3-one-canonical-provider-the-type-admits-alternates)) is a deployment-rules edit, never an app-spec edit.
+   slot exists only for a capability whose [§3](#3-canonical-providers-extension-is-capability-specific)
+   contract explicitly admits an alternate; Registry does not.
 3. **The shape** is chosen by **deployment rules** — single-node vs distributed, replica counts, the structural
    object graph the provider is deployed as ([§5](#5-per-cluster-structural-shapes--beyond-values)).
 
@@ -270,14 +273,16 @@ flowchart TD
 
 ML serving adds a **ninth capability, `InferenceEngine`** — the abstract interface an ML workload names to
 declare it serves inference, exactly as an app names `ObjectStore` to declare it keeps durable objects. It
-exercises the [§4](#4-capability--provider--shape-the-binding) binding at its strictest: where a generic capability's provider *defaults* to the [§3](#3-one-canonical-provider-the-type-admits-alternates)
+exercises the [§4](#4-capability--provider--shape-the-binding) binding at its strictest: where a generic capability's provider *defaults* to the [§3](#3-canonical-providers-extension-is-capability-specific)
 canonical (part 2 above) and could later admit an alternate, an `InferenceEngine`'s provider is a union with
 **no arm to author a download** — it is **selected from an eligible target node/host offering derived from the detected substrate** and materialized by the shared jit-build resolver on first miss. In a heterogeneous
 cluster there is no single cluster-wide substrate to consult; selection must name a concrete eligible offering
 or an elastic candidate class.
 
-**The canonical provider is a closed union of substrate-tagged `EngineRuntime` identities.** `EngineRuntime` is
-a **closed union over substrate lanes** (one arm per lane); the **engine family** is a *separate* closed-union
+**The canonical provider is a closed union of substrate-tagged `EngineRuntime` identities.** The executable
+closed sets must be the Haskell `EngineRuntime` and `InferenceFamily` data types, and the executable lane/family
+availability relation is a total Haskell mapping over those constructors. No binder or checker parses the
+table below. `EngineRuntime` is a **closed union over substrate lanes** (one arm per lane); the **engine family** is a *separate* closed-union
 field of the `InferenceBinding` (the two compose as a product — lane × family — not one fused index; see the
 Dhall below). Neither admits an arbitrary-`Url` / `Download` arm — the load-bearing rule — and each named
 identity is resolved on first miss into a `CacheBudget`-bounded content-addressed
@@ -288,15 +293,21 @@ cache ([content_addressing_determinism.md §4.5](./content_addressing_determinis
 | Engine lane (the `EngineRuntime` union) | `Apple-Metal` · `CUDA` · `linux-cpu` |
 | Engine family (the `InferenceBinding.family` union, a named identity) | `llama.cpp` · `whisper.cpp` · `ONNX` · `vLLM` · `pytorch` · `diffusers` · `transformers` · `Audiveris` |
 
+This table is explanatory only. Its rows must be checked against the Haskell constructor inventory for
+documentation drift; human review of a new row cannot admit a provider, family, recipe, or behavioral
+expectation without the corresponding Haskell constructor, total mapping, independent Haskell expectation,
+and owning phase evidence.
+
 The ML siblings **link as libraries** rather than run as fetched sidecars, so the library is present the moment
 the pod is; the engine *payload* the library drives is a named identity the shared **jit-build resolver**
 materializes on first miss into the `CacheBudget`-bounded cache
 ([content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
 with the resolver's build inputs and the base image owned by
 [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain).
-The unions are closed **here** because every arm is a **named catalog identity**: adding an engine family is a new
-`InferenceBinding.family` arm plus a resolver recipe, never something an app `.dhall` can author, and the families in the
-table above map to the inference modalities the platform serves. The same move is made for container images
+The unions are closed by their Haskell declarations because every arm is a **named catalog identity**: adding
+an engine family is a new `InferenceFamily` constructor plus a resolver recipe, never something an app
+`.dhall` can author. The reader-facing family row above describes the target modalities but does not define
+them. The same move is made for container images
 by `ImageIdentity`
 ([image_build_doctrine.md §5](./image_build_doctrine.md#5-what-the-image-identity-is-given-that-the-tag-is-an-address)) —
 a closed union of named identities with no free-digest or `Url` arm, so "run a foreign image" fails dhall-typecheck
@@ -450,9 +461,10 @@ of these mistakes into unrepresentable states is owned by
 base container, the engine *payload* is not (it is materialized on first miss into the `CacheBudget`-bounded
 content-addressed cache, [content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 
-> **Honesty.** Phase 32 implements and tests the pure `InferenceEngine` offering quotient, family/lane
-> relation, identity-complete CUDA/Metal owner demands, residency/coexistence checks, and opaque provisioned
-> accelerator. Live jit-resolution and cross-lane weight loading remain UNVERIFIED. The sibling **infernix**
+> **Honesty — target only, NOT VALIDATED.** Phase 32 must eventually test the pure `InferenceEngine` offering
+> quotient, family/lane relation, identity-complete CUDA/Metal owner demands, residency/coexistence checks,
+> and opaque provisioned accelerator. Live jit-resolution and cross-lane weight loading are outside that pure
+> target. The sibling **infernix**
 > project is *evidence* that the
 > select-don't-fetch engine binding is real code — **sibling evidence, not an amoebius result**:
 > `src/Infernix/Runtime/Worker.hs` (sibling source)
@@ -525,7 +537,7 @@ longer "every cluster runs the identical manifest graph"; it is:
   invariant that actually matters, and it is owned as a classification by
   [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
 - **The capability set is cluster-invariant.** Every amoebius cluster offers all eight **cluster-invariant**
-  capabilities with their canonical providers ([§2](#2-the-capability-set), [§3](#3-one-canonical-provider-the-type-admits-alternates)). A never-before-seen child cluster still has an ObjectStore, a Sql, an
+  capabilities with their canonical providers ([§2](#2-the-capability-set), [§3](#3-canonical-providers-extension-is-capability-specific)). A never-before-seen child cluster still has an ObjectStore, a Sql, an
   Identity. The closed `Capability` union has **nine** arms: those eight plus `InferenceEngine`
   ([§4.1](#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)),
   which is offered where an ML extension provides it rather than on every cluster. "Eight" is the
@@ -597,7 +609,7 @@ it foreclosed:
 
 - **An app cannot name a product.** The app surface offers a capability union ([§2](#2-the-capability-set)) with no product arms, so
   "deploy `minio` directly" has no syntax — it fails dhall-typecheck (the Dhall typechecker) before any binary runs.
-- **A capability cannot bind to a provider with no inhabitant.** The provider union ([§3](#3-one-canonical-provider-the-type-admits-alternates)) admits only providers
+- **A capability cannot bind to a provider with no inhabitant.** The provider union ([§3](#3-canonical-providers-extension-is-capability-specific)) admits only providers
   amoebius has built; an unbuilt alternate has no arm, so a binding to it does not decode (gadt-decode).
 - **A capability cannot be left unbound.** Every declared capability resource requires a binding; a capability
   need with no provider+shape is an undecodable record, not a runtime `Pending`.
@@ -647,24 +659,23 @@ This document is normative capability-model doctrine only. Delivery sequencing, 
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
 never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed reconciler that render and apply a chosen shape** land with platform services in **Phase 58**, and the
 **capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
-shapes** — was delivered by **Phase 30**. This doc states the normative shape; the plan owns the validation
+shapes** — is assigned to **Phase 30**, which is NOT VALIDATED. This doc states the normative shape; the plan owns the validation
 status and ledger.
 
-Phase 80 validates the CPU arm of the closed engine-runtime binding with a pinned executable resolver fixture:
-its build/download recipes converge on one content digest and version, and two real clients reuse one owner-
-managed cache entry. This is Tier-1 resolver and cache evidence, not production model inference; full llama.cpp,
-cross-substrate equality, the Tier-2 model cache, and Tier-3 CUDA kernels remain UNVERIFIED. `linux-cpu` is an
-always-available option on every hardware substrate.
+Phase 80 is planned to validate the CPU arm of the closed engine-runtime binding, including content-digest
+convergence and two-client reuse of one owner-managed cache entry. It is NOT VALIDATED; production inference,
+cross-substrate equality, the Tier-2 model cache, and Tier-3 CUDA kernels are likewise unverified.
+`linux-cpu` remains the target always-available option on every hardware substrate.
 
 ---
 
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — the application-logic-vs-deployment-rules split this model rides on
-- [Platform Services Doctrine](./platform_services_doctrine.md) — the concrete provider set, the derived-connectivity rule ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), and the single wild-ingress path
+- [Platform Services Doctrine](./platform_services_doctrine.md) — selected-provider deployment topology, the derived-connectivity rule ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), and the single wild-ingress path
 - [DSL Doctrine](./dsl_doctrine.md) — the typed Dhall surface, total composability, and the typed spec gates a capability binding decodes through
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — rendering a chosen shape into typed manifests and the idempotent typed reconciler (no Helm)
-- [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `distribution` registry refs, the base container ([§7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) bakes the jit-build resolver + toolchain that materializes every `EngineRuntime` arm), and the Temurin JVM toolchain
+- [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `registry:2` refs, the base container ([§7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) bakes the jit-build resolver + toolchain that materializes every `EngineRuntime` arm), and the Temurin JVM toolchain
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — the ML-asset lifecycle ([§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) whose Tier-1 jit-resolved engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name, `SecretRef`, and Vault Kubernetes auth for provider credentials
 - [Substrate Doctrine](./substrate_doctrine.md) — the detected substrate catalog, substrate-indexed `EngineRuntime` offerings, and the engine/provider-derived LoadBalancer choice beneath Edge
@@ -674,9 +685,9 @@ always-available option on every hardware substrate.
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 
-> **Honesty.** The pure capability representation and binder are built and tested by Phase 30, and the pure
-> conditional planner/post-bind provision seal is built and tested by Phase 31; manifest
-> generation and the typed reconciler remain Phase 58 work. The design is generalized from evidence in the
+> **Honesty.** Existing capability, binder, planner, and provision-seal source is an observed footprint only;
+> Phases 30 and 31 are NOT VALIDATED, and manifest generation plus the typed reconciler remain Phase 58 work.
+> The design is generalized from evidence in the
 > sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering, a chart-platform planner), and
 > prodbox itself names products and
 > enforces the very substrate-equivalence lint this doctrine reverses. Per

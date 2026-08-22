@@ -15,12 +15,12 @@ capacity, capability, and platform doctrines it cites. It presumes only that a s
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Two surfaces, one app written once](#1-two-surfaces-one-app-written-once)
@@ -73,8 +73,8 @@ cross-cutting invariant "Application logic and deployment rules are separate DSL
 
 **Everything on this surface survives a move.** An app torn off its cluster and stood up somewhere else — on a
 different substrate, at a different scale — carries these things *with* it because they *are* the app. Its
-mandatory authored source is an **app-spec `.dhall`** containing or importing a bounded `UiSource`, semantic
-service/workflow requirements, and typed port bindings. That source checks to one `BoundUiProgram`, from which
+mandatory operator input is an **external/untracked app-spec `.dhall`** containing or importing a bounded
+`UiSource`, semantic service/workflow requirements, and typed port bindings. That input checks to one `BoundUiProgram`, from which
 the generic PureScript client plan and amoebius UI-server plan derive
 ([low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans)).
 
@@ -96,7 +96,7 @@ The app-spec surface declares:
 - **UI and user lifecycles** — the bounded `UiSource` modules, state, routes, forms, typed effects, workflow
   views, and artifact interactions that define the user experience. Their checked representation and runtime
   boundary are owned by
-  [low_code_ui_runtime_doctrine.md §4](./low_code_ui_runtime_doctrine.md#4-the-authored-dhall-surface).
+  [low_code_ui_runtime_doctrine.md §4](./low_code_ui_runtime_doctrine.md#4-the-external-dhall-surface).
 - **LB services** — *which* of the app's services are reachable from the edge. (Whether they are reachable
   is never the app's call: all wild ingress is owned by Keycloak via the LB + Gateway API — see
   [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). The app declares *what to publish*;
@@ -132,7 +132,7 @@ What is *conspicuously absent* from this surface is the whole vocabulary of [§3
 region, no failover policy, no chaos knob, no substrate selector. The app author cannot write those words
 because the type does not have those fields.
 
-[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) tests the capability instance of this split:
+[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) owns the target capability test for this split:
 the app-facing `CapabilityNeed` has no product, provider, or shape field, while two distinct composed files
 normalize to identical app slices and bind to structurally different provider graphs whose product,
 object-role, controller, execution, and intent semantics match an independently authored projection.
@@ -141,7 +141,7 @@ object-role, controller, execution, and intent semantics match an independently 
 
 ## 3. The deployment-rules surface — how the same app *runs*
 
-The Phase-30 `CapabilityBinding` realizes the provider/shape portion of this surface as a one-built-arm
+The Phase-30 contract specifies the provider/shape portion of this surface as a one-built-arm
 provider choice plus `SingleNode | Distributed n`; neither field is admitted by the app need.
 
 The deployment-rules surface is the mirror image of [§2](#2-the-application-logic-surface--what-an-app-is): **everything on this surface is about robustness, scale, and placement — and none of it changes what the app is.** Turn every one of these dials and a user sees the
@@ -191,8 +191,8 @@ The deployment-rules surface declares:
   type, the promotion pointer, and the immutable release ledger are owned by
   [release_lifecycle_doctrine.md §3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer). This is the type-level reason there is
   no separate "dev version" and "prod version" of an app ([§5](#5-why-the-split-matters--cashing-it-out)).
-  Phase 71 validated this rule by pointing Dev, Staging, and Prod at the same immutable release hash without
-  rebuilding any app bytes, while environment changes remained CAS operations on pointer objects.
+  Phase 71 owns the acceptance criterion: Dev, Staging, and Prod must point at the same immutable release hash
+  without rebuilding any app bytes, while environment changes remain CAS operations on pointer objects.
 - **Offline policy and realtime topology.** The application decides whether it is `OnlineOnly` or defines
   offline projections, queueable ports, blob classes, and an offline view: those choices change what the app
   does for a user. The deployment decides maximum offline lease, permitted persisted flow labels, local
@@ -271,10 +271,10 @@ the *reason* it is worth enforcing.
 ## 6. The proof case: a low-code workflow UI as application-logic-only
 
 The canonical demonstration is a low-code application that presents an infernix or jitML workflow and lifts its
-ready artifact into an interactive UX. The sibling demo SPAs supply UX evidence and migration fixtures; their
-handwritten component trees and client effects are not the amoebius application model. The amoebius app authors
-bounded `UiSource` modules, binds typed workflow/artifact ports, and lets the generic runtime render and dispatch
-them. Trusted Haskell adapters preserve the sibling workflow semantics
+ready artifact into an interactive UX. The sibling demo SPAs are external/untracked UX evidence for the
+migration; their handwritten component trees and client effects are not tracked amoebius fixtures, source, or
+application models. The amoebius app authors bounded `UiSource` modules, binds typed workflow/artifact ports,
+and lets the generic runtime render and dispatch them. Trusted Haskell adapters preserve the sibling workflow semantics
 ([low_code_ui_workflow_lifting.md §12](./low_code_ui_workflow_lifting.md#12-workflows-and-artifact-lifting-into-the-ux)).
 
 That application is authored once as application logic: its UI program, user lifecycle, durable-data
@@ -372,7 +372,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 ```mermaid
 flowchart TD
 %% register: algebra
-  app["App spec Dhall written once: UiSource, typed ports, auth refs, durable data, workflows"]:::intent -->|joined with| r1["Deployment rules A: single cluster, replicas=1"]:::intent
+  app["External/untracked app input written once: UiSource, typed ports, auth refs, durable data, workflows"]:::intent -->|joined with| r1["Deployment rules A: single cluster, replicas=1"]:::intent
   app -->|same bytes, joined with| r2["Deployment rules B: N clusters, geo-replicated, gateway failover"]:::intent
   r1 -->|renders| d1["Deployment: one cluster, one region"]:::runtime
   r2 -->|renders| d2["Deployment: N geo-replicated clusters, route53 failover"]:::runtime
@@ -413,9 +413,10 @@ rules.
 
 The checker derives the complete enumeration of reachable event constructors, routes, ports, transitions,
 and scoped actions from `CheckedUiProgram`. That enumeration is generated at gate time and never committed.
-The expected observation and the interaction that produces it are independently authored and committed;
-generating either from the program under test would create a self-agreeing oracle. An enumerated surface with
-no authored expectation remains explicitly UNVERIFIED. This is the derivation boundary owned by
+The expected observation and the interaction that produces it are separately reviewed, version-controlled
+Haskell (`.hs`) semantic values; any serialized interaction or observation is lazily projected beneath
+`.build/**`. Deriving either semantic expectation from the subject would create a self-agreeing oracle. An
+enumerated surface with no independent Haskell expectation remains explicitly UNVERIFIED. This is the derivation boundary owned by
 [testing_doctrine.md §9 — generated enumeration, authored expectation](./testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation)
 and applied to UI verification by
 [low_code_ui_runtime_doctrine.md §17 — verification obligations](./low_code_ui_runtime_doctrine.md#17-verification-obligations).
@@ -428,18 +429,18 @@ the concentration principle intact: distribution behavior is still exercised and
 boundary rather than duplicated inside each application
 ([chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)).
 
-[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) supplies concrete local evidence for this
-split. Five application-authored interactions and four visible-state expectations exact-join the generated
+[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) owns the concrete local acceptance case for
+this split. Five application-authored interactions and four visible-state expectations must exact-join the generated
 workflow surface for single- and multi-tenant sources, while neither source contains a replica, topology,
 rollout, failover, or fault-schedule choice. The same expectations still require later operator-selected live
 topologies before any deployment, replica-loss, or HA claim becomes verified.
 
-Phase 79 supplies the concrete provider-node classification boundary: workflow-completion and load may be
+Phase 79 owns the concrete provider-node classification boundary: workflow-completion and load may be
 inputs to a declared deployment `ScalingPolicy`, but application logic cannot request a node, select a provider
-SKU, weaken quota/capability admission, or bypass taint and scheduler authority. The contract and a retained-
-Kubernetes signal analogue pass; real EKS node mutation remains UNVERIFIED.
+SKU, weaken quota/capability admission, or bypass taint and scheduler authority. Its gate must accept the
+contract and a retained-Kubernetes signal analogue; real EKS node mutation remains UNVERIFIED.
 
-Phase 91 exercises this split at the core boundary: the application-facing contract names a scope-bound
+Phase 91 must exercise this split at the core boundary: the application-facing contract names a scope-bound
 artifact workflow, while `linux-cpu`, the finite CPU resource envelope, the named engine, cache placement,
 Pulsar/MinIO/Vault wiring, and worker topology remain deployment/runtime choices. The scoped gate uses a pinned
 micro-decoder and one untouched sibling compacted-topic module; a production TinyLlama engine and the full
@@ -461,7 +462,7 @@ mechanics it points at:
 | Secrets-by-name, `SecretRef`, parent-injects-into-child | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | Services as **capabilities** (ObjectStore, Sql, …), one canonical provider, per-cluster shape | [service_capability_doctrine.md](./service_capability_doctrine.md) |
 | Rendering a shape into typed manifests + the typed reconciler (no Helm) | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
-| Image build (one image per architecture, baked binaries + the `distribution` registry, versioning) | [image_build_doctrine.md](./image_build_doctrine.md) |
+| Image build (one image per architecture; baked non-Registry service binaries; separately preloaded Distribution `registry:2`; versioning) | [image_build_doctrine.md](./image_build_doctrine.md) |
 | Geo-replication / failover mechanics, dynamic node provisioning, teardown | [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) |
 | The async cross-cluster proof obligation + chaos methodology | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 | Test-as-an-`InForceSpec`-topology, `suggest-test`, the ledger | [testing_doctrine.md](./testing_doctrine.md) |

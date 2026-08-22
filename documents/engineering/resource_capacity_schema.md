@@ -20,6 +20,8 @@ constructed, from scalar quantities outward to whole-deployment budgets, and eve
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Compute quantities and container envelopes](#1-compute-quantities-and-container-envelopes)
 - [2. Images and the kubelet filesystem layout](#2-images-and-the-kubelet-filesystem-layout)
@@ -3154,7 +3156,7 @@ NormalizedExecutionCommitment =
       -- the observed LaunchInFlight record is execution.reservation; there is no second record to pair.
   | HostLaunchPending :
       { reservation : HostLaunchInFlightNoProcessRecord }
-      -- no-process is already proven by the refinement; the debit is reservation.record.axes.
+      -- no-process must first be established by the refinement; the debit is reservation.record.axes.
   | HostProcess :
       < Running  : ObservedHostProcessExecution Running
       | Draining : ObservedHostProcessExecution Draining

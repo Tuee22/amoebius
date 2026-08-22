@@ -1,18 +1,20 @@
 # Phase 6: The workflow calculus
 
-> **Purpose**: Provision, build, deploy, observe and teardown as one algebra, with teardown a type obligation.
+> **Purpose**: Specify the target Haskell capability to represent provision, build, deploy, observe,
+> and teardown as one Haskell workflow algebra in which teardown remains a type-level obligation.
 > **Read this if**: something has to happen to a running system, or teardown has to be reasoned about, or this gate has to be read precisely.
 
-Before the generative re-baseline nothing in the plan owned this: make teardown an obligation the type system tracks rather than a step somebody remembers.
-Its first deliverable is five arms — provision, build, deploy, observe, teardown — over one vocabulary, and this phase sits where the vocabulary it consumes first exists.
-The rule behind the workflow calculus is owned by [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md), which this contract implements rather than restates.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/workflow_calculus_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md
 **Generated sections**: none
 
 </details>
@@ -20,12 +22,13 @@ The rule behind the workflow calculus is owned by [`workflow_calculus_doctrine.m
 ---
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 6.1: The workflow calculus ✅](#sprint-61-the-workflow-calculus-)
+- [Sprint 6.1: The workflow calculus ⏸️](#sprint-61-the-workflow-calculus-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,66 +36,81 @@ The rule behind the workflow calculus is owned by [`workflow_calculus_doctrine.m
 
 ## Phase Status
 
-✅ Done — built and sealed 2026-08-20, the fourth of the five inserted calculi to be built. `python3
-tools/workflow_calculus_gate.py` passes all thirteen sides on substrate `none`, lane `none`, natural `arm64`,
-untranslated. An independently authored obligation ledger names eight obligations over five workflows and
-every one is replayed against what the run actually recorded; the four calculus modules carry no ambient read
-and no partial token; the suite reaches its acceptance token with ten checks green; three compile-fail pairs
-are red at the reason each asserts; and all three seeded mutants redden their own locus and no other.
-Attestation `sha256:7f3b34a513bdad679fafa266b46e4e6509a8d038687911dc493b63216dc6c855` binds to a 2,127-file source snapshot; as everywhere here, the
-reference names the run and this record follows it.
+⏸️ Blocked — NOT VALIDATED.
 
-**Why the ledger asks three questions instead of one.** A single "the accounting is correct" check would have
-been cheaper and worth less, because the three ways an obligation can be mishandled are invisible to each
-other. Dropping one breaks the equality of the provisioned and released *sets* and leaves the multiplicity
-intact. Discharging one twice does the reverse — the sets stay equal, and only a count notices. And a transfer
-recorded as a teardown leaves both untouched while losing the only statement of when the resource actually
-goes away. Each seeded mutant reddens exactly one of the three, which is what makes the three questions
-separate claims rather than three spellings of one.
+Blocked by redesigned Phase 5, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-**What the type system carries, and what it does not.** The outstanding-obligation set is the workflow's type
-index: `provision` adds a name, `teardown` and `transfer` remove one, and `runWorkflow` accepts only a
-workflow that begins and ends owing nothing. There is no combinator that shrinks the set any other way, which
-is what [`workflow_calculus_doctrine.md` §3](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation)'s
-"no discard rule" means here — dropping an obligation is not refused at run time, it is unspellable. What the
-type does not carry is whether the provider actually deleted anything, which that same section already
-records as a `live-effect` observation and this register does not reach.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-Make teardown an obligation the type system tracks rather than a step somebody remembers.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to represent provision, build, deploy, observe, and teardown as one Haskell
+workflow algebra in which teardown remains a type-level obligation.
 
-**Phase scope:** one cohesive claim — *a workflow cannot end while it still owes a teardown*. Five arms share one vocabulary precisely so that obligation can be stated across them at all.
-**Substrate:** `none`
-**Lane:** `none`
-**Register:** 1
-**Depends on:** [Phase 5](phase_05_lift_calculus.md) — the lift calculus, whose layers and witnesses each arm is placed at, and through it the budget calculus the build arm spends against.
-**Gate:** `python3 tools/run_phase_gate.py 06` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
+
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — represent provision, build, deploy, observe, and teardown
+as one Haskell workflow algebra in which teardown remains a type-level obligation. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 5](phase_05_lift_calculus.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 06`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Independent oracle.** A resource-ledger oracle authored independently, replaying a workflow trace and requiring the provisioned and released sets to be equal.
-- **Committed mutants.** Mutants drop an obligation, discharge one twice, and transfer without a stated condition.
-- **Specific-reason negatives.** Each negative fixture asserts the reason it fails, paired with a positive differing only in sequential and parallel composition typed by the witnesses each arm consumes.
-- **Fresh challenge.** Not applicable — this gate is pure, so the separately authored predicate stands in for it: a resource-ledger oracle authored independently, replaying a workflow trace and requiring the provisioned and released sets to be equal.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — represent provision, build, deploy, observe, and teardown as one Haskell workflow algebra in which teardown remains a type-level obligation. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 06` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 05 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — the rule behind the workflow calculus.
+- [`workflow_calculus_doctrine.md` §2 — Five arms, one algebra](../documents/engineering/workflow_calculus_doctrine.md#2-five-arms-one-algebra) — the rule behind the workflow calculus.
 
 ## Sprints
 
-## Sprint 6.1: The workflow calculus ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done — 2026-08-20.
-**Implementation**: `src/Amoebius/Calculus/Workflow/{Arm,Obligation,Ledger,Run}.hs`,
-`tools/workflow_calculus_gate.py`, `test/spec/calculus/WorkflowCalculusSpec.hs`,
-`test/oracle/workflow_calculus/obligation_ledger.tsv`, `test/oracle/workflow_calculus_surfaces.tsv`,
-`test/negative/compile_fail/workflow_calculus/{workflow_discharges_its_obligation,workflow_ends_owing_a_teardown,transfer_names_its_condition,transfer_without_a_condition,teardown_discharges_what_was_provisioned,teardown_of_an_unheld_obligation}.hs`
-**Blocked by**: None.
-**Independent Validation**: A resource-ledger oracle authored independently, replaying a workflow trace and requiring the provisioned and released sets to be equal.
-**Docs to update**: `documents/engineering/workflow_calculus_doctrine.md`
+## Sprint 6.1: The workflow calculus ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -119,7 +137,7 @@ resource is named.
 
 ### Remaining Work
 
-None for this phase. Parallel composition is admitted over disjoint resources and the disjointness is a
+The pre-reset `None` claim is permanently invalid; the phase remains blocked and NOT VALIDATED. Parallel composition is admitted over disjoint resources and the disjointness is a
 constraint rather than a convention, but nothing here executes: what parallel composition asserts is that the
 two orders are equally admissible, not that anything ran at once. Binding a claim to the fixture that
 discharges it is the evidence calculus's, which is the next phase's and is recorded `UNVERIFIED` here; and a
@@ -129,13 +147,18 @@ names, which no type discipline reaches.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — **done
   2026-08-20.** §3's "the compile-fail fixture establishing that is owed by the phase that builds the workflow
   calculus; none exists" is replaced by the three that do, and by what they establish: the obligation is a type
   index, and dropping one is unspellable rather than refused.
 
+**Cross-references to add:**
+
+- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+
 ## Related Documents
+
 - [Development Plan](README.md)
 - [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — the rule behind the workflow calculus.

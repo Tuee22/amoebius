@@ -4,14 +4,10 @@
 > effects, premature traffic shift, lost owner-scoped projections, or discarded reconnect cursors.
 > **Read this if**: phase 83 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 83 delivers the UI rollout, projection catch-up, and reconnect; its design is owned by [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), and the plan for reaching it is owned here.
-Register 3, scoped live, on the `linux-cpu` substrate.
-The scoped gate passed on 2026-08-11; cluster, browser, and provider observations remain `UNVERIFIED`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -24,9 +20,11 @@ The scoped gate passed on 2026-08-11; cluster, browser, and provider observation
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 83.1: Execute and verify the coherent UI release transition ⏸️](#sprint-831-execute-and-verify-the-coherent-ui-release-transition-)
@@ -37,25 +35,18 @@ The scoped gate passed on 2026-08-11; cluster, browser, and provider observation
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-82 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 82, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-🟡 Scoped gate passed. The transition kernel, cursor isolation, registration drain, host-local durable
-observers, and all four mutation loci pass. Real Keycloak, Gateway API/Envoy, Pulsar, browser, Kubernetes,
-CNI, and provider observations remain `UNVERIFIED`.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -67,9 +58,9 @@ Connection registrations and routed envelopes carry the admitted program/ABI epo
 accepting sockets, remove or expire Redis registrations, issue a bounded reconnect control frame, and retain
 old decoders until their compatibility window closes.
 
-**Session scope:** Implement and validate the single `A → B → A` UI release transition with one acceptance
-command, `cabal test phase57-ui-rollout-reconnect`; split if the work introduces another rollout algorithm,
-substrate, or infrastructure-failure injection.
+**Supporting observation:** a phase-number-neutral Haskell rollout/reconnect suite may exercise the single
+`A → B → A` transition; the sole acceptance command is `pb validate phase 83`. Split if the work introduces
+another rollout algorithm, substrate, or infrastructure-failure injection.
 
 **Phase scope:** one cohesive claim — *a release rolls forward and back without stale-plan effects or discarded cursors*. Catch-up is what makes a projection survive the rollout that interrupted it.
 
@@ -81,93 +72,55 @@ Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 82](phase_82_ui_multi_tenant_live.md) — multi-tenant low-code UI isolation, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 83` performs the pinned transition and satisfies the
-independent timeline, fresh-action, cursor, stale-plan, rollback, and mutant predicates in
-[Gate integrity](#gate-integrity). UI-server readiness or an app-authored rollout trace alone is insufficient.
+**Depends on:** [Phase 82](phase_82_ui_multi_tenant_live.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 83`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-**Representative set.** Release A and release B have distinct `ProgramDigest`s and compatible state/port
-contracts recorded in a committed witness. B changes one visible projection and one idempotent mutation.
-Tenant A has one owner and one same-tenant non-owner; tenant B has a foreign owner with equal-shaped resource,
-cursor, and action identities. The owners maintain live projected streams while Gateway API shifts `HTTPRoute`
-weights. The transition includes B catch-up, 0→100 traffic shift, an old-client request, same-owner cursor
-resume, same-tenant and cross-tenant cursor replays, and CAS rollback to A.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *a release rolls forward and back without stale-plan effects or discarded cursors*. Catch-up is what makes a projection survive the rollout that interrupted it. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 83` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 82 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**Pinned independent oracle.** Phase 0 commits `test/golden/ui_rollout_reconnect/rollout_timeline.tbl`,
-`test/golden/ui_rollout_reconnect/cursor_expectations.json`, and `test/golden/ui_ha_multizone/access_matrix.tbl`. The timeline
-requires `B watermark reached < first B traffic < old drain`; the cursor table fixes accepted sequence ids
-without consulting the projector implementation; the access matrix pairs owner success with same-tenant
-non-owner and equal-shaped foreign-tenant denials.
+## Resource provision — UNRESOLVED
 
-**Real authority provenance.** After A is ready, Keycloak mints distinct least-privilege sessions for tenant
-A's owner/non-owner and tenant B's owner. Tenant, owner, membership, and scope epochs are derived from those
-sessions; caller-supplied values never seed the rollout, cursor, or access oracle. Unavailable or stale
-Keycloak provenance makes the gate fail closed.
-
-**Fresh challenge and outside observations.** After A is serving, the harness issues fresh nonces before,
-during, and after the shift. A read-only Kubernetes/API observer records immutable release/pointer history;
-Gateway API status and Envoy access logs record actual backend selection; a separately implemented native
-Pulsar consumer records broker message ids and B's watermark; and a browser-network proxy records plan ids,
-reload responses, and resume cursors. Each accepted nonce must appear exactly once in the authoritative
-workflow/data observation and in the owner projection. Missing or self-reported evidence fails closed.
-
-**Security and stale-state negatives.** The same-tenant non-owner and tenant-B owner each replay tenant A's
-cursor and handle and observe the same denial with zero provider effect or subscription movement. An A client
-invoking a changed B port receives either a compatibility-admitted response or `ReloadRequired`; it can never
-execute by digest omission. Caller-supplied tenant, owner, release, or watermark values are hostile inputs.
-Rollback must not retag a cursor or projection to another subject or tenant scope.
-
-**Bypass probes.** The browser-network harness sends the stale A plan directly to B's action endpoint and a
-foreign-owner and foreign-tenant cursors directly to the projector service, bypassing route visibility and
-normal reconnect code. The action journal and native broker observer must show zero forbidden effect, and a
-named caller Pod using each real user session must be denied direct UI-server Pod, projector Service, Pulsar,
-MinIO, and SQL paths. CNI flow records and provider authentication/audit—not client error text—decide the
-result.
-
-**Committed mutants.** `test/mutant/ui_rollout_reconnect/shift_before_watermark.dhall` must fail the external timeline,
-and `test/mutant/ui_rollout_reconnect/discard_resume_cursor.dhall` must fail the independent broker/browser sequence
-predicate. `test/mutant/ui_rollout_reconnect/drop_tenant_cursor_key.patch` must leak or advance the equal-shaped
-foreign-tenant cursor and fail the access/broker oracle. A hardcoded success page cannot reproduce the
-post-start nonce across the API, broker, gateway, and browser observers.
-`test/mutant/ui_rollout_reconnect/stale_redis_registration.patch` keeps an A registration routable after drain and must
-fail the backend/Redis/cursor timeline.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- Adopt [`release_lifecycle_doctrine.md` §5 — readiness-gated rollout](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply): move only immutable release pointers and ordered gateway weights.
-- Adopt [`low_code_ui_runtime_doctrine.md` §15 — versioning and rollout](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): enforce exact plan/contract epochs or checked compatibility.
-- Adopt [`pulsar_client_doctrine.md` §5.1 — TableView projection](../documents/engineering/pulsar_client_doctrine.md#51-two-derived-capabilities-read-model-and-two-deliberately-absent-ones): catch up and resume owner-scoped projections.
-- Adopt [`testing_spoof_resistance.md` §12](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): observe the transition through independent live observers.
-- Adopt [`ui_realtime_coordination_doctrine.md §7`](../documents/engineering/ui_realtime_coordination_doctrine.md#7-replicas-drain-rollout-and-gateway-migration): drain connection ownership and preserve cursor/ABI compatibility without sticky sessions.
+- Adopt [`release_lifecycle_doctrine.md` §5 — `RolloutPlan` / `RolloutPhase`: the readiness-gated apply](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply): move only immutable release pointers and ordered gateway weights.
+- Adopt [`low_code_ui_runtime_doctrine.md` §15 — Versioning, rollout, and generated artifacts](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): enforce exact plan/contract epochs or checked compatibility.
+- Adopt [`pulsar_client_doctrine.md` §5.1 — Two derived capabilities (read-model), and two deliberately absent ones](../documents/engineering/pulsar_client_doctrine.md#51-two-derived-capabilities-read-model-and-two-deliberately-absent-ones): catch up and resume owner-scoped projections.
+- Adopt [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence): observe the transition through independent live observers.
+- Adopt [`ui_realtime_coordination_doctrine.md` §7 — Replicas, drain, rollout, and gateway migration](../documents/engineering/ui_realtime_coordination_doctrine.md#7-replicas-drain-rollout-and-gateway-migration): drain connection ownership and preserve cursor/ABI compatibility without sticky sessions.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 83.1: Execute and verify the coherent UI release transition ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Ui/ReleaseTransition.hs`,
-`src/Amoebius/Ui/Projection/Cursor.hs`, `src/Amoebius/Ui/Realtime/Drain.hs`,
-`test/spec/live/UiRolloutSpec.hs`, `tools/ui_rollout_reconnect_live.py`, and `tools/ui_rollout_reconnect_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/ui_rollout_reconnect_gate.py`; scoped transition,
-cursor, registration, fresh-journal, durable reconnect, and mutant observations are tested. Real Keycloak,
-Gateway/Pulsar/browser/API/CNI observations remain `UNVERIFIED`.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/release_lifecycle_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`,
-`documents/engineering/ui_realtime_coordination_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -184,7 +137,7 @@ Deliver one coherent, reversible UI release transition with scope-preserving rec
 
 ### Validation
 
-1. Run `python3 tools/ui_rollout_reconnect_gate.py` on `linux-cpu`; the scoped canonical
+1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-83 supporting suite must run on `linux-cpu`; the scoped canonical
    transition must match the pinned custody and local timeline/cursor/scope predicates, all four mutants must
    fail at their pinned loci, and unsupported provider observations must remain `UNVERIFIED`.
 
@@ -196,7 +149,8 @@ Those surfaces are deliberately `UNVERIFIED`; the scoped local gate does not sub
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/release_lifecycle_doctrine.md` — record the coherent rollout/rollback evidence.
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record stale-plan and compatibility behavior.
 - `documents/engineering/pulsar_client_doctrine.md` — record watermark and cursor-resume evidence.
@@ -204,6 +158,7 @@ Those surfaces are deliberately `UNVERIFIED`; the scoped local gate does not sub
   and non-sticky reconnect behavior.
 
 **Cross-references to add:**
+
 - The phase tracker, substrate map, and component inventory must link this transition and ledger.
 
 ## Related Documents

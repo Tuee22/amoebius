@@ -1,39 +1,37 @@
 # Phase 51: The host-ensure kernel
 
 > **Purpose**: Move every host assertion after the handoff into one closed, substrate-indexed algebra whose
-> install steps are typed data, and prove that algebra total.
+> install steps are typed data, with algebraic totality as the target claim.
 > **Read this if**: a host tool has to be ensured, a substrate arm has to be added, or a step has to run inside
 > a frame rather than on the host.
 
-This phase owns what the binary asserts about its own host: which frame a substrate supplies, which engine
-that frame supplies, what each reconciler installs, and how a step is executed. It does not own the
-pre-binary floor assertions or the toolchain build, which belong to
-[Phase 50](phase_50_host_assert_cli.md), and it does not own the frame's mount contract or the pristine-Linux
-provider selection, which
-[`substrate_doctrine.md` §4](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
-fixes and this phase only consumes.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 51.1: The closed substrate algebra ✅](#sprint-511-the-closed-substrate-algebra-)
-- [Sprint 51.2: Install steps as typed data ✅](#sprint-512-install-steps-as-typed-data-)
-- [Sprint 51.3: The reconciler table ✅](#sprint-513-the-reconciler-table-)
-- [Sprint 51.4: The probe-first ensure driver ✅](#sprint-514-the-probe-first-ensure-driver-)
-- [Sprint 51.5: The lift fold to argv ✅](#sprint-515-the-lift-fold-to-argv-)
+- [Sprint 51.1: The closed substrate algebra ⏸️](#sprint-511-the-closed-substrate-algebra-)
+- [Sprint 51.2: Install steps as typed data ⏸️](#sprint-512-install-steps-as-typed-data-)
+- [Sprint 51.3: The reconciler table ⏸️](#sprint-513-the-reconciler-table-)
+- [Sprint 51.4: The probe-first ensure driver ⏸️](#sprint-514-the-probe-first-ensure-driver-)
+- [Sprint 51.5: The lift fold to argv ⏸️](#sprint-515-the-lift-fold-to-argv-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,29 +39,17 @@ fixes and this phase only consumes.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-22. The workflow-routed twelve-sided gate passes on natural `arm64`, untranslated:
-the closed host algebra builds with every warning an error and has no wildcard arm; all four catalogue plans
-join their authored oracle; applicability, diagnostics and refusal derive from one reconciler table; replay
-converges once and mutates nothing thereafter; and the one lift fold preserves all three contexts. All five
-seeded defects redden their exact checks, all 23 surfaces join, and the authored tree and outside-host
-inventory remain unchanged. Attestation
-`sha256:ecd9481e8540827635b55f31947ccaa619266faecad103fd6e1b7d9287b2a6e5` binds source
-`sha256:42ce8e5f7946e151…` over 2,318 files. The run also removed a redundant workflow-calculus constructor
-import that the phase's `-Werror` boundary correctly refused. Phase 52 is now the sole open contract.
+⏸️ Blocked — NOT VALIDATED.
 
-Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
-change what this phase's gate must cover, so any earlier seal is history and no longer presents completion
-evidence.
-
-The run found three defects. `dsl-core` needed `Amoebius.Pulumi.Engine` at compile time and never
-declared it, so `-Werror=missing-home-modules` refused the build outright — the module is now
-declared. The first draft of the wildcard scan keyed on any constructor appearing in a `case` block,
-which read `classify`'s case over a `String` as a case over `Substrate` and refused its legitimate
-catch-all; it now keys on the arm patterns. And the first draft of the diagnostic check compared by
-substring, which passes for a diagnostic naming a *superset* of the set its row admits — exactly the
-drift the check exists to catch.
+Blocked by redesigned Phase 50, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
 ---
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -71,95 +57,69 @@ The binary takes over every assertion the moment [Phase 50](phase_50_host_assert
 pressure on this phase is that the takeover happens once, in one place. One table answers which frame a
 substrate supplies and which engine that frame supplies. One type describes an install step. One driver
 executes a plan, and one fold turns a lift context into the argv that runs a step inside it. A second
-spelling of any of the four is the defect this phase exists to make unconstructable.
+spelling of any of the four is the defect the future phase gate must make unconstructable.
 
-Making it unconstructable is a typing obligation rather than a testing one. "Install Docker twice on Apple"
-and "no Linux frame on Windows" are not conditions a suite catches after the fact — they are values the
-algebra never builds. The map from substrate to frame is total, closed, and carries no default arm to absorb
-a member nobody considered. A test can only observe the cases someone thought to write down; a total
-map without a wildcard refuses to compile when a case goes missing.
+That foreclosure is a typing obligation rather than a testing one. "Install Docker twice on Apple"
+and "no Linux frame on Windows" must not be values the target algebra can build. The map from substrate to
+frame must be total and closed, with no default arm to absorb a member nobody considered. A test can only
+observe the cases someone thought to write down; the future gate must establish that a total map without a
+wildcard refuses to compile when a case goes missing.
 
 What the tree carries today is a declared substrate story with no interpreter behind it.
 `installAndVerify` has zero callers, and `pristineLinuxProvider` is consumed only by two specs.
 `Cluster/Bootstrap.hs` refuses `apple` and `windows` outright rather than entering their frames; `HostTool`
 has five constructors and no Docker arm; and `installMechanism :: String` in `src/Amoebius/Host/Ensure.hs`
 holds values like `brew-install:ghcup` that nothing parses and nothing executes. The plan is pure and
-uninterpretable at the same time, and that pairing is what this phase closes.
+uninterpretable at the same time, and that pairing is what the future phase gate must close.
 
 **Phase scope:** one cohesive claim — *every post-handoff host assertion resolves through one closed,
 substrate-indexed algebra whose install steps are typed data*. Its sprint seams are the algebra, the step
 type, the reconciler table, the driver, and the lift fold. It splits if a second acceptance register or a
 second substrate appears.
 
-**Substrate:** `none` — the algebra is replayed against a committed fake tool directory, not a host ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
+**Substrate:** `none` — Haskell declarations generate a fresh run-local fake tool directory beneath
+`.build/**`; it is never committed and the algebra is replayed against it, not a host
+([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
 
 **Lane:** none ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
 
 **Register:** 2 — boundary-with-fakes: the claim is about tool resolution and emitted argv, not about a value ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 50](phase_50_host_assert_cli.md)
-
-**Requires**: `host-floor`
-
-**Gate:** `python3 tools/run_phase_gate.py 51` passes every check named in
-[Gate integrity](#gate-integrity). Phase 52 does not open until it is green.
-
----
+**Depends on:** [Phase 50](phase_50_host_assert_cli.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 51`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-`python3 tools/host_ensure_kernel_gate.py` settles four questions, none of which needs a machine to answer
-because every one of them is a question about a value.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-
-**The rendered plan is compared against an independent oracle, not against itself.** The gate renders the
-ensure plan for all four catalog members — `linux-cpu`, `linux-cuda`, `apple`, `windows`. Each rendering
-joins against `test/oracle/host_ensure_plans.tsv`, a table authored from the doctrine rather than dumped from
-the implementation. The join runs in both directions, so a step the oracle does not name and an oracle
-row no plan emits are both failures. A golden captured from the code under test proves only that the code is
-deterministic.
-
-**Resolution is exercised against a committed fixture, by absolute path.**
-`test/fixture/host_ensure_kernel/` holds a fake tool directory whose entries are stubs that record the argv
-they were invoked with. Every step resolves into that directory and is invoked by the path the resolver
-returned, so a bare name reaching the process layer appears in the recorded argv rather than being inferred
-from the source.
-
-**Idempotence is replayed, not asserted.** Each plan is driven absent → present → present against the
-fixture. The first pass must converge, the second must issue no install argv at all, and the post-probe must
-be the predicate the pre-probe used — a driver that probes one property and verifies another reports a
-convergence it never reached.
-
-**Totality is structural.** `cabal build --ghc-options=-Werror` fails the gate on any incomplete pattern
-match over `Substrate`, `Frame`, or `HostTool`, and the gate separately refuses a wildcard arm in any `case`
-over those types inside the host modules. A wildcard makes an exhaustive-looking match silently absorb the
-next constructor, which is the failure the compiler otherwise catches for free.
-
-**Five mutants sit in `test/mutant/registry.tsv`**, and the battery is only meaningful if each reddens a
-different check:
-
-- A Docker install step added to the Apple reconciler row — reddens the oracle join, because the Apple row's
-  engine is already supplied inside the frame and the oracle names it exactly once.
-- A reconciler row whose applicability column and diagnostic disagree — reddens the single-table join, since
-  the diagnostic is derived from the applicability column rather than authored beside it.
-- A driver that omits the re-resolve between steps — reddens the fixture replay, because the step after an
-  install reads the pre-install snapshot and reports its tool missing.
-- A driver that reports converged without re-probing — reddens the absent → present → present replay at the
-  post-condition, where the second pass observes an unverified claim.
-- A lift fold that drops the frame prefix — reddens the recorded argv, which then names the host tool at the
-  position the guest command occupies.
-
----
-
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/host_ensure_kernel/`.
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *every post-handoff host assertion resolves through one closed, substrate-indexed algebra whose install steps are typed data*. Its sprint seams are the algebra, the step type, the reconciler table, the driver, and the lift fold. It splits if a second acceptance register or a second substrate appears. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 51` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 50 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — the host-ensure kernel is admitted by satisfying the contract, not by appearing on a list.
+- [`extension_conformance_doctrine.md` §5 — The conformance gate is generated, not authored](../documents/engineering/extension_conformance_doctrine.md#5-the-conformance-gate-is-generated-not-authored) — the host-ensure kernel is admitted by satisfying the contract, not by appearing on a list.
 - [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract):
   probe, install when absent, resolve the absolute path from the package manager, invoke by that path and
   never by a name the OS searches for.
-- [`substrate_doctrine.md` — the exact boundary of the no-`PATH` rule](../documents/engineering/substrate_doctrine.md#the-exact-boundary-of-the-no-path-rule):
+- [`substrate_doctrine.md` §3 — The no-environment / no-`PATH` lazy tool-ensure contract; “The exact boundary of the no-`PATH` rule”](../documents/engineering/substrate_doctrine.md#the-exact-boundary-of-the-no-path-rule):
   only the outermost tool is resolved, and a nested command is the guest's own name against the guest's own
   environment — which is what makes a single fold over a lift context sufficient.
 - [`dsl_doctrine.md` §5 — the illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
@@ -173,13 +133,11 @@ different check:
 
 ## Sprints
 
-## Sprint 51.1: The closed substrate algebra ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Host/Frame.hs`, `src/Amoebius/Host/Substrate.hs`
-**Blocked by**: none within the phase
-**Requires**: `host-floor`
-**Independent Validation**: the frame and engine maps are total over `Substrate` with no wildcard arm, proved by `-Wincomplete-patterns` under `-Werror`
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+## Sprint 51.1: The closed substrate algebra ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -208,14 +166,11 @@ member.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 51.2: Install steps as typed data ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs`
-**Blocked by**: Sprint 51.1
-**Independent Validation**: no install step carries a free-form string, and every step renders to an argv whose head is a resolved `AbsExe`
-**Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`
+## Sprint 51.2: Install steps as typed data ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -242,14 +197,11 @@ make an install step a value the driver executes rather than a label a reader in
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 51.3: The reconciler table ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Host/Reconciler.hs`, `test/fixture/host_ensure_kernel/`
-**Blocked by**: Sprint 51.2
-**Independent Validation**: applicability, diagnostic, and install plan for every reconciler derive from one row, and a second declaration of any of the three is refused
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+## Sprint 51.3: The reconciler table ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -275,14 +227,11 @@ express a reconciler as a row so its three views cannot disagree with each other
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 51.4: The probe-first ensure driver ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Host/Ensure.hs`, `src/Amoebius/Host/Context.hs`
-**Blocked by**: Sprint 51.3
-**Independent Validation**: the absent → present → present replay against the committed fake tool directory converges once and issues no install argv thereafter
-**Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`
+## Sprint 51.4: The probe-first ensure driver ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -308,14 +257,11 @@ pre-condition.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 51.5: The lift fold to argv ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Host/Lift.hs`, `test/spec/host/HostEnsureKernelSpec.hs`
-**Blocked by**: Sprint 51.4
-**Independent Validation**: one fold produces host, VM, and container argv from a single step list, each compared against the authored oracle
-**Docs to update**: `documents/engineering/substrate_doctrine.md`, `documents/engineering/daemon_topology_doctrine.md`
+## Sprint 51.5: The lift fold to argv ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -339,13 +285,14 @@ without a second deployment path.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ---
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/substrate_doctrine.md` — §3's honesty note records package-manager-canonical
   discovery once the resolver performs it, and the install-and-verify subsection records the typed step and
   the closed frame map.
@@ -353,16 +300,18 @@ None.
   three contexts.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/system_components.md` — the lazy tool-ensure row leaves PARTIAL once the driver has a
   caller and the mechanism is typed, and the new host modules take their rows.
 - `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md` — the
-  [host-ensure amendment](legacy_tracking_for_deletion_archive.md#host-ensure-amendment--2026-08-17) rows naming the
+  [active host obligations](legacy_tracking_for_deletion.md#4-host-image-and-lift-violations) naming the
   uninterpretable mechanism, the caller-less driver, the thrice-written tool set, and the second discovery
   helper close here.
 
 ---
 
 ## Related Documents
+
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md)
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md)
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md)

@@ -14,12 +14,12 @@ model-as-data machinery it is expressed in, owned by
 
 **Status**: Authoritative source
 **Supersedes**: documents/engineering/tla_modelling_assumptions.md
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. The one obligation](#1-the-one-obligation)
@@ -149,12 +149,13 @@ Both instruments read the **same** `Model`:
 
 - **Simulate (io-sim).** The lifted pure decision core is driven by `io-classes`/`IOSimPOR`'s deterministic,
   partial-order-reduced scheduler against adversarial interleavings, asserting the same safety predicates the
-  invariants name. This is the design-schedule check for both branches. The Phase-17 gate bounds schedule
-  exploration at 20 and checks the correct model plus all five invariant mutants; this is tested-for-design,
+  invariants name. This is the design-schedule check for both branches. The Phase-17 gate must bound schedule
+  exploration at 20 and check the correct model plus all five invariant mutants; this targets tested-for-design strength,
   not the later Register-2.5 daemon simulation.
 - **Prove (TLC).** `emitTLA` renders the `Model` to a spec TLC model-checks exhaustively at a bounded scope,
-  reaching every safety invariant with no counterexample **and** every liveness `PROPERTY` under the fairness
-  `F`. Because the model is the value the runtime interprets, a green run is proven-for-the-model *about the
+  and must reach every safety invariant with no counterexample **and** every liveness `PROPERTY` under the
+  fairness `F`. Because the model is the value the runtime interprets, an independently reviewed successful
+  run can be proven-for-the-model *about the
   shape the code takes*, at the bound. Liveness is a TLC-only verdict — the io-sim and explorer readings assert
   the *safety* predicates only ([formal_model_doctrine.md §3](./formal_model_doctrine.md#3-two-total-renderings)).
 
@@ -162,13 +163,14 @@ Both are Register-1, in-process, needing no cluster ([conformance_harness_doctri
 A validated model is green in both, and both go red under a seeded mutation (a transition that drops the fence,
 or decommissions before drain-complete).
 
-**Validated instance.** The [Phase-17 gate](../../DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md) passed
-on 2026-08-21: explorer and TLC agree on the exact 53-state set, the five safety invariants and three liveness
-properties are green, every fairness removal is red, and each named safety mutant violates exactly its expected
-invariant. Generated TLA+/CFG bytes remain transient; a twelve-row semantic renderer oracle and two
-meaning-changing renderer mutants validate their declarations. The gate also projects the actual Phase-10
-five-calculus composition through Phase 11's `compositionModel`, so this protocol model consumes the shared
-formal vocabulary rather than validating a substitute. Runtime fidelity remains UNVERIFIED.
+**Phase-17 target instance — NOT VALIDATED.** The
+[Phase-17 gate](../../DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md) must make explorer and TLC agree on
+the exact 53-state set; the five safety invariants and three liveness properties must hold, every fairness
+removal must be red, and each named safety mutant must violate exactly its expected invariant. Generated
+TLA+/CFG bytes remain transient; a twelve-row semantic renderer oracle and two meaning-changing renderer
+mutants must validate their declarations. The gate must also project the Phase-10 five-calculus composition
+through Phase 11's `compositionModel`, so this protocol model consumes the shared formal vocabulary rather
+than validating a substitute. Runtime fidelity remains UNVERIFIED.
 
 ---
 
@@ -237,10 +239,11 @@ proof lands, at least one over-scope stress run (3 clusters, chained) is checked
 
 Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline):
 
-- **Proven-for-the-model at scope 2**, generalized by the [§5](#5-one-and-done-plus-a-per-inforcespec-structural-fit)
-  pairwise cutoff. What scope 2 alone does not prove (concurrent three-way or chained migration) is exactly what
-  the cutoff argument, not the raw scope, discharges; at least one over-scope run (3 clusters, chained) is
-  checked to stress the cutoff assumption.
+- **Target strength: proven-for-the-model at scope 2**, generalized by the
+  [§5](#5-one-and-done-plus-a-per-inforcespec-structural-fit) pairwise cutoff after independent review. What
+  scope 2 alone cannot prove (concurrent three-way or chained migration) is exactly what the cutoff argument,
+  not the raw scope, must discharge; at least one over-scope run (3 clusters, chained) must stress the cutoff
+  assumption.
 - **Abstracted premises are named as assumptions.** Real-time and clock-skew are abstracted away and monitored
   at runtime, never proven by the model; the "MinIO/Pulsar/Patroni effectively lossless" delegation ([§1](#1-the-one-obligation))
   is an assumed premise the whole reduction rests on, recorded as such. Two further premises are named
@@ -272,10 +275,10 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
 
 ## 7. Planning ownership
 
-This document is normative model doctrine only. The `Model`, io-sim harness, and `emitTLA` model-check were
-validated by Phase 17. Phase 75 adds the trace validator, full modeled-action coverage, and live Planned/Failover
-drills. Its external journal showed zero Planned loss under positive lag and a fenced Failover inside the
-declared RTO. The data-loss bound remains assumed-and-monitored; Route53, real WAN, and physically independent
+This document is normative model doctrine only. Phase 17 owns the target `Model`, io-sim harness, and
+`emitTLA` model-check. Phase 75 owns the trace validator, full modeled-action coverage, and live
+Planned/Failover drills. Its external journal must show zero Planned loss under positive lag and a fenced
+Failover inside the declared RTO. The data-loss bound remains assumed-and-monitored; Route53, real WAN, and physically independent
 child brokers remain UNVERIFIED. Phase order, status, and gates live only in
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 

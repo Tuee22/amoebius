@@ -1,21 +1,15 @@
 # Phase 75: Gateway-migration drills + model-correspondence
 
-> **Purpose**: Discharge the Register-3 residue of amoebius's one proof obligation — drive the built
-> `src/Amoebius/Multicluster/*` gateway-migration runtime through **both** a `Planned` coordinated handover
-> (RPO=0) and a `Failover` emergency takeover (bounded rebind) against the live [Phase 74](phase_74_multicluster_spawn_georepl.md) forest, trace-validate it against the Phase-51 emitted spec, and
-> show that runtime *is* the Phase-17 design-model's decision core.
-> **Read this if**: phase 75 is next in the queue, or a later phase depends on what its gate establishes.
+> **Purpose**: Target the Register-3 residue of amoebius's one proof obligation — drive the future Haskell
+> gateway-migration runtime through **both** a `Planned` coordinated handover (RPO=0) and a `Failover`
+> emergency takeover (bounded rebind) against the future [Phase 74](phase_74_multicluster_spawn_georepl.md)
+> forest, then compare its trace with the Phase-17 model. NOT VALIDATED.
+> **Read this if**: phase 75 is next in the queue, or a later phase depends on its future gate.
 
-Phase 75 delivers the gateway-migration drills + model-correspondence; its design is owned by [consistency_pacelc_doctrine.md](../documents/engineering/consistency_pacelc_doctrine.md), [gateway_migration_model_doctrine.md](../documents/engineering/gateway_migration_model_doctrine.md), [gateway_migration_doctrine.md](../documents/engineering/gateway_migration_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-11 with `python3 tools/gateway_migration_drills_gate.py --reuse-fresh-live`;
-ledger `external-run-reference`.
-The CPU-only Linux fallback is always selectable, regardless of detected hardware. Fresh guest isolation maps
-the two Linux classes to Incus, Apple to Lima, and Windows to WSL2.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -28,10 +22,11 @@ the two Linux classes to Incus, Apple to Lima, and Windows to WSL2.
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — the sealed whole-deployment migration envelope](#resource-provision--the-sealed-whole-deployment-migration-envelope)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 75.1: The gateway-migration runtime — both branches over the Phase-17 `interpret` core ⏸️](#sprint-751-the-gateway-migration-runtime--both-branches-over-the-phase-17-interpret-core-)
@@ -45,59 +40,30 @@ the two Linux classes to Incus, Apple to Lima, and Windows to WSL2.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-74 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 74, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-Done (invalidated). The runtime delegates every modeled edge to the Phase-17 `interpret` core, validates both pinned traces
-and all five named invariants, and explores 256 deterministic lag/fault schedules. The Register-3 drill creates
-a parent and two child clusters, records 24 source-acked writes per branch outside the forest, forces eight to
-be unreplicated at each cut, proves Planned RPO=0 by set equality, performs a fenced Failover in 0.214 seconds
-against the pinned 60-second RTO, moves an actual raw-kernel WireGuard hub role, reconciles the tail, and removes
-all test clusters, network namespaces, journal files, and DNS authority state. Both committed mutants turn red.
-There is **no** First-Axis / control-plane-election work here: the sole per-system
-obligation amoebius owns is the cross-cluster gateway migration, both branches, and this phase discharges its
-live residue.
-
-The configured AWS token was invalid, so provider Route53 mutation is UNVERIFIED. The live gate instead makes
-an actual DNS repoint through an isolated authoritative UDP server and checks it independently with `dig`.
-Physically independent child-local Pulsar brokers and a real WAN partition also remain UNVERIFIED. The ledger
-marks the data-loss bound assumed-and-monitored, model safety proven-for-the-model, and runtime/RTO tested.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-Because [Phase 74](phase_74_multicluster_spawn_georepl.md) turned the single cluster into a geo-replicated
-forest and classified the crossing boundary — leaving the gateway authority and any CAS "latest" pointer in the
-non-confluent bucket — the one thing that remains is the authority hand-off across that boundary. This phase does
-four things and stops there. First, **the gateway-migration runtime** — the built
-`src/Amoebius/Multicluster/*` modules enact the wild-ingress gateway move in both branches: a `Planned`
-coordinated `quiesce → drain → verify-caught-up → cutover` that loses no committed write (RPO=0), and a
-`Failover` survivor-promotion through a fail-closed freshness gate that repoints the authoritative DNS owner and the WireGuard hub
-and rebinds within a declared data-loss budget, each keeping a live session bindable throughout. Second, **the teardown-vs-chaos distinction** — a graceful teardown-with-cleanup is lossless by construction (it rides a
-synchronization event and hands off the gateway as a `Planned` migration), a chaos-failover is bounded by
-budget, the two are observably distinct, and a teardown that would make the root `InForceSpec` unsatisfiable
-pushes back. Third, **the Register-2.5 trace-validation** — the real forest code runs under `IOSimPOR` against a
-modeled route53/Pulsar and its observed transition log is validated step-by-step against the Phase-17 emitted
-spec's `Next` relation, pulling the runtime-fidelity obligation forward from Register-3-only chaos into
-deterministic, replayable simulation. Fourth, **the correspondence** — because Phase 17 rendered one reifiable
-`Model` into both `interpret` (the runtime decision core) and `emitTLA` (the proven, never-committed `.tla`),
-the built runtime's per-edge decision *is* that `interpret`; renderer correspondence is differentially checked,
-and
-what this phase adds is the Register-3 chaos injection against a running forest that confirms the abstracted
-physics (real time, clock skew, actual replication lag, the MinIO/Pulsar/Patroni lossless delegation) actually
-hold — never a hand-maintained variable→module table.
+**Target capability — NOT VALIDATED.** After Phase 74's future approval, this phase must exercise the authority
+handoff across the non-confluent gateway boundary. The Haskell runtime must enact both branches: a `Planned`
+`quiesce → drain → verify-caught-up → cutover` handover targeting RPO=0, and a `Failover` promotion through a
+fail-closed freshness gate within a declared data-loss budget. The gate must distinguish lossless
+teardown-with-cleanup from bounded-loss chaos failover and refuse teardown that would make the root
+`InForceSpec` unsatisfiable. Before live injection, the production decision core must run under `IOSimPOR`
+against modeled boundaries and its transition log must satisfy the independently reviewed Phase-17 `Model`
+relation. The live challenge then tests only the named physical premises; it does not convert a model result
+or sampled drill into universal proof. No predecessor result or runtime correspondence is current.
 
 This phase consumes earlier phases and does not re-implement them: Phase 74's geo-replicated forest and
 invariant-confluence classifier, Phase 17's `GatewayMigration` `Model` + `interpret` + decode-time
@@ -106,10 +72,10 @@ structural-fit fold, Phase 64's Keycloak-owned wild ingress, Phase 73's WireGuar
 **stretched cluster is not geo-replication**: one etcd, one boundary owes no R9 budget and no Second-Axis
 obligation and is out of scope here.
 
-**Phase scope:** one cohesive claim — *both branches of the one proof obligation are discharged against a live forest*. Model correspondence is what connects this run to the Register-1 proof that preceded it.
+**Phase scope:** one cohesive target claim — *both branches of the one proof obligation are challenged against a live forest and compared with the independently approved model*. No discharge is current.
 
-**Substrate:** linux-cpu — the gate drives the migration over the parent and both child clusters that Phase 74
-spins up as `kind` clusters on a single linux-cpu host; no accelerator and no provider cluster is in
+**Substrate:** linux-cpu — the future gate drives the migration over the parent and both child clusters that Phase 74
+must spin up as `kind` clusters on a single linux-cpu host; no accelerator and no provider cluster is in
 scope (provider-managed clusters are [Phase 76](phase_76_provider_deploy_checkpoint.md)). Partition tolerance is
 exercised by killing a sibling on the same host — not a property a single root cluster exercises.
 The `linux-cpu` lane remains available on every hardware substrate.
@@ -118,85 +84,39 @@ The `linux-cpu` lane remains available on every hardware substrate.
 
 **Register:** 3 — live infrastructure: a real child forest, an authoritative local DNS repoint, a real
 WireGuard hub-role move, and adversarial fault injection against the running forest. Route53 provider mutation
-is explicitly outside the achieved boundary.
+is explicitly outside the target boundary.
 
-**Depends on:** [Phase 74](phase_74_multicluster_spawn_georepl.md) — multi-cluster spawn + geo-replication, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 75` is green: the `Planned` handover and the `Failover`
-takeover each satisfy every oracle, committed budget, named invariant, observer, and mutant of
-[Gate integrity](#gate-integrity). A bare "loss = 0" report cannot satisfy it.
+**Depends on:** [Phase 74](phase_74_multicluster_spawn_georepl.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 75`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-This gate is anchored by the committed artifacts below; substituting evidence produced by the harness under
-test or after the run cannot satisfy it:
-- **Write-journal oracle (independent of the SUT).** The drill client writes every source-acked write ID to
-  `test/fixture/inject/journal/` (a store outside the forest, never the SUT's own replication log). "Committed write"
-  means *source-acked*, not *already-replicated*; under a **non-idle** workload the harness asserts **≥ 8** such
-  IDs are
-  acked-but-not-yet-replicated at the quiesce/kill instant (a positive observed lag), then asserts set-equality
-  of journaled-vs-present IDs on the new owner. The ledger embeds the raw journal counts (acked,
-  un-replicated-at-cut, recovered), never a bare "loss = 0".
-- **The two branches and what each must show.** The `Planned` handover moves authority before any un-replicated
-  write is lost, and post-cutover every journaled ID is present on the new owner. Killing the lead cluster
-  mid-workflow — again with ≥ 8 acked-but-un-replicated IDs in flight — drives a `Failover` that promotes the
-  surviving sibling only through its fail-closed freshness gate, repoints the authoritative local DNS record and
-  the WireGuard hub, and rebinds within the committed numeric `DataLossBudget`.
-- **Committed numeric budget fixture.** `test/fixture/dhall/phase_65_gateway_migration.dhall` fixes `lagBound = 5 s`,
-  `RTO = 60 s`, scaled to the single-host kind forest; authored and committed in this phase's oracle-pinning sprint; its hash is pinned in the gate record and re-checked at gate
-  time so a budget edited after measuring the drill fails the hash check. The drill reports declared-vs-measured
-  for **both** dimensions, so a post-hoc-tuned or absurd budget is visible red.
-- **The five named invariants, and correspondence.** The Register-3 Inject drills assert all five Phase-17 safety
-  invariants against the live forest: `UniqueGatewayOwner`, `SessionAlwaysRebindable`, `PlannedIsLossless`,
-  `NoWriteAfterStaleFailover` — the safety half of the superseded `FailoverBounded`, whose recovery-time half is
-  carried separately as the *tested* RTO datapoint rather than as a bounded-divergence invariant — and
-  `NoTakeWithoutProvenFreshness`, which the survivor-promotion drills already exercise through the fail-closed
-  freshness gate and which is therefore asserted by name rather than left implicit. That the built
-  `src/Amoebius/Multicluster/*` runtime is the Phase-17 `GatewayMigration` model's `interpret` is discharged as
-  the step-by-step trace-validation of Sprint 75.3 (Register 2.5); Register 3 adds only the
-  modeled-action-coverage assertion that every modeled action fired ≥ 1 time across the drill set.
-- **Mutation controls.** At least one committed member of this [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) set must fail: (a) `verify-caught-up`-stub — the
-  `Planned` `verify-caught-up` edge is weakened to `const True` (dropped-guard); the journal oracle must catch
-  the lost un-replicated suffix red. (b) `promote-before-fence` — the `Failover` `PromotionGate` guard is negated
-  so it promotes without a proven watermark/fence (guard-negation); `NoWriteAfterStaleFailover` must go red. Both
-  mutants are committed under `test/mutant/gateway_migration_drills/` and re-run every gate, not hand-run once.
-- **External-observer teardown check.** Phase 75 claims only its pre-Phase-48 teardown scope; the later
-  flagged-credential and comprehensive postflight sweep are not implied. After teardown, an **OS-boundary observer** — `kind get clusters`, `ip netns list`, exact temporary-root inventory, and termination of the queried local DNS authority —
-  reports zero surviving migration DNS records and zero surviving child clusters, while the retained
-  `no-provisioner` PVs that Sprint 75.2 deliberately preserves are explicitly exempt (named in the fixture as the
-  retained set).
-- **Machine-derived ledger + validator.** The ledger is generated from the run record (measured RPO/RTO,
-  observed max lag, the raw journal counts, drill seeds, timestamps, the teardown-observer result), and a
-  committed validator cross-checks every ledger figure against the harness's raw journal and the OS-boundary
-  observer, failing the gate on any mismatch or hand-edited field. It records recovery time as *tested*
-  (drilled), the data-loss bound as *assumed* (monitored, not proven), and the modeled safety/liveness as
-  *proven-for-the-model at scope 2* — a Phase-17 design result, never a runtime guarantee. Layers outside
-  Register 3 stay marked UNVERIFIED, and because this is a live-band gate the runtime layer is marked *tested*,
-  never *proven* ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
+**Contract review**: REJECTED — NOT VALIDATED.
 
-```mermaid
-flowchart LR
-  %% register: algebra
-  fx["committed fixtures"]:::intent
-  or["independently authored oracle"]:::intent
-  mu["seeded mutant"]:::intent
-  g{{"the phase 75 gate command"}}:::gate
-  ok((("phase seal: the ledger this gate emits"))):::seal
-  no>"the mutant must turn it red"]:::refuse
-  fx -->|"binds the corpus"| g
-  or -->|"binds the expectation"| g
-  mu -->|"binds the defect"| g
-  g -->|"fixtures green, oracle agrees"| ok
-  g -->|"mutant green means the gate is not one"| no
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
-  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
-  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
-```
-*Design intent. Phase 75's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive target claim — *both branches of the one proof obligation are challenged against a live forest and compared with the independently approved model*. No discharge is current. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 75` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 74 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-## Resource provision — the sealed whole-deployment migration envelope
+## Resource provision — UNRESOLVED
+
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
@@ -241,93 +161,79 @@ Live readback normalizes the old/overlap/new gateway and fabric epochs, Pulumi/c
 workflow/store/database high-water, exhaustive API identities/churn/model, physical etcd state, and harness
 process/backing use.
 
-The committed resource corpus makes each execution envelope, pod/CNI/CSI slot, CPU, memory, logical ephemeral
+The Haskell-declared resource corpus makes each execution envelope, pod/CNI/CSI slot, CPU, memory, logical ephemeral
 and routed physical byte, image/workspace object, durable/object/database extent, Pulumi plugin/checkpoint
 operand, API object/churn/model term, etcd logical/physical byte, network queue/log term, and host-harness
-operand one unit short in isolation and expects zero migration/cloud/store effects. Dropped-envelope mutants
+operand one unit short in isolation and expects zero migration/cloud/store effects. Serialized cases are
+generated beneath `.build/test-corpora/**`. Applied Haskell dropped-envelope mutants
 remove the source proxy, target edge child, overlap peer graph, Pulumi executor, checkpoint admission gateway,
 workflow collector, API object, etcd churn/model, or external journal; each must turn the gate red even if the
 RPO/RTO assertions would otherwise pass.
 
 ## Doctrine adopted
 
-- [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — gateway-migration drills + model-correspondence provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
-- [`consistency_pacelc_doctrine.md §3`](../documents/engineering/consistency_pacelc_doctrine.md#3-the-one-configurable-axis--the-deployment-rules-pacelc-surface)
+- [`workflow_calculus_doctrine.md` §3 — Teardown is a type obligation](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation) — gateway-migration drills + model-correspondence provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
+- [`consistency_pacelc_doctrine.md` §3 — The one configurable axis — the deployment-rules PACELC surface](../documents/engineering/consistency_pacelc_doctrine.md#3-the-one-configurable-axis--the-deployment-rules-pacelc-surface)
   — **the PACELC failover budget (`rto` / `dnsTtl` / `lagBound`) and its decode folds.** The `Failover` drill
   rebinds within the declared `FailoverBudget`; the phase corpus includes an `rto < dnsTtl` spec that is gadt-decode
-  decode-rejected ([§3.5](../documents/engineering/consistency_pacelc_doctrine.md#35-the-upload-time-feasibility-push-back)),
+  decode-rejected ([`consistency_pacelc_doctrine.md` §3.5 — The upload-time feasibility push-back](../documents/engineering/consistency_pacelc_doctrine.md#35-the-upload-time-feasibility-push-back)),
   and "clients/resolvers honor the record TTL" is recorded as a named R8 **assumed** premise.
-- [`gateway_migration_model_doctrine.md §6`](../documents/engineering/gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)
-  and [`§7`](../documents/engineering/gateway_migration_model_doctrine.md#7-planning-ownership)
+- [`gateway_migration_model_doctrine.md` §6 — Modelling bounds and honesty](../documents/engineering/gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)
+  and [`gateway_migration_model_doctrine.md` §7 — Planning ownership](../documents/engineering/gateway_migration_model_doctrine.md#7-planning-ownership)
   — *single-source correspondence* and *planning ownership*: because `interpret` and `emitTLA` render one
   `Model`, there is **no** separate variable→module correspondence table to complete; what remains for the live
   phase is the Register-3 chaos injection against a running forest (that the abstracted physics hold), and this
-  phase is exactly that gate. It also inherits the [`§1`](../documents/engineering/gateway_migration_model_doctrine.md#1-the-one-obligation)
-  one-obligation framing (no First-Axis election model) and the [`§5`](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)
-  scope-2 pairwise cutoff the built forest must stay inside.
-- [`gateway_migration_doctrine.md §2`](../documents/engineering/gateway_migration_doctrine.md#2-the-planned-branch--a-coordinated-strong-consistency-handover)
-  and [`§3`](../documents/engineering/gateway_migration_doctrine.md#3-the-failover-branch--an-availability-first-emergency-takeover)
+  phase is exactly that gate. It also inherits the [`gateway_migration_model_doctrine.md` §1 — The one obligation](../documents/engineering/gateway_migration_model_doctrine.md#1-the-one-obligation)
+  one-obligation framing (no First-Axis election model) and the [`gateway_migration_model_doctrine.md` §5 — One-and-done, plus a per-`InForceSpec` structural fit](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)
+  scope-2 pairwise cutoff the target forest must stay inside.
+- [`gateway_migration_doctrine.md` §2 — The `Planned` branch — a coordinated strong-consistency handover](../documents/engineering/gateway_migration_doctrine.md#2-the-planned-branch--a-coordinated-strong-consistency-handover)
+  and [`gateway_migration_doctrine.md` §3 — The `Failover` branch — an availability-first emergency takeover](../documents/engineering/gateway_migration_doctrine.md#3-the-failover-branch--an-availability-first-emergency-takeover)
   — the two arms of `GatewayMigration = <Planned | Failover>`: the coordinated strong-consistency handover
   (RPO=0, proven-for-the-model at scope 2) and the availability-first emergency takeover (RPO>0, bounded by the data-loss
   budget, reconciling to a single owner) — with the client-rebind protocol of
-  [`§4`](../documents/engineering/gateway_migration_doctrine.md#4-client-rebind--a-live-session-must-always-find-the-gateway)
+  [`gateway_migration_doctrine.md` §4 — Client rebind — a live session must always find the gateway](../documents/engineering/gateway_migration_doctrine.md#4-client-rebind--a-live-session-must-always-find-the-gateway)
   and the typed, edge-observed state machine of
-  [`§5`](../documents/engineering/gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine)
-  built as the effectful shell around the Phase-17 decision core, honest per
-  [`§6`](../documents/engineering/gateway_migration_doctrine.md#6-honesty-and-layer-markers).
-- [`chaos_failover_second_axis.md §18`](../documents/engineering/chaos_failover_second_axis.md#18-the-rules-scale-to-the-boundary)
-  and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows)
+  [`gateway_migration_doctrine.md` §5 — The migration as a typed, edge-observed state machine](../documents/engineering/gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine)
+  to be built as the effectful shell around the Phase-17 decision core, honest per
+  [`gateway_migration_doctrine.md` §6 — Honesty and layer markers](../documents/engineering/gateway_migration_doctrine.md#6-honesty-and-layer-markers).
+- [`chaos_failover_second_axis.md` §18 — The rules scale to the boundary](../documents/engineering/chaos_failover_second_axis.md#18-the-rules-scale-to-the-boundary)
+  and [`chaos_failover_second_axis.md` §19 — The cross-boundary ledger and conformance rows](../documents/engineering/chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows)
   — the R7/R8/R9 cross-boundary rules: the fail-closed promotion-freshness gate and active-merge reconciliation
   (R7), the named-bounded-monitored replication lag (R8), and the two-dimensional failover budget — bounded
   permanent data loss and bounded recovery time (R9) — with the
-  [Inject move (§11)](../documents/engineering/chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose)
-  run against the running forest and the [proven/tested/assumed ledger (§12)](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
+  [`chaos_failover_doctrine.md` §11 — Move III — Inject: break the running thing on purpose](../documents/engineering/chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose)
+  run against the running forest and the [`chaos_failover_doctrine.md` §12 — The moral core — proven, tested, assumed](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
   kept honest. The doctrine works this exact shape through in its
-  [Appendix B](../documents/engineering/chaos_failover_worked_examples.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)
-  worked example; this phase realizes it live.
-- [`cluster_lifecycle_doctrine.md §5`](../documents/engineering/cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction),
-  [`§6`](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec),
-  and [`§9`](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)
+  [`chaos_failover_worked_examples.md` Appendix B — Worked example (fenced): cross-cluster geo-replication failover (the open cross-cluster failover question)](../documents/engineering/chaos_failover_worked_examples.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)
+  worked example; this phase must challenge that target live.
+- [`cluster_lifecycle_doctrine.md` §5 — Teardown-with-cleanup vs chaos-failover (the central distinction)](../documents/engineering/cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction),
+  [`cluster_lifecycle_doctrine.md` §6 — Push-back when teardown would break the root `InForceSpec`](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec),
+  and [`cluster_lifecycle_doctrine.md` §9 — How bring-up and teardown are implemented: the reconciler, not a state machine](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)
   — the central distinction between a lossless teardown-with-cleanup and a bounded-loss chaos-failover, and the
-  declarative push-back on a teardown that would make the root `InForceSpec` unsatisfiable — all enacted as
+  declarative push-back on a teardown that would make the root `InForceSpec` unsatisfiable — all to be enacted as
   `discover → diff → enact → re-observe` reconciles over a managed-resource registry, never a bespoke lifecycle
   state machine.
-- [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
-  — the Register-2.5 runtime-fidelity stage: the real forest code under `IOSimPOR` against a modeled
+- [`deterministic_simulation_doctrine.md` §4 — Register 2.5 — where deterministic simulation sits](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
+  — the Register-2.5 runtime-fidelity stage: the future production forest code under `IOSimPOR` against a modeled
   route53/Pulsar, trace-validated against the Phase-17 emitted spec's `Next` relation before the Register-3 live
   drills, so the code↔model bridge is a formal, early, replayable check rather than only sampled live chaos.
-- [`testing_doctrine.md §3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
+- [`testing_doctrine.md` §3 — The test-topology contract: spin up → run → always tear down](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
   (the test-as-`InForceSpec` spin-up → run → always-tear-down contract) and
-  [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
-  (the per-run proven/tested/assumed ledger): the register this gate reaches and the ledger it emits.
+  [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
+  (the per-run proven/tested/assumed ledger): the register this gate must reach and the candidate ledger it must emit.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 75.1: The gateway-migration runtime — both branches over the Phase-17 `interpret` core ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Multicluster/GatewayMigration.hs` (the effectful
-orchestrator whose per-edge decision delegates to the Phase-17 `src/Amoebius/Formal/GatewayMigration.hs`
-`interpret`), `src/Amoebius/Multicluster/PlannedHandover.hs`, `src/Amoebius/Multicluster/PromotionGate.hs`,
-`src/Amoebius/Multicluster/DnsRepoint.hs`, `src/Amoebius/Multicluster/ClientRebind.hs` — delivered and
-gate-covered.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a `Planned` handover drives the ordered edge-observed state machine end to end and
-loses no committed write (RPO=0); a `Failover` promotes the survivor only through its freshness gate and
-accounts for the un-replicated suffix by the R9 budget alone. The numbered `### Validation` list below carries
-the edge order and both branches' acceptance conditions.
-**Docs to update**:
-`documents/engineering/gateway_migration_doctrine.md`, `documents/engineering/chaos_failover_doctrine.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`gateway_migration_doctrine.md §2`](../documents/engineering/gateway_migration_doctrine.md#2-the-planned-branch--a-coordinated-strong-consistency-handover)/[`§3`](../documents/engineering/gateway_migration_doctrine.md#3-the-failover-branch--an-availability-first-emergency-takeover),
 the client-rebind protocol of [`§4`](../documents/engineering/gateway_migration_doctrine.md#4-client-rebind--a-live-session-must-always-find-the-gateway),
 and the R7/R8/R9 cross-boundary rules of
@@ -338,6 +244,7 @@ the watermark stays a typed `NotYetObserved`), so the runtime realizes the prove
 it.
 
 ### Deliverables
+
 - A `Planned` coordinated `quiesce → drain → verify-caught-up → cutover` (repoint the gateway DNS record and
   the WireGuard hub role, then unfreeze — **not** the apiserver-VPN-IP, which is a per-cluster stretched-cluster
   construct owned by its own cluster and never repointed by a gateway migration,
@@ -353,6 +260,7 @@ it.
   (data-loss window, recovery time).
 
 ### Validation
+
 1. A `Planned` handover under a **non-idle** workflow (the drill client journals every source-acked write ID to
    the out-of-forest store of [Gate integrity](#gate-integrity), and the harness asserts **≥ 8 acked-but-un-replicated IDs exist at the quiesce instant** — observed replication lag > 0 — so an idle-workload rubber stamp cannot pass) moves authority with
    **measured loss = 0 proven by set-equality of journaled-vs-present IDs on the new owner** (not by a
@@ -372,24 +280,15 @@ it.
    suffix is accounted for **only** by the R9 data-loss budget, never silently resolved to "absent."
 
 ### Remaining Work
+
 Route53 provider mutation remains UNVERIFIED; the authoritative local DNS and raw-kernel fabric paths are done.
 
 ## Sprint 75.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-`.dhall` push-back ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Multicluster/Teardown.hs`,
-`src/Amoebius/Multicluster/Pushback.hs` — delivered and gate-covered.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a graceful teardown of a child drains workloads, flushes
-Pulsar/MinIO/Postgres replication to a synchronization event, hands off the gateway (a `Planned` migration),
-and releases compute while preserving retained `no-provisioner` PVs — losing nothing; a teardown that would
-make the root `InForceSpec` unsatisfiable pushes back, names what stops working and the declared failback,
-and proceeds only under an explicit override.
-**Docs to update**:
-`documents/engineering/cluster_lifecycle_doctrine.md`,
-`documents/engineering/storage_lifecycle_doctrine.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`cluster_lifecycle_doctrine.md §5`](../documents/engineering/cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)/[`§6`](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec),
 enacted as the reconciler of
 [`§9`](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine):
@@ -398,6 +297,7 @@ push-back that refuses — by default — a teardown that would leave the persis
 with an explicit operator override the only escape.
 
 ### Deliverables
+
 - A `gracefulTeardown` reconcile: idempotent drain/flush/handoff ordering timed to a synchronization event,
   releasing compute while preserving retained backing so a later spin-up recreates PV bindings over the same
   bytes.
@@ -414,6 +314,7 @@ with an explicit operator override the only escape.
   with "cannot observe" never collapsed to "absent."
 
 ### Validation
+
 1. A graceful child teardown loses nothing (rides a sync event, preserves backing while PV API objects may
    disappear) and a later spin-up recreates the identical shape over the same bytes; a teardown of a
    load-bearing cluster whose removal breaks any CPU, memory, ephemeral-storage, durable-storage, cache,
@@ -424,26 +325,15 @@ with an explicit operator override the only escape.
    distinct — lossless-by-construction vs bounded-by-budget — and the code reports which guarantee held.
 
 ### Remaining Work
+
 None inside the sealed single-host child-forest boundary.
 
 ## Sprint 75.3: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/spec/sim/GatewayMigrationSimSpec.hs` (the `IOSimPOR` battery over
-the modeled route53 + geo-replicated Pulsar) and `test/spec/sim/GatewayMigrationTrace.hs` (the trace-validator
-checking observed transitions against the emitted `Next`), driving the real `src/Amoebius/Multicluster/*`
-forest code lifted onto the Phase-16 `io-classes` `Env` interface — delivered as the deterministic pure
-runtime/trace battery.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the real `Multicluster/*` forest code runs under `IOSimPOR` against a modeled
-route53 and geo-replicated Pulsar, and its observed transition log is trace-validated step-by-step against the
-Phase-17 emitted spec, pulling the runtime-fidelity (Tier-2) obligation **forward** from Register-3-only chaos
-into deterministic, replayable simulation. Substrate `none`, Register 2.5.
-**Docs to update**:
-`documents/engineering/deterministic_simulation_doctrine.md` (Phase-75 status backlink),
-`documents/engineering/gateway_migration_model_doctrine.md` (§6 the Register-2.5 trace-validation bridge).
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
 and [`gateway_migration_model_doctrine.md §6`](../documents/engineering/gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty):
 discharge the runtime-fidelity obligation in two stages, not one — first as trace-validated deterministic
@@ -451,6 +341,7 @@ simulation against the modeled world here (Register 2.5), then as live Inject dr
 — so the code↔model bridge is a formal, early, replayable check rather than only sampled live chaos.
 
 ### Deliverables
+
 - The `GatewayMigrationSimSpec` battery: the real forest code under `IOSimPOR` against the modeled route53
   (short-TTL, **no compare-and-swap**, propagation delay) and the modeled geo-replicated Pulsar, asserting all
   five safety invariants — `UniqueGatewayOwner`, `SessionAlwaysRebindable`, `PlannedIsLossless`,
@@ -465,31 +356,22 @@ simulation against the modeled world here (Register 2.5), then as live Inject dr
   replication-lag / clock-skew physics remain the Register-3 residue (Sprint 75.4).
 
 ### Validation
-1. `cabal test gateway-migration-sim` is green — no schedule violates a safety invariant and no observed
+
+1. Rejected historical observation: the `gateway-migration-sim` Cabal suite was recorded green — no schedule
+   violates a safety invariant and no observed
    transition falls outside `Next`; a deliberately broken forest (a fence dropped, a decommission-before-drain)
    is caught red; the discovered counterexample replays identically under its seed.
 
 ### Remaining Work
-None for Register 2.5; real WAN physics remain outside the live single-host result.
+
+The pre-reset `None` claim is permanently invalid; this sprint remains blocked and NOT VALIDATED. Real WAN physics remain outside the retained historical single-host result.
 
 ## Sprint 75.4: Register-3 correspondence — Inject drills against the running forest + live gate `.dhall` + ledger ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/fixture/dhall/phase_65_gateway_migration.dhall` (the live gate
-topology) and `test/spec/inject/GatewayMigrationForest.hs` (the Register-3 Inject harness re-using the Phase-17
-named invariants against the built runtime), plus `tools/gateway_migration_drills_live.py` — delivered. The Phase-17 `GatewayMigration`
-`Model`, its `emitTLA` proof, and its io-sim agreement were authored and discharged in Phase 17; this sprint
-consumes them, it does not re-author them.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the built `src/Amoebius/Multicluster/*` decision core is shown to be the Phase-17
-`interpret` — single-source correspondence, no variable→module table — and the live gate topology spins the
-forest up, runs both branches, tears down leak-free, and emits a machine-derived ledger. The numbered
-`### Validation` list below carries the drill set and its oracles.
-**Docs to update**:
-`documents/engineering/gateway_migration_model_doctrine.md`,
-`documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/testing_doctrine.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`gateway_migration_model_doctrine.md §6`](../documents/engineering/gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)/[`§7`](../documents/engineering/gateway_migration_model_doctrine.md#7-planning-ownership):
 because correspondence is differentially checked (one `Model` → `interpret` + `emitTLA`), run the deferred
 Register-3 residue — the [Inject move (§11)](../documents/engineering/chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose)
@@ -499,6 +381,7 @@ ledgered per [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_
 and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows).
 
 ### Deliverables
+
 - The Register-3 Inject drill set run in the inter-cluster dimension against the running forest — cut
   replication, kill the lead mid-`Planned`-handover, kill the lead with no drain to force `Failover`, drive lag
   past the bound, and fail back with late plus duplicate arrivals — each asserting the Phase-17 named invariants.
@@ -521,6 +404,7 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
   assumed-and-monitored result as proven.
 
 ### Validation
+
 1. The built decision core resolves to the Phase-17 `interpret` — the correspondence-check mechanic is fixed as:
    the step-by-step trace-validation of Sprint 75.3 (Register 2.5) **plus** a Register-3 **modeled-action-coverage assertion** that every modeled action fired ≥ 1 time across the drill set (no orphaned modeled action); step-by-step
    trace-validation is the Sprint-70.3 obligation and is not re-run in Register 3. The Inject drills run against
@@ -534,11 +418,13 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
    hand-edited field fails the gate; out-of-Register-3 layers stay marked UNVERIFIED.
 
 ### Remaining Work
+
 Route53 provider API mutation, physically independent brokers, and real WAN partitioning remain UNVERIFIED.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/gateway_migration_model_doctrine.md` — flip §6's Register-3 chaos-injection residue to
   *run against a live forest* for both branches, recording the differential-correspondence result and live trace
   validation without inventing a variable→module table; keep the abstracted premises assumed.
@@ -557,6 +443,7 @@ Route53 provider API mutation, physically independent brokers, and real WAN part
 - `documents/engineering/testing_doctrine.md` — record the Register-3 Inject + live-gate ledger this phase emits.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-75 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/system_components.md` — register the `src/Amoebius/Multicluster/GatewayMigration.hs`,
   `PlannedHandover.hs`, `PromotionGate.hs`, `DnsRepoint.hs`, `ClientRebind.hs`, `Teardown.hs`, `Pushback.hs`
@@ -564,6 +451,7 @@ Route53 provider API mutation, physically independent brokers, and real WAN part
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-75 → linux-cpu row in the per-phase substrate map.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker; Phase 75 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys
 - [overview.md](overview.md) — target architecture and the one-formal-obligation constraint

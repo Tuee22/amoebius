@@ -3,38 +3,31 @@
 > **Purpose**: Re-derive the `jitML` numerical and training core as an amoebius-owned workload extension —
 > the guarantee it adds being a storage grant that carries its own ceiling, which the seed's cache does not —
 > and test that one scope-bound CUDA training request produces a pointer-committed checkpoint artifact
-> through the existing workflow, cache, accelerator-owner, and content-store seams, with no silent CPU
+> through human-approved predecessor workflow, cache, accelerator-owner, and content-store seams, with no silent CPU
 > fallback.
 > **Read this if**: phase 93 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 93 delivers the core jitML CUDA artifact lift; its design is owned by [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), [capability_extension_doctrine.md](../documents/engineering/capability_extension_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), and the plan for reaching it is owned here.
-Register 3, scoped live evidence, on the `linux-cuda` substrate.
-The linked adapter, pure contract, four compiled mutants, physical host-CUDA run, retained-MinIO record, and
-enumeration ledger passed their 16-check scoped gate on 2026-08-11. The ledger is
-`external-run-reference`; the receipt is
-`dynamically-resolved`. CPU execution through `linux-cpu` remains
-available on every hardware substrate. When an uncontaminated Linux host is required, use Incus for
-Linux/Linux-CUDA hardware, Lima for Apple hardware, or WSL2 for Windows hardware.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, documents/engineering/content_addressing_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 93.1: Produce one committed jitML artifact on CUDA ⏸️](#sprint-931-produce-one-committed-jitml-artifact-on-cuda-)
@@ -45,38 +38,18 @@ Linux/Linux-CUDA hardware, Lima for Apple hardware, or WSL2 for Windows hardware
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-92 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 92, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-🟡 Scoped gate passed 2026-08-11. The leaf package compiles the untouched sibling
-`JitML.Codegen.RuntimeOperationsCuda` module beside a constructor-hidden artifact adapter. Pure capacity,
-commit, identity, idempotency, and four mutation checks pass; a physical GTX 970 and retained MinIO supply the
-live record. The full sibling trainer and Kubernetes accelerator-owner chain do not yet exist in amoebius.
-
-Phase 69 continues to own Pulsar-Failover takeover and pointer-CAS safety; Phase 80 continues to own the
-determinism kernel and bounded first-miss cache. Phase 93 consumes those contracts without adding another
-coordinator, election, store, cache, or determinism implementation.
-
-Every scoped training start carries one server-derived `CommandId` unchanged as the Phase-69 workflow
-work-id through the canonical CBOR command, every progress/checkpoint event, and the terminal committed or
-failed event. The adapter cannot replace it with a trainer Pod UID, retry id, checkpoint digest, or pointer
-revision. Producer resends retain their Phase-67 producer/sequence identity; consumer redelivery and restart
-fold on the stable work-id. The same scoped command id plus normalized request returns the original workflow
-and committed-artifact outcome without launching another trainer; the same id with a changed normalized
-request is a typed pre-effect idempotency conflict.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -92,8 +65,9 @@ ScopedTrainingRequest tenant app
 
 The scoped leaf compiles the sibling CUDA runtime-operations code generator behind that seam; the full
 numerical, autodiff, SL/RL, tuning, and checkpoint modules remain outside the tested linkage. They do not
-become a standalone service or another binary. `dhall/jitml/package.dhall` describes a workload extension
-that requires the existing `JitBuild`, `Coordination`, and `InferenceEngine` capabilities. It has no
+become a standalone service or another binary. A Haskell workload-extension value requires the existing
+`JitBuild`, `Coordination`, and `InferenceEngine` capabilities; any external Dhall projection is generated
+beneath `.build/dhall/**` or supplied external/untracked, never committed as `dhall/jitml/package.dhall`. It has no
 replica, region, failover, provider, raw endpoint, bucket, object-key, or arbitrary engine-download field.
 Those decisions remain trusted bind/provision outputs.
 
@@ -125,109 +99,71 @@ ETag-CAS pointer, full sibling multi-layer trainer/checkpoint format, and failov
 The output of this phase is the core committed artifact contract. Phase 94 alone owns its downstream
 presentation and interaction adapter; no interaction-ready handle is produced or accepted here.
 
-**Session scope:** One scoped CUDA-microtrainer-to-committed-artifact slice, one package, one pure suite, one
-live evidence reader, and one aggregate command; no Phase-94 presentation work is included.
+The bounded campaign covers one scoped CUDA-microtrainer-to-committed-artifact slice, one package, one pure
+suite, one live evidence reader, and one aggregate command; no Phase-94 presentation work is included.
 **Phase scope:** one cohesive claim — *a CUDA training request is bound to a scope, and there is no silent fall back to CPU*. The checkpoint it produces is committed by pointer through the existing seams.
 
 **Substrate:** linux-cuda
 **Lane:** cuda ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/run_phase_gate.py 93` checks Phase-0
-custody, package/Dhall contracts, physical-CUDA and retained-MinIO evidence, cleanup, the independent reader,
-four compiled mutants, documentation, and the ledger. Details are delegated to [Gate integrity](#gate-integrity).
-
-**Depends on:** [Phase 24](phase_24_conformance_gate_generator.md) — the generated gate that admits it, and [Phase 4](phase_04_budget_calculus.md), the grant a checkpoint store is bounded by. The infernix re-derivation beside it is a different seed on a different substrate.
+**Depends on:** [Phase 92](phase_92_infernix_ui_rederivation.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 93`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Phase-0 representative set.** Before implementation, Phase 0 commits
-  `test/fixture/dhall/jitml_ui_lift/jitml_cuda_artifact.dhall`,
-  `test/fixture/jitml_ui_lift/cuda_capacity_matrix.tsv`,
-  `test/fixture/jitml_ui_lift/committed_artifact_contract.tsv`, and
-  `test/fixture/jitml_ui_lift/command_identity_matrix.tsv`, plus
-  `test/fixture/jitml_ui_lift/resource_shape.json`. The one positive workload is a pinned supervised training job
-  with at least 200 optimizer steps and a multi-layer model of at least 10 million parameters; falling below
-  either floor fails rather than substituting a token workload.
-- **Fresh challenge.** The harness creates an unpredictable command id and 24-byte challenge-bearing batch.
-  The host CUDA process retains command=work identity in its evidence manifest; a Kubernetes Pod/cgroup
-  correlation is not claimed.
-- **Positive commit chain.** `nvidia-smi` and the CUDA driver supply device/process/memory observations. The
-  driver launches 200 real kernels over a 10-million-float array and compares the full checkpoint with a
-  separately computed byte oracle. Retained MinIO readback establishes blob, manifest, pointer-last order,
-  ETags, an unchanged 412 conflict, and zero object delta on a pointer resend. Kubernetes allocation,
-  containerd cache, Pulsar offsets, and a live adapter resend remain UNVERIFIED.
-- **Paired capacity negatives with zero effects.** The independent matrix and pure contract cover raw-fit/net-
-  one-short and current-free-one-short refusals before modeled effects. Live zero-effect provider twins are
-  not claimed.
-- **Uncommitted negative.** The pure constructor refuses `PointerCasConflict`; retained MinIO separately
-  returns 412 for a conflicting create-only conditional pointer and preserves the original bytes. A mutable
-  latest-pointer ETag update and orphan-horizon drill remain UNVERIFIED.
-- **Bypass probes.** An unauthenticated direct MinIO checkpoint read returns 403. A Kubernetes trainer-launch
-  bypass and tenant-credential provider pair remain UNVERIFIED.
-- **Observers outside the adapter.** CUDA driver returns, `nvidia-smi` process/device inventory, full
-  checkpoint comparison, and retained MinIO readback are the evidence. Kubernetes audit, cache, broker, and
-  Vault observers remain UNVERIFIED.
-- **Committed mutants.** Phase 0 commits
-  `test/mutant/jitml_lift_cuda/mut-51-silent-cpu-fallback.patch` (effect swap),
-  `test/mutant/jitml_lift_cuda/mut-51-spend-raw-vram.patch` (guard weakening), and
-  `test/mutant/jitml_lift_cuda/mut-51-mint-artifact-before-cas.patch` (guard weakening), plus
-  `test/mutant/jitml_lift_cuda/mut-51-regenerate-command-id.patch` (idempotency weakening). The unchanged gate
-  command must turn the CUDA witness, reserve negative, uncommitted-artifact, and redelivery rows red
-  respectively; any surviving mutant fails the gate.
-- **Independent oracle and honesty.** Capacity arithmetic, expected Kubernetes allocation, artifact scope,
-  canonical-manifest predicates, and allowed state transitions are hand-authored before the implementation
-  and do not call its planner, renderer, encoder, or artifact constructor. This gate establishes one bounded
-  physical CUDA microtrainer and commit slice. It does not establish full sibling numerical correctness,
-  a multi-layer model, same-substrate determinism, Kubernetes ownership, native CBOR, trainer failover, or
-  general tenant noninterference. The universal `linux-cpu` option and Incus/Lima/WSL2 clean-host routing stay
-  available independently of this CUDA-specific gate.
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6` for the numerical core on `linux-cuda`; negatives under `test/negative/jitml_rederivation/` pin a checkpoint retained past a grant that never carried a ceiling for it.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *a CUDA training request is bound to a scope, and there is no silent fall back to CPU*. The checkpoint it produces is committed by pointer through the existing seams. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 93` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 92 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
+
+## Resource provision — UNRESOLVED
+
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
 - [Lift and Compose Doctrine §5 — The re-derivation map](../documents/engineering/lift_and_compose_doctrine.md#5-the-re-derivation-map):
   reuse jitML's computational substance while replacing its infrastructure envelope.
-- [Capability Extension Doctrine §5 — Requirement edges](../documents/engineering/capability_extension_doctrine.md#5-the-requirement-edges):
+- [`capability_extension_doctrine.md` §5 — The requirement edges](../documents/engineering/capability_extension_doctrine.md#5-the-requirement-edges):
   bind jitML only through the existing `JitBuild`, `Coordination`, and `InferenceEngine` providers.
-- [Content Addressing Doctrine §2 — Three-tier store](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
-  and [§4.5 — ML-asset lifecycle](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
+- [`content_addressing_doctrine.md` §2 — The three-tier store: blobs ← manifests ← pointers](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
+  and [`content_addressing_determinism.md` §4.5 — The ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
   require pointer-CAS commitment and closed-catalog first-miss materialization.
-- [Daemon Topology Doctrine §4.2 — Accelerator owner](../documents/engineering/daemon_topology_doctrine.md#42-the-accelerator-owner-worker-wholesale-per-node-ownership-a-typed-per-node-singleton):
+- [`daemon_topology_doctrine.md` §4.2 — The accelerator-owner worker: wholesale per-node ownership, a typed per-node singleton](../documents/engineering/daemon_topology_doctrine.md#42-the-accelerator-owner-worker-wholesale-per-node-ownership-a-typed-per-node-singleton):
   give exactly one named owner container the node's wholesale device claim.
-- [Resource Capacity Doctrine §8 — Declared, provisioned, observed](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime):
+- [`resource_capacity_doctrine.md` §8 — Where the numbers come from: declared in pure input, provisioned before render, cross-checked at runtime](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime):
   spend net allocatable and current-free device capacity before effects.
-- [Testing spoof resistance §12](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect):
+- [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence):
   correlate a post-start challenge with independently observed CUDA and store effects.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 93.1: Produce one committed jitML artifact on CUDA ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/JitML/CudaArtifactLift.hs`, `jitml/jitml-lift.cabal`,
-`dhall/jitml/package.dhall`, `test/spec/kernel/JitMLCudaArtifactContractSpec.hs`,
-`test/spec/live/JitMLCudaArtifactLift.hs`, and `tools/jitml_lift_cuda_live.py`
-**Blocked by**: reopened numeric predecessor gates.
-**Requires**: `host-floor` — the NVIDIA kernel driver, whose presence is what classifies the host
-`linux-cuda` at all. The device plugin advertising `nvidia.com/gpu` is **not** required: it is a DaemonSet
-this phase renders like every other operator install.
-**Independent Validation**: the single live command checks the positive
-CUDA-to-commit chain, both pre-effect capacity negatives, the pointer-conflict and command-id conflict
-negatives, and all four committed mutants against repository-local evidence.
-**Docs to update**:
-`documents/engineering/lift_and_compose_doctrine.md`,
-`documents/engineering/capability_extension_doctrine.md`,
-`documents/engineering/content_addressing_doctrine.md`, `documents/engineering/daemon_topology_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`, and `documents/engineering/testing_doctrine.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -252,7 +188,7 @@ artifact carrying its trusted scope and provenance.
 
 ### Validation
 
-1. Run `python3 tools/jitml_lift_cuda_gate.py --reuse-fresh-live` on `linux-cuda`.
+1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-93 supporting suite must run on `linux-cuda`.
 2. Require pure CPU/floor/capacity/identity/idempotency/commit checks and all four mutants to pass or turn red
    at their exact loci.
 3. Require physical CUDA device/process inventory, 10-million-parameter/200-step execution, complete
@@ -268,7 +204,7 @@ correctness/noninterference remain UNVERIFIED.
 
 ## Documentation Requirements
 
-**Engineering docs updated for the scoped result:**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - Record only the tested jitML adapter, CUDA owner binding, and pointer-commit contract in the owning
   lift/capability/content/daemon/capacity doctrines; do not restate inherited Phase-69 or Phase-80 proofs.

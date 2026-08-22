@@ -1,32 +1,34 @@
 # Phase 10: Composition across the five calculi
 
-> **Purpose**: Deliver the total composition boundary that preserves the Phase 8 request-scope index and
-> exactly adds the Phase 9 resource index across values from all five core calculi.
+> **Purpose**: Specify the target Haskell capability to provide a total Haskell composition boundary
+> that preserves the Phase 8 request-scope index and combines the Phase 9 resource index across all
+> five core calculi.
 > **Read this if**: two calculus components must be combined, a component transform must retain its indices,
 > or the boundary between base composition and later extension-law conformance must be read precisely.
 
-This phase owns the base composition operator, not arbitrary-extension closure. It combines representative
-values from the artifact, budget, lift, workflow, and evidence calculi at one request scope and derives one
-exact resource fold. Phase 22 later instantiates C1–C7 over extension declarations and retains the unproved
-C1 residue.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_20_extension_declaration.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_20_extension_declaration.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 10.1: Index-preserving five-calculus composition ✅](#sprint-101-index-preserving-five-calculus-composition-)
+- [Sprint 10.1: Index-preserving five-calculus composition ⏸️](#sprint-101-index-preserving-five-calculus-composition-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -34,67 +36,70 @@ C1 residue.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All thirteen gate sides passed on natural `arm64`, untranslated. The run
-exhausted 25 ordered pairs and 125 triples, passed three 500-case properties, rejected different request
-scopes, and reddened all three real mutants. All ten metrics matched and 18 surfaces joined completely.
-Attestation `sha256:d18a3046817c4ab9c5291cc345c8c0ee78703bcdc420c777b4714e069261eb2e` binds source
-`sha256:9660bb0796d25968…` over 2,156 files.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 9, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`Component scope` is a private closed sum whose five arms contain real representative values from the five
-owning calculi. Each smart constructor requires a `RequestScope scope` and a `ResourceVector`. `compose`
-accepts the same `scope` variable on both arguments, `append` preserves sequence, and
-`compositionResource` folds exact `Natural` addition. A label transform preserves the calculus payload and
-both indices.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to provide a total Haskell composition boundary that preserves the Phase 8
+request-scope index and combines the Phase 9 resource index across all five core calculi.
 
-**Phase scope:** One Register-1 composition boundary accepted by
-`python3 tools/calculus_composition_gate.py`; split if work introduces extension declarations, verdicts,
-generated extension gates, arbitrary-link-set closure, a protocol, or a runtime observer.
-**Substrate:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-**Register:** 1 — pure/golden
-**Depends on:** [Phases 3–7](README.md#phase-overview) — the five calculus payload types;
-[Phase 8](phase_08_scope_index.md) — the rank-2 request scope; and
-[Phase 9](phase_09_resource_index.md) — the exact base resource vector.
-**Gate:** `python3 tools/run_phase_gate.py 10` passes committed oracle
-`test/oracle/calculus_composition/pairs.tsv`, compiler fixtures
-`test/negative/compile_fail/calculus_composition/{same_scope_composes,different_scopes_do_not_compose}.hs`,
-125 triples, three coverage-bound properties, three real mutants, totality/boundary scans, surface join,
-ledger, containment, write guard, natural architecture, and source-bound attestation.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
+
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — provide a total Haskell composition boundary that
+preserves the Phase 8 request-scope index and combines the Phase 9 resource index across all five
+core calculi. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 9](phase_09_resource_index.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 10`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set:** one value from each real calculus payload type; all 25 ordered pairs; all 125
-  ordered triples; both identity directions; and one label transform per calculus.
-- **Independent oracle:** `test/oracle/calculus_composition/pairs.tsv` predates each run and states the exact
-  four-axis resource result for every ordered pair. The gate verifies its closed 5×5 shape before the suite
-  reads it and never regenerates expected values from observed composition.
-- **Generated properties:** three QuickCheck properties sample arbitrary resource vectors for exact addition,
-  associativity, and transform preservation. Each runs 500 cases and covers every calculus constructor at
-  15% or more. These infinite-domain results are `TESTED (sampled)`.
-- **Exhausted properties:** the five-calculus constructor set, 25 ordered kind pairs, and 125 ordered kind
-  triples are finite and exhausted. This does not exhaust the payload or numeric domains.
-- **Specific compiler barrier:** the same-scope program type-checks; the minimal different-scope twin fails
-  because the two rank-2 request skolems cannot unify. The reason is pinned to GHC's type mismatch.
-- **Seeded mutants:** three registry-backed configurations admit different scopes, saturate exact resource
-  addition, or erase the resource index during a transform. Each must fail at its named compiler or property
-  locus, and the clean configuration is restored afterward.
-- **Totality and numeric developability:** the one-module `calculus-composition` library uses a dedicated
-  source root, depends only on Phases 3–9, has exhaustive-pattern warnings as errors, and is scanned for
-  partial or ambient-read tokens. It imports no later `dsl-core`.
-- **Law honesty:** the gate exercises the base forms of identity (C2), associativity (C3), resource
-  additivity (C5), and scope conjunction (C6). It does not establish extension closure (C1), external
-  non-interference (C4), address disjointness (C7), or composition of the S/P law families. Those later
-  obligations remain `UNVERIFIED`.
-- **Observer controls:** this value-only boundary has no authority endpoint or external effect at which to
-  place a nonce, authenticated observer, bypass attempt, or authority pair. Its independent instruments are
-  the authored table, the compiler, and source/build mutants; protocol and runtime remain unclaimed.
-- **Extension conformance (§M.13).** Not applicable: the deliverable is algebra infrastructure consumed by
-  future extensions, not a domain, provider, hardware extension, or conformance verdict.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-The gate establishes exact finite-kind composition and sampled index laws. It does not prove arbitrary
-extension closure, correctness of a calculus payload, live capacity truth, or runtime isolation.
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — provide a total Haskell composition boundary that preserves the Phase 8 request-scope index and combines the Phase 9 resource index across all five core calculi. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 10` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 09 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
@@ -102,24 +107,16 @@ extension closure, correctness of a calculus payload, live capacity truth, or ru
 - [`extension_conformance_laws.md` C3 — Associativity](../documents/engineering/extension_conformance_laws.md#c3-associativity): grouping never changes component order, names, or the derived resource fold.
 - [`extension_conformance_laws.md` C5 — Budget additivity](../documents/engineering/extension_conformance_laws.md#c5-budget-additivity): the base resource requirement is the exact sum of its components.
 - [`extension_conformance_laws.md` C6 — Scope conjunction](../documents/engineering/extension_conformance_laws.md#c6-scope-conjunction): composition accepts one request-scope index and never widens it.
-- [`extension_conformance_doctrine.md` §7 — link-time union closure](../documents/engineering/extension_conformance_doctrine.md#7-link-time-union-closure): pair/triple tests remain evidence rather than the missing universal C1 proof.
-- [`testing_doctrine.md` §9 — generated enumeration, authored expectation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation): run-time surfaces and generated cases join to independent expectations.
+- [`extension_conformance_doctrine.md` §7 — Link-time union closure](../documents/engineering/extension_conformance_doctrine.md#7-link-time-union-closure): pair/triple tests remain evidence rather than the missing universal C1 proof.
+- [`testing_doctrine.md` §9 — Derivation: generated enumeration, authored expectation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation): run-time surfaces and generated cases join to independent expectations.
 
 ## Sprints
 
-## Sprint 10.1: Index-preserving five-calculus composition ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done
-**Implementation**: `lib:calculus-composition`,
-`src/calculus-composition/Amoebius/Calculus/Composition.hs`,
-`test/spec/calculus/CalculusCompositionSpec.hs`,
-`test/negative/compile_fail/calculus_composition/**`,
-`test/oracle/calculus_composition/**`, and `tools/calculus_composition_gate.py`.
-**Blocked by**: None.
-**Independent Validation**: The authored 25-row table states every pair's exact resource vector. The
-different-scope compiler twin, exhaustive triples, generated properties, and three build/source mutants use
-independent failure mechanisms.
-**Docs to update**: `documents/engineering/{extension_conformance_doctrine,extension_conformance_laws,testing_doctrine}.md`, `DEVELOPMENT_PLAN/{README,overview,system_components,legacy_tracking_for_deletion}.md`.
+## Sprint 10.1: Index-preserving five-calculus composition ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -154,11 +151,12 @@ at one request scope, preserve their payloads and order, and derive the exact re
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `extension_conformance_doctrine.md` — distinguish the built base operator from the unbuilt extension
   declaration, generated gate, verdict, and C1 proof.
 - `extension_conformance_laws.md` — record the finite Phase-10 instances of C2, C3, C5, and C6 without
@@ -167,6 +165,7 @@ None.
   runtime residue.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md`, `overview.md`, and `system_components.md` — reconcile status, sequence,
   component paths, and evidence.
 - `DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md` — consume the sealed algebra before the proof stack.

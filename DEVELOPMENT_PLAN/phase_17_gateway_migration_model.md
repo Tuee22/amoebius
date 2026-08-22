@@ -1,34 +1,36 @@
 # Phase 17: Gateway-migration model (both branches)
 
-> **Purpose**: Express the planned and failover gateway-migration branches as one reifiable `Model`, then
-> establish their bounded design properties through independent semantic, explorer, TLC, simulation, and
-> structural-fit readings.
+> **Purpose**: Specify the target Haskell capability to express the planned and failover
+> gateway-migration branches as one Haskell model and compare bounded semantic, explorer, and
+> simulation readings, with every foreign model-checker product generated only beneath `.build/**`.
 > **Read this if**: the cross-cluster gateway protocol, its proof boundary, or its per-spec cutoff must be
 > changed or reviewed.
 
-This phase owns the concrete `GatewayMigration` model, its semantic renderer contract, bounded design proof,
-schedule agreement, and structural-fit cutoff. It consumes the formal kernel and deterministic-simulation
-substrate; it does not establish correspondence to a live daemon or forest.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/gateway_migration_model_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/gateway_migration_model_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 17.1: Concrete model, semantic renderer, and calculus projection ✅](#sprint-171-concrete-model-semantic-renderer-and-calculus-projection-)
-- [Sprint 17.2: Explorer and TLC proof battery ✅](#sprint-172-explorer-and-tlc-proof-battery-)
-- [Sprint 17.3: Schedule agreement, structural cutoff, and sealed gate ✅](#sprint-173-schedule-agreement-structural-cutoff-and-sealed-gate-)
+- [Sprint 17.1: Concrete model, semantic renderer, and calculus projection ⏸️](#sprint-171-concrete-model-semantic-renderer-and-calculus-projection-)
+- [Sprint 17.2: Explorer and TLC proof battery ⏸️](#sprint-172-explorer-and-tlc-proof-battery-)
+- [Sprint 17.3: Historical schedule/cutoff gate work ⏸️](#sprint-173-schedule-agreement-structural-cutoff-and-sealed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -36,110 +38,87 @@ substrate; it does not establish correspondence to a live daemon or forest.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All ten gate sides passed on natural `arm64`, untranslated: all fourteen metrics
-matched, 17 surfaces joined to 19 run-time items, and 34 emitted TLA+/CFG artifacts remained generated and
-untracked. Attestation `sha256:492ebe71ffe1abac5cf95bfa800518685544eadabdba440f46b95d30fdb84031`
-binds source `sha256:fce1f042661a4eb4…` over 2,185 files. Repository-conformance and documentation support
-gates passed on that snapshot. The design is proven only for the bounded model; runtime fidelity is
-UNVERIFIED and the decomposition lemma remains OPEN.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 16, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`gatewayMigrationModel` is one Phase-11 `Model` containing both the `Planned` coordinated handover and the
-`Failover` emergency takeover. Its five safety invariants are `UniqueGatewayOwner`,
-`SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover`, and
-`NoTakeWithoutProvenFreshness`. Its three liveness properties are `MergeConverges`,
-`SessionEventuallyRebinds`, and `PlannedMigrationTerminates`, each checked under the model's declared weak
-fairness.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to express the planned and failover gateway-migration branches as one Haskell
+model and compare bounded semantic, explorer, and simulation readings, with every foreign
+model-checker product generated only beneath `.build/**`.
 
-The in-process explorer and TLC agree on the exact set of 53 reachable states and on their fingerprints.
-Every action and the antecedent-bearing paths are reachable. Five invariant-specific mutants violate exactly
-their named invariant, five mechanical safety mutants are red, and removing fairness makes each of the three
-liveness properties red. `IOSimPOR` agrees with the safety reading inside an explicit schedule bound of 20.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
 
-The generated TLA+/CFG bytes are transient. A twelve-row semantic table instead fixes the module,
-extensions, constants, variables, initialization, actions, fairness, invariants, properties, constraint,
-specification, and deadlock policy; two renderer mutations must change those facts. The same suite also
-constructs the real Phase-10 artifact/budget/lift/workflow/evidence composition and passes its Phase-11
-`compositionModel` projection, preventing the protocol gate from validating a parallel formal vocabulary.
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
 
-The total `structuralFit` fold admits only pairwise, graph-independent, resource-independent, acyclic
-migration graphs within the model's budget, TTL, freshness, and offset envelope. A distinct reference
-predicate, an exact corpus, 500 covered QuickCheck cases, 500 totality cases, and eight clause-deletion
-mutants decide that claim. A scope-3 shared-resource stress model is green while its dual-owner mutant is red.
-This stress result does not prove the general decomposition lemma, which remains OPEN.
+**Phase scope:** Target capability only — express the planned and failover gateway-migration
+branches as one Haskell model and compare bounded semantic, explorer, and simulation readings, with
+every foreign model-checker product generated only beneath `.build/**`. NOT VALIDATED.
 
-**Phase scope:** One concrete two-branch protocol model, one generated-artifact semantic contract, one actual
-five-calculus projection, one bounded proof/simulation battery, and one per-spec structural-fit envelope;
-split if another protocol, proof calculus, or live correspondence boundary is introduced.
-**Substrate:** none
-**Lane:** none
-**Register:** 1 — pure/in-process design validation; TLC is a local proof tool, not a live substrate.
-**Depends on:** [Phase 11](phase_11_formal_model_kernel.md) — supplies `Model`, explorer, TLA+/CFG renderer,
-and the formal composition bridge; [Phase 16](phase_16_deterministic_sim_substrate.md) — supplies the
-deterministic-simulation and actual-calculus harness boundary and is the preceding numeric seal.
-**Gate:** `python3 tools/run_phase_gate.py 17` passes the model/TLC/simulation suite, fourteen exact
-metrics, semantic renderer and calculus projections, all mutation families, complete surface join, generated
-artifact discipline, natural architecture, containment, write guard, ledger, and source-bound attestation;
-the anti-tautology apparatus is specified in [Gate integrity](#gate-integrity).
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 16](phase_16_deterministic_sim_substrate.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 17`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set (§M.7):** both migration branches, all 20 declared actions, five safety invariants,
-  three temporal properties, the exact 53-state bounded graph, the actual five-calculus composition, every
-  eight-clause structural-fit dimension, and the scope-3 shared-resource stress model are named inputs.
-- **Independent oracles (§M.1/§M.3):** `model_contract.tsv`, `invariant_mutants.tsv`, `cutoff_cases.tsv`,
-  `cutoff_mutants.tsv`, `renderer_semantics.tsv`, and `CalculusComposition.expected.tsv` are authored semantic
-  expectations. `referenceFit` shares no decision helper with `structuralFit`; TLC and the in-process explorer
-  are separate readings of the model. No committed fixture is regenerated from emitted output.
-- **Semantic renderer, not a byte golden:** freshly emitted `.tla`/`.cfg` are projected to twelve semantic
-  facts. Dropping an invariant declaration or changing weak to strong fairness changes the projection.
-  Generated artifacts, metrics, fingerprints, logs, ledgers, and attestations remain beneath `.build/**`.
-- **Mutation quota (§M.2):** five exact per-invariant mutations, five mechanical guard/effect mutations,
-  three fairness deletions, two renderer mutations, eight cutoff-clause deletions, and one scope-3 dual-owner
-  mutation all turn the applicable instrument red. The invariant mutants must violate their own invariant and
-  no other; a generic failure cannot satisfy the check.
-- **Vacuity and positive controls (§M.4/§M.8):** both branches, every action, and the three guarded safety
-  paths are reachable on the correct model. The correct model is green before each mutant is trusted, each
-  liveness property is green with fairness before it is required to redden without fairness, and the cutoff
-  corpus pairs each rejected dimension with an admitted neighbour.
-- **Generator coverage (§M.4):** the 500-case structural-fit property requires at least five-percent coverage
-  of multi-active, shared-DNS, cluster-reuse, cyclic, budget, TTL, freshness, offset, and over-scope cases; a
-  separate 500-case run forces the fold to normal form.
-- **Bounded honesty:** 53 states and the `IOSimPOR` schedule bound of 20 are exact model bounds, not runtime
-  coverage. Safety and liveness are `proven-for-the-model`; structural-fit and schedule evidence are tested.
-  Live daemon/forest correspondence remains UNVERIFIED and the decomposition lemma is OPEN.
-- **External observation (§M.5/§M.10):** TLC's subprocess result and fingerprints are compared to the
-  in-process explorer rather than to a self-reported compliance log. Authentication, authorization,
-  ownership authority, and alternate live paths are absent from this Register-1 model, so §§M.10–M.12 have no
-  applicable credential or bypass pair.
-- **Fresh challenge (§M.9):** not applicable. This phase is pure and binds independently authored semantic
-  predicates rather than an effectful service response.
-- **Extension conformance (§M.13).** Not applicable. Phase 17 declares no extension or domain member.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — express the planned and failover gateway-migration branches as one Haskell model and compare bounded semantic, explorer, and simulation readings, with every foreign model-checker product generated only beneath `.build/**`. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 17` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 16 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`gateway_migration_model_doctrine.md` §3](../documents/engineering/gateway_migration_model_doctrine.md#3-the-model): both branches are one reifiable value with named safety and liveness obligations.
-- [`gateway_migration_model_doctrine.md` §4](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove): explorer, TLC, and bounded schedule readings have distinct scopes.
-- [`gateway_migration_model_doctrine.md` §5](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit): decode-time structural fit transfers only the admitted bounded envelope.
-- [`formal_model_doctrine.md` §4.1](../documents/engineering/formal_model_doctrine.md#41-the-reference-model-and-its-semantic-oracle): semantic renderer facts replace generated-output snapshots.
-- [`formal_model_doctrine.md` §6](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): a bounded green result proves the model claim, not runtime fidelity.
+- [`gateway_migration_model_doctrine.md` §3 — The `Model`](../documents/engineering/gateway_migration_model_doctrine.md#3-the-model): both branches are one reifiable value with named safety and liveness obligations.
+- [`gateway_migration_model_doctrine.md` §4 — Simulate and prove](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove): explorer, TLC, and bounded schedule readings have distinct scopes.
+- [`gateway_migration_model_doctrine.md` §5 — One-and-done, plus a per-`InForceSpec` structural fit](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit): decode-time structural fit transfers only the admitted bounded envelope.
+- [`formal_model_doctrine.md` §4.1 — The reference model and its semantic oracle](../documents/engineering/formal_model_doctrine.md#41-the-reference-model-and-its-semantic-oracle): semantic renderer facts replace generated-output snapshots.
+- [`formal_model_doctrine.md` §6 — What a green model-check proves, and what it does not](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): only a future independently accepted bounded result could support the bounded model claim; no current result or runtime-fidelity claim exists.
 
 ## Sprints
 
-## Sprint 17.1: Concrete model, semantic renderer, and calculus projection ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done.
-**Implementation**: `src/Amoebius/Formal/GatewayMigration.hs`,
-`test/spec/formal/gateway/GatewayMigrationSpec.hs`,
-`test/harness/deterministic_simulation/CalculusProjection.hs`, and
-`test/oracle/formal/gateway/{model_contract,renderer_semantics,gateway_migration_manifest}.tsv`.
-**Blocked by**: None.
-**Independent Validation**: the model matches the authored constants/actions/obligations contract; twelve
-renderer facts match exactly; two semantic renderer mutants are detected; and the actual Phase-10
-composition matches all eight Phase-11 formal projection facts.
-**Docs to update**: `documents/engineering/{gateway_migration_model_doctrine,formal_model_doctrine}.md` and
-`DEVELOPMENT_PLAN/{overview,system_components}.md`.
+## Sprint 17.1: Concrete model, semantic renderer, and calculus projection ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -160,18 +139,11 @@ hand-maintained TLA+ source or generated byte fixture.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 17.2: Explorer and TLC proof battery ✅
+## Sprint 17.2: Explorer and TLC proof battery ⏸️
 
-**Status**: Done.
-**Implementation**: `src/Amoebius/Formal/GatewayMigration.hs`,
-`test/spec/formal/gateway/GatewayMigrationSpec.hs`, and
-`test/oracle/formal/gateway/{invariant_mutants,model_contract}.tsv`.
-**Blocked by**: Sprint 17.1's concrete model and authored contract.
-**Independent Validation**: explorer/TLC fingerprint equality, exact invariant-local mutation outcomes, and
-fairness removal are distinct observations over the same model.
-**Docs to update**: `documents/engineering/{gateway_migration_model_doctrine,formal_model_doctrine}.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -193,19 +165,11 @@ load-bearing.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 17.3: Schedule agreement, structural cutoff, and sealed gate ✅
+## Sprint 17.3: Schedule agreement, structural cutoff, and sealed gate ⏸️
 
-**Status**: Done.
-**Implementation**: `src/Amoebius/Multicluster/StructuralFit.hs`,
-`test/spec/formal/gateway/GatewayMigrationSpec.hs`,
-`test/oracle/formal/gateway/{cutoff_cases,cutoff_mutants}.tsv`,
-`test/oracle/gateway_migration_model_surfaces.tsv`, and `tools/gateway_migration_model_gate.py`.
-**Blocked by**: Sprint 17.2's green reference model.
-**Independent Validation**: bounded `IOSimPOR` agreement, a separate structural-fit predicate/corpus,
-coverage floors, eight diagnostic clause mutations, and a scope-3 shared-resource mutation.
-**Docs to update**: `DEVELOPMENT_PLAN/{README,overview,legacy_tracking_for_deletion,system_components}.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -229,17 +193,19 @@ the result as a source-bound phase attestation.
 
 ### Remaining Work
 
-None for the bounded model. Runtime fidelity is UNVERIFIED and the decomposition lemma remains OPEN by design.
+The pre-reset `None` claim is permanently invalid; the phase remains blocked and NOT VALIDATED. Runtime fidelity is UNVERIFIED and the decomposition lemma remains OPEN by design.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `gateway_migration_model_doctrine.md` — record the current semantic renderer and actual-calculus projection,
   and preserve the bounded proof/runtime distinction.
 - `formal_model_doctrine.md` — record the concrete Phase-17 use of the semantic renderer rule and formal
   composition bridge.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md`, `overview.md`, `system_components.md`, and
   `legacy_tracking_for_deletion.md` — reconcile order, evidence, implementation paths, and retired byte-golden
   and pre-rebaseline-body debt.

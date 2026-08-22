@@ -15,10 +15,12 @@ resulting daemon uses, owned by [host_cluster_comms_doctrine.md](./host_cluster_
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. The commitment: headless, on-host, no VM](#1-the-commitment-headless-on-host-no-vm)
@@ -70,7 +72,7 @@ flowchart TD
 > evidence and not proof, and it is not authoritative for amoebius: a seed result establishes that the shape is
 > reachable, never that amoebius reaches it
 > ([`lift_and_compose_doctrine.md` §3](./lift_and_compose_doctrine.md#3-a-seed-is-a-reference-implementation)).
-> Phase 89 implements and tests amoebius's fixed-MSL numerical contract, bridge/build plan,
+> Phase 89 owns implementation and validation of amoebius's fixed-MSL numerical contract, bridge/build plan,
 > fast-math-off rule, and no-VM/no-SwiftPM/no-keychain exclusions. Its executing host was Linux `x86_64`, so
 > actual `/usr/bin/clang` framework linking, `MTLDevice`/`MTLLibrary`, and Metal GPU dispatch remain
 > **UNVERIFIED**; the seed result is still the only physical Apple evidence, and it is somebody else's. Status
@@ -224,9 +226,9 @@ GPU, and it compiles for the *actual* device that will execute the kernel.
 
 This document is normative Apple-build/run doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the
-headless fixed-Metal-bridge build + the native Apple-Metal host worker land in **Phase 89** (`apple`), whose
-gate ([phase_89_apple_metal_host_daemon.md](../../DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md)) brings up
-the Apple cluster on Lima, builds the worker **headless on-host via the fixed bridge**, and dispatches a
+headless fixed-Metal-bridge build + the native Apple-Metal host worker are assigned to **Phase 89** (`apple`), whose
+target gate ([phase_89_apple_metal_host_daemon.md](../../DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md)) must bring up
+the Apple cluster on Lima, build the worker **headless on-host via the fixed bridge**, and dispatch a
 Metal inference job over Pulsar. This doc never maintains a competing status ledger; it states the target
 shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 

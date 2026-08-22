@@ -14,10 +14,12 @@ are expressed, owned by [formal_model_doctrine.md](./formal_model_doctrine.md).
 
 **Status**: Deprecated
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, documents/engineering/README.md
+**Referenced by**: documents/engineering/README.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

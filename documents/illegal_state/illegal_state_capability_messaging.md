@@ -22,6 +22,8 @@ or put an untyped payload on the wire. The numbering belongs to
 
 </details>
 
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ---
 
 ## 1. Scope
@@ -88,14 +90,15 @@ different layer. **Owner:** [`pulsar_client_doctrine.md` §3.1](../engineering/p
 *consume* decode is a total fail-fast check — decode-foreclosed, exactly like the CRC32C frame check — never a
 runtime-checked claim that a received body is valid.
 **Validation-locus:** `gadt-decode` on the *produce* side — the closed codec is a **Haskell** surface
-(`Serialise` / `CborPayload` / `encodeCbor`), so the foreclosure is a compile-fail golden at the gadt-decode
-Haskell layer, **not** a `dhall type` failure: `dhall type` never sees the produce API **+** `gadt-decode`
+(`Serialise` / `CborPayload` / `encodeCbor`). A tracked Haskell negative declaration lazily materializes the
+attempted non-CBOR producer beneath `.build/test-corpora/**` and requires its exact GHC refusal at the
+gadt-decode Haskell layer, **not** a `dhall type` failure: `dhall type` never sees the produce API **+** `gadt-decode`
 on the *consume* side (the total
 `Either DecodeError a` returns `Left` on a malformed body, exactly like the CRC32C frame check). Explicitly
 **not** a `live-effect` locus: there is no runtime-checked claim that a received body is valid — the decode
 either succeeds or fails fast.
 
-**Phase-67 evidence:** realized. The exported producer surface accepts only typed `Serialise` values, the
+**Permanently invalidated Phase-67 run report.** realized. The exported producer surface accepts only typed `Serialise` values, the
 `CborPayload` constructor is private, and a fixture importing `produceRaw` fails for the pinned missing-export
 reason. A hand-authored API golden and the committed re-added-raw-arm mutant keep that foreclosure live; a
 malformed received body returns `Left`, while two live namespaces round-trip typed CBOR through the native wire.
@@ -148,7 +151,7 @@ reuse a catalog link as fetch, add direct network access to a trusted component,
 HTML sink; compile/check, artifact scan, CSP, or the network oracle must turn red before the provider accepts an
 effect.
 
-**Phase-39 evidence.** The Register-1 binder matches seven port tuples and two canonical fixed-HTTPS link joins
+**Permanently invalidated Phase-39 run report.** The Register-1 binder matches seven port tuples and two canonical fixed-HTTPS link joins
 against independent string relations. Eight pinned failures, eight link-catalog failures, and three bounded
 input failures occur before a bound program can emit its pure binding trace; all seven guard/escape mutants turn
 red at exact loci. Thirteen generated classes meet their floor, the real five-calculus projection composes
@@ -156,7 +159,7 @@ red at exact loci. Thirteen generated classes meet their floor, the real five-ca
 behavior, provider authentication, and live isolation remain UNVERIFIED. See
 [Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md).
 
-**Phase-42 evidence.** The Register-2 generic bundle renders untrusted values through `textContent`, accepts
+**Permanently invalidated Phase-42 run report.** The Register-2 generic bundle renders untrusted values through `textContent`, accepts
 only its closed PureScript event arms, and emits same-origin HTTP/WebSocket requests in real Chrome. An
 independent bundle scanner, browser-enforced CSP canary, fresh request nonce, navigation-only link observation,
 and OS-enforced loopback-only network observer all pass; raw-sink, direct-provider, stale-plan,

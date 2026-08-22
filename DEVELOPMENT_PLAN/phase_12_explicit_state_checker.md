@@ -1,32 +1,35 @@
 # Phase 12: The amoebius explicit-state checker
 
-> **Purpose**: Deliver an amoebius-owned bounded explicit-state checker over the Phase-11 `Model`, with
-> replayable minimal counterexamples and verdicts bound to the checked model and search bound.
+> **Purpose**: Specify the target Haskell capability to perform bounded explicit-state search over
+> the Phase 11 Haskell model with deterministic replay and counterexample products generated only
+> beneath `.build/**`.
 > **Read this if**: a finite model has to be checked without delegating frontier semantics to another checker,
 > or the exact reach of the resulting Register-1 evidence must be understood.
 
-This phase owns the independent breadth-first checking algorithm and its bounded-verdict evidence. It consumes
-the Phase-11 model/interpreter semantics but does not call that phase's explorer; it does not claim liveness,
-unbounded induction, code refinement, or runtime fidelity.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/formal_model_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 12.1: Independent bounded checker and replayable verdicts ✅](#sprint-121-independent-bounded-checker-and-replayable-verdicts-)
-- [Sprint 12.2: Differential oracle and mutation evidence ✅](#sprint-122-differential-oracle-and-mutation-evidence-)
+- [Sprint 12.1: Independent bounded checker and replayable verdicts ⏸️](#sprint-121-independent-bounded-checker-and-replayable-verdicts-)
+- [Sprint 12.2: Differential oracle and mutation evidence ⏸️](#sprint-122-differential-oracle-and-mutation-evidence-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -34,89 +37,86 @@ unbounded induction, code refinement, or runtime fidelity.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All twelve gate sides passed on natural `arm64`, untranslated: 10 metrics
-matched, all three mutants were red at their own loci, and 18 surfaces joined to 21 enumerated items.
-Attestation `sha256:a3c020f5fabd75e5a96295fb4895694852b102e0ac16bff95af92d9f0215761e` binds source
-`sha256:8c15e647c970372c…` over 2,163 files. Repository-conformance and documentation support gates passed on
-that same snapshot.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 11, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`Amoebius.Checker.ExplicitState` independently breadth-first searches the Phase-11 `Model` fragment. A private
-positive `SearchBound` makes the boundary convention explicit. The result distinguishes safe completion,
-invariant/deadlock counterexamples, and frontier exhaustion; each verdict records the checker-local model
-digest, declared bound, distinct-state count, and result. Counterexample steps bind their source and target
-fingerprints and can be replayed through `interpret`.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to perform bounded explicit-state search over the Phase 11 Haskell model with
+deterministic replay and counterexample products generated only beneath `.build/**`.
 
-**Phase scope:** One bounded explicit-state algorithm and one independent correspondence gate; split if work
-adds liveness, symbolic induction, refinement checking, a production protocol model, or runtime simulation.
-**Substrate:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-**Register:** 1 — pure/golden
-**Depends on:** [Phase 11](phase_11_formal_model_kernel.md) — the closed `Model`, interpreter semantics, and
-reference explorer against which the separately implemented checker is compared.
-**Gate:** `python3 tools/run_phase_gate.py 12` passes the hand-enumerated verdict oracle, bounded BFS
-and replay suite, Phase-11 explorer parity, three build mutants at specific loci, generated-result discipline,
-surface join, ledger, containment, write guard, natural architecture, and source-bound attestation.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
+
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — perform bounded explicit-state search over the Phase 11
+Haskell model with deterministic replay and counterexample products generated only beneath
+`.build/**`. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 11](phase_11_formal_model_kernel.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 12`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set:** seven authored fixtures cover an eight-state branching model at the exact bound,
-  the same model one state below the bound, safe and unsafe counters, an initial deadlock, a constrained
-  frontier, and a parameterized branch. Their outcomes cover all four result classes.
-- **Independent oracle:** `test/oracle/explicit_state_checker/models.tsv` fixes each fixture's bound, verdict
-  class, exact distinct-state count, violation name, and trace length. Those finite state spaces were
-  hand-enumerated; generated checker output is not used as its own expectation.
-- **Independent frontier:** the checker lives in a dedicated-root sublibrary, consumes the `formal-model`
-  public API, and may import interpreter semantics but not `Amoebius.Formal.Explore`. A source check enforces
-  that boundary and rejects partial or ambient-read tokens in the checker module.
-- **Differential:** the Phase-11 explorer and the Phase-12 checker agree on state count and invariant verdict
-  for the five fixtures where their contracts overlap. Bound exhaustion and deadlock are checked directly
-  because the reference explorer does not expose those Phase-12 result classes.
-- **Counterexample validity:** both unsafe verdicts replay to the reported terminal fingerprint. A forged
-  target fingerprint must fail specifically as `TraceReplayFailure`, so an event list alone cannot masquerade
-  as a trace for another state.
-- **Seeded defects:** three real Cabal/CPP builds widen every action guard, skip invariant checking, or retain
-  only one successor per frontier node. Each must fail at its registry-declared fixture/field locus.
-- **Verdict identity:** the checker-local SHA-256 digest changes with the complete reified model constructor
-  tree and is recorded with the bound and result. It is evidence identity, not a content-addressed artifact
-  name, a general-scope proof, or a protocol compatibility identifier.
-- **Generated-artifact discipline:** the suite rewrites `.build/checkers/explicit-state/results.tsv`; the gate
-  compares all ten metrics to authored values and requires the result to remain outside the source snapshot.
-- **Honesty boundary:** finite-scope invariant/deadlock claims are proven-for-the-model; algorithmic parity,
-  trace replay, and mutation sensitivity are tested. Liveness, unbounded scope, intended-protocol fidelity,
-  and running-code fidelity remain `UNVERIFIED`.
-- **Observer controls:** this is a deterministic pure checker over authored values, with no authority endpoint
-  or live service. Nonces, authenticated observers, bypass attempts, and authority pairs are not applicable;
-  the independent instruments are the hand oracle and the separately implemented Phase-11 explorer.
-- **Extension conformance (§M.13).** Not applicable: this phase delivers proof infrastructure, not an extension
-  declaration, provider/hardware domain, or extension-conformance verdict.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-The gate establishes a bounded checker whose own frontier is sensitive to the named defect families. It does
-not prove that the hand-authored model is the intended protocol or that all possible checker defects have been
-enumerated.
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — perform bounded explicit-state search over the Phase 11 Haskell model with deterministic replay and counterexample products generated only beneath `.build/**`. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 12` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 11 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`formal_model_doctrine.md` §3 — Two total renderings](../documents/engineering/formal_model_doctrine.md#3-two-total-renderings): the checker consumes the same total interpreter semantics without reusing the explorer frontier.
+- [`formal_model_doctrine.md` §3 — Two total renderings](../documents/engineering/formal_model_doctrine.md#3-two-total-renderings): the target checker must consume the same total Haskell interpreter semantics without reusing the explorer frontier.
 - [`formal_model_doctrine.md` §4 — Single-source correspondence](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence): checker/explorer parity is stated over the same reified model value.
-- [`formal_model_doctrine.md` §6 — What a green model-check proves](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): the bound and model-fidelity limits remain explicit.
-- [`formal_model_doctrine.md` §6.1 — The proof stack is amoebius-owned](../documents/engineering/formal_model_doctrine.md#61-the-proof-stack-is-amoebius-owned): the first checker layer has an amoebius-owned implementation and evidence boundary.
+- [`formal_model_doctrine.md` §6 — What a green model-check proves, and what it does not](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): the bound and model-fidelity limits remain explicit.
+- [`formal_model_doctrine.md` §6.1 — The proof stack is amoebius-owned](../documents/engineering/formal_model_doctrine.md#61-the-proof-stack-is-amoebius-owned): the target first checker layer requires an amoebius-owned Haskell implementation and independent evidence boundary; neither is currently accepted.
 - [`testing_doctrine.md` §9 — Derivation: generated enumeration, authored expectation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation): all run-time metrics, checks, and mutants join to the independently authored Phase-12 surface expectation.
 
 ## Sprints
 
-## Sprint 12.1: Independent bounded checker and replayable verdicts ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done
-**Implementation**: `lib:explicit-state-checker`,
-`src/explicit-state-checker/Amoebius/Checker/ExplicitState.hs`, and the three
-`explicit-state-{widens-action-guard,skips-invariant,truncates-frontier}-mutant` Cabal flags.
-**Blocked by**: None.
-**Independent Validation**: The dedicated checker source is rejected if it imports the Phase-11 explorer;
-the seven-model result oracle and replay checks exercise its public API directly.
-**Docs to update**: `documents/engineering/formal_model_doctrine.md` and
-`DEVELOPMENT_PLAN/{README,overview,system_components}.md`.
+## Sprint 12.1: Independent bounded checker and replayable verdicts ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -141,19 +141,11 @@ Adopt the amoebius-owned first proof-stack layer: implement bounded search indep
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 12.2: Differential oracle and mutation evidence ✅
+## Sprint 12.2: Differential oracle and mutation evidence ⏸️
 
-**Status**: Done
-**Implementation**: `test/spec/formal/explicit/ExplicitStateCheckerSpec.hs`,
-`test/oracle/explicit_state_checker/**`, `test/oracle/explicit_state_checker_surfaces.tsv`,
-`test/mutant/registry.tsv`, and `tools/explicit_state_checker_gate.py`.
-**Blocked by**: Sprint 12.1's independent checker API.
-**Independent Validation**: Hand-authored model outcomes are compared both with Phase-12 observations and,
-where contracts overlap, with the separately implemented Phase-11 explorer.
-**Docs to update**: `documents/engineering/formal_model_doctrine.md` and
-`DEVELOPMENT_PLAN/{README,legacy_tracking_for_deletion,system_components}.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -180,15 +172,17 @@ checker parity, counterexample replay, and mechanism-specific mutation sensitivi
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `formal_model_doctrine.md` — record the built explicit-state layer and preserve the finite/model-fidelity
   boundary.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md`, `overview.md`, `substrates.md`, and `system_components.md` — reconcile status,
   lane, implementation paths, and evidence.
 - `DEVELOPMENT_PLAN/phase_13_symbolic_checker.md` — open only after this phase seals; retain its independent

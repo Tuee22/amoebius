@@ -1,384 +1,319 @@
-# Development Plan: gate integrity and artifact hygiene
+# Development Plan: gate integrity and repository closure
 
-> **Purpose**: The gate half of the plan rulebook — what a gate must prove before it can be trusted, the
-> universal artifact-hygiene postcondition every gate inherits, how plan and implementation are reconciled, and
-> the final repository layout no phase may write outside.
-> **Read this if**: a phase gate is being written or judged sufficient, or a path is being added to the tree.
+> **Purpose**: Define the non-spoofable phase-gate contract, the universal source and artifact postconditions,
+> the one active divergence register, and the final-tree rule every phase inherits.
+> **Read this if**: a phase gate is being written, reviewed, run, or proposed as evidence for a status change.
 
-This slice is authoritative for gate integrity, artifact hygiene, and the target repository tree. The hub it
-belongs to, [`development_plan_standards.md`](development_plan_standards.md), keeps every heading and anchor
-and remains authoritative for the rulebook's structure.
+This slice is authoritative for gate integrity. The phase model and status authority live in
+[`development_plan_phase_model.md`](development_plan_phase_model.md); the hub that preserves the rulebook's
+section lettering lives in [`development_plan_standards.md`](development_plan_standards.md).
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
-- [M. Gate integrity (a gate cannot be passed by a stub)](#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-- [S. Universal artifact-hygiene gate](#s-universal-artifact-hygiene-gate)
+
+- [M. Gate integrity (a gate cannot authorize itself)](#m-gate-integrity-a-gate-cannot-authorize-itself)
+- [S. Universal source and artifact hygiene gate](#s-universal-source-and-artifact-hygiene-gate)
 - [T. Plan-to-implementation reconciliation](#t-plan-to-implementation-reconciliation)
 - [U. The final repository layout](#u-the-final-repository-layout)
 - [Related Documents](#related-documents)
 
 ---
 
-## M. Gate integrity (a gate cannot be passed by a stub)
+<a id="m-gate-integrity-a-gate-cannot-be-passed-by-a-stub"></a>
 
-A phase gate exists to prove the phase's objective was actually delivered. A gate a stub, fake, hardcoded
-happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gate** — and every sprint
-**Validation** that feeds it — obeys the clauses below; a gate that omits an applicable clause is incomplete.
+## M. Gate integrity (a gate cannot authorize itself)
 
-1. **Independent oracle provenance.** A version-controlled fixture, golden, expected error, or locus tag is a
-   human-authored input reviewed independently of the implementation. The implementation author is not its
-   sole author or reviewer.
-   - A golden or expected value regenerated from the implementation's own output is not a test: it passes
-     for any output, a stub's included.
-   - A reference implementation may generate an expected value at run time, but that expected file remains
-     under `.build/runs/` and is never committed. The reference implementation and its authored inputs may be
-     version-controlled when they do not import or reuse the subject's decision logic.
-   - Authorship before the implementation is strong provenance when Git history establishes it. An existing
-     oracle whose chronology or independent review cannot be established is a regression fixture, not an
-     independent oracle, until it receives an independent review or replacement.
-   - A fixture and subject first introduced in the same commit have no Git-established chronology between
-     them. The fixture is therefore a regression fixture until an independent reviewer validates or replaces
-     its expectation; a manifest claim cannot supply the missing provenance.
-   - **Amendment.** A pinned oracle is not frozen — a renderer's output, an error tag, or an expected value
-     may legitimately change when the design does.
-   - It is **amended**, never rewritten from a failing run: the new expectation is authored from the
-     *intended* output, the change to the expectation is reviewed as its own change (with the reason
-     recorded beside it), and the mutants that the oracle must still turn red are re-run against the amended
-     value.
-   - Copying the failing run's actual output over a golden converts an oracle into a snapshot and voids
-     clause 1 for every subsequent run; it is prohibited in every phase.
-   - Where a byte-exact golden is used, the phase must also pin the **canonical rendering convention** the
-     golden is authored under (encoding, ordering, indentation, and a content-stable generated-by stamp
-     carrying no timestamp or run-varying field) — without one, a hand-authored byte-exact fixture is not
-     writable and clause 1 cannot be satisfied ([generated_artifacts_doctrine.md §3](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)).
-     A byte-exact golden is therefore authored no earlier than the sprint that fixes its convention.
-2. **Committed mutation quota.** Every gate names **at least one committed seeded mutant** — a deliberately
-   broken implementation or spec — that the gate must turn red. Mutants are drawn from a defined operator set
-   (guard negation/weakening, effect swap, dropped effect/`UNCHANGED`, quantifier flip, fairness drop,
-   invariant-clause delete, union-arm addition), not one hand-picked strawman, and are committed and re-run,
-   not run once. Every seeded mutant is one record in the single mutant corpus the
-   [§U](#u-the-final-repository-layout) target tree declares, in one format, naming its operator, its change,
-   and the locus at which the gate must go red. A mutation carried anywhere else — a build flag, a
-   conditional-compilation symbol, an alternative project file or source directory — is **named by a field of
-   that record**, never registered separately: a second registry no listing of the corpus can see is how a
-   quota is met on paper and unmet in fact.
-3. **Independent reference predicates.** An equivalence or exact-match check — an `accepts ⟺ in-envelope`
-   property, an expected-argv assertion, an expected-error-tag assertion — defines its reference side
-   **independently of the code under test** (a committed hand-authored table or a distinct specification),
-   never by reusing the implementation's own fold, helper, or `Step→argv` function. A check whose oracle is the
-   subject under test is a tautology.
-4. **Generator coverage.** A property-based (QuickCheck) gate carries `cover` / `classify` obligations that
-   force the illegal / reject / boundary branch to fire a stated minimum fraction of cases. A generator that
-   emits one near-constant legal value proves nothing about the reject path.
-5. **External-observer traces.** A gate that asserts *how* the binary behaved — every tool invoked by absolute
-   path, zero Helm invocations, no public-registry pull, no credential access on the render path — reads its
-   trace from an **observer at the OS boundary** (an argv-recording shim, `strace`, a CNI/containerd log),
-   never from a compliance trace the code under test emits about itself, which cannot record the calls that
-   bypass it.
-6. **Determinism honesty.** A determinism / reproducibility gate forces an **independent recomputation** on the
-   second run (cache-bypass, or a distinct content-addressed namespace) and asserts the compute path actually
-   executed. A "second run" served from a content-addressed store hit proves memoization, not determinism.
-7. **Concrete corpus.** A gate names its "representative set" **explicitly** — which capabilities, which
-   service set, which fixtures — in the phase doc. An undefined "representative set" is satisfied by one
-   hand-picked happy-path shape.
-8. **Specific-reason negatives.** A negative fixture asserts **why** it fails — its expected `dhall type`
-   error, `DecodeError` tag, or compile-fail locus — and is paired with a positive that differs only in the
-   foreclosed dimension. A negative that merely "fails" can fail for an unrelated reason (a typo, a missing
-   field) while the illegal state it targets stays representable.
-9. **Fresh-challenge binding.** Every effectful boundary or live gate uses a harness-generated unpredictable
-   nonce or canary issued after the subject starts, carries it through the public operation, and recovers it
-   from the independent observation. Fixed output, stale state, or a pre-recorded response cannot satisfy the
-   gate. Pure gates name a separately authored reference predicate and mark an effectful challenge not
-   applicable.
-10. **Authenticated observer provenance.** The gate names the observer outside the system under test and the
-    raw evidence it reads. An unavailable, unauthenticated, incomplete, or challenge-mismatched observer fails
-    closed; a self-reported compliance trace is never a fallback.
-11. **Authority-paired security checks.** An authentication, authorization, tenancy, or ownership gate uses
-    real least-privilege credentials minted by the authority under test. It pairs an own-scope success with a
-    foreign-scope denial that differs only in authority or scope, and externally observes zero forbidden
-    effect. Caller-authored identity or tenant headers are hostile inputs, not evidence.
-12. **Bypass-path negatives.** A gate claiming a single edge, broker, store, workflow, or provider path probes
-    the alternate direct paths as well as the intended path. Success through the sanctioned route cannot hide
-    an independently reachable bypass.
+A phase gate is an attempt to falsify one bounded claim. It is not a script exit code, an evidence bundle, a
+hash, a self-reported ledger, or a count of tests. Those are observations a reviewer may use. None can promote
+a phase by itself.
 
-13. **Extension-conformance discharge.** A gate that delivers an extension — a domain, a provider, or a
-    hardware substrate — names, per law family, which laws it discharges and how: the L-law properties over its
-    own declared vocabulary, the C-law composition suite against every other member of the link set, and the
-    S- and P-law instances for the seams it declares. Each unrepresentability claim in that discharge names a
-    compile-fail fixture that fails for its pinned reason, and the gate produces a sealed verdict binding the
-    declaration digest, the core version the laws came from, the suite digest, and the result
-    ([`extension_conformance_doctrine.md` §6](../documents/engineering/extension_conformance_doctrine.md#6-the-verdict-seal)).
-    A gate delivering no extension marks the clause not applicable, on the same terms as clause 9. What this
-    forecloses is the failure mode extension guidelines always have: a conformance claim discharged by the
-    author's own reading rather than by a suite the author cannot weaken.
+Three parties are deliberately distinct:
 
-These clauses are what a phase's **Gate** and each sprint's **Validation** are checked against. The Phase-0
-documentation lint verifies that every gate names its authored fixtures, mutant(s), and independent oracle.
-The generated run ledger records the result and is externally attested. The implementation author must not be
-the sole author or reviewer of the oracle.
+1. the **subject** implements the claimed behaviour;
+2. the **oracle and harness** attempt to falsify that behaviour without importing its decision logic; and
+3. the **human validation authority** reviews the contract and raw observations and alone may promote status.
 
-Clauses 9–12 are the plan projection of
-[`testing_spoof_resistance.md` §12](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect).
-Each applicable phase declares the challenge, observer, authority source, and paired negative in its gate
-apparatus. Raw observations and digests remain generated run evidence outside Git.
+The subject, harness, generated evidence, an LLM, or CI may produce a **validation candidate**. Only the human
+authority may write ✅ Done. A candidate remains **NOT VALIDATED** until that decision. The approval is an
+external, cryptographically authenticated receipt bound to the source snapshot, phase-contract digest,
+qualified-harness digest, and raw-observation digest. It verifies against a human-controlled trust root that
+the candidate change cannot amend and use in the same promotion. A path, hash-looking string, or unsigned
+Markdown assertion is not approval.
+
+This trust split is intentional. Source in one repository can always be changed so that subject and test
+collude; no program in that same trust domain can prove the absence of such collusion. Independent review and
+human-held signing authority close the authorization gap that mutation testing alone cannot close.
+
+### M.1 The fixed gate contract
+
+Every numbered phase contains a `## Gate integrity` section with exactly one table using the following keys.
+Free prose cannot substitute for a missing row, `N/A` carries the required reason and reviewer, and generated
+evidence cannot populate authored contract fields.
+
+| Key | Required content |
+|---|---|
+| `Claim` | One falsifiable capability statement and its explicit exclusions. |
+| `Subject` | The production `.hs` module and entry point exercised; a wrapper, manifest, or gate runner alone is not a subject. |
+| `Command` | `pb validate phase NN`; Python treats that and every other argv as opaque, makes only the minimal platform distinction needed to establish/build, then execs the exact Haskell binary with argv unchanged. The binary owns host-floor policy, command dispatch, and every verdict. |
+| `Oracle` | A separately authored `.hs` oracle module, its independence boundary, provenance, and human reviewer. |
+| `Positive controls` | A closed named corpus and the exact observations expected for each member. |
+| `Paired negatives` | For every foreclosed dimension, a minimally different positive/negative pair and the exact rejection locus and reason. |
+| `Mutants` | For each mutant: operator, production locus, applied-change witness, expected red observation, and controls that must remain green. |
+| `Discovery` | The authoritative expected surface, runtime-discovered surface, two-way equality rule, and explicit refusal of empty discovery. |
+| `Challenge` | A post-start nonce/canary for effectful claims, or a reviewed reason that a pure claim uses an independent predicate instead. |
+| `Observer` | The observer outside the subject, raw observation it reads, authenticity check, and fail-closed rule. |
+| `Authority/bypass` | Paired least-privilege success/foreign-scope denial and alternate-path probes, or reviewed non-applicability. |
+| `Freshness` | How stale state, cached output, prior evidence, and replayed responses are made unable to pass. |
+| `Qualification` | Sabotage cases that qualify the harness before the clean candidate run. |
+| `Cleanroom` | Proof that the gate starts without generated products or condemned legacy copies and derives everything required lazily. |
+| `Legacy closure` | Stable IDs owned by this phase and the exact zero-finding check required before promotion. |
+| `Predecessor` | The immediately preceding phase's human approval receipt, or `genesis` for Phase 0. |
+| `Residue` | Untested layers and assumptions, stated as `UNVERIFIED`; an empty residue requires reviewer justification. |
+| `Human authority` | Required external approval class; always `human-only`, never a tool-generated assertion. |
+
+The `**Gate:**` summary line contains only the command and a link to this table. A phase-specific command may
+be an argument selected by the Haskell dispatcher, but Python, shell, a data file, or a generated program may
+not decide or wrap the verdict. The standard command is a target contract until Phase 0 implements and
+qualifies it; its presence in a phase document is not a claim that it currently exists or passes.
+
+The structural documentation checker may parse governed inventory, metadata, headings, links, anchors,
+backlinks, status syntax, phase dependencies, and this fixed table shape. It may not infer any row's semantic
+adequacy or any cross-cutting product/source/provider decision from natural-language wording or token counts.
+Those executable decisions live in reviewed Haskell declarations; prose correspondence is a separate human
+review obligation. A policy-looking prose decoy must be behaviorally inert.
 
 <a id="gate-integrity-delegation"></a>
-**Gate → Gate-integrity delegation.** A `**Gate:**` line may discharge these clauses inline **or** delegate them to the
-phase's `## Gate integrity` section ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton)) by anchor. Delegation is a
-first-class, conforming form: a `**Gate:**` line that names its fixtures, mutant(s), and oracle *in a linked
-`## Gate integrity` section* satisfies this section exactly as an inline naming does. A conforming
-implementation of the Phase-0 gate-integrity lint (check (f)) therefore **follows one anchor hop** from the
-`**Gate:**` line into the delegated section before reporting a gate under-specified; it must not flag a gate
-whose apparatus lives one hop away.
+
+### M.2 Oracle independence
+
+An oracle is independent only when all of the following are true:
+
+- its expectation is authored from the requirement, not captured or regenerated from subject output;
+- it does not import, call, copy, or mechanically translate the subject's decision function;
+- its reviewer is not the sole author of the subject behaviour under review;
+- its provenance predates the candidate implementation or has an explicit independent-review receipt; and
+- changing it is reviewed as a contract change and invalidates affected evidence.
+
+Independent expectations are Haskell source. A second-language copy, a checked-in golden, or a TSV/JSON/YAML/
+Dhall table is not stronger independence; it is additional behavioural source that the Haskell-only rule
+forbids. Byte output is compared by a separately authored Haskell semantic predicate or by bytes derived at
+run time from that predicate under `.build/**`.
+
+### M.3 Mutants must prove that they changed the subject
+
+Counting mutant declarations is not mutation testing. Before a mutant result is accepted, the harness records
+the clean subject digest, applies a named operator to a named production locus in an isolated
+`.build/source-snapshot/**` copy, records the changed digest and a semantic or textual diff witness, builds
+that changed subject, and observes the specified red result. A missing locus, no-op transform, unchanged
+binary, unexecuted mutant, skipped mutant, or red result at another locus fails the gate.
+
+The operator set and mutant declarations are Haskell values. The run must demonstrate at least these
+properties:
+
+- each required mutant is discovered and executed exactly once;
+- each mutant changes the intended production behaviour;
+- the named oracle row turns red for the named reason;
+- unrelated positive controls remain green; and
+- restoring the clean source restores the clean result.
+
+A deliberately broken alternate implementation that production can never select is not a mutant of the
+subject. A build flag is admissible only when the resulting compiled production locus and changed binary are
+both observed.
+
+### M.4 Harness qualification precedes every candidate
+
+The harness is qualified against a fixed, reviewed sabotage corpus before it judges a candidate. Qualification
+must show that it rejects, at minimum:
+
+1. a constant-success verdict;
+2. a no-op subject;
+3. a wrong but well-formed output;
+4. empty discovery and a missing subject or oracle;
+5. a skipped or no-op mutant;
+6. a mutant that fails at the wrong locus;
+7. stale or replayed evidence;
+8. a self-reported observer substituted for the external observer;
+9. an authority or bypass violation;
+10. residue or teardown leakage; and
+11. a generated or legacy input smuggled into the cleanroom run.
+
+Qualification and the clean run are separate invocations over the same harness digest. A candidate produced
+by an unqualified harness is rejected regardless of its own result. The qualification corpus is Haskell
+source reviewed independently of the harness implementation; its raw observations are generated lazily and
+never committed.
+
+### M.5 Effectful and pure claims
+
+An effectful claim uses a challenge issued after the subject starts and recovers it through an authenticated
+observer outside the subject. Missing, incomplete, unauthenticated, challenge-mismatched, or self-reported
+observations fail closed. Security claims pair an own-scope success with a foreign-scope denial and observe
+zero forbidden effect; route claims probe the intended route and every direct bypass.
+
+A pure claim cannot use a live nonce meaningfully. It instead uses a separately reviewed predicate, branch
+coverage obligations, boundary generators, explicit positive/negative pairs, and changed-subject mutants.
+Property sampling reports only the explored sample and its coverage; it never upgrades to universal proof.
+
+### M.6 Candidate evidence and human promotion
+
+The Haskell gate writes raw observations and a schema-checked candidate bundle beneath `.build/runs/**`. Its
+digest binds provenance; it does not make the contents true. The candidate must contain explicit per-row
+`green`, `red`, `refused`, or `UNVERIFIED` states. Missing rows, empty arrays, implicit defaults, skipped work,
+or a top-level success bit without row evidence fail schema validation.
+
+The human reviewer compares the contract, qualification observations, clean observations, source diff,
+unverified residue, and predecessor approval. The reviewer may then issue the external approval receipt and
+personally change status. Automation and LLMs are prohibited from creating, copying, inferring, or claiming
+that approval.
 
 ---
 
-## S. Universal artifact-hygiene gate
+<a id="s-universal-artifact-hygiene-gate"></a>
 
-Every phase gate includes one implicit postcondition in addition to its phase-specific capability check. A
-gate cannot pass unless all of these conditions hold:
+## S. Universal source and artifact hygiene gate
 
-1. The result is bound to a recorded **source-snapshot** digest, and commit timing is not a gate input
-   ([the enforcement contract](../documents/engineering/repository_layout_doctrine.md#8-enforcement-and-source-snapshot-acceptance) defines the snapshot).
-2. Test surfaces are enumerated at run time into `.build/test-surfaces/` and joined to authored expectations.
-3. All deliberate compilation, generation, resolution, caching, temporary output, and run evidence stays
-   under `.build/**`; ignored Python interpreter caches are the sole source-adjacent exception.
-4. No command writes beneath an authored root except for Python's ignored interpreter cache.
-5. No `.lock`, `.freeze`, package checksum database, hard-coded library/package SHA, resolved user-home path,
-   generated ledger, evidence file, enumeration, bytecode, or generated source is tracked.
-6. The gate leaves tracked files unchanged and creates no unignored generated path.
-7. The Docker context contains no generated output, evidence, dependency tree, cache, secret, or runtime state.
-8. The generated run bundle is schema-checked and installed as an immutable, content-addressed attestation
-   under `.build/evidence-store/**`, bound to the source-snapshot digest and phase contract.
-9. The source snapshot contains every authored input the build, tests, and gate use, and the same documented
-   command succeeds against the snapshot alone; an ignored worktree file is never an input.
-10. The semantic provenance scan rejects tracked reproducible copies even when their paths are not ignored or
-    their filenames resemble authored fixtures.
-11. Every path the run leaves behind is either in the target tree of
-    [`repository_layout_doctrine.md` §2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure)
-    or ignored by **both** contracts. A tracked path outside that tree, an unignored generated path, an
-    ignore rule for a path the tree does not contain, and a path naming a phase ordinal outside
-    [§U](#u-the-final-repository-layout) clause 3's exception set each fail the gate. Clause 5's deferral
-    mechanism applies unchanged.
-12. A before/after host inventory proves that the run created no amoebius-owned path, mount, loop device,
-    container, volume, cache, or daemon state outside the physical repository root.
-13. Production runtime and durable state use only `.data/**`; test runtime and durable state use only one
-    harness-owned `.test_data/runs/<run-id>/**` root. A test fails before mutation if production state or
-    configuration is selected, and teardown deletes only its exact marker-proven run root.
-14. `test-secrets.dhall` is the sole cleartext secret-at-rest. Only the elevated test harness may read it;
-    production rejects it, and no run copies it into output, state, logs, arguments, environments, container
-    contexts, or attestations.
-15. The run records the detected substrate, the selected lane, and the **natural architecture** that lane ran
-    on, and every executed artifact belongs to that architecture. A run that cannot name its architecture, that
-    executes an artifact of another architecture under emulation, or that builds one through a cross-toolchain
-    fails ([`substrate_doctrine.md` §1.1](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule)).
+The final invariant is absolute, but numerical migration needs a fail-closed transition rule: before the final
+source migration closes, a phase candidate may contain only source-boundary findings that are matched
+bijectively to active register rows owned by strictly later phases. An unregistered finding, a finding owned by
+the candidate or an earlier phase, a stale row with no finding, or two rows/findings sharing one locus refuses
+the candidate. This is accounting, not a waiver: the owning phase must reach zero, and no later phase may
+reintroduce the finding.
 
-16. A gate that adds or amends an illegal-state catalogue entry leaves the catalogue a **complete covering**
-    over its declared taxonomy: every cell of the product of the declared axes holds an entry, is inadmissible
-    under the declared layer-to-locus relation, or carries a one-line justification for holding none, and an
-    unjustified empty cell fails the gate
-    ([`documentation_standards.md` §16](../documents/documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list)).
-    The grid is generated; the entries' pairings, the relation, and the justifications are authored.
+The transition exception has a hard stop. A Phase-49 candidate must report **zero source-boundary debt**:
+every `LTD-SRC-*` query, including Phase-0-owned `LTD-SRC-008`, is zero. The only remaining non-Haskell
+behavioral source is Python under `pb/**` that a deny-by-default Haskell AST/import/effect audit has positively
+classified into minimal platform discrimination, contained toolchain establishment, source-bound build, and
+opaque exec handoff. Phase 50 validates the runtime behavior of that already-bounded handoff and owns no
+source-migration row. Phase 51 and every later candidate retain the same final source grammar.
+Consequently no host or hardware phase can open while condemned source remains tracked.
 
-**Clause 16 is discharged, 2026-08-20.** All three axes are closed and enumerated, the generator exists
-([`../tools/covering_grid.py`](../tools/covering_grid.py)), and the 252 cells resolve as 64 occupied, 154
-inadmissible, and 34 justified, with none owing a reason
-([`../documents/illegal_state/README.md`](../documents/illegal_state/README.md)). What made the previous eleven
-unclosable was the instrument rather than the catalogue: an entry naming several foreclosure layers and several
-loci was credited with the product of them, so an empty cell could not be told from an unpaired one. Each entry
-now pairs a layer to a locus on its own `Cells:` line, which is what makes the count a measurement. A gate
-amending an entry inherits the postcondition and may not leave a cell unjustified — a rule that now bites,
-because there is no standing remainder to hide behind.
+Every phase inherits the following postconditions. They are part of the gate, not optional cleanup:
 
-**Clause 15 invalidates every phase seal recorded before 2026-08-16.** No earlier gate recorded the
-architecture it proved, so no earlier attestation can be read as a claim about one — and the seal that did
-name two architectures reached the second under an emulator. This is the same shape as the containment
-amendment's clauses 11–14: a postcondition the prior contract did not have, which every phase must now satisfy
-in numeric order. What each phase's status becomes is recorded in [README.md](README.md), never here
-([§R](development_plan_phase_model.md#r-where-the-cross-cutting-invariants-live)).
-
-```mermaid
-flowchart LR
-  %% register: orientation
-  run["a phase gate run"] -->|"records"| prov["detected substrate, selected lane, natural architecture"]
-  prov -->|"every executed artifact is that architecture"| seal["the phase seal"]
-  prov -->|"unnamed, emulated, or cross-built"| refuse["no seal"]
-```
-*Orientation. Clause 15 of [§S](#s-universal-artifact-hygiene-gate), whose lane vocabulary is owned by [`substrate_doctrine.md` §1.1](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule): a run that cannot name the architecture it proved has proven it for none.*
+1. **Closed source language.** The target snapshot contains no tracked executable, behavioural, validation,
+   test, fake, oracle, generator, migration, or runtime logic except `.hs`; during the ordered migration, every
+   contrary finding must satisfy the strictly-later active-row transition rule above, which expires before
+   the Phase-49 candidate.
+2. **One bootstrap exception.** Non-Haskell program source is permitted only under `pb/**`, and only to make
+   the minimum platform distinction needed to select the establishment adapter, establish the pinned
+   Haskell toolchain, build the source-bound
+   Haskell binary, and exec it with every user argument unchanged. Haskell owns host-floor decisions, public
+   commands, help, version, product policy, tests, gates, evidence, and validation verdicts.
+3. **Semantic source scan.** The source-closure check classifies path, extension, executable bit, shebang,
+   imports, call graph, effects, and role. For `pb/**`, a deny-by-default Python AST/import/effect grammar
+   rejects unsupported syntax, unresolved calls, dynamic execution/import/reflection/hooks, and effects
+   outside one externally observed adapter. Renaming another program as data or omitting an extension does
+   not admit it; keyword absence or public-help enumeration is never proof of role.
+4. **Lazy derivation.** Dockerfiles, bake files, Dhall, PureScript, JavaScript, shell, Proto, Pulumi programs,
+   manifests, fixtures, goldens, negatives, mutant materializations, inventories, ledgers, and every other
+   reproducible product are generated only when consumed and only beneath `.build/**`.
+5. **Narrow authored non-code inputs.** Markdown, licenses, Cabal/project configuration, ignore rules, and
+   narrowly justified packaging metadata may be tracked. None may encode executable product or validation
+   decisions that belong in Haskell.
+6. **No source-adjacent output.** Compilation, generation, resolution, caches, temporary files, interpreter
+   bytecode, evidence, and test discovery remain beneath `.build/**`. There is no cache exception beside
+   authored source, including for `pb`.
+7. **Snapshot closure.** The documented command succeeds from a fresh source snapshot with `.build/**`,
+   `.data/**`, and `.test_data/**` absent. An ignored worktree input makes the gate fail.
+8. **No condemned fallback.** The cleanroom run starts with every legacy path owned by the phase absent and
+   proves no fallback, migration input, compatibility copy, or pre-generated substitute was read.
+9. **Tracked-tree immutability.** The gate does not change any tracked file and leaves no unignored output.
+10. **Two ignore boundaries.** Generated output, dependency trees, caches, evidence, secrets, and runtime
+    state are excluded from both the repository and container build contexts.
+11. **State containment.** Production state lives only under `.data/**`; test state lives only under one
+    marker-proven `.test_data/runs/<run-id>/**` root; teardown removes exactly the owned test root.
+12. **External residue check.** Before/after observation reports every repository-owned path, mount, loop
+    device, container, volume, cache, daemon, namespace, and external resource touched by the run. Unexpected
+    residue fails.
+13. **Secret containment.** No cleartext secret enters source, output, arguments, environments, logs, build
+    contexts, or candidate evidence. Test-secret exceptions, if any, are explicit inputs outside production
+    and are destroyed with the run.
+14. **Natural architecture.** Hardware runs record detected substrate, selected lane, and natural
+    architecture; emulation and cross-built evidence cannot establish another lane.
+15. **Complete discovery.** Expected and discovered test/capability/resource surfaces agree in both
+    directions, are non-empty where the claim requires behaviour, and contain no implicit “tested” defaults.
+16. **Active legacy closure.** Every divergence has one stable row in
+    [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md), and the owning phase reaches zero
+    matching findings before it may be a validation candidate. Earlier phases prove exact accounting of
+    later-owned findings; findings may not be deferred out of, reassigned by, or survive their owning phase.
+17. **Predecessor closure.** Except Phase 0, the immediately preceding phase has a valid human approval receipt
+    for the exact current contract. Hardware-specific work cannot run as a phase gate before the no-hardware
+    DSL promotion barrier is human-approved.
+18. **Evidence is not authority.** Run bundles are generated diagnostics. No path, digest, attestation, test
+    count, or tool-emitted “pass” authorizes ✅ Done.
 
 <a id="s-commit-timing"></a>
-**Commit timing is not a gate input, and no document may reintroduce it as one.** A result is bound to the
-source it actually ran against, so an uncommitted change is validated on exactly the same terms as a committed
-one, and committing, amending, rebasing, or pushing that same source changes nothing a gate observed. The
-operator commits whenever they choose, on their own cadence, and phase order never waits on it. This replaces
-the pre-2026-08-12 precondition requiring a pristine committed worktree, and the companion rule that any other
-run was merely diagnostic; both are withdrawn, because they made every phase closure wait on an unrelated
-human act while adding nothing a reader needs to trust the result. Documentation check `t` fails any governed
-document that asserts either again.
 
-The snapshot digest is **provenance, not a standing precondition**. It records exactly which source produced a
-result, so a reader can tell one run's evidence from another's. It does not mean an unrelated later edit
-retracts a seal: a closed phase reopens only under [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase), when the change
-touches what that phase's gate actually covers.
-
-Python runs with ordinary bytecode caching enabled. `.gitignore` and `.dockerignore` must cover every
-`__pycache__` directory and Python bytecode suffix, and Phase 0 rejects tracked bytecode, context leakage,
-missing patterns, or command-level suppression. A source-adjacent ignored cache is allowed to remain locally;
-it is not a gate output, authored input, or version-controlled artifact.
-
-The target tree, the complete file classification, output inventory, ignore patterns, source-snapshot
-acceptance, and revision-history disposition are owned by
-[`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md). A phase document
-states only its capability-specific acceptance condition; it does not duplicate these sixteen clauses.
-
-**Clause 5 is enforced by every gate and remediated by the owning phase.** Read as a whole-tree condition it
-would make Phase 0 wait on phases 1–95, because the tracked resolver output, digest tables, and generated-root
-consumers those phases own are spread across the tree — which inverts the numeric order this plan is built on.
-[`repository_layout_doctrine.md §3.5`](../documents/engineering/repository_layout_doctrine.md#35-tsv-inventory-and-provenance)
-settles it: Phase 0 owns the shared corpora and the machinery, and each later phase owns its domain tables
-before revalidation. A finding outside the running phase's ownership is therefore **deferred, never
-suppressed** — it is reported at every run, attributed to the phase whose gate must clear it, justified by a
-row in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md), and removed from the deferral
-list when that phase closes. A deferral that no longer matches a finding fails the gate, so the list only
-shrinks. Nothing may be deferred out of the phase that owns it.
-
-Phase 0 additionally audits reachable revision history. A discovered secret requires rotation and a
-coordinated purge. A non-secret generated or obsolete historical blob requires forward cleanup plus an
-operator-recorded choice between retaining prior history and an explicitly approved coordinated rewrite.
-Unreachable local objects are reported separately and do not change the shared repository closure.
-
-This amendment invalidates every prior phase seal because the former gates could consume committed
-enumerations and ledgers, write evidence beneath `DEVELOPMENT_PLAN/`, and rely on tracked resolver output or
-host-specific paths. Existing code may satisfy the capability part, but that result cannot restore Done until
-the redesigned gate passes in numeric order.
+The source-snapshot digest records what ran; commit timing is not an input. A later source or contract change
+invalidates only evidence it changes, but every phase in the present reset is explicitly **NOT VALIDATED** and
+has no reusable approval. No pre-reset seal, attestation, hash, status sentence, or scoped result may be
+promoted into current evidence.
 
 ---
 
 ## T. Plan-to-implementation reconciliation
 
-The plan, implementation, tests, and historical evidence are independent inputs to a reconciliation. None is
-presumed correct merely because it already exists or is authoritative for a different concern. Target intent
-comes from current doctrine and explicit operator decisions; sequencing and acceptance come from this plan;
-implementation presence comes from dated repository inspection; current proof comes only from the redesigned
-gate and verified repository-local attestation.
+Doctrine states target intent, the plan states sequence and acceptance, repository inspection states what is
+present, and qualified evidence states what one run observed. None can silently substitute for another.
 
-Every documentation sweep follows this policy:
+Every reconciliation follows these rules:
 
-1. **Establish the audit boundary.** Record the date, exact revision, worktree state, upstream relation, roots
-   inspected, and whether observations are committed, uncommitted, ignored, untracked, generated, reachable
-   history, unreachable local objects, or external. An audit states the snapshot it observed; it never presents
-   one snapshot's counts as another's.
-2. **Compare by contract, not filename.** For each phase, compare target capability, implementation paths,
-   tests, gate behavior, artifact provenance, substrate/register, and remaining work. A similarly named file
-   does not establish semantic coverage.
-3. **Classify, do not promote.** Update the tracker with one [§C](development_plan_phase_model.md#c-status-vocabulary) progress term. File
-   presence, compilation, an old ledger, or an invalidated pass cannot yield `Policy-conformant` or ✅ Done.
-4. **Record every divergence.** Missing target code, extra legacy code, generated material in authored roots,
-   a tracked path outside the target tree of [§U](#u-the-final-repository-layout), a phase ordinal in a
-   directory, filename, or build-component name, a re-baseline's audit map, obsolete terminology,
-   incompatible gate behavior, hard-coded resolution, test-plan mismatch, and unclear ownership each receive
-   a row in
-   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md), with an owner and closure condition.
-5. **Resolve ambiguity explicitly.** If doctrine, plan, and code disagree on intended behavior, the phase stays
-   open or blocked while documentation records the conflict and the decision required. An audit never chooses
-   a new product policy implicitly.
-6. **Update all owners together.** A settled decision updates the owning doctrine, tracker, affected phase
-   contracts, component/substrate inventory, and legacy row in one documentation change. Duplicated status or
-   generated audit projections are prohibited.
-7. **Refresh or retire snapshots.** Counts and path inventories are dated diagnostics. A later relevant change
-   refreshes them; closure replaces the divergence row with its verified disposition rather than preserving a
-   stale count as current truth.
-8. **Verify source closure against the source snapshot.** A build or gate input that exists only because the
-   worktree retains an ignored file is missing source, even when the local command passes. A snapshot failure
-   creates a legacy row owned by the phase that must relocate or replace the input.
-9. **Audit history separately.** Current ignore rules do not remove earlier blobs. Record secrets, generated
-   artifacts, obsolete terminology, and other unwanted history separately from current-tree findings, then
-   apply the disposition policy in [§S](#s-universal-artifact-hygiene-gate).
-
-`legacy_tracking_for_deletion.md` is therefore broader than a deletion list: until convergence it is the
-mandatory register of existing code, test, tool, and generated-file state that conflicts with the intended
-plan. The tracker provides the concise current view; the legacy register provides the actionable mismatch
-detail.
+1. Record the date, exact source snapshot, worktree boundary, inspected roots, and whether each observation is
+   tracked, untracked, ignored, generated, historical, or external.
+2. Compare semantic contracts: capability, subject entry point, independent oracle, gate behaviour,
+   source/artifact provenance, register, substrate, and cleanup. Similar filenames prove nothing.
+3. Report implementation presence only as an observed footprint or known partial. Compilation, file presence,
+   an old run, or a generated bundle is never validation.
+4. Put every current mismatch in the single active register
+   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md), with a stable ID, exact finding,
+   owner phase, detection command, and executable closure check.
+5. Keep that register active-only. Closed or superseded rows are deleted; Git history is the archive. No
+   archive file, archive slice, “closed” appendix, or second deletion list is permitted.
+6. Resolve policy ambiguity in doctrine before changing implementation. An audit does not choose product
+   policy implicitly.
+7. Update the doctrine owner, phase contract, tracker, component/substrate inventory, and active legacy row
+   together when a decision changes their shared boundary.
+8. Re-run source closure from an empty generated tree. A local ignored file, pre-existing tool, cache, or
+   compatibility copy cannot satisfy a prerequisite silently.
+9. Audit revision history separately. Historical blobs may require a human decision, but they never become a
+   second live work register.
+10. Preserve numerical order. A later phase may not validate an earlier phase by proxy, and hardware evidence
+    may not substitute for the pre-hardware DSL promotion barrier.
 
 ---
 
 ## U. The final repository layout
 
-**The problem.** Thirty-one top-level roots hold tracked content, and twenty-seven arrived in one commit
-alongside the doctrine section declaring them canonical — so
-[`repository_layout_doctrine.md` §2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure)
-transcribed what a build target needed rather than a shape anyone chose. Four roots hold nothing but a package
-declaration reaching into a sibling root; two test roots hold the same kinds of thing split by era, one
-carrying a singular and a plural spelling of the same role. Nothing in this rulebook was violated to produce
-any of it.
+[`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md) owns the complete
+normative tree and the mechanical file classification. The development plan adds four consequences:
 
-**Why the obvious alternative fails.** The alternative already in force is that each phase adds the paths its
-build needs and a later cleanup converges the tree. It does not converge, because no clause makes a new path a
-reviewable decision: a sprint's `**Implementation**` field ([§F](development_plan_standards.md#f-the-sprint-block-format)) is checked for
-honesty, never for destination. And a cleanup cannot converge a tree whose taxonomy is instantiated once per
-package — renaming one plural sibling fixes today's pair and leaves the next package free to mint the next.
+1. A phase may name only a final authored path already admitted by that tree. A needed new root is justified
+   and added to doctrine before implementation, never treated as temporary.
+2. Authored behavioural source is Haskell, with the sole bounded `pb/**` bootstrap exception in [§S](#s-universal-source-and-artifact-hygiene-gate).
+   Reproducible non-Haskell material is a lazy product beneath `.build/**`, not repository source.
+3. No source, fixture, oracle, mutant, harness, build component, directory, or diagnostic filename contains a
+   phase ordinal. The only exceptions are `DEVELOPMENT_PLAN/phase_NN_<slug>.md` and generated `.build/**`
+   partitions keyed by phase.
+4. Every root is justified by what its contents are and who consumes them, not by the phase or build target
+   that first needed it.
 
-**The rule.** There is **one target tree**, it is **normative**, and it lives in
-[`repository_layout_doctrine.md` §2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure).
-Phase 0 owns it, alongside the doctrine suite, the two ignore contracts, and the artifact-policy gate it
-already owns. Four clauses follow.
-
-1. **No phase creates a path that is not in the target tree.** A sprint's `**Implementation**`, a phase's
-   `### Deliverables`, and a gate's outputs each name a path the finished repository has. A phase that needs a
-   path the tree does not contain **amends the tree first**, in the same documentation change, with the root
-   justified by what its contents *are* — the language they are written in, or the reader that consumes them —
-   and never by which phase or build target introduced them. There is no provisional path and no scratch root:
-   a directory whose reason to exist is that some phase needed somewhere to put something is a defect at the
-   moment it is proposed, not at the moment someone notices.
-
-2. **Everything this repository's source, checks, tests, or gates produce is ignored by both contracts;
-   everything else exists only because it is intended for the final repository.** The classification is
-   mechanical and already stated
-   ([`repository_layout_doctrine.md` §1](../documents/engineering/repository_layout_doctrine.md#1-classification-rule)):
-   if repository inputs plus a documented command reproduce the file, it is generated. What this clause adds
-   is the **partition** — a path is generated *and covered by both ignore contracts*, or authored *and in the
-   target tree*. There is no third state, so an untracked path no rule ignores and an ignored path nothing
-   generates are both findings. The contracts themselves, including what a rule for a path outside the tree
-   means, are owned by
-   [`repository_layout_doctrine.md` §6](../documents/engineering/repository_layout_doctrine.md#6-gitignore-contract)–[§7](../documents/engineering/repository_layout_doctrine.md#7-dockerignore-contract).
-
-3. **No directory or file name contains a phase ordinal.** A phase ordinal in a path encodes *when something
-   was built* into *what it is*, which is the category error clause 1 forecloses, and it is what makes
-   [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) expensive: a phase that must rename its files to change its own
-   validation criteria will not change them. The sanctioned exception set is **two entries and closed**:
-
-   | Sanctioned | Why |
-   |---|---|
-   | `DEVELOPMENT_PLAN/phase_NN_<slug>.md` | [§B](development_plan_standards.md#b-canonical-file-layout-snake_case) makes `NN` the document's sort order and [§E](development_plan_phase_model.md#e-one-canonical-phase-model) makes it the document's identity. The ordinal is not a label on a capability; it *is* the file. |
-   | `.build/**` paths keyed by phase | The phase is a run's partition key. These paths are generated, ignored by both contracts, and never repository names. The rule still binds the **authored constant** that spells such a path, so one constant is the only place a generated path learns a phase. |
-
-   Everything else is out: source files and directories, fixtures, goldens, negatives, oracles, mutants,
-   harness scripts, tool filenames, build flags, build-component names (they become build paths), and literal
-   strings in diagnostics. A phase-numbered name is replaced by a **capability** name derived from the owning
-   phase document's slug; ownership is recorded where it belongs — in that phase's contract and in
-   [`system_components.md`](system_components.md). Naming a phase in *prose* is unaffected and expected.
-
-4. **A root is justified by what it is**, recorded in the doctrine tree's role line and reviewable on its own
-   terms. The criterion for the case this repository gets wrong repeatedly — whether a unit warrants its own
-   build package — is owned by
-   [`repository_layout_doctrine.md` §2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure).
-
-**What it forecloses.** Adding a directory because a build target needed one, then deferring whether the
-finished repository has it. That deferral has no natural closing date, and its cost is not the directories —
-it is that the layout doctrine stops being a design a reader can disagree with.
+These rules make repository closure a prerequisite to evidence. A gate cannot certify behaviour while
+silently consuming a condemned source language, a pre-generated artifact, or a legacy fallback.
 
 ---
 
 ## Related Documents
-- [development_plan_standards.md](development_plan_standards.md) — the family hub this slice belongs to
-- [README.md](README.md) — the live tracker, which owns every phase's status
-- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — the divergence register
+
+- [Development-plan standards](development_plan_standards.md) — the family hub and phase-document schema
+- [Phase model](development_plan_phase_model.md) — status, sequence, and human-only promotion
+- [Development-plan tracker](README.md) — the sole current phase-status source
+- [Active legacy register](legacy_tracking_for_deletion.md) — current divergence only
+- [Repository layout doctrine](../documents/engineering/repository_layout_doctrine.md) — the complete tree and source classification
+- [Testing spoof resistance](../documents/engineering/testing_spoof_resistance.md) — the trust and evidence threat model

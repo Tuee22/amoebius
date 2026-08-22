@@ -1,33 +1,35 @@
 # Phase 14: The amoebius refinement checker
 
-> **Purpose**: Check a bounded, GHC-compiled Haskell function fragment against source-local refinements and
-> an explicit correspondence to a named model invariant.
+> **Purpose**: Specify the target Haskell capability to check a bounded GHC-compiled Haskell
+> function fragment against source-local refinements and an explicit
+> postcondition-to-model-invariant correspondence obligation.
 > **Read this if**: a model property must constrain implementation source, or the exact boundary of that
 > code-refinement claim must be understood.
 
-This phase owns a deliberately small refinement checker rather than a vendored general-purpose type system.
-It checks actual Haskell source with GHC, parses the supported function body and annotation independently,
-constructs the preservation and correspondence obligations, and injects Z3 only as their decision procedure.
-It does not claim arbitrary-Haskell semantics, effectful or recursive code refinement, or runtime fidelity.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/formal_model_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 14.1: Compiled-source refinement boundary ✅](#sprint-141-compiled-source-refinement-boundary-)
-- [Sprint 14.2: Correspondence, negatives, and mutation evidence ✅](#sprint-142-correspondence-negatives-and-mutation-evidence-)
+- [Sprint 14.1: Compiled-source refinement boundary ⏸️](#sprint-141-compiled-source-refinement-boundary-)
+- [Sprint 14.2: Correspondence, negatives, and mutation evidence ⏸️](#sprint-142-correspondence-negatives-and-mutation-evidence-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -35,104 +37,83 @@ It does not claim arbitrary-Haskell semantics, effectful or recursive code refin
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All twelve gate sides passed on natural `arm64`, untranslated: six Haskell
-functions compiled, two safe `Model` values projected their invariants after eight reachable states, all
-eleven metrics matched, all three proof mutants were red at their own loci, and 21 surfaces joined to 24
-enumerated items. Attestation `sha256:49a4add5639a432da7f97d798a0012e6163000a98deb1dab9c335438ca027e45`
-binds source `sha256:dfccfc0bf4d2c531…` over 2,180 files. Repository-conformance and documentation support
-gates passed on that same snapshot.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 13, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`tools/refinement_checker.py` checks one-line, first-order `Integer` functions carrying a closed
-`amoebius-refinement` block. GHC first syntax- and type-checks the actual fixture. The checker then parses the
-same equation into its owned linear-integer/boolean expression tree, proves that the annotated precondition
-and body establish the postcondition, and separately proves that the postcondition implies the predicate in
-the predicate projected from a compiled Phase-11 `Model` value named by `(model, invariant)`. A satisfiable query retains a solver model and
-becomes a named counterexample result; a missing mapping and unsupported source syntax are rejections rather
-than proofs.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to check a bounded GHC-compiled Haskell function fragment against source-local
+refinements and an explicit postcondition-to-model-invariant correspondence obligation.
 
-**Phase scope:** One bounded Haskell-source grammar, one preservation obligation, and one explicit
-postcondition-to-model-invariant correspondence obligation; split if work admits effects, recursion,
-higher-order values, algebraic data, polymorphism, nonlinear arithmetic, automatic correspondence inference,
-or production-runtime trace fidelity.
-**Substrate:** none
-**Lane:** none
-**Register:** 1 — pure/golden
-**Depends on:** [Phase 11](phase_11_formal_model_kernel.md) — the named invariant vocabulary whose
-implementation correspondence is recorded; the checker does not call the Phase-11 interpreter or either
-model-checking algorithm.
-**Gate:** `python3 tools/run_phase_gate.py 14` passes GHC compilation, the hand-authored function and
-invariant oracles, exact preservation/correspondence results, three registry-backed checker mutants at their
-own loci, generated-result discipline, surface join, ledger, containment, write guard, natural architecture,
-and source-bound attestation.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
+
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — check a bounded GHC-compiled Haskell function fragment
+against source-local refinements and an explicit postcondition-to-model-invariant correspondence
+obligation. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 13](phase_13_symbolic_checker.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 14`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set:** six actual Haskell modules cover two proved counter functions, a proved two-argument
-  sum, a body that violates its postcondition, a postcondition that does not imply its registered invariant,
-  and an annotation naming no invariant.
-- **Independent oracle:** `test/oracle/refinement_checker/functions.tsv` fixes source, function, model,
-  invariant, exact result class, diagnostic reason, correspondence requirement, and source line.
-  `model_invariants.tsv` separately fixes the expected semantics of the two required model/invariant
-  predicates; the checker consumes the generated projection, not that oracle.
-- **Compiled source, owned semantics:** all six sources pass GHC `-fno-code` through an injected absolute
-  compiler path. The checker owns the annotation parser, the supported Haskell-expression parser, sort
-  checking, SMT-LIB query construction, and result classification; unsupported syntax is an error.
-- **Supported fragment:** a source has one `Integer -> ... -> Integer` signature and one single-line equation
-  over named integer arguments, literals, unary negation, `+`, `-`, comparisons, equality, boolean connectives,
-  and `if`/`then`/`else`. Preconditions and postconditions use the same closed grammar, with `result` admitted
-  only there.
-- **Two obligations:** correspondence asks whether `post ∧ ¬registeredInvariant` is satisfiable. Preservation
-  asks whether `pre ∧ result = body ∧ ¬post` is satisfiable. Only two unsatisfiable answers yield `proved`;
-  satisfiable answers become `correspondence-mismatch` or `postcondition-counterexample` with a solver model.
-- **Model projection:** `RefinementModelProjection.hs` constructs two actual Phase-11 `Model` values, requires
-  their structural validity and green explorer verdict over eight reachable states, and projects their named
-  invariant expressions into `.build/checkers/refinement/model_invariants.tsv`. The checker consumes that
-  generated projection; the authored registry is only a semantic oracle over its identities and expressions.
-- **Registry honesty:** the fixture annotation asserts which model result the function implements, and both
-  bounded models deliberately name that state variable `result`. The gate proves the function postcondition
-  implies the projected invariant and complete coverage of the two required pairs; it does not infer a
-  general state projection or prove that a production call site applies the function as the model's action.
-- **Solver/compiler boundary:** GHC and Z3 are dynamically resolved from authored compatibility requirements
-  and injected as absolute paths. Neither is discovered from ambient `PATH`; Z3 decides the submitted QF_LIA
-  formulas but does not own the checker.
-- **Seeded defects:** three registry modes delete one conjunct from a precondition, skip the correspondence
-  obligation, or replace the checked postcondition with `true`. They fail independently at the sum,
-  negative-identity, and broken-decrement status fields.
-- **Generated-artifact discipline:** the suite writes only `.build/checkers/refinement/results.tsv`. Eleven
-  metrics must equal authored values, 21 surfaces must join to 24 run-time items, and both outputs must remain
-  outside the source snapshot.
-- **Honesty boundary:** the proof concerns the checker-defined semantics of the compiled, supported function
-  fragment. Equivalence between that parser and all GHC semantics, effects, runtime call sites, actual protocol
-  behavior, and live execution remain assumed or `UNVERIFIED`.
-- **Observer controls:** this compiler/SMT process reaches no authenticated service and exercises no authority
-  boundary, so a privileged/unprivileged observer pair has no subject. Its anti-spoofing evidence is instead
-  the separate model projection, function-result oracle, and three obligation-specific defects.
-- **Extension conformance (§M.13).** Phase 14 declares neither an extension nor a domain member; clause 13
-  therefore has no declaration boundary to exercise, and the only outputs are refinement verdicts.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-The gate establishes a useful but narrow code-refinement claim. It does not turn a source annotation into a
-proof that an arbitrary daemon implements a Phase-11 transition system.
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — check a bounded GHC-compiled Haskell function fragment against source-local refinements and an explicit postcondition-to-model-invariant correspondence obligation. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 14` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 13 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`formal_model_doctrine.md` §6 — What a green model-check proves](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): code refinement is a separate layer from model safety.
-- [`formal_model_doctrine.md` §6.1 — The proof stack is amoebius-owned](../documents/engineering/formal_model_doctrine.md#61-the-proof-stack-is-amoebius-owned): the corpus owns the bounded checker and delegates only formula decisions.
+- [`formal_model_doctrine.md` §6 — What a green model-check proves, and what it does not](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): code refinement is a separate layer from model safety.
+- [`formal_model_doctrine.md` §6.1 — The proof stack is amoebius-owned](../documents/engineering/formal_model_doctrine.md#61-the-proof-stack-is-amoebius-owned): the target Haskell corpus and checker must own the verdict and may delegate only raw formula observations.
 
 ## Sprints
 
-## Sprint 14.1: Compiled-source refinement boundary ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done
-**Implementation**: `tools/refinement_checker.py`,
-`test/spec/formal/refinement/RefinementModelProjection.hs`, `test/fixture/refinement_checker/**`, and the
-`ghc`/`z3` entries resolved through `tools/toolchain.py`.
-**Blocked by**: None.
-**Independent Validation**: GHC accepts every actual source module before the separately implemented parser
-and solver obligations classify it.
-**Docs to update**: `documents/engineering/formal_model_doctrine.md` and
-`DEVELOPMENT_PLAN/{README,overview,system_components}.md`.
+## Sprint 14.1: Compiled-source refinement boundary ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -158,20 +139,11 @@ while keeping compiler and solver responsibilities explicit.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 14.2: Correspondence, negatives, and mutation evidence ✅
+## Sprint 14.2: Correspondence, negatives, and mutation evidence ⏸️
 
-**Status**: Done
-**Implementation**: `test/oracle/refinement_checker/**`,
-`test/oracle/refinement_checker_surfaces.tsv`, `test/mutant/registry.tsv`, and
-`tools/refinement_checker_gate.py`.
-**Blocked by**: Sprint 14.1's total compiled-source boundary and exact classifications.
-**Independent Validation**: two authored semantic expectations are joined to invariant expressions projected
-from compiled `Model` values, and six authored function expectations are challenged by three logically
-distinct checker defects.
-**Docs to update**: `documents/engineering/formal_model_doctrine.md` and
-`DEVELOPMENT_PLAN/{README,legacy_tracking_for_deletion,system_components}.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -195,15 +167,17 @@ reason, and demonstrate that the gate detects weakened hypotheses, omitted corre
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `formal_model_doctrine.md` — settle the refinement ownership choice and record the supported source,
   correspondence, compiler, solver, and runtime premises.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md`, `overview.md`, `substrates.md`, and `system_components.md` — reconcile status,
   implementation paths, evidence, and the substrate-none claim.
 

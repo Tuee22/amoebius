@@ -16,7 +16,7 @@ amoebius.
 
 **Status**: Reference only
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, README.md, documents/engineering/README.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, README.md, documents/engineering/README.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -56,8 +56,9 @@ which document to open first.
   header block, SSoT / no-duplication, the proven/tested/assumed honesty discipline, the third-person tone, and
   the `§N` anchor-link conventions.
 - **[`engineering/repository_layout_doctrine.md`](./engineering/repository_layout_doctrine.md)** — the complete
-  authored/generated repository tree; the closed `.build`/`.data`/`.test_data` roots; and the project-engine,
-  test-secrets, ignore, dependency-resolution, and local evidence rules.
+  tracked-tree grammar: every behavioral source is `.hs`, Python under `pb/**` is the sole language exception,
+  every external-language artifact is generated lazily under `.build/**`, and operator inputs stay untracked.
+  It also owns the closed `.build`/`.data`/`.test_data` roots and ignore/context rules.
 
 ## Where status, progress, and phase order live
 

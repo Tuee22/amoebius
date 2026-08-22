@@ -1,41 +1,38 @@
-# Phase 26: GADT-indexed IR + total decoder (gadt-decode)
+# Phase 26: Haskell protocol declarations, GADT-indexed IR, and total decoder
 
-> **Purpose**: Stand up the GADT-indexed Haskell IR and the total, fail-fast `Dhall.inputFile auto` decoder
-> — gadt-decode — that turns a dhall-typecheck-well-typed Dhall value into a legal amoebius world or a structured `Left`,
+> **Purpose**: Define the GADT-indexed Haskell IR, Haskell wire declarations, and a total fail-fast decoder
+> that consumes an external value or the Phase-25 projection beneath `.build/dhall/**` and returns a legal world or a structured `Left`,
 > carrying normalized complete resource demands and target capacities in-process before any real resource
 > exists, while preserving the later post-bind `ProvisionedSpec` boundary.
 > **Read this if**: phase 26 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 26 delivers the GADT-indexed IR + total decoder (gadt-decode); its design is owned by [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-Gate passed 2026-08-09; ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ✅](#sprint-261-the-amoebius-cabal-package--gadt-decode-spec-test-suite-skeleton-)
-- [Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ✅](#sprint-262-gadt-indexed-ir--smart-constructors--phantom-tenant-refs--ownership-indices-)
-- [Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ✅](#sprint-263-the-fail-closed-decoder-dhallinputfile-auto--exception-catch--structured-decodeerror-)
-- [Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ✅](#sprint-264-the-gadt-decode-decode-battery-gadt-decode-spec--the-gate-)
-- [Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ✅](#sprint-265-decoding-the-shared-secretref-and-rejecting-a-literal-)
+- [Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ⏸️](#sprint-261-the-amoebius-cabal-package--gadt-decode-spec-test-suite-skeleton-)
+- [Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ⏸️](#sprint-262-gadt-indexed-ir--smart-constructors--phantom-tenant-refs--ownership-indices-)
+- [Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ⏸️](#sprint-263-the-fail-closed-decoder-dhallinputfile-auto--exception-catch--structured-decodeerror-)
+- [Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ⏸️](#sprint-264-the-gadt-decode-decode-battery-gadt-decode-spec--the-gate-)
+- [Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ⏸️](#sprint-265-decoding-the-shared-secretref-and-rejecting-a-literal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -43,166 +40,28 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. The amended twelve-sided gate passed on natural `arm64`, untranslated. The
-bounded `gadt-decode-spec` decoded five semantic-hash-pinned positives, rejected four distinct tagged
-negatives, separated three compiler pairs, and retained all 5,527 structural rows. Its independent projection
-preserved those rows while composing the decoded positives through all five Phase-10 calculus kinds. All 22
-metrics matched; 25 surfaces joined completely to 28 enumerated items; every mutant, containment check,
-repository-conformance check, and documentation check passed. Attestation
-`sha256:191f73334197dd821f5463e3467368597b4310df64dd483ad215a969f1b8cc98` binds source
-`sha256:df8136496ef04daa…` over 2,260 files. Capacity feasibility, binding, provisioning, and runtime remain
-UNVERIFIED at their later owners.
+⏸️ Blocked — NOT VALIDATED.
 
-**Reopened 2026-08-19 by the generative re-baseline.** The artifact, budget, lift, workflow and evidence
-calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents
-completion evidence.
+Blocked by redesigned Phase 25, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-**The first amended run found two integration defects.** `dsl-core` still compiled private copies of
-`Amoebius.Capacity.{Types,Fold}` and `Amoebius.Dsl.Topology` after Phase 9 made `lib:capacity-topology` their
-owner, so `dsl-spec` saw ambiguous modules and incompatible duplicate types. Those modules now live only
-under the Phase-9 component and `dsl-core` depends on it. The run then reached the semantic oracle and found
-three App/Deployment hash pins predating the sealed Phase-25 schema. Independent `dhall hash` and in-process
-decode agree on the replacement hashes while all five node counts and structural fingerprints remain exact.
-
-**The amended boundary is deliberately isolated from later phases.** The shared `dsl-spec` had accumulated
-Phase-27-through-33 corpus, fold, bind, provision, and render checks, so invoking it here violated numerical
-phase order. Phase 26 now builds `DecodeSpec.hs` as `gadt-decode-spec` with only this phase's decoder boundary.
-That bounded suite also projects the five decoded positives into the Phase-10 calculus composition in authored
-artifact/budget/lift/workflow/evidence order; an independent three-row oracle requires five kinds and the same
-5,527 retained structural rows. The sealed amended gate is green over 22 exact metrics, 12 sides, and 25
-surfaces joined to 28 enumerated items.
-
-**The OS-boundary observer is now decidable on every substrate.** It was `strace -e trace=execve`, which
-exists on one of the four, so a gate declaring substrate `none` died at `FileNotFoundError` before its first
-check on two of them — a seal that had never been decidable off Linux.
-[`tools/argv_observer.py`](../tools/argv_observer.py) replaces it by making both routes to a tool observable
-with nothing but the process model: the **declared** route hands out an absolute path that is a recording
-interposer, which logs its own argv and then `exec`s the real tool; the **ambient** route is a directory of
-refusing shims placed first on `PATH`, one per name each family can be spelled as, which record the attempt
-and exit non-zero. There is no third route in this repository, and that boundary is stated rather than
-implied — a narrower observation that holds everywhere beats a total one that holds in one place.
-[`testing_doctrine.md` §8](../documents/engineering/testing_doctrine.md#8-one-substrate-per-validation) now
-owns the rule; a kernel tracer stays right where a gate declares the substrate that has one.
-
-**Two committed mutants prove the observer can fail**, one per claim it makes:
-`ambient-path-lookup` reaches `dhall` by bare name and must be refused and recorded (exit 127), and
-`unobserved-family` presents an empty observation and must report the family missing rather than inferring it
-from the suite having passed. Neither needs the suite rebuilt.
-
-**What it caught on its first run.** Three call sites —
-`test/spec/capability/ProvisionSealGate.hs` and two in `test/spec/capability/EngineAcceleratorGate.hs` —
-invoked `dhall` by bare name while every other call site resolved it. The `strace` observer had been running
-past them for as long as the suite has existed, because on Linux the ambient lookup succeeded. Each now reads
-`AMOEBIUS_DHALL` through the same resolver its neighbours use, and fails closed when it is unset.
-
-**And four thresholds that had drifted from their own registry.** `test/spec/dsl/ValidationLocusLedger.hs`
-compared `dhall/examples/locus_registry.tsv`'s `owner_phase` column against **pre-amendment** ordinals: the
-corpus phase read 6 where the registry said 7, so twenty-six rows the corpus already rejected were read as
-deferred; the extension-astcheck locus was pinned to Phase 33 where the registry said 15. Each is now a named constant
-carrying the phase it means.
-
-**Reopened 2026-08-16 by the natural-architecture amendment.**
-[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
-the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
-architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
-it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
-[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-15. `python3 tools/gadt_decode_ir_gate.py` passed all eleven sides: all 20
-authored metrics match, the decoder, distinct negatives, compile pairs, structural and polarity mutants,
-partiality scan, and absolute-tool observer are green, 23 surfaces join to 26 run-time items, and generated
-output, host inventory, and authored roots remain contained and unchanged. The project-contained attestation
-is `sha256:7f9907ae8c5dde956367f67a1e5663f364b8887625351c654bdd829a8c58112c`, bound to source snapshot
-`sha256:ee3ee22f7aa4b788…`; Phase 26 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-13 after the secrets amendment, attestation
-`sha256:bd7e03f3d8f33d5359d89cd453437d2101e31ec10ffdcdc278e82a54eeaee04a`.
-
-**What the reseal added.** The decoder refines every sensitive field into the shared
-`Amoebius.Vault.SecretRef`, which gained the `Prompt` arm the Dhall union has, so all three arms decode
-through one type rather than two that can drift. A fourth tag, `PlaintextSecret`, is returned when that field
-holds a value instead of a reference, and a new negative pins it against a paired positive differing in
-exactly one place. The paired positive of *every* negative is now decoded and required to succeed: §M.8's
-control was authored in the oracle but never run, so a twin that stopped decoding would not have been noticed.
-
-**Why `structural-tree-rows` is unchanged.** The paired positive is a decode control, not a structural-oracle
-row. The structural oracle pins five fixtures whose node trees *are* the corpus its deletion and substitution
-mutant families range over; adding a sixth would restate a measured sum without adding a distinct claim, and
-the amendment only required restating it *if* a positive fixture gained the type.
-
-**Reopened 2026-08-13.** This phase was Done (invalidated), sealed 2026-08-12 against source snapshot
-`sha256:52a29644c13595a7…` with attestation
-`sha256:3dfdee987647704b9e62dd70e6c31c4fe96b58df533b216a7b59f73f38ad1a1f`. That seal is invalidated by the
-same scope amendment that reopened Phase 25: gadt-decode must decode the shared `SecretRef` and reject any literal
-secret value, which is a decoder surface this phase's gate does not yet carry
-([§N](development_plan_standards.md#n-reopening-and-amending-a-phase)).
-
-**The decoder stays pure.** gadt-decode decides *shape* and nothing else — it opens no socket and needs no Vault.
-Whether a named secret exists is a live question answered at admission
-([vault_pki_doctrine.md §3.4](../documents/engineering/vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect)),
-which is what keeps gadt-decode runnable over a whole config tree with no cluster in reach.
-
-**Remaining work.** None. Sprint 26.5 discharged the amendment and the gate is green on all twelve sides.
-
-**Invalidated seal — historical record:**
-
-**Observed progress — 2026-08-12:** **Policy-conformant.** The gadt-decode capability result is unchanged and
-re-run: five positive fixtures decode to their authored trees, three tagged negatives fail at distinct
-`DecodeError` tags, four import-policy negatives including the nested pair fail `ForbiddenImport`, three
-compile-fail pairs separate legal from illegal at their authored loci, the 5527-node structural inventory and
-its deletion and substitution mutant families hold, the decoder source carries no partial function, and an
-OS-boundary `execve` observer confirms every `cabal`, `dhall`, and `ghc` invocation used an absolute path.
-23 surfaces join to 26 run-time enumerated items and the ledger is derived into
-`.build/runs/phase_52/<run-id>/`.
-
-**Three corrections, each recorded rather than absorbed.** First, the results table was *written, not
-measured*: sixteen of its twenty rows were string literals emitted after the checks that would have raised, so
-a weakened check would have gone on reporting the same values. Every observable row is now parsed from the
-suite's acceptance token, the `execve` trace, or the mutant's failure locus. Second,
-`test/spec/dsl/DecodeSpec.hs` hard-coded one developer's `ghc` and `dhall` paths; the suite still invokes both by
-absolute path — that is what the argv observer checks — but the path is now a run-local resolution and the
-suite fails closed without it. Third, `Amoebius.Entry.ServeUi` — the `serve-ui` entry point, reached only
-through the executable's subcommand table — was an exposed module of `lib:dsl-core`, so every phase linking the
-shared decision core depended on the Phase-43 UI-server boundary. While that boundary's ABI is unimplemented
-this made the core itself fail to compile and blocked this phase outright. The entry point now belongs to the
-`amoebius` executable, which is the component that calls it; the unimplemented seam stays inside Phase 43
-([legacy register](legacy_tracking_for_deletion.md)). The sibling `Amoebius.Ui.Server.Security` module, needed
-by the core but listed in no component, is now declared.
-
-**Invalidated historical record:**
-
-**This gate cannot run today.** `tools/gadt_decode_ir_gate.py:55-57` resolve their oracles to
-`tests/oracle/gadt-decode/{positive_trees,compile_pairs,decode_cases}.tsv`; the tree has
-`test/oracle/gadt_decode_ir/`. Both halves of each path are wrong and all three are read at run time, so
-the gate fails before its first check — which also means the 2026-08-09 record below was made against paths
-that have since moved, and is not re-usable as evidence until the gate runs again. Fixing the three constants
-is this phase's, tracked in
-[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md#one-binary-many-roles--2026-08-17).
-
-Done (invalidated). `python3 tools/gadt_decode_ir_gate.py` passed on 2026-08-09 with ledger
-`dynamically-resolved`. The gate ran on **no substrate**
-(`none`) in **Register 1** — it stood up no host and no cluster, only an
-in-process decode battery. Where a shape below is already exercised in a sibling system (hostbootstrap's
-`inputFile auto` decoder and its `Left (ContextDecodeFailed …)` fail-fast discipline), that is **sibling evidence, not an amoebius result**.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase builds the second of the DSL's typed spec gates. dhall-typecheck (Phase 25) rejects what is not even
-well-typed Dhall; gadt-decode rejects what is well-typed Dhall but is not a legal amoebius world. It delivers the
-GADT-indexed Haskell intermediate representation the Dhall surface decodes *into* — sum types, smart
+**Target capability — NOT VALIDATED.** The second typed boundary is to reject values that are structurally
+well-typed but do not describe a legal amoebius world. Haskell is to own the protocol declarations, the
+GADT-indexed intermediate representation — sum types, smart
 constructors, phantom tenant references, and ownership indices designed so that an illegal combination has no
 inhabitant — together with the fail-closed decoder `decodeCluster :: FilePath -> IO (Either DecodeError ClusterIR)`
 built on the native `dhall` library's `Dhall.inputFile auto` wrapped in an exception-catch. Totality here is
 defined precisely: every input, well-typed or not, yields `Right` or a structured `Left` *without throwing*.
-The Phase-25 prerequisite sealed on 2026-08-21. The bounded `gadt-decode-spec` suite decodes five
-semantic-hash-pinned positives, rejects four distinct tagged refinement negatives, separates three
-legal/illegal compile pairs, and retains 5,527 exact structural rows. It composes those five decoded values
-through the Phase-10 artifact, budget, lift, workflow, and evidence calculus arms in authored order against an
-independent projection oracle. Capacity feasibility, binding, provisioning, and runtime remain UNVERIFIED.
+All positive, negative, compile-refusal, wire, and projection cases are to be Haskell values. Any Dhall or
+protocol bytes needed to exercise them are generated run-locally beneath `.build/**` and are never tracked
+fixtures or authority. Capacity feasibility, binding, provisioning, and runtime remain UNVERIFIED.
 `ClusterIR` is not resource-agnostic: every execution unit carries stable id/revision, arm-specific
 controller/cardinality/policy in a private `BoundExecutionBody`—Deployment, StatefulSet, DaemonSet, Job, or
 HostProcess—with only kind-valid rollout/progress fields and a structurally compatible Pod/host/accelerator
@@ -218,11 +77,10 @@ mandatory finite `MonitoringWorkBudget`, including its volume presentation. Ever
 mandatory per-stage `BuildExecutionEnvelope`; every kind
 engine and every rke2 server/agent retains its role-indexed named-process `EngineSystemReserve`, named system-
 carve reference, and applicable finite `ControlPlane | Worker` engine-storage demand. Quantities are converted once to canonical unit-tagged
-forms (millicores, bytes, whole devices); no later stage reparses free-form resource strings or invents omitted
-defaults. This phase proves only
-that those declarations are present, normalized, and structurally legal. Arithmetic feasibility and placement
-remain checked folds, not type-inhabitance claims.
-The pure decode code carries no `error`/`undefined`/partial head (checked non-partial); and because
+forms (millicores, bytes, whole devices); no later stage may reparse free-form resource strings or invent
+omitted defaults. The target claim is limited to presence, normalization, and structural legality; arithmetic
+feasibility and placement remain later checked folds, not type-inhabitance claims. The target decode code may
+carry no `error`/`undefined`/partial head; because
 `Dhall.inputFile auto` alone throws (`DhallErrors`, IO exceptions) rather than returning `Left`, the
 exception-catch wrapper catches those and maps them to a structured `Left DecodeError` (fail-closed) so no
 throw escapes into a half-applied effect. What is *not* here: the chain
@@ -230,8 +88,8 @@ throw escapes into a half-applied effect. What is *not* here: the chain
 (Phase 9) consumed by the conditional infrastructure-planning/post-materialization provision seal (Phase 31),
 the capability→provider binder (Phase 30), and
 the exhaustive illegal-state corpus with its per-entry validation-locus
-ledger and QuickCheck properties (Phase 27). This phase checks the decoder is non-partial, fail-closed, and structurally
-rejecting on a representative gadt-decode negative set; the exhaustive corpus rides on top of it next.
+ledger and Haskell properties (Phase 27). This phase's unresolved contract must eventually establish a
+non-partial, fail-closed decoder against a separately reviewed Haskell corpus.
 
 The non-bypass ordering is fixed here even though its implementation lands after this decoder:
 
@@ -248,169 +106,107 @@ derives its demand from that exact bound expansion; no caller-authored demand ve
 plan is one batch-owned Pulumi graph/checkpoint/dependency/concurrency/quota value and cannot render. Only its
 CAS-consumed, provider-read-back result (or the explicit no-plan materialized arm) can construct
 `ProvisionContext`; only then may `provision` resolve opaque prior-execution/volume/registry refs and
-construct the opaque checked value. Provider expansion has already made every platform pod, sidecar, init
+construct the opaque checked value. At that target boundary, provider expansion must have made every platform pod, sidecar, init
 container, volume, cache owner, and accelerator owner explicit.
 
-**Phase scope:** one cohesive claim — *decoding either yields a legal world or one structured refusal, and
-never a partial one*. The bounded suite covers five positive trees, four tagged negatives, three compile
-pairs, and the five-calculus composition projection without executing Phase-27-through-33 checks.
+**Phase scope:** one target claim — decoding yields either a legal Haskell world or one structured refusal,
+never a partial result. Generated Dhall/protocol bytes stay beneath `.build/**`; later folds and effects are not exercised.
 
-**Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` battery analogous to the
-Phase-0 documentation lint and the Phase-25 `dhall type` corpus.
+**Substrate:** `none` — no host, cluster, browser, or hardware; only the canonical Haskell gate owns the verdict.
 
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
-**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
+**Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 9](phase_09_resource_index.md) for the single-owned capacity/topology vocabulary,
-[Phase 10](phase_10_calculus_composition.md) for the five-calculus projection, and
-[Phase 25](phase_25_dhall_schema_generation.md) for the Dhall schema whose well-typed values this decoder consumes.
-
-**Gate:** `python3 tools/run_phase_gate.py 26` must pass 22 exact metrics and the 25-surface join around the
-bounded `gadt-decode-spec`, its authored oracles, and every committed mutant. Phase 27 stays blocked until the
-ledger records Register 1 green and all later feasibility/runtime layers UNVERIFIED.
-
-```mermaid
-flowchart LR
-  %% register: orientation
-  s0["Sprint 26.1: package + bounded gadt-decode-spec"]
-  s1["Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs…"]
-  s2["Sprint 26.3: The fail-closed decoder (Dhall.inputFile auto…"]
-  s3["Sprint 26.4: bounded decoder battery + five-calculus projection"]
-  s4["Sprint 26.5: SecretRef decode + plaintext refusal"]
-  gate["the phase 26 gate"]
-  s0 -->|"produces what the next consumes"| s1
-  s1 -->|"produces what the next consumes"| s2
-  s2 -->|"produces what the next consumes"| s3
-  s3 -->|"adds the secret refinement"| s4
-  s4 -->|"the last seam the gate closes over"| gate
-```
-*Orientation. The bounded Phase-26 seams, ordered under [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub); preliminary gate run green, final seal pending.*
+**Depends on:** [Phase 25](phase_25_dhall_schema_generation.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 26`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The isolated `gadt-decode-spec` exercises only the Phase-26 decoder boundary; the shared `dsl-spec` remains the
-later umbrella and is not Phase-26 evidence. The gate additionally joins its recorded surfaces to the authored
-expectation in both directions, so an undeclared surface fails as loudly as a missing one. The decoded
-five-calculus projection is checked against `test/oracle/gadt_decode_ir/calculus_projection.tsv`, authored
-independently of the Haskell fold, and therefore cannot be satisfied by merely printing the measured result.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-
-Each positive fixture decodes through the fail-closed `decodeCluster` into its `ClusterIR`, and each
-gadt-decode-class negative fixture **first passes `dhall type`** — the dhall-typecheck-green precondition that makes its
-rejection attributable to the decoder alone, not to dhall-typecheck — and only then returns a structured
-`Left DecodeError` with its expected tag. The decode path is checked non-partial and fail-closed three ways:
-deep-NF strict evaluation via an `NFData ClusterIR` instance forced by `evaluate . force` on the decode path;
-`-Wall` plus a partiality grep proving no `error`/`undefined`/partial match in the pure code; and an
-exception-catch wrapper mapping every thrown `DhallError`/IO exception to a structured `Left`. A structural
-oracle also traverses every positive `ClusterIR` and proves the complete normalized resource/capacity tree was
-retained.
-
-This is a **Register-1** in-process check that runs on no substrate. It checks non-partiality of the pure code
-and fail-closure on thrown exceptions; it is not a proof of termination or of exception-freedom of the
-underlying `dhall` library.
-
-**Committed oracle, corpus, and mutants ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clauses 1/2/7/8).** The gate's oracle side is authored and
-committed in **Phase 0 before the decoder exists** — never regenerated from `decodeCluster`'s own output. It
-comprises: (a) the **representative gadt-decode negative set**, defined concretely as **exactly one negative fixture per named `DecodeError` failure class** — `SchemaMismatch`, `OutOfDomainArm`, `UnspellableCombination`, and `PlaintextSecret` — each
-`illegal_decode_*.dhall` fixture mapped in its committed header to a specific `illegal_state_catalog.md` entry
-and pinned to its expected tag; the suite is **red if any of the four tag arms has zero fixtures** (so a
-blanket catch-all tag cannot pass) and red if any negative fails its `dhall type` precondition. (b) The
-**minimal-pair compile-fail set** for each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (see Sprint 26.2). (c) A **committed seeded mutant set that must go red, committed and re-run** (not run once): the mutant `illegal_decode_schema.dhall`
-→ legalized twin (a negative whose gadt-decode-illegal index is corrected so it would decode) **must turn the suite red**, demonstrating the "any illegal fixture decodes ⇒ red" polarity is an executed check, not a restated
-assertion. The resource decoder mutants independently drop logical `ephemeralStorage`, a physical carve
-reference, `PhysicalDiskPartition.allocatableRawBytes`, a `NamedDiskCarve` parent index or extent-arm
-geometry field, `kubeletMetadataModel`, a pod runtime-metadata
-network/mount identity, one execution id/revision/cardinality/replicated-count/per-node-selector/rollout
-operand, admit a raw rolling policy whose surge and unavailable operands are both zero, or erase one
-accelerator source/workload/residency/coexistence operand; mismatch either coexistence-map
-domain from the exact source classes; make sharded totals/ids/count disagree; drop provider `podSlots`,
-provider `attachableVolumes`, the target `CloudAccountId`, any one of
-`ProviderQuota.maxInstances`/`maxVcpu`/`acceleratorCaps`/`nodeRootStorage`/`durable`, or provider-class
-`quotaVcpu`; coerce a class-local disk/accelerator template id into a concrete physical id; replace the decoded
-`MonitoringWorkBudget` with descriptor-independent fixed Prometheus resources; replace a storage fault policy
-with an editable favorable-scenario list; drop orphan-GC/claim-slot fields; or delete one of the filesystem
-layout, `NodeImageStorageModelVersion`, an OCI index/manifest/config/compressed-layer object, a snapshot-chain
-cost, provider root backing policy, node-root-storage quota arm, `VolumePresentation`,
-`MonitoringWorkBudget.volume.presentation`, backing allocation minimum/quantum, exact cache population,
-registry upload operands, or Vault Raft/audit operands. Each must fail the independent positive-tree
-traversal/type inventory.
-The role mutants take the same `OutOfDomainArm` tag and need no fourth class: a fourth arm added to
-`InClusterRole`, a `Worker` arm stripped of its `WorkerKind` payload, and a replica count moved off the
-`Worker` arm onto the union itself each must turn the suite red. Because these are closedness mutants over a
-schema module Phase 25 owns, the expected-tag oracle gains their rows in Phase 0 alongside the rest.
-The expected-tag reference table and expected resource-field inventory are committed Phase-0 oracles,
-independent of the decoder's own output ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 3).
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — Haskell declarations and a total Haskell decoder accept a legal world or return one structured refusal; Haskell-owned cases lazily generate any Dhall/protocol bytes beneath `.build/**`. Later folds, effects, hardware, and runtime remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 26` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: Phase-26-owned `LTD-SRC-003` remains active. Its exact Proto-family zero-finding check, field-number reintroduction negative, independently reviewed Haskell binding, and sprint-level owner assignment have not been accepted. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 25 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact gADT-indexed IR + total decoder (gadt-decode) emits is a recipe over a content address, never an authored file.
-- [`dsl_doctrine.md §4 — total composability`](../documents/engineering/dsl_doctrine.md#4-total-composability):
+- [`jit_artifact_doctrine.md` §2 — The rule, and the closed exception list](../documents/engineering/jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list) — every artifact gADT-indexed IR + total decoder (gadt-decode) emits is a recipe over a content address, never an authored file.
+- [`dsl_doctrine.md` §4 — Total composability](../documents/engineering/dsl_doctrine.md#4-total-composability):
   adopt the **import policy** the doctrine assigns to the Phase-25/12 gate. `env:` and remote (`http(s):`)
   imports are forbidden in any authored or uploaded spec; every spec is resolved-and-frozen to a
   fully-local, `sha256:…`-hashed expression **before** decode. This phase owns the enforcement — Sprint 26.3's
   resolve-and-freeze stage and its `ForbiddenImport` negatives — and it is what makes the effect-free/total
-  premise of [§2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)
+  premise of [`dsl_doctrine.md` §2 — Two languages, one system: Dhall carries params, Haskell carries logic](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)
   true of the expression actually decoded, rather than of arbitrary unresolved Dhall.
-- [`dsl_doctrine.md §5 — the illegal-state-unrepresentable contract`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
+- [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
   adopt **gadt-decode — the Haskell typed decoder**. A well-typed Dhall value becomes a Haskell value through the
   native `dhall` library in-process (`Dhall.inputFile auto`); decoding is total and fail-fast (a structured
   `Either`, never a throw), and the ADTs make illegal combinations un-spellable — *because the value cannot
   be constructed, it cannot be decoded, and because it cannot be decoded, it cannot be deployed.*
-- [`illegal_state_catalog.md §4`](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
-  — the typing techniques discharged at the decode boundary: **GADT-indexed state machines** ([§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed), only legal transitions are typed), **capability & phantom tenant tags** ([§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable), cross-tenant references are uninhabitable), and **ownership indices** ([§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), single-owner SSoT structurally). This phase builds the IR
-  that carries those indices; the capacity-accounting and topology-relation folds ([§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)/[§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)) are deferred to
+- [`illegal_state_techniques.md` §4.3 — GADT-indexed state machines — only legal transitions are typed](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+  — the typing techniques discharged at the decode boundary: **GADT-indexed state machines** ([`illegal_state_techniques.md` §4.3 — GADT-indexed state machines — only legal transitions are typed](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed), only legal transitions are typed), **capability & phantom tenant tags** ([`illegal_state_techniques.md` §4.2 — Capability and phantom tenant tags — cross-tenant refs are uninhabitable](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable), cross-tenant references are uninhabitable), and **ownership indices** ([`illegal_state_techniques.md` §4.4 — Ownership indices — single-owner SSoT, structurally](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), single-owner SSoT structurally). This phase builds the IR
+  that carries those indices; the capacity-accounting and topology-relation folds ([`illegal_state_techniques.md` §4.6 — Capacity accounting — placement witness (compute) and summed demand within capacity (storage), checked](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)/[`illegal_state_techniques.md` §4.7 — Compatibility / topology relations by construction over a collection](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)) are deferred to
   Phase 9.
-- [`resource_capacity_doctrine.md §3/§4`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
+- [`resource_capacity_doctrine.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget) and [`resource_capacity_doctrine.md` §4 — The total fold: `fits`, `carve`, `place`, and the nesting](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
   — the complete pure resource vocabulary and its checked-construction boundary. This phase carries and
   normalizes the declarations in `ClusterIR`; Phase 9 implements the arithmetic/placement folds; Phase 31 runs
   them after capability binding and provider expansion to construct an opaque `ProvisionedSpec` and its
   unique whole-deployment render-source set. Private service projections contribute sources but never cross
   the public boundary; a raw decoded or merely bound value can never reach Phase 33's `renderAll`.
-- [`illegal_state_catalog.md §2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
-  and [`illegal_state_techniques.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
+- [`illegal_state_catalog.md` §2 — The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
+  and [`illegal_state_techniques.md` §6 — Three layers of foreclosure (and the honesty they force)](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
   — the load-bearing limit and the three layers of foreclosure: layers 1–2 (type-/decode-foreclosed) are
-  Register-1 and honestly discharged here; layer 3 (runtime-checked) stays deferred. Honors [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) verbatim: *a
+  the intended Register-1 boundary here; layer 3 (runtime-checked) stays deferred. The eventual contract must honor [`illegal_state_catalog.md` §2 — The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) verbatim: *a
   type-check proves the spec composes, not that the cluster enforces it.*
-- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — **Register 1** (pure/golden, in-process, no cluster): the register this phase's gate reaches; and [`§4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
+- [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — **Register 1** (pure/semantic-oracle, in-process, no cluster): the register this phase's gate reaches; and [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
   — the per-run proven/tested/assumed ledger the battery emits, marking model↔runtime correspondence
   UNVERIFIED.
 
 ## Sprints
 
-> **Current validation record.** The sealed amended run on 2026-08-21 covers every sprint through the bounded
-> `gadt-decode-spec`, including the five-calculus projection. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-## Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ✅
-**Status**: Done
-**Implementation**: `amoebius.cabal`, `cabal.project` (the real package, not the Phase-1
-throwaway probe), the `dsl-core` internal library, the bounded `gadt-decode-spec` test-suite stanza, and the built
-`src/Amoebius/Dsl/` module tree.
-**Blocked by**: none within the phase.
-**Independent Validation**: `cabal build` of the package and `cabal test gadt-decode-spec` succeed
-under the Phase-1 pin, and no tool reaches them through ambient `PATH`. The numbered `### Validation` list
-below carries the resolution rule and the argv observer that decide the second half.
-**Docs to update**:
-`DEVELOPMENT_PLAN/system_components.md` (register the `amoebius` package + bounded suite), this document.
+> **Permanently invalidated history.** Every completion, seal, reseal, transcript, evidence, and
+> closure statement in the sprint bodies below is rejected as current validation. The material is retained
+> only as a target-capability inventory and cannot support status, promotion, or a validation claim.
+
+## Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt the pinned toolchain from the Phase 1 spike and stand up the real `amoebius` cabal package with a
 `gadt-decode-spec` test-suite target, so this phase has a buildable in-process surface — the minimal skeleton
 gadt-decode needs, with **no** chain/reconcile/control-plane daemon kernel.
 
 ### Deliverables
+
 - `amoebius.cabal` + `cabal.project` pinned to GHC 9.12.4 / Cabal 3.16.1.0 with the Phase-1 `allow-newer`
   set, exposing the `dsl-core` modules and a `gadt-decode-spec` test-suite stanza.
 
 ### Validation
-1. Pinned `cabal build amoebius:dsl-core` and `cabal test gadt-decode-spec` succeed under GHC 9.12.4 / Cabal 3.16.1.0;
+
+1. Rejected historical observation: direct Cabal builds and the `gadt-decode-spec` Cabal suite were recorded
+   successful under GHC 9.12.4 / Cabal 3.16.1.0;
    the phase gate's `strace` observer records absolute Cabal, GHC, and Dhall executable paths.
 2. "No `PATH`-resolved tool" is disambiguated to the one interpretation both engineers now share, since this
    validation has no amoebius binary of its own: the harness resolves `ghc`/`cabal`/`dhall` to the **absolute
@@ -422,23 +218,15 @@ gadt-decode needs, with **no** chain/reconcile/control-plane daemon kernel.
    external-observer trace, not a self-report by the build script.
 
 ### Remaining Work
-None for Phase 26. Later DSL expansion belongs to the numerically assigned phases.
 
-## Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Dsl/Types.hs`, `src/Amoebius/Dsl/SmartConstructors.hs`,
-`src/Amoebius/Dsl/Ref.hs`, plus the committed compile-pair corpus.
-**Blocked by**: none within the phase.
-**Independent Validation**: the catalog's decode-foreclosed classes
-([§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally))
-have no inhabitant, proven by **committed minimal-pair compile-fail fixtures** rather than by
-absence-by-omission. The numbered `### Validation` list below carries what each pair must do.
-**Docs to update**:
-`documents/illegal_state/illegal_state_catalog.md` (per-entry layer reconciliation — which entries this IR
-type-forecloses), `documents/engineering/dsl_doctrine.md` (Phase-26 status backlink),
-`DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED. Later DSL expansion belongs to the numerically assigned phases.
+
+## Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`illegal_state_catalog.md §4.2/§4.3/§4.4`](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed):
 build the Haskell types the Dhall decodes into — GADT-indexed so only legal transitions are typed, phantom
 tenant-tagged so a cross-tenant reference is uninhabitable, and ownership-indexed so a resource has one
@@ -447,6 +235,7 @@ Complete normalized resource/capacity data is retained in the semantic-hash-pinn
 refined execution retains its exact resource subtree; no provisioned total is synthesized here.
 
 ### Deliverables
+
 - `ClusterIR` and its component ADTs as GADT-indexed types + smart constructors exposing only a legal
   vocabulary, carried by `src/Amoebius/Dsl/Types.hs` alongside the normalized resource/capacity declaration
   fields; the phantom tenant `Ref tenant a` and ownership indices of `src/Amoebius/Dsl/Ref.hs`, catalogued at [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally).
@@ -462,7 +251,7 @@ refined execution retains its exact resource subtree; no provisioned total is sy
   value to decode at all, so the negatives here are closedness negatives, not field checks. Doctrine assigns
   the foreclosure to this gate ([§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon),
   *decode-foreclosed (gadt-decode)*), and the union is written three times in the tree today with no two agreeing
-  ([legacy_tracking_for_deletion_archive.md](legacy_tracking_for_deletion_archive.md#one-binary-many-roles--2026-08-17)).
+  ([legacy_tracking_for_deletion.md §4](legacy_tracking_for_deletion.md#4-host-image-and-lift-violations)).
   Cardinality is decoded **indexed on the role**: only the `Worker` arm admits a replica count, so catalog
   [§3.90](../documents/illegal_state/illegal_state_lifecycle.md#390-a-role-whose-cardinality-contradicts-it)
   needs no separate check.
@@ -708,6 +497,7 @@ refined execution retains its exact resource subtree; no provisioned total is sy
 - The committed minimal-pair compile-fail fixtures: for each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), a legal twin (compiles; cited to a named `legal_*.dhall` positive it decodes through) and an illegal twin (fails `ghc -fno-code` with a type error naming the same constructor/index), plus each pair's committed expected type-error locus.
 
 ### Validation
+
 1. For each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant), [§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT transition index), and [§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (ownership index), the phase commits
    **two source fixtures differing only in the one index** — tenant tag, state index, or owner — and that
    committed minimal pair holds at compile time: the legal twin compiles
@@ -797,29 +587,22 @@ refined execution retains its exact resource subtree; no provisioned total is sy
    - The later shared-ledger property separately rejects a wrong-account join.
 
 ### Remaining Work
-None for Phase 26; exhaustive catalog expansion is Phase 27.
 
-## Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Dsl/Decode.hs` (`decodeCluster :: FilePath -> IO
-(Either DecodeError ClusterIR)`) and `src/Amoebius/Dsl/Error.hs` (the tagged `DecodeError` type).
-**Blocked by**: none within the phase.
-**Independent Validation**: the decode path returns `Either DecodeError ClusterIR` and never throws into a
-half-applied effect, and `DecodeError` carries each named failure class as its own constructor, so a blanket
-catch-all tag is a type-level regression rather than a passing implementation. The numbered `### Validation`
-list below carries the partiality and deep-normal-form checks.
-**Docs to update**:
-`documents/engineering/dsl_doctrine.md` (§5 gadt-decode backlink to the in-process decoder),
-`documents/engineering/testing_doctrine.md` (the Register-1 in-process ledger variant),
-`DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED. Exhaustive catalog expansion is Phase 27.
+
+## Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`dsl_doctrine.md §5 — gadt-decode, the Haskell typed decoder`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
 implement the fail-closed in-process decoder that mirrors hostbootstrap's `decodeContextFile = inputFile
 auto` and its `Left (ContextDecodeFailed …)` fail-fast return — *sibling evidence, not an amoebius result* —
 so nothing is ever reconciled against a config that did not fully decode.
 
 ### Deliverables
+
 - `decodeCluster :: FilePath -> IO (Either DecodeError ClusterIR)` over the native `dhall` library, with a
   structured `DecodeError` whose class of failure is carried by **distinct constructors** — `SchemaMismatch`,
   `OutOfDomainArm`, `UnspellableCombination` — not a single catch-all arm; and an `NFData ClusterIR` instance
@@ -841,6 +624,7 @@ so nothing is ever reconciled against a config that did not fully decode.
   fail-closed decode — not a proof of termination or of exception-freedom of the underlying `dhall` library.
 
 ### Validation
+
 1. A malformed or out-of-domain value returns a structured `Left DecodeError` — including inputs on which
    `Dhall.inputFile auto` throws, which the wrapper catches and tags rather than propagating; the partiality
    gate reports no partial call reachable from the pure decode code; and the `evaluate . force` on the decoded
@@ -852,23 +636,15 @@ so nothing is ever reconciled against a config that did not fully decode.
    thunked/bottom field is caught as `Left` rather than escaping — proving the deep force is on the live path.
 
 ### Remaining Work
-None for Phase 26.
 
-## Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ✅
-**Status**: Done
-**Implementation**: `test/spec/dsl/DecodeSpec.hs`; positive fixtures reuse Phase 25's
-`dhall/examples/legal_*.dhall`; the representative gadt-decode negative set `dhall/examples/illegal_decode_*.dhall`;
-the semantic-hash/tree/count oracles; structural mutants; and `tools/gadt_decode_ir_gate.py`.
-**Blocked by**: none within the phase.
-**Independent Validation**: `cabal test gadt-decode-spec` is green, and the expected-tag oracle is the committed
-Phase-0 fixture-header table, independent of the decoder's own fold
-([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 3). The
-numbered `### Validation` list below carries the per-fixture obligations and the three red conditions.
-**Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (backlink: the decode-foreclosed entries
-exercised here → layer-2 Register-1), `documents/engineering/testing_doctrine.md`,
-`DEVELOPMENT_PLAN/README.md` (flip the Phase-26 status when the gate passes).
+The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED.
+
+## Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`testing_doctrine.md §2 — Register 1`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing): assemble the
 in-process decode battery that exercises the fail-closed decoder over every positive fixture and confirms it
 returns a structured `Left` on each representative gadt-decode negative, emitting a Register-1 proven/tested/assumed ledger
@@ -880,6 +656,7 @@ checked at [Phase 31](phase_31_provision_seal.md)'s conditional post-bind infras
 provisioning boundary.
 
 ### Deliverables
+
 - `test/spec/dsl/DecodeSpec.hs` asserting: each `legal_*.dhall` positive fixture decodes to its `ClusterIR`; each
   `illegal_decode_*.dhall` gadt-decode negative first passes `dhall type` then returns the expected structured
   `Left DecodeError` whose tag matches its committed header; and every positive's decoded resource/capacity
@@ -945,7 +722,7 @@ provisioning boundary.
     child/rollout source operands, exact cache population, registry upload, object-store
     resident/retention/admission/producer identity, Vault Raft/audit, or host enforcement fields;
   - the traversal/type inventory must reject each mutant independently.
-- The **concretely named representative gadt-decode negative set** ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 7), committed in this phase's oracle-pinning sprint: **exactly one `illegal_decode_*.dhall` fixture per named `DecodeError` class** — `illegal_decode_schema.dhall`
+- The **concretely named representative gadt-decode negative set** ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 7) is a Haskell corpus that must lazily generate beneath `.build/test-corpora/**` **exactly one `illegal_decode_*.dhall` case per named `DecodeError` class** — `illegal_decode_schema.dhall`
   (`SchemaMismatch`), `illegal_decode_domain.dhall` (`OutOfDomainArm`), `illegal_decode_unspellable.dhall`
   (`UnspellableCombination`, a raw
   `RawDeploymentRolloutPolicy.RollingUpdate { maxSurge = 0, maxUnavailable = 0 }`) — each header citing
@@ -953,7 +730,7 @@ provisioning boundary.
   paired with a positive `legal_*.dhall` differing only in the foreclosed dimension ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 8). Every one
   passes `dhall type` (dhall-typecheck-green) by construction; the rollout case has both `{ 1, 0 }` and `{ 0, 1 }`
   legal controls.
-- **A committed seeded mutant** ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 2), committed and re-run: a legalized twin of
+- **An applied Haskell changed-subject mutant** ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 2), generated and re-run beneath the candidate root: a legalized twin of
   `illegal_decode_schema.dhall` whose gadt-decode-illegal index is corrected so the value would decode; the suite
   **must go red** when the mutant replaces its negative, demonstrating the "any illegal fixture decodes ⇒ red"
   check actually executes.
@@ -961,34 +738,29 @@ provisioning boundary.
   in-process, but no runtime-enforcement claim is made.
 
 ### Validation
-1. `cabal test gadt-decode-spec` is green — positives decode; every `illegal_decode_*.dhall` negative first passes
+
+1. Rejected historical observation: the `gadt-decode-spec` Cabal suite was recorded green — positives decode;
+   every `illegal_decode_*.dhall` negative first passes
    `dhall type` (suite red otherwise, so the rejection on record is gadt-decode's and not dhall-typecheck's, which
    forecloses negatives that are merely ill-typed Dhall) and then returns the tagged `Left` matching its
-   committed header; the suite is red if any gadt-decode-illegal fixture decodes; all
+   independently authored Haskell expectation; the suite is red if any gadt-decode-illegal case decodes; all
    four `DecodeError` tag arms have >=1 fixture (suite red if any arm is empty); and the deep-NF force and
    fail-closed assertions hold. Each positive's resource/capacity traversal is complete and normalized, and
    the dropped-resource-field decoder mutant turns the suite red.
-2. The committed seeded mutant (the legalized twin of `illegal_decode_schema.dhall`) turns the suite **red**
+2. The applied Haskell seeded mutant (the legalized twin of `illegal_decode_schema.dhall`) turns the suite **red**
    when substituted — a re-run, executed demonstration that "any illegal fixture decodes ⇒ red" is a live
    check, not a tautological restatement of the assertion's polarity.
-3. The normalized resource-tree traversal matches `resource_field_inventory.tsv` on every positive and turns
-   red under the committed dropped-`ephemeralStorage` decoder mutant; a decoder cannot pass by preserving only
+3. The normalized resource-tree traversal matches a separately authored Haskell resource-field inventory on
+   every positive and turns red under the applied dropped-`ephemeralStorage` decoder mutant; a decoder cannot pass by preserving only
    CPU/memory or collapsing accelerator/VRAM structure.
 
 ### Remaining Work
-None. The exhaustive per-catalog-entry corpus begins in Phase 27.
 
-## Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Vault/SecretRef.hs`, `src/Amoebius/Dsl/Error.hs`,
-`src/Amoebius/Dsl/Decode.hs`, `test/spec/dsl/DecodeSpec.hs`, `dhall/examples/legal_secret_app.dhall`,
-`dhall/examples/illegal_decode_plaintext_secret.dhall`
-**Blocked by**: Sprint 26.4
-**Requires**: `host-floor` — `ghc`, `cabal`, and `dhall` are resolved from the run-local record Phase 1 writes, and acquired when absent.
-**Independent Validation**: the negative is dhall-typecheck green and must still be rejected, so the claim cannot be
-satisfied by the typechecker; its paired positive decodes, and every other negative's twin now does too.
-**Docs to update**: `documents/engineering/vault_pki_doctrine.md` (gadt-decode backlink),
-`DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `DEVELOPMENT_PLAN/README.md`
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The exhaustive per-catalog-entry corpus begins in Phase 27.
+
+## Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -1007,7 +779,8 @@ type.
 
 ### Validation
 
-1. `cabal test gadt-decode-spec` is green with four tagged negatives at four distinct tags.
+1. Rejected historical observation: the `gadt-decode-spec` Cabal suite was recorded green with four tagged
+   negatives at four distinct tags.
 2. The plaintext negative passes `dhall type` and returns `PlaintextSecret`.
 3. Each negative's paired positive decodes; a twin that stopped decoding fails the suite.
 4. The decoder stays pure — no socket, no Vault, no filesystem read beyond the spec's own import graph.
@@ -1020,7 +793,8 @@ one is Phase 61's too.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/dsl_doctrine.md` — backlink §5's gadt-decode to the in-process Phase-26 decoder; keep the
   runtime-enforcement half as Tier-2 residue owned by Phase 64.
 - `documents/illegal_state/illegal_state_catalog.md` — annotate each entry the IR type-/decode-forecloses here
@@ -1031,12 +805,14 @@ one is Phase 61's too.
   emits (correspondence and runtime fidelity UNVERIFIED).
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-26 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-26 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register the `amoebius` cabal package, `src/Amoebius/Dsl/{Types,
   SmartConstructors,Ref,Decode,Error}.hs`, and the bounded `gadt-decode-spec` test-suite as Phase-26 rows.
 
 ## Related Documents
+
 - Phase-26 partial-foreclosure ledger — the tested/proven/unverified split sealed by this gate
 - [README.md](README.md) — the live tracker and phase order this document serves
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *spec-composition proven*, never *runtime proven*)

@@ -4,40 +4,38 @@
 > arithmetic, the BookKeeper/MinIO/registry/ZooKeeper/Patroni/Vault/etcd geometry with complete
 > recovery/healing/orphan scenarios, filesystem presentation + allocation rounding, uniform StatefulSet claims,
 > schema/registry-backend migration storage, the six-arm object-store producer peak, and Pulsar's two ceilings —
-> as total, in-process Haskell, and prove under QuickCheck that every producer's physical demand fits its
+> as total, in-process Haskell, with Haskell laws requiring every producer's physical demand to fit its
 > single-owner backing and each storage-geometry negative decode-rejects directly on its isolated axis, on
-> hand-authored logical-demand/backing fixtures, before any host or backing exists.
+> separately authored Haskell logical-demand/backing values, before any host or backing exists; serialized
+> cases, if needed, are lazy `.build/test-corpora/**` output.
 > **Read this if**: phase 28 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 28 delivers the logical→physical storage geometry folds; its design is owned by [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-Gate passed 2026-08-09; ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ✅](#sprint-281-the-storagebudgetgrowable-arithmetic--logicalphysical-geometry-fold-)
-- [Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ✅](#sprint-282-the-policy-only-storage-scaling-fold--provisionedstoragescalingenvelope--planstoragescaling-)
-- [Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ✅](#sprint-283-quickcheck-properties--storage-accepts--in-envelope-pulsar-two-ceiling-uniform-claim-)
-- [Sprint 28.4: The storage-geometry fold-negative corpus + the gate ✅](#sprint-284-the-storage-geometry-fold-negative-corpus--the-gate-)
+- [Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ⏸️](#sprint-281-the-storagebudgetgrowable-arithmetic--logicalphysical-geometry-fold-)
+- [Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ⏸️](#sprint-282-the-policy-only-storage-scaling-fold--provisionedstoragescalingenvelope--planstoragescaling-)
+- [Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ⏸️](#sprint-283-quickcheck-properties--storage-accepts--in-envelope-pulsar-two-ceiling-uniform-claim-)
+- [Sprint 28.4: The storage-geometry fold-negative corpus + the gate ⏸️](#sprint-284-the-storage-geometry-fold-negative-corpus--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -45,79 +43,28 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. `python3 tools/storage_geometry_gate.py` passed all eleven sides on natural
-`arm64`, untranslated. The bounded suite rejects 30 direct variants beside 30 legal twins, admits two decoded
-positive specs, retains both Gate-1 pairs, and composes 99 observed units through all five calculus kinds. All
-31 mutants redden, all 17 metrics match, all five Phase-28 registry rows discharge, and 43 surfaces join to 51
-items. The project-contained attestation is
-`sha256:baf06e5a7d5512990b583fcf29912f008819e2e358c14da4f38937dc8cdb1d58`, bound to source snapshot
-`sha256:5c316f972c37912d…` over 2,266 files. Repository conformance and documentation support gates pass; Phase
-28 owns no remaining migration deferral.
+⏸️ Blocked — NOT VALIDATED.
 
-**The first amended run exposed and closed stale boundaries.** The phase now runs only the bounded `storage-geometry-spec`, not
-the shared `dsl-spec` that also executes Phase-29-through-33 checks. Current Phase-28 registry ownership is
-reconciled directly, and an independently authored projection composes the 30 negatives, 30 twins, two
-positive specs, six envelope properties and 31 mutants through all five Phase-10 calculus kinds. The amended
-eleven-sided gate passes all 17 metrics and joins 43 surfaces to 51 items; the final source-bound result is
-recorded above.
+Blocked by redesigned Phase 27, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-**Opened 2026-08-17** when the preceding phase resealed.
-[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
-the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
-architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
-it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
-[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-15. `python3 tools/storage_geometry_gate.py` passed all ten sides: all 27 storage
-variants and twins, both dhall-typecheck barriers, six properties, all 31 mutants, the honesty ledger, and all 13
-authored metrics pass; 39 surfaces join to 44 run-time items; generated output and host state remain contained.
-The project-contained attestation is `sha256:cea869188d4bb543b62a216ca00c7cc98feb47c7218f3744bae546828680a247`,
-bound to source snapshot `sha256:6eb21174546f6510…`; Phase 28 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:690d8f832a33de37…`
-(1933 non-ignored files) and published a verified pre-containment external attestation
-`sha256:2236282920d39585e287806cab364d279156460312aec61e480abdc812d9435c`.
-
-**Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 27
-storage variants redden at their specific tags beside 27 green twins, five named negatives and two dhall-typecheck
-training cases hold, two positives decode and fit, six QuickCheck properties hold with coverage in both
-directions, and all 31 seeded mutants redden. Evidence and the ledger move into
-`.build/runs/phase_11/<run-id>/`, and the run publishes a snapshot-bound attestation.
-
-**The surface join's three provisional associations are closed.** The earlier draft pointed twenty claim
-surfaces at one acceptance token, then forced 27 cases into 27 slots by associating complete failure scenarios
-with object-count quota, allocation rounding with root-EBS quota, and the Pulsar hot-tier ceiling with an
-`emptyDir` cache bound. Phase 28 adds three direct negative/twin rows for the named claims and gives the three
-formerly borrowed cases their actual surface names. The resulting 30-case partition is exact rather than
-provisional. `test/spec/dsl/StorageGeometryGate.hs` also resolves `dhall` per run, and every Cabal invocation
-carries the resolved compiler.
-
-**Invalidated historical record:**
-
-Done (invalidated). `python3 tools/storage_geometry_gate.py` passed on 2026-08-09 on
-**no substrate** (`none`) in **Register 1**, with ledger
-`dynamically-resolved`. It stood up no host,
-cluster, or backing: the result is an in-process storage-geometry fold + QuickCheck battery layered on the
-[Phase 9 gate](phase_09_resource_index.md). Live backing observation/mutation, execution/runtime storage,
-accelerator/provider composition, capability binding, provisioning, render fidelity, and physical enforcement
-remain **UNVERIFIED**. Where a shape below is exercised in a sibling system
-(prodbox's platform-backbone BookKeeper/MinIO/ZooKeeper recovery accounting), that is **sibling evidence, not an amoebius result**.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase makes amoebius's *"no unbounded storage, anywhere; every producer's physical demand fits a
-single-owner backing"* invariant executable as pure provisioning arithmetic, and proves its
-implementation/properties under QuickCheck in-process. It owns the **logical→physical storage-geometry fold only** — the slice of the capacity model that turns a producer's declared *logical* demand into a *physical*
+**Target capability — NOT VALIDATED.** The Haskell-only target makes amoebius's *"no unbounded storage,
+anywhere; every producer's physical demand fits a single-owner backing"* invariant a pure provisioning fold.
+Haskell values own every case and expectation; any serialized case or mutation is generated lazily beneath
+`.build/**`. The phase is limited to the **logical→physical storage-geometry fold** — the slice of the capacity model that turns a producer's declared *logical* demand into a *physical*
 byte requirement against a named backing, and the closed storage-budget arithmetic over it:
 
 - The **closed `StorageBudget` / `Growable` unions' arithmetic**: the single-owner ceiling-per-arm
   `StorageBudget` fold (no unbounded arm) and the `Growable`/`ScalingPolicy` quota-bounded escape valve (no
   bare-unbounded arm). The union *shapes* are type-foreclosed upstream (Phase 25/13); the *arithmetic* over them
-  is the pure fold this phase adds.
+  is the pure fold this phase's target must add.
 - The **logical→physical geometry** for `bookKeeperPhysicalDemand` (write-quorum placement, journal/index
   reserve, and **every** failure/re-replication subset derived from its finite fault bound), `minioPhysicalDemand`
   (stripe padding, data+parity shards, metadata, healing workspace, and every per-set plus cross-set failure
@@ -151,7 +98,7 @@ byte requirement against a named backing, and the closed storage-budget arithmet
 These storage checks consume constructible values and may reject them at `provision-seal`; in the catalog
 vocabulary they are **decode-foreclosed**, not type-inhabitance claims. Because the storage
 `Σ ≤ backing` sum is decidable in **both** directions (unlike the sound-not-complete compute `place`), this
-phase proves the stronger **accept ⟺ in-envelope** equivalence for the geometry fold.
+target contract requires the stronger **accept ⟺ in-envelope** equivalence for the geometry fold.
 
 **What is *not* here.** The base `fits`/`carve`/`place` capacity fold, the `Topology`/`ComputeEngine`/
 compatibility relation, and `mkRke2` distinctness ([Phase 9](phase_09_resource_index.md)); the
@@ -167,247 +114,94 @@ validation or mutation of a scaling transition — [Phase 58](phase_58_object_re
 snapshot-bound action/token/CAS plumbing, [Phase 60](phase_60_retained_storage.md) enacts the retained-carve
 arms, and [Phase 79](phase_79_provider_dynamic_nodes.md) enacts the `CreateProviderCapacity` arm.
 
-**Phase scope:** one cohesive claim — *a producer's physical demand fits the single backing that owns it*. Every arm of the geometry is decided before a byte of storage exists.
+**Phase scope:** one target claim — the pure Haskell fold accepts only when a producer's physical demand fits
+the single backing that owns it. No live backing is inspected.
 
-**Substrate:** none — no host, no cluster, no backing; the gate is an in-process `cabal test` storage-geometry
-fold + QuickCheck battery, analogous to the Phase 26 decode battery and the Phase 27 property suite.
+**Substrate:** none — no host, cluster, backing, or hardware; the canonical Haskell gate owns all observations
+and the candidate verdict.
 
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
-**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
+**Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 9](phase_09_resource_index.md) for the base capacity fold this geometry extends to
-physical storage, [Phase 10](phase_10_calculus_composition.md) for the five-calculus projection, and
-[Phase 27](phase_27_illegal_state_covering.md) for the reached illegal-state registry boundary. The numeric
-predecessor holds this phase's negative ownership rows but supplies no storage-fold vocabulary.
-
-**Gate:** `python3 tools/run_phase_gate.py 28` is green: the logical→physical storage-geometry fold is
-provably total and accepts the in-envelope producers, each committed negative refuses on its own
-over-backing axis, every seeded mutant reddens the bounded suite, and the authored five-calculus projection
-matches. [Gate integrity](#gate-integrity) fixes each term.
+**Depends on:** [Phase 27](phase_27_illegal_state_covering.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 28`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 <a id="n-gate-integrity-refinements"></a>
 ## Gate integrity
 
-The suite runs the geometry folds; the gate additionally replays the recovery, healing and orphan scenarios against the authored oracle and reddens on each seeded arithmetic mutation.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-
-This section pins the concrete interpretations the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-clauses require for Phase 28; it strengthens, never weakens, the Gate and sprint Validations above. It carries
-**this seam's slice** of the storage-geometry corpus committed for the old capacity/topology phase; the base
-capacity/topology negatives are gated by [Phase 9](phase_09_resource_index.md) and the execution/
-accelerator/VM-partition negatives by [Phase 29](phase_29_execution_accelerator_folds.md). This phase does **not**
-duplicate that corpus — it partitions it along the storage seam.
-
-The Gate's one acceptance condition is the conjunction of four checks. The logical→physical storage-geometry
-fold holds under QuickCheck, so every generated in-envelope producer yields a physical demand that fits its
-single-owner backing, and the fold is **provably total** in the sense the totality gate below fixes. The pure
-folds return their structured `ProvisionError`/`Left` on each negative in the representative set below when
-applied **directly to the hand-authored logical-demand/backing fixture that isolates its over-backing axis**:
-no `bind` or `provision` call enters this gate, because [Phase 31](phase_31_provision_seal.md) re-exercises
-these same folds through its post-bind provision seal. The storage-geometry variant rows of the two positive
-fixtures fit feasibly. And the gate turns red under the **committed per-geometry seeded-mutant battery**
-(§M.2), green only when the **implementation-independent storage-envelope reference predicate** (§M.3,
-defined in Sprint 28.3) accepts a returned physical demand *iff* it is in-envelope.
-
-```mermaid
-flowchart LR
-  %% register: orientation
-  s0["Sprint 28.1: The StorageBudget/Growable arithmetic + logical→physical…"]
-  s1["Sprint 28.2: The policy-only storage-scaling fold —…"]
-  s2["Sprint 28.3: QuickCheck properties — storage accepts ⟺ in-envelope…"]
-  s3["Sprint 28.4: The storage-geometry fold-negative corpus + the gate"]
-  calc["authored five-calculus storage projection"]
-  gate["the phase 28 gate"]
-  s0 -->|"produces what the next consumes"| s1
-  s1 -->|"produces what the next consumes"| s2
-  s2 -->|"produces what the next consumes"| s3
-  s3 -->|"the last seam the gate closes over"| gate
-  calc -->|"independent expectation"| gate
-```
-*Implemented Phase 28 seams; [Gate integrity](#gate-integrity) owns the apparatus.*
-
-### Representative set (§M.7)
-
-The gate's storage-geometry fold-negative corpus is *exactly* the five named
-fixtures inherited from the source corpus:
-`illegal_store_over_backing`, `illegal_hot_tier_over_bookie`, `illegal_topic_time_only_offload`,
-`illegal_cache_over_local_pool`, and `illegal_incluster_cache_bound_mismatch`; the
-positive set is the storage-geometry variant rows of
-`legal_multisubstrate_cluster` (a store-fits-backing row, BookKeeper/MinIO physical-fits, uniform-claim
-exact-fit, presentation/quantum-rounding exact-fit, and ZooKeeper/Patroni/Vault recovery-fits plus a
-control-plane-storage-steady-fits row) and `legal_managed_eks` (a fixed-`InstanceStore` root-fits row and a
-derived-root-EBS-within-`nodeRootStorage`-quota row). All are committed in this phase's oracle-pinning sprint,
-before the `Amoebius.Capacity.*` storage implementation exists (§M.1), as part of the
-forty-one-fixture corpus; the compute/topology base-fold negatives (`illegal_engine_substrate_mismatch`,
-`illegal_rke2_reused_host`, `illegal_overcommit_*`, the elastic-branch negatives,
-`illegal_untolerated_taint`, `illegal_memory_backed_underreserved`,
-`illegal_tmpfs_init_persistence_underreserved`, …) are owned by
-[Phase 9](phase_09_resource_index.md) and the execution/accelerator/VM-partition and
-provider-root/control-plane-storage fixtures
-(`illegal_hard_ceiling_overcommit`, `illegal_node_local_storage_over_backing`,
-`illegal_disk_backing_alias_double_spend`, `illegal_filesystem_layout_*`, `illegal_image_*`, the
-accelerator/CUDA/Metal negatives, `illegal_provider_instance_store_root_underprovisioned`,
-`illegal_provider_node_root_ebs_over_quota`, `illegal_control_plane_storage_transition_overrun`, and
-`legal_tmpfs_two_concurrent_writers_single_debit`) by
-[Phase 29](phase_29_execution_accelerator_folds.md).
-`illegal_store_over_backing` is a stable fixture identifier with a **committed case table** for MinIO
-parity/healing, finite-horizon failed-write/upload orphan exposure, filesystem overhead, backing
-minimum/quantum rounding, uniform claims (a differing-backing ordinal short despite aggregate spare bytes
-elsewhere), registry upload/failed-partial or filesystem→MinIO old+new copy workspace, one ZooKeeper member's
-transaction-log/snapshot recovery, one Patroni data/WAL/failover ordinal, schema old+new/temp/WAL overlap, and
-Vault Raft compaction/recovery plus audit rotation; the same fixture's producer cases omit each of the six
-closed object-store arms (`app`/`content`/`registry`/`Pulsar-offload`/`Pulumi-checkpoint`/`control-plane-state`)
-in turn. `illegal_hot_tier_over_bookie` has logical-fit/physical-overflow cases for BookKeeper
-write-quorum/recovery placement. These are variants inside the named fixtures, not unnamed additions to the
-exact corpus, and do not change the five-negative/two-positive representative count.
-
-The committed case table contains **30** independently pinned variant rows and 30 legal twins under those
-five stable negative-family names. Three rows directly close the former provisional joins for complete
-failure scenarios, backing-allocation rounding, and the Pulsar hot-tier ceiling. It also covers the later registry additions for backup-medium fit,
-disjoint capacity pools, and restore-target fit. Together with the two dhall-typecheck training-retention barriers,
-the emitted `.build/dsl/storage-geometry/validation-locus-ledger.tsv` supplies evidence for all **5** Phase-28-owned
-registry subcases at their declared loci.
-
-The bounded suite also composes the observed `30,30,2,6,31` negative/twin/positive/property/mutant counts as
-artifact, budget, lift, workflow and evidence components at one request scope. The exact component order,
-names, counts and resource vector `5,99,0,0` are pinned independently in
-`test/oracle/storage_geometry/calculus_projection.tsv`.
-
-### Committed per-geometry seeded-mutant battery (§M.2)
-
-One committed mutant per geometry obligation, each
-individually required to turn the suite red, drawn from the operator set:
-- **Storage `Σ` / backing comparison** — weaken the backing comparison (accept a physical demand one byte over
-  its single-owner backing).
-- **BookKeeper** — drop write-quorum placement or the recovery/re-replication scenario derivation from its
-  finite fault bound.
-- **MinIO** — drop stripe padding, data+parity shards, metadata, the healing workspace, or the complete
-  per-set plus cross-set failure-scenario product.
-- **Fault-scenario product** — collapse the complete derived fault-policy scenario product to a favourable
-  subset.
-- **Concurrent/orphan exposure** — drop the finite-horizon failed-write/upload orphan retention.
-- **Filesystem overhead** — skip the `Block`/version-pinned filesystem-presentation overhead.
-- **Backing minimum/quantum** — skip the `BackingAllocationPolicy` minimum/quantum rounding.
-- **Uniform claim rounding** — replace `max ordinal × members` with an aggregate that moves spare bytes
-  between backings.
-- **Pulsar hot-tier ceiling** — drop the physically expanded hot-tier ceiling (accept a topic whose logical
-  hot bytes fit but whose write-quorum/recovery placement exceeds one bookie).
-- **Pulsar durable-total ceiling** — drop the durable-total offload ceiling (accept a time-only-offload topic
-  with no size-triggered durable bound).
-- **Native cache-pool accounting** — reuse the same cache bytes twice / exceed the named host cache backing.
-- **In-cluster cache nesting** — drop the exact catalog asset join/digest dedup/first-miss temporary peak,
-  drop `ProvisionedCacheDemand.derivedPeak ≤ CacheBudget ≤ emptyDir.sizeLimit`, or charge the same bytes twice.
-- **Provider-root storage** — under-size a fixed `InstanceStore` root; omit the root policy/presentation/
-  allocation; fail to derive and round the private `EphemeralRootEbs` request; or debit it from durable quota
-  rather than the separate `nodeRootStorage` byte/volume-count ceiling. (The provider-root negatives
-  `illegal_provider_instance_store_root_underprovisioned` and `illegal_provider_node_root_ebs_over_quota` are
-  owned by [Phase 29](phase_29_execution_accelerator_folds.md); this mutant guards the shared geometry fold, not
-  a Phase-28 gate fixture.)
-- **Control-plane etcd physical transition** — omit WAL preallocation/overshoot, the snapshot-save temporary,
-  the serialized defrag old+new overlap, or the `(maxBackups + 1) × maxBytesPerFile` audit rotation term.
-  (The control-plane-storage negative `illegal_control_plane_storage_transition_overrun` is owned by
-  [Phase 29](phase_29_execution_accelerator_folds.md); this mutant guards the shared geometry fold, not a
-  Phase-28 gate fixture.)
-- **Object-store producer** — omit a source-producer arm (any of the six, including the control-plane-state
-  sixth arm); accept a physical-object identity/size conflict; accept a same-byte/different-object-count
-  geometry; or drop a per-writer admission witness.
-- **Registry** — drop the OCI object dedup, the bounded concurrent upload workspace, or the failed-partial
-  extents retained for the GC horizon.
-- **ZooKeeper** — drop a member's transaction-log/snapshot/failure-recovery overlap.
-- **Patroni** — drop the data/WAL/checkpoint/failover peak or the SQL-mutation admission proxy derivation.
-- **Vault** — drop the persisted-version/lease expansion, the Raft/WAL/snapshot model, the old+new compaction
-  overlap, the recovery headroom, or the audit rotation term.
-- **Migration** — drop the old+new+workspace/temp/WAL high-water or the executor demand of any of
-  `provisionStorageMigration` / `provisionSchemaMigration` / `provisionRegistryBackendMigration`.
-- **`planStorageScaling`** — return `AllocateWithinRetainedCarve` / `CreateProviderCapacity` /
-  `ShrinkByVerifiedMigration` without witnessing the retained carve / residual quota / old+new migration
-  high-water, or ignore the `ObservedStorageScalingSnapshot` fingerprint.
-
-Field-deletion operators are explicit members of this battery: delete one OCI stored object, snapshot chain,
-registry upload bound, root-backing policy/quota, or Vault Raft/audit operand and require a **structured rejection** rather than treating absence as zero or falling back to an aggregate.
-
-### Totality gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub))
-
-Every storage fold module — `Amoebius.Capacity.{Storage,StorageGeometry,ServiceStorage,Growable,StorageScaling}`
-— must compile with `-Werror=incomplete-patterns` and
-`-Werror=incomplete-uni-patterns`, without `error`, partial `head`, or `fromJust`; the QuickCheck no-crash
-sample is an additional check and cannot satisfy totality on its own.
-
-### Independent reference predicate (§M.3)
-
-Defined in Sprint 28.3 Deliverables; it never calls `bookKeeperPhysicalDemand`, `minioPhysicalDemand`,
-`provisionObjectStoreProducer`, `registryStoragePeak`, `vaultStoragePeak`, `uniformStatefulSetClaims`, or
-the Pulsar/cache/provider-root folds, deriving the complete fault-policy scenario product, presentation
-overhead, allocation rounding, and per-backing residual **directly** from the generated fixture's declared
-logical demands and backing rules, and asserting **accept ⟺ in-envelope**. It is a **Register-1** in-process
-check that runs on no substrate.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — a pure Haskell geometry fold accepts only when each producer's physical demand fits its single owning backing; Haskell-owned cases and mutations generate any transient bytes beneath `.build/**`. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 28` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 27 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`jit_budget_doctrine.md`](../documents/engineering/jit_budget_doctrine.md) — the bytes logical→physical storage geometry folds causes to exist are charged to a grant that carries its ceiling and concurrency together.
-- [`resource_capacity_doctrine.md §5`](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)
-  — **`StorageBudget` bounded by construction, single-owner ceiling per arm**: this phase implements the closed
+- [`jit_budget_doctrine.md` §3 — A ceiling is inseparable from its concurrency](../documents/engineering/jit_budget_doctrine.md#3-a-ceiling-is-inseparable-from-its-concurrency) — the bytes logical→physical storage geometry folds causes to exist are charged to a grant that carries its ceiling and concurrency together.
+- [`resource_capacity_doctrine.md` §5 — `StorageBudget`: bounded by construction, single-owner ceiling per arm](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)
+  — **`StorageBudget` bounded by construction, single-owner ceiling per arm**: the target is to implement the closed
   `StorageBudget` fold (every producer's required `StorageBudgetId` resolves once to its selected backing/quota
   owner; no aggregate moves spare bytes between backings) and the logical→physical BookKeeper/MinIO placement
   plus the complete fault-scenario/orphan/uniform-claim/presentation-rounding fold as pure Haskell.
-- [`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)
-  — **`Growable` + `ScalingPolicy`, the quota-bounded dynamic provisioning arm**: this phase implements the
+- [`resource_capacity_doctrine.md` §6 — `Growable` / `ScalingPolicy`: the quota-bounded dynamic-provisioning arm](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)
+  — **`Growable` + `ScalingPolicy`, the quota-bounded dynamic provisioning arm**: the target is to implement the
   closed `Growable`/`ScalingPolicy` escape valve (no bare-unbounded arm) and the private policy-only
   `ProvisionedStorageScalingEnvelope`, complete `ObservedStorageScalingSnapshot` input carrier, and total
   observe-then-plan `planStorageScaling`; it cannot validate or enact a live transition.
-- [`resource_capacity_doctrine.md §7`](../documents/engineering/resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)
-  — **Pulsar has two ceilings, the hot tier and the durable total**: this phase implements the two-ceiling
+- [`resource_capacity_doctrine.md` §7 — Pulsar has two ceilings: the hot tier and the durable total](../documents/engineering/resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)
+  — **Pulsar has two ceilings, the hot tier and the durable total**: the target is to implement the two-ceiling
   Pulsar fold (physically expanded hot-tier fit built on the `bookKeeperPhysicalDemand` witness + durable-total
   offload fit), so a time-only or physically hot-tier-over-bookie topic decode-rejects.
-- [`resource_capacity_doctrine.md §2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)
+- [`resource_capacity_doctrine.md` §2 — The load-bearing honesty limit: a capacity sum is a decode-foreclosed check, never type-foreclosed](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)
   — **the load-bearing honesty limit**: a storage sum is a checked rejection (**decode-foreclosed** in the
   historical layer taxonomy), never type-foreclosed; its concrete locus is the post-bind `provision-seal`. The
-  union *shapes* are type-foreclosed (Phase 25/13); the *arithmetic* over them is the pure fold this phase adds.
-  Because the storage `Σ ≤ backing` sum is decidable both ways, this phase asserts the stronger
+  union *shapes* are type-foreclosed (Phase 25/13); the *arithmetic* over them is the pure fold this phase's
+  target must add.
+  Because the storage `Σ ≤ backing` sum is decidable both ways, the target contract requires the stronger
   **accept ⟺ in-envelope** equivalence, not merely soundness.
-- [`illegal_state_catalog.md §4.6`](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
+- [`illegal_state_techniques.md` §4.6 — Capacity accounting — placement witness (compute) and summed demand within capacity (storage), checked](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
   — the capacity-accounting technique's **storage-checked** half (summed demand within capacity, storage
-  checked), covering the storage/retention catalog entries [§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)/[§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)/[§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) at the honest layer
-  ([`§6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
+  checked), covering the storage/retention catalog entries [`illegal_state_security.md` §3.11 — An unsafe workload (no resource limits, no hardened securityContext)](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[`illegal_state_capacity.md` §3.17 — An over-committed deploy or workload (host / VM / cluster capacity exceeded)](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[`illegal_state_storage.md` §3.19 — An application consuming more storage than its backing (MinIO and Pulsar)](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)/[`illegal_state_storage.md` §3.20 — A Pulsar topic without a bounded / tiered / retained lifecycle](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)/[`illegal_state_ml_asset.md` §3.25 — An ML asset named by arbitrary URL (or an unready / unlanded model)](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) at the honest layer
+  ([`illegal_state_techniques.md` §6 — Three layers of foreclosure (and the honesty they force)](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
   every storage **sum** is checked at `provision-seal` and never type-foreclosed, honoring the load-bearing
-  limit of [`§2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it).
-- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (**Register 1** — pure/golden, in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the register this gate reaches and
+  limit of [`illegal_state_catalog.md` §2 — The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it).
+- [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (**Register 1** — pure/semantic-oracle, in-process, no cluster) and [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the register this gate reaches and
   the ledger it emits, with model↔runtime correspondence and runtime fidelity marked UNVERIFIED (owned by the
   live band — [Phase 58](phase_58_object_reconciler.md)/[Phase 60](phase_60_retained_storage.md)/
   [Phase 62](phase_62_platform_backbone.md)/[Phase 79](phase_79_provider_dynamic_nodes.md)).
 
 ## Sprints
 
-> **Current validation record.** The sealed amended run on 2026-08-21 covers every sprint through the
-> bounded `storage-geometry-spec`, including the five-calculus projection. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-## Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Capacity/Storage.hs`, `src/Amoebius/Capacity/StorageGeometry.hs`,
-`src/Amoebius/Capacity/ServiceStorage.hs`, and `src/Amoebius/Capacity/Growable.hs`, extending
-`src/Amoebius/Capacity/Types.hs`. The Deliverables below inventory what each carries.
-**Blocked by**: [Phase 9 gate](phase_09_resource_index.md) (the base capacity types and
-subtraction folds); Phase 26 gate (the GADT-indexed IR + total decoder).
-**Independent Validation**: a unit suite runs the geometry folds over hand-authored
-logical-demand/backing inputs, so a feasible producer resolves its provisioned bytes once and fits its
-single-owner backing, every over-backing axis returns the fold's tagged `Left` naming it, and dropping any
-scenario, overhead, or rounding term makes the property red. The numbered Validation list below states each
-check.
-**Docs to update**: `documents/engineering/resource_capacity_doctrine.md` (Phase-28 status
-backlink for §5/§6/§7), `documents/engineering/storage_lifecycle_doctrine.md` (§5.2 backing read-side),
-`documents/engineering/pulsar_client_doctrine.md` (§6 two-ceiling read-side),
-`documents/illegal_state/illegal_state_catalog.md` (§3.19–§3.20 layer reconciliation),
-`DEVELOPMENT_PLAN/system_components.md`.
+> **Permanently invalidated history.** Every completion, seal, reseal, transcript, evidence, and
+> closure statement in the sprint bodies below is rejected as current validation. The material is retained
+> only as a target-capability inventory and cannot support status, promotion, or a validation claim.
+
+## Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`resource_capacity_doctrine.md` §5 — StorageBudget bounded by construction, single-owner ceiling per arm](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)
 and [`§7` — Pulsar's two ceilings, the hot tier and the durable total](../documents/engineering/resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total):
 implement the logical→physical storage-geometry fold as pure, checked provision-seal arithmetic — genuine
@@ -416,6 +210,7 @@ erasure-coded producers, presentation/allocation rounding for every volume, and 
 declared logical numbers only (the substrate backing inventory and PV sizes are owned elsewhere).
 
 ### Deliverables
+
 - The closed `StorageBudget`/`Growable` unions (no unbounded / no bare-unbounded arm) and the aggregate backing
   fold: every producer's required `StorageBudgetId` resolves once to its selected backing/quota owner; the
   provider-object `CloudQuota` arm remains a distinct bounded object-count plus model-indexed `Logical | Billed`
@@ -505,6 +300,7 @@ Shared declarations live beside their owning folds rather than enlarging the Pha
 phase; this sprint consumes that base and owns the storage declarations plus the geometry arithmetic.
 
 ### Validation
+
 1. A feasible input yields a physical demand that fits its single-owner backing after deriving BookKeeper
    replication/recovery, MinIO erasure/healing/in-flight/orphan/presentation/rounding/uniform-claim peaks,
    registry upload/partial/rehome exposure, ZooKeeper log/snapshot/recovery, Patroni data/WAL/failover, schema
@@ -522,31 +318,22 @@ phase; this sprint consumes that base and owns the storage declarations plus the
    overhead, or rounding term makes the property red.
 
 ### Remaining Work
-None.
 
-## Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ✅
-**Status**: Done
-**Implementation**: `src/Amoebius/Capacity/StorageScaling.hs`
-(`ProvisionedStorageScalingEnvelope`, `ObservedStorageScalingSnapshot`, `planStorageScaling`) — built and
-exhaustively pattern-checked.
-**Prerequisite satisfied**: Sprint 28.1 (the `StorageBudget` arithmetic + backing/quota types the envelope
-retains and the plan witnesses).
-**Blocked by**: none within the phase.
-**Independent Validation**: a unit suite constructs a private envelope for each `Growable` producer, feeds a
-complete fingerprinted snapshot, and asserts `planStorageScaling` resolves to exactly one witnessed arm and
-that this phase has **no mutation capability** — it observes and plans only. The numbered Validation list
-below states each check.
-**Docs to update**:
-`documents/engineering/resource_capacity_doctrine.md` (§6 `Growable`/`ScalingPolicy` policy backlink),
-`documents/engineering/storage_lifecycle_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+
+## Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`resource_capacity_doctrine.md` §6 — Growable + ScalingPolicy, the quota-bounded dynamic provisioning arm](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm):
 implement the policy-only `ProvisionedStorageScalingEnvelope` representation and the total observe-then-plan
 `planStorageScaling` fold, so a scaling *decision* is a pure function of the retained envelope and a complete
 observed snapshot — never a live mutation, and never a check that requires a live backing.
 
 ### Deliverables
+
 - A private `ProvisionedStorageScalingEnvelope` retaining the exact budget/backing, finite backing-indexed
   policy, and desired provisioned demand projection, but no observation or speculative transition.
 - A complete `ObservedStorageScalingSnapshot` input carrier fingerprinting current allocation, residual/quota,
@@ -555,13 +342,14 @@ observed snapshot — never a live mutation, and never a check that requires a l
   StorageScalingPlan`, returning only `NoChange | AllocateWithinRetainedCarve | CreateProviderCapacity |
   ShrinkByVerifiedMigration`, with current allocation, residual/quota, and old+new migration high-water
   witnessed on every non-`NoChange` arm.
-- An in-file honesty note: Phase 28 has no mutation capability; the generic live action is validated by
+- An in-file honesty note: Phase 28 has no mutation capability; the generic live action must later be validated by
   [Phase 58 (the object reconciler)](phase_58_object_reconciler.md), the retained
   `AllocateWithinRetainedCarve`/`ShrinkByVerifiedMigration` arms are enacted by
   [Phase 60 (retained storage)](phase_60_retained_storage.md), and `CreateProviderCapacity` by
   [Phase 79 (provider dynamic nodes)](phase_79_provider_dynamic_nodes.md).
 
 ### Validation
+
 1. Each generated envelope+snapshot pair resolves to exactly one arm; the arm's witness (retained carve,
    residual quota, or old+new migration high-water) is present and derived from the snapshot, not authored; a
    mutant that emits `AllocateWithinRetainedCarve`/`CreateProviderCapacity`/`ShrinkByVerifiedMigration` without
@@ -574,27 +362,15 @@ observed snapshot — never a live mutation, and never a check that requires a l
    witnessed.
 
 ### Remaining Work
-None.
 
-## Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ✅
-**Status**: Done
-**Implementation**: `test/spec/dsl/StorageGeometryProps.hs` (QuickCheck generators for
-logical-demand/backing inputs + the property battery: BookKeeper/MinIO scenario derivation,
-presentation/allocation rounding, uniform-claim grouping, the six-arm object-store merge, the two Pulsar
-ceilings, cache nesting, provider-root storage, control-plane physical transition, migration transitions,
-and the storage `Σ ≤ backing` equivalence), reusing the Phase-27 property harness; the independently selected
-mutants live in `test/spec/dsl/StorageGeometryMutants.hs` and the `storage_geometry` registry rows.
-**Blocked by**: Sprint 28.1, Sprint 28.2.
-**Independent Validation**: `cabal test storage-geometry-spec` proves the storage folds accept exactly the in-backing
-inputs, with each equivalence property clearing its committed coverage floor in both directions, and no
-mutant in the per-geometry battery of [Gate integrity](#gate-integrity) survives. The Validation list below
-enumerates the properties and the mutants.
-**Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
-`documents/engineering/storage_lifecycle_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`,
-`documents/engineering/testing_doctrine.md` (the Register-1 property register),
-`DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+
+## Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (Register 1)
 and the honesty limit of [`resource_capacity_doctrine.md §2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed):
 express the storage-geometry fold as QuickCheck properties. Because the storage `Σ ≤ backing` sum is decidable
@@ -603,6 +379,7 @@ in-backing inputs) over generated corpora, not merely soundness — the storage 
 compute `place`.
 
 ### Deliverables
+
 - The **implementation-independent storage-envelope reference predicate** (§M.3): a committed, hand-authored
   envelope predicate authored in this phase's oracle-pinning sprint, distinct from the fold under test, that **never calls**
   `bookKeeperPhysicalDemand`, `minioPhysicalDemand`, `provisionObjectStoreProducer`, `mergeObjectStoreLogicalPeaks`,
@@ -647,6 +424,7 @@ compute `place`.
   partial match, explicit `error`, or exception. Sampling is corroborating evidence, not the totality proof.
 
 ### Validation
+
 1. The geometry-fold `accepts ⟺ in-envelope` equivalence, presentation/rounding, uniform-claim, Pulsar
    two-ceiling, cache-nesting, provider-root, and control-plane-transition properties hold over generated
    inputs, each meeting its committed `cover`/`checkCoverage` minimum of ≥30% rejecting (out-of-backing) and
@@ -657,30 +435,15 @@ compute `place`.
    individually** — the properties have teeth on every geometry obligation, not two.
 
 ### Remaining Work
-None.
 
-## Sprint 28.4: The storage-geometry fold-negative corpus + the gate ✅
-**Status**: Done
-**Implementation**:
-`test/spec/dsl/StorageGeometryFixtures.hs` holds the 30 direct post-decode geometry variants and twins pinned by
-`test/oracle/storage_geometry/storage_cases.tsv`; two Dhall dhall-typecheck pairs live under `dhall/examples/storage_geometry/` and
-are pinned by `test/oracle/storage_geometry/dhall_typecheck_cases.tsv`; the
-`legal_multisubstrate_cluster`/`legal_managed_eks` specs are decoded before their positive geometry rows run.
-`test/spec/dsl/StorageGeometry{Props,Mutants,Gate,Spec}.hs`,
-`test/oracle/storage_geometry/calculus_projection.tsv`, and `tools/storage_geometry_gate.py` provide the
-property, 31-mutant, registry-ledger, five-calculus, and sealing harnesses (§M.1,
-[Gate integrity](#gate-integrity)).
-**Blocked by**: Sprint 28.1, Sprint 28.2, Sprint 28.3; [Phase 25](phase_25_dhall_schema_generation.md) gate.
-**Independent Validation**: the gate applies the storage-geometry folds directly to each hand-authored
-logical-demand/backing fixture, so every positive row fits its backing feasibly and every negative returns
-its specific committed tag on its isolated over-backing axis, not merely "some `Left`". The numbered
-Validation list below gives the fixture-to-tag mapping.
-**Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (the
-storage §3.11/§3.17/§3.19/§3.20/§3.25 checked-rejection / `provision-seal` entries → layer-2 Register-1),
-`documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-28 status when the
-gate passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-28 `none` gate row).
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+
+## Sprint 28.4: The storage-geometry fold-negative corpus + the gate ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`illegal_state_catalog.md` §4.6 — capacity-accounting, storage checked](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 and [`§3`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent):
 assemble the phase's single Register-1 gate — the pure storage-geometry folds reject each over-backing negative
@@ -688,6 +451,7 @@ while the positive store-fits rows fit feasibly — and emit the per-entry valid
 honest foreclosure layer of each.
 
 ### Deliverables
+
 - The fold-negative fixtures — `illegal_store_over_backing` ([§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)),
   whose case table includes logical committed bytes fitting while erasure/healing, finite-horizon
   failed-write orphans, filesystem overhead, backing minimum/quantum, uniform-claim rounding, a
@@ -738,7 +502,9 @@ honest foreclosure layer of each.
   prodbox's platform-backbone recovery accounting, not an amoebius result.
 
 ### Validation
-1. `cabal test storage-geometry-spec` is green — every one of the five storage-geometry fold negatives
+
+1. Rejected historical observation: the `storage-geometry-spec` Cabal suite was recorded green — every one of
+   the five storage-geometry fold negatives
    ([Gate integrity](#gate-integrity) representative set) returns its **specific committed** tagged `Left`, both
    positive fixtures' storage-geometry rows fit feasibly, the QuickCheck battery holds at its coverage minima,
    and the committed per-geometry seeded-mutant battery ([Gate integrity](#gate-integrity)) turns the suite red
@@ -761,11 +527,13 @@ honest foreclosure layer of each.
    Register-1 proven/tested/assumed ledger over the logical-to-physical obligations above.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs updated at the gate seal:**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/resource_capacity_doctrine.md` — backlink §5/§6/§7 storage arithmetic to the
   implemented `Amoebius.Capacity.{Storage,StorageGeometry,ServiceStorage,Growable,StorageScaling}`; confirm
   every storage/retention sum stayed a checked pre-effect rejection at the post-bind `provision-seal`, and that
@@ -780,7 +548,8 @@ None.
 - `documents/engineering/testing_doctrine.md` — record the Register-1 storage-geometry property + fold ledger
   this gate emits (correspondence and runtime fidelity UNVERIFIED).
 
-**Cross-references added:**
+**Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-28 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-28 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register
@@ -790,6 +559,7 @@ None.
   — the sibling sub-phases whose base fold and composed place-witness bracket this seam.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker and phase order this document serves
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the no-unbounded-storage invariant

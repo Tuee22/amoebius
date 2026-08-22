@@ -4,28 +4,27 @@
 > workflow runtime, projection path, and infernix interaction without any application-specific browser code.
 > **Read this if**: phase 81 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 81 delivers the single-tenant low-code UI live path; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), and the plan for reaching it is owned here.
-Register 3, scoped live, on the `linux-cpu` substrate.
-The scoped gate passed on 2026-08-11; the full browser/identity/provider topology remains `UNVERIFIED`.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: DEVELOPMENT_PLAN/phase_69_spa_live_deploy.md (single-tenant portion)
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 81.1: Complete single-tenant UI slice ⏸️](#sprint-811-complete-single-tenant-ui-slice-)
@@ -36,44 +35,39 @@ The scoped gate passed on 2026-08-11; the full browser/identity/provider topolog
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-80 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 80, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-🟡 **Scoped gate passed 2026-08-11.** Pinned access/Origin/CSRF/network oracles, authorization-before-dispatch,
-fresh-challenge propagation, cross-replica routing, durable receipt authority, a real two-endpoint loopback
-socket/temporary receipt probe, and seven mutants pass. Fresh OIDC/browser, Keycloak/Envoy, Kubernetes UI
-replicas, retained Redis/PostgreSQL/MinIO/Pulsar, infernix, and provider network observers remain
-**UNVERIFIED**. Ledger `external-run-reference`.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase is the first complete live application slice. One checked UI program runs in the generic browser
-interpreter and UI-server responsibility behind Keycloak and Envoy. Its typed ports exercise SQL, object
-storage, Pulsar-backed workflow state, owner-scoped projections, and a ready infernix artifact. It tests the
+**Target capability — NOT VALIDATED.** This phase must become the first complete live application slice. One
+checked UI program must run in the generic browser interpreter and UI-server responsibility behind Keycloak
+and Envoy. Its typed ports must exercise SQL, object storage, Pulsar-backed workflow state, owner-scoped
+projections, and a ready infernix artifact. The future gate tests the
 single-tenant path only; multiple tenants, rollout continuity, and failure-domain redundancy remain separate
 phases.
-The topology uses at least two ready UI-server replicas without sticky routing. The gate pins a browser socket
+The target topology must use at least two ready UI-server replicas without sticky routing. The future gate pins a browser socket
 to replica A, originates a projection event and command receipt through replica B, and requires scoped Redis
-fanout plus durable cursor/receipt repair to deliver them to A. This establishes cross-pod routing, not HA.
+fanout plus durable cursor/receipt repair to deliver them to A. That candidate may establish bounded cross-pod
+routing only, not HA, and cannot promote itself.
 
-**Session scope:** Wire and validate one single-tenant end-to-end topology with the acceptance command
-`cabal test phase55-ui-single-tenant-live`; split if completion requires a second tenant, a release transition,
-or a replica/failure-domain fault claim.
+**Supporting observation:** a phase-number-neutral Haskell single-tenant live suite may exercise the seam; the
+sole acceptance command is `pb validate phase 81`. Split if completion requires a second tenant, a release
+transition, or a replica/failure-domain fault claim.
 
-**Phase scope:** one cohesive claim — *one generic application runs end to end with no application-specific browser code*. Everything the application needs is a plan the generic interpreter already runs.
+**Phase scope:** one cohesive target claim — *one generic application must run end to end with no
+application-specific browser code*. Everything the application needs must be a plan supported by the future
+human-approved predecessor interpreter.
 
 **Substrate:** `linux-cpu` ([§L](development_plan_standards.md#l-one-substrate-discipline)).
 
@@ -81,93 +75,59 @@ or a replica/failure-domain fault claim.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 70](phase_70_ui_projection_runtime.md) — the owner-scoped projection runtime, and [Phase 72](phase_72_ui_program_release.md), the released plan the generic interpreter runs.
-
-**Gate:** `python3 tools/run_phase_gate.py 81` deploys the concrete representative topology and satisfies
-every fixture, external observation, paired authority check, fresh challenge, bypass probe, and mutant in
-[Gate integrity](#gate-integrity). A browser screenshot, app-emitted compliance event, or `replicas=1` topology
-cannot satisfy the gate.
+**Depends on:** [Phase 80](phase_80_determinism_jitcache.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 81`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-**Representative set.** The committed topology contains one `AppId`, one Keycloak realm/tenant, two real
-subjects (`owner` and `other`), one generic UI-server Deployment, one UI projector, one Patroni database,
-one MinIO bucket/prefix, one Pulsar workflow plus owner-keyed projection, and one Phase-91 infernix workflow
-whose committed output is converted to a `ReadyArtifactHandle`. Playwright enters only through the public
-Keycloak/Envoy origin. No fake provider or direct in-cluster browser route participates.
-The UI-server Deployment has at least two replicas. A harness-controlled backend selection proves the socket
-owner and event/receipt origin are different pods; a one-replica or local-only connection-map mutant fails.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-**Pinned oracles.** Phase 0 commits `test/golden/ui_single_tenant_live/single_tenant_access.tbl`,
-`test/golden/ui_single_tenant_live/effect_observations.json`, `test/golden/ui_single_tenant_live/origin_csrf.tbl`, and
-`test/golden/ui_single_tenant_live/network_edges.tbl` before the UI runtime implementation. They independently state the
-subject/action matrix, required cross-system nonce and artifact dispatch/read observations, valid-session
-origin/CSRF outcomes, and intended plus forbidden network edges; the test never regenerates them from a bound
-plan.
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *one generic application runs end to end with no application-specific browser code*. Everything the application needs must be a plan supported by the human-approved predecessor interpreter. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 81` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 80 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**Fresh effect and external custody.** After all workloads report ready, the harness generates an unpredictable
-nonce. The owner enters it through the real browser UI, starts the workflow, and invokes the ready infernix
-artifact. Observers outside the UI runtime recover the nonce from PostgreSQL using a pinned read-only audit
-identity, from MinIO through its authenticated S3 API, from Pulsar with a separately provisioned native audit
-consumer, and from Envoy/CNI access-flow logs. MinIO request audit and an independent infernix worker
-execution/action-journal observer bind the artifact read and dispatch to the same trace/challenge. The evidence
-ledger hashes those raw observations. Missing, unauthenticated, incomplete, or nonce-mismatched evidence fails
-closed.
+## Resource provision — UNRESOLVED
 
-**Paired security and bypass checks.** The owner succeeds; the `other` subject repeats the same handle and
-payload and receives a denial while the external SQL/S3/Pulsar observers record zero foreign mutation, MinIO
-request audit records no artifact GET/HEAD, and the infernix execution/action observer records no dispatch.
-With an otherwise valid owner session, wrong `Origin`, missing CSRF, and invalid CSRF requests are sent directly
-to the mutation and artifact endpoints; each must fail before handler bytes, provider access, or dispatch.
-Unauthenticated requests, caller-authored tenant/subject headers, guessed handles, direct service addresses,
-and browser attempts to reach SQL, MinIO, Pulsar, Vault, or inference endpoints are probed independently and
-must fail. Hiding a control is not authorization evidence.
-
-**Committed mutants.** The same gate must turn red for
-`test/mutant/ui_single_tenant_live/canned_ui_response.dhall`,
-`test/mutant/ui_single_tenant_live/open_provider_edge.dhall`, and
-`test/mutant/ui_single_tenant_live/drop_ui_networkpolicy.dhall`, plus
-`test/mutant/ui_single_tenant_live/disable_csrf_check.patch` and
-`test/mutant/ui_single_tenant_live/dispatch_artifact_before_auth.patch`, plus
-`test/mutant/ui_single_tenant_live/local_socket_map_only.patch` and
-`test/mutant/ui_single_tenant_live/redis_receipt_authority.patch`. The first cannot echo the post-start nonce from
-all provider observations; the edge mutants fail the independently observed forbidden-edge table; and the
-CSRF/dispatch mutants create forbidden handler or audit bytes even if the public denial is forged.
-
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`; negatives under `test/negative/ui_single_tenant_live/`.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`extension_conformance_security.md`](../documents/engineering/extension_conformance_security.md) — single-tenant low-code UI live path carries an identity boundary, and S1-S6 are what make crossing it unrepresentable.
-- Adopt [`low_code_ui_runtime_doctrine.md` §§13–14 — the generic client/server and HA boundary](../documents/engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server): run one checked program without a bespoke frontend or server.
-- Adopt [`platform_services_doctrine.md` §9 — the single authenticated ingress](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path): every browser request crosses Keycloak and Envoy.
-- Adopt [`content_addressing_determinism.md` §4.5 — ready artifact lifecycle](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss): expose only an authorized ready infernix handle.
-- Adopt [`testing_spoof_resistance.md` §12](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): bind success to fresh provider-observed effects.
-- Adopt [`ui_realtime_coordination_doctrine.md` §§4–6](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): force cross-pod WebSocket delivery while durable cursors and receipts remain outside Redis.
+- [`extension_conformance_security.md` §4 — S1–S6](../documents/engineering/extension_conformance_security.md#4-s1s6) — single-tenant low-code UI live path carries an identity boundary, and S1-S6 are what make crossing it unrepresentable.
+- Adopt [`low_code_ui_runtime_doctrine.md` §13 — Generic PureScript client and amoebius UI server](../documents/engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server)
+  and [`low_code_ui_runtime_doctrine.md` §14 — Runtime role, deployment, and high availability](../documents/engineering/low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability): run one checked program without a bespoke frontend or server.
+- Adopt [`platform_services_doctrine.md` §9 — The LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path): every browser request crosses Keycloak and Envoy.
+- Adopt [`content_addressing_determinism.md` §4.5 — The ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss): expose only an authorized ready infernix handle.
+- Adopt [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence): bind success to fresh provider-observed effects.
+- Adopt [`ui_realtime_coordination_doctrine.md` §4 — Typed routing and resume envelope](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope),
+  [`ui_realtime_coordination_doctrine.md` §5 — Redis is ephemeral platform-internal coordination](../documents/engineering/ui_realtime_coordination_doctrine.md#5-redis-is-ephemeral-platform-internal-coordination),
+  and [`ui_realtime_coordination_doctrine.md` §6 — Durable commands, receipts, and replay](../documents/engineering/ui_realtime_coordination_doctrine.md#6-durable-commands-receipts-and-replay): force cross-pod WebSocket delivery while durable cursors and receipts remain outside Redis.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 81.1: Complete single-tenant UI slice ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Ui/Live/SingleTenant.hs`,
-`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/spec/live/UiSingleTenantSpec.hs` (planned; not
-built)
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `cabal test
-phase55-ui-single-tenant-live` against the pinned tables and provider-owned observations
-**Docs to update**:
-`documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/platform_services_doctrine.md`,
-`documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -187,7 +147,8 @@ Deliver the one-tenant generic UI runtime path and its externally observed secur
 
 ### Validation
 
-1. Run `cabal test phase55-ui-single-tenant-live` on `linux-cpu`; require all canonical observations green and
+1. Rejected historical observation: the `phase55-ui-single-tenant-live` Cabal suite expected all canonical
+   observations green on `linux-cpu` and
    each named mutant red for its pinned reason.
 2. Force the browser WebSocket onto replica A and event/receipt production through replica B, then flush Redis
    between publish and response. Reconnect/cursor/receipt lookup must recover the authoritative outcome once,
@@ -199,12 +160,14 @@ The portable and local cross-replica slice is implemented; the full provider/bro
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record the single-tenant runtime evidence.
 - `documents/engineering/platform_services_doctrine.md` — record the observed authenticated and forbidden edges.
 - `documents/engineering/testing_doctrine.md` — link the challenge-bound evidence ledger.
 
 **Cross-references to add:**
+
 - The phase tracker, substrate map, and component inventory must link this gate and its evidence.
 
 ## Related Documents

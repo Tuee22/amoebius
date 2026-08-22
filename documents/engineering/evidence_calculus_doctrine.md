@@ -1,26 +1,26 @@
 # Evidence Calculus Doctrine
 
-> **Purpose**: Single source of truth for the **evidence calculus** — the fifth component of an extension's
-> declaration, in which every claim an extension makes names the fixture that discharges it, unrepresentability
-> claims carry a compile-fail fixture apiece, and an expectation is authored from the requirement rather than
-> derived from the output it checks. It fixes what a claim–fixture binding is and when one is well formed.
-> **Read this if**: an extension is being declared, or a claim has to be tied to something that could falsify it.
+> **Purpose**: Define claim-to-fixture bindings, the evidence strength each fixture kind permits, oracle
+> independence, and the human authorization boundary.
+> **Read this if**: an extension or phase makes a claim that must be falsifiable rather than merely asserted.
 
-This document owns the evidence calculus. The machinery that *runs* fixtures — the register model, the test
-topology, the ledger, the harness — is owned by [`testing_doctrine.md`](./testing_doctrine.md) and referenced
-rather than restated. This document is about the shape of the obligation, not about how a suite executes.
+This document owns the evidence calculus. Execution registers and harness topology belong to
+[`testing_doctrine.md`](./testing_doctrine.md); spoof resistance belongs to
+[`testing_spoof_resistance.md`](./testing_spoof_resistance.md); current status belongs only to the
+[development-plan tracker](../../DEVELOPMENT_PLAN/README.md).
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, documents/engineering/README.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/workflow_calculus_doctrine.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. A claim is a value, and it names its fixture](#2-a-claim-is-a-value-and-it-names-its-fixture)
 - [3. The four fixture kinds](#3-the-four-fixture-kinds)
@@ -34,142 +34,123 @@ rather than restated. This document is about the shape of the obligation, not ab
 
 ## 1. Why this doctrine exists
 
-The other four calculi describe what an extension *does*: what it emits, what it charges, where it runs, what
-it changes. This one describes what an extension is prepared to have **falsified**.
+The other calculi describe what a declaration emits, consumes, changes, and must release. The evidence
+calculus describes what it is prepared to have falsified.
 
-Without it the obligation surface has a hole shaped exactly like the failure the whole corpus is built against.
-An extension can declare a total artifact function, a bounded grant, a closed layer set and a discharged
-teardown obligation, and still assert — in prose, in a comment, in a design document — that some state is
-impossible. Prose does not redden. The claim survives every gate, gets cited by the next document, and is
-believed until the state occurs in production.
-
-So the fifth component exists to make a claim into a value that carries its own refutation condition. An
-extension that says "this cannot happen" and names nothing that would fail if it did has not made a claim; it
-has expressed a hope, and [`../documentation_standards.md` §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)
-is the standing rule that such a sentence may not be written in the indicative.
+A prose claim survives when its implementation becomes wrong because prose has no red state. A well-formed
+evidence claim therefore carries its falsification boundary as data. This makes missing coverage visible and
+prevents “the suite passed” from standing in for the one case that matters.
 
 ---
 
 ## 2. A claim is a value, and it names its fixture
 
-A **claim** is a declared statement about the extension's behaviour paired with the fixture that would falsify
-it. The pairing is the point: neither half is admissible alone. A fixture with no claim is a test nobody can
-interpret, and a claim with no fixture is prose.
+A claim is a bounded statement paired one-to-one with a fixture capable of falsifying it. Neither half is
+admissible alone.
 
-Three rules make the binding well formed.
+Three rules make the pair well formed:
 
-- **Every claim names exactly one fixture.** A claim discharged by "the suite" is discharged by nothing in
-  particular, and stays green when the one relevant case is deleted.
-- **Every unrepresentability claim names a compile-fail fixture**, and that fixture must fail **for its pinned
-  reason and no other**. A fixture that fails because of a typo also fails when the type it was testing is
-  weakened, so an unpinned compile-fail fixture is worse than none — it is a green light wired to a loose
-  connection. This is L5 in [`extension_conformance_laws.md`](./extension_conformance_laws.md#3-l1l5-the-per-extension-laws).
-- **A claim's strength is bounded by its fixture's kind.** The claim may not be stated more strongly than
-  [§3](#3-the-four-fixture-kinds) allows for the fixture discharging it, which is what stops "the property test
-  passed" from being written down as "the property holds".
+1. **Every claim names exactly one primary fixture.** Supporting controls may be many, but responsibility for
+   the claim cannot disappear into “the suite”.
+2. **Every unrepresentability claim names a compile-fail fixture** that fails for its pinned diagnostic code
+   and locus, paired with a minimally different compiling case.
+3. **The claim cannot be stronger than its fixture kind, register, corpus, observer, or substrate.** Missing
+   layers remain `UNVERIFIED`.
 
-What this forecloses is the drift that no review catches: a claim strengthened over successive edits while the
-fixture beneath it stays where it was.
+The declaration also names the subject entry point, oracle module, reviewer, required changed-subject mutant,
+and current residue. Those bindings are Haskell values. Serialized views, fixtures, or reports are generated
+only beneath `.build/**` and cannot become an alternate evidence registry.
 
 ---
 
 ## 3. The four fixture kinds
 
-The kinds are closed, and each fixes what a passing run entitles the claim to say.
+The kinds are closed:
 
-| Kind | What a pass establishes | What it never establishes |
+| Kind | What one qualifying result establishes | What it never establishes |
 |---|---|---|
-| **Compile-fail** | the specific expression does not typecheck, for the pinned reason | that no expression of that state exists — only that this one is rejected |
-| **Property** | no counterexample was found in the generated sample | that none exists; a property test exhibits counterexamples and cannot certify absence |
-| **Oracle** | the output satisfies an independently authored predicate | that the predicate captures the requirement |
-| **Live probe** | the running system did this, once, in this environment | that it will do it again, or anywhere else |
+| **Compile-fail** | The named expression is rejected for the pinned reason and locus | That no other expression can inhabit the state |
+| **Property** | The explored sample found no counterexample and met its coverage obligations | Universal truth outside that sample |
+| **Oracle** | The observed output satisfied a separately reviewed predicate | That the predicate fully captures the requirement |
+| **Live probe** | A fresh effect was externally observed once on the named substrate | Repeatability, another substrate, or uncompromised infrastructure |
 
-Two consequences are worth stating because they are routinely got wrong in this corpus and elsewhere.
-
-A **compile-fail corpus is not an exhaustiveness proof.** Foreclosing a state means the type admits no
-inhabitant; a fixture demonstrates one rejected expression. The gap between them is closed by the argument that
-the type is right, not by adding fixtures, and that argument is a human one
-([`../illegal_state/illegal_state_techniques.md` §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
-
-A **property suite is evidence of presence, never of absence.** Any claim of universal quantification
-discharged by property testing is conditional, and must be written as conditional. C1 in the law family is the
-worked example ([`extension_conformance_laws.md` §4](./extension_conformance_laws.md#4-c1c7-the-compositional-laws)).
+A fixture that fails for an unrelated reason does not discharge its claim. A live probe without a post-start
+challenge and external observer is a subject report, not live evidence. A byte equality without independent
+semantics establishes only byte equality.
 
 ---
 
 ## 4. Independence is what makes a fixture worth running
 
-A fixture derived from the thing it checks tests that a program agrees with itself.
+An expectation derived from the output it checks proves that a program agrees with itself. Independence
+therefore requires all of the following:
 
-This is the one place the generative rule of [`jit_artifact_doctrine.md` §2](./jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list)
-stops short, and it stops short deliberately: expectations are on the exception list. A fixture's *mechanism*
-may be generated — how it walks a tree, parses a document, drives a browser. Its *expectation* is authored from
-the requirement, by a path that does not run through the machinery under test.
+- the expectation is authored from the requirement;
+- the oracle does not import, call, copy, or mechanically translate subject decision logic;
+- the oracle is separately reviewed, and its reviewer is not the subject's sole author;
+- subject and expectation chronology is known, or an explicit independent review supplies the missing
+  provenance; and
+- amending the expectation invalidates affected evidence and re-runs its mutants.
 
-The test has a sharp form. **If the generator were wrong, would this fixture still be red?** An oracle written
-from the requirement stays red. A golden captured from last week's output goes green the moment the wrong
-output becomes the new golden, which is why byte goldens of generated output were replaced by semantic oracles
-([`jit_artifact_doctrine.md` §7](./jit_artifact_doctrine.md#7-goldens-become-oracles)).
+Independent oracle logic is `.hs`. A Dhall/JSON/YAML/TSV/golden copy is not made independent by being written
+in another format; it is behavioural source outside the closed Haskell boundary. When bytes or another format
+are required at an interface, Haskell derives them lazily beneath `.build/**`, while a separate Haskell
+semantic predicate states the expectation.
 
-The self-referential case is the hard one, and it is not fully soluble. amoebius's own gates are workflows in
-the algebra those gates validate ([`workflow_calculus_doctrine.md` §5](./workflow_calculus_doctrine.md#5-the-self-referential-suite)),
-so a fixture cannot always be authored by a path outside the machinery. What is available is a **mutation
-argument**: a corpus of deliberately broken inputs, each of which the gate must reject for a named reason. A
-gate that passes its mutants is not proved correct, but a gate that is consistently wrong in the same direction
-as its subject will pass a mutant it should have caught. The corpus is owned by
-[`testing_doctrine.md` §12](./testing_doctrine.md#12-spoof-resistant-evidence).
+Self-referential gates do not receive a special exemption. Their workflow representation may exercise the
+same calculus, but it cannot authorize its own verdict. The independently reviewed oracle/harness must first
+reject the fixed sabotage corpus, every mutant must demonstrate a changed production locus, raw observations
+must be retained, and a human-held external signature is the only promotion authority. Mutation sensitivity
+is one falsification technique within that boundary, not a cure for shared authorship.
 
 ---
 
 ## 5. What evidence is worth is the register's business
 
-This calculus fixes the *binding*. It does not fix what a discharged claim is worth, because that depends on
-where the fixture ran: a pure property suite, a boundary run against fakes, and a live run on real hardware
-discharge the same claim to three different strengths.
+The claim-to-fixture binding does not determine the strength of a result. Register 1 establishes value/model
+behaviour, Register 2 establishes the protocol presented to an externally observed fake, Register 2.5 tests
+real concurrent code against a modeled environment, and Register 3 records a live effect on one real
+substrate. The definitions live in
+[`testing_doctrine.md` §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing).
 
-That scale is the register model, owned by
-[`testing_doctrine.md` §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing). An extension's evidence
-component declares the register each fixture runs at, and a claim inherits the weakest register among the
-fixtures discharging it. Declaring a register the fixture cannot reach is itself an illegal state — it is the
-same defect as an unpinned compile-fail fixture, one level up.
+A claim inherits the weakest required observation. Supporting lower-register checks cannot promote a live
+claim, and hardware success cannot compensate for an unvalidated decode, binding, planning, or rendering
+claim. The development plan therefore places a complete no-hardware DSL promotion barrier before host and
+hardware gates.
 
 ---
 
 ## 6. The residue
 
-Stated plainly, because an evidence calculus is exactly the kind of machinery that reads as a guarantee:
+The calculus makes claims reviewable and falsifiable; it does not make them true.
 
-- **It does not make a claim true.** It makes a claim falsifiable and binds it to the thing that would falsify
-  it. A well-formed claim with a passing fixture can still be false, if the fixture is weak.
-- **It does not choose the fixtures.** Which cases are worth a fixture is a design judgement, and an extension
-  that declares an easy fixture for a hard claim satisfies this calculus completely.
-- **It does not close the self-referential gap.** [§4](#4-independence-is-what-makes-a-fixture-worth-running)'s
-  mutation argument reduces the risk; it does not eliminate it, and a gate and its subject sharing an author
-  share that author's blind spots.
-- **The claim value, the fixture binding, and the register declaration are built; the judgement is not.**
-  [Phase 7](../../DEVELOPMENT_PLAN/phase_07_evidence_calculus.md) delivered a claim that carries its
-  discharge, the four kinds paired one-to-one with what each entitles a claim to say, the register model as a
-  value, and the mutant record with its carrier and its locus — all as pure values in Register 1. The three
-  residues above are untouched by that, and the third one especially: the phase's own inventory is a hand
-  written one for a *different* phase, which makes the derivation and the expectation two errors rather than
-  one, and does not make them independent. Status lives only in the
-  [tracker](../../DEVELOPMENT_PLAN/README.md).
+- It does not prove that a human-authored oracle is correct.
+- It does not turn finite sampling into universal proof.
+- It does not prove the compiler, kernel, observer, authority, provider, hardware, or reviewer uncompromised.
+- It does not let a generated bundle, digest, attestation, or exit code authorize status.
+- It does not let prior evidence survive a changed contract, subject, oracle, source boundary, or predecessor.
+
+Every result names these limits as assumptions or `UNVERIFIED` residue. The present reset marks every numbered
+phase NOT VALIDATED, so this doctrine carries no current implementation-result instance.
 
 ---
 
 ## 7. Planning ownership
 
-This document is normative only. Which phase delivers the claim value, the fixture kinds, and the register
-declaration is owned by [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Normative shapes are
-design intent; only explicitly named phase instances are tested amoebius results.
+This doctrine is normative design intent. Phase order, current status, the fixed gate table, qualification,
+and human promotion live in `DEVELOPMENT_PLAN/`. A phase adopts this calculus by naming its bounded claim,
+Haskell subject, independently reviewed Haskell oracle, qualifying controls, changed-subject mutant, register,
+and residue.
 
 ---
 
 ## Related Documents
-- [Engineering Doctrine Index](./README.md)
-- [Extension Conformance Doctrine](./extension_conformance_doctrine.md) — the hub, whose [§3](#2-a-claim-is-a-value-and-it-names-its-fixture) obligation surface this calculus is the fifth component of
-- [Extension Conformance Laws](./extension_conformance_laws.md) — L5, the per-extension law this calculus states in full
-- [Testing Doctrine](./testing_doctrine.md) — the register model, the harness, and the mutant corpus this calculus defers to
-- [JIT Artifact Doctrine](./jit_artifact_doctrine.md) — the generative rule, and why expectations are excepted from it
-- [Workflow Calculus Doctrine](./workflow_calculus_doctrine.md) — the self-referential suite that makes independence hard
-- [Illegal-State Techniques](../illegal_state/illegal_state_techniques.md) — the foreclosure layers a compile-fail fixture reports against
+
+- [Engineering doctrine index](./README.md)
+- [Extension conformance doctrine](./extension_conformance_doctrine.md)
+- [Extension conformance laws](./extension_conformance_laws.md)
+- [Testing doctrine](./testing_doctrine.md)
+- [Testing spoof resistance](./testing_spoof_resistance.md)
+- [JIT artifact doctrine](./jit_artifact_doctrine.md)
+- [Workflow calculus doctrine](./workflow_calculus_doctrine.md)
+- [Development-plan gate integrity](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md)

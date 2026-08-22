@@ -1,32 +1,34 @@
 # Phase 20: The extension declaration
 
-> **Purpose**: Make an extension one complete, inspectable value with a mandatory component from each core
-> calculus, one request-scope index, exact resource accounting, and a content-derived identity.
+> **Purpose**: Specify the target Haskell capability to represent an extension as one complete
+> Haskell value with every core-calculus component, one request-scope index, exact resource
+> accounting, and a content-derived identity.
 > **Read this if**: the extension value, its five readers, its canonical identity, or the boundary between a
 > declaration and later conformance-law machinery must change.
 
-This phase owns `lib:extension-declaration`, the complete declaration shape, and its bounded Register-1
-evidence. It consumes the five-component algebra from Phase 10. It does not state or discharge L-, C-, S-, or
-P-laws, generate a conformance suite, mint a verdict, prove declaration uniqueness within a linked library, or
-claim that the two fixture declarations are conforming domain extensions.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md, documents/engineering/extension_conformance_laws.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 20.1: Complete indexed declaration ✅](#sprint-201-complete-indexed-declaration-)
+- [Sprint 20.1: Complete indexed declaration ⏸️](#sprint-201-complete-indexed-declaration-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -34,101 +36,85 @@ claim that the two fixture declarations are conforming domain extensions.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All thirteen gate sides passed on natural `arm64`, untranslated: ten exact
-metrics matched and 18 surfaces joined to 20 run-time items. Attestation
-`sha256:8fda8331662847891e69173fe8ea43b041c4aa43ef688638b921085ff62c8d99` binds source
-`sha256:fedf29ba024d1e10…` over 2,216 files. Repository-conformance attestation
-`sha256:e75686f058eebb27e43c237b5f2895ce30cd619dfdcb6694790a1604dc18723b` and documentation attestation
-`sha256:4de39c603a98df36753941c11af1766f33b392458f1844f4dc86d0a34f8ac986` passed on that snapshot. The
-declaration boundary and canonical identities are tested only over the declared corpus; SHA-256 collision
-absence is ASSUMED, and law conformance plus runtime fidelity remain UNVERIFIED.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 19, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-`lib:extension-declaration` exports an opaque `ExtensionDeclaration scope`. Its only normal constructor takes
-an extension name and exactly five `Component scope` arguments in artifact, budget, lift, workflow, and
-evidence order. It rejects an empty extension name and a component occupying the wrong calculus slot. Because
-all five arguments share the same generative request-scope variable, components minted by different requests
-do not typecheck together. Each component retains its own resource vector; the declaration's resource index is
-the exact Phase-10 natural-number composition fold.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to represent an extension as one complete Haskell value with every
+core-calculus component, one request-scope index, exact resource accounting, and a content-derived
+identity.
 
-Five calculus-specific readers derive singleton sets from the stored components. A canonical payload
-projection maps recipes, allowances, layers, structured workflow ledgers, and evidence registers to explicit
-semantic fields without `Show`; the declaration digest is SHA-256 over the version, extension name, calculus
-tag, component name, four resource coordinates, and those payload fields, each independently length-framed.
-Collision resistance is assumed, not proven.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
 
-The bounded corpus contains two fixture declarations, `infernix` and `jitml`, with ten independently authored
-semantic rows. They are declaration-shape fixtures only: neither is a Phase-21 law verdict nor the later live
-re-derivation of its namesake seed. The Haskell suite compares all readers to the table, checks exact calculus
-order and resource totals, and emits observations beneath `.build/**`. Python independently recomputes both
-digests from the authored fields. A legal five-component/same-scope program compiles; the adjacent missing-
-component and cross-request programs fail at constructor arity and request-scope equality. Three mutations
-make one component optional, erase the scope index, or omit the declared recipe from its reader, and each is
-observed at its named locus.
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
 
-**Phase scope:** Two concrete declaration-shape fixtures, ten mandatory components, five exact readers, two
-semantic refusals, two compiler barriers, two independently recomputed identities, and three mutants; a law
-property, conformance verdict, link-set rule, runtime extension, or additional calculus belongs to its owning
-later phase.
-**Substrate:** none
-**Lane:** none
-**Register:** 1 — pure declaration construction, authored semantic oracles, compiler negatives, and mutation.
-**Depends on:** [Phase 10](phase_10_calculus_composition.md) — supplies the closed five-calculus component sum,
-same-request index, component resource vectors, exact composition fold, and canonical payload projections.
-**Gate:** `python3 tools/run_phase_gate.py 20` passes ten exact metrics, two-declaration/ten-component
-inventory agreement, independent SHA-256 recomputation, two typed barriers, three exact mutants, an
-18-surface/20-item join, architecture, containment, write guard, ledger, and source-bound attestation; [Gate
-integrity](#gate-integrity) owns the anti-tautology apparatus.
+**Phase scope:** Target capability only — represent an extension as one complete Haskell value with
+every core-calculus component, one request-scope index, exact resource accounting, and a
+content-derived identity. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 19](phase_19_reconcile_core_simulation.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 20`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set (§M.7):** two fixture declarations each carry exactly one artifact, budget, lift,
-  workflow, and evidence component; their ten rows vary every payload kind and both declaration identities.
-- **Independent oracle (§M.1/§M.3):** `inventory.tsv` is authored from the two fixture definitions. The gate's
-  Python implementation separately length-frames those semantic fields and recomputes SHA-256; no digest or
-  generated output is committed as an oracle.
-- **Mutation quota (§M.2):** optional evidence, erased request-scope equality, and omitted artifact-reader
-  output redden `RequiredComponents`, `ScopeIndexPreserved`, and `ArtifactReaderComplete` respectively.
-- **Specific-reason negatives (§M.8):** the legal five-component/same-scope program runs first. Its four-
-  component sibling fails because `declareExtension` still awaits a component; its mixed-request sibling fails
-  at the `RequestScope` equality. Each production mutation makes only its corresponding forbidden program run.
-- **Finite coverage honesty (§M.4):** exactly two names, ten components, two semantic refusals, and the empty
-  workflow-ledger payload are tested. Arbitrary extensions, non-empty workflow-ledger payloads, SHA-256
-  collision absence, and runtime fidelity are not inferred.
-- **External observation (§M.5/§M.10):** the authored table, independent Python digest, and GHC diagnostics
-  observe the library. The production module does not decide its own verdict.
-- **Authority/bypass (§§M.11–M.12):** the constructor is private and its checked smart constructor is the only
-  normal introduction rule. Whether a linked extension has an undeclared side channel or multiple competing
-  declaration values is a later law/admission question and remains UNVERIFIED.
-- **Fresh challenge (§M.9):** not applicable. This is a pure value boundary and accepts no effectful response;
-  the independently authored predicate and changed-name digest control are the challenge.
-- **Extension conformance (§M.13).** Not applicable: this phase builds the contract. It does not
-  claim either fixture has a conformance verdict.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — represent an extension as one complete Haskell value with every core-calculus component, one request-scope index, exact resource accounting, and a content-derived identity. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 20` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 19 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`extension_conformance_doctrine.md` §2](../documents/engineering/extension_conformance_doctrine.md#2-what-an-extension-is): the extension boundary is an inspectable value.
-- [`extension_conformance_doctrine.md` §3](../documents/engineering/extension_conformance_doctrine.md#3-the-obligation-surface-one-component-per-calculus): the value has one mandatory component per calculus.
-- [`extension_conformance_doctrine.md` §6](../documents/engineering/extension_conformance_doctrine.md#6-the-verdict-seal): declaration identity is content-derived; verdict construction remains later work.
+- [`extension_conformance_doctrine.md` §2 — What an extension is](../documents/engineering/extension_conformance_doctrine.md#2-what-an-extension-is): the target extension boundary is an inspectable Haskell value.
+- [`extension_conformance_doctrine.md` §3 — The obligation surface: one component per calculus](../documents/engineering/extension_conformance_doctrine.md#3-the-obligation-surface-one-component-per-calculus): the target value must have one mandatory component per calculus.
+- [`extension_conformance_doctrine.md` §6 — The verdict seal](../documents/engineering/extension_conformance_doctrine.md#6-the-verdict-seal): the target declaration identity is content-derived; verdict construction remains later work.
 
 ## Sprints
 
-## Sprint 20.1: Complete indexed declaration ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done.
-**Implementation**: `src/extension-declaration/Amoebius/Extension/Declaration.hs`,
-`src/calculus-composition/Amoebius/Calculus/Composition.hs`,
-`test/spec/extension/ExtensionDeclarationSpec.hs`,
-`test/negative/compile_fail/extension_declaration/DeclarationCompile.hs`,
-`test/mutant/extension_declaration/ExtensionDeclarationMutants.hs`,
-`test/oracle/extension_declaration/{inventory,mutation_catalog}.tsv`,
-`test/oracle/extension_declaration_surfaces.tsv`, and `tools/extension_declaration_gate.py`.
-**Blocked by**: None.
-**Independent Validation**: the ten-row authored inventory and independent Python digest implementation agree
-with the actual readers; GHC rejects both adjacent illegal programs at their pinned reasons.
-**Docs to update**: `documents/engineering/extension_conformance_doctrine.md` and
-`DEVELOPMENT_PLAN/{README,overview,system_components}.md`.
+## Sprint 20.1: Complete indexed declaration ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -151,15 +137,22 @@ effect runs.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-Update [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) only
-after the capability gate passes, distinguishing the tested declaration boundary from unimplemented law,
-gate-generation, verdict, and runtime claims.
+**Engineering docs to update (when the human promotes the gate, never before):**
+
+- [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — after
+  promotion, distinguish the accepted declaration boundary from unimplemented law, gate-generation, verdict,
+  and runtime claims.
+
+**Cross-references to add:**
+
+- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
 
 ## Related Documents
+
 - [Development Plan](README.md)
 - [Phase 10](phase_10_calculus_composition.md) — the component and index algebra this phase stores.
 - [Phase 21](phase_21_extension_laws_per_extension.md) — the first laws instantiated over this value.

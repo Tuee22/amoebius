@@ -14,17 +14,15 @@ replay. It does not own the online runtime it pairs with, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
-
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. Scope and adjacent owners](#2-scope-and-adjacent-owners)
-- [3. The authored continuity surface](#3-the-authored-continuity-surface)
+- [3. The external continuity surface](#3-the-external-continuity-surface)
 - [4. Queueable ports are a stricter port class](#4-queueable-ports-are-a-stricter-port-class)
 - [5. One bound program, paired online and offline plans](#5-one-bound-program-paired-online-and-offline-plans)
 - [6. Closed browser facilities and encrypted storage](#6-closed-browser-facilities-and-encrypted-storage)
@@ -83,7 +81,8 @@ them.
 
 ---
 
-## 3. The authored continuity surface
+<a id="3-the-authored-continuity-surface"></a>
+## 3. The external continuity surface
 
 `UiSource` adds one mandatory closed field:
 
@@ -101,10 +100,10 @@ Conceptually, `OfflineSource` contains:
 }
 ```
 
-Phase 41's concrete Register-1 mirror uses `Projection { projectionId : Text }`,
+The bounded Haskell mirror may use `Projection { projectionId : Text }`,
 `BlobClass { blobClassId : Text }`, and a textual `offlineView`. Those identifiers are language-level keys;
-the richer browser policy, retention labels, encrypted stores, and runtime handles remain later-phase types
-and are UNVERIFIED by the pure compiler gate.
+schemas, examples, test cases, and serialized browser plans are generated beneath `.build/**` from Haskell.
+An operator's actual `UiSource` value remains external or local-untracked input.
 
 `OnlineOnly` preserves the memory-only behavior. `Offline` names semantics only: values that may be projected
 locally, ports whose user intent may be queued, blob classes needed before upload, and the bounded view shown
@@ -349,12 +348,12 @@ not equivalent to server-side Vault custody. Encryption at rest does not protect
 compromised same-origin runtime code, browser extensions, or a compromised device; CSP, dependency integrity,
 the bounded generated client, and local unlock reduce that exposure but do not remove it.
 
-Phase 45 validates the local browser portion in Register 2. The production PureScript graph and generic bundle
-compile with the five closed offline facilities; two real Chrome processes preserve and recover a fresh
-AES-GCM canary from encrypted IndexedDB, enforce own/foreign partitions and one fenced Web Locks owner, observe
-BroadcastChannel handoff, retain only the immutable service-worker asset set, and report quota refusal. The
-five-calculus projection accounts for 50 units and all six reference mutants redden. Server replay and live
-multi-zone continuity remain UNVERIFIED. Status and evidence remain solely in the
+Only after the human user accepts the hardware-free UI/DSL/generator barrier may the local browser gate
+compile freshly generated PureScript with the closed offline facilities. Separate
+browser processes must preserve and recover a fresh encrypted canary, enforce partitioning and fenced
+ownership, observe handoff, retain only the generated immutable asset set, and report quota refusal. Haskell
+oracles and Haskell-declared production-source mutants must be reviewed independently; browser/container
+success cannot retroactively qualify their generator or expectations, and status remains solely in the
 [Development Plan](../../DEVELOPMENT_PLAN/README.md).
 
 The sibling `mattandjames` repository supplies implementation evidence for the motivating

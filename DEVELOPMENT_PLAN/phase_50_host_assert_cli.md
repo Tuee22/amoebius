@@ -1,35 +1,37 @@
-# Phase 50: The `pb` host-assertion CLI
+# Phase 50: Validate the bounded `pb` → Haskell handoff
 
-> **Purpose**: Deliver the one pre-binary tool amoebius owns — a Python CLI that asserts the host floor
-> idempotently, builds `exe:amoebius`, and hands off — and prove it does nothing else.
-> **Read this if**: a bare host has to reach a built amoebius binary, or the `pb` command surface has to change.
+> **Purpose**: Validate the runtime behavior of the already source-closed non-Haskell exception: make the
+> minimal platform distinction, establish the contained Haskell toolchain, build the exact binary, and exec
+> it with opaque user arguments.
+> **Read this if**: Phase 49 has been human-approved or a bare checkout's already-bounded handoff must be
+> observed without giving Python command or verdict authority.
 
-This phase owns the pre-binary boundary: what `pb` asserts, what it builds, and where it stops. It does not
-own anything the binary does after the handoff — the ensure algebra is
-[Phase 51](phase_51_host_ensure_kernel.md)'s and every later host action is the binary's, as
-[`substrate_doctrine.md` §6](../documents/engineering/substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)
-fixes. Its one prerequisite is the target tree [Phase 2](phase_02_repository_layout_conformance.md) moved.
+Phase 0 owns source-role closure for `pb/**`, and Phase 49 requires that closure before the no-hardware DSL
+barrier can be promoted. This phase does not migrate or pardon source. It validates the effectful runtime
+handoff of the already-bounded exception without moving product, test, oracle, gate, host-policy, help, or
+version logic into Python.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/substrate_doctrine.md, pb/README.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 50.1: The Poetry distribution and its quality gate ✅](#sprint-501-the-poetry-distribution-and-its-quality-gate-)
-- [Sprint 50.2: The closed command topology ✅](#sprint-502-the-closed-command-topology-)
-- [Sprint 50.3: The idempotent host assertions ✅](#sprint-503-the-idempotent-host-assertions-)
-- [Sprint 50.4: Build and hand off ✅](#sprint-504-build-and-hand-off-)
+- [Sprint 50.1: Bind the already-bounded bootstrap surface ⏸️](#sprint-501-bind-the-already-bounded-bootstrap-surface-)
+- [Sprint 50.2: Ensure and build in the contained root ⏸️](#sprint-502-ensure-and-build-in-the-contained-root-)
+- [Sprint 50.3: Exec-only validation handoff ⏸️](#sprint-503-exec-only-validation-handoff-)
+- [Sprint 50.4: Bounded-bootstrap candidate ⏸️](#sprint-504-bounded-bootstrap-candidate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,243 +39,217 @@ fixes. Its one prerequisite is the target tree [Phase 2](phase_02_repository_lay
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-22. The workflow-routed eleven-sided gate passes on natural `arm64`, untranslated:
-the Poetry/Click quality floor is green at 100% branch coverage; all 36 command, check and mutant surfaces
-join; the fake-host replay converges once and mutates nothing thereafter; all four seeded defects redden
-their exact checks; and the gate leaves both the authored tree and the outside-host inventory unchanged. Its
-fresh tool environment is contained beneath `.build/toolchain/host_assert_cli/`, including Poetry and pip
-caches. Attestation `sha256:452fc0ad35e56526c952558ff578a5fa175a00856f6af20b885630befda86ace`
-binds source `sha256:48c9e75353198eb4…` over 2,318 files. Phase 51 is now the sole open contract.
+⏸️ Blocked — NOT VALIDATED.
 
-Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
-change what this phase's gate must cover, so any earlier seal is history and no longer presents completion
-evidence.
-
-The run found four defects in this phase's own work, each now fixed and covered: the escape-hatch scan
-decoded `.pyc` bytecode as UTF-8; it also reported prose that merely *named* a banned construct, which
-made the rule unstatable in the module that states it; `linux-cuda`'s floor was read as forking
-`linux-cpu`'s rather than extending it; and `available_memory` used `SC_AVPHYS_PAGES`, which Darwin
-does not define — so the capacity admission was Linux-only and undecidable on two catalogue members.
+Blocked by the redesigned Phase 49 no-hardware DSL barrier and its human approval, including zero
+`LTD-SRC-008` findings. Every prior `pb` quality
+gate, Python test result, surface inventory, seal, receipt, completion claim, or fake-host result is invalidated
+as validation evidence. Existing implementation is an **Observed footprint / Known partial** only.
 
 ---
 
 ## Phase Summary
 
-`pb` is the only amoebius program that runs before an amoebius binary exists, and the whole design pressure
-on it is to stay small. It asserts the per-substrate floor — the package-manager root, a hardware or firmware
-fact, a credentialed account — resolves GHCup, GHC and Cabal, builds `exe:amoebius`, and replaces itself with
-it. Everything richer is the binary's, because the no-environment, no-`PATH` contract cannot begin until
-there is a binary to enforce it.
+The accepted source role is a Phase-0 precondition, not this phase's conclusion. Python may make only the
+minimal platform distinction necessary to select the direct toolchain-establishment adapter, establish the pinned
+GHC/Cabal toolchain beneath `.build/**`, build the single Haskell executable, and replace itself with that
+exact executable. Every user argument is opaque and forwarded unchanged. Empty argv, help, version,
+bootstrap, validation, unknown verbs, and future commands are all interpreted after handoff by Haskell.
 
-What this phase adds beyond today's package is rigour rather than reach. `pb` is currently an `argparse` CLI
-under a bare setuptools `pyproject.toml` with no type checker, no formatter, no linter and no test suite
-configured anywhere in the repository. This phase gives it a Poetry distribution installed with `pipx`, a
-closed Click command topology, an explicit self-update surface, and a quality gate that runs before anything
-it produces is trusted.
+The accepted Python grammar is a deny-by-default reviewed Haskell value, `PbBootstrapGrammar`. Its closed
+syntax/import/call graph rejects every unsupported node and, explicitly, `eval`, `exec`, `compile`, dynamic
+import, reflection or `getattr` dispatch, import hooks, decorators, metaclasses, monkeypatching, plugin
+discovery, shell execution, FFI, and network effects. All permitted filesystem and process effects route
+through one injected `BootstrapAdapter`, observed outside Python. A keyword scan or public-help inventory
+cannot satisfy this contract.
 
-**Phase scope:** one cohesive claim — *the pre-binary assertions are idempotent, the command surface is
-closed, and the handoff is the program's last act*. Its sprint seams are the distribution, the topology, the
-assertions, and the handoff. It splits if a second acceptance register or a second substrate appears.
-
-**Substrate:** `none` — the assertions run against a committed fake-host boundary, not a host ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
-
-**Lane:** none ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
-
-**Register:** 2 — boundary-with-fakes: the claim is about a tool boundary, not about a value ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
-
-**Depends on:** [Phase 2](phase_02_repository_layout_conformance.md)
-
-**Requires**: `host-floor`
-
-**Gate:** `python3 tools/run_phase_gate.py 50` passes every check named in
-[Gate integrity](#gate-integrity). Phase 51 does not open until it is green.
-
----
+**Phase scope:** one cohesive claim — the Phase-0-classified `pb` handoff establishes the contained Haskell toolchain, builds the exact source-bound binary, forwards every argv unchanged, and terminates through the single observed exec adapter without retaining authority. It splits if Python is asked to interpret a user command or perform any post-handoff capability.
+**Substrate:** `none`
+**Lane:** `none`
+**Register:** 2
+**Depends on:** [Phase 49](phase_49_self_referential_gates.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 50`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The gate is `python3 tools/host_assert_cli_gate.py`, and it decides four things that are checkable without a
-host.
+**Contract review**: REWRITTEN — NOT VALIDATED; implementation and independent review remain open.
 
-
-**The quality floor is a precondition, not a report.** `poetry run python -m pb.check_code` runs `ruff`,
-then `black --check`, then `mypy` under `strict` with `disallow_any_explicit`, fail-fast in that order; and
-`poetry run python -m pb.test_all` runs the suite at 100% branch coverage. A violation aborts the gate before
-any assertion is exercised, because a style or typing failure should cost seconds rather than a full run.
-
-**Idempotence is proved by replay against a committed fixture, not asserted.** Each assertion is driven
-through an absent → present → present transcript held in `test/fixture/host_assert_cli/`. The first run must
-converge, the second must report converged, and the second must mutate nothing — the transcript records
-every argv the run issued, and an empty mutation set on the second pass is the property.
-
-**The command surface is closed and the oracle is independent.** `test/oracle/host_assert_cli_surfaces.tsv`
-enumerates every command, its options, and whether it is maintainer-only; the gate joins the parser's own
-introspection against it in both directions, so a command the oracle does not name and an oracle row no
-command implements are both failures. An unknown verb resolves to no command.
-
-**Four seeded mutants must redden**, each at its own check and no other, registered in
-`test/mutant/registry.tsv`: an assertion that reports converged without probing; an assertion whose second
-run mutates; an invocation that names a bare command instead of an absolute path; and a run that continues
-past a floor refusal.
-
----
-
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/host_assert_cli/`.
+| Key | Phase-50 contract |
+|---|---|
+| `Claim` | Given the already accepted `PbBootstrapGrammar`, `pb` makes only the platform distinction required to establish the contained toolchain, builds the exact source-bound Haskell executable, and execs it with every user argument unchanged. Python never interprets a public command, host-floor policy, help/version behavior, product result, evidence, or verdict. Real-host capability claims are excluded. |
+| `Subject` | The exact Phase-0-classified Python paths under `pb/pb/` and their single injected `BootstrapAdapter`, exercising toolchain establishment, build, and exec handoff. The Haskell validator `Amoebius.Validation.PbBoundary` is the harness, not the subject. Packaging metadata is structural input; admin/runtime/test/verdict paths are forbidden. |
+| `Command` | `pb validate phase 50`; the outer `pb` instance must itself end by execing the source-built Haskell binary, which runs the Phase-50 fake-boundary contract and owns the candidate verdict. |
+| `Oracle` | Planned `test/Amoebius/Validation/PbBoundaryOracle.hs`, separately authored from the bootstrap implementation and independently human-reviewed. It states `PbBootstrapGrammar`, the exact allowed imports/effect adapter, build identity, opaque argv handoff, and platform-specific exec observation. Reviewer is unassigned; this blocks validation. |
+| `Positive controls` | Haskell-described fake adapters cover the minimal supported platform choices, absent/present toolchain, first build/converged rebuild, and opaque argv cases including empty, help, version, validation, unknown, and adversarial-looking values. Each names exact reads, writes, process tree, binary digest, argv bytes, and exit observation without assigning meaning to the argv. |
+| `Paired negatives` | Minimal pairs cover unsupported platform, ambient `PATH` selection, user-home/system-temp writes, source-adjacent cache, skipped ensure, stale or non-source-built binary, direct effects outside `BootstrapAdapter`, no exec, reordered/rewritten/dropped argv, swallowed/forged exit, and every forbidden syntax/import/effect family named by `PbBootstrapGrammar`. |
+| `Mutants` | Haskell copies the indexed `pb` source into a run-owned `.build/source-snapshot/**`, applies one witnessed mutation per forbidden family and handoff invariant, builds and executes only that changed snapshot, and proves the Git index and worktree are byte-identical before and after. Mutants include skipped probe, ambient command, external write, stale binary, return instead of exec, argv rewrite, forced zero exit, and each dynamic-execution/import/reflection/hook/decorator/metaclass/monkeypatch/plugin/shell/FFI/network bypass. Each named row turns red while unrelated controls remain green. |
+| `Discovery` | A complete Python AST and resolved import/call/effect graph is joined bidirectionally to the closed Haskell `PbBootstrapGrammar`; unsupported syntax and unresolved calls refuse. Runtime observation independently joins every filesystem/process effect to the single `BootstrapAdapter` and proves every successful terminal path reaches exact-binary exec. Empty/partial discovery, a lexical-only scan, an unclassified path, or an unobserved effect refuses the run. |
+| `Challenge` | The fake Haskell binary is created after `pb` starts and receives a fresh unpredictable argv/environment canary. Its independent process observer must recover that canary and exact source-built binary digest after the handoff. |
+| `Observer` | An OS-boundary Haskell supervisor records executable paths, argv, environment allowlist, file operations, process replacement/tree, stdin/stdout/stderr, and exit propagation. Subject-emitted logs or ledgers are not evidence. Missing replacement/process observation fails closed. |
+| `Authority/bypass` | Probes supply command-looking and adversarial argv, call internal modules directly, supply caller-selected executable paths, seed stale binaries, inject `PATH` tools, and exercise every forbidden grammar/effect family. User argv remains opaque and reaches Haskell unchanged; every attempt to route an effect around `BootstrapAdapter` or execute another binary refuses. |
+| `Freshness` | Toolchain/build roots and fake executable are run-owned beneath a fresh `.build/**` tree; first and converged runs prove which path executed. Pre-existing stable binaries, caches, evidence, or worktree-generated inputs cannot satisfy the gate. |
+| `Qualification` | The Haskell harness first rejects constant success, no-op bootstrap, wrong binary, empty AST/effect discovery, missing oracle, skipped/no-op mutant, wrong-locus failure, stale evidence, self-reported exec, argv bypass, external writes, an unsupported grammar node, and an effect outside `BootstrapAdapter`. |
+| `Cleanroom` | The run starts without `.build/**`, source-adjacent Python caches, prior binary, evidence, or condemned `pb` residue. Mutations occur only in indexed copies beneath `.build/source-snapshot/**`; toolchain/build/test output stays beneath `.build/**`; the external observer proves the Git index and worktree are unchanged. |
+| `Legacy closure` | Phase 50 owns no migration row. The exact Phase-49 approval binds a snapshot on which `LTD-SRC-008` and all source-migration queries were already zero; this run refuses any mismatch or reintroduction rather than attempting to close it. |
+| `Predecessor` | The exact external human approval for Phase 49. `pb` cannot manufacture or substitute it, and the Phase-50 run refuses a missing, stale, or locally shaped receipt. |
+| `Residue` | `UNVERIFIED`: real host package managers and permissions; the Phase-51 Haskell ensure algebra; Docker/Colima/WSL; hardware; images; registry; cluster; and all runtime behaviour after Haskell handoff. |
+| `Human authority` | `human-only`: the Haskell candidate and observed `pb` exit cannot promote Phase 50 or open Phase 51. |
 
 ## Doctrine adopted
 
-- [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — the `pb` host-assertion CLI is admitted by satisfying the contract, not by appearing on a list.
-- [`substrate_doctrine.md` §6 — the bootstrap coordinator contract](../documents/engineering/substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off):
-  one Python CLI, two modes, no shell script, and a handoff that does not return.
-- [`substrate_doctrine.md` §3.1 — the per-substrate floor](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply):
-  the three classes that belong to the floor, and the rule that anything with a supported install plan is
-  ensured rather than written down as a manual prerequisite.
-- [`testing_doctrine.md` §4 — no skips, fail fast](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact):
-  a skipped assertion that reports success misrepresents coverage, so the suite carries no skip and no
-  expected failure.
-
----
+- [`repository_layout_doctrine.md` §2 — complete repository structure](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure) — the sole non-Haskell source exception and its closed role.
+- [`substrate_doctrine.md` §6 — the pre-binary handoff contract](../documents/engineering/substrate_doctrine.md#6-the-pre-binary-handoff-contract) — minimal platform adapter selection, contained establishment, source-bound build, and unchanged-argv exec only.
+- [`validation_frame_doctrine.md` §2 — the bootstrap boundary](../documents/engineering/validation_frame_doctrine.md#2-the-bootstrap-boundary) — Haskell owns every validation verdict.
+- [`testing_spoof_resistance.md` §12 — spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) — external process observation and human authority.
 
 ## Sprints
 
-## Sprint 50.1: The Poetry distribution and its quality gate ✅
-**Status**: Done
-**Implementation**: `pb/pyproject.toml`, `pb/poetry.toml`, `pb/pb/check_code.py`, `pb/pb/test_all.py`, `pb/pb/narrow.py`, `pb/stubs/`, `test/spec/pb/`
-**Blocked by**: none within the phase
-**Requires**: `host-floor`
-**Independent Validation**: `poetry run python -m pb.check_code` exits 0 over `pb` and `stubs`; `poetry run python -m pb.test_all` reports 100% branch coverage
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+## Sprint 50.1: Bind the already-bounded bootstrap surface ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Validation/PbBoundary.hs`
+**Blocked by**: [Phase 49](phase_49_self_referential_gates.md) human approval
+**Independent Validation**: A valid bounded module is accepted, a one-node forbidden dynamic-execution variant is refused at the grammar locus, a changed indexed-snapshot bypass mutant reddens only its named row, and runtime/toolchain behavior remains explicit residue.
+**Oracle**: planned `test/Amoebius/Validation/PbBoundaryOracle.hs`; separate authorship, custody, and independent human review are required and currently missing.
+**Legacy IDs**: none — the Phase-49-bound zero-source-debt query must remain zero
+**Docs to update**: `documents/engineering/repository_layout_doctrine.md`, `documents/engineering/substrate_doctrine.md`
 
 ### Objective
 
-Adopt [`substrate_doctrine.md` §6](../documents/engineering/substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off);
-give `pb` a distribution a consumer installs rather than a directory a consumer runs.
+Consume the exact Phase-49 approval and bind the already-bounded `pb/**` snapshot, grammar, and adapter
+identity without changing bootstrap source or reopening source migration.
 
 ### Deliverables
 
-- A Poetry `pyproject.toml` declaring the runtime dependencies and a `pb` console script; `poetry.toml`
-  pinning the virtualenv in-project, which is what makes an environment check meaningful.
-- `mypy` under `strict` with `disallow_any_explicit`, `warn_unused_ignores`, `warn_redundant_casts` and
-  `warn_return_any`; `ruff` and `black` at one line length; `pytest` with a coverage floor of 100.
-- `check_code` and `test_all` as module entry points, so there is exactly one supported way to run each.
-- A `stubs/` directory on `mypy_path`, linted and formatted but not type-checked.
+- Exact binding to the Phase-49-approved `PbBootstrapGrammar`, source identities, zero-source-debt result,
+  and adapter contract.
+- Refusal on any `pb/**` byte, mode, path, grammar, or effect-boundary mismatch.
+- A no-write postcondition for `pb/**`, its packaging metadata, and the Git index/worktree.
 
 ### Validation
 
-1. Every `dict[str, Any]` at a JSON boundary is replaced by `object` plus an explicit narrowing helper
-   (`pb/pb/narrow.py`), and `disallow_any_explicit` passes with no suppression. `mypy` cannot see a
-   `cast` or a `# type: ignore`, so `check_code` scans the token stream for all three: the ban is
-   enforced rather than configured.
-2. Invoking `pytest` directly is refused; the runner is the only supported entry.
+The Haskell audit replays the already-approved grammar against copied mutations beneath `.build/**`, rejects
+one minimal member of every forbidden syntax/import/effect family, and refuses any mismatch with the exact
+Phase-49 snapshot. It never treats help text or token occurrence as discovery, and the external observer proves
+the tracked tree did not change.
 
 ### Remaining Work
 
-None.
+Implement and independently review the Haskell snapshot/grammar binding. Any required `pb/**` source change
+reopens its Phase-0 `LTD-SRC-008` owner and consequently invalidates and reruns the chain through Phase 49;
+Phase 50 cannot make that change or close a source row.
 
-## Sprint 50.2: The closed command topology ✅
-**Status**: Done
-**Implementation**: `pb/pb/cli.py`
+## Sprint 50.2: Ensure and build in the contained root ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Validation/PbBoundary.hs`
 **Blocked by**: Sprint 50.1
-**Independent Validation**: the parser's introspection joins to `test/oracle/host_assert_cli_surfaces.tsv` in both directions
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+**Independent Validation**: An absent-toolchain positive reaches the exact source-built binary, a minimally different ambient-path case refuses, a changed adapter-bypass mutant reddens the containment row, and real package-manager/permission behavior remains residue.
+**Oracle**: `test/Amoebius/Validation/PbBoundaryOracle.hs`; independent reviewer required.
+**Legacy IDs**: none — the Phase-49-bound zero-source-debt query must remain zero
+**Docs to update**: `documents/engineering/substrate_doctrine.md`, `documents/engineering/validation_frame_doctrine.md`
 
 ### Objective
 
-Fix the command surface so that it is enumerable, and so that an unknown verb is a refusal rather than a
-guess.
+Externally observe that the already-bounded bootstrap establishes the minimal Haskell toolchain and builds
+the one executable without ambient paths or source-adjacent output.
 
 ### Deliverables
 
-- A Click group whose commands are registered at import: the consumer surface, and a maintainer surface that
-  resolves to nothing outside this checkout's development environment.
-- One pass-through command that stops option parsing at the first non-option token and forwards the
-  remainder verbatim to the built binary.
-- A friendly-error layer that turns a known failure class into one actionable line rather than a traceback.
-- An explicit `update` command; nothing else consults or mutates the installation.
+- Haskell-owned observation of probe-first contained toolchain establishment.
+- Haskell-owned observation of the source-snapshot-bound build and exact executed binary identity.
+- First/converged run observations with no tracked-tree mutation.
 
 ### Validation
 
-1. An unknown verb produces `No such command`.
-2. A maintainer command is absent from `--help` and unresolvable outside the development environment, and
-   re-checks its authority in its own body.
+The fake host externally records every read/write/process action and catches skipped probes, ambient paths,
+stale binaries, unconditional copy, and writes outside `.build/**`.
 
 ### Remaining Work
 
-None.
+Implement and qualify the external Haskell observation. A discovered bootstrap defect reopens its Phase-0
+`LTD-SRC-008` owner and consequently invalidates and reruns the chain through Phase 49; it is not repaired or
+reclassified inside this phase.
 
-## Sprint 50.3: The idempotent host assertions ✅
-**Status**: Done
-**Implementation**: `pb/pb/prereqs.py`, `pb/pb/process.py`, `test/fixture/host_assert_cli/`, `test/harness/host_assert_cli/`
+## Sprint 50.3: Exec-only validation handoff ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Validation/PbBoundary.hs`
 **Blocked by**: Sprint 50.2
-**Independent Validation**: the absent → present → present replay converges once and mutates nothing thereafter
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+**Independent Validation**: An opaque-argv positive reaches the fresh exact fake binary, a one-argument rewrite is refused, a changed return-instead-of-exec mutant reddens the process row, and native platform replacement semantics remain explicit residue.
+**Oracle**: `test/Amoebius/Validation/PbBoundaryOracle.hs`; independent reviewer required.
+**Legacy IDs**: none — the Phase-49-bound zero-source-debt query must remain zero
+**Docs to update**: `documents/engineering/testing_spoof_resistance.md`
 
 ### Objective
 
-Adopt [`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply);
-assert the floor and ensure the Haskell toolchain, and nothing beyond either.
+Observe every `pb <argv...>` invocation as the already-bounded platform-discriminate/establish/build/opaque-
+exec handoff, never as a Python command parser or gate.
 
 ### Deliverables
 
-- One subprocess choke point: argv only, never a shell; an environment overlaid rather than replaced; output
-  mirrored live and captured at once so a failure can be classified after the fact.
-- A floor check per substrate that refuses with the remediation instruction rather than a bare failure.
-- A pinned, digest-verified GHCup acquisition; no installer is piped to a shell.
+- Verbatim handoff of every argv, including empty/help/version/validation/unknown cases.
+- Exact binary-identity and process-replacement observation.
+- No Python verdict parsing, wrapping, fallback, or status mutation.
 
 ### Validation
 
-1. Every assertion is a probe followed by an action, and the probe is also the post-condition.
-2. A failed floor check names what to do about it.
+Changed-subject mutants rewrite argv, select another binary, return instead of exec, swallow failure, force
+success, or parse evidence; each fails at its named external observation.
 
 ### Remaining Work
 
-None.
+Implement and independently review the external handoff observer. Any needed bootstrap-source change reopens
+its Phase-0 `LTD-SRC-008` owner and consequently invalidates and reruns the chain through Phase 49 rather than
+becoming Phase-50 work.
 
-## Sprint 50.4: Build and hand off ✅
-**Status**: Done
-**Implementation**: `pb/pb/bootstrap.py`
+## Sprint 50.4: Bounded-bootstrap candidate ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: `src/Amoebius/Validation/PbBoundary.hs`, `app/amoebius/Main.hs`
 **Blocked by**: Sprint 50.3
-**Independent Validation**: the built binary lands at one stable path and the program does not return
-**Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`
+**Independent Validation**: One cleanroom positive exercises every adapter path, a minimally different forbidden effect refuses, a changed exec-bypass mutant reddens its named row, and real-host plus post-handoff residue remains explicit while Python cannot authorize status.
+**Oracle**: Separate authorship, custody, and independent review of the planned Phase-50 oracle are required and currently missing; final authority remains the human reviewer.
+**Legacy IDs**: none — the Phase-49-bound zero-source-debt query must remain zero
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only after human promotion
 
 ### Objective
 
-Build `exe:amoebius` host-native and replace the Python process with it, so that the pre-binary boundary
-closes at a single observable point.
+Produce a candidate for human review without treating a successful handoff as approval.
 
 ### Deliverables
 
-- A repo-local build whose output is copied to one stable path only when its bytes changed.
-- A handoff that `exec`s on POSIX and propagates the child's exit code on Windows, with the difference stated
-  rather than papered over.
+- Qualification and clean raw process observations.
+- Candidate evidence bound to the Phase-49 approval, its zero-source-debt snapshot, and the exact source/harness.
+- Explicit real-host residue.
 
 ### Validation
 
-1. The binary path is absolute and the handoff refuses a relative one.
-2. A second invocation with unchanged sources performs no copy.
+The human validation authority reviews the source exception, oracle custody, qualification, raw process trace,
+legacy closure, and residue and alone decides whether to promote Phase 50.
 
 ### Remaining Work
 
-None.
-
----
+All implementation, qualification, independent review, legacy closure, and human decision remain open.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
-- `documents/engineering/substrate_doctrine.md` — §6 records the distribution, the `update` surface, and the
-  closed topology once they exist.
-- `documents/engineering/repository_layout_doctrine.md` — §6 and §7 gain the ignore rule for the
-  distribution's in-project virtualenv, which is the artifact class this phase creates.
+**Engineering docs to update (when the human promotes the gate, never before):**
+
+- `documents/engineering/substrate_doctrine.md` — only if the bounded bootstrap roles or adapter seam change.
+- `documents/engineering/repository_layout_doctrine.md` — only if the source exception changes.
+- `documents/engineering/validation_frame_doctrine.md` — only if validation handoff changes.
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md` — retire the row recording that `pb` is an `argparse`
-  CLI with no configured quality tooling, and record what the module split condemns.
 
----
+- Phase 49 predecessor approval and Phase 51 consumer links.
 
 ## Related Documents
-- [Substrate Doctrine](../documents/engineering/substrate_doctrine.md)
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md)
-- [Phase 51](phase_51_host_ensure_kernel.md)
-- [Development Plan](README.md)
+
+- [Development-plan tracker](README.md)
+- [Phase 49 promotion barrier](phase_49_self_referential_gates.md)
+- [Phase 51 host-ensure kernel](phase_51_host_ensure_kernel.md)
+- [Active legacy register](legacy_tracking_for_deletion.md)
+- [Repository layout doctrine](../documents/engineering/repository_layout_doctrine.md)
+- [Substrate doctrine](../documents/engineering/substrate_doctrine.md)
+- [Validation execution doctrine](../documents/engineering/validation_frame_doctrine.md)

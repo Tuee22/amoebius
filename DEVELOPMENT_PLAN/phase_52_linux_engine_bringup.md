@@ -5,36 +5,34 @@
 > **Read this if**: a bare Linux host has to reach a working container engine, or a host action's re-run
 > behaviour has to change.
 
-This phase owns the first contact with a real host: what a newly materialized Linux guest carries before
-anything is installed, what the run installs into it, and what a second identical run is permitted to touch.
-It does not own how that guest is materialized — the provider mapping and the pristine-guest contract belong
-to
-[`substrate_doctrine.md` §4](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux),
-which this phase consumes without restating. Nor does it own the recipe it builds: its generated semantics and
-native invocation value are constrained by [Phase 35](phase_35_image_recipe_generation.md), and the pre-binary command surface belongs to
-[Phase 50](phase_50_host_assert_cli.md).
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 52.1: The pristine guest and its recorded preflight 📋](#sprint-521-the-pristine-guest-and-its-recorded-preflight-)
-- [Sprint 52.2: The pre-binary leg on a host that carries nothing 📋](#sprint-522-the-pre-binary-leg-on-a-host-that-carries-nothing-)
-- [Sprint 52.3: The engine, and sudoless access as three proofs 📋](#sprint-523-the-engine-and-sudoless-access-as-three-proofs-)
-- [Sprint 52.4: The native build and the version verdict 📋](#sprint-524-the-native-build-and-the-version-verdict-)
-- [Sprint 52.5: The second run that changes nothing 📋](#sprint-525-the-second-run-that-changes-nothing-)
+- [Sprint 52.1: The pristine guest and its recorded preflight ⏸️](#sprint-521-the-pristine-guest-and-its-recorded-preflight-)
+- [Sprint 52.2: The pre-binary leg on a host that carries nothing ⏸️](#sprint-522-the-pre-binary-leg-on-a-host-that-carries-nothing-)
+- [Sprint 52.3: The engine, and sudoless access as three proofs ⏸️](#sprint-523-the-engine-and-sudoless-access-as-three-proofs-)
+- [Sprint 52.4: The native build and the version verdict ⏸️](#sprint-524-the-native-build-and-the-version-verdict-)
+- [Sprint 52.5: The second run that changes nothing ⏸️](#sprint-525-the-second-run-that-changes-nothing-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -42,18 +40,20 @@ native invocation value are constrained by [Phase 35](phase_35_image_recipe_gene
 
 ## Phase Status
 
-🔄 Active — Phase 51 sealed 2026-08-22. This is the sole open contract. No live gate implementation or
-current `linux-cpu/amd64` evidence exists yet; the phase remains open until both are present.
+⏸️ Blocked — NOT VALIDATED.
 
-The 2026-08-22 routed attempt reached the retained command and returned RED because
-`tools/linux_engine_bringup_gate.py` is absent. This native Darwin/`arm64` workstation also cannot supply the
-contract's natural `linux-cpu/amd64` lane; an ARM guest or an emulated AMD64 guest cannot substitute for it.
+Blocked by redesigned Phase 51, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
-change what this phase's gate must cover, so any earlier seal is history and no longer presents completion
-evidence.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
 ---
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -92,76 +92,51 @@ appears.
 
 **Register:** 3 — live: the claim is about a host's observable state, which no in-process model settles ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 35](phase_35_image_recipe_generation.md)
-
-**Requires**: `host-floor`
-
-**Gate:** `python3 tools/run_phase_gate.py 52` passes every check named in
-[Gate integrity](#gate-integrity), twice in succession against one guest. Phase 53 does not open until it is
-green.
-
----
+**Depends on:** [Phase 51](phase_51_host_ensure_kernel.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 52`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The gate is `python3 tools/linux_engine_bringup_gate.py --execute`, and it decides five things, none of which
-is decidable off a host.
+**Contract review**: REJECTED — NOT VALIDATED.
 
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *a pristine Linux guest reaches a running amoebius image without elevation, and an identical second run mutates nothing*. Its sprint seams are the guest, the pre-binary leg, the engine, the native build, and the re-run. It splits if a second substrate or a second acceptance register appears. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 52` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 51 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-**The clean preflight is evidence, not a formality.** Before the first install argv, the run reads the guest
-and writes what it found: no engine package, no `docker` group row, no daemon socket, and no image carrying
-the amoebius name. `test/fixture/linux_engine_bringup/preflight.tsv` holds the committed inventory that read
-is joined against, so a guest that was already populated fails at the first check rather than yielding a pass
-a dirty host would also have produced.
+## Resource provision — UNRESOLVED
 
-**Sudoless reach is read three ways, and each read is separate.** The group database is read for the invoking
-user's membership; a client call is issued inside a login session created after the install; and the same
-call is issued from the process that did the installing, before any re-login. All three must succeed and none
-may be retried under elevation, because reach with elevation is a different property from the one claimed.
-
-**The post-state joins an independently authored oracle.**
-`test/oracle/linux_engine_bringup_surfaces.tsv` enumerates every surface the run may have changed — the
-packages it may install, the group row it writes, the daemon's data root, and the image reference it builds.
-The join runs in both directions, so a change the oracle does not name and an oracle row nothing realized are
-both failures. The table is authored from the doctrine rather than captured from a first run, since a run
-that records its own expectation demonstrates only that it is self-consistent.
-
-**Idempotence is a comparison of two ledgers.** Each pass emits an action ledger that separates a probe from
-a mutation. The second pass must record probes and no mutations: an empty mutation set alone is satisfied by
-a pass that did nothing at all, including nothing to check, so an empty probe set fails the same check.
-
-**`test/mutant/registry.tsv` carries five mutants for this gate.** Each must fail it, and no two may fail
-it at the same check:
-
-- `ephemeral-membership` grants the group to the running process only and never writes the group database —
-  reddens the durable-membership read while the current-process read stays green, which is what shows the
-  three proofs are not one proof spelled three ways.
-- `unrefreshed-credentials` writes the group database and leaves the installing process's credential set as
-  it was — reddens the current-process read alone.
-- `elevated-retry` re-issues a denied daemon call under elevation — reddens the future-session read, because
-  a call that needed elevation answers a question the gate did not ask.
-- `converge-without-probe` reports the second pass converged from the first pass's recorded result — reddens
-  the empty-probe-set check.
-- `platform-override` hands the build an explicit platform the guest cannot execute — reddens the
-  native-architecture check.
-
----
-
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/linux_engine_bringup/`.
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
-- [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) — linux: sudoless Docker and the native image is admitted by satisfying the contract, not by appearing on a list.
+- [`extension_conformance_doctrine.md` §5 — The conformance gate is generated, not authored](../documents/engineering/extension_conformance_doctrine.md#5-the-conformance-gate-is-generated-not-authored) — linux: sudoless Docker and the native image is admitted by satisfying the contract, not by appearing on a list.
 - [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract):
   the engine is probed, installed when absent, resolved to an absolute path from the package manager, and
   invoked by that path, which is what makes "installed" a state a later run can re-read.
 - [`substrate_doctrine.md` §4.3 — Incus on Linux](../documents/engineering/substrate_doctrine.md#43-incus-on-linux):
   the guest is created only after the provider's own initialisation verifies, so a provider that is not ready
   is reported as a provider failure rather than as a failed install inside a guest that never existed.
-- [`image_build_doctrine.md` §3 — one image per architecture](../documents/engineering/image_build_doctrine.md#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index):
+- [`image_build_doctrine.md` §3 — One image per architecture — the tag carries the architecture, not an index](../documents/engineering/image_build_doctrine.md#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index):
   the requested architecture, the guest's, and the engine's are compared before the build starts, and a
   mismatch refuses rather than emulating, because a container shares the host's instruction set.
-- [`testing_doctrine.md` §3 — the test-topology contract](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down):
+- [`testing_doctrine.md` §3 — The test-topology contract: spin up → run → always tear down](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down):
   the guest is destroyed on every exit path, so a failed run leaves no host state for the next run to
   inherit and misread as its own.
 
@@ -169,14 +144,11 @@ it at the same check:
 
 ## Sprints
 
-## Sprint 52.1: The pristine guest and its recorded preflight 📋
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Frame/Incus.hs`, `test/fixture/linux_engine_bringup/`
-**Blocked by**: none within the phase
-**Requires**: `host-floor`
-**Independent Validation**: the guest's pre-install read matches the committed preflight inventory row for row, and the provider reports no guest after the run
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+## Sprint 52.1: The pristine guest and its recorded preflight ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -206,13 +178,9 @@ installed.
 
 The whole sprint.
 
-## Sprint 52.2: The pre-binary leg on a host that carries nothing 📋
+## Sprint 52.2: The pre-binary leg on a host that carries nothing ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Floor/Linux.hs`, `tools/toolchain_requirements.json`
-**Blocked by**: Sprint 52.1
-**Independent Validation**: the guest reaches `exe:amoebius` at one absolute path, and no Python process survives the handoff
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -240,13 +208,9 @@ and observe the handoff from outside the process that performs it.
 
 The whole sprint.
 
-## Sprint 52.3: The engine, and sudoless access as three proofs 📋
+## Sprint 52.3: The engine, and sudoless access as three proofs ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Engine/Docker.hs`, `src/Amoebius/Host/Engine/Access.hs`
-**Blocked by**: Sprint 52.2
-**Independent Validation**: the group database, a freshly created login session, and the installing process each reach the daemon, and none of the three calls is elevated
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -275,13 +239,9 @@ install the container engine and make it usable without elevation as three prope
 
 The whole sprint.
 
-## Sprint 52.4: The native build and the version verdict 📋
+## Sprint 52.4: The native build and the version verdict ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Engine/Build.hs`, `src/Amoebius/Image/Build.hs`
-**Blocked by**: Sprint 52.3
-**Independent Validation**: the built image's architecture equals the guest's, and the recorded version string is the one the container printed
-**Docs to update**: `documents/engineering/image_build_doctrine.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -310,13 +270,9 @@ a verdict.
 
 The whole sprint.
 
-## Sprint 52.5: The second run that changes nothing 📋
+## Sprint 52.5: The second run that changes nothing ⏸️
 
-**Status**: Planned
-**Implementation**: `tools/linux_engine_bringup_gate.py`, `test/oracle/linux_engine_bringup_surfaces.tsv`
-**Blocked by**: Sprint 52.4
-**Independent Validation**: the second pass's ledger records probes and no mutations, and the two post-state reads agree on every surface the oracle names
-**Docs to update**: `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -350,13 +306,15 @@ The whole sprint.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/substrate_doctrine.md` — §3.1's linux floor records what a real guest actually
   needed, and §4.3 records Incus as an exercised provider rather than a planned one.
 - `documents/engineering/image_build_doctrine.md` — §3's refusal-on-mismatch rule records its observed
   failure mode once a mismatch has been refused on a host.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/development_plan_standards.md` — add this phase to the `Declared by` column of the
   `host-floor` row in §F, because that column is joined in both directions.
 - `DEVELOPMENT_PLAN/substrates.md` — add the per-phase row naming this gate's substrate, lane, and what it
@@ -365,6 +323,7 @@ The whole sprint.
 ---
 
 ## Related Documents
+
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md)
 - [Image Build & Registry](../documents/engineering/image_build_doctrine.md)
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md)

@@ -1,39 +1,36 @@
 # Phase 27: Illegal-state corpus + validation-locus ledger
 
-> **Purpose**: Assemble the exhaustive illegal-state corpus — every negative fixture split by the locus that
-> rejects it — plus the QuickCheck property suite and the per-entry validation-locus ledger, in-process,
+> **Purpose**: Define the exhaustive illegal-state corpus as Haskell values — every negative split by the locus
+> that must reject it — plus Haskell properties and the per-entry validation-locus ledger, in-process,
 > before any real resource exists.
 > **Read this if**: phase 27 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 27 delivers the illegal-state corpus + validation-locus ledger; its design is owned by [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-Gate passed 2026-08-09; ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus ✅](#sprint-271-exhaustive-negativepositive-corpus-split-by-foreclosure-locus-)
-- [Sprint 27.2: GADT-index compile-fail goldens (type-foreclosed layer) ✅](#sprint-272-gadt-index-compile-fail-goldens-type-foreclosed-layer-)
-- [Sprint 27.3: QuickCheck property suite ✅](#sprint-273-quickcheck-property-suite-)
-- [Sprint 27.4: The per-entry validation-locus ledger — the gate ✅](#sprint-274-the-per-entry-validation-locus-ledger--the-gate-)
+- [Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus ⏸️](#sprint-271-exhaustive-negativepositive-corpus-split-by-foreclosure-locus-)
+- [Sprint 27.2: GADT-index compile-refusal cases (type-foreclosed layer) ⏸️](#sprint-272-gadt-index-compile-refusal-cases-type-foreclosed-layer-)
+- [Sprint 27.3: QuickCheck property suite ⏸️](#sprint-273-quickcheck-property-suite-)
+- [Sprint 27.4: The per-entry validation-locus ledger — the gate ⏸️](#sprint-274-the-per-entry-validation-locus-ledger--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,313 +38,125 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. `python3 tools/illegal_state_corpus_gate.py` passed all twelve sides on natural
-`arm64`, untranslated: 97 catalog entries reconcile to 121 registry subcases; the bounded corpus passes with
-17 Gate-1 negatives, 13 Gate-2 negatives, 12 positives, 43 discharged subcases, 78 deferred subcases, seven
-joined predecessor rows and four rerun predecessor compile pairs. All 21 authored metrics match, every one of
-the six registry mutants and four implementation-mutant classes reddens at its own locus, the five-calculus
-projection accounts for 172 units, and 26 surfaces join to 29 run-time items. The project-contained
-attestation is `sha256:2927a4939a6087fcc81cbbcecf627bc383665c6852c21fc3474c05b7c4157c82`, bound to source
-snapshot `sha256:02eecba789d0c085…` over 2,265 files; Phase 27 owns no remaining migration deferral.
+⏸️ Blocked — NOT VALIDATED.
 
-**The first amended run exposed a stale boundary and ten missing joins.** The phase invoked the shared
-`dsl-spec`, so it executed Phase-28-through-33 checks before their turn; it now owns the bounded
-`illegal-state-corpus-spec`. Its reached-owner threshold was still `7`, while the current owner is Phase 27,
-and six oracle rows named the departed `dhall-typecheck/` directory. Correcting those defects brought the
-current 97-entry/121-subcase catalog into view and found ten valid Phase-8/9 rows absent from the ledger. Three
-Phase-9 Dhall cases now run here against exact goldens, while seven GADT rows join through an independently
-authored predecessor projection whose four Phase-9 compiler pairs are rerun. The sealed amended gate is green
-over 21 metrics and 26 surfaces joined to 29 items, and the documentation and support gates pass.
+Blocked by redesigned Phase 26, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-**Three of the four registry mutators had stopped mutating, and the gate could not tell.** `owner_drift`
-rewrote `Phase-43`, an ordinal the ordering re-baseline renumbered away, so it edited no byte and was counted
-as an applied mutant the check happened to survive. The mutator now reads its victim out of the registry
-rather than pinning an ordinal — a literal phase number in a mutator is one renumber away from naming nobody,
-which is exactly how this one died. And every mutator is now required to change something: a run compares the
-scratch tree's **content digests** before and after, because `storage` → `unknown` and `dhall-typecheck` →
-`unknown-locus` are both length-preserving and a size comparison called two live mutations no-ops.
-
-**Earlier superseded count correction.** The one-binary amendment added
-`3.89 context-role-cell` and `3.90 role-indexed-cardinality` — the context/role grid's two dhall-typecheck entries —
-without updating this gate's authored counts in the same change. At that point they became 90 entries, 106 subcases, and 73
-deferred, and the three reconcile with each other and with the unchanged `discharged-subcases` pin:
-106 = 33 discharged here + 73 deferred to a later owner. That arithmetic is what makes the update a judgement
-rather than a fit to whatever happened to run.
-
-**Opened 2026-08-17** when the preceding phase resealed.
-[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
-the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
-architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
-it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
-[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-15. `python3 tools/illegal_state_corpus_gate.py` passed all eleven sides: all 19
-metrics match, 88 catalog entries and 104 subcases reconcile, every registry/domain/index/decision mutant
-reddens, the corpus and honesty-bannered ledger pass, 24 surfaces join to 27 run-time items, and host state is
-unchanged. The project-contained attestation is
-`sha256:a0b75311f33ab71f39ee18b5813d271f0dc93239e553b16aa5af1afb153bdc3f`, bound to source snapshot
-`sha256:a086f6a584a75dcd…`; Phase 27 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:a1e246296ecadb42…`
-(1931 non-ignored files) and published a verified pre-containment external attestation
-`sha256:2a18c8372d20736e226b93994c8fcd7e133af9e55bc799889551a653269a8b05`.
-
-**Observed progress — 2026-08-12:** **Policy-conformant.** The corpus result is unchanged and re-run: 88
-catalog entries reconcile to 104 registry subcases, 14 dhall-typecheck and 13 gadt-decode negatives fail at their own loci
-beside green twins, 12 positives decode, five compile-fail pairs separate legal from illegal, four QuickCheck
-properties hold under `checkCoverage`, the RKE2 server arms are exhausted, and 33 subcases are discharged
-against 71 owner-pinned deferrals. All four registry-reconciliation mutants plus the union-arm, resource
-normalization, GADT-index-weakening, and broken-decision mutants turn the battery red at their own loci. 24
-surfaces join to 27 run-time enumerated items.
-
-**Three corrections.** The results table was written rather than measured; the catalog, registry, corpus, and
-locus-ledger counts, the reddened-property set, and the surviving-mutant count are now all parsed from what the
-run observed. `test/spec/dsl/CorpusSpec.hs` hard-coded one developer's `dhall` path and now resolves it per run,
-failing closed when unset. And `.build/dsl/**` — written by nineteen phases — was never declared in the canonical
-generated-output inventory; the eighteen deferrals covering it were not a migration backlog but a missing
-inventory row, so the class is now declared and all eighteen rows are retired.
-
-**Invalidated historical record:**
-
-Done (invalidated). `python3 tools/illegal_state_corpus_gate.py` passed on 2026-08-09 with ledger
-`dynamically-resolved`. The gate ran on **no
-substrate** (`none`) in **Register 1** — it stood up no host and no cluster, only an in-process corpus battery
-over the `dhall` typechecker, the Phase-26 decoder, a pinned `ghc -fno-code` expect-fail harness, and
-QuickCheck. It discharged 33 Phase-25/12/13-owned registry subcases and recorded the remaining 71 subcases as
-deferred to their exact owners. Runtime enforcement, capacity/provisioning, and rendered-output fidelity
-remain UNVERIFIED.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase turns the typed spec gates stood up in Phases 25 and 26 into an *exhaustive*, honestly-classified
-proof. Phase 25 proved dhall-typecheck rejects a representative dhall-typecheck-class negative set; Phase 26 proved the total
-decoder rejects a representative gadt-decode-class negative set. This phase assembles the **whole** illegal-state
-corpus — one negative fixture per catalog entry that Register 1 can settle — and requires each to be rejected
-at exactly the locus its catalog classification names: a dhall-typecheck negative must fail `dhall type`, a gadt-decode
-negative must pass `dhall type` and then decode to a structured `Left`, and a GADT-index (type-foreclosed)
-negative must fail to compile under a pinned `ghc -fno-code` expect-fail golden. It adds the QuickCheck
-property suite that establishes closure, round-trip, fold-totality, and composition-preservation over the
-smart-constructor vocabulary, sampled where the domain is infinite and exhausted where it is finite (the three
-`Rke2Servers` arms). It then emits the **per-entry validation-locus ledger**: a map from every catalog entry
-to the one truth-maker locus that settles it — `dhall-typecheck`, `gadt-decode`, `provision-seal`,
-`rendered-artifact-oracle`, or `live-effect` — asserting that the dhall-typecheck/gadt-decode loci owned here carry rejecting fixtures
-and recording later loci as deferred to their owning phase. Deferred ownership is an orthogonal registry
-field; `provision-seal` is the distinct post-bind Phase-31 locus where whole-deployment capacity, topology,
-storage, and target compatibility return `ProvisionError`. Phase 9 builds/proves those pure folds and Phase 31
-invokes them after capability/provider expansion. What is *not* here: those
-later capacity/storage/execution/provisioning folds and their negatives (Phases 28–32), the rendered-output goldens the
-`rendered-artifact-oracle` locus points at (Phase 33),
-the representational SPA-composition corpus (Phase 37), and every `live-effect` residue (the live band).
+**Target capability — NOT VALIDATED.** A closed Haskell corpus is to map every illegal-state catalog entry to
+exactly one truth-maker locus: structural typecheck, Haskell decode, provision seal, rendered-object oracle, or
+deferred live effect. Haskell values own all positive/negative pairs, properties, compile-refusal modules, and
+independent expectations. When a case needs Dhall, compiler input, a rendered object, or mutation bytes, the
+Haskell harness is to materialize them beneath `.build/**`; no fixture, golden, ledger, or mutant is tracked as
+non-Haskell source. This phase may cover only the Phase-25/26 pure loci and exact-owner deferrals. Capacity,
+rendering, browser, hardware, and every live-effect row remain with later phases.
 
-**Phase scope:** one cohesive claim — *every foreclosure claim in the catalogue is a fixture or an exact-owner
-deferral, and every reached fixture names the locus that rejects it*. The bounded suite covers 97 catalog
-entries, 121 subcases, predecessor joins, and the five-calculus corpus/ledger projection.
+**Phase scope:** one target claim — every catalog entry is represented by a Haskell case at its exact pure
+rejection locus or by an exact-owner deferral; generated case bytes stay beneath `.build/**`.
 
-**Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` + `dhall type` +
-`ghc -fno-code` corpus battery analogous to the Phase-0 documentation lint.
+**Substrate:** `none` — no host, cluster, browser, or hardware; the canonical Haskell gate owns all tool
+invocation and the candidate verdict.
 
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
-**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
+**Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 8](phase_08_scope_index.md) and [Phase 9](phase_09_resource_index.md) for reached
-predecessor evidence, [Phase 10](phase_10_calculus_composition.md) for the five-calculus projection,
-[Phase 25](phase_25_dhall_schema_generation.md) for the schema, and
-[Phase 26](phase_26_gadt_decode_ir.md) for the total decoder.
-
-**Gate:** `python3 tools/run_phase_gate.py 27` must pass 21 metrics and the 26-surface join around the
-bounded corpus suite, exact failure oracles, predecessor projection, five-calculus projection, and all ten
-mutants while retaining later feasibility, render, and runtime claims as UNVERIFIED.
+**Depends on:** [Phase 26](phase_26_gadt_decode_ir.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 27`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-This gate satisfies the applicable [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clauses through the following committed apparatus.
-The fixture/error oracles are oracle-pinned; the owner/family catalog enrichment was hand-authored before
-the corpus/ledger implementation that consumes it (§M.1 oracle-pinning):
+**Contract review**: REJECTED — NOT VALIDATED.
 
-
-```mermaid
-flowchart LR
-  %% register: algebra
-  fx["committed fixtures"]:::intent
-  or["independently authored oracle"]:::intent
-  mu["seeded mutant"]:::intent
-  calc["authored five-calculus projection"]:::intent
-  g{{"the phase 27 gate command"}}:::gate
-  ok((("phase seal: the ledger this gate emits"))):::seal
-  no>"the mutant must turn it red"]:::refuse
-  fx -->|"binds the corpus"| g
-  or -->|"binds the expectation"| g
-  mu -->|"binds the defect"| g
-  calc -->|"binds the re-baseline"| g
-  g -->|"fixtures green, oracle agrees"| ok
-  g -->|"mutant green means the gate is not one"| no
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
-  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
-  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
-```
-*Implemented Phase-27 gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
-
-**What the gate command accepts.** Every negative fixture is rejected at its tagged locus and nowhere else.
-A dhall-typecheck-class negative fails `dhall type` at authoring time with an error equal to its oracle-pinned
-error-locus golden naming the foreclosing union/field (§M.8 specific-reason). A gadt-decode-class negative passes
-`dhall type` and then decodes to a structured `Left DecodeError` whose tag equals its oracle-pinned
-expected-`DecodeError`-tag golden. A GADT-index negative fails to compile under the pinned `ghc -fno-code`
-expect-fail harness with a GHC **type** error — a scope or parse error does not satisfy it — pinned to a
-committed expected-error-locus golden. The suite is red if any illegal fixture is admitted at or past its
-locus. QuickCheck is green under `checkCoverage` across closure, round-trip, fold-totality, and
-composition-preservation, with the Sprint 27.3 coverage minima met. The per-entry validation-locus ledger
-(`dhall-typecheck` / `gadt-decode` / `extension-astcheck` / `provision-seal` / `rendered-artifact-oracle` /
-`live-effect`) is emitted with every catalog entry mapped to its truth-maker locus and a separate
-`owner_phase` / `case_family` disposition, both reconciled against the catalog-reconciled committed
-`locus_registry.tsv` — the independent oracle of §M.3 — and red on any divergence. The whole run is
-**Register 1** and in-process: it stands up no substrate.
-
-> **Realized registry note:** all 97 catalog entries carry `**Validation-locus:**`, `**Delivery-owner:**`, and
-> `**Case-family:**` tags. The documentation lint reconciles those tags against the committed 121-subcase
-> `dhall/examples/locus_registry.tsv` before the ledger emitter runs.
-
-> **Subcase-identity resolution.** The registry carries an explicit, non-empty `subcase` key beside each
-> catalog entry. Entries that owe more than one fixture or locus
-> ([`§3.16`](../documents/illegal_state/illegal_state_topology.md) fixed-node cardinality and host
-> distinctness; [`§3.23`](../documents/illegal_state/illegal_state_capability_messaging.md) produce-side and
-> malformed-received-body)
-> are represented by multiple named registry rows, so no entry reads as covered when only its first subcase
-> lands.
-
-**The coverage obligation this registry serves.** The registry is **not** the enumeration half of
-[`testing_doctrine.md §9`](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation)
-— that half is regenerated at gate time and never committed. `locus_registry.tsv` is the committed,
-independently-authored **oracle** (§M.3) that the gate-time-regenerated enumeration is checked against; the
-committed fixtures are the *expectation* half. Joining the regenerated enumeration to the committed fixtures,
-with the registry as the oracle, yields the coverage obligation, whose semantics are:
-
-- A registry row whose `owner_phase` is **this phase or an earlier one** and whose Dhall/GADT locus has no
-  direct fixture or explicit predecessor-evidence mapping turns the Phase-27 gate **red** — the evidence the reached owner phase was obliged to
-  commit is missing. This is the same red-on-unmapped rule as the acceptance conditions above and the
-  Sprint 27.4 validation below.
-- A registry row whose `owner_phase` is a **later** phase is correctly deferred: it is **mapped as deferred**
-  to that phase and emits **no UNVERIFIED row** — deferral is not absence. When that later phase's gate runs
-  and finds the fixture still missing, *its* run records the entry **UNVERIFIED** in the ledger's `coverage`
-  array. This is what the `Delivery-owner:` enrichment exists to distinguish, and why the join cannot be
-  built before it.
-
-The **catalog-side** half of this obligation — that every entry carries a locus, that numbering is
-contiguous, that index anchors resolve, and that every entry has a technique-matrix row — is not deferred to
-this phase: it is Phase-0 documentation-lint check (g)
-([`phase_0`](phase_00_documentation_suite.md)), which validates the enumeration is well-formed over text
-alone, before any fixture exists to join against.
-
-- **Oracle-pinning (§M.1) + specific-reason negatives (§M.8).** Each negative fixture ships a committed expected-failure
-  golden authored by hand, not regenerated from the implementation: `dhall/examples/goldens/<name>.typeerr`
-  (the `dhall type` error, naming the offending union/field) for each `illegal_dhall_typecheck_*`;
-  `test/golden/dsl/<name>.tag` (the expected `DecodeError` constructor tag) for each `illegal_decode_*`;
-  `test/spec/dsl/compilefail/<name>.expected` (the expected GHC type-error class + locus) for each compile-fail golden.
-  The suite asserts the observed failure **equals** its golden, not merely that some failure occurred.
-- **Independent reference predicate (§M.3).** The validation-locus reference side is the catalog's committed
-  per-entry `**Validation-locus:**`, `**Delivery-owner:**`, and `**Case-family:**` tags in
-  `documents/illegal_state/illegal_state_*.md` once this phase adds the latter two, reconciled by the
-  Phase-0 documentation lint (extended here) into
-  `dhall/examples/locus_registry.tsv`. Those catalog tags are authored independently of
-  `ValidationLocusLedger.hs`; the coverage assertion reads that registry, never the emitter's own
-  classification or a hard-coded section-number range.
-- **Committed mutation quota (§M.2).** Four committed seeded mutants (from the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) operator set) MUST turn the gate
-  red, re-run each gate run: (a) a **union-arm-addition** schema mutant admitting a product-named capability →
-  `CorpusSpec` red; (b) a **dropped-resource-normalization guard** decoder mutant that admits a zero/incomplete
-  resource declaration or discards one normalized resource field → the corresponding gadt-decode negative or
-  positive-field traversal turns `CorpusSpec` red; (c) a **guard-weakening** GADT-index mutant widening one
-  index → a compile-fail golden compiles → `compile_fail.sh` red; (d) a **broken-smart-constructor / partialized-fold** mutant → each of the four QuickCheck properties red. Capacity/storage/execution fold mutants remain owned
-  by their exact phases; Phase 27 consumes only the reached predecessor evidence named in its projection. The gate is itself red if any mutant
-  survives.
-- **Generator coverage (§M.4).** Sprint 27.3's `checkCoverage` minima (below) force the nontrivial reject/boundary
-  arms to fire.
-- **Concrete corpus (§M.7).** The representative set is enumerated explicitly in the Sprint 27.1/6.2 Deliverables
-  and the committed `locus_registry.tsv`, not left to "representative".
-
-- **Extension conformance (§M.13).** Not applicable: this phase delivers no extension.
+| Key | Contract |
+|---|---|
+| `Claim` | Target only — every illegal-state catalog entry is a Haskell-owned case at its exact pure rejection locus or an exact-owner deferral; all non-Haskell case, compiler, oracle, and mutant bytes are generated beneath `.build/**`. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 27` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: `LTD-DOC-001` remains active; its exact zero-consumer input-closure check and Markdown/serialized-registry reintroduction negatives have not been implemented or qualified. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 26 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
 - [`illegal_state_techniques.md §6 — Three layers of foreclosure (and the honesty they force)`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
   the three foreclosure layers (`type-foreclosed` / `decode-foreclosed` / `runtime-checked`) and the
-  **dhall-typecheck-vs-gadt-decode caveat** — Dhall has no opaque types, so the corpus must **split** its negatives into
-  *dhall-typecheck-must-fail-`dhall type`* and *gadt-decode-must-fail-decode*, and never bill a gadt-decode-only foreclosure as a
-  dhall-typecheck type-check failure. This phase reifies that split as fixtures.
-- [`illegal_state_techniques.md §5 — Coverage matrix`](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)
-  and [`§2 — the load-bearing limit`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
-  the coverage matrix is the checklist the corpus must exhaust — one fixture per Register-1-settleable entry —
-  and [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)'s limit is honored verbatim: *a type-check proves the spec composes, not that the cluster enforces
+  **structural-typecheck-vs-Haskell-decode caveat** — Dhall has no opaque types, so the Haskell corpus must
+  split its cases between the two loci and lazily generate any Dhall projection; it may never bill a
+  decode-only foreclosure as a structural type-check failure.
+- [`illegal_state_techniques.md` §5 — Coverage matrix — which technique forecloses which illegal state](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)
+  and [`illegal_state_catalog.md` §2 — The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
+  the coverage matrix is the checklist the Haskell corpus must exhaust — one case per Register-1-settleable entry —
+  and [`illegal_state_catalog.md` §2 — The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)'s limit is honored verbatim: *a type-check proves the spec composes, not that the cluster enforces
   it.* Entries whose truth-maker is the running cluster are ledgered `live-effect`, never claimed here.
-- [`dsl_doctrine.md §5 — the illegal-state-unrepresentable contract`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
+- [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
   the **typed spec gates** — dhall-typecheck (the Dhall typechecker) and gadt-decode (the in-process `Dhall.inputFile auto`
-  decoder). This phase exercises both against the exhaustive negative corpus and pins the type-foreclosed
-  residue with the compile-fail golden that gives the GADT indices their teeth.
-- [`resource_capacity_doctrine.md §3 — The types: Quantity, Capacity, Demand, Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
-  and [`§4 — The total fold: fits, carve, place, and the nesting`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting):
+  decoder). The target Haskell harness exercises both and generates compile-refusal input beneath `.build/**`;
+  no checked-in golden gives the GADT indices their authority.
+- [`resource_capacity_doctrine.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
+  and [`resource_capacity_doctrine.md` §4 — The total fold: `fits`, `carve`, `place`, and the nesting](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting):
   the complete resource envelope and opaque post-bind checked boundary. This phase exhausts the resource
-  **shape/normalization** cases its predecessors own (including the missing-envelope [§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext) negative) and
+  **shape/normalization** cases its predecessors own (including the missing-envelope [`illegal_state_security.md` §3.11 — An unsafe workload (no resource limits, no hardened securityContext)](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext) negative) and
   derives every later capacity, storage, accelerator, VRAM, and missing-capability deferral from registry
   ownership tags; it never claims later capacity or provisioning folds have run early.
-- [`testing_doctrine.md §2 — the registers`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — **Register 1**
-  (pure/golden, in-process, no cluster): the register this phase's gate reaches; and
-  [`§4 — the per-run ledger`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) — the proven/tested/assumed ledger
+- [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — **Register 1**
+  (pure/semantic-oracle, in-process, no cluster): the register this phase's gate reaches; and
+  [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) — the proven/tested/assumed ledger
   the battery emits, the validation-locus ledger being its per-catalog-entry specialization with model↔runtime
   correspondence marked UNVERIFIED.
-- [`conformance_harness_doctrine.md §2 — the registers`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
-  and [`§5 — honesty`](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish): Register 1 is the pure/golden
-  no-cluster band, and a green Register-1 corpus establishes the spec composes and the foreclosures fire —
-  **nothing** about whether the physical effects converge, which is the deferred `live-effect` locus.
+- [`conformance_harness_doctrine.md` §2 — The registers, as amoebius uses them for pre-cluster validation](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
+  and [`conformance_harness_doctrine.md` §6 — Honesty: what the harness does and does not establish](../documents/engineering/conformance_harness_doctrine.md#6-honesty-what-the-harness-does-and-does-not-establish): Register 1 is the pure/semantic-oracle
+  no-cluster band. Any future candidate result is limited to pure composition and named refusals; it can say
+  **nothing** about whether physical effects converge, which is the deferred `live-effect` locus.
 
 ## Sprints
 
-> **Current validation record.** The sealed amended run on 2026-08-21 covers every sprint through the
-> bounded `illegal-state-corpus-spec`, including the predecessor and five-calculus projections. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override the current seal. Any instruction to commit
-> generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. The current
-> phase gate and universal artifact hygiene both pass.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-## Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus ✅
-**Status**: Done
-**Implementation**: `dhall/examples/{legal_*,illegal_dhall_typecheck_*,illegal_decode_*}.dhall`
-(extending the Phase-25 positive + dhall-typecheck corpus and the Phase-26 gadt-decode set to one fixture per
-Register-1-settleable catalog entry); `test/spec/dsl/CorpusSpec.hs`; `test/oracle/illegal_state_corpus/{dhall_typecheck_cases,gadt_decode_cases}.tsv`;
-`dhall/examples/locus_registry.tsv`; `tools/locus_registry_lint.py`.
-**Blocked by**: [Phase 26](phase_26_gadt_decode_ir.md) supplied the total decoder + GADT-indexed IR; [Phase 25](phase_25_dhall_schema_generation.md) supplied the
-dhall-typecheck schema + positive corpus; Phase 1 supplied the `dhall` CLI and package pin. The catalog-tag/registry
-oracle was authored before `CorpusSpec.hs`.
-**Independent Validation**: the corpus battery rejects every reached Phase-8/9/25/27 negative at its own tagged
-locus against that fixture's committed expected-error golden, admits every legal twin and positive,
-reconciles its coverage note against `locus_registry.tsv`, and turns red under the two seeded mutants. The
-numbered Validation list below states each condition.
-**Docs to update**:
-`documents/illegal_state/illegal_state_*.md` (add per-entry `Delivery-owner` / `Case-family` tags and
-gate-case backlinks), `DEVELOPMENT_PLAN/system_components.md` (corpus inventory), this document.
+> **Permanently invalidated history.** Every completion, seal, reseal, transcript, evidence, and
+> closure statement in the sprint bodies below is rejected as current validation. The material is retained
+> only as a target-capability inventory and cannot support status, promotion, or a validation claim.
+
+## Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`illegal_state_techniques.md §5/§6`](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state):
 assemble the corpus that exercises the type discipline exhaustively over the coverage matrix, **honestly split by the locus that rejects each fixture** — dhall-typecheck negatives that must fail `dhall type`, gadt-decode negatives that
 must pass `dhall type` and decode-reject — never billing a gadt-decode-only foreclosure as a dhall-typecheck failure.
 
 ### Deliverables
-- A one-time catalog enrichment across every `documents/illegal_state/illegal_state_*.md` entry: retain the
-  existing `**Validation-locus:**` tag and add required `**Delivery-owner:**` and `**Case-family:**` tags. The
-  documentation lint is extended to reject a missing/duplicate/unknown **`Delivery-owner:` or `Case-family:`**
-  tag (the `Validation-locus:` presence check is owned by Phase-0 check (g), not re-owned here) and to
-  reconcile `locus_registry.tsv`. The registry is the committed oracle consumed by the fixture harness and
-  ledger emitter.
-- Positive fixtures (`legal_multisubstrate_cluster`, `legal_managed_eks`, `trivial_app`, a deployment-rules
-  fixture) that decode with complete normalized resource envelopes and target capacities, carried forward
-  from Phase 25/12.
-- dhall-typecheck negatives (`illegal_dhall_typecheck_*`, must fail `dhall type`) are **exactly** the rows enumerated by
-  `locus_registry.tsv` with `validation_locus = dhall-typecheck` and
+
+- A closed Haskell catalogue declares each entry, validation locus, delivery owner, case family, and occupied
+  cell. A separately authored Haskell oracle states the expected identities and relations. Reader-facing
+  `Validation-locus:`, `Delivery-owner:`, `Case-family:`, and `Cells:` prose may be checked for document shape,
+  but no gate translates it into a behavioural value or treats it as the executable registry.
+- Positive Haskell case declarations (`legal_multisubstrate_cluster`, `legal_managed_eks`, `trivial_app`, and
+  deployment rules) lazily render any Dhall/compiler input beneath `.build/**`, then decode with complete
+  normalized resource envelopes and target capacities.
+- dhall-typecheck negatives (`illegal_dhall_typecheck_*`, must fail `dhall type`) are **exactly** the Haskell
+  catalogue rows with `validation_locus = dhall-typecheck` and
   `owner_phase ≤ Phase-27`. Required members
   include product-named capability ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)), insecure/backdoor ingress ([§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)), a workload missing its complete
   `ResourceEnvelope` ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext); the Phase-25 `illegal_missing_resource_envelope` case), unbounded storage /
@@ -355,7 +164,8 @@ must pass `dhall type` and decode-reject — never billing a gadt-decode-only fo
   ([§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), a substrate/topology arm the union does not offer
   ([§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)/[§3.15](../documents/illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)), and the controller fields Dhall intentionally omits:
   DaemonSet both-positive rollout, StatefulSet unsupported feature/nonzero partition, and Job missing terminal
-  retention. The registry, not this prose list, is the exact enumeration.
+  retention. The reviewed Haskell catalogue, not this prose list or a Markdown/TSV projection, is the exact
+  enumeration.
 - gadt-decode negatives (`illegal_decode_*`, must pass `dhall type`, then decode-reject) are **exactly** registry
   rows with `validation_locus = gadt-decode` whose
   `owner_phase ≤ Phase-27`; these exercise the Phase-26
@@ -390,11 +200,12 @@ must pass `dhall type` and decode-reject — never billing a gadt-decode-only fo
   allocatable VRAM; and provider-expanded resource demand. Phase 9 owns the pure folds and Phase 31 owns the end-to-end post-bind
   `ProvisionContext → Topology → BoundDeployment → Either ProvisionError ProvisionedSpec` boundary. Adding a new catalog row with
   those tags automatically adds it to the deferred set; no phase-doc range edit is required.
-- **Near-miss twinning (forecloses wrong-reason negatives, §M.8).** Each dhall-typecheck negative is a **single-construct mutation** of a named committed legal fixture (its `legal_*` twin, differing only in the one foreclosed
-  dimension), and that twin MUST pass `dhall type`; the negative's `dhall type` error MUST equal the committed
-  `<name>.typeerr` golden that names the foreclosing union/field, so a fixture that fails for an unrelated
-  reason (typo, missing field, syntax error) does not pass. Each `illegal_decode_*` negative is likewise a
-  single-field mutation of a legal twin that decodes, and asserts its committed expected `DecodeError` tag.
+- **Near-miss twinning (forecloses wrong-reason negatives, §M.8).** Each dhall-typecheck negative is a
+  **single-construct mutation** of a Haskell-declared legal twin, differing only in the foreclosed dimension.
+  The twin must pass `dhall type`; the observed error must match a separately authored Haskell expectation
+  naming the foreclosing union or field. Each `illegal_decode_*` negative is likewise a single-field mutation
+  of a legal twin that decodes and is checked against an independently declared `DecodeError` tag. All
+  non-Haskell bytes are generated beneath the fresh run root.
 - **Per-Register-1-locus fixtures (disambiguation).** A catalog entry carrying more than one Register-1 locus
   (e.g. [§3.16](../documents/illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) = `dhall-typecheck` cardinality sub-part + `gadt-decode` distinctness fold) owes **one fixture row per Register-1 locus it carries**, each rejected at its own locus — not one row total. The ledger's
   single "truth-maker locus" per entry is the earliest-sufficient among the loci it carries (§M.8 tie-break:
@@ -402,81 +213,77 @@ must pass `dhall type` and decode-reject — never billing a gadt-decode-only fo
   by reached phases, while later-owned subcases remain visibly deferred to those phases.
 
 ### Validation
-1. Every reached dhall-typecheck negative fails `dhall type` with its observed error matching the committed
-   `<name>.typeerr` golden that names the foreclosing union/field, and its legal near-miss twin passes
+
+1. Every reached dhall-typecheck negative fails `dhall type` with its observed error matching a separately
+   authored Haskell expectation that names the foreclosing union or field, and its legal near-miss twin passes
    `dhall type`.
-2. Every reached gadt-decode negative passes `dhall type` and then decodes to a `Left DecodeError` whose
-   tag equals its committed `<name>.tag` golden, its legal twin decodes, and every positive fixture decodes.
+2. Every reached gadt-decode negative passes `dhall type` and then decodes to a `Left DecodeError` whose tag
+   equals its separately authored Haskell expectation; its legal twin and every positive case decode.
 3. `CorpusSpec` is red if any illegal fixture is admitted at or past its tagged locus, if any twin fails, or
    if any observed error diverges from its golden.
 4. The coverage note maps each fixture to its catalog entry and foreclosure layer and is reconciled against
-   the committed `locus_registry.tsv`, and every exact-owner provisioning row is present in the derived
+   the separately authored Haskell locus inventory, and every exact-owner provisioning row is present in the derived
    deferred set with the exact owner.
-5. The committed union-arm-addition schema mutant (a) and resource-normalization decoder mutant (b) each turn
-   `CorpusSpec` red when re-applied.
+5. Haskell-declared union-arm-addition and resource-normalization mutants are applied to generated run-local
+   sources; each turns `CorpusSpec` red and records the changed production locus.
 
 ### Remaining Work
-None for Sprint 27.1.
 
-## Sprint 27.2: GADT-index compile-fail goldens (type-foreclosed layer) ✅
-**Status**: Done
-**Implementation**: `test/spec/dsl/compilefail/*.hs` (each a minimal module that spells an
-illegal combination) + `test/oracle/illegal_state_corpus/compile_fail.tsv` + `tools/{compile_fail.py,compile_fail.sh}`
-(a pinned `ghc -fno-code` expect-fail harness).
-**Blocked by**: none within the phase.
-**Independent Validation**: the pinned `ghc -fno-code` harness shows every compile-fail golden has no
-inhabitant — it fails on a GHC **type** error matching that golden's committed `.expected` file while its
-one-token legal twin compiles — and turns red under the seeded index-weakening mutant. The numbered
-Validation list below states each condition.
-**Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (per-entry type-foreclosed annotation for
-the entries pinned here), `DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset `None` claim is permanently invalid; Sprint 27.1 remains blocked and NOT VALIDATED.
+
+## Sprint 27.2: GADT-index compile-refusal cases (type-foreclosed layer) ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt the [`illegal_state_techniques.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
 `type-foreclosed` layer at its strongest: give the GADT indices their teeth by proving the illegal value has
 **no inhabitant** — it does not merely decode to a `Left`, it does not compile at all. This is the residue the
 Phase-25 honesty caveat routed here, since Dhall has no opaque types.
 
 ### Deliverables
-- Compile-fail goldens for the type-foreclosed entries the IR indices foreclose: a cross-tenant `Ref`
+
+- Haskell declarations for compile-refusal cases covering the type-foreclosed entries the IR indices foreclose:
+  a cross-tenant `Ref`
   ([§3.8](../documents/illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)/[§3.10](../documents/illegal_state/illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree)), a PVC with no matching PV ([§3.2](../documents/illegal_state/illegal_state_storage.md#32-pvcs-that-dont-bind-pvs)), an endpoint-kind interconversion ([§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)), and a route built
   from no live service handle ([§3.3](../documents/illegal_state/illegal_state_security.md#33-misconfigured-gateway)), plus a non-CBOR Pulsar produce payload
-  ([§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)) — each an expect-fail module that must not compile.
-- A pinned `ghc -fno-code` expect-fail harness reporting one aggregate green/red over the golden set, plus a
-  positive control module that compiles. Each golden ships a committed `test/spec/dsl/compilefail/<name>.expected`
-  golden (expected GHC error class = type-error, plus locus) authored in this phase's oracle-pinning sprint, and a one-token legal twin.
-- The committed guard-weakening GADT-index mutant (c) — used to prove the harness actually rejects.
+  ([§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)).
+  Each declaration lazily renders an expect-fail module beneath `.build/**`; no module, golden, or expected
+  compiler output is tracked as non-Haskell source.
+- A pinned `ghc -fno-code` expect-fail harness reporting one aggregate green/red over the generated case set,
+  plus a generated positive-control module that compiles. A separately authored Haskell oracle declares each
+  expected GHC error class and locus and each one-token legal twin; the harness renders both modules and
+  expectations only beneath the fresh `.build/**` run root.
+- A Haskell-declared guard-weakening GADT-index mutation, applied to a run-local production-source copy, that
+  proves the harness actually rejects changed production behaviour.
 
 ### Validation
-1. Every compile-fail golden imports only the real exported vocabulary, is scope-clean and parse-clean, and
+
+1. Every generated compile-refusal case imports only the real exported vocabulary, is scope-clean and
+   parse-clean, and
    fails to compile under the pinned `ghc -fno-code` harness with a GHC **type** error whose class and locus
-   match its committed `test/spec/dsl/compilefail/<name>.expected` golden.
+   match the separately authored Haskell expectation.
 2. The error class is asserted, not merely "fails": it is read from structured diagnostics —
    `-fdiagnostics-as-json`, or a pinned `--json`-derived tag — so a scope, parse, or name error does not
-   satisfy a golden.
-3. Each golden's one-token legal twin, differing only in the single foreclosed index, compiles, as does the
+   satisfy a case.
+3. Each case's one-token legal twin, differing only in the single foreclosed index, compiles, as does the
    companion positive control module carrying the legal vocabulary.
-4. The harness is red if any golden compiles, if any golden fails for a non-type reason, or if any observed
-   diagnostic diverges from its `.expected` golden.
-5. The committed guard-weakening GADT-index mutant (c) makes at least one golden compile and thereby turns
-   the harness red.
+4. The harness is red if any negative compiles, if any negative fails for a non-type reason, or if any
+   observed diagnostic diverges from its Haskell expectation.
+5. The guard-weakening GADT-index mutation makes at least one negative compile and thereby turns the harness
+   red while an unaffected control remains green.
 
 ### Remaining Work
-None for Sprint 27.2.
 
-## Sprint 27.3: QuickCheck property suite ✅
-**Status**: Done
-**Implementation**: `test/spec/dsl/DecisionPropSpec.hs` (`prop_smartCtorClosure`,
-`prop_decodeRoundTrip`, `prop_foldTotal`, `prop_compositionPreservesWellFormedness`) and
-`test/spec/dsl/DecisionPropMain.hs`.
-**Blocked by**: none within the phase.
-**Independent Validation**: `cabal test` runs the four properties green **under `checkCoverage`** with every
-declared minimum met and each result labelled TESTED or PROVEN, and the committed broken-constructor mutant
-turns all four red. The numbered Validation list below states each condition.
-**Docs to update**: `documents/engineering/testing_doctrine.md` (the
-sampled-vs-exhausted label discipline), `DEVELOPMENT_PLAN/system_components.md`.
+The pre-reset `None` claim is permanently invalid; Sprint 27.2 remains blocked and NOT VALIDATED.
+
+## Sprint 27.3: QuickCheck property suite ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`illegal_state_techniques.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
 and [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact): establish the
 closure / round-trip / fold-totality / composition-preservation properties of the type discipline, labelled
@@ -484,6 +291,7 @@ honestly — **TESTED (sampled)** for infinite domains, upgraded to **PROVEN** o
 exhausted (the three `Rke2Servers` arms).
 
 ### Deliverables
+
 - `prop_smartCtorClosure` (a smart constructor never yields an illegal value), `prop_decodeRoundTrip`
   (encode∘decode is identity on well-formed IR), `prop_foldTotal` (every decode-time fold terminates on
   generated input without partiality), and `prop_compositionPreservesWellFormedness` (composing two
@@ -499,7 +307,9 @@ exhausted (the three `Rke2Servers` arms).
 - The committed broken-smart-constructor / partialized-fold seeded mutant (d) that must turn each property red.
 
 ### Validation
-1. `cabal test` runs the property suite green under `checkCoverage`: closure holds over the smart-constructor
+
+1. Rejected historical observation: the Cabal property suite was recorded green under `checkCoverage`:
+   closure holds over the smart-constructor
    vocabulary, decode round-trips, every fold is total on generated input, and composition preserves
    well-formedness.
 2. Each property declares its `cover`/`classify` obligations, and the run fails if a declared minimum is not
@@ -510,23 +320,15 @@ exhausted (the three `Rke2Servers` arms).
    red, and the suite is red if that mutant survives any property.
 
 ### Remaining Work
-None for Sprint 27.3.
 
-## Sprint 27.4: The per-entry validation-locus ledger — the gate ✅
-**Status**: Done
-**Implementation**: `test/spec/dsl/ValidationLocusLedger.hs` (the coverage-projection emitter + assertion, run as
-part of `illegal-state-corpus-spec`), `tools/illegal_state_corpus_gate.py`, and independently authored expectations under `test/oracle/`.
-**Blocked by**: none within the phase.
-**Independent Validation**: the emitter's per-entry locus and disposition are reconciled against the
-committed `dhall/examples/locus_registry.tsv`, which is lint-derived from catalog tags authored before the
-emitter, so the assertion goes red on any locus, owner, or family divergence and on any reached row
-without a passing fixture. The numbered Validation list below states each condition.
-**Docs to update**:
-`documents/illegal_state/illegal_state_catalog.md` (per-entry realized-locus annotation),
-`documents/engineering/testing_doctrine.md` (the validation-locus ledger variant),
-`DEVELOPMENT_PLAN/README.md` (flip the Phase-27 status when the gate passes).
+The pre-reset `None` claim is permanently invalid; Sprint 27.3 remains blocked and NOT VALIDATED.
+
+## Sprint 27.4: The per-entry validation-locus ledger — the gate ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) and
 [`illegal_state_techniques.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
 emit the per-entry validation-locus ledger — the honest map from every catalog entry to the one locus that
@@ -545,7 +347,8 @@ externally attest: that is a separate artifact recording what this gate establis
 its schema, linter, and path are centrally owned rather than re-derived here.
 
 ### Deliverables
-- Consumption of the Sprint-27.1-authored catalog enrichment and `locus_registry.tsv`; Sprint 27.4 does not
+
+- Consumption of the Sprint-27.1 Haskell catalog enrichment and its run-local generated locus projection; Sprint 27.4 does not
   regenerate or reinterpret their owner/family classification from the emitter.
 - A ledger emitter that classifies each catalog entry into its earliest-sufficient truth-maker locus:
   `dhall-typecheck` (fails `dhall type`, authoring-time), `gadt-decode` (compile-fail golden or decode
@@ -556,11 +359,11 @@ its schema, linter, and path are centrally owned rather than re-derived here.
   the earliest-sufficient Register-1 locus
   (`dhall-typecheck` < `gadt-decode` < `provision-seal` < `rendered-artifact-oracle`), while each sub-case retains
   its own registry row so one entry can owe fixtures at more than one locus or phase.
-- The committed independent oracle: `dhall/examples/locus_registry.tsv`, reconciled by the Phase-0 lint from
-  the catalog's per-entry `**Validation-locus:**` plus the Phase-27-added `**Delivery-owner:**` and
-  `**Case-family:**` tags, with columns at minimum `entry`, `subcase`, `validation_locus`, `owner_phase`, and
-  `case_family`. The
-  provisioning-deferred set is a query over those committed rows (`owner_phase ∈ {Phase-9, Phase-31}` plus the
+- The independent Haskell locus oracle, which may render a diagnostic `locus_registry.tsv` only beneath
+  `.build/**`, checks the production Haskell catalogue against separately authored Haskell expectations. It
+  never derives semantics from the catalogue Markdown. The generated projection has columns at minimum
+  `entry`, `subcase`, `validation_locus`, `owner_phase`, and `case_family`. The
+  provisioning-deferred set is a query over those Haskell-declared rows (`owner_phase ∈ {Phase-9, Phase-31}` plus the
   provisioning case families), not a duplicated literal section-number list.
 - A coverage assertion that **reconciles the emitter's locus for every entry against the registry** and goes
   red on any locus/owner/family divergence, then requires every reached `dhall-typecheck` /
@@ -569,12 +372,14 @@ its schema, linter, and path are centrally owned rather than re-derived here.
   Tier-2-UNVERIFIED banner.
 
 ### Validation
+
 1. The ledger emits with every catalog entry mapped to exactly one truth-maker locus (`dhall-typecheck` /
    `gadt-decode` / `provision-seal` / `rendered-artifact-oracle` / `live-effect`) and one disposition
-   (`discharged-here` or `deferred : owner_phase`), that map reconciled against the committed
-   `locus_registry.tsv` and red on any locus, owner, or family divergence.
-2. The enriched catalog and its lint-derived registry are committed before `ValidationLocusLedger.hs` and
-   remain independent of it, so the emitter cannot decide which class owes a fixture.
+   (`discharged-here` or `deferred : owner_phase`), with the production Haskell map reconciled against the
+   separately authored Haskell oracle and red on any locus, owner, or family divergence.
+2. The production catalogue and independent oracle are distinct Haskell modules with separate human-review
+   custody. Neither consumes the other, a Markdown page, or a serialized registry, so the emitter cannot
+   decide which class owes a case.
 3. The coverage assertion is green: every reached `dhall-typecheck` or `gadt-decode` row carries a
    passing rejecting fixture here, and every deferred row names its registry owner — `provision-seal`
    topology/capacity/storage/cache/accelerator/capability-provision rows → Phase 9 or Phase 31,
@@ -583,32 +388,35 @@ its schema, linter, and path are centrally owned rather than re-derived here.
    a stale hard-coded range, or claimed settled before its owner phase.
 
 ### Remaining Work
-None. Enumeration, ledgers, and run evidence remain generated beneath `.build/` and join to authored
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Enumeration, ledgers, and run evidence remain generated beneath `.build/` and join to authored
 expectations at gate time.
 
 ## Documentation Requirements
 
-**Engineering docs updated with the gate result:**
-- `documents/illegal_state/illegal_state_*.md` — annotate every themed entry with committed
-  `**Delivery-owner:**` and `**Case-family:**` tags alongside its existing validation locus
+**Engineering docs to update (when the human promotes the gate, never before):**
+
+- `documents/illegal_state/illegal_state_*.md` — annotate every themed entry with reader-facing
+  `**Delivery-owner:**` and `**Case-family:**` statements alongside its existing validation locus
   (`dhall-typecheck` / `gadt-decode` / `provision-seal` →
-  Register 1, with reached Dhall/GADT rows discharged here; later or different-locus rows retain their exact
+  Register 1, with reached generated-Dhall/GADT rows targeted here; later or different-locus rows retain their exact
   owners; `rendered-artifact-oracle` → Phase 33; `live-effect` → the live band), and confirm the §5
   coverage matrix is exhausted for the Register-1 rows this phase owns.
 - `documents/engineering/dsl_doctrine.md` — backlink §5's two gates to the exhaustive Phase-27 corpus and the
-  compile-fail golden that pins the type-foreclosed layer.
+  compile-refusal case family that pins the type-foreclosed layer.
 - `documents/engineering/testing_doctrine.md` — record the validation-locus ledger variant and the
   sampled-vs-exhausted QuickCheck label discipline this gate emits (correspondence and runtime fidelity
   UNVERIFIED).
 
-**Cross-references added:**
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-27 status when the gate passes; link this document.
+**Cross-references to add:**
+
+- `DEVELOPMENT_PLAN/README.md` — the human authority alone may change Phase-27 status after the redesigned gate and external approval; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-27 `none` gate row.
-- `DEVELOPMENT_PLAN/system_components.md` — register `dhall/examples/illegal_*`, `test/spec/dsl/CorpusSpec.hs`,
-  `test/spec/dsl/compilefail/`, `test/spec/dsl/DecisionPropSpec.hs`, and `test/spec/dsl/ValidationLocusLedger.hs` as Phase-27
-  design-first rows.
+- `DEVELOPMENT_PLAN/system_components.md` — map only the target Haskell corpus, compile-fail, property, and
+  validation-locus modules; serialized Dhall examples are lazy `.build/**` products, never tracked components.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker and phase order this document serves
 - Phase 27 illegal-state ledger — the authored proven/tested/unverified account of this gate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
@@ -620,7 +428,7 @@ expectations at gate time.
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger the
   validation-locus ledger specializes
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — [§2](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) the registers,
-  [§5](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish) the honesty limit (a green Register-1 corpus is not a live-effect claim)
+  [§5](../documents/engineering/conformance_harness_doctrine.md#6-honesty-what-the-harness-does-and-does-not-establish) the honesty limit (a green Register-1 corpus is not a live-effect claim)
 - [phase_25](phase_25_dhall_schema_generation.md) — dhall-typecheck, the Dhall schema + positive corpus this phase extends
 - [phase_26](phase_26_gadt_decode_ir.md) — gadt-decode, the GADT-indexed IR + decoder this corpus rides atop
 - [phase_9](phase_09_resource_index.md) — the pure capacity/topology/storage fold negatives selected

@@ -1,18 +1,20 @@
 # Phase 5: The lift calculus
 
-> **Purpose**: A closed layer set, a total transition relation, and a witness for each transition.
+> **Purpose**: Specify the target Haskell capability to represent the closed effect-layer set, total
+> transition relation, and consumed transition witness as one typed Haskell lift calculus.
 > **Read this if**: the layer an effect runs at matters, or a transition needs a witness, or this gate has to be read precisely.
 
-Before the generative re-baseline nothing in the plan owned this: make where an effect runs part of its type, and make the relation between layers total.
-Its first deliverable is a closed layer set: on the host, inside a frame, inside a container, with no `Other` arm, and this phase sits where the vocabulary it consumes first exists.
-The rule behind the lift calculus is owned by [`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md), which this contract implements rather than restates.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, documents/engineering/lift_and_compose_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, documents/engineering/lift_and_compose_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -20,12 +22,13 @@ The rule behind the lift calculus is owned by [`lift_and_compose_doctrine.md`](.
 ---
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 5.1: The lift calculus ✅](#sprint-51-the-lift-calculus-)
+- [Sprint 5.1: The lift calculus ⏸️](#sprint-51-the-lift-calculus-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,66 +36,81 @@ The rule behind the lift calculus is owned by [`lift_and_compose_doctrine.md`](.
 
 ## Phase Status
 
-✅ Done — built and sealed 2026-08-20, the third of the five inserted calculi to be built. `python3
-tools/lift_calculus_gate.py` passes all fourteen sides on substrate `none`, lane `none`, natural `arm64`,
-untranslated. Two authored tables decide the calculus and neither is read off it: the pair table names all
-nine ordered layer pairs and the relation agrees with it in both directions, and the observation table crosses
-every admitted pair with every observation and `observe` agrees with that. The four calculus modules carry no
-ambient read and no partial token; the suite reaches its acceptance token with eleven checks green; the
-composition whose layers do not meet and the witness written down rather than observed each have no type while
-their twins compile; and all three seeded mutants redden their own locus and no other.
+⏸️ Blocked — NOT VALIDATED.
 
-**The fallback scan is the part worth reading twice.** A dispatch that grows a catch-all arm answers every
-pair exactly as it did before, so no table sees it — and it is still the arm a fourth layer would silently fall
-into, which is the defect [`lift_and_compose_doctrine.md` §7](../documents/engineering/lift_and_compose_doctrine.md#7-the-lift-calculus)
-names when it says there is no fallback arm. The gate therefore scans the source, and it scans the source
-**the compiler actually sees**: it selects the `#ifdef` branches the run's defines choose before looking, since
-raw text carries every seeded mutant at once and a check that cannot tell the clean tree from a mutated one
-decides nothing. The seeded fallback leaves both tables green and every in-process check passing, and only the
-scan reacts.
+Blocked by redesigned Phase 4, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-**One mutant was narrowed rather than accepted.** The witness forgery first licensed a frame entry whatever
-was observed, which reddened the transition-specificity check as well as the observation table — and a mutant
-that reddens two checks says nothing about which of them was holding the property. It now forges only where
-*nothing* was observed, which is both the narrowest form of the defect and the purest: there is not even a
-mistaken observation behind the evidence.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-Make where an effect runs part of its type, and make the relation between layers total.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to represent the closed effect-layer set, total transition relation, and
+consumed transition witness as one typed Haskell lift calculus.
 
-**Phase scope:** one cohesive claim — *where an effect runs is part of its type, and no pair of layers is left undecided*. A closed set, a total relation over it, and a witness consumed by each transition are exactly what that requires.
-**Substrate:** `none`
-**Lane:** `none`
-**Register:** 1
-**Depends on:** [Phase 3](phase_03_artifact_calculus.md) — the artifact calculus, which supplies the first effects a layer has to place. This phase is independent of the budget calculus; the ordinal between them is sequence, not dependency.
-**Gate:** `python3 tools/run_phase_gate.py 05` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
+
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
+
+**Phase scope:** Target capability only — represent the closed effect-layer set, total transition
+relation, and consumed transition witness as one typed Haskell lift calculus. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 4](phase_04_budget_calculus.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 05`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Independent oracle.** A layer-pair table authored from the substrate doctrine, naming which pairs have a constructor and which have none.
-- **Committed mutants.** Mutants add a fallback arm, forge a witness without an observation, and compose two lifts whose layers do not meet.
-- **Specific-reason negatives.** Each negative fixture asserts the reason it fails, paired with a positive differing only in composition typed so two lifts compose exactly when the inner target layer is the outer source layer.
-- **Fresh challenge.** Not applicable — this gate is pure, so the separately authored predicate stands in for it: a layer-pair table authored from the substrate doctrine, naming which pairs have a constructor and which have none.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — represent the closed effect-layer set, total transition relation, and consumed transition witness as one typed Haskell lift calculus. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 05` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 04 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md) — the rule behind the lift calculus.
+- [`lift_and_compose_doctrine.md` §7 — The lift calculus](../documents/engineering/lift_and_compose_doctrine.md#7-the-lift-calculus) — the rule behind the lift calculus.
 
 ## Sprints
 
-## Sprint 5.1: The lift calculus ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done — 2026-08-20.
-**Implementation**: `src/Amoebius/Calculus/Lift/{Layer,Witness,Transition,Compose}.hs`,
-`tools/lift_calculus_gate.py`, `test/spec/calculus/LiftCalculusSpec.hs`,
-`test/oracle/lift_calculus/{transition_pairs,witness_observations}.tsv`,
-`test/oracle/lift_calculus_surfaces.tsv`,
-`test/negative/compile_fail/lift_calculus/{paths_meet_at_a_layer,paths_do_not_meet,witness_comes_from_an_observation,witness_asserted}.hs`
-**Blocked by**: None.
-**Independent Validation**: A layer-pair table authored from the substrate doctrine, naming which pairs have a constructor and which have none.
-**Docs to update**: `documents/engineering/lift_and_compose_doctrine.md`
+## Sprint 5.1: The lift calculus ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -121,7 +139,7 @@ constructor anywhere in it — including an operator constructor like `:` — ma
 
 ### Remaining Work
 
-None for this phase. The relation is over primitive transitions and is deliberately not transitive, so
+The pre-reset `None` claim is permanently invalid; the phase remains blocked and NOT VALIDATED. The relation is over primitive transitions and is deliberately not transitive, so
 `on-host → in-container` has no inhabitant and reaching a container from the host is a composition; that
 distinction is what a path is for, and a relation closed under transitivity would erase it. Whether teardown
 is an obligation the type system tracks is the workflow calculus's claim, which is the next phase's and is
@@ -131,15 +149,20 @@ to observe.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
 
 - [`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md) — **done
   2026-08-20.** §7 gains the record that the calculus's three parts are built, and what is not: the layer set
   is closed at three members, so the "and so on outward" the section allows for is a change to the set rather
   than something the code already carries.
-- [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md) — **done 2026-08-20.** §4's
+- [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md) — **historical pre-reset note from 2026-08-20 — permanently invalid for promotion.** §4's
   "what is built today" paragraph said the per-transition witness type did not exist yet. It does.
 
+**Cross-references to add:**
+
+- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+
 ## Related Documents
+
 - [Development Plan](README.md)
 - [`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md) — the rule behind the lift calculus.

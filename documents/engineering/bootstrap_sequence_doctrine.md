@@ -15,12 +15,12 @@ by [platform_services_doctrine.md](./platform_services_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
 
-> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
@@ -42,7 +42,7 @@ Two questions in the vision are left unowned by the docs that touch them:
 > the cluster daemon?"* — and — *"how does a new `.dhall` get implemented or unlock keys provided in the root
 > node? does the project binary provide a thin cli tool to interact with the amoebius daemon api?"*
 
-The bring-up *pieces* exist — the bootstrap coordinator CLI ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)),
+The bring-up *pieces* exist — the pre-binary handoff ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-pre-binary-handoff-contract)),
 "init follows readiness" ([`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)),
 the "bootstrap coordinator, not the brain" host daemon ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)),
 Vault init/unseal ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)),
@@ -79,7 +79,7 @@ interactions occur through the [amoebius] NodePort."* The one-way handoff is [§
 ```mermaid
 flowchart TD
 %% register: orientation
-  pb[pb bootstrap coordinator CLI, Python: toolchain, build, exec binary] --> hb[Host binary / sudo host daemon]
+  pb[pb pre-binary handoff, bounded Python: establish, build, exec unchanged argv] --> hb[Host binary / sudo host daemon]
   hb -->|channel 1: distro mTLS, BOOTSTRAP ONLY| api[kube-apiserver reachable]
   api --> lease[Bootstrap host holds mandatory reconciler Lease]
   lease --> sched[BootstrapCapacitySchedulerReady: exact config and root, no managed taint]
@@ -104,8 +104,11 @@ The sequence is a [`readiness_ordering_doctrine.md`](./readiness_ordering_doctri
 ([`cluster_lifecycle_doctrine.md` §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
 The ordered steps, each gated on the prior step's readiness:
 
-1. **The bootstrap coordinator CLI** (`pb bootstrap`) ensures the toolchain, builds the binary, and `exec`s `amoebius
-   bootstrap --distro={kind,rke2}` ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)).
+1. **The pre-binary handoff** receives the user's `pb bootstrap --distro={kind,rke2}` argv, makes only its
+   minimal platform-adapter distinction, establishes the contained toolchain, builds the source-bound binary,
+   and `exec`s it with exactly `bootstrap --distro={kind,rke2}` unchanged. Python does not implement a
+   `bootstrap` mode or construct the distro flag
+   ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-pre-binary-handoff-contract)).
 2. **The host daemon brings up the distro** — the zero-secret single-node root (`kind`, or
    `Rke2Servers.Single`) — and waits on `discover = Present` for `kube-apiserver` (a successful mTLS call,
    not a timer; [`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers)).
@@ -153,7 +156,8 @@ This is the **root** bootstrap; a *child* cluster is spawned by a parent (the Pu
 [`cluster_lifecycle_doctrine.md` §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)),
 which injects the child's scoped `InForceSpec` + secrets rather than prompting a human. This ordered sequence **retires the open question** [`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
 recorded (bootstrap config / first-manifest delivery): the first operator-supplied manifest is delivered by step 10's `dhall
-update`, and the transient bootstrap config is the binary-sibling `amoebius.dhall` the bootstrap coordinator establishes.
+update`, and the transient bootstrap config is the binary-sibling `amoebius.dhall` the Haskell host
+bootstrap coordinator establishes after handoff.
 
 ---
 
@@ -195,9 +199,9 @@ The handoff is **one-way, observed-gated, and transfers control-surface authorit
 
 ## 5. The admin control plane: the CLI ↔ the control-plane daemon REST API
 
-After handoff, the operator drives the cluster through **one surface**: the operator CLI (`pb`) → the
+After handoff, the operator drives the cluster through **one surface**: Haskell command mode (`amoebius`) → the
 **amoebius NodePort service** → a **REST API on the in-cluster control-plane daemon**. This is the vision's *"thin cli
-tool [that] interact[s] with the amoebius daemon api"* — and the answer is a thin Python frontend over the typed REST control plane, not a second runtime daemon or control plane.
+tool [that] interact[s] with the amoebius daemon api"* — and the answer is a thin Haskell client over the typed REST control plane, not a second runtime daemon or control plane.
 
 ### The endpoints
 
@@ -222,9 +226,10 @@ The load-bearing ones:
   to provision what the spec declares. An absent secret, an SSH key that cannot connect, a host short of its declared resources,
   or a cloud credential lacking permission or quota is **rejected at upload, before any reconcile**. This is a
   **runtime-checked** admission gate — it reaches real hosts and cloud APIs — honest about its layer: a name's
-  *existence* is a decode-time check, but a name's *capability* is proven live at `dhall update`. In tests
-  this operator interaction is *simulated* from
-  a single flagged `test-secrets.dhall`, the only place secret values live at rest
+  *existence* is a decode-time check, but a name's *capability* is proven live at `dhall update`. In tests this
+  operator interaction is simulated from a single flagged `test-secrets.dhall` supplied externally at the
+  specifically ignored repository-root path. That file is never version controlled, generated from repository
+  source, copied into `.build/**`, or retained as evidence; the harness records only redacted identities and secret names
   ([`testing_doctrine.md` §6](./testing_doctrine.md#6-flagged-test-credentials)).
 
 ### This is the admin plane, distinct from the workload plane
@@ -306,22 +311,22 @@ This document is normative bootstrap-sequence + admin-control-plane doctrine onl
 status, and gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never
 restated here. For orientation only (the plan is authoritative): the **chain/Step kernel** the ordered sequence
 is enacted through rides **Phase 34**, and the **bootstrap coordinator + single-node kind bring-up** rides **Phase 55**; the
-**host→control-plane daemon handoff** itself is delivered by **Phase 65** (the control-plane daemon). The **whole admin REST surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — is delivered by **Phase 65 Sprint 65.4**,
+**host→control-plane daemon handoff** itself is assigned to **Phase 65** (the control-plane daemon). The **whole admin REST surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — is assigned to **Phase 65 Sprint 65.4**,
 because [§3](#3-the-ordered-bootstrap-sequence) step 8 exposes the surface *at* the handoff point: there is no
-control-plane daemon to host an endpoint before it. **Phase 61** (root Vault/PKI) delivers the Vault, the
+control-plane daemon to host an endpoint before it. **Phase 61** (root Vault/PKI) owns the Vault, the
 password-sealed unlock-material envelope, and the built-in client that the `vault init/unseal` endpoint fronts —
 unsealing there is driven under the Phase-58 bootstrap-host authority, the only authority that exists that
 early. This doc states the target shape and links back for status.
 
-> **Honesty.** Phase 55 now carries the `pb` bootstrap coordinator mode and reconcile-driven single-node kind bring-up in
-> amoebius code, and a pristine Incus VM exercises their absent→installed→build→`exec` path, no-op re-run,
-> divergence repairs, hard storage and transition boundaries, complete runtime inventory, exact process
-> envelopes, six red mutants, and leak-free teardown. The authoritative Phase-55 gate is complete. Every
+> **Target validation boundary — NOT VALIDATED.** Phase 50 must cover the bounded pre-binary handoff without
+> hardware; after Phases 51–54 are independently accepted in order, Phase 55 covers only Haskell-owned,
+> reconcile-driven single-node kind bring-up. Its target gate must exercise a pristine Incus VM through
+> Haskell host observation and reconcile, no-op re-run, divergence repairs, hard storage and transition boundaries,
+> complete runtime inventory, exact process envelopes, six red mutants, and leak-free teardown. Every
 > hardware substrate always supplies the `linux-cpu` lane: Linux runs it natively or in Incus, Apple in Lima,
-> and Windows in WSL2 when a pristine Linux host is required. Phase 65 now delivers the typed host→control-plane daemon
-> Lease handoff, the four endpoint families, and the `pb` admin-REST client mode; its Register-3 ledger is
-> `dynamically-resolved`. Claims beyond those delivered
-> boundaries remain design intent or inherited sibling evidence
+> and Windows in WSL2 when a pristine Linux host is required. Phase 65 owns the typed host→control-plane daemon
+> Lease handoff, the four endpoint families, and the Haskell command-mode admin-REST client. All of these claims remain
+> design intent until the tracker records human promotion
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
@@ -333,7 +338,7 @@ early. This doc states the target shape and links back for status.
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — [§4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) init-follows-readiness, [§5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal) the operator-password unseal the admin endpoint carries, [§10](./vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault) the pre-Vault trust floor
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — [§3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio) the workload-plane rule this admin plane is distinct from; [§4](./host_cluster_comms_doctrine.md#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls) channel 1 (bootstrap-only)
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) the handoff trigger (`/readyz` Serving + the `Committed` readiness edge; single-instance is delegated to k8s/etcd, so there is no election commit to await)
-- [Substrate Doctrine](./substrate_doctrine.md) — [§6](./substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) the bootstrap coordinator CLI igniter
+- [Substrate Doctrine](./substrate_doctrine.md) — [§6](./substrate_doctrine.md#6-the-pre-binary-handoff-contract) the bounded pre-binary handoff
 - [Platform Services Doctrine](./platform_services_doctrine.md) — [§11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) the derived platform bring-up DAG
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.42](../illegal_state/illegal_state_security.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness) an unauthenticated admin mutation foreclosed
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

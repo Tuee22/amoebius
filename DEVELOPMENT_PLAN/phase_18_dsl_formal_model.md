@@ -1,33 +1,36 @@
 # Phase 18: DSL formal model
 
-> **Purpose**: Give a bounded tranche of amoebius's DSL decisions and concurrent protocols both an actual-code
-> reading and a reifiable formal-model reading before live reconciliation begins.
+> **Purpose**: Specify the target Haskell capability to project a bounded tranche of DSL decisions
+> and concurrent protocols from Haskell values into executable and formal-model readings, with every
+> Dhall, TLA+, CFG, or rendered fixture product generated only beneath `.build/**`.
 > **Read this if**: the decoder/fold/render boundary, Lease/reservation/reconcile models, or the line between
 > bounded design proof and runtime fidelity must be changed.
 
-This phase owns five bounded DSL/protocol models, their actual-code projections, and their TLC/explorer gate.
-It consumes the formal kernel, the five-calculus composition adapter, and existing DSL constructors. It does
-not claim coverage of every DSL input or correspondence to an effectful daemon.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 18.1: Actual bounded DSL projections ✅](#sprint-181-actual-bounded-dsl-projections-)
-- [Sprint 18.2: Protocol models and correspondence ✅](#sprint-182-protocol-models-and-correspondence-)
-- [Sprint 18.3: Explorer, TLC, mutation, and gate ✅](#sprint-183-explorer-tlc-mutation-and-gate-)
+- [Sprint 18.1: Actual bounded DSL projections ⏸️](#sprint-181-actual-bounded-dsl-projections-)
+- [Sprint 18.2: Protocol models and correspondence ⏸️](#sprint-182-protocol-models-and-correspondence-)
+- [Sprint 18.3: Explorer, TLC, mutation, and gate ⏸️](#sprint-183-explorer-tlc-mutation-and-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -35,111 +38,87 @@ not claim coverage of every DSL input or correspondence to an effectful daemon.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-21. All ten gate sides passed on natural `arm64`, untranslated: all fourteen metrics
-matched, 15 surfaces joined to 18 run-time items, and 34 emitted TLA+/CFG artifacts remained generated and
-untracked. Attestation `sha256:9fcb3a2cf8686c7c04e90029a2b1f894b67edebe5bb0a4df3ef2062a7b6fd81b`
-binds source `sha256:3bfce081173586eb…` over 2,192 files. Repository-conformance attestation
-`sha256:ebe799134b00fb10b0938a2f18a75d5de938e3ce20660c5f1664e908214ebf34` and documentation attestation
-`sha256:db5964aa67444da4e08ee1ec278c7ccda805d64772c119cac0b7d5ee3ffd9395` passed on that snapshot. Decision
-code is tested only over the declared bounded tranche, protocol properties are proven only for the models,
-and runtime fidelity is UNVERIFIED.
+⏸️ Blocked — NOT VALIDATED.
+
+Blocked by redesigned Phase 17, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
+
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-The actual-code half exercises five authored decoder positives and four exact-tag negatives, ignoring their
-generated normalization hashes; those hashes detect change but do not explain meaning. It exhausts all 6,561
-pairs of four-axis demand/capacity vectors whose coordinates lie in `0..2` against an independently written
-componentwise reference. Two provisioned fixtures—single-node object storage and three-member SQL—project 19
-rendered objects into 19 `chain` steps with exact semantic identity and activation-frame sequences and no
-construction-time effects.
+This phase specifies a Haskell target capability; it does not report a current implementation or
+result. The target is to project a bounded tranche of DSL decisions and concurrent protocols from
+Haskell values into executable and formal-model readings, with every Dhall, TLA+, CFG, or rendered
+fixture product generated only beneath `.build/**`.
 
-Three concrete protocol readings check the actual `dsl-core` implementation: a Lease action token succeeds
-once and rejects reuse and a foreign holder, one scheduler reservation is not double-debited and follows the
-legal `Reserved → BindingInFlight → Bound` path, and an unreachable node observation refuses a destructive
-reconcile while the adjacent present observation permits it. The suite also constructs the real Phase-10
-artifact/budget/lift/workflow/evidence composition through the shared adapter and checks its Phase-11 formal
-projection.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
+`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
+tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
+code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
+`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
+evidence contract remain UNRESOLVED and block validation.
 
-Five new models cover the bounded projection, snapshot-token use, reservation transition, Lease authority,
-and reconcile protocol. With the existing calculus-composition model, the contract contains six models and
-18 reachable states. Explorer and TLC agree exactly on every fingerprint of the five transition-bearing DSL
-models. Eight safety invariants and four liveness properties hold under named fairness; eight exact safety
-mutants and four fairness-drop mutants turn red. Fresh TLA+/CFG are checked semantically against the authored
-model contract and remain generated beneath `.build/**`.
+This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
+promote its claim.
 
-**Phase scope:** Five actual decoder cases/four exact negatives, one finite 6,561-cell capacity domain, two
-provisioned render/chain fixtures, three concrete protocol decisions, five DSL/protocol models, and the shared
-calculus projection; split or open a later owner for another domain, fixture family, or runtime bridge.
-**Substrate:** none
-**Lane:** none
-**Register:** 1 — pure/in-process bounded design validation.
-**Depends on:** [Phase 11](phase_11_formal_model_kernel.md) — supplies `Model`, explorer, and `emitTLA`;
-[Phase 16](phase_16_deterministic_sim_substrate.md) — supplies the actual five-calculus harness adapter;
-[Phase 17](phase_17_gateway_migration_model.md) — supplies the preceding numeric seal and the concrete
-semantic-renderer precedent.
-**Gate:** `python3 tools/run_phase_gate.py 18` passes the bounded actual-code and formal-model battery,
-fourteen exact metrics, complete surface join, generated-artifact discipline, architecture, containment,
-write guard, ledger, and source-bound attestation; [Gate integrity](#gate-integrity) owns the anti-tautology
-apparatus.
+**Phase scope:** Target capability only — project a bounded tranche of DSL decisions and concurrent
+protocols from Haskell values into executable and formal-model readings, with every Dhall, TLA+,
+CFG, or rendered fixture product generated only beneath `.build/**`. NOT VALIDATED.
+
+**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+
+**Lane:** `none`.
+
+**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+
+**Depends on:** [Phase 17](phase_17_gateway_migration_model.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 18`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-- **Representative set (§M.7):** the decoder corpus is exactly the five positive and four negative rows in
-  the existing Gate-2 tables; the capacity domain is every demand/capacity pair in `{0,1,2}⁴`; render/chain
-  uses object-store/SingleNode and SQL/Distributed-3; concrete protocols are Lease token, scheduler
-  reservation, and unreachable node planning; the formal set is named above.
-- **Independent oracles (§M.1/§M.3):** `positive_trees.tsv` contributes fixture, surface, and structural
-  count; `decode_cases.tsv` contributes exact error tags; `implementation_projection.tsv` fixes bounded
-  counts, identities, and frames; `model_contract.tsv` fixes names, states, actions, invariants, and properties;
-  `mutation_catalog.tsv` fixes each mutant's invariant; and `CalculusComposition.expected.tsv` fixes the
-  shared formal projection. The componentwise capacity reference does not call `fits`.
-- **No generated-output oracle:** decoder normalization hashes and structural fingerprints are deliberately
-  not Phase-18 acceptance facts. TLA+/CFG and render output are freshly projected to semantic names,
-  identities, frames, and outcomes; no emitted bytes are committed or compared to a committed byte snapshot.
-- **Mutation quota (§M.2):** initial-value substitution, token and reservation guard weakening, Lease guard
-  deletion, and four reconcile action/effect mutations each violate exactly one authored invariant. Removing
-  fairness from each temporal model makes its property red. A generic non-zero result cannot satisfy either
-  family.
-- **Positive and adjacent controls (§M.8):** every decoder negative carries an authored positive twin; the
-  unreachable/present node decisions differ only in observation; correct models and actual implementations
-  are green before mutations are trusted; token first-use precedes reuse denial; reservation legal transitions
-  bracket the illegal skip.
-- **Finite coverage honesty (§M.4):** the capacity comparison is exhaustive only inside its 6,561-cell domain.
-  The five decoder positives, four negatives, and two provisioned fixtures are named examples, not generators
-  and not claims about the entire DSL.
-- **Independent formal observer (§M.5/§M.10):** TLC subprocess fingerprints are compared to the in-process
-  explorer for all five transition-bearing models. The actual code projections are compared to authored
-  semantic tables and independent predicates, not self-reported compliance traces.
-- **Proof boundary:** eight safety and four liveness claims are `proven-for-the-model`; actual-code projections
-  are tested at their bounds. The calculus projection inherits its one-state Phase-11 reading. Effectful daemon
-  traces, live service behavior, and model-to-runtime fidelity remain UNVERIFIED for Phase 19 and later owners.
-- **Fresh challenge (§M.9):** not applicable. This is a pure Register-1 gate with authored semantic predicates,
-  no effectful service response, and no accepted stale state.
-- **Authority/bypass (§§M.11–M.12):** not applicable to a design-model gate. The Lease holder pair is a pure
-  decision check, not an authentication or live authority claim.
-- **Extension conformance (§M.13).** Not applicable. Phase 18 declares no extension or domain member.
+**Contract review**: REJECTED — NOT VALIDATED.
+
+| Key | Contract |
+|---|---|
+| `Claim` | Target capability only — project a bounded tranche of DSL decisions and concurrent protocols from Haskell values into executable and formal-model readings, with every Dhall, TLA+, CFG, or rendered fixture product generated only beneath `.build/**`. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 18` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 17 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
-- [`formal_model_doctrine.md` §3](../documents/engineering/formal_model_doctrine.md#3-two-total-renderings): explorer and TLC are separate readings of one model value.
-- [`formal_model_doctrine.md` §4.1](../documents/engineering/formal_model_doctrine.md#41-the-reference-model-and-its-semantic-oracle): semantic facts, not generated bytes, decide renderer acceptance.
-- [`formal_model_doctrine.md` §6](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): finite green results do not establish runtime fidelity.
-- [`dsl_doctrine.md` §5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): the model does not claim credit for states the type system already excludes.
-- [`cluster_lifecycle_doctrine.md` §9](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine): unreachable observation is distinct from absence.
+- [`formal_model_doctrine.md` §3 — Two total renderings](../documents/engineering/formal_model_doctrine.md#3-two-total-renderings): explorer and TLC are separate readings of one model value.
+- [`formal_model_doctrine.md` §4.1 — The reference model and its semantic oracle](../documents/engineering/formal_model_doctrine.md#41-the-reference-model-and-its-semantic-oracle): semantic facts, not generated bytes, decide renderer acceptance.
+- [`formal_model_doctrine.md` §6 — What a green model-check proves, and what it does not](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): no finite result is current; any future accepted model result would still leave runtime fidelity unproved.
+- [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): the target model must not claim credit for states that a human-approved Haskell type-system boundary must first exclude.
+- [`cluster_lifecycle_doctrine.md` §9 — How bring-up and teardown are implemented: the reconciler, not a state machine](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine): unreachable observation is distinct from absence.
 
 ## Sprints
 
-## Sprint 18.1: Actual bounded DSL projections ✅
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-**Status**: Done.
-**Implementation**: `test/spec/formal/dsl/DslFormalModelSpec.hs`,
-`test/oracle/formal/dsl/implementation_projection.tsv`, existing Gate-2 decoder tables, `BindFixtures`, and
-`ProvisionFixtures`.
-**Blocked by**: None.
-**Independent Validation**: actual decoder surface/count and exact errors, exhaustive componentwise capacity
-comparison, and exact render/chain identity/frame projections are read from distinct authored expectations.
-**Docs to update**: `documents/engineering/{dsl_doctrine,formal_model_doctrine}.md` and
-`DEVELOPMENT_PLAN/{overview,system_components}.md`.
+## Sprint 18.1: Actual bounded DSL projections ⏸️
+
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -162,17 +141,11 @@ hashes or byte snapshots as semantic evidence.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 18.2: Protocol models and correspondence ✅
+## Sprint 18.2: Protocol models and correspondence ⏸️
 
-**Status**: Done.
-**Implementation**: `src/Amoebius/Formal/Dsl/Models.hs`,
-`test/spec/formal/dsl/DslFormalModelSpec.hs`, and `test/oracle/formal/dsl/model_contract.tsv`.
-**Blocked by**: Sprint 18.1's bounded actual-code vocabulary.
-**Independent Validation**: model names/actions/states/obligations are authored separately; actual Lease,
-reservation, and node-observation decisions are exercised through `dsl-core`.
-**Docs to update**: `documents/engineering/{cluster_lifecycle_doctrine,formal_model_doctrine}.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -193,18 +166,11 @@ code correspondence explicitly bounded.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 18.3: Explorer, TLC, mutation, and gate ✅
+## Sprint 18.3: Explorer, TLC, mutation, and gate ⏸️
 
-**Status**: Done.
-**Implementation**: `test/spec/formal/dsl/DslFormalModelSpec.hs`,
-`test/oracle/formal/dsl/{model_contract,mutation_catalog}.tsv`,
-`test/oracle/dsl_formal_model_surfaces.tsv`, and `tools/dsl_formal_model_gate.py`.
-**Blocked by**: Sprint 18.2's models and actual-code projections.
-**Independent Validation**: exact explorer/TLC state fingerprints, exact-invariant safety mutations, and
-fairness removal are three distinct controls.
-**Docs to update**: `DEVELOPMENT_PLAN/{README,overview,legacy_tracking_for_deletion,system_components}.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
@@ -226,17 +192,19 @@ source-bound phase attestation.
 
 ### Remaining Work
 
-None.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `formal_model_doctrine.md` — record the bounded DSL/protocol model set and actual-code projection boundary.
 - `dsl_doctrine.md` — record the bounded decoder/fold/render/chain evidence without generalizing it.
 - `cluster_lifecycle_doctrine.md` — record the modeled and actual unreachable-observation decision while
   leaving effectful reconciliation UNVERIFIED.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/README.md`, `overview.md`, `system_components.md`, and
   `legacy_tracking_for_deletion.md` — reconcile order, evidence, implementation paths, and rewritten-body debt.
 

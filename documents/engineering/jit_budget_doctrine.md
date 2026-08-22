@@ -17,10 +17,12 @@ restated.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, README.md, documents/engineering/README.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Every phase-run or implementation-result statement in this document is permanently invalidated diagnostic history. It cannot establish or reactivate current status, even if a phase later advances. Target doctrine remains normative; current status is solely in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
@@ -184,12 +186,12 @@ Stated plainly, because a budget calculus reads as stronger than it is:
   admitted against its declared bound, and a recipe that exceeds its own declaration is refused mid-write. That
   refusal is the one place a partial rendering can occur; [§4](#4-admission-fails-first-not-last)'s staging rule
   is what keeps it from becoming a partial *artifact*, and it is why the per-item bound is part of the grant.
-- **The grant, admission, and the reaper are built; the rest of this document is not.**
-  [Phase 4](../../DEVELOPMENT_PLAN/phase_04_budget_calculus.md) delivered the grant issued from a finite pool,
+- **Phase 4 owns the target grant, admission, and reaper boundary; the rest remains later work.**
+  [Phase 4](../../DEVELOPMENT_PLAN/phase_04_budget_calculus.md) must cover the grant issued from a finite pool,
   the ceiling and concurrency as one bound, `admit`/`admitFirst` over a demand, the staging rule of
   [§4](#4-admission-fails-first-not-last), and the retention grant that has no constructor without a reaper —
-  all as pure values in Register 1, which is a decision result and not a runtime one. What no phase has
-  delivered is [§6](#6-composition-sums-and-the-sum-is-checked)'s additivity, which is stated over the lift
+  all as pure values in Register 1, which would be a decision result and not a runtime one. No phase currently
+  claims [§6](#6-composition-sums-and-the-sum-is-checked)'s additivity, which is stated over the lift
   calculus above this one, or any live observation of the free space
   [§7](#7-the-residue) keeps outside the calculus. Status lives only in the
   [tracker](../../DEVELOPMENT_PLAN/README.md).
@@ -200,7 +202,8 @@ Stated plainly, because a budget calculus reads as stronger than it is:
 
 This document is normative only. Which phase delivers the grant type, admission, the retention grant, and the
 reaper is owned by [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Normative shapes are design
-intent; only explicitly named phase instances are tested amoebius results.
+intent. Only a phase-specific, independently reviewed candidate plus external human approval could establish
+an amoebius result; every current phase is NOT VALIDATED.
 
 ---
 

@@ -6,30 +6,27 @@
 > `linux-cpu`.
 > **Read this if**: phase 67 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 67 delivers the native Pulsar client (CBOR); its design is owned by [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), [substrate_doctrine.md](../documents/engineering/substrate_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-10 with `python3 tools/pulsar_client_gate.py --reuse-fresh-live`;
-ledger `external-run-reference`.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
+command transcript, or evidence reference retained below is historical inventory only: it is permanently
+non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
 
 ## Contents
+
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — the native Pulsar client envelope](#resource-provision--the-native-pulsar-client-envelope)
+- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 67.1: Fork supernova → amoebius-pulsar native binary protocol ⏸️](#sprint-671-fork-supernova--amoebius-pulsar-native-binary-protocol-)
@@ -44,36 +41,22 @@ ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-66 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+⏸️ Blocked — NOT VALIDATED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+Blocked by redesigned Phase 66, its independent validation, and human promotion; every earlier
+promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
+completion claim, and implementation result in this document is invalidated as validation evidence, even
+where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Known partial** only.
 
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
+Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
+satisfied and human-approved.
 
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-**Done.** `amoebius-pulsar` now speaks Pulsar's native TCP binary protocol with generated protobuf command
-types, mandatory CRC32C payload frames, typed CBOR-only application bodies, derived topics, all four
-subscription types, seek, acknowledgement, and explicit producer sequence identities. Two fresh namespaces
-round-tripped commands and events against the live HA service; external broker-admin readback established
-duplicate collapse, unacked redelivery, replay, and complete teardown. The Register-2.5 battery explored 720
-reorder/duplicate schedules and killed its unstable-key twin. The three committed source mutants and both
-compile-refusal fixtures turn the unchanged gate red for their pinned reasons.
-
-Every hardware substrate can always run the `linux-cpu` lane. When a validation needs a pristine Linux host,
-use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows; specialized lanes are additive.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-This phase delivers amoebius's **one and only transport to Pulsar**: a single native-protocol Haskell client,
+This phase's target is amoebius's **one and only transport to Pulsar**: a single native-protocol Haskell client,
 `amoebius-pulsar`, speaking Pulsar's TCP binary protocol directly. There is no WebSocket transport, no
 HTTP-upgrade side-door, and no second-language runtime; this client replaces both sibling transports outright.
 It owns four things. First, the **native binary protocol** — length-prefixed `proto-lens`-generated
@@ -103,80 +86,37 @@ remain additive and are exercised by later phases.
 **Register:** 3 (live infrastructure) — the gate runs against a real broker on a real cluster, not an
 in-process fake.
 
-**Depends on:** [Phase 66](phase_66_app_tenancy.md) — tenant/provider provisioning, which this phase consumes rather than rebuilds.
-
-**Gate:** `python3 tools/run_phase_gate.py 67` is green: the `InForceSpec` test topology satisfies every committed
-oracle, negative, mutant, and external sweep named in [Gate integrity](#gate-integrity), and emits a Register-3
-proven/tested/assumed ledger with every layer outside Register 3 UNVERIFIED.
-
-```mermaid
-flowchart LR
-  %% register: algebra
-  fx["committed fixtures"]:::intent
-  or["independently authored oracle"]:::intent
-  mu["seeded mutant"]:::intent
-  g{{"the phase 67 gate command"}}:::gate
-  ok((("phase seal: the ledger this gate emits"))):::seal
-  no>"the mutant must turn it red"]:::refuse
-  fx -->|"binds the corpus"| g
-  or -->|"binds the expectation"| g
-  mu -->|"binds the defect"| g
-  g -->|"fixtures green, oracle agrees"| ok
-  g -->|"mutant green means the gate is not one"| no
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
-  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
-  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
-```
-*Validated Phase-67 gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+**Depends on:** [Phase 66](phase_66_app_tenancy.md) — exact current human approval; the numeric chain includes every earlier phase
+**Gate:** `pb validate phase 67`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-The run happens on a `linux-cpu` kind cluster with Pulsar up as a standard HA service (Phase 62). There the
-`InForceSpec` test topology **round-trips a workflow command → event over the native Pulsar binary protocol
-with broker-side deduplication enabled**, a **CBOR command/event payload round-trips byte-for-byte** through
-the typed codec, and a **fixture attempting a non-CBOR payload fails to type-check** — the topology spinning
-up, running, and tearing down leak-free and idempotently on re-run. The topic descriptor also round-trips its
-required `StorageBudgetId` and complete `PulsarOffloadObjectDemand` source operands (segment size, offload
-concurrency/rate window, deletion lag, failure/orphan horizon, and admission model); Phase 62 owns the live
-MinIO geometry/drill.
+**Contract review**: REJECTED — NOT VALIDATED.
 
-The gate passes only when every clause below holds; each is checked against an **oracle-pinned oracle**
-authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from the client.
+| Key | Contract |
+|---|---|
+| `Claim` | one cohesive claim — *one native-protocol client, one payload codec, and no WebSocket anywhere*. The delivery contract is at-least-once with broker-side dedup, which the round-trip has to exhibit. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
+| `Command` | `pb validate phase 67` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
+| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
+| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
+| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
+| `Predecessor` | MISSING — blocks validation: the current Phase 66 human approval receipt does not exist. |
+| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
-- **Committed oracle corpus (representative set, §M.7, §M.1).** The gate's representative set is named
-  explicitly and committed under `test/golden/pulsar_client/` in Phase 0: (a) spec-derived byte goldens for
-  the `BaseCommand` frame set `{CONNECT, CONNECTED, LOOKUP_TOPIC, PRODUCER, PRODUCER_SUCCESS, SEND,
-  SEND_RECEIPT, SUBSCRIBE, FLOW, MESSAGE, ACK, ACK_RESPONSE, SEEK}` derived by hand from the Pulsar protocol
-  spec (never from `proto-lens` output of this fork); (b) a CBOR command vector and event vector with their
-  hand-computed canonical-CBOR byte strings; (c) the non-CBOR negative fixtures of Sprint 67.2 V4 with their
-  expected compile diagnostics; (d) the gate topology's `RouteEntry` descriptor `round_trip_dedup.dhall` and a
-  hand-written expected derived-topic table (the `persistent://<tenant>/<ns>/<workflow>.<phase>.linux-cpu`
-  strings), authored independently of `topicFor` (§M.3); (e) a pre-run snapshot of the standing Phase-62
-  namespace's policy set.
-- **Topology algebra is on the gate path (§M.3).** The gate topology's produced and consumed topic names are
-  asserted equal to the committed expected derived-topic table of (d) — the gate uses `topicFor`-derived topics,
-  not hand-written strings — and a companion negative gate run seeds the same topology with a one-sided link and
-  asserts `validateTopology` refuses it **before any broker socket is opened**.
-- **Non-CBOR foreclosure is checked by reason (§M.8).** The gate's non-CBOR clause passes only when the
-  compile-fail harness matches each fixture's committed expected diagnostic and the API-surface golden of
-  [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) below holds; an ill-typed file failing for an unrelated reason does not satisfy it.
-- **Committed seeded mutants must go red (§M.2).** The gate re-runs a committed mutant set and asserts each
-  turns it red: (i) a `topicFor` mutant that emits a literal topic string instead of the derived name;
-  (ii) a `validateTopology` mutant with the one-sided-link clause deleted (invariant-clause delete);
-  (iii) a codec mutant exposing a raw-`ByteString` `produceRaw` (union-arm addition). A green gate under any
-  mutant is a failed gate.
-- **Leak-free is an external enumerate-and-compare sweep (§M.5).** "Leak-free" is defined as: after teardown,
-  the harness enumerates all topics, subscriptions/cursors, and namespaces in the test tenant **by querying the standing broker's admin surface** (an observer external to the client under test, not the client's own
-  bookkeeping) and asserts the set is empty, and asserts the standing Phase-62 namespace's policy set
-  (including the deduplication policy) equals the pre-run snapshot of (e).
-- **Idempotency forces an independent recompute (§M.6).** "Idempotent on re-run" means the topology is
-  re-applied a second time against a **distinct test namespace** (cache-bypass: no reuse of the first run's
-  namespace, cursors, or dedup cursor) and the setup/round-trip path is asserted to have actually executed on
-  run 2 — a no-op served by leftover state from run 1 fails the gate.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+## Resource provision — UNRESOLVED
 
-## Resource provision — the native Pulsar client envelope
+> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
@@ -230,64 +170,48 @@ provision.
 
 ## Doctrine adopted
 
-- [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — native Pulsar client (CBOR) provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
-- [`pulsar_client_doctrine.md §1`](../documents/engineering/pulsar_client_doctrine.md#1-one-client-one-wire-no-websockets)
-  — *one client, one wire, no WebSockets*: this phase builds the single native-protocol client the doctrine
-  mandates and deletes both sibling WebSocket/Node transports; lookup, produce, consume, subscribe, and seek
+- [`workflow_calculus_doctrine.md` §3 — Teardown is a type obligation](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation) — native Pulsar client (CBOR) provisions, and a teardown obligation it cannot discharge is a value it cannot construct.
+- [`pulsar_client_doctrine.md` §1 — One client, one wire, no WebSockets](../documents/engineering/pulsar_client_doctrine.md#1-one-client-one-wire-no-websockets)
+  — *one client, one wire, no WebSockets*: this phase's target must build the single native-protocol client the doctrine
+  mandates and eliminate both sibling WebSocket/Node transports; lookup, produce, consume, subscribe, and seek
   ride the native protocol or they do not happen.
-- [`pulsar_client_doctrine.md §3`](../documents/engineering/pulsar_client_doctrine.md#3-the-native-binary-protocol)
-  and [`§4`](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-re-derives-and-what-it-adds)
+- [`pulsar_client_doctrine.md` §3 — The native binary protocol](../documents/engineering/pulsar_client_doctrine.md#3-the-native-binary-protocol)
+  and [`pulsar_client_doctrine.md` §4 — Forked from supernova — what amoebius re-derives and what it adds](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-re-derives-and-what-it-adds)
   — *the native binary protocol* and *forked from supernova*: `proto-lens`-generated `BaseCommand` framing
   with hand-written size prefixes / magic / CRC32C only, one persistent TCP session per broker, forked from
   `cr-org/supernova` onto the repo-wide GHC 9.12.4 pin — treated as a *starting point with sibling provenance*,
   not a proven foundation.
-- [`pulsar_client_doctrine.md §5`](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek)
+- [`pulsar_client_doctrine.md` §5 — The capability surface: lookup · produce · consume · subscribe · seek](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek)
   — *the capability surface: lookup · produce · consume · subscribe · seek*: long-lived producers,
   flow-controlled consumers, all four subscription types exposed (the client exposes, the daemon-topology
   layer picks), and seek-based replay.
-- [`pulsar_client_doctrine.md §3.1`](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor)
+- [`pulsar_client_doctrine.md` §3.1 — Payloads are exclusively CBOR](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor)
   — *payloads are exclusively CBOR*: every application payload is CBOR through a typed codec, canonical where
   content-addressed; a non-CBOR body has no inhabitant
-  ([`illegal_state_catalog.md §3.23`](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)).
-- [`pulsar_client_doctrine.md §6`](../documents/engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra)
+  ([`illegal_state_capability_messaging.md` §3.23 — A non-CBOR Pulsar payload](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)).
+- [`pulsar_client_doctrine.md` §6 — The declarative topology algebra](../documents/engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra)
   — *the declarative topology algebra*: topic names are a derived function of a typed `RouteEntry`, and an
   unroutable graph is a validation error returning the full violation list, not a runtime mystery.
-- [`pulsar_client_doctrine.md §7`](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)
+- [`pulsar_client_doctrine.md` §7 — Delivery: at-least-once with broker-side dedup (the robust default)](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)
   — *delivery: at-least-once with broker-side dedup*: at-least-once made effectively-once by **broker-side**
   namespace deduplication on `(producer_name, sequence_id)`; intra-cluster consensus is delegated, not
   re-proven.
-- [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) [§3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) — *the no-environment / no-`PATH` lazy tool-ensure contract*: the supernova fork's `protoc`/`proto-lens` codegen is discovered lazily by full path through the
+- [`substrate_doctrine.md` §3 — The no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) [`substrate_doctrine.md` §3 — The no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) — *the no-environment / no-`PATH` lazy tool-ensure contract*: the supernova fork's `protoc`/`proto-lens` codegen is discovered lazily by full path through the
   substrate package manager — no host-`PATH` lookup for code generation and no ambient-environment client
   configuration.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
 
 ## Sprint 67.1: Fork supernova → amoebius-pulsar native binary protocol ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-the live native socket exchange are validated.
-**Implementation**: `src/Amoebius/Pulsar/Frame.hs`,
-`src/Amoebius/Pulsar/Connection.hs`, and `proto/PulsarApi.proto` — the
-authored source; `Proto/PulsarApi.hs` is `proto-lens`-generated at build from that `.proto`, never hand-written
-(delivered and validated).
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: golden-frame encode/decode round-trips of representative `BaseCommand` types byte-for-byte
-against spec-derived fixtures; a CONNECT → CONNECTED → LOOKUP_TOPIC exchange against a single-node broker
-resolves a topic owner through any redirects; a deliberately corrupted CRC32C payload frame yields a
-structured decode error, never a silent drop.
-**Docs to update**:
-`documents/engineering/pulsar_client_doctrine.md` (§3, §4), `documents/engineering/substrate_doctrine.md`
-(the no-env/no-`PATH` lazy `protoc` discovery the fork conforms to).
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`pulsar_client_doctrine.md §3`](../documents/engineering/pulsar_client_doctrine.md#3-the-native-binary-protocol)
 and [`§4`](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-re-derives-and-what-it-adds):
 fork `cr-org/supernova` into the `amoebius-pulsar` package on the repo-wide GHC 9.12.4 pin, and stand up the
@@ -295,6 +219,7 @@ framing layer, the CONNECT/CONNECTED handshake, and LOOKUP-based service discove
 session per broker — the supernova provenance as **sibling evidence, not an amoebius result**.
 
 ### Deliverables
+
 - The `amoebius-pulsar` cabal package forked from supernova, dependency bounds bumped to GHC 9.12.4.
 - A frame codec: simple commands (`totalSize` · `commandSize` · `command`) and payload commands (command +
   optional broker-entry-metadata block behind `0x0e02` + magic `0x0e01` + mandatory CRC32C + `metadata` + raw
@@ -312,6 +237,7 @@ session per broker — the supernova provenance as **sibling evidence, not an am
   environment variable, no `PATH` lookup, anywhere in the build or runtime path.
 
 ### Validation
+
 1. Encode/decode golden frames for representative `BaseCommand` types and assert byte-for-byte equality
    against spec-derived fixtures.
 2. Drive CONNECT → CONNECTED → LOOKUP_TOPIC against a single-node broker on the `linux-cpu` kind cluster and
@@ -323,30 +249,22 @@ session per broker — the supernova provenance as **sibling evidence, not an am
    requests/limits/image/local storage normalize to the private provisioned projection.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 67.2: Capability surface + exclusively-CBOR payload codec ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-golden, and raw-payload compile refusal are validated.
-**Implementation**: `src/Amoebius/Pulsar/Producer.hs`,
-`src/Amoebius/Pulsar/Consumer.hs`, `src/Amoebius/Pulsar/Subscription.hs`,
-`src/Amoebius/Pulsar/Seek.hs`, `src/Amoebius/Pulsar/Cbor.hs` (the typed CBOR
-payload codec on `serialise`/`cborg`) — delivered and validated.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: run against the **live single-node `kind`-cluster broker (Register 3)** — the same
-standing Pulsar service as the gate, not an in-process fake — so every frame-level assertion is wire-real. The
-numbered `### Validation` list below carries the producer, consumer, subscription, seek, and codec obligations.
-**Docs to update**: `documents/engineering/pulsar_client_doctrine.md` (§5, §3.1),
-`documents/illegal_state/illegal_state_catalog.md` (§3.23).
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`pulsar_client_doctrine.md §5`](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek)
 and [`§3.1`](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor): build the
 five-verb client surface — long-lived producers, flow-controlled consumers, all four subscription types, and
 seek-based replay — over the persistent session from Sprint 67.1, with **every application payload encoded exclusively as CBOR** through a typed codec.
 
 ### Deliverables
+
 - A producer: `PRODUCER` → `PRODUCER_SUCCESS` binds a `producer_id` + `producer_name`; each `SEND` carries
   `producer_id` and a first-class `sequence_id`; replies are `SEND_RECEIPT` (with `message_id`) or
   `SEND_ERROR`. One long-lived producer session — no per-publish connection churn, no base64-in-JSON inflation.
@@ -365,6 +283,7 @@ seek-based replay — over the persistent session from Sprint 67.1, with **every
   `BYTES`.
 
 ### Validation
+
 1. Produce N messages over one persistent producer and assert N `SEND_RECEIPT`s with monotonic `message_id`s.
 2. For each subscription type, attach the matching consumer set and assert its delivery shape (single reader;
    primary-then-standby ordering; round-robin spread; per-key affinity).
@@ -386,28 +305,21 @@ seek-based replay — over the persistent session from Sprint 67.1, with **every
    confirmed by the broker's `ACK_RESPONSE`.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 67.3: Declarative topology algebra + one-sided-link validation ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-violations are validated, including the deleted-clause mutant.
-**Implementation**: `src/Amoebius/Pulsar/Topology.hs` — delivered and validated.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: property tests that `topicFor` derives
-`persistent://<tenant>/<namespace>/<workflow>.<phase>.<substrate>` from a typed `RouteEntry`, checked against
-an **oracle-pinned hand-authored expected-topic table** — a distinct spec of the naming scheme, not
-`topicFor`'s own output re-fed as its own oracle (§M.3). The numbered `### Validation` list below carries the
-violation-list and exemption obligations.
-**Docs to update**:
-`documents/engineering/pulsar_client_doctrine.md` (§6).
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`pulsar_client_doctrine.md §6`](../documents/engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra):
 make topic names a derived function of a typed descriptor and make an unroutable graph a validation error, not
 a runtime mystery — the illegal-state-unrepresentable principle applied to the message bus.
 
 ### Deliverables
+
 - A typed `RouteEntry { workflow, phase, lanes, liveness }` descriptor as the single source of truth, and a
   `topicFor` derivation producing the fully-qualified `<workflow>.<phase>.<substrate>` topic — no hand-written
   topic strings anywhere.
@@ -425,6 +337,7 @@ a runtime mystery — the illegal-state-unrepresentable principle applied to the
   `List RouteEntry`.
 
 ### Validation
+
 1. Property test: for each generated `RouteEntry`, `topicFor descriptor` equals the entry computed by the
    **oracle-pinned independent expected-topic table** (§M.3) — not merely equal to `topicFor` mapped over
    the descriptor, which is a tautology. "No code path accepts a literal topic string" is made concrete as a
@@ -448,31 +361,22 @@ a runtime mystery — the illegal-state-unrepresentable principle applied to the
    topics through `topicFor`, never from hand-written strings.
 
 ### Remaining Work
-None.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 67.4: At-least-once + broker-side dedup + the command→event round-trip gate ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-duplicate collapse, redelivery, seek replay, independent state readback, and leak-free cleanup.
-**Implementation**: `src/Amoebius/Pulsar/Dedup.hs`,
-`src/Amoebius/Pulsar/Namespace.hs` (the namespace dedup-policy reconcile),
-`src/Amoebius/Pulsar/Provision.hs`, `test/spec/pulsar/PulsarClientLiveSpec.hs`, and
-`tools/pulsar_client_live.py` — delivered and validated.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: with namespace deduplication enabled the broker rejects a retried
-`(producer_name, sequence_id)` at ingest and redelivers the un-acked message after a consumer crash, and
-distinct keys never share one dedup cursor. The numbered `### Validation` list below carries the gate run, the
-dedup drill, and the leak-free sweep.
-**Docs to update**: `documents/engineering/pulsar_client_doctrine.md` (§7), `DEVELOPMENT_PLAN/README.md` (flip the
-Phase-67 status when the gate passes).
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`pulsar_client_doctrine.md §7`](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default):
 default to at-least-once delivery made effectively-once by **broker-side** deduplication, so a retried
 producer or a redelivered consumer cannot corrupt idempotent state — then assemble the phase gate: a
 command→event round-trip over the native protocol with dedup on and CBOR payloads.
 
 ### Deliverables
+
 - The **broker half**: a reconcile step that enables Pulsar's namespace deduplication policy so the broker
   tracks `(producer_name, sequence_id)` and rejects duplicates at ingest.
 - The **producer half**: every publish carries a stable `producer_name` and a monotonic `sequence_id` within
@@ -496,6 +400,7 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
   asserted to turn the gate red (§M.2).
 
 ### Validation
+
 1. Run the gate topology end-to-end on the `linux-cpu` kind cluster and assert: a workflow command round-trips
    to an event over the native protocol with broker-side dedup enabled; the CBOR payloads round-trip
    byte-for-byte against the oracle-pinned CBOR command/event vectors; the produced and consumed topic
@@ -525,24 +430,16 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
 > delegated, not re-proven.
 
 ### Remaining Work
-None. The content store, workflow runtime, cross-cluster correspondence, and broker consensus internals remain
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The content store, workflow runtime, cross-cluster correspondence, and broker consensus internals remain
 explicitly UNVERIFIED under their owning later phases.
 
 ## Sprint 67.5: Register-2.5 exactly-once effect under simulated redelivery ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-and the unstable-key twin replays red.
-**Implementation**: `test/spec/pulsar/PulsarDedupSimSpec.hs`, driving the production
-`src/Amoebius/Pulsar/Dedup.hs` fold — delivered and validated.
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the real dedup fold, keyed by a replication-surviving work-id, upholds the
-**exactly-once effect** invariant (R3) on every schedule the simulation explores. Deterministically
-replayable, substrate `none`, Register 2.5. The numbered `### Validation` list below carries the injected
-fault set and the broken-fold control.
-**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-67 status backlink),
-`documents/engineering/pulsar_client_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+**Status**: Blocked — NOT VALIDATED
 
 ### Objective
+
 Adopt [`deterministic_simulation_doctrine.md §3/§4`](../documents/engineering/deterministic_simulation_doctrine.md#3-the-simulated-environment-and-its-fault-model)
 and the R3 rule ([`chaos_failover_doctrine.md §13`](../documents/engineering/chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need)):
 validate that the *built* dedup fold makes at-least-once delivery effectively-once under adversarial
@@ -550,6 +447,7 @@ redelivery/reorder/crash schedules **in-process and deterministically replayable
 gate — the interleaving a single-threaded test cannot reach.
 
 ### Deliverables
+
 - The `PulsarDedupSimSpec` battery: the real dedup fold under `IOSimPOR` against the modeled Pulsar, asserting
   no-loss + no-double-apply on every explored schedule under injected
   reorder/duplicate/crash-mid-acknowledge/partition faults.
@@ -559,16 +457,20 @@ gate — the interleaving a single-threaded test cannot reach.
   only *modeled* here.
 
 ### Validation
-1. `cabal test pulsar-dedup-sim` is green — no schedule loses or double-applies an effect; a deliberately broken
+
+1. Rejected historical observation: the `pulsar-dedup-sim` Cabal suite was recorded green — no schedule loses
+   or double-applies an effect; a deliberately broken
    fold (a non-stable key, an ack-before-process) is caught red; the discovered counterexample replays
    identically under its seed.
 
 ### Remaining Work
-None. Modeled-broker fidelity is discharged only to the extent covered by the Register-3 live run.
+
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Modeled-broker fidelity is discharged only to the extent covered by the Register-3 live run.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update (when the human promotes the gate, never before):**
+
 - `documents/engineering/pulsar_client_doctrine.md` — record that §1, §3–§7 (no-WebSockets rule, native
   protocol, supernova fork, capability surface, topology algebra, dedup contract) **and §3.1 (the exclusively-CBOR payload codec)** are realized in `amoebius-pulsar`; flip the relevant sibling-evidence
   honesty notes to delivered once the gate runs (status itself stays in this plan).
@@ -582,6 +484,7 @@ None. Modeled-broker fidelity is discharged only to the extent covered by the Re
   landing in Phase 68.
 
 **Cross-references to add:**
+
 - `DEVELOPMENT_PLAN/system_components.md` — register the `amoebius-pulsar` package and its target module paths
   (`Frame`, `Connection`, `Proto/PulsarApi`, `Producer`, `Consumer`, `Subscription`, `Seek`, `Cbor`,
   `Topology`, `Dedup`, `Namespace`) as Phase-67 design-first rows against the component inventory.
@@ -591,6 +494,7 @@ None. Modeled-broker fidelity is discharged only to the extent covered by the Re
   document.
 
 ## Related Documents
+
 - [README.md](README.md) — the live tracker and phase order this document serves
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format) sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty/registers, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (the CBOR-only payload and no-WebSockets rules)
