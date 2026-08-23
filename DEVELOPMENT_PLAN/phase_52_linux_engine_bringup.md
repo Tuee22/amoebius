@@ -53,7 +53,7 @@ satisfied and human-approved.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -283,7 +283,7 @@ run the whole sequence a second time against the same guest and require that it 
 
 - An action ledger per pass that types each entry as a probe or a mutation, so two passes are comparable
   rather than merely both green.
-- A post-state read after each pass over exactly the surfaces the oracle enumerates, joined in both
+- A post-state read after each pass over exactly the surfaces the Haskell oracle enumerates, joined in both
   directions.
 - A teardown that destroys the guest on every exit path, so the phase leaves nothing behind for a later run
   to inherit.

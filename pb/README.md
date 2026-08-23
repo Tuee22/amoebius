@@ -34,10 +34,11 @@ The final item includes empty argv, `--help`, `--version`, `bootstrap`, `validat
 and every future public command. Python does not parse or dispatch that surface. Haskell owns host-floor
 decisions, help, version, validation, product behavior, evidence, exit meaning, and every user-facing verb.
 
-The accepted Python syntax, import, and effect surface is deny-by-default. Phase 0 must close
-`LTD-SRC-008` by proving the checked-in package fits that bounded role before the no-hardware DSL barrier can
-be considered. Phase 50 later validates the runtime handoff; it does not widen the exception or own a source
-migration.
+The accepted Python syntax, import, resolved-call, control-flow, and potential-effect surface is exact,
+non-empty, and deny-by-default. Phase 0 must close `LTD-SRC-008` with that static Haskell-owned proof before
+the no-hardware DSL barrier can be considered. Phase 0 through Phase 49 invoke the exact source-built Haskell
+binary directly; `pb` is not validation transport. Phase 50 alone validates the runtime handoff; it does not
+widen the exception or own a source migration.
 
 ## Development and generated material
 

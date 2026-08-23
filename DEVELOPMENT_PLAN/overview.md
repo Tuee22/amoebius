@@ -146,7 +146,8 @@ and [`service_capability_doctrine.md` §2 — The capability set](../documents/e
 **Convergence stance.** The sibling projects are **frozen typed evidence** that a shape works, not lockstep
 peers to track: amoebius lifts each sibling's *role* onto its own seams and reimplements nothing
 ([`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md)), while what stops being
-carried forward is the [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) ledger. infernix and
+carried forward is recorded in typed Haskell migration bindings and explained in
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). infernix and
 jitML join as the closed **workload-extension set** linked into trusted runtime variants — never a migration
 through hostbootstrap first — with their engines jit-resolved into a bounded content-addressed cache rather than baked.
 Low-code applications remain checked release data; only an optional reviewed server adapter joins the linked set
@@ -359,9 +360,10 @@ fidelity remain explicitly unverified
 - **Implementation footprints exist, but none is validated.** The repository contains Haskell plus tracked
   Python, PureScript, Dhall, protocol, test, gate, mutant, and live-harness violations. Except for the bounded
   `pb/**` bootstrap, every non-Haskell behavioral source is condemned migration input.
-  [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) must account bijectively for every
-  observed violation until its numerical owner closes it; [system_components.md](system_components.md) remains
-  target-only.
+  Typed Haskell legacy bindings must account bijectively for every observed violation until their numerical
+  owners close them. [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) explains those
+  bindings to readers and supplies no IDs, owners, predicates, counts, or verdict inputs;
+  [system_components.md](system_components.md) remains target-only.
 - **Every prior seal is invalidated.** Earlier gates used repository-resident enumeration and ledgers, wrote run
   evidence beneath `DEVELOPMENT_PLAN/`, or depended on tracked resolver output and host-specific paths.
 - **Status posture:** Phase 0 is Active — NOT VALIDATED; Phases 1–95 are Blocked — NOT VALIDATED. The
@@ -385,7 +387,7 @@ fidelity remain explicitly unverified
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys ([§A](development_plan_standards.md#a-header-metadata-same-block-as-the-doctrine-suite) header, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate)
 - [system_components.md](system_components.md) — the target component inventory: surface → owning doctrine → planned module path
 - [substrates.md](substrates.md) — the substrate registry and per-phase substrate map
-- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — the migration-removal ledger as prodbox/infernix/jitML converge
+- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — the reader-facing explanation of typed Haskell migration bindings as prodbox/infernix/jitML converge
 - [later_phases.md](later_phases.md) — the in-scope, high-numbered phases not yet given their own document
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine SSoTs this overview summarizes and links
 - [Documentation Standards](../documents/documentation_standards.md) — the header/link mechanics this inherits

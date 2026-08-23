@@ -45,7 +45,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -85,7 +85,7 @@ NOT VALIDATED.
 |---|---|
 | `Claim` | Target capability only — represent claims, Haskell evidence fixtures, fixture kinds, and mutation records so a claim without a falsifiable evidence binding is not expressible. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 07` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 07` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -131,15 +131,16 @@ Bind every claim a phase makes to the fixture that discharges it, so an unchecke
 A claim without a fixture reference must fail to construct, and every registered mutant must redden its named locus.
 
 **"Fail to construct" is two claims and both are checked.** That the constructor takes a fixture at all is a
-claim about an export list, so it is a committed compile-fail pair — omitting the argument leaves a function
-waiting for a `Fixture`, and the rejection names it. That a fixture naming *nothing* is refused is a claim
+claim about an export list, so it is a reviewed `.hs` compile-fail pair — omitting the argument leaves a
+function waiting for a `Fixture`, and the separately authored Haskell oracle requires the rejection to name
+it. That a fixture naming *nothing* is refused is a claim
 about a value, so it is an in-process check, and it is where the seeded binding-erasure mutant lands: a `Text`
 has no non-empty arm, so this is the one door the type could not close.
 
-**The registry is derived, not restated.** The three mutant records the join reads come from
-`test/mutant/registry.tsv` — the one registry the corpus already has — decoded through the carrier rule rather
-than re-listed here. Offering the calculus a second source is refused rather than merged, which is what makes
-"a carrier field rather than a second registry" a check instead of a preference.
+**The registry is Haskell, not serialized input.** The join consumes three reviewed values from the canonical
+Haskell mutation registry through the carrier rule rather than re-listing them here. Offering the calculus a
+second registry source is refused rather than merged. Any TSV rendering is a diagnostic beneath `.build/**`
+and cannot influence the verdict.
 
 ### Remaining Work
 

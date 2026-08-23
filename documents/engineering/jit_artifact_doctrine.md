@@ -63,12 +63,22 @@ a rendering of a declaration the program already holds.
 > **Every behavioral artifact that is not tracked Haskell source is generated lazily from Haskell beneath
 > `.build/**`. Python under `pb/**` is the sole source-language exception.**
 
-The tracked-tree classification is closed and implemented by a deny-by-default Haskell source/effect audit;
-this table is a reader-facing explanation and is never parsed as an allowlist. It is intentionally not an
-“independent expectation” exception: independently authored expectations are Haskell values, while their
-serialized encodings are generated. The repository-layout doctrine owns the exact path grammar. Qualification
-observes `pb/**` argv and `exec` effects from outside the bootstrap; metadata and documentation receive only
-structural checks and human review, which can never admit a behavioral artifact.
+The target tracked-tree classification is closed and is to be enforced by a deny-by-default Haskell
+source/effect audit; this table is a reader-facing explanation and is never parsed as an allowlist. It is
+intentionally not an “independent expectation” exception: independently authored expectations are Haskell
+values, while their serialized encodings are generated. The repository-layout doctrine owns the exact path
+grammar. The completed audit must join that grammar to a complete semantic consumer/effect graph, traverse
+every authored root through a descriptor-relative no-follow walk, authenticate immutable source blobs and the
+network-independent toolchain input, and qualify the `pb/**` argv/`exec` effects under an observer outside the
+bootstrap. Metadata and documentation receive only structural checks and human review, which can never admit a
+behavioral artifact.
+
+**Observed footprint / Known partial — NOT VALIDATED.** The current Haskell source-closure components are
+partial diagnostics recorded in the tracker’s
+[current implementation audit](../../DEVELOPMENT_PLAN/README.md#current-implementation-audit). They do not yet
+establish the complete semantic consumer/effect graph, the descriptor-relative no-follow authored-root walk,
+authenticated blob/tool acquisition, changed-production qualification, or independent human review. Their
+presence therefore establishes neither a completed source/effect audit nor a qualified `pb/**` exception.
 
 | Exception | Why it must exist first |
 |---|---|
@@ -207,13 +217,16 @@ output, so it stays red when the generator is wrong, which is the whole job
 
 - **It does not make the recipes correct.** A deterministic, budgeted, injectively named rendering of the wrong
   content is all of those things and still wrong. That is the [§7](#7-goldens-become-oracles) oracle's job.
-- **It does not remove the bootstrap boundary.** Python beneath `pb/**` is the sole bounded source-language
-  exception, and qualification observes its actual argv/`exec` effects from outside the bootstrap. A
-  deny-by-default Haskell source/effect audit owns that classification; prose and filename conventions cannot
-  widen it. Repository/build metadata and documentation receive structural checks and human review only. No
-  product behavior, test expectation, oracle, mutant, fixture, recipe, or generated source is admitted merely
-  because a human reviewed a non-Haskell artifact: those declarations remain Haskell, and every serialized
-  projection is materialized lazily beneath `.build/**`.
+- **It does not remove the bootstrap boundary.** Python beneath `pb/**` is the sole target bounded
+  source-language exception. Its completed qualification must observe actual argv/`exec` effects from outside
+  the bootstrap, and its deny-by-default Haskell source/effect audit must close the semantic consumer/effect,
+  no-follow authored-root, authenticated blob/tool, changed-production qualification, and independent-review
+  gaps stated in [§2](#2-the-rule-and-the-closed-exception-list). The current partial footprint does not do so.
+  Prose and filename conventions cannot widen the target classification. Repository/build metadata and
+  documentation receive structural checks and human review only. No product behavior, test expectation,
+  oracle, mutant, fixture, recipe, or generated source is admitted merely because a human reviewed a
+  non-Haskell artifact: those declarations remain Haskell, and every serialized projection is materialized
+  lazily beneath `.build/**`.
 - **It does not establish delivery status.** Which recipes exist and which gates have been independently
   accepted belongs only to the [tracker](../../DEVELOPMENT_PLAN/README.md). This doctrine carries no current
   validation claim.

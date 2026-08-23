@@ -47,7 +47,7 @@ Known partial** only.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -85,7 +85,7 @@ implementation, provider state, browser enforcement, and live tenant isolation r
 |---|---|
 | `Claim` | Target only — a Haskell checked UI requirement cannot become `BoundUiProgram` until every port and link has exactly one compatible trusted binding. Generated cases remain beneath `.build/**`; runtime effects are not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 39` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 39` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -152,13 +152,14 @@ Keep navigation names separate from effect transport and provider coordinates.
 
 - Exact named-link catalog parity and canonical fixed-HTTPS validation.
 - Nineteen binding/link/bounded-input refusals.
-- Seven paired quantifier, guard, type, invariant, and escape mutants.
+- Seven paired Haskell quantifier, guard, type, invariant, and escape changed-subject mutants.
 
 ### Validation
 
 1. Both link projections equal the independent relation.
 2. Every binding/link/bounded refusal retains its exact tag before a trace exists.
-3. Every mutant exits red and reports only its authored locus.
+3. Every Haskell-authored changed-subject mutant exits red and reports only its declared locus; any external
+   mutant form is generated lazily beneath `.build/**`.
 
 ### Remaining Work
 
@@ -181,7 +182,8 @@ Seal the pure binding claim with current calculus, architecture, surface, contai
 ### Validation
 
 1. The authored calculus rows fix the five-kind order, component names, count vector, and resource sum.
-2. Ordinary and Darwin-denied executions accept; seven isolated mutant executions report their exact loci.
+2. Ordinary and Darwin-denied executions accept; seven isolated Haskell changed-subject mutant executions
+   report their exact loci.
 3. Architecture, surfaces, ledger, containment, write guard, and attestation all close on the same run.
 
 ### Remaining Work
@@ -196,7 +198,8 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — pure exact binding and honest live residues.
 - `documents/engineering/service_capability_doctrine.md` — semantic capability consumer evidence.
-- `documents/illegal_state/illegal_state_capability_messaging.md` — exact escape controls and mutants.
+- `documents/illegal_state/illegal_state_capability_messaging.md` — exact escape controls and Haskell
+  changed-subject mutants.
 
 **Cross-references to add:**
 

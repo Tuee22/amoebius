@@ -30,9 +30,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 75.1: The gateway-migration runtime — both branches over the Phase-17 `interpret` core ⏸️](#sprint-751-the-gateway-migration-runtime--both-branches-over-the-phase-17-interpret-core-)
-- [Sprint 75.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-`.dhall` push-back ⏸️](#sprint-752-teardown-with-cleanup-vs-chaos-failover--unsatisfiable-dhall-push-back-)
+- [Sprint 75.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-spec push-back ⏸️](#sprint-752-teardown-with-cleanup-vs-chaos-failover--unsatisfiable-spec-push-back-)
 - [Sprint 75.3: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation ⏸️](#sprint-753-register-25-gateway-migration-runtime-fidelity--simulation--trace-validation-)
-- [Sprint 75.4: Register-3 correspondence — Inject drills against the running forest + live gate `.dhall` + ledger ⏸️](#sprint-754-register-3-correspondence--inject-drills-against-the-running-forest--live-gate-dhall--ledger-)
+- [Sprint 75.4: Register-3 correspondence — Inject drills against the running forest + lazy live-gate projection + ledger ⏸️](#sprint-754-register-3-correspondence--inject-drills-against-the-running-forest--lazy-live-gate-projection--ledger-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -51,7 +51,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -227,6 +227,8 @@ RPO/RTO assertions would otherwise pass.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 75.1: The gateway-migration runtime — both branches over the Phase-17 `interpret` core ⏸️
 
@@ -266,11 +268,12 @@ it.
    **measured loss = 0 proven by set-equality of journaled-vs-present IDs on the new owner** (not by a
    self-defined "committed = already replicated"), and a session that never loses its endpoint; a `Failover`
    after killing the lead (again with ≥ 8 acked-but-un-replicated IDs in flight) resumes through one authority
-   with **measured loss ≤ the committed `lagBound` and authority transfer within the committed `RTO`**, where
-   those budgets are the oracle-pinned numeric values in `test/fixture/dhall/phase_65_gateway_migration.dhall`
-   (`lagBound = 5 s`, `RTO = 60 s`) whose hash is pinned before the drill runs — the drill **reports declared-vs-measured for both dimensions**, so a generous or post-hoc-tuned budget is visible; driving lag
-   past the committed bound makes the freshness gate refuse to promote and the lag monitor alarm before a breach;
-   and the committed `promote-before-fence` mutant ([Gate integrity](#gate-integrity)) — the `PromotionGate` guard negated — must go red.
+   with **measured loss ≤ the Haskell-declared `lagBound` and authority transfer within the Haskell-declared `RTO`**, where
+   those oracle-pinned numeric values are authored in reviewed Haskell and lazily projected to
+   `.build/test-corpora/dhall/phase_65_gateway_migration.dhall`
+   (`lagBound = 5 s`, `RTO = 60 s`) before the drill runs — the drill **reports declared-vs-measured for both dimensions**, so a generous or post-hoc-tuned budget is visible; driving lag
+   past the declared bound makes the freshness gate refuse to promote and the lag monitor alarm before a breach;
+   and the Haskell-authored changed-subject `promote-before-fence` mutant ([Gate integrity](#gate-integrity)) — the `PromotionGate` guard negated — must go red.
 2. The `Planned` branch drives the ordered edge sequence `stand-up-replica → quiesce → drain /
    verify-caught-up → promote → source-proxy + repoint DNS → unfreeze → drain-monitor → decommission`, the old
    gateway serving as a transparent proxy for the whole DNS-drain window so a live session always has a working
@@ -283,7 +286,7 @@ it.
 
 Route53 provider mutation remains UNVERIFIED; the authoritative local DNS and raw-kernel fabric paths are done.
 
-## Sprint 75.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-`.dhall` push-back ⏸️
+## Sprint 75.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-spec push-back ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 
@@ -293,7 +296,8 @@ Adopt [`cluster_lifecycle_doctrine.md §5`](../documents/engineering/cluster_lif
 enacted as the reconciler of
 [`§9`](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine):
 implement a graceful teardown as a controlled handoff that is lossless by construction, and the declarative
-push-back that refuses — by default — a teardown that would leave the persistent global `.dhall` unsatisfiable,
+push-back that refuses — by default — a teardown that would leave the persistent global Haskell-declared
+`InForceSpec` unsatisfiable (any Dhall form is only a lazy `.build/**` projection),
 with an explicit operator override the only escape.
 
 ### Deliverables
@@ -308,7 +312,7 @@ with an explicit operator override the only escape.
   epoch's device-count/per-device net-VRAM or Metal shared-memory requirement. Teardown may proceed only when the surviving forest can re-run
   `provision` for the unchanged desired spec and construct a fresh opaque `ProvisionedSpec` with placement,
   storage, and capability witnesses; otherwise it pushes back before releasing any resource, naming the
-  exhausted axis/capability and the `.dhall` failback, with the same fail-closed `Unreachable → refuse` posture
+  exhausted axis/capability and the Haskell-declared failback, with the same fail-closed `Unreachable → refuse` posture
   as the reconciler.
 - A managed-resource registry entry per cluster/child/node/stack/PV so teardown is one `reconcileAbsent` loop
   with "cannot observe" never collapsed to "absent."
@@ -366,7 +370,7 @@ simulation against the modeled world here (Register 2.5), then as live Inject dr
 
 The pre-reset `None` claim is permanently invalid; this sprint remains blocked and NOT VALIDATED. Real WAN physics remain outside the retained historical single-host result.
 
-## Sprint 75.4: Register-3 correspondence — Inject drills against the running forest + live gate `.dhall` + ledger ⏸️
+## Sprint 75.4: Register-3 correspondence — Inject drills against the running forest + lazy live-gate projection + ledger ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 
@@ -375,7 +379,8 @@ The pre-reset `None` claim is permanently invalid; this sprint remains blocked a
 Adopt [`gateway_migration_model_doctrine.md §6`](../documents/engineering/gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)/[`§7`](../documents/engineering/gateway_migration_model_doctrine.md#7-planning-ownership):
 because correspondence is differentially checked (one `Model` → `interpret` + `emitTLA`), run the deferred
 Register-3 residue — the [Inject move (§11)](../documents/engineering/chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose)
-against the running forest confirming the abstracted physics actually hold — as the test-`.dhall` of
+against the running forest confirming the abstracted physics actually hold — as the Haskell-declared test
+topology lazily rendered beneath `.build/**` described by
 [`testing_doctrine.md §3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down),
 ledgered per [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
 and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows).
@@ -388,15 +393,17 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
   This is the concrete confirmation that the built runtime, which *is* the model's
   `interpret`, upholds under real physics what the model proves in logical time (never a re-authored TLA+ spec,
   never a paper variable→module table, which is what the superseded framing had reversed).
-- `test/fixture/dhall/phase_65_gateway_migration.dhall`: spin two children up, geo-replicate, run a `Planned` handover
+- A reviewed Haskell gate-topology declaration that lazily renders
+  `.build/test-corpora/dhall/phase_65_gateway_migration.dhall`: spin two children up, geo-replicate, run a `Planned` handover
   asserting RPO=0 via the write-journal oracle, kill the lead to force `Failover` asserting rebind within the
   oracle-pinned numeric budget (`lagBound = 5 s`, `RTO = 60 s`, hash-pinned), reconcile divergent
   histories, and always tear down leak-free (verified by the OS-boundary kind/network-namespace/journal/DNS observer) —
-  emitting the machine-derived per-run ledger artifact. The gate topology `.dhall`, `test/fixture/inject/journal/` (the
-  out-of-forest write-ID journal schema), and the authored run-ledger schema validator are **committed in this
-  phase's oracle-pinning sprint before the runtime exists**; generated ledgers remain under `.build/runs/`. The runtime-dependent `test/mutant/gateway_migration_drills/` seeded mutants (the `verify-caught-up`-stub
-  and `promote-before-fence` mutants that must go red) mutate the Sprint-70.1 implementation, so they are
-  **committed at the start of Phase 75, before that implementation is trusted** (the §M.1
+  emitting the machine-derived per-run ledger artifact. The gate topology, out-of-forest write-ID journal
+  schema, run-ledger schema validator, and their independent expectations are authored as reviewed Haskell
+  before the runtime exists; their reproducible Dhall, journal, and ledger materializations are generated lazily
+  beneath `.build/test-corpora/**` or `.build/runs/**` and remain untracked. The runtime-dependent Haskell seeded
+  mutation operators (`verify-caught-up`-stub and `promote-before-fence`) mutate the Sprint-70.1 implementation,
+  so they are **reviewed at the start of Phase 75, before that implementation is trusted** (the §M.1
   start-of-owning-phase form for oracles that depend on later code).
 - A machine-derived per-run proven/tested/assumed ledger that marks `Planned` RPO=0 **proven-for-the-model (Phase 17, scope 2) + drilled (tested)**, the `Failover` recovery time + reconciliation **tested (drilled)**, the data-loss /
   replication-lag bound **assumed (monitored, never proven)**, and the modeled safety/liveness
@@ -409,11 +416,12 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
    the step-by-step trace-validation of Sprint 75.3 (Register 2.5) **plus** a Register-3 **modeled-action-coverage assertion** that every modeled action fired ≥ 1 time across the drill set (no orphaned modeled action); step-by-step
    trace-validation is the Sprint-70.3 obligation and is not re-run in Register 3. The Inject drills run against
    the live forest and pass, each asserting all five named safety invariants (`NoWriteAfterStaleFailover` is the
-   safety half; the recovery-time half is the separate *tested* RTO datapoint). `phase_69_gateway_migration.dhall`
-   reports **RPO=0 for `Planned` proven by the write-journal set-equality oracle ([Gate integrity](#gate-integrity)) under a workload with ≥ 8 acked-but-un-replicated IDs at the cut** — not a bare "loss = 0" — and **measured loss ≤ the oracle-pinned `lagBound` and transfer ≤ the committed `RTO`** (hash pinned before the drill; declared-vs-measured reported
+   safety half; the recovery-time half is the separate *tested* RTO datapoint). The Haskell-declared gate topology,
+   lazily projected to `.build/test-corpora/dhall/phase_65_gateway_migration.dhall`,
+   reports **RPO=0 for `Planned` proven by the write-journal set-equality oracle ([Gate integrity](#gate-integrity)) under a workload with ≥ 8 acked-but-un-replicated IDs at the cut** — not a bare "loss = 0" — and **measured loss ≤ the oracle-pinned `lagBound` and transfer ≤ the Haskell-declared `RTO`** (declared-vs-measured reported
    for both). Teardown is **leak-free by the OS-boundary observer of [Gate integrity](#gate-integrity)**: kind,
    network-namespace, exact-root, and local-DNS inventories report zero surviving migration records and test clusters, with the
-   retained `no-provisioner` PVs of Sprint 75.2 explicitly exempt. The committed seeded mutants ([Gate integrity](#gate-integrity): `verify-caught-up`-stub and `promote-before-fence`) each go red. The ledger is **machine-derived from the run record** and passes its committed validator — every ledger figure (RPO/RTO, observed max lag, raw journal
+   retained `no-provisioner` PVs of Sprint 75.2 explicitly exempt. The Haskell-authored changed-subject seeded mutants ([Gate integrity](#gate-integrity): `verify-caught-up`-stub and `promote-before-fence`) each go red. The ledger is **machine-derived from the run record** and passes its Haskell validator — every ledger figure (RPO/RTO, observed max lag, raw journal
    counts, seeds, timestamps, teardown-observer result) cross-checks against the raw journal, and any mismatch or
    hand-edited field fails the gate; out-of-Register-3 layers stay marked UNVERIFIED.
 

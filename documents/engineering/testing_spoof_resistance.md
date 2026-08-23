@@ -172,8 +172,12 @@ why old evidence cannot be “re-verified” into a new status after the contrac
 All product, test, gate, oracle, fake, generator, and mutation logic is Haskell source. The sole non-Haskell
 source exception, `pb/**`, may only make the minimum platform distinction needed to establish the pinned
 Haskell toolchain, build the source-bound binary, and exec it with every user argument unchanged. Haskell
-owns host-floor policy, help, version, validation, and every other public command. A deny-by-default Haskell
-AST/import/effect audit and an external effect observer—not tokens or help output—bound the exception.
+owns host-floor policy, help, version, validation, and every other public command. Phase 0 bounds the checked-in
+exception statically with an exact non-empty, deny-by-default Haskell-owned AST/import/resolved-call/
+control-flow/potential-effect graph; tokens, filenames, comments, dead strings, and help output cannot satisfy
+it. That result is source admission, not runtime evidence. Phase 0 through Phase 49 invoke Haskell directly.
+Phase 50 alone places the already source-bounded adapter effects, executable identity, unchanged argv, exec
+replacement, and exit propagation under an external observer.
 
 Every candidate starts without `.build/**`, `.data/**`, `.test_data/**`, generated formats, evidence, caches,
 or legacy fallbacks. The run derives required non-Haskell material lazily beneath `.build/**`, proves which

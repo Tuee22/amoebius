@@ -88,12 +88,18 @@ The governed set is closed:
 | `overview.md` | Target architecture and sequence narrative |
 | `system_components.md` | Target component inventory |
 | `substrates.md` | Substrate vocabulary and per-phase map |
-| `legacy_tracking_for_deletion.md` | The one active implementation/plan divergence register |
+| `legacy_tracking_for_deletion.md` | The one active reader-facing explanation of implementation/plan divergence |
 | `phase_NN_<slug>.md` | One contract per contiguous numbered phase |
 | `later_phases.md` | Unnumbered future intent only |
 
-There is one legacy register only. Closed and superseded rows are deleted; Git history is
-the archive. No other file may become a second deletion register.
+There is one reader-facing legacy register only. Closed and superseded explanations are deleted; Git history
+is the archive. No other file may become a second deletion register. Its legacy-specific structural seam
+enforces exact canonical file cardinality, UTF-8 readability, and absence of an archive alias. The general
+documentation checker may separately enforce ordinary orientation metadata, headings, links, and anchors. A
+closed Haskell legacy inventory owns identities, owners, observation bindings, closure bindings, and
+reintroduction negatives; neither structural seam may interpret a Markdown row, cell, count, ID spelling,
+owner phrase, or predicate-shaped string as legacy semantics or use it in an executable closure verdict.
+Human review owns correspondence between the two surfaces.
 
 All planned implementation paths name authored `.hs` source. The sole non-Haskell source exception is
 `pb/**`, whose bootstrap-only scope is closed by [§S](#s-universal-artifact-hygiene-gate). Reproducible
@@ -111,6 +117,13 @@ only a `Validation candidate`.
 At this reset, Phase 0 is `🔄 Active — NOT VALIDATED`; every later numbered phase is
 `⏸️ Blocked — NOT VALIDATED` pending its immediate predecessor's human approval. No prior completion claim,
 seal, hash, receipt, attestation, or status survives as current evidence.
+
+The current phase-status line and the `**Gate:**` summary line are raw, one-line, exact fields and each occurs
+once. A substring such as `Validated — NOT VALIDATED`, a second bare status marker, another `**Status**:` field,
+or a canonical-looking copy supplied through a fence, HTML comment, or physical line wrap is a defect. Sprint
+sections likewise contain exactly one reviewed `**Status**:` field and no additional bare current-status marker.
+Historical status is described only as explicitly invalidated prose; it is never restated as a second status
+field or bare marker.
 
 ---
 
@@ -150,11 +163,14 @@ Every `phase_NN_<slug>.md` uses this order:
 ## Related Documents
 ```
 
-The six Phase Summary fields are required, closed, and ordered exactly as shown. The Gate line is a target
-command, not an assertion that it exists or passes. The Haskell binary decides the candidate verdict; `pb`
-may only make the minimal platform distinction, establish the contained toolchain, build the source-bound
-binary, and exec that exact binary with every argument unchanged. A Python or shell phase-gate command is
-non-conforming.
+The six Phase Summary fields are required, closed, and ordered exactly as shown. The Gate line is a future
+public-command target, not an assertion that it exists, runs, or passes. Until Phase 50 has current human
+approval, `pb` is an inadmissible validation transport: Phase 0 through Phase 49 build and invoke the exact
+source-bound Haskell executable directly from an authenticated, network-independent toolchain input. Phase 50
+alone places the already source-bounded `pb` ensure/build/unchanged-argv/exec handoff under external runtime
+observation. Phase 51 and later may use the public `pb validate phase NN` transport only after binding the
+current Phase-50 approval. In every case the Haskell binary decides the candidate verdict; Python may never do
+so. A Python or shell verdict is non-conforming.
 
 `## Gate integrity` is mandatory for every phase, including documentation-only Phase 0. Its fixed table makes
 missing trust boundaries mechanically visible; prose, a diagram, or a link to a generic runner cannot replace
@@ -211,7 +227,7 @@ Each sprint uses this exact header and field set:
 **Requires**: <`natural-linux-cpu-amd64-host` | `disposable-linux-cpu-amd64-host`; omit if none>
 **Independent Validation**: <one falsifiable seam; never merely the parent gate>
 **Oracle**: <separate .hs module, independence boundary, and human reviewer>
-**Legacy IDs**: <owned active rows, or `none` with the zero-finding query>
+**Legacy IDs**: <reader-facing references to the typed Haskell bindings, or `none`>
 **Docs to update**: <governed doctrine owners>
 
 ### Objective
@@ -224,6 +240,14 @@ For behavioural work, `Implementation` and `Oracle` are `.hs`. A sprint may name
 objective is within the bootstrap exception; Python tests, gate logic, source-policy logic, product logic, or
 oracle logic are never admitted there.
 
+Every behavioral test, expectation, fixture declaration, and mutation reference elsewhere in a phase also
+names one exact `.hs` path, Haskell module, or Haskell declaration. A plan must not point at a test artifact-family directory,
+wildcard, serialized file, script, patch, or foreign-language file as retained repository material. Haskell
+may render the corresponding transport lazily beneath an explicit `.build/**` destination. A reset notice
+does not excuse contradictory retained instructions; the documentation syntax check rejects the retired path
+form until the body is corrected. That syntax check reads raw Markdown bytes, including fenced blocks and
+HTML comments, and joins wrapped artifact-authority wording across line boundaries.
+
 `Independent Validation` names the seam's positive control, paired specific-reason negative, changed-subject
 mutant, and residue. The expanded numbered Validation list may provide detail. A command exit code, parent
 gate reference, test count, fixture existence, or hash comparison alone is insufficient.
@@ -231,11 +255,25 @@ gate reference, test count, fixture existence, or hash comparison alone is insuf
 `Blocked by` names plan work. `Requires` names only an environmental fact no phase can build. Its current
 closed vocabulary is `natural-linux-cpu-amd64-host` and `disposable-linux-cpu-amd64-host`; a new fact requires
 a reviewed standards amendment before use. A tool, predecessor capability, prior sprint output, or same-run
-resource is never a `Requires` token: those belong in `Blocked by` or `Resource provision`, while `pb` or the
-Haskell binary ensures tools lazily into `.build/**`.
+resource is never a `Requires` token: those belong in `Blocked by` or `Resource provision`. The source-bound
+Haskell binary ensures phase tools lazily into `.build/**`. Python under `pb/**` may establish only the Haskell
+toolchain needed to build and replace itself with that binary; it cannot resolve a phase tool or policy.
 
 No sprint is Done merely because its isolated check runs. Its candidate must be retained by the qualified
 parent gate, reviewed by the human authority, and promoted by that human.
+
+A same-phase implementation release is distinct from sprint promotion. When a later sprint's `Blocked by`
+field names an earlier sprint, a human reviewer may release that exact seam for downstream implementation
+after reviewing its current contract, subject, oracle, diagnostic observations, and residue. The release
+changes no status and is not candidate evidence, approval, or permission to validate. It binds the exact
+current bytes; any source, contract, or oracle change invalidates it. The qualified parent gate must later
+rerun and retain every sprint seam before human promotion. Without an explicit release, downstream sprint
+implementation remains blocked.
+
+The `Legacy IDs` field is structural plan prose, not a legacy inventory. Automation may require the field and
+its exact position, but it may not parse its IDs, owner implications, cardinality, or closure wording into a
+finding or verdict. The closed Haskell inventory and total owner/closure bindings govern execution; a human
+reviewer compares this field and the rest of the sprint prose with those values.
 
 **Fail-closed reset transition.** A blocked phase may temporarily retain a pre-reset sprint body only beneath
 both its phase-level `Reset contract interpretation` notice and its `Reset validation review` notice. Such a
@@ -408,23 +446,29 @@ Every gate inherits the eighteen source/artifact postconditions in
 [`development_plan_gate_integrity.md` §S](development_plan_gate_integrity.md#s-universal-source-and-artifact-hygiene-gate).
 They include the closed Haskell source language, bounded `pb/**` exception, semantic source scan, lazy
 generation beneath `.build/**`, clean-snapshot closure, absence of condemned fallbacks, tracked-tree
-immutability, containment, complete discovery, exact accounting of strictly-later migration rows, zero
-findings for the candidate phase's owned rows, predecessor approval, and the rule that evidence is not
-authority. A later-owned row is temporary observed debt, not permission to add or consume that source. The
-transition expires before the promotion cut: Phase 49 requires every `LTD-SRC-*` query, including
+immutability, containment, complete discovery, exact accounting against strictly-later typed Haskell legacy
+bindings, zero findings for the candidate phase's due bindings, predecessor approval, and the rule that
+evidence is not authority. A later-owned binding records temporary observed debt; it is not permission to add
+or consume that source. The reader-facing register explains those bindings but supplies no executable value.
+The transition expires before the promotion cut: Phase 49 requires every `LTD-SRC-*` query, including
 Phase-0-owned `LTD-SRC-008`, to be zero. The only non-Haskell behavioral source then remaining is `pb/**`
 Python positively classified by the deny-by-default Haskell grammar as minimal platform discrimination,
 contained toolchain establishment, source-bound build, and opaque exec handoff. Phase 50 validates that
-already-bounded runtime handoff and owns no source-migration row; Phase 51 onward retains the same grammar.
+already-bounded runtime handoff and owns no source-migration binding; Phase 51 onward retains the same grammar.
 Hardware therefore cannot begin with condemned tracked source present.
 
 ---
 
 ## T. Plan-to-implementation reconciliation
 
-The plan, doctrine, implementation, and evidence are separate inputs. Current mismatches live only in
-`legacy_tracking_for_deletion.md` with stable ID, owner, detection command, and executable closure. Closed rows
-are deleted; Git history is the archive.
+The plan, doctrine, implementation, and evidence are separate inputs. Current mismatches have executable
+identity, owner, observation, closure, and reintroduction bindings only in reviewed Haskell. The single
+`legacy_tracking_for_deletion.md` file explains that active inventory to readers; human correspondence review
+owns its agreement with Haskell. Its legacy-specific structural seam may enforce canonical file cardinality,
+UTF-8 readability, and archive absence, while the general documentation checker may enforce ordinary
+document structure. Neither may interpret row content or count as legacy semantics or use it in a closure
+verdict. Closed explanations are deleted after the corresponding reviewed Haskell transition; Git history is
+the archive.
 
 The full rule is in
 [`development_plan_gate_integrity.md` §T](development_plan_gate_integrity.md#t-plan-to-implementation-reconciliation).
@@ -447,6 +491,7 @@ The full rule is in
 - [Development-plan tracker](README.md)
 - [Phase model](development_plan_phase_model.md)
 - [Gate integrity and repository closure](development_plan_gate_integrity.md)
-- [Active legacy register](legacy_tracking_for_deletion.md)
+- [Reader-facing legacy register](legacy_tracking_for_deletion.md) — prose correspondence, not executable
+  inventory or closure authority
 - [Documentation standards](../documents/documentation_standards.md)
 - [Repository layout doctrine](../documents/engineering/repository_layout_doctrine.md)

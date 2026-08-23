@@ -47,7 +47,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -114,7 +114,7 @@ offering has no deployable value. No device is queried and no runtime behavior i
 |---|---|
 | `Claim` | Target only — a pure Haskell model requiring an accelerator absent from its supplied target offering has no deployable value; any Dhall or serialized case is generated beneath `.build/**`; no device, driver, or runtime is observed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 32` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 32` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -249,8 +249,11 @@ resolve.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The URL-free union, quotient, family relation, opaque checked accelerator, exact identity/policy
-domains, all permitted epochs, and residency rules are sealed by the Phase-32 gate.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work
+includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and
+phase-specific obligation in the redesigned gate. The URL-free union, quotient, family relation, opaque
+checked accelerator, exact identity/policy domains, permitted epochs, and residency rules remain target claims
+requiring fresh evidence.
 
 ## Sprint 32.2: The accelerator-provision corpus + the Register-1 gate ⏸️
 
@@ -278,8 +281,9 @@ per-entry validation-locus ledger that names the honest foreclosure layer of eac
   policy-permitted co-resident epoch against per-device net allocatable VRAM — all checked against the
   independent hand-authored aggregation table / family×lane relation (§M.3), with `cover`/`classify` +
   `checkCoverage` forcing each reject branch (§M.4).
-- The five committed accelerator-provision seeded mutants (§M.2), committed and re-run (not run once), each
-  individually required to turn the suite red: `mutant_drop_accelerator_work_item`,
+- Five reviewed Haskell accelerator-provision mutation operators (§M.2), applied to temporary production
+  subjects beneath `.build/mutants/**` and re-run, each individually required to turn the suite red:
+  `mutant_drop_accelerator_work_item`,
   `mutant_accept_accelerator_domain_mismatch`, `mutant_select_favorable_accelerator_epoch`,
   `mutant_drop_accelerator_overlap_debit`, `mutant_skip_accelerator_shard_validation`.
 - A Register-1 validation-locus ledger mapping every entry to its catalog id ([§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) for the engine-by-URL state)
@@ -297,14 +301,16 @@ per-entry validation-locus ledger that names the honest foreclosure layer of eac
    byte-invariant and structurally different by the object-node-multiset oracle against its authored semantic projection;
    `illegal_engine_by_url` fails `dhall type` at its asserted locus; each provision negative returns its
    specifically-tagged `Left`; the coverage obligations meet `checkCoverage`; exact-fit boundaries accept and
-   each one-device/one-byte-short pair rejects; and the suite is red under each of the five committed seeded
+   each one-device/one-byte-short pair rejects; and the suite is red under each of the five applied Haskell
    mutants. The validation-locus ledger is present and its coverage-assertion machinery (Phase-27 precedent)
    turns the suite **red** if any named fixture, negative reason, or mutant is missing.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The eleven-sided Register-1 gate, 17-row locus ledger, 34-unit five-calculus projection, 18 metrics, and
-29-surface/45-item join are sealed.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work
+includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and
+phase-specific obligation in the redesigned gate. The eleven-sided Register-1 gate, 17-row locus ledger,
+34-unit five-calculus projection, 18 metrics, and 29-surface/45-item join remain unaccepted target coverage.
 
 ## Documentation Requirements
 
@@ -330,11 +336,12 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-32 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — only the human authority may change Phase 32 after reviewing a qualified
+  candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-32 `none` gate row.
-- `DEVELOPMENT_PLAN/system_components.md` — register the `InferenceEngine` fill of `dhall/amoebius/Capability.dhall`,
-  `src/Amoebius/Capability/Engine.hs`, and the engine/accelerator property + gate suites as Phase-32 design-first
-  rows.
+- `DEVELOPMENT_PLAN/system_components.md` — register the Haskell `InferenceEngine` capability projection,
+  `src/Amoebius/Capability/Engine.hs`, and the Haskell engine/accelerator property and oracle suites as
+  Phase-32 design-first rows. The Dhall projection is lazy output beneath `.build/dhall/**`.
 
 ## Related Documents
 

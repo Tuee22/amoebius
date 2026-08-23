@@ -57,7 +57,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -73,7 +73,8 @@ gate; split if work adds another asset tier, substrate, final register, or indep
 **The determinism kernel.** First, it lifts Phase 69's concrete blob/manifest key renderers into a kernel-level
 `ContentAddress` typeclass, so the rule that *a content-derived name cannot be forged* is one reusable primitive
 rather than a per-store copy. Second, it must implement the `experimentHash` run identity — a total function of the
-resolved `.dhall` normal form and the live linux-cpu substrate fingerprint — so two runs share a store namespace
+resolved Haskell DSL normal form and the live linux-cpu substrate fingerprint; any Dhall transport is generated
+lazily beneath `.build/**` — so two runs share a store namespace
 only when they are genuinely the same experiment on the same substrate. Third, it must implement the SplitMix seed
 derivation that gives every stream a seed that is a pure function of `(masterSeed, streamIndex)` alone,
 independent of worker count, scheduling, and assignment. These seams are shared, not ML-specific: the SplitMix
@@ -115,11 +116,11 @@ Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_co
 ```mermaid
 flowchart LR
 %% register: algebra
-  dhall["Resolved dhall normal form"]:::intent --> eh[["experimentHash primitive"]]:::intent
+  dhall["Resolved Haskell DSL normal form"]:::intent --> eh[["experimentHash primitive"]]:::intent
   subfp["linux-cpu substrate fingerprint"]:::intent --> eh
   ca[["ContentAddress typeclass"]]:::intent --> store[/"Phase 69 content-addressed store"/]:::effect
   eh --> store
-  master["masterSeed in the dhall"]:::intent --> seed[["deriveSplitMixSeed primitive"]]:::intent
+  master["masterSeed in the Haskell declaration"]:::intent --> seed[["deriveSplitMixSeed primitive"]]:::intent
   store --> stage[["Pure seeded compute stage"]]:::intent
   seed --> stage
   stage --> gateA["Same experimentHash gives byte-identical output"]:::runtime
@@ -203,7 +204,7 @@ projection — orchestrator, configured active/standby workers (the active run w
 content-mutation gateway, and collector/verification Job with complete envelopes, whose command/event topics,
 subscriptions, cursor/backlog/retention/hot-ledger/offload and output gateway/object extents merge into
 Pulsar/BookKeeper/MinIO capacity before publish. No broker or standing gateway Pod makes a new workflow's
-messages/storage free. Fixture Job actions are serialized by snapshot-bound preflight: the next run receives no
+messages/storage free. Haskell-declared case Job actions are serialized by snapshot-bound preflight: the next run receives no
 apply capability until the predecessor Pod UID's absence/release witness is fresh (staged live evidence, not an
 invented cross-kind rollout constructor); both `<experimentHash>/<runId>` output object sets remain charged in
 the object-store producer demand through the out-of-band comparison.
@@ -213,7 +214,7 @@ both live client Pods. Every container row includes lifecycle, selected-platform
 ephemeral-storage requests+limits, runtime working set, writable-rootfs allowance (or read-only root), and log
 headroom; every Pod row carries Pod overhead, bounded disk/memory volumes, derived mapped
 ConfigMap/Secret/projected/token payloads, durable claims and attachment classes (none in the representative
-fixture), the owner's one `InClusterCacheDemand` or a client's `cache = None`, and `accelerator = None`. Resolver
+Haskell case), the owner's one `InClusterCacheDemand` or a client's `cache = None`, and `accelerator = None`. Resolver
 download/build/unpack, compiler subprocess CPU/RSS, import workspace, pipe/network buffers, and temporary files
 execute inside the owner container and are included in that owner's runtime and cache-temporary operands; the
 typed client handle is a library protocol and creates no client-service Pod. The in-cluster Distribution
@@ -251,10 +252,10 @@ runtime/mutation unit and must each turn the resource gate red even if the outpu
 workload, Haskell operators drop the client envelope, owner envelope, owner image demand, or host-observer
 envelope, or start a replacement owner before old-cache absence is observed; each must turn the gate red
 before materialization. The Haskell negative bundle additionally lowers CPU, memory, logical ephemeral, each
-routed physical backing, image/pull workspace, pod/IP slots, CSI slots (on a matched PVC-bearing fixture), each
+routed physical backing, image/pull workspace, pod/IP slots, CSI slots (on a matched Haskell PVC-bearing case), each
 resident output object and object-store workspace, and host-harness CPU/memory/capture/log/scratch by one
 unit/byte and expects a tagged pre-effect `Left`. Each unique CSI PVC spends one driver attachment slot; both
-representative fixtures declare no PVC and therefore spend zero CSI slots, never an implicit unlimited value.
+representative Haskell cases declare no PVC and therefore spend zero CSI slots, never an implicit unlimited value.
 
 ## Doctrine adopted
 
@@ -271,7 +272,7 @@ implement; individual sprints cite the same sections where they must adopt them.
   rather than the durable MinIO bucket.
 - [`content_addressing_doctrine.md` §3 — `experimentHash`: identity is *what was requested* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
   — *`experimentHash`: identity is what was requested ‖ where it ran*: the run identity folds the resolved
-  `.dhall` normal form and the substrate fingerprint into one digest, so a flipped metric direction or a
+  Haskell DSL normal form and the substrate fingerprint into one digest, so a flipped metric direction or a
   different substrate is a different experiment in a different namespace.
 - [`content_addressing_determinism.md` §4 — Determinism by construction: pinned inputs + pure stages + derived seed](../documents/engineering/content_addressing_determinism.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
   — *determinism by construction: pinned inputs + pure stages + derived seed*, with its pinned-input leg
@@ -290,8 +291,8 @@ implement; individual sprints cite the same sections where they must adopt them.
   marks it green.
 - [`service_capability_doctrine.md` §4.1 — The InferenceEngine capability — the engine is target-offering-selected and jit-resolved, never authored](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)
   — *the `InferenceEngine` capability — the engine is substrate-selected and jit-resolved, never authored*: the
-  closed `EngineRuntime` union has **no arbitrary-`Url`/`Download` arm**; the `.dhall` *selects* an arm by the
-  detected substrate and can never *author* a fetch, and the shared jit-build resolver materializes the named
+  closed `EngineRuntime` union has **no arbitrary-`Url`/`Download` arm**; the Haskell DSL selects an arm by the
+  detected substrate and can never author a fetch (any Dhall form is only a lazy `.build/**` transport), and the shared jit-build resolver materializes the named
   identity on first miss.
 - [`resource_capacity_doctrine.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
   / [`resource_capacity_types.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`; “The systematic provision matrix”](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
@@ -326,6 +327,8 @@ implement; individual sprints cite the same sections where they must adopt them.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 80.1: `ContentAddress` typeclass kernel primitive ⏸️
 
@@ -346,21 +349,22 @@ lift Phase 69's concrete blob/manifest key renderers into a kernel-level `Conten
 - Newtyped `BlobSha` / `ManifestSha` carriers with no public constructor from a free `Text`.
 - Adapters binding the typeclass to Phase 69's `blobs/<sha256>` and `manifests/<sha256>` writers — the
   `If-None-Match: *`, `412 = success` protocol stays owned by the store.
-- The oracle-pinned compile-fail fixture `test/negative/compile_fail/phase_70_forge_blobsha.hs` (with its expected
-  locus), the hand-authored logical-equivalence oracle for the canonical-encoding property, and the mutant
+- The reviewed Haskell compile-fail source `test/negative/compile_fail/phase_70_forge_blobsha.hs` (with its
+  Haskell-declared expected locus), the independently authored Haskell logical-equivalence oracle for the
+  canonical-encoding property, and the Haskell changed subject
   `test/mutant/determinism_jitcache/content_order_leak.hs` — authored before `ContentAddress.hs` exists (§M.1–M.3).
 
 ### Validation
 
-1. Type-level, verified by the committed compile-fail fixture `test/negative/compile_fail/phase_70_forge_blobsha.hs`
+1. Type-level, verified by the reviewed Haskell compile-fail source `test/negative/compile_fail/phase_70_forge_blobsha.hs`
    (§M.8): its attempt at `BlobSha "deadbeef"` — constructing a `BlobSha`/`ManifestSha` carrier from a free
    `Text` literal — MUST fail to compile with "`BlobSha` constructor not
    in scope / not exported" at the named locus, while the paired positive `contentAddress bytes` compiles. The
    only path to a `BlobSha`/`ManifestSha` is `contentAddress`; an export-list audit confirms no re-export.
-2. Property: `contentAddress x == contentAddress y` whenever `x` and `y` are logically equal, where **logical equality is defined by a committed hand-authored equivalence independent of the canonical bytes** (§M.3) —
+2. Property: `contentAddress x == contentAddress y` whenever `x` and `y` are logically equal, where **logical equality is defined by an independently authored Haskell equivalence, separate from the canonical bytes** (§M.3) —
    the generator emits distinct byte pre-images of equal content (permuted map order, reordered fields,
    equivalent integer encodings) and a `cover` obligation (§M.4) requires ≥30% of cases to carry such a distinct
-   pre-image; those cases must collapse to the identical key. The committed mutant
+   pre-image; those cases must collapse to the identical key. The Haskell-authored changed-subject mutant
    `test/mutant/determinism_jitcache/content_order_leak.hs` (a canonical-encoder that preserves field order rather than
    sorting; operator: dropped-effect) MUST turn this property red (§M.2).
 
@@ -385,17 +389,17 @@ no-env/no-`PATH` contract.
   `sha256(resolved-dhall ‖ substrate-fingerprint)`, with the fingerprint gathered by full-path subprocess probes,
   never from environment or `PATH`.
 - The store namespace key `<experimentHash>/…` wired so two genuinely different runs — including a flipped metric
-  direction (part of the resolved `.dhall`) or a different substrate fingerprint — cannot collide.
+  direction (part of the resolved Haskell DSL value) or a different substrate fingerprint — cannot collide.
 - A separately authored Haskell fingerprint oracle (minimum witness set plus each witness's absolute probe
-  path) and a Haskell-declared fake probe generated beneath `.build/test-corpora/**` for the sensitivity check — both
+  path) and a Haskell-declared fake probe generated beneath `.build/test-tools/**` for the sensitivity check — both
   reviewed before `ExperimentHash.hs` exists (§M.1, §M.3).
 
 ### Validation
 
-1. `experimentHash` is a pure function of `(resolved-dhall, substrate-fingerprint)`: it changes when either the
-   resolved `.dhall` (a Haskell-declared flipped-metric case generated beneath `.build/**`) or the
+1. `experimentHash` is a pure function of `(resolved-dsl, substrate-fingerprint)`: it changes when either the
+   resolved Haskell DSL value (including the flipped-metric case) or the
    substrate fingerprint changes, and re-derives identically across re-evaluation of the same inputs. Asserted
-   against the oracle-pinned fixtures, not values regenerated from the SUT.
+   against independently authored Haskell cases, not values regenerated from the SUT.
 2. The fingerprint carries every witness required by the independent Haskell fingerprint oracle
    (substrate lane `linux-cpu` + the named GHC-version, RTS/runtime-version, ISA, and libc/ABI witnesses, each
    with its absolute probe path); a fingerprint missing a required witness FAILS, and a hardcoded constant such
@@ -403,8 +407,9 @@ no-env/no-`PATH` contract.
    verified from the argv-recording exec shim or `strace -f -e execve` OS-boundary observer (§M.5), whose log
    shows every probe invoked by absolute path and no `getenv`/`PATH` lookup on the fingerprint path, never a
    self-report; two probes of the same host fold to the same digest. The **sensitivity check**, substituting one
-   named probe's binary with the committed fake `test/harness/fake/phase_70_fake_ghc` (which emits a different version),
-   MUST change the folded digest (§M.3). The committed mutant
+   named probe's binary with a Haskell-authored fake probe lazily built at
+   `.build/test-tools/phase_70_fake_ghc` (which emits a different version),
+   MUST change the folded digest (§M.3). The Haskell-authored changed-subject mutant
    `test/mutant/determinism_jitcache/const_fingerprint.hs` (fingerprint hardcoded to `"linux-cpu"`; operator:
    dropped-effect) MUST turn the schema and sensitivity checks red (§M.2).
 
@@ -435,11 +440,12 @@ per-stream seed reachable only through one total function.
 1. A simulated 1-worker vs 100-worker dispatch in arbitrary order seeds stream `37` identically every time. The
    generator carries a `cover` obligation (§M.4) forcing ≥25% of cases into the high-worker-count/shuffled-order
    branch, so the property is not satisfied by a near-constant single-worker generator. Expected seed values for
-   streams `0`, `1`, `37` are checked against a **committed hand-computed golden**
-   `test/golden/determinism_jitcache/splitmix_seeds.json` (§M.1, SplitMix64 with gamma `0x9E3779B97F4A7C15` worked by hand,
-   not regenerated from `Rng.hs`).
+   streams `0`, `1`, `37` are checked against an **independently hand-computed Haskell expectation**
+   (§M.1, SplitMix64 with gamma `0x9E3779B97F4A7C15` worked by hand, not regenerated from `Rng.hs`). Its
+   reproducible JSON view is generated lazily at
+   `.build/test-corpora/determinism_jitcache/splitmix_seeds.json` and remains untracked.
 2. No seed reads wall-clock, a worker id, or `/dev/urandom`; the derivation is a pure function of
-   `(masterSeed, streamIndex)` alone. The committed mutant `test/mutant/determinism_jitcache/rng_workerid.hs` (seed folds in a
+   `(masterSeed, streamIndex)` alone. The Haskell-authored changed-subject mutant `test/mutant/determinism_jitcache/rng_workerid.hs` (seed folds in a
    worker id in addition to `streamIndex`; operator: effect-swap) MUST turn validation 1 red (§M.2).
 
 ### Remaining Work
@@ -465,15 +471,17 @@ cross-substrate equality.
 
 - A pure seeded compute stage (`Determinism.hs`) taking a content-addressed input, a request, and a derived
   SplitMix seed, with all I/O at the interpreter boundary.
-- The gate `.dhall` (`test/fixture/dhall/phase_70_determinism_repro.dhall`) that spins up the Phase-69 workflow, runs the
+- The reviewed Haskell gate declaration, lazily projected to
+  `.build/test-corpora/dhall/phase_70_determinism_repro.dhall`, that spins up the Phase-69 workflow, runs the
   stage twice, stores each output as a content-addressed blob under its `experimentHash` namespace, tears down,
   and compares outputs.
 - A ledger artifact recording: identity/seed totality as **proven-in-types**, same-substrate reproduction as
   **tested on linux-cpu**, and cross-substrate bit-equality as **explicitly not asserted** (UNVERIFIED), matching
   the doctrine's proven/tested/assumed table.
-- The oracle-pinned representative oracle set (authored before any kernel module exists, §M.1): the positive
-  `test/fixture/dhall/phase_70_determinism_repro.dhall` and its one-dimension-differing negative siblings
-  `..._flipped_metric.dhall`, `..._alt_seed.dhall`, `..._alt_input.dhall` (§M.7, §M.8); the committed mutant
+- The independently authored Haskell representative oracle set (authored before any kernel module exists,
+  §M.1): the positive declaration and its one-dimension-differing flipped-metric, alternate-seed, and
+  alternate-input negative declarations (§M.7, §M.8). Any Dhall projection is generated lazily beneath
+  `.build/test-corpora/dhall/**` and remains untracked; the Haskell-authored changed-subject mutant
   `test/mutant/determinism_jitcache/const_output.hs` (§M.2); and the harness's OS-boundary observer on the compute Pod
   (an argv/exec shim or `strace`) that witnesses run 2's fresh compute and the fresh-pod output-key absence
   (§M.5, §M.6).
@@ -485,16 +493,17 @@ cross-substrate equality.
    retained prefix until its stage writes. The OS-boundary observer (§M.5) confirms that boundary. The comparison
    is an **out-of-band harness byte compare** of both retained/fetched blobs — never a `412` on the second PUT,
    which proves store dedup, not reproduction (§M.6).
-2. Output is a genuine function of the machinery: the `..._alt_seed.dhall` run and the `..._alt_input.dhall` run
+2. Output is a genuine function of the machinery: the Haskell-declared alternate-seed run and alternate-input run
    each produce **different** output bytes from the base run (asserted on the stored blobs). A stage whose output
    is invariant under a changed seed or a changed pinned input FAILS.
-3. Changing the resolved `.dhall` (the `..._flipped_metric.dhall` sibling, differing only in metric direction) or
+3. Changing the resolved Haskell DSL value (the flipped-metric sibling, differing only in metric direction) or
    substituting the substrate fingerprint produces a different `experimentHash` and a distinct store namespace;
    the run is allowed to differ. Because a single linux-cpu host cannot genuinely re-fingerprint, the fingerprint
-   leg is exercised by an **in-process substitution using the committed fake probe** (`test/harness/fake/phase_70_fake_ghc`),
+   leg is exercised by an **in-process substitution using the Haskell-authored fake probe**, whose executable is
+   built lazily at `.build/test-tools/phase_70_fake_ghc`,
    and the ledger records this leg as **UNVERIFIED for a real distinct substrate** (synthetic mutation only),
    never green.
-4. The committed mutant `test/mutant/determinism_jitcache/const_output.hs` (constant-output stage) is re-run and MUST turn
+4. The Haskell-authored changed-subject mutant `test/mutant/determinism_jitcache/const_output.hs` (constant-output stage) is re-run and MUST turn
    validation 2 red (§M.2).
 5. The ledger artifact is emitted and marks no cross-substrate claim green: same-substrate reproduction
    *tested on linux-cpu*, identity/seed totality *proven-in-types*, cross-substrate bit-equality UNVERIFIED.
@@ -542,7 +551,7 @@ over-budget derived peak before the resolver ever materializes an asset.
 ### Validation
 
 1. There is no exported path to a cache key from a free string; the only path to a resident entry is content
-   addressing — asserted by the committed compile-fail negative `test/negative/determinism_jitcache/freestring_key.hs`
+   addressing — asserted by the reviewed Haskell compile-fail source `test/negative/determinism_jitcache/freestring_key.hs`
    (registered in the Phase-27 negative corpus, authored in this phase's oracle-pinning sprint) failing to
    typecheck *at the attempt to construct a cache key from a `String`/`Text`/`Url`* with the specific
    "no instance / no exported constructor" error, paired with a positive that differs only in keying from
@@ -561,9 +570,9 @@ over-budget derived peak before the resolver ever materializes an asset.
 4. **Pin-aware pruning is exercised, not declared:** a cache filled to `CacheBudget` with a mix of pinned and
    unpinned residents, then asked to admit one more resident, **evicts an unpinned resident, never a pinned one**,
    and leaves measured peak/final occupancy within `CacheBudget`; the property asserts a pinned resident is
-   present and a named unpinned resident is absent post-prune. The committed seeded mutant `prune = pure ()`
+   present and a named unpinned resident is absent post-prune. The Haskell-authored changed-subject seeded mutant `prune = pure ()`
    ([Gate integrity](#gate-integrity) part (b) mutant (b)) must turn this clause red (the over-budget residency survives). This is the pure-pool property; its live on-disk counterpart is the Sprint 80.8 postflight residency
-   measurement. The fold's expected verdicts are the Phase-0 fixture's hand-authored table, never the fold's own
+   measurement. The fold's expected verdicts are an independently authored Phase-0 Haskell table, never the fold's own
    output.
 5. A QuickCheck property shows every resident entry is reachable only by hashing real bytes and that a lookup is
    a total HIT/MISS, with `cover`/`classify` obligations forcing **≥30% MISS** and **≥30% HIT** cases (§M.4), so
@@ -594,22 +603,24 @@ path.
   URL), stores the result content-addressed into `Amoebius.Jit.Cache`, then returns the handle.
 - The build-from-source path invoking the Phase-56 baked toolchain by absolute path (no `PATH`, no env), and the
   download path resolving a named prebuilt identity — neither exposing a free-URL or free-string constructor.
-- An in-file honesty note: URL-foreclosure and identity-from-closed-catalog are **proven-in-types** (dhall-typecheck); the
+- An in-file honesty note: URL-foreclosure and identity-from-closed-catalog are **proven-in-types** by the Haskell
+  type boundary; the
   first-miss materialization *succeeding* on real infrastructure is the live residue proven at the phase gate; the
   model (Tier 2) and kernel (Tier 3) tiers reuse this resolver but land in Phases 60/61.
 
 ### Validation
 
-1. The suite drives the resolver against an oracle-pinned backend fixture whose served or compiled bytes
-   **sha256-match the `test/oracle/determinism_jitcache/oracle.dhall` pin** — not an arbitrary "fake" blob, so a backend
+1. The suite drives the resolver against a Haskell-declared backend case whose served or compiled bytes
+   **sha256-match the independently authored Haskell content pin**. Its reproducible Dhall view is generated
+   lazily at `.build/test-corpora/determinism_jitcache/oracle.dhall` and remains untracked — this is not an arbitrary "fake" blob, so a backend
    returning unpinned bytes must fail the suite. A cold cache triggers exactly one `resolve`
-   (download-or-build) and stores the result, **and the stored `ContentAddress` equals that committed pin**; a
+   (download-or-build) and stores the result, **and the stored `ContentAddress` equals that independent Haskell pin**; a
    warm cache returns a handle with no resolve, proven by the argv-recording shim / `strace` observer at the OS
    boundary (§M.5) capturing zero toolchain-or-backend subprocess on the warm path; there is no path that accepts
-   a URL or free string, asserted by the committed compile-fail negative `test/negative/determinism_jitcache/url_arm.hs`
+   a URL or free string, asserted by the reviewed Haskell compile-fail source `test/negative/determinism_jitcache/url_arm.hs`
    (Phase-27 corpus, independently authored) failing at the constructor locus with "no `Url`/free-string
    constructor", paired with the closed-catalog positive that compiles.
-   The committed seeded mutant `resolve _ = <fixed-marker>` ([Gate integrity](#gate-integrity) part (b) mutant (a))
+   The Haskell-authored changed-subject seeded mutant `resolve _ = <fixed-marker>` ([Gate integrity](#gate-integrity) part (b) mutant (a))
    must turn the stored-address assertion red.
 2. Every subprocess the resolver spawns is invoked by absolute path, never resolved against `PATH` — asserted by
    an OS-boundary argv-recording shim capturing the full absolute `argv[0]`, not a resolver self-report.
@@ -646,14 +657,15 @@ that later names it, without a shared writable host mount.
 
 1. One cache-owner pod and two client pods scheduled to the same node name the same `EngineRuntime` identity.
    Client A's first `resolve` is a MISS that the owner materializes into its bounded disk-backed `emptyDir`, to
-   bytes sha256-matching the `test/oracle/determinism_jitcache/oracle.dhall` pin; Client B on the same node HITs the resident
+   bytes sha256-matching the independently authored Haskell content pin (whose untracked Dhall view is generated
+   lazily at `.build/test-corpora/determinism_jitcache/oracle.dhall`); Client B on the same node HITs the resident
    handle with no re-materialization, proven by the OS-boundary observer — unchanged resident inode/mtime, and
    the in-cluster `registry:2` access log plus an egress capture recording zero new pull or build
    subprocess for Client B — never by a resolver-emitted counter. The owner's rendered manifest carries exact
    provision-derived CPU/memory/`ephemeral-storage` requests+limits, its `emptyDir.sizeLimit`, and no writable
    `hostPath`, with the applied ephemeral request at least the volume bound plus writable/log headroom.
 2. Two concurrent first-misses, **forced to overlap by a shared barrier and materialization deliberately slowed
-   (a payload-size floor or an injected delay in the fixture backend) so both observe MISS before either
+   (a payload-size floor or an injected delay in the Haskell-declared backend case) so both observe MISS before either
    commits**, converge to exactly one stored copy whose bytes hash to the catalog pin;
    no partial/temp file remains in the cache directory and no torn or duplicate resident entry exists. Repeated same-digest requests use
    one in-flight temporary extent, while an `(n+1)`th distinct missing digest queues and the observed simultaneous
@@ -681,15 +693,18 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
 
 ### Deliverables
 
-- The gate `.dhall` naming exactly the one representative identity `EngineRuntime.LlamaCppCpu@<pinned-ver>`
+- The reviewed Haskell gate declaration naming exactly the one representative identity
+  `EngineRuntime.LlamaCppCpu@<pinned-ver>`
   ([Gate integrity](#gate-integrity) concrete corpus), driving one cache-owner pod, two client pods on the same
-  node, and the oracle-pinned resident-plus-temp over-budget, digest-size-conflict, deletion-credit,
-  bounded-parallel-overflow, and ephemeral-under-reserved fixtures.
-- The oracle-pinned oracle `test/oracle/determinism_jitcache/oracle.dhall` (expected `ContentAddress`, catalog-owned
-  final-resident/temporary byte `Quantity`, `--version`) and the committed seeded mutants under
-  `test/mutant/determinism_jitcache/cache/` (`resolve _ = <marker>`, `prune = pure ()`, one-byte-short store), authored before
+  node, and the independently pinned Haskell resident-plus-temp over-budget, digest-size-conflict,
+  deletion-credit, bounded-parallel-overflow, and ephemeral-under-reserved cases.
+- The independently authored Haskell oracle (expected `ContentAddress`, catalog-owned
+  final-resident/temporary byte `Quantity`, `--version`) and the Haskell-authored changed-subject mutation
+  operators (`resolve _ = <marker>`, `prune = pure ()`, one-byte-short store), authored before
   `src/Amoebius/Jit/*` exists.
-- The gate harness asserting: (i) first-miss materialization whose stored bytes sha256-match the committed pin,
+  Reproducible Dhall and applied-mutant materializations are generated lazily beneath
+  `.build/test-corpora/**` and `.build/test-mutants/**` and remain untracked.
+- The gate harness asserting: (i) first-miss materialization whose stored bytes sha256-match the independent Haskell pin,
   the named arm actually ran (OS-boundary argv-shim/`strace` or registry audit log), the handle is live (reports
   the pinned `--version`), and **zero public-registry pull** by live egress/CNI capture plus the `registry:2`
   audit log; (ii) exact provision-derived CPU/memory/`ephemeral-storage` and `emptyDir.sizeLimit` on the owner,
@@ -699,7 +714,7 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
   resident was evicted, and measured bytes stayed within `CacheBudget`; (v) the resident-plus-temp over-budget,
   digest-size-conflict, deletion-before-observation, bounded-parallel-overflow, and ephemeral-under-reserved
   specs' **tagged** `ProvisionError`/`Left`s at the provision seal, with each artifact's measured final/temp
-  sizes within its catalog-owned `AssetMaterializationDemand`. The gate must turn red under the committed mutants.
+  sizes within its catalog-owned `AssetMaterializationDemand`. The gate must turn red under the Haskell-authored changed-subject mutants.
 - A Register-3 ledger recording: URL-foreclosure and the required bounded-`CacheBudget` field as
   **proven-in-types**, the numeric cache/ephemeral inequalities as **provision-seal checked**, first-miss
   resolution and cross-pod reuse as **tested on linux-cpu**, and the Tier-2 model / Tier-3 kernel reuse as
@@ -714,16 +729,16 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
    log recording the in-cluster serve on `download`), and the handle is live (reports the pinned `--version`).
    "Zero public-registry pull authored by URL" is discharged by live network observation — a CNI/egress capture
    plus the `registry:2` audit log showing no request to any public registry host — **in addition to** the
-   dhall-typecheck type-level foreclosure; the type check alone does not satisfy this clause. The owner has exact
+   Haskell type-level foreclosure; the type check alone does not satisfy this clause. The owner has exact
    provision-derived CPU/memory/`ephemeral-storage` requests+limits and `emptyDir.sizeLimit` matching its pure
    provision, its request covers those bounds plus writable/log headroom, and it has no writable `hostPath`. A second
    client on the node reuses the resident handle with no resolve, proven by unchanged resident inode/mtime and
-   zero new pull. The committed seeded mutant `resolve _ = <marker>` ([Gate integrity](#gate-integrity) part (b) mutant (a)) must turn this clause red.
+   zero new pull. The Haskell-authored changed-subject seeded mutant `resolve _ = <marker>` ([Gate integrity](#gate-integrity) part (b) mutant (a)) must turn this clause red.
 2. With the cache filled to budget, a postflight on-disk peak/final measurement confirms pin-aware eviction and
    resource enforcement: the pinned resident survives, the unpinned resident is evicted, and measured peak/final
    bytes remain within `CacheBudget` — measured on disk, not self-reported. The gate independently reconstructs
    the observed resident digest map and matches it to the private `ProvisionedCacheDemand`, with
-   selected-for-deletion entries still charged until observed absent. The committed mutant `prune = pure ()`
+   selected-for-deletion entries still charged until observed absent. The Haskell-authored changed-subject mutant `prune = pure ()`
    ([Gate integrity](#gate-integrity) part (b) mutant (b)) must turn this red. A resident-plus-bounded-temp
    one-byte overflow, catalog digest-size conflict, early deletion credit, bounded-parallel-derived overflow, and
    ephemeral-under-reserved owner each return their **tagged** `Left` at the Phase-9 fold at the Phase-31
@@ -777,11 +792,11 @@ The Tier-2 model and Tier-3 CUDA kernel reuse remain assigned to Phases 91 and 9
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Kernel/ContentAddress.hs`,
   `src/Amoebius/Kernel/ExperimentHash.hs`, `src/Amoebius/Kernel/Rng.hs`, `src/Amoebius/Kernel/Determinism.hs`,
   `src/Amoebius/Jit/Cache.hs`, `src/Amoebius/Jit/CacheBudget.hs`, `src/Amoebius/Jit/Resolver.hs`,
-  `src/Amoebius/Jit/CacheOwner.hs`, the `DeterminismReproSpec` and `EngineCacheGate` live suites, and the
-  oracle-pinned oracle/negative/mutant artifacts (`test/fixture/dhall/phase_70_determinism_repro.dhall` and siblings,
-  `test/oracle/determinism_jitcache/oracle.dhall`, `test/negative/determinism_jitcache/freestring_key.hs`,
-  `test/negative/determinism_jitcache/url_arm.hs`, `test/mutant/determinism_jitcache/determinism/`, `test/mutant/determinism_jitcache/cache/`) as Phase-80
-  design-first rows.
+  `src/Amoebius/Jit/CacheOwner.hs`, the Haskell `DeterminismReproSpec` and `EngineCacheGate` live suites, the
+  Haskell oracle and mutation modules, and the exact Haskell compile-fail sources
+  `test/negative/determinism_jitcache/freestring_key.hs` and
+  `test/negative/determinism_jitcache/url_arm.hs` as Phase-80 design-first rows. Lazily generated serialized
+  cases and applied-mutant materializations beneath `.build/**` are not component-inventory rows.
 
 ## Related Documents
 

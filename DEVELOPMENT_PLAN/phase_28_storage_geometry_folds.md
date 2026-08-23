@@ -51,7 +51,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -136,7 +136,7 @@ and the candidate verdict.
 |---|---|
 | `Claim` | Target only — a pure Haskell geometry fold accepts only when each producer's physical demand fits its single owning backing; Haskell-owned cases and mutations generate any transient bytes beneath `.build/**`. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 28` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 28` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -380,7 +380,7 @@ compute `place`.
 
 ### Deliverables
 
-- The **implementation-independent storage-envelope reference predicate** (§M.3): a committed, hand-authored
+- The **implementation-independent storage-envelope reference predicate** (§M.3): a separately reviewed Haskell
   envelope predicate authored in this phase's oracle-pinning sprint, distinct from the fold under test, that **never calls**
   `bookKeeperPhysicalDemand`, `minioPhysicalDemand`, `provisionObjectStoreProducer`, `mergeObjectStoreLogicalPeaks`,
   `registryStoragePeak`, `vaultStoragePeak`, `provisionZooKeeperMetadataStore`, `provisionPatroniSql`,
@@ -427,12 +427,13 @@ compute `place`.
 
 1. The geometry-fold `accepts ⟺ in-envelope` equivalence, presentation/rounding, uniform-claim, Pulsar
    two-ceiling, cache-nesting, provider-root, and control-plane-transition properties hold over generated
-   inputs, each meeting its committed `cover`/`checkCoverage` minimum of ≥30% rejecting (out-of-backing) and
+   inputs, each meeting its Haskell-declared `cover`/`checkCoverage` minimum of ≥30% rejecting (out-of-backing) and
    ≥30% accepting (in-backing) inputs per fold (§M.4).
-2. **Each committed mutant in the per-geometry seeded-mutant battery ([Gate integrity](#gate-integrity)) —
-   including the storage `Σ`, both Pulsar ceilings, uniform-claim, cache-nesting, provider-root,
-   control-plane, migration, and `planStorageScaling` mutants — makes a property red when re-run
-   individually** — the properties have teeth on every geometry obligation, not two.
+2. **Each reviewed Haskell operator in the per-geometry seeded-mutant battery ([Gate integrity](#gate-integrity))
+   is applied to a temporary subject beneath `.build/mutants/**` and makes a property red when re-run
+   individually**. This includes the storage `Σ`, both Pulsar ceilings, uniform-claim, cache-nesting,
+   provider-root, control-plane, migration, and `planStorageScaling` mutants; the properties have teeth on
+   every geometry obligation, not two.
 
 ### Remaining Work
 
@@ -483,12 +484,12 @@ honest foreclosure layer of each.
     ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)),
     and the control-plane etcd max-WAL/preallocated-next/snapshot-save/serialized-defrag transition overrun
     ([§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar))
-    — but their **committed gate negatives** (`illegal_provider_instance_store_root_underprovisioned` /
+    — but their **Haskell-declared gate negatives** (`illegal_provider_instance_store_root_underprovisioned` /
     `illegal_provider_node_root_ebs_over_quota` / `illegal_control_plane_storage_transition_overrun`) are
     owned by [Phase 29](phase_29_execution_accelerator_folds.md) per the §M.7 partition — fold mechanics
     here, gate oracle in Phase 29; the cache negatives `illegal_cache_over_local_pool` /
-    `illegal_incluster_cache_bound_mismatch` are this phase's **own** committed gate negatives.
-  - This phase's committed gate asserts exactly the five pure storage-geometry/cache negatives
+    `illegal_incluster_cache_bound_mismatch` are this phase's **own** Haskell-declared gate negatives.
+  - This phase's Haskell gate contract asserts exactly the five pure storage-geometry/cache negatives
     (`illegal_store_over_backing`, `illegal_hot_tier_over_bookie`, `illegal_topic_time_only_offload`,
     `illegal_cache_over_local_pool`, `illegal_incluster_cache_bound_mismatch`).
 - The positive storage-geometry variant rows of `legal_multisubstrate_cluster` (a store-fits-backing row,
@@ -505,9 +506,9 @@ honest foreclosure layer of each.
 
 1. Rejected historical observation: the `storage-geometry-spec` Cabal suite was recorded green — every one of
    the five storage-geometry fold negatives
-   ([Gate integrity](#gate-integrity) representative set) returns its **specific committed** tagged `Left`, both
+   ([Gate integrity](#gate-integrity) representative set) returns its **specific Haskell-expected** tagged `Left`, both
    positive fixtures' storage-geometry rows fit feasibly, the QuickCheck battery holds at its coverage minima,
-   and the committed per-geometry seeded-mutant battery ([Gate integrity](#gate-integrity)) turns the suite red
+   and the applied Haskell per-geometry seeded-mutant battery ([Gate integrity](#gate-integrity)) turns the suite red
    individually. A negative that provisions successfully or returns the wrong tag is a failure; the ledger must
    keep live-only storage behavior explicitly UNVERIFIED.
 2. The gate applies the Phase-28 storage-geometry folds directly to each hand-authored logical-demand/backing
@@ -550,7 +551,8 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-28 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — only the human authority may change Phase 28 after reviewing a qualified
+  candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-28 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register
   `src/Amoebius/Capacity/{Storage,StorageGeometry,ServiceStorage,Growable,StorageScaling}.hs` and the

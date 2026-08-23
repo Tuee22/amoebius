@@ -54,7 +54,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -96,7 +96,7 @@ Metal framework. Fourth, it runs that worker as a managed subprocess of the host
 **ordinary Pulsar + content-store peer over host-only NodePorts with no mTLS**: commands arrive as Pulsar
 messages, mutations pass only through the Phase-69 gateway into the content-addressed MinIO store, and there is
 no bespoke binary↔daemon RPC — coordination is Pulsar plus the gateway-backed store, with security from the
-network restriction, not from transport crypto. The representative fixture exposes no raw MinIO backend
+network restriction, not from transport crypto. The representative Haskell-declared case exposes no raw MinIO backend
 NodePort. A future raw-GET endpoint must be a separately counted read-only Service with read-only credentials,
 no PUT/DELETE/multipart authority and no mutation route; it cannot share the gateway Service identity.
 
@@ -307,6 +307,8 @@ cite the same sections where they must adopt them.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 89.1: Apple substrate management — Lima Linux VM + brew lazy tool-ensure ⏸️
 
@@ -369,9 +371,10 @@ and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-f
 1. With `limactl` absent, the reconciler installs it via brew, re-resolves it to an absolute path, and starts
    the VM; with it present, the same call is a verified no-op (idempotent).
 2. A unit test exercises the pure install plan for apple without invoking brew.
-3. Cross-check the live physical-host and VM/node inventory against
-   `test/golden/apple_metal_host_daemon/resource_fold.json`; observed supply below any declared CPU, memory/unified-memory, or
-   storage value fails. Before creation, rederive the current fixture's
+3. Cross-check the live physical-host and VM/node inventory against an independently authored Haskell resource
+   expectation, whose reproducible JSON view is generated lazily at
+   `.build/test-corpora/apple_metal_host_daemon/resource_fold.json` and remains untracked; observed supply below
+   any declared CPU, memory/unified-memory, or storage value fails. Before creation, rederive the current Haskell case's
    `requiredUsableBytes` from the guest system plus unique kubelet-layout carves, apply its
    `FilesystemPresentation` overhead and backing minimum/quantum, and assert the private result is the pinned
    40-GiB raw `provisionedBytes`; the raw field cannot be supplied directly. Reserve that sparse-allocation
@@ -381,7 +384,7 @@ and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-f
    high-water, or remove/change the compatible `AppleMetalOffering MetalProfile` reject
    before `brew install`, `limactl create`, bridge build, or cache write; the Metal case returns
    `MissingCapability AppleMetal`/profile mismatch and an external effects trace is empty.
-   A changed-snapshot fixture allocates host memory, parent-disk/sparse-image high-water, or cache bytes after
+   A Haskell-declared changed-snapshot case allocates host memory, parent-disk/sparse-image high-water, or cache bytes after
    validation but before Lima/worker enactment; the immediate token recheck refuses and the trace contains zero
    brew/Lima/bridge/cache/worker mutation.
 4. After Lima creates the accepted disk, independently assert `qemu-img info`/Lima reports raw virtual size
@@ -389,15 +392,16 @@ and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-f
    assert the root/layout mounts expose the
    declared `fsType`, each quota/partition supplies its promised usable bytes, and their unique-carve sum plus
    guest-system reserve equals `requiredUsableBytes`. At the host boundary, record allocated sparse bytes
-   (`st_blocks`/Lima's actual-size observer), drive the fixture through its pinned allocation high-water, and
+   (`st_blocks`/Lima's actual-size observer), drive the Haskell case through its pinned allocation high-water, and
    assert allocation never exceeds the once-reserved high-water or spills into durable/cache carves. A live
    raw virtual disk one byte below the witness, an incorrect fs type, a missing layout hard cap, or a host
-   allocated high-water above the witness refuses start/continuation and turns the external oracle red.
-5. Run `vm_disk_boundaries.csv`: the exact-boundary case fits; adding one guest-usable byte crosses the
+   allocated high-water above the witness refuses start/continuation and turns the external Haskell oracle red.
+5. Run the independently authored Haskell VM-disk-boundary table (any CSV view is generated lazily beneath
+   `.build/**` and remains untracked): the exact-boundary case fits; adding one guest-usable byte crosses the
    allocation quantum and, with the same parent residual, rejects before `brew install`/Lima create. A
-   provisioner mutant that omits filesystem/sparse-image overhead or rounds down instead of up is caught by
+   Haskell-authored changed-subject provisioner that omits filesystem/sparse-image overhead or rounds down instead of up is caught by
    the independent expected witness. The paired live one-byte-short image is rejected by Validation 4. Every
-   failure has an empty mutation trace up to the deliberate observer-created live mutant.
+   failure has an empty mutation trace up to the deliberate observer-created live changed subject.
 6. Execution-boundary trace check (not a source grep): the whole sprint run is driven through the tool-ensure
    seam, which records `(argv, env)` for every spawn, and is additionally run under an OS-boundary exec trace
    (`dtruss`/`execsnoop` capturing every `execve` and its environment). The suite asserts, from the trace, that
@@ -421,8 +425,8 @@ realize channel 2's transport — a NodePort bound to the host's loopback so the
 `127.0.0.1:<nodeport>` with no path from LAN/WAN — applying the sibling project's loopback-only precedent
 (sibling evidence, not an amoebius result) onto the Lima-backed apple substrate, whose Lima VM node network —
 per [`substrate_doctrine.md §4.1 — Colima and Lima on Apple`](../documents/engineering/substrate_doctrine.md#41-colima-and-lima-on-apple-the-provider-follows-the-workload)
-— this sprint's substrate-layer loopback binding constrains. The rendered manifests are
-emitted from Haskell and never committed.
+— this sprint's substrate-layer loopback binding constrains. Rendered manifests are generated lazily from
+reviewed Haskell beneath ignored `.build/**` and remain untracked.
 
 ### Deliverables
 
@@ -432,7 +436,7 @@ emitted from Haskell and never committed.
   `127.0.0.1:<nodeport>` shape hold on the Lima VM **without relaxing the restriction** (never by publishing
   the port wider). The MinIO backend has no raw NodePort and has no credential or route reachable by the host
   worker.
-- A closed optional raw-content-read arm: `None` for the representative fixture, or a separately counted
+- A closed optional raw-content-read arm: `None` for the representative Haskell case, or a separately counted
   read-only Service with its own identity, read-only credential, complete provisioned Service/API-object and
   backing demand, and no PUT/DELETE/multipart/mutation route. A raw MinIO mutation endpoint is not an arm.
 - An assertion seam proving the negative: no `LoadBalancer` Service, no Gateway/HTTPRoute, and no wild listener
@@ -506,12 +510,13 @@ this sprint realizes it in amoebius for the first time.
    fitting build, an OS/config observer proves the compiler stays within CPU/RSS and named backing ceilings;
    deliberate overrun is throttled/terminated/`ENOSPC`, never spilled elsewhere.
 2. Compile generated MSL at runtime and dispatch A, B, and nonce-derived C. Generate all three expected outputs
-   with `test/golden/apple_metal_host_daemon/metal_job_ref.py` under `.build/runs/phase_86/`; require exact equality, distinct
+   with an independently authored Haskell reference implementation; materialize its run-local outputs only
+   beneath `.build/runs/phase_89/`. Require exact equality, distinct
    A/B output, and a real `MTLLibrary`/pipeline-reflection/`MTLBuffer` observation. Assert bit-stable output
    under the fast-math-off determinism contract by recomputing `job_A` on a **cache-bypassed** run in a distinct
    content-addressed namespace and asserting the compute path (MSL compile + GPU dispatch) actually executed and
-   produced a bit-identical result — a store hit does not satisfy this. The committed mutants
-   `test/mutant/apple_metal_host_daemon/const_output.patch` and `cpu_reference_bypass.patch` must each turn this validation
+   produced a bit-identical result — a store hit does not satisfy this. The Haskell-authored changed-subject
+   `const-output` and `cpu-reference-bypass` operators must each turn this validation
    red at the numeric or Metal-observer locus respectively.
    The OS-boundary memory/cache observer also confirms the worker stays within its declared runtime +
    Metal-unified-memory ceiling and the host cache stays inside its one carved backing; crossing either ceiling
@@ -521,8 +526,9 @@ this sprint realizes it in amoebius for the first time.
 
 ### Remaining Work
 
-Remove the tracked A/B expected files, retain the reviewed reference script and inputs, replace the replay
-mutant, and generate expectations at run time. Physical bridge compilation,
+Any pre-reset non-Haskell behavioral material at this seam is condemned legacy inventory and is not an
+implementation instruction. The target retains only reviewed Haskell
+reference inputs/logic and generates expectations lazily beneath `.build/**`. Physical bridge compilation,
 `MTLDevice`/`MTLLibrary` observation, and GPU dispatch remain UNVERIFIED.
 
 ## Sprint 89.4: Host compute daemon lifecycle as a managed subprocess ⏸️
@@ -563,12 +569,13 @@ defined startup and a clean shutdown rather than an unmanaged background process
 3. Kill the host binary mid-`Serve` and assert the worker subprocess is drained and gone.
 4. Mutate the worker demand so the VM carve plus host/runtime headroom plus worker non-Metal runtime and Metal
    unified-memory ceiling exceed physical memory; assert failure before `Acquire` and zero worker/cache effects.
-5. Run deliberate CPU, RSS, Metal-allocation, and cache-write overrun fixtures. An OS process observer plus an
+5. Run deliberate Haskell-declared CPU, RSS, Metal-allocation, and cache-write overrun cases. An OS process observer plus an
    independent supervisor-event reader proves the declared sample interval/consecutive-breach/terminate policy
    is applied, no process survives beyond that finite breach window,
    `MTLDevice.currentAllocatedSize` is covered by the same response, and the cache carve never exceeds its
-   cap. A hard-enforcement-required fixture rejects as `UnsupportedEnforcement`; a mutant that launches the
-   worker without applying the supervisor must turn every corresponding oracle red.
+   cap. A Haskell-declared hard-enforcement-required case rejects as `UnsupportedEnforcement`; a
+   Haskell-authored changed subject that launches the worker without applying the supervisor must turn every
+   corresponding Haskell oracle red.
 6. Race two supervisor starts against the same host-ledger root and require one CAS winner. Crash after
    Reserved and after LaunchInFlight, then restart: identical reservation retry is idempotent, an observed PID
    repairs to Running, and an unknown launch outcome remains charged. During replacement, stale drain/process/
@@ -606,10 +613,11 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
   as `LoadBalancer`-typed, Envoy-routed, or wild-listening, and a host compute daemon cannot publish its own
   wild ingress — its only inbound coordination is Pulsar plus the provisioned content endpoint. Raw MinIO
   mutation authority is unrepresentable; an optional raw-GET Service is a distinct read-only arm.
-- The gate `.dhall` (`test/fixture/dhall/phase_75_apple_metal_peer.dhall`) is a **generated artifact emitted from Haskell at gate-run time and never committed** — its byte-authority is the authored Haskell emitter in
+- The reviewed Haskell gate declaration lazily emits its untracked Dhall transport at
+  `.build/test-corpora/dhall/phase_75_apple_metal_peer.dhall` at gate-run time; byte authority remains in the Haskell emitter in
   `src/Amoebius/HostWorker/Peer.hs` / `HostComms/Illegal.hs`, per development_plan_standards [§B](development_plan_standards.md#b-canonical-file-layout-snake_case) (Implementation names authored source, never a generated artifact). The authority for the type-check negatives is
   instead a separately authored Haskell host-comms oracle plus four Haskell one-field mutation operators; all
-  serialized illegal cases are emitted beneath `.build/test-corpora/**`. The gate `.dhall`, once emitted, drives:
+  serialized illegal cases are emitted beneath `.build/test-corpora/**`. The generated transport, once emitted, drives:
   derive and verify the complete physical-host → Lima-VM/node + host-worker + cache provision witness —
   including the private presentation/allocation-rounded `ProvisionedVmDiskCarve` and its once-charged sparse
   high-water; bring up the apple cluster on Lima; expose the content-mutation gateway and Pulsar on the
@@ -627,23 +635,26 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
 
 ### Validation
 
-1. Each of the four committed wild-exposure negatives in `test/fixture/dhall/phase_75_illegal/` (NodePort as
+1. Each of the four independently authored Haskell wild-exposure negatives, with serialized forms generated
+   lazily beneath `.build/test-corpora/dhall/phase_75_illegal/` (NodePort as
    `LoadBalancer`; Envoy/HTTPRoute route on the port; wild listener on the port; daemon wild ingress) — each a
-   one-field mutation of the committed green host-comms spec, differing only in the foreclosed field — fails
-   `dhall type` with the pinned structured error naming its specific violated exclusion (asserted against the
-   corpus-registered expected error string at its validation-locus tag), while the green spec type-checks; the
-   committed mutant `test/mutant/apple_metal_host_daemon/lb_nodeport.patch` (which re-types the NodePort `LoadBalancer` in the
+   one-field mutation of the reviewed Haskell green host-comms declaration, differing only in the foreclosed
+   field — fails the generated-transport `dhall type` check with the pinned structured error naming its specific
+   violated exclusion (asserted against the independent Haskell expected error at its validation-locus tag),
+   while the green projection type-checks; the Haskell-authored `lb-nodeport` changed-subject operator (which
+   re-types the NodePort `LoadBalancer` in the
    *gate* spec) must turn this validation red.
-2. The gate `.dhall` runs the full Apple-Metal peer workflow: the worker consumes the job over native Pulsar
+2. The Haskell-declared gate, through its lazily generated transport, runs the full Apple-Metal peer workflow:
+   the worker consumes the job over native Pulsar
    (no WebSocket frames, no TLS handshake, only `127.0.0.1:<nodeport>`), and the output landed through the
    provisioned mutation gateway in MinIO,
    retrieved by content address, equals the fresh reference output generated under the run bundle for reviewed
    inputs A/B and nonce-derived challenge C. A and B yield distinct outputs, so a constant result fails. The
-   committed `cpu_reference_bypass.patch` returns correct numerical bytes without a Metal dispatch and must
+   Haskell-authored `cpu-reference-bypass` changed subject returns correct numerical bytes without a Metal dispatch and must
    fail the external `MTLDevice`/library/pipeline/buffer observation. The gate then tears down leak-free per the
    three-part residue check.
 3. The live host, Lima VM, Kubernetes node, pods, host worker, private Metal epoch peak, cache, and storage inventory
-   matches the Phase-0 resource-fold oracle: all CPU, memory/unified-memory, logical pod-ephemeral,
+   matches the independently authored Phase-0 Haskell resource-fold oracle: all CPU, memory/unified-memory, logical pod-ephemeral,
    layout-routed OCI content/snapshot/workspace, durable, and cache demands fit with nested/disjoint pool
    ownership. The VM's raw virtual size equals private
    `provisionedBytes`; its mounted guest/layout usable bytes and fs types match the presentation witness; and
@@ -651,20 +662,22 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
    overlapping-storage, one-byte-short-raw-disk, next-allocation-quantum, double-debit, omitted-work-item,
    coexistence-domain-mismatch, favorable-epoch, co-resident-overlap-one-short, and
    missing/incompatible-Metal-profile negatives fail before any Lima/bridge/cache/worker mutation (except the
-   deliberately materialized live-short-disk observer fixture, which refuses start before workload effects).
+   deliberately materialized Haskell live-short-disk observer case, which refuses start before workload effects).
 4. Auth resolves the worker's content-mutation-gateway/Pulsar credentials by name through Vault with no
    env/`PATH` read and supplies no raw MinIO mutation credential; the ledger artifact is emitted and marks
    the Apple-Metal physics row as assumed, not green.
 5. Independently lower every provider/compiler/worker/harness CPU, memory, process, writable/log/scratch/cache,
    client-buffer and object-overlap operand by one unit/byte, and lower each surviving pod/IP/CSI/image/storage
    residual by one. Each case returns its pinned `Left` before effects. Dropped-execution-envelope and
-   premature-replacement, omitted-work-item, favorable-epoch, and dropped-overlap-debit mutants turn the
+   Haskell-authored premature-replacement, omitted-work-item, favorable-epoch, and dropped-overlap-debit
+   changed subjects turn the
    external process/Metal/cache/store observer red; the exact-fit
    control live-readbacks equal the private provision projection.
 
 ### Remaining Work
 
-Remove the tracked expected outputs and old replay mutant as part of Sprint 89.3. The pure peer/auth and
+Pre-reset non-Haskell behavioral material at this seam is condemned legacy inventory, not actionable work;
+Sprint 89.3 instead retains Haskell reference logic and lazy `.build/**` outputs. The pure peer/auth and
 illegal-state boundaries are tested; the physical Apple Pulsar/gateway/MinIO/Vault workflow remains UNVERIFIED.
 
 ## Documentation Requirements

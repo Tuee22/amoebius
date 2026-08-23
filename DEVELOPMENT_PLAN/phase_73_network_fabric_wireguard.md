@@ -47,7 +47,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -213,6 +213,8 @@ the gate red.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 73.1: Vault-KV Curve25519 peer keys — secrets by name, minted and custodied in Vault ⏸️
 
@@ -267,8 +269,9 @@ wg set` reconcile — no Netmaker agent, no side channel.
   IPs and out-of-fabric-CIDR `AllowedIPs` decode-foreclosed (a total fold returning `Left`); each peer's key a
   `SecretRef` name resolved from Vault-KV (Sprint 73.1). The gateway-role hub renders a stable hub VPN-IP +
   `Endpoint`; VPN-IP allocation is disjoint-per-cluster (confluent by construction).
-- The committed golden `expected-peer-config.golden` pinning the rendered config (secrets as `SecretRef` names,
-  not key bytes) — the render is asserted byte-identical to it.
+- A separately authored Haskell peer-config expectation containing `SecretRef` names rather than key bytes.
+  The golden transport is generated lazily beneath `.build/test-corpora/network_fabric_wireguard/**` and the
+  render is compared with the Haskell expectation.
 - The control-plane daemon's `wg` reconcile: `discover` reads live interface state via `wg show`, `diff` against
   `render(inventory)`, `enact` via `wg set` — idempotent, driven only by observed kernel state, with `wg0`-bound
   listeners never bound to `0.0.0.0`/LAN/WAN ([`§5`](../documents/engineering/network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric)).
@@ -294,14 +297,16 @@ wg set` reconcile — no Netmaker agent, no side channel.
 
 ### Validation
 
-1. `render(wireguard_fabric.dhall)` is byte-identical to `expected-peer-config.golden`; the overlapping-VPN-IP
-   and out-of-CIDR-`AllowedIPs` negatives are rejected with their committed `DecodeError` tags, each paired with
+1. Render the Haskell-declared topology materialized beneath `.build/test-corpora/network_fabric_wireguard/**`
+   and compare it with the independent Haskell peer-config expectation. The overlapping-VPN-IP and
+   out-of-CIDR-`AllowedIPs` negatives are rejected with their Haskell-declared `DecodeError` tags, each paired with
    a positive differing only in the foreclosed dimension.
 2. On the linux-cpu host the reconcile brings `wg0` to the rendered peer set on each node (confirmed by `wg show`
    read from the kernel), and a second reconcile pass issues zero `wg set` mutations (idempotent) — the compute
    path is re-run (not memoized), its `discover` observed to re-read live kernel state before concluding the
-   empty diff (§M.6). Before the first pass, assert the topology/resource expansion is byte-identical to
-   `expected-fabric-demand.json`, then read back the listener cgroup, rate/queue controls, log rotation and
+   empty diff (§M.6). Before the first pass, compare topology/resource expansion with a separately authored
+   Haskell expectation whose JSON projection is generated beneath `.build/test-corpora/**`, then read back the
+   listener cgroup, rate/queue controls, log rotation and
    nodefs high-water, interface peers, and socket binding. All identities, reservations, ceilings, bounds, and
    peer sets must equal the admitted row; stress at the declared rate/queue boundary remains inside it.
 3. Increase CPU reservation, CPU ceiling, memory reservation, memory ceiling, queue memory, and rotated nodefs
@@ -309,7 +314,7 @@ wg set` reconcile — no Netmaker agent, no side channel.
    change one live commitment after validation. Each case must fail with its pinned reason before the first
    effect, while external `ip monitor`, `wg show`, qdisc/cgroup/log-policy observers and the listener process
    table prove zero interface creation, `wg set`, queue/cgroup/log mutation, listener bind/restart, and nodefs
-   writes. The matched fitting case differs only in the reduced field and enacts. Committed mutants that admit
+   writes. The matched fitting case differs only in the reduced field and enacts. Haskell-authored changed-subject mutants that admit
    against the pre-expansion aggregate, reuse a stale token, or double-charge the named reserve must turn this
    validation red.
 
@@ -331,28 +336,30 @@ probe over the VPN IP, not a self-report.
 
 ### Deliverables
 
-- The positive gate: the two-peer fabric of `wireguard_fabric.dhall` rendered (byte-identical to the golden) and
-  capacity-expanded byte-identically to `expected-fabric-demand.json`, admitted through
+- The positive gate: a Haskell-declared two-peer fabric, lazily rendered beneath
+  `.build/test-corpora/network_fabric_wireguard/**`, compared with independent Haskell peer-config and demand
+  expectations, admitted through
   `ValidatedFabricEnactment`, and reconciled onto real `wg0` interfaces; its OS-enforced per-node
   CPU/memory/rate/queue/log controls read back exactly, the spoke→hub reachability probe is green over the hub
-  VPN-IP, and teardown is leak-free — expressed as a test-topology `.dhall` with a teardown obligation.
-- The negative regression guard: the inline-key-literal (secrets-in-Dhall), overlapping-VPN-IP, and
-  out-of-CIDR-`AllowedIPs` fixtures re-run against the same render entry point, each failing at dhall-typecheck/gadt-decode
-  with its foreclosure tag equal to the oracle-pinned hand-authored oracle
-  `test/fixture/network_fabric_wireguard/negative-expected-tags.tsv` (§M.3/§M.8), each paired with a positive differing only in
+  VPN-IP, and teardown is leak-free — expressed as a Haskell test-topology declaration with a teardown
+  obligation; any Dhall transport is rendered lazily beneath `.build/**` and remains untracked.
+- The negative regression guard: the Haskell inline-key-literal (secrets-in-Dhall), overlapping-VPN-IP, and
+  out-of-CIDR-`AllowedIPs` cases re-run against the same render entry point, each failing at dhall-typecheck/gadt-decode
+  with its foreclosure tag equal to an independently authored Haskell oracle. Its reproducible TSV view is
+  generated lazily at `.build/test-corpora/network_fabric_wireguard/negative-expected-tags.tsv` and remains
+  untracked (§M.3/§M.8); each is paired with a positive differing only in
   the foreclosed dimension.
-- **Committed seeded mutants (§M.2):** `test/fixture/network_fabric_wireguard/mutants/missing-peer-key.patch` (the spoke's
+- **Haskell-authored changed-subject mutation operators (§M.2):** `missing-peer-key` (the spoke's
   `SecretRef` resolves to no live Vault-KV entry — `wg0` never comes up, the probe fails red) and
-  `test/fixture/network_fabric_wireguard/mutants/hub-no-endpoint.patch` (the hub-role config omits its `Endpoint` — the spoke
-  has no hub address, the probe fails red) — both committed and re-run each gate, each asserted to turn the gate
-  red.
-- The **oracle-pinned oracle bundle** committed before any implementation exists:
-  `dhall/examples/wireguard_fabric.dhall`, `expected-peer-config.golden`,
-  `expected-fabric-demand.json`, `reachability-expected.json`, and `negative-expected-tags.tsv` (under
-  `test/fixture/network_fabric_wireguard/`).
+  `hub-no-endpoint` (the hub-role config omits its `Endpoint` and the probe fails red). Reviewed Haskell
+  mutation intent is applied to production source; any patch representation is generated lazily beneath
+  `.build/test-mutants/network_fabric_wireguard/**` and remains untracked.
+- The independently reviewed Haskell oracle bundle declares the topology, peer config, demand, reachability,
+  and negative tags before implementation. Dhall, golden, JSON, and TSV projections are generated lazily
+  beneath `.build/test-corpora/network_fabric_wireguard/**` and carry no independent authority.
 - The pre-effect negative bundle: CPU reservation/ceiling, memory reservation/ceiling, queue-state memory, and
   rotated nodefs demand each exceed the current residual by exactly one unit; an expansion omits one rendered
-  peer; and a validated fingerprint changes before enactment. Each must return its committed specific reason
+  peer; and a validated fingerprint changes before enactment. Each must return its Haskell-declared specific reason
   and an external observer must prove zero interface/peer/qdisc/cgroup/log/listener effects.
 - A **Register-3** proven/tested/assumed ledger recording the live-reachability result (the spoke reached the
   hub over the VPN IP) and marking the deferred / out-of-register surfaces UNVERIFIED: the cross-cluster
@@ -367,9 +374,8 @@ probe over the VPN IP, not a self-report.
 ### Validation
 
 1. The harness stands the two-peer fabric — the gateway-role hub and one spoke, each in its own Linux network
-   namespace on the linux-cpu host — up from `dhall/examples/wireguard_fabric.dhall`. The control-plane daemon renders
-   config byte-identical to `expected-peer-config.golden` and
-   expands capacity byte-identically to `expected-fabric-demand.json`; the provisioned node/peer rows exactly
+   namespace on the linux-cpu host from the Haskell-declared topology. The control-plane daemon's config and
+   capacity expansion equal the independent Haskell expectations; the provisioned node/peer rows exactly
    cover the topology; and the current-residual fingerprint yields one `ValidatedFabricEnactment`. It reconciles
    `wg0` on both peers; the spoke's external-observer probe reaches the hub at its VPN-IP matching
    a separately authored Haskell reachability predicate (an OS-level ICMP echo and TCP connect from the spoke

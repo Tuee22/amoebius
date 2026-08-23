@@ -1,7 +1,7 @@
 # Phase 94: The jitML training and checkpoint contracts, re-derived
 
 > **Purpose**: Re-derive jitML's training, checkpoint, and ready-model contracts against the generic UI runtime and test
-> only an owned, committed, Ready model can be invoked from the authenticated application, with the terminal
+> only an owned, pointer-committed, Ready model can be invoked from the authenticated application, with the terminal
 > training receipt recoverable across UI-server, Redis, and WebSocket loss.
 > **Read this if**: phase 94 is next in the queue, or a later phase depends on what its gate establishes.
 
@@ -47,11 +47,14 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
-**What this phase re-derives, and what it must add.** The seed's training and checkpoint contracts become scope-indexed values, so a model handle cannot cross from the tenant that trained it. The seed's own numerics are a reference implementation and a source of test vectors, never a linked dependency.
+**What this phase re-derives, and what it must add.** The seed's training and checkpoint contracts become
+scope-indexed values, so a model handle cannot cross from the tenant that trained it. The seed's own numerics
+remain an external reference implementation, never a linked dependency or repository vector source;
+independent expectations are authored in Haskell.
 
 This phase owns one adapter seam: the Phase-93 training/checkpoint/model contracts become typed UI workflow and
 artifact ports consumed by the generic runtime and released through Phase 71. The linked Haskell adapter
@@ -80,7 +83,9 @@ cancellation, and model invocation remain online-only in the initial adapter con
 the sole acceptance command is `pb validate phase 94`. Split if the work changes Phase-93 training/commit,
 reopens Phase-69 failover, adds a generic UI
 constructor, introduces another runtime image, or needs a second independently useful claim.
-**Phase scope:** one cohesive claim — *only an owned, committed, Ready model can be invoked*. The terminal receipt survives the loss of the UI server, the cache and the socket that delivered it.
+**Phase scope:** one cohesive claim — *only an owned, pointer-committed, Ready model can be invoked*. Here,
+"committed" names observed content-store pointer state, never a version-control operation or repository
+artifact. The terminal receipt survives the loss of the UI server, the cache and the socket that delivered it.
 
 **Substrate:** linux-cuda
 **Lane:** cuda ([§L](development_plan_standards.md#l-one-substrate-discipline))
@@ -95,7 +100,7 @@ constructor, introduces another runtime image, or needs a second independently u
 
 | Key | Contract |
 |---|---|
-| `Claim` | one cohesive claim — *only an owned, committed, Ready model can be invoked*. The terminal receipt survives the loss of the UI server, the cache and the socket that delivered it. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | one cohesive claim — *only an owned, pointer-committed, Ready model can be invoked*. The terminal receipt survives the loss of the UI server, the cache and the socket that delivered it. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
 | `Command` | `pb validate phase 94` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
@@ -147,6 +152,8 @@ unbounded Redis/output-buffer, or one-short post-fault lookup shape refuses befo
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 94.1: Bind the jitML training-to-ready-model UI adapter ⏸️
 
@@ -162,16 +169,18 @@ reimplementing training, or turning a checkpoint identifier into browser authori
 
 - A linked Haskell jitML UI adapter with typed training, progress, readiness, model-invocation, and error ports,
   preserving the original command/workflow identity into the durable terminal receipt.
-- One Dhall UI module released as Phase-72 content under the unchanged amoebius runtime image.
-- Phase-0 public-contract, interaction, readiness/owner/scope, and hostile-output fixtures.
-- Committed readiness, tenant-scope, same-tenant-owner, local-only-route, and Redis-as-receipt mutants.
+- One Haskell-declared UI module released as Phase-72 content under the unchanged amoebius runtime image; any
+  Dhall projection is generated lazily beneath ignored `.build/**` and remains untracked.
+- Phase-0 Haskell public-contract, interaction, readiness/owner/scope, and hostile-output cases and expectations.
+- Haskell-authored changed-subject readiness, tenant-scope, same-tenant-owner, local-only-route, and
+  Redis-as-receipt operators.
 - A Register-3 ledger with challenge, authority provenance, external observer digests, and teardown evidence.
 
 ### Validation
 
 1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-94 supporting suite must run on linux-cuda.
-2. Drive training to a committed successful checkpoint, verify Ready-handle issuance, invoke it, and compare
-   the UI result and external GPU execution with the independent oracle; require the durable receipt to retain
+2. Drive training to a successful checkpoint observed through its content-store pointer, verify Ready-handle issuance, invoke it, and compare
+   the UI result and external GPU execution with the independent Haskell oracle; require the durable receipt to retain
    the exact original command/workflow identities.
 3. Pin the socket to replica A and originate receipt delivery through replica B; flush Redis and drop the
    socket after durable commit, then require reconnect/receipt lookup to return the outcome once with no second
@@ -179,7 +188,7 @@ reimplementing training, or turning a checkpoint identifier into browser authori
 4. Replay the exact handle/input under tenant A's non-owner and tenant B's owner, then replay in-flight and
    failed checkpoint handles under the owning subject; require pinned denials and zero forbidden effects.
 5. Assert model output remains escaped presentation and creates no authority-bearing follow-on request.
-6. Apply all five named mutants and require the unchanged gate command to fail on their exact matrix rows.
+6. Apply all five named Haskell changed subjects and require the unchanged gate command to fail on their exact matrix rows.
 
 ### Remaining Work
 
@@ -193,8 +202,8 @@ commit, direct-worker policy, general noninterference, and multi-zone availabili
 
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record only the tested
   training/checkpoint-to-ready-model UI interaction and exact denial matrix.
-- `documents/engineering/lift_and_compose_doctrine.md` — keep the sibling SPA a UX fixture and Phase-93's
-  numerical/training core an inherited dependency.
+- `documents/engineering/lift_and_compose_doctrine.md` — keep the sibling SPA an external, untracked UX
+  reference only and Phase-93's numerical/training core an inherited dependency.
 - `documents/engineering/tenancy_doctrine.md` — record live scope/readiness denial without claiming general
   noninterference.
 - `documents/engineering/ui_realtime_coordination_doctrine.md` — record the exact tested two-replica
@@ -204,7 +213,8 @@ commit, direct-worker policy, general noninterference, and multi-zone availabili
 
 - `DEVELOPMENT_PLAN/README.md` and `DEVELOPMENT_PLAN/overview.md` — link the phase and flip status only after
   the linux-cuda Register-3 ledger is green.
-- `DEVELOPMENT_PLAN/system_components.md` — register the jitML UI adapter and its generated Dhall projection under Phase 94.
+- `DEVELOPMENT_PLAN/system_components.md` — register the Haskell jitML UI adapter and Haskell projection emitter
+  under Phase 94; generated Dhall output remains untracked and is not a component-inventory row.
 
 ## Related Documents
 

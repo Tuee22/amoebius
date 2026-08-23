@@ -50,7 +50,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -208,18 +208,19 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
   (ChaCha20-Poly1305 / AES-256-GCM) — **never raw SHA-256**; the password memorized, entered at the prompt on
   init and every unseal, persisted nowhere; raw keys never printed.
 - A **pluggable unlock-material backend** behind one interface — the load-bearing property is only that the
-  material is password-AEAD-sealed and never plaintext at rest. **At the root Phase-61 bring-up the backend is the host-side `.age` file**: MinIO does not exist until Phase 62, so a MinIO-sealed object (and equally a cloud
+  material is password-AEAD-sealed and never plaintext at rest. **At the root Phase-61 bring-up the backend is a
+  host-side encrypted runtime file outside the repository**: MinIO does not exist until Phase 62, so a MinIO-sealed object (and equally a cloud
   KMS or TPM/YubiKey identity) is a *later* backend option, never a root-unseal prerequisite — the root Vault
   must not depend on a platform service it precedes (no Vault↔MinIO bootstrap cycle).
 - **Fail-closed ordering**: no secret-dependent workload runs before Vault reports reachable, initialized, and
   unsealed; a consumer reaching a sealed Vault fails closed.
-- **Committed seeded mutant(s) (§M.2)**, committed and re-run, each MUST turn Validation red: (i) a
+- **Haskell changed-production-subject mutants (§M.2)**, re-run on every candidate, each MUST turn Validation red: (i) a
   *dropped-guard* mutant of `Unseal.hs` that re-runs `vault operator init` on rebuild instead of unsealing existing
   data (must fail the canary-identity and already-initialized checks); (ii) an *effect-swap* mutant of `Seal.hs`
   that seals the unlock material with raw `SHA-256(password)`-keyed obfuscation instead of the Argon2id→AEAD
   envelope (must fail the envelope-format and wrong-password checks); (iii) a *storage-term deletion* mutant
   that omits Raft old+new compaction/recovery headroom or renders a one-byte-smaller PVC (must fail the
-  independent peak oracle before apply); and (iv) an *unbounded-audit* mutant that drops the backup/retention
+  independently authored Haskell peak expectation before apply); and (iv) an *unbounded-audit* mutant that drops the backup/retention
   limits or points the audit path outside its named backing (must fail render identity and the live cap probe).
 
 ### Validation
@@ -231,11 +232,12 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
    Vault); (b) the unlock-material ciphertext digest is **unchanged** (no key regeneration); (c) a `vault operator
    init` attempt against the recreated cluster returns **already-initialized**; and (d) the Vault audit device
    records an **unseal** operation and **no** init operation on the rebuild.
-2. **Password-crypto witness (forecloses fake/plaintext sealing).** Assert: (a) the at-rest unlock file parses as
-   the pinned `test/golden/vault/unlock-envelope.spec` envelope with its Argon2id `m/t/p` parameters and AEAD
-   algorithm identifier matching the spec; (b) an unseal attempt with a **wrong password** fails closed and yields
+2. **Password-crypto witness (forecloses fake/plaintext sealing).** Assert: (a) the at-rest unlock file parses
+   according to a separately authored Haskell envelope expectation with its Argon2id `m/t/p` parameters and AEAD
+   algorithm identifier matching that expectation; (b) an unseal attempt with a **wrong password** fails closed and yields
    no key material (paired positive: the correct password unseals — the two runs differ only in the password,
-   §M.8); (c) a byte-scan of the unlock file, the PV bytes, stdout/stderr, and every bring-up artifact finds **none**
+   §M.8); (c) a Haskell byte scanner over the unlock file, the PV bytes, stdout/stderr, and every bring-up
+   artifact finds **none**
    of the raw unseal keys and **not** the root token.
 3. **Fail-closed ordering (named workload, paired positive).** Deploy the named canary consumer pod
    (`vault-canary-consumer`, a workload whose sole readiness dependency is reading the canary `SecretRef.Vault`)
@@ -246,7 +248,8 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
 4. **Password-persistence scope (disambiguated).** Assert the operator password is the sole human-supplied secret
    and appears in **none** of the following explicitly enumerated stores: the Vault pod filesystem and mounted
    volumes, the host filesystem under the retained-PV mount, the raw PV block bytes, every container's environment
-   block (`/proc/<pid>/environ`), the reconciler and Vault logs, and the bring-up shell history — a byte-scan for
+   block (`/proc/<pid>/environ`), the reconciler and Vault logs, and the bring-up shell history — a Haskell byte
+   scan for
    the password string over exactly this set, no broader and no narrower.
 5. **Pure storage-boundary and zero-effects witness.** Independently rederive the durable usable peak from the declared
    KV/Transit/PKI/auth populations, histories, leases, and pinned Raft model. Supply a retained backing or
@@ -261,7 +264,7 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
    compares every Vault app/init/rotation CPU, memory, and `ephemeral-storage` request/limit, bounded pod-local
    volume, writable/log allowance, cache `None`, and accelerator `None` to the enclosing opaque
    `ProvisionedServiceSpec`; presence-only checks are insufficient.
-6. **Live Raft/audit high-water witness.** Populate the bounded test corpus through its declared retained
+6. **Live Raft/audit high-water witness.** Populate the bounded Haskell test corpus through its declared retained
    versions, certificate/revocation and lease histories; force a Raft snapshot and compaction while observing
    simultaneous old+new files, then restart at that boundary and observe WAL replay/recovery. The mounted
    filesystem high-water must stay within the usable provision and the raw device within
@@ -292,7 +295,7 @@ make the root Vault's `pki/` engine the one self-signed trust anchor for the for
   (ZeroSSL/route53, Phase 64) and is not the distro's own self-signed cluster CA (the chicken-and-egg floor,
   [`vault_pki_doctrine.md §10`](../documents/engineering/vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault));
   the cross-cluster intermediate-CA hierarchy is deferred to federation and flagged **live-proof-pending**.
-- **Committed seeded mutant(s) (§M.2)**, committed and re-run, each MUST turn Validation red: (i) a *dropped-guard*
+- **Haskell changed-production-subject mutants (§M.2)**, re-run on every candidate, each MUST turn Validation red: (i) a *dropped-guard*
   mutant of `Pki.hs` that issues an internal leaf while Vault is **sealed** instead of failing closed (must fail
   the sealed-issuance check); and (ii) an *effect-swap* mutant of `Pki.hs` that returns a leaf signed by an
   unrelated key so it does **not** chain back to the self-signed root CA (must fail the chain-verify check).
@@ -335,7 +338,7 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
 - A **Register-3** proven/tested/assumed ledger naming the live substrate; the cross-cluster intermediate-CA
   hierarchy, parent/child unseal, and parent secret injection are explicitly left UNVERIFIED (owned by the
   federation phases), never marked green.
-- **Committed seeded mutant(s) (§M.2)**, committed and re-run, each MUST turn Validation red: (i) a
+- **Haskell changed-production-subject mutants (§M.2)**, re-run on every candidate, each MUST turn Validation red: (i) a
   *dropped-effect* mutant of `Client.hs` that reads a token from a mounted file / env var instead of performing
   `auth/kubernetes/login` (must fail the audit-device login-provenance check and the role-deletion negative);
   (ii) a *guard-weakening* mutant of `Error.hs` that folds `secret-missing` and `sealed` into one tag or logs the
@@ -344,8 +347,8 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
 ### Validation
 
 1. **K8s-auth provenance witness (forecloses image-baked token).** A consumer authenticates via Vault Kubernetes
-   auth and reads the canary `SecretRef.Vault`-named KV secret, getting **byte-identical** the value in
-   `test/golden/vault/canary.json`; the **Vault audit device** records the read ran under a token minted by
+   auth and reads the canary `SecretRef.Vault`-named KV secret, getting **byte-identical** the independently
+   generated run-unique value held by the external observer; the **Vault audit device** records the read ran under a token minted by
    `auth/kubernetes/login` bound to the consumer's exact namespace + service account. Then **delete the Vault role (or the service account)** and assert the same read now fails with the typed `policy-missing`/denied error —
    proving the login actually occurs rather than a pre-minted token. Assert the pod has no agent sidecar and no
    plaintext Secret mount (read from the argv/exec observer and the pod spec, §M.5).
@@ -353,11 +356,14 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
    is denied; the representative `TransitKey` unwrap is exercised — its positive unwrap succeeds, and a
    policy-denied unwrap yields the typed **`decrypt-denied`** tag; a read against an unreachable Vault (no
    listener) yields the typed **`unavailable`** tag; and each of the sealed / uninitialized / policy-missing /
-   secret-missing / unavailable / decrypt-denied reads returns **its specific tag from `test/golden/vault/error-tags.golden`** (§M.8 — each negative asserts *why* it failed, paired with the
+   secret-missing / unavailable / decrypt-denied reads returns **its specific tag from a separately authored
+   Haskell error-tag expectation** (§M.8 — each negative asserts *why* it failed, paired with the
    positive canary read or unwrap that differs only in the foreclosed dimension), so all six error tags and the
-   one `TransitKey` unwrap in the representative set (§M.7) are gated here. **Presence-oracle absence is operationally defined:** the emitted log line for `secret-missing`, `policy-missing`, and `sealed` must be **byte-identical except for the typed tag itself** (so log shape reveals nothing about whether a path/secret exists), and a grep
-   of the Vault audit device and the consumer's structured logs finds **none** of: the requested mount/path, the
-   resolved value, and the auth token.
+   one `TransitKey` unwrap in the representative set (§M.7) are gated here. **Presence-oracle absence is
+   operationally defined:** the emitted log line for `secret-missing`, `policy-missing`, and `sealed` must be
+   **byte-identical except for the typed tag itself** (so log shape reveals nothing about whether a path/secret
+   exists), and a Haskell scanner over the complete Vault-audit and consumer structured-log observations finds
+   **none** of: the requested mount/path, the resolved value, and the auth token.
 3. Emit the Register-3 ledger; assert the deferred federation surfaces are recorded UNVERIFIED, not green.
 
 ### Remaining Work
@@ -393,7 +399,7 @@ Register-3 live gate — not a substitute for it.
   in >=15%, and the specific adversarial sequence sealed→unreachable→lease-expiry→restart is exercised in >=1% —
   so the named sequence is a *covered case*, never the entire explored set. A run whose generator fails to hit
   these fractions is a red gate, not a pass.
-- **Committed seeded mutant (§M.2)**, committed and re-run, MUST turn the invariant red: a *dropped-guard* mutant of
+- **A Haskell changed-production-subject mutant (§M.2)**, re-run on every candidate, MUST turn the invariant red: a *dropped-guard* mutant of
   the freshness check that permits a `SecretRef` read while the modeled Vault is sealed (must produce a
   counterexample under the explored schedules).
 - **Deterministic replay**: every schedule is seed-addressed, so a counterexample is replayable byte-for-byte from

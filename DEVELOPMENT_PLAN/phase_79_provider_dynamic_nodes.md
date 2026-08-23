@@ -50,7 +50,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -61,7 +61,7 @@ First, **dynamic node provisioning by signal**. The provider child's node set is
 `Amoebius.Cluster.NodeProvisioner` reads the declared elastic-node rule — a typed `ScalingPolicy`
 ([`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm))
 driven by **load** and **workflow completion** (spot-instance-cost-driven scaling is a declared future signal
-class, deferred and not exercised by this phase's gate corpus or seeded mutants) — computes the desired node
+class, deferred and not exercised by this phase's Haskell gate corpus or Haskell seeded mutations) — computes the desired node
 set, and drives the live set toward it through the [Phase 58](phase_58_object_reconciler.md)
 `discover → diff → enact → re-observe` reconciler, with no bespoke node state machine. Provisioning a node is
 one more reconcile pass over the desired node set in the root `InForceSpec`; the elasticity rule lives **only**
@@ -83,7 +83,8 @@ seals nothing until receipt-bound provider readback. Join is quarantined behind 
 full supply/layout/device observation, and a [Phase 59](phase_59_capacity_scheduler.md) scheduler-generation CAS;
 an `Unreachable` node observation **refuses** rather than stranding an EC2 instance.
 
-Second, the **phase gate** (Sprint 79.2): a single `.dhall` that, from a linux-cpu parent, spins up the EKS
+Second, the **phase gate** (Sprint 79.2): a single Haskell-declared topology, with any serialized projection
+generated lazily beneath `.build/**`, that from a linux-cpu parent spins up the EKS
 provider cluster ([Phase 76](phase_76_provider_deploy_checkpoint.md)), converges its stateless in-cluster
 control plane ([Phase 77](phase_77_provider_child_bringup.md)), dynamically provisions an extra node **by evaluating a declared signal rule** (Sprint 79.1), binds the Pulumi-created durable EBS through the static
 `ebs.csi.aws.com` CSI PV and writes a run-unique marker ([Phase 78](phase_78_provider_ebs_credential.md)),
@@ -220,6 +221,8 @@ reclamation to [Phase 90](phase_90_test_topology_live.md). The ledger cannot pro
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 79.1: Dynamic node provisioning by signal ⏸️
 
@@ -239,7 +242,7 @@ cloud effect.
 - An `Amoebius.Cluster.NodeProvisioner` that reads the declared elastic-node rule — a typed `ScalingPolicy`
   ([`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm))
   driven by **load** and **workflow completion** (spot-instance-cost-driven scaling is a declared future signal
-  class, deferred and not exercised by this phase's gate corpus or seeded mutants) — computes the desired node
+  class, deferred and not exercised by this phase's Haskell gate corpus or Haskell seeded mutations) — computes the desired node
   set, and drives the live set toward it through the [Phase 58](phase_58_object_reconciler.md) reconciler; no
   bespoke node state machine. Each provisioning step selects from named `ProviderNodeClass` values carrying a
   catalog-pinned provider SKU, allocatable CPU plus finite overcommit policy, memory, `podSlots`, CNI/IP
@@ -286,12 +289,13 @@ cloud effect.
 ### Validation
 
 1. **Closed-loop, signal-driven** provisioning (forecloses a static hand-edited replica knob): deploy a fixed
-   `ScalingPolicy` rule and then drive **only the signal**, with **no edit to the `.dhall` or the node target between observations** — for the **workflow-completion** class, start and later finish a workflow; for the
+   `ScalingPolicy` rule and then drive **only the signal**, with **no edit to the Haskell declaration, its lazy
+   `.build/**` projection, or the node target between observations** — for the **workflow-completion** class, start and later finish a workflow; for the
    **load** class, apply and later remove synthetic load — and assert the extra node is provisioned solely by the
    rule's evaluation of the signal, joins, and is later reclaimed when the signal recedes. A run in which the node
    target was operator-mutated is **invalid**. The scale event and its trigger are read from an **OS-boundary observer** (the cloud-API mutating-call audit trail correlating the `RunInstances`/node-group modify to the
    signal event, §M.5), not the provisioner's self-report. Both signal classes (workflow-completion, load) are
-   named committed corpus (§M.7). The committed seeded mutant `mut-47.1-ignore-signal` (a provisioner whose
+   named Haskell corpus (§M.7). The Haskell-authored changed-subject seeded mutant `mut-47.1-ignore-signal` (a provisioner whose
    `ScalingPolicy` signal fields are decoded but never consumed — a node moves only on a hand-edited target) MUST
    go **red** on this validation (§M.2): under signal-only drive it never provisions.
 2. Re-run the reconcile at a stable target and assert a no-op, defined observably as **zero mutating cloud-API calls** in the OS-boundary audit trail on run 2 (§M.5/§M.6) — not exit 0 and not the reconciler's
@@ -300,7 +304,7 @@ cloud effect.
    pruning a node it cannot confirm absent, and assert the specific outcome tag `RefuseOnUnreachable` (§M.8),
    paired with the positive `Absent`-observation case that differs only in observability and *does* prune. The
    run-local changed-subject mutant `mut-47.1-unreachable-as-gone` (treating `Unreachable` as `Absent`) MUST go red here.
-   Join-race fixtures separately delay the launch taint, schedule a default-scheduler Pod before config
+   Haskell-declared join-race cases separately delay the launch taint, schedule a default-scheduler Pod before config
    extension, use a stale scheduler generation, omit the Node UID/provider-instance binding, or expose the node
    before full supply/layout/device readback. Each must quarantine/refuse before workload Binding. A positive
    audit trace proves the first non-bootstrap Pod on the node was custom-scheduled after reservation CAS and the
@@ -311,7 +315,7 @@ cloud effect.
    quota-overcommit error **before** invoking Pulumi; the external cloud-API mutating-call audit must remain
    empty. A paired positive differing only in maximum count provisions infrastructure, observes its
    consumed-token materialization, and only then seals `ProvisionedSpec`; the applied run-local `mut-47.1-apply-over-quota`
-   mutant MUST go red for issuing any create/modify call after that rejection. Paired one-field fixtures
+   mutant MUST go red for issuing any create/modify call after that rejection. Paired Haskell one-field cases
    separately exhaust node-root EBS count and bytes while durable headroom remains, and exhaust durable bytes
    while node-root headroom remains; each rejects before mutation, proving the ledgers cannot substitute for one
    another. A Haskell-declared replacement-overlap case fits steady state but not old+new root volumes and must also reject.
@@ -324,7 +328,7 @@ cloud effect.
    refusal; it does not re-implement it).
 6. Fit CPU, memory, storage bytes, and regional EBS count, then make the aggregate simultaneous pod count one
    above every candidate's lesser declared/kubelet/CNI slot residual; provisioning must return `NoPodSlotCover`
-   before cloud mutation. In a paired CSI fixture, keep pod slots ample but make one node's live `CSINode`
+   before cloud mutation. In a paired Haskell CSI case, keep pod slots ample but make one node's live `CSINode`
    `ebs.csi.aws.com` residual one attachment below the unique-PVC set while the SKU declaration is higher; it
    returns `NoCsiAttachSlotCover`. Repeated mounts of one PVC count once, whereas old and replacement PVCs in a
    migration count twice. The applied Haskell `mut-47.1-ignore-live-csinode` and `mut-47.1-dedup-distinct-pvcs` mutants
@@ -342,8 +346,10 @@ cloud effect.
    `ProviderInstanceId { account, cluster, class, ordinal }` and complete disk/carve/slot template path a distinct
    scoped symbolic disk/carve/accelerator-slot identity; after both nodes join, the API/cloud inventory must show
    distinct concrete backing, carve, and device ids attached to those slots, while the capacity fold charges the
-   per-instance bytes/devices twice — checked against the committed `test/golden/provider_two_instance_identity_map.txt`
-   (§M.3). The committed `mut-47.1-template-id-as-physical` mutant reuses a class-local template id as both nodes'
+   per-instance bytes/devices twice — checked against an independently authored Haskell identity-map
+   expectation whose reproducible text view is generated lazily at
+   `.build/test-corpora/provider_two_instance_identity_map.txt` (§M.3). The Haskell-authored changed-subject
+   `mut-47.1-template-id-as-physical` mutant reuses a class-local template id as both nodes'
    physical id and MUST go red before workload admission.
 10. For an `EphemeralRootEbs` class, assert the launch-template request is the private integral-GiB
     `ProvisionedNodeRootVolumeRequest`, each joined node exposes the exact layout/mount/quota identities and
@@ -390,7 +396,8 @@ first-Node taint, supply/layout/device, scheduler-generation, physical-identity,
 Adopt [`pulumi_iac_doctrine.md §3 — State lifetime matches resource lifetime, per class`](../documents/engineering/pulumi_iac_doctrine.md#3-state-lifetime-matches-resource-lifetime-per-class)
 and [`§8 — deploys are enacted by the reconciler`](../documents/engineering/pulumi_iac_doctrine.md#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated),
 with [`cluster_lifecycle_doctrine.md §9 — bring-up and teardown are a reconciler, not a state machine`](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine):
-assemble the phase gate — a single `.dhall` that brings a provider cluster up, provisions a node by signal, and
+assemble the phase gate — a single Haskell-declared topology, lazily projectable beneath `.build/**`, that
+brings a provider cluster up, provisions a node by signal, and
 tears the **ephemeral class used by this per-run gate** down leak-free via one `reconcileAbsent` over the owned
 subset, with `Unreachable → refuse` and the **broadened run-owned OS-boundary sweep backstop** (run-tag **and**
 VPC-id **and** `eks:cluster-name` / `kubernetes.io/cluster/<name>` keyed), while the durable EBS class is
@@ -398,7 +405,8 @@ correctly left retained.
 
 ### Deliverables
 
-- The gate `test/fixture/dhall/phase_69_provider_provision.dhall`: spin up the EKS provider cluster
+- The reviewed Haskell gate topology, lazily projected to
+  `.build/test-corpora/dhall/phase_69_provider_provision.dhall`: spin up the EKS provider cluster
   ([Phase 76](phase_76_provider_deploy_checkpoint.md)), first derive the complete app/platform demand and
   provision it against the named base/elastic node classes, the bounded cache demand charged within local
   ephemeral supply (the cache-owner `emptyDir` charged **once** inside the [Phase 9](phase_09_resource_index.md) logical local-ephemeral fold — **not** a second supply pool and **not** the [Phase 80](phase_80_determinism_jitcache.md) typed `CacheBudget`/jit-build construct, which is out of this phase's scope), parent executor Jobs and
@@ -419,15 +427,16 @@ correctly left retained.
   the `eks:cluster-name` / `kubernetes.io/cluster/<name>` ownership tags — so untagged provider-spawned orphans
   (EKS control-plane CloudWatch log group, auto ENIs, auto IAM roles/instance profiles, CCM/LB-controller ELBs
   and target groups) are enumerated even though they carry no amoebius run tag. It explicitly does **not** read
-  the emptied Pulumi checkpoint or the registry's own `discover`. Its expected output is the committed Phase-0
-  oracle `test/golden/provider_ephemeral_sweep_expected.txt`.
+  the emptied Pulumi checkpoint or the registry's own `discover`. Its expected output is declared by an
+  independent Phase-0 Haskell oracle; the reproducible text view is generated lazily at
+  `.build/test-corpora/provider_ephemeral_sweep_expected.txt` and remains untracked.
 - A per-run proven/tested/assumed ledger recording: provider bring-up + signal-driven node join as **tested on the EKS provider target from a linux-cpu parent**; per-run teardown leak-freedom **under the broadened run-owned sweep** as **tested**; durable EBS retention as **correct-by-class**; and the elevated-harness
   durable-EBS *reclamation* as **explicitly deferred to [Phase 90](phase_90_test_topology_live.md), not asserted here**.
 
 ### Validation
 
-1. Run the gate end-to-end over the committed representative set
-   `test/fixture/dhall/phase_69_provider_provision.dhall` (named in the Gate above): assert the provider cluster
+1. Run the gate end-to-end over the reviewed Haskell representative set, lazily projected to
+   `.build/test-corpora/dhall/phase_69_provider_provision.dhall` (named in the Gate above): assert the provider cluster
    comes up only after the pure fold constructs placement, storage, capability, and quota witnesses for the
    complete `ResourceEnvelope`; the child's scheduler reaches bootstrap readiness, every bootstrap add-on
    old UID is released and its replacement reservation-joined, full managed authority is read back, and the
@@ -442,8 +451,8 @@ correctly left retained.
      image-storage model, provider-vCPU/base/max metadata, zone, and accelerator offering against its
      declared class, failing on any shortfall or policy mismatch; the two nodes materialized from one class
      must also expose distinct concrete backing/carve/device ids for their globally scoped provider-instance
-     and complete template-path slots (checked against
-     `test/golden/provider_two_instance_identity_map.txt`).
+     and complete template-path slots (checked against the independent Haskell identity-map expectation, whose
+     text view is generated lazily at `.build/test-corpora/provider_two_instance_identity_map.txt`).
    - The bounded cache-owner `emptyDir` is charged **once** inside that [Phase 9](phase_09_resource_index.md) local-ephemeral demand, not as a second supply pool.
    - Write a fresh run-unique marker through `<ns>/sts0/pv_0` after asserting its static PV uses `driver:
      ebs.csi.aws.com`, `volumeHandle: <that EBS volume ID>`, and matching zone affinity; record the EBS
@@ -452,12 +461,13 @@ correctly left retained.
      not exit 0 or a self-reported empty diff.
    - Then tear the per-run stack down. "No orphaned VPC, control plane, node group, or node" is discharged
      **only** by the independent read-only cloud-API **run-owned** sweep defined in [Gate integrity](#gate-integrity) (direct AWS `Describe*` under a distinct read-only audit credential, keyed on the run tag **and** VPC id **and** `eks:cluster-name` / `kubernetes.io/cluster/<name>` — explicitly **not** the Pulumi post-destroy checkpoint and **not** the registry's own `discover`, both of which the teardown itself just drove and which cannot see provider-spawned out-of-registry orphans).
-   - The sweep MUST return zero ephemeral-class resources against
-     `test/golden/provider_ephemeral_sweep_expected.txt`; retained durable EBS is the sole permitted
+   - The sweep MUST return zero ephemeral-class resources against the independent Haskell sweep expectation,
+     whose text view is generated lazily at `.build/test-corpora/provider_ephemeral_sweep_expected.txt`;
+     retained durable EBS is the sole permitted
      survivor by class; a non-empty sweep fails the run and the leak list is written into the ledger.
-   - The committed seeded mutant `mut-47.2-skip-sweep` (teardown that leaves one **tagged** provider-spawned
-     ELB behind, invisible to the registry `discover`) MUST go **red** on this sweep, **and** the committed
-     `mut-47-untagged-orphan` (teardown that leaves an **untagged** provider-spawned orphan — an EKS
+   - The Haskell-authored changed-subject seeded mutant `mut-47.2-skip-sweep` (teardown that leaves one **tagged** provider-spawned
+     ELB behind, invisible to the registry `discover`) MUST go **red** on this sweep, **and** the Haskell-authored
+     changed-subject `mut-47-untagged-orphan` (teardown that leaves an **untagged** provider-spawned orphan — an EKS
      control-plane CloudWatch log group, auto ENI, auto IAM role, or CCM-created ELB with no
      `amoebius:test-run` tag) MUST go **red only on the broadened run-owned enumeration** and would pass a
      tag-only sweep — so a run that asserts leak-freedom from a tag-only sweep, or from the emptied
@@ -480,8 +490,8 @@ correctly left retained.
    cloud mutating call; the AWS audit trail is empty and no Pulumi checkpoint, EKS control plane, node group,
    node, or EBS volume is created. This is the live zero-effects witness that an impossible provider deployment is
    not represented as a cluster left waiting for capacity. The `mut-47.1-apply-over-quota` mutant MUST go red.
-5. Run the one-short executor/plugin/workspace/checkpoint-budget, pod-slot, CSI-attach, root-EBS, durable-EBS, and
-   migration-overlap fixtures from Sprints 69.1 and its provider siblings and assert the exact private provisioned
+5. Run the Haskell-declared one-short executor/plugin/workspace/checkpoint-budget, pod-slot, CSI-attach,
+   root-EBS, durable-EBS, and migration-overlap cases from Sprints 69.1 and its provider siblings and assert the exact private provisioned
    witness is the sole input to Job manifests, checkpoint gateway writes, launch templates, `CreateVolume`,
    PVC/PV, and static CSI attachment. The `drop-parallel-executor` ([Phase 76](phase_76_provider_deploy_checkpoint.md)),
    `credit-old-before-observed-delete` ([Phase 78](phase_78_provider_ebs_credential.md)), and this phase's
@@ -490,7 +500,7 @@ correctly left retained.
    than a renderer-side re-derivation.
 6. Assert the provisioning chain itself, not merely its outcome. The gate `InForceSpec` binds and expands the
    child, then derives the provider cluster's initial `ProvisionedInfrastructurePlan` from that exact
-   `BoundDeployment` against the fixture's complete provider node-class and quota declarations before any
+   `BoundDeployment` against the Haskell case's complete provider node-class and quota declarations before any
    cloud mutation — including the exact Pulumi executor/plugin/workspace/cache, checkpoint-object, pod-slot,
    CSI-attach, root/durable EBS geometry, and provider byte/count ledgers. It then validates that plan against
    a fresh provider snapshot, CAS-consumes the plan and its per-action tokens, observes the EKS

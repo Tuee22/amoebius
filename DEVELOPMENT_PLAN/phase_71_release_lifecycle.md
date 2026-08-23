@@ -51,7 +51,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -262,6 +262,8 @@ the section the target must adopt; individual sprints cite the same sections whe
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 71.1: The immutable `Release` ledger (`releaseHash`) ⏸️
 
@@ -289,21 +291,22 @@ after convergence.
   unrepresentable at the store boundary.
 - Deduplication: writing an already-present logical `Release` returns the existing `releaseHash` and adds no
   new entry — content-addressed, self-naming.
-- **oracle-pinned oracles (committed before the folder exists):** a golden `test/golden/release_hash.txt` —
-  the expected `releaseHash` for one fixed `Release` fixture `test/golden/release_fixture.json`, computed by an
-  **independent sha256 tool** (not the amoebius folder) and committed in this phase's oracle-pinning sprint; and a **specific-reason negative** `release_fixture_perturbed.json` (the same `Release` with a single image digest changed) whose
-  expected outcome is a `releaseHash` **differing from the golden at the derived key** — paired with the
-  positive that differs only in that digest. Committed seeded mutant (operator: dropped-input / effect swap):
-  `mutant/hash-omits-substrate` — a folder that omits `substrate-fp` from the hash preimage, collapsing two
-  substrate-distinct generations to one key; the gate MUST turn this mutant **red** against the golden vector.
+- A separately reviewed Haskell oracle declares one fixed `Release`, its expected `releaseHash`, and a
+  one-image-digest perturbation whose hash must differ at the derived key. It lazily materializes the JSON and
+  text transports beneath `.build/test-corpora/release_lifecycle/**`; those bytes remain untracked and are not
+  oracle authority. The independent Haskell expectation is checked against a separately implemented SHA-256
+  calculation. The applied Haskell `hash-omits-substrate` changed-subject operator removes `substrate-fp`
+  from the production preimage and must turn the gate red.
 
 ### Validation
 
 1. Execute at **Register 3** against the Phase-69 single-node kind cluster's live MinIO store, never an
    in-process fake — the register is stated so the result's evidential weight is unambiguous. Write the fixed
-   `release_fixture` and assert the emitted `releaseHash` is **byte-equal to the committed golden `release_hash.txt`** (independently recomputed), and that a second write deduplicates to the same
+   Haskell-declared release case and assert the emitted `releaseHash` equals the independent Haskell
+   expectation (also independently recomputed), and that a second write deduplicates to the same
    entry and hash.
-2. Assert the specific-reason negative `release_fixture_perturbed.json` yields a `releaseHash` **that differs from the golden** (a changed image digest changes identity), and that `mutant/hash-omits-substrate` turns
+2. Assert the Haskell-declared one-digest perturbation yields a different `releaseHash`, and that the applied
+   Haskell `hash-omits-substrate` operator turns
    this validation **red** (two substrate-distinct fixtures collapse to one key).
 3. Attempt to edit a field of an existing `releaseHash` entry and assert the content-addressed write protocol
    **rejects** it — the ledger is append-only and immutable.
@@ -349,11 +352,12 @@ pointer over the fixed ledger, not a redeploy.
 - Exact Content-demand objects for all three pointer HEADs and their retained histories; concurrent CAS loser,
   failed write, multipart, and prior-body extents remain charged under the release `StorageBudgetId` and sole
   mutation admission until fresh inventory proves reclamation.
-- **oracle-pinned oracles:** a committed **compile-fail fixture** `test/negative/reject/fourth_environment.hs` whose
+- **Oracle-pinned Haskell source:** a reviewed compile-fail fixture `test/negative/reject/fourth_environment.hs` whose
   expected outcome is a **specific type error at the `Environment` constructor site** (no constructor for a
   fourth arm), paired with a positive that names an enumerated arm; and a golden pointer-history transcript
-  `test/golden/promote_history.txt` (the expected ETag sequence for a fixed `Dev → Staging → Prod` promotion
-  chain, authored independently). Committed seeded mutant (operator: guard weakening): `mutant/blind-put` — a
+  `.build/test-corpora/promote_history.txt` (the expected ETag sequence for a fixed `Dev → Staging → Prod` promotion
+  chain, declared by an independent Haskell oracle and lazily rendered beneath `.build/test-corpora/**`). The
+  applied Haskell `blind-put` changed-subject operator weakens the guard in a
   promoter that `PUT`s the pointer without `If-Match`, so a concurrent lost update silently clobbers; the gate
   MUST turn it **red** by a racing-CAS check that observes a lost write.
 
@@ -361,10 +365,13 @@ pointer over the fixed ledger, not a redeploy.
 
 1. Assert the compile-fail fixture `fourth_environment.hs` **fails to type-check at the constructor site** (an
    un-enumerated environment has no constructor), paired with a passing enumerated-arm positive.
-2. Promote a fixed `Dev → Staging → Prod` chain and assert the pointer ETag sequence is **byte-equal to the committed `promote_history.txt`**, that `Staging` and `Prod` end pointing at the **same** immutable
+2. Promote a fixed `Dev → Staging → Prod` chain and assert the pointer ETag sequence equals the independent
+   Haskell expectation whose transcript is generated beneath `.build/test-corpora/**`; assert that `Staging`
+   and `Prod` end pointing at the **same** immutable
    `Release` (zero app rebuild), and that no new `Release` entry was written.
 3. Race two concurrent `promote` calls; assert one commits, the loser gets `412`, re-reads and re-applies, and
-   assert `mutant/blind-put` turns this validation **red** (a lost update is observed under the racing check).
+   assert the Haskell-authored `blind-put` changed subject turns this validation **red** (a lost update is
+   observed under the racing check).
 4. Make pointer-history retention, the concurrent CAS-loser extent, gateway execution, or the Content budget
    one unit short, and omit one environment pointer in turn; each case refuses before PUT. The exact-fit
    pointer HEAD/history inventory must normalize to the provisioned Content projection.
@@ -410,15 +417,16 @@ unrepresentable state.
   on it — an in-process validation of the DSL can never mean the cluster enforces it.
 - A refusal carries the **specific reason** (`PromotionRefused:RuntimeEvidenceMissing`), not a bare failure,
   and leaves the environment pointer HEAD untouched.
-- **oracle-pinned oracles (authored before the gate exists):** the committed environment→required-strength
-  mapping table `test/golden/evidence_strength.txt` (hand-authored, independent of the gate's fold), which
+- **Oracle-pinned Haskell source (authored before the gate exists):** an independent
+  environment→required-strength mapping whose optional text projection is generated lazily beneath
+  `.build/test-corpora/**`, which
   records `Dev` = Decision green, `Staging` = Protocol *tested*, `Prod` = Runtime/chaos *tested* — never
   *proven* on any arm; the
-  under-verified `Release` fixture `test/fixture/release_unverified` (its consumed evidence ledger marks the
+  under-verified `Release` fixture `.build/test-corpora/release_unverified` (its consumed evidence ledger marks the
   Runtime/chaos layer UNVERIFIED) with expected outcome **refused with tag `PromotionRefused:RuntimeEvidenceMissing`**; the `Staging`-refusal fixture
-  `test/fixture/release_protocol_unverified` (Protocol layer UNVERIFIED) with expected outcome **refused with tag `PromotionRefused:ProtocolEvidenceMissing`**; and the positive `test/fixture/release_verified` differing
-  **only in the Runtime evidence edge** with expected outcome **advance**. Committed seeded mutant (operator:
-  guard weakening): `mutant/gate-admits-unverified` — a `PromotionGate` whose precondition is weakened so
+  `.build/test-corpora/release_protocol_unverified` (Protocol layer UNVERIFIED) with expected outcome **refused with tag `PromotionRefused:ProtocolEvidenceMissing`**; and the positive `.build/test-corpora/release_verified` differing
+  **only in the Runtime evidence edge** with expected outcome **advance**. Haskell-authored changed-subject seeded mutant (operator:
+  guard weakening): `gate-admits-unverified` — a Haskell `PromotionGate` whose precondition is weakened so
   `release_unverified → Prod` is **admitted**; the gate MUST turn it **red** (the promotion that SHOULD be
   refused advances the pointer).
 
@@ -430,10 +438,10 @@ unrepresentable state.
 2. Attempt `release_protocol_unverified → Staging` and assert it is **refused with the specific tag `PromotionRefused:ProtocolEvidenceMissing`** with the `Staging` pointer HEAD **unchanged**, exercising the
    middle arm of the three-arm mapping; assert the paired positive advances `Staging` once its Protocol-layer
    (Register-2.5) evidence is present.
-3. Assert the required-strength decision is taken **against the committed `evidence_strength.txt`** hand table,
+3. Assert the required-strength decision is taken against the independently authored Haskell mapping,
    never against a value derived from the gate's own fold, and that a Tier-1-only (in-process,
    Runtime-UNVERIFIED) ledger supplies no Runtime witness for `Prod`.
-4. Assert `mutant/gate-admits-unverified` turns this validation **red** — an admitted under-verified promotion
+4. Assert the Haskell-authored `gate-admits-unverified` changed subject turns this validation **red** — an admitted under-verified promotion
    is a gate failure, observed as an unwarranted pointer advance in the store history.
 
 > **Honesty.** Promote-unverified→prod is **type-foreclosed** (uninhabitable — no `advance` term); this sprint
@@ -475,43 +483,46 @@ values end-to-end.
   the same SSA declare-and-prune path, or **CAS the environment pointer back** to the prior `Release` (Sprint
   34.2) and let the reconciler converge — no special "undo" machinery, because a prior generation is a valid
   `Release` and a prior pointer value is a valid CAS target.
-- The gate `release_lifecycle.dhall` test topology — the named **representative set: one trivial app with three
-  environment pointers (`Dev`/`Staging`/`Prod`), three committed `Release` entries (`release_verified`,
+- A Haskell-declared release-lifecycle test topology, lazily rendered as Dhall beneath
+  `.build/test-corpora/release_lifecycle/**` — the named **representative set: one trivial app with three
+  environment pointers (`Dev`/`Staging`/`Prod`), three content-store-committed `Release` entries (`release_verified`,
   `release_unverified`, `release_protocol_unverified`), and one `RolloutPlan` of three ordered phases (base-apply → DB schema-migration →
   finalize, where the `finalize` phase enacts retire-old)** over the standing platform stack plus one Postgres — and its `ReleaseLifecycleSpec`: write the
   ledger, refuse the under-verified promotion, advance the satisfied one, roll out in order, and always tear
   down, emitting a per-run ledger artifact.
-- **Pre-runtime evidence pinned in this phase's oracle-pinning sprint:** the committed
-  ordered-apply reference `test/golden/rollout_order.txt` (the expected phase-apply sequence, authored
-  independently and matched against the API-server audit observer, not the reconciler's self-report); the
-  committed post-migration verify oracle `test/golden/migrated_rows.txt` (the expected verified row set of the
-  schema migration, independent of the migrator's own count); and committed seeded mutants the gate MUST turn
-  **red** — `mutant/gate-admits-unverified` (Sprint 71.3; the phase-level mandated mutant — the promotion that
-  SHOULD be refused but is admitted), `mutant/rollout-reorders-retire` (operator: effect swap — a
+- **Pre-runtime evidence pinned in reviewed Haskell:** independently authored ordered-apply and migrated-row
+  expectations, matched against the API-server audit observer and database readback rather than subject
+  self-report. Optional text projections are generated lazily beneath `.build/test-corpora/release_lifecycle/**`.
+  Applied Haskell changed-subject operators the gate must turn
+  **red** — the Haskell-authored `gate-admits-unverified` (Sprint 71.3; the phase-level mandated changed subject — the promotion that
+  SHOULD be refused but is admitted), `rollout-reorders-retire` (operator: effect swap — a
   `RolloutPlan` that retires-old **before** verified-migrate, violating `create-new → verified-migrate →
-  retire-old` and risking byte loss), and `mutant/phase-gate-selfreport` (operator: effect swap — a
+  retire-old` and risking byte loss), and `phase-gate-selfreport` (operator: effect swap — a
   `RolloutPhase` that gates the next phase on a self-emitted "done" log rather than observed live object
   status, caught by the external-observer apply-order trace).
 
 ### Validation
 
 1. Run the gate topology end-to-end on the linux-cpu kind cluster and assert, **live**: (a) the `Release`
-   ledger write emits a `releaseHash` byte-equal to the committed golden (Sprint 71.1, independently
+   ledger write emits a `releaseHash` equal to the independent Haskell expectation (Sprint 71.1, independently
    recomputed); (b) `release_unverified → Prod` is **refused with `PromotionRefused:RuntimeEvidenceMissing`**
    and the `Prod` pointer HEAD is unchanged in the store (Sprint 71.3); (c) `release_verified → Prod`
    **advances the ETag-CAS pointer** (Sprint 71.2), observed from the store's pointer history; (d) the
-   `RolloutPlan` applies its phases in the order of the committed `rollout_order.txt`, **read from the API-server audit observer** (not the reconciler's self-report), each phase gated on observed live status.
+   `RolloutPlan` applies its phases in the independently declared order, **read from the API-server audit
+   observer** rather than the reconciler's self-report, each phase gated on observed live status.
 2. Assert the **DB schema-migration `RolloutPhase`** provisions the new schema, migrates and **verifies** the
-   copy against the committed `migrated_rows.txt` oracle, and only the later `finalize` phase retires the old — asserting no
-   phase, including retire, denotes durable-byte destruction and that **no `.dhall` value denotes "discard
-   these bytes"**. Assert `mutant/rollout-reorders-retire` turns
+   copy against the independently authored Haskell row-set oracle, and only the later `finalize` phase retires
+   the old — asserting no
+   phase, including retire, denotes durable-byte destruction and that **no Haskell DSL declaration or
+   serialized transport denotes "discard these bytes"**. Assert the Haskell-authored
+   `rollout-reorders-retire` changed subject turns
    this validation **red** (retire-before-verified-migrate is a gate failure).
    In the same run, make each schema/index/row, WAL, temporary workspace, executor CPU/memory/ephemeral/image/
    log, claim/attachment, and old/new workload-overlap operand one unit short; assert each refuses before DDL or
-   Job creation. A scalar-peak mutant and mutants dropping the old schema on failure or verification WAL must
-   turn red.
-3. Assert the mandated `mutant/gate-admits-unverified` turns the gate **red** (an admitted under-verified
-   promotion advances the pointer that should not move), and `mutant/phase-gate-selfreport` turns it **red**
+   Job creation. Haskell-authored changed-subject operators for a scalar-peak error, dropping the old schema on
+   failure, and dropping verification WAL must turn red.
+3. Assert the mandated Haskell-authored `gate-admits-unverified` changed subject turns the gate **red** (an admitted under-verified
+   promotion advances the pointer that should not move), and the `phase-gate-selfreport` changed subject turns it **red**
    (the external-observer apply-order trace catches a phase gated on a self-report rather than live status).
 4. Assert **leak-free teardown** — the postflight sweep inventories every applied k8s object (by the run's
    ApplySet/field manager), every pointer/ledger entry under the run's per-run store namespace prefix, and the

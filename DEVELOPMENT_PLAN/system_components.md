@@ -6,8 +6,10 @@
 
 This is a target-only inventory. It owns no architectural rule and makes no implementation or validation
 claim. Architecture belongs to the linked doctrine, phase status belongs only to [the tracker](README.md), and
-every current source/layout divergence belongs only to
-[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
+executable source/layout-divergence accounting belongs to typed Haskell bindings in
+`Amoebius.Validation.Legacy`. The single
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) file explains those bindings to readers;
+human review owns the correspondence.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -64,9 +66,11 @@ that rule.
 ## Reconciliation state
 
 This document deliberately contains no present-tree audit, historical result, stale receipt, or deletion
-checklist. [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) is the single active register
-for every known divergence. A current finding not bijectively matched to one active stable ID is itself a
-Phase-0 failure. Removing a row here cannot conceal debt, and adding a path here cannot validate it.
+checklist. The closed typed Haskell inventory in `Amoebius.Validation.Legacy` is the only executable source
+of active divergence IDs, owners, observations, and closure predicates. The single
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) register explains that inventory to
+readers and supplies no machine input. A current finding not bijectively matched to one typed Haskell ID is
+itself a Phase-0 failure. Editing either Markdown file cannot conceal debt or validate it.
 
 ## 1. The single binary — three contexts, several typed roles
 
@@ -106,8 +110,9 @@ Dhall schema/prelude/projection used by tooling is lazily generated beneath `.bu
 | UI/offline semantics and lazy browser projections | `src/**/Ui/*.hs`; generated `.build/ui/**` | [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) | [37–46](phase_37_ui_program_schema.md) |
 | Haskell generator/gate/mutant/test-workflow layer | `src/**/{Generate,Validate,Test}/*.hs`; `test/**/*.hs` | [Testing Doctrine](../documents/engineering/testing_doctrine.md) | [47–49](phase_47_tool_and_mutant_generation.md) |
 
-No host, browser, container, cluster, provider, or hardware validation may start until Phase 49 itself has been
-independently validated and human-promoted after every predecessor.
+No live host, live browser, container, cluster, provider, or hardware validation may start until Phase 49 itself
+has been independently validated and human-promoted after every predecessor. Pure browser semantics, lazy UI
+generation, and fake boundaries remain part of the pre-barrier Haskell proof.
 
 ## 3. Manifests — typed renderer + the SSA reconciler
 
@@ -232,22 +237,25 @@ Provider/cluster state and drill records are live or `.build/**` products.
 ## 14. The pre-cluster (Register 1–2) design-first validation surface
 
 Phases 1–49 establish the Haskell language, semantics, generators, independent oracles, mutation qualification,
-cleanroom derivation, and full hardware-free pipeline before any live/hardware work. Their shared command form
-is exactly `pb validate phase NN`; `pb` only ensures/builds/execs the Haskell verdict entry point. Each phase's
-18-key table must be resolved, independently reviewed, run fresh, and human-promoted in strict numerical order.
+cleanroom derivation, and full hardware-free pipeline before any live/hardware work. Their shared future public
+spelling is `pb validate phase NN`, but `pb` is inadmissible evidence until Phase 50 is human-approved. Each
+Phase 1–49 candidate therefore builds and invokes the exact source-bound Haskell binary directly from an
+authenticated, network-independent toolchain input. Each phase's 18-key table must be resolved, independently
+reviewed, run fresh, and human-promoted in strict numerical order.
 
 Phase 49 is the final promotion barrier and must exercise:
 
 `decode → legality → bind/expand → plan/resolve → provision → renderAll → plan → dry-run → fake apply`
 
 with no browser, container, cluster, provider, network service, or hardware-specific observer. Until that
-barrier is promoted, Phase 50 and every live/hardware phase remain blocked.
+barrier is promoted, Phase 50 and every later phase remain blocked. Phase 50 then validates only the bounded
+`pb` handoff, Phase 51 remains hardware-free, and Phase 52 is the first hardware-bearing gate.
 
 ## Related Documents
 
 - [Development Plan Tracker](README.md) — sole phase-status authority
 - [Development Plan Standards](development_plan_standards.md) — plan and gate contract
-- [Legacy Tracking for Deletion](legacy_tracking_for_deletion.md) — sole active divergence register
+- [Legacy Tracking for Deletion](legacy_tracking_for_deletion.md) — sole reader-facing explanation of active typed Haskell divergence bindings
 - [Repository Layout Doctrine](../documents/engineering/repository_layout_doctrine.md) — closed source tree
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — lazy `.build/**` rule
 - [Testing Spoof Resistance](../documents/engineering/testing_spoof_resistance.md) — independent validation trust

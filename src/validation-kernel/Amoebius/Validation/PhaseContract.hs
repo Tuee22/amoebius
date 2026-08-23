@@ -6,13 +6,14 @@ module Amoebius.Validation.PhaseContract
   , checkPhaseContracts
   ) where
 
+import Amoebius.Validation.PolicyContract qualified as Policy
 import Amoebius.Validation.Types
   ( CheckResult (..)
   , Finding
   , finding
   , observation
   )
-import Data.Char (isAlphaNum, isDigit, isSpace)
+import Data.Char (isDigit, isSpace)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Maybe (listToMaybe, mapMaybe)
@@ -25,6 +26,7 @@ import Text.Read (readMaybe)
 data PhaseDocument = PhaseDocument
   { phaseNumber :: Int
   , phasePath :: FilePath
+  , phaseRawLines :: [Text]
   , phaseLines :: [(Int, Text)]
   , phaseTitle :: Maybe Text
   , phaseFields :: Map Text [Text]
@@ -66,6 +68,7 @@ checkPhaseContractsWithSemanticBarrier requireSemanticAudit supplied =
         [ observation "phase-document-count" (showText (Map.size phases))
         , observation "tracker-row-count" (showText (length trackerRows))
         , observation "gate-row-count" (showText (sum (map (length . phaseGateRows) (Map.elems phases))))
+        , observation "sprint-section-count" (showText (sum (map (length . sprintSectionsFor) (Map.elems phases))))
         , observation "unresolved-marker-cell-count" (showText unresolvedMarkerCount)
         , observation "missing-marker-cell-count" (showText missingMarkerCount)
         , observation "refusal-marker-cell-count" (showText refusalMarkerCount)
@@ -75,11 +78,9 @@ checkPhaseContractsWithSemanticBarrier requireSemanticAudit supplied =
           <> concatMap checkPhaseStructure (Map.elems phases)
           <> concatMap (checkDependency phases) (Map.elems phases)
           <> concatMap checkGate (Map.elems phases)
-          <> concatMap checkSprintStatuses (Map.elems phases)
+          <> concatMap (checkSprintStatuses requireSemanticAudit) (Map.elems phases)
           <> trackerFindings
           <> checkTrackerJoin phases trackerRows
-          <> checkPhaseFortyNine phases trackerRows
-          <> checkPrehardwareBoundary phases
           <> [ finding
                  "PLAN-SEMANTIC-AUDIT-UNIMPLEMENTED"
                  "DEVELOPMENT_PLAN/"
@@ -100,14 +101,14 @@ checkPhaseContractsWithSemanticBarrier requireSemanticAudit supplied =
     | candidates@(first : _) <- Map.elems grouped
     , length candidates /= 1
     ]
-  expectedNumbers = Set.fromList [0 .. 95]
+  expectedNumbers = Set.fromList [phaseDomainLowerNumber .. phaseDomainUpperNumber]
   actualNumbers = Map.keysSet phases
   missingNumbers = Set.toAscList (expectedNumbers Set.\\ actualNumbers)
   extraNumbers = Set.toAscList (actualNumbers Set.\\ expectedNumbers)
   phaseDomainFindings =
     duplicatePhaseFindings
       <> [finding "PLAN-PHASE-MISSING" "DEVELOPMENT_PLAN/" ("missing Phase " <> showText number) | number <- missingNumbers]
-      <> [finding "PLAN-PHASE-EXTRA" (phasePath phase) "phase ordinal lies outside the closed 0..95 domain" | number <- extraNumbers, Just phase <- [Map.lookup number phases]]
+      <> [finding "PLAN-PHASE-EXTRA" (phasePath phase) ("phase ordinal lies outside the closed " <> phaseDomainLabel <> " domain") | number <- extraNumbers, Just phase <- [Map.lookup number phases]]
       <> [finding "PLAN-PHASE-DISCOVERY" "DEVELOPMENT_PLAN/" "no numbered phase contracts were supplied" | Map.null phases]
   trackerCandidates = [contents | (path, contents) <- normalized, path == trackerPath]
   trackerRows = case trackerCandidates of
@@ -139,6 +140,7 @@ parsePhaseDocument path contents = do
     PhaseDocument
       { phaseNumber = number
       , phasePath = path
+      , phaseRawLines = Text.lines contents
       , phaseLines = visible
       , phaseTitle = parsePhaseTitle number visible
       , phaseFields = fields
@@ -254,13 +256,30 @@ checkPhaseStructure phase =
     | phaseTitle phase == Nothing
     ]
   statuses = statusLines phase
-  expectedStatus = if number == 0 then "🔄 Active — NOT VALIDATED." else "⏸️ Blocked — NOT VALIDATED."
+  expectedStatus = Policy.resetPhaseStatusText (policyResetStatus number) <> "."
+  statusBodies = sectionBodies "## Phase Status" (phaseLines phase)
+  currentStatusClaims =
+    [ Text.strip line
+    | body <- statusBodies
+    , (_, line) <- body
+    , isBareCurrentStatusClaim line
+    ]
+  additionalStatusFields =
+    [ Text.strip line
+    | body <- statusBodies
+    , (_, line) <- body
+    , "**Status**:" `Text.isPrefixOf` Text.stripStart line
+    ]
+  rawExpectedStatusCount = length (filter (== expectedStatus) (phaseRawLines phase))
   statusFindings =
     [ finding
         "PLAN-PHASE-STATUS"
         path
-        ("Phase Status must be exactly '" <> expectedStatus <> "'")
+        ("Phase Status must contain exactly one raw canonical current-status line '" <> expectedStatus <> "' and no second bare current-status claim")
     | statuses /= [expectedStatus]
+        || currentStatusClaims /= [expectedStatus]
+        || not (null additionalStatusFields)
+        || rawExpectedStatusCount /= 1
     ]
   summaryFindings = concatMap checkSummaryField summaryFieldNames
   checkSummaryField name =
@@ -290,7 +309,7 @@ checkDependency :: Map Int PhaseDocument -> PhaseDocument -> [Finding]
 checkDependency phases phase =
   case Map.findWithDefault [] "Depends on" (phaseFields phase) of
     [dependency]
-      | phaseNumber phase == 0 ->
+      | phaseNumber phase == phaseDomainLowerNumber ->
           [ finding "PLAN-DEPENDENCY" (phasePath phase) "Phase 0 must depend on genesis only"
           | Text.toCaseFold (Text.strip dependency) /= "genesis"
           ]
@@ -301,7 +320,8 @@ checkDependency phases phase =
   checkNumbered dependency =
     let (targets, linkProblems) = markdownTargets dependency
         resolved = map (resolveFrom (phasePath phase)) targets
-        expectedPath = phasePath <$> Map.lookup (number - 1) phases
+        predecessor = policyPredecessorNumber number
+        expectedPath = phasePath <$> Map.lookup predecessor phases
         forward =
           [ targetNumber
           | target <- resolved
@@ -317,7 +337,7 @@ checkDependency phases phase =
           <> [ finding
             "PLAN-DEPENDENCY-PREDECESSOR"
             (phasePath phase)
-            ("Depends on must contain only one link, to immediate Phase " <> showText (number - 1))
+            ("Depends on must contain only one link, to immediate Phase " <> showText predecessor)
         | maybe True (\path -> resolved /= [path]) expectedPath
         ]
           <> [ finding
@@ -334,7 +354,6 @@ checkGate phase =
     <> unresolvedFindings
     <> commandFindings
     <> summaryCommandFindings
-    <> semanticRowFindings
  where
   path = phasePath phase
   number = phaseNumber phase
@@ -343,6 +362,8 @@ checkGate phase =
   rowMap = Map.fromList rows
   commandText = "pb validate phase " <> formatPhase number
   expectedCommand = "`" <> commandText <> "`"
+  expectedSummaryValue = expectedCommand <> "; see [Gate integrity](#gate-integrity). NOT VALIDATED."
+  expectedSummaryLine = "**Gate:** " <> expectedSummaryValue
   shapeFindings =
     [ finding
         "PLAN-GATE-SHAPE"
@@ -370,11 +391,9 @@ checkGate phase =
       [ finding
           "PLAN-GATE-COMMAND"
           path
-          ("Command row must name exactly one canonical " <> expectedCommand <> " and no Python/tool runner")
+          ("Command row must name exactly one canonical " <> expectedCommand)
       | validationCommandSpans value /= [(1, commandText)]
           || countOccurrences expectedCommand value /= 1
-          || "python" `Text.isInfixOf` Text.toCaseFold value
-          || "tools/" `Text.isInfixOf` Text.toCaseFold value
       ]
     Nothing -> []
   summaryCommandFindings = case Map.findWithDefault [] "Gate" (phaseFields phase) of
@@ -382,30 +401,13 @@ checkGate phase =
       [ finding
           "PLAN-GATE-SUMMARY-COMMAND"
           path
-          ("Gate summary must name exactly one canonical " <> expectedCommand <> " and remain NOT VALIDATED")
-      | validationCommandSpans value /= [(1, commandText)]
+          ("Gate summary must be the exact one-line reset form '" <> expectedSummaryLine <> "'")
+      | value /= expectedSummaryValue
+          || validationCommandSpans value /= [(1, commandText)]
           || countOccurrences expectedCommand value /= 1
-          || not ("NOT VALIDATED" `Text.isInfixOf` value)
+          || length (filter (== expectedSummaryLine) (phaseRawLines phase)) /= 1
       ]
     _ -> []
-  semanticRowFindings =
-    requireRow "Residue" "UNVERIFIED" "Residue must explicitly retain UNVERIFIED layers"
-      <> requireRow "Human authority" "human-only" "Human authority must be human-only"
-      <> predecessorRow
-  requireRow key token detail = case Map.lookup key rowMap of
-    Just value -> [finding "PLAN-GATE-SEMANTICS" path detail | not (token `Text.isInfixOf` value)]
-    Nothing -> []
-  predecessorRow = case Map.lookup "Predecessor" rowMap of
-    Just value
-      | number == 0 -> [finding "PLAN-GATE-PREDECESSOR" path "Phase-0 Predecessor row must name genesis" | not ("genesis" `Text.isInfixOf` Text.toCaseFold value)]
-      | otherwise ->
-          [ finding
-              "PLAN-GATE-PREDECESSOR"
-              path
-              ("Predecessor row must name immediate Phase " <> showText (number - 1))
-          | not (phaseReference (number - 1) value)
-          ]
-    Nothing -> []
 
 inlineCodeSpans :: Text -> [(Int, Text)]
 inlineCodeSpans = go . Text.unpack
@@ -442,24 +444,6 @@ containsMissingMarker value =
     || "MISSING —" `Text.isInfixOf` value
     || "MISSING:" `Text.isInfixOf` value
 
-phaseReference :: Int -> Text -> Bool
-phaseReference number value =
-  any (`boundedTokenIn` value) ["Phase " <> formatPhase number, "phase " <> formatPhase number]
-
-boundedTokenIn :: Text -> Text -> Bool
-boundedTokenIn token source = any matchesAt [0 .. Text.length source]
- where
-  matchesAt offset =
-    let (before, suffix) = Text.splitAt offset source
-        after = Text.drop (Text.length token) suffix
-        leftBoundary = case Text.unsnoc before of
-          Nothing -> True
-          Just (_, character) -> not (isAlphaNum character)
-        rightBoundary = case Text.uncons after of
-          Nothing -> True
-          Just (character, _) -> not (isDigit character)
-     in token `Text.isPrefixOf` suffix && leftBoundary && rightBoundary
-
 gateKeys :: [Text]
 gateKeys =
   [ "Claim"
@@ -482,39 +466,168 @@ gateKeys =
   , "Human authority"
   ]
 
-checkSprintStatuses :: PhaseDocument -> [Finding]
-checkSprintStatuses phase = concatMap checkSection sprintSections
+checkSprintStatuses :: Bool -> PhaseDocument -> [Finding]
+checkSprintStatuses enforceCanonicalInventory phase =
+  inventoryFindings <> concatMap checkSection sprintSections
  where
-  sprintSections =
+  sprintSections = sprintSectionsFor phase
+  parsedOrdinals = map (parseSprintOrdinal (phaseNumber phase) . fst) sprintSections
+  expectedOrdinals = [1 .. Map.findWithDefault 0 (phaseNumber phase) canonicalSprintCounts]
+  inventoryFindings =
+    [ finding
+        "PLAN-SPRINT-INVENTORY"
+        (phasePath phase)
+        ( "sprint identities must be the reviewed contiguous inventory "
+            <> showText expectedOrdinals
+            <> "; observed "
+            <> showText parsedOrdinals
+        )
+    | enforceCanonicalInventory && parsedOrdinals /= map Just expectedOrdinals
+    ]
+  checkSection (heading, body) =
+    let ordinal = parseSprintOrdinal (phaseNumber phase) heading
+        statusEntries =
+          [ (lineNumber, Text.strip value)
+          | (lineNumber, line) <- body
+          , Just value <- [Text.stripPrefix "**Status**:" line]
+          ]
+        statuses = map snd statusEntries
+        expectedStatus = expectedSprintStatus (phaseNumber phase) <$> ordinal
+        bareStatusClaims = [Text.strip line | (_, line) <- body, isBareCurrentStatusClaim line]
+        rawStatusIsCanonical = case expectedStatus of
+          Nothing -> False
+          Just expected ->
+            case statusEntries of
+              [(lineNumber, _)] -> atMay (phaseRawLines phase) (lineNumber - 1) == Just ("**Status**: " <> expected)
+              _ -> False
+     in [ finding
+            "PLAN-SPRINT-IDENTITY"
+            (phasePath phase)
+            ("sprint heading has no exact current-phase ordinal: " <> Text.strip heading)
+        | ordinal == Nothing
+        ]
+          <> [ finding
+                 "PLAN-SPRINT-STATUS"
+                 (phasePath phase)
+                 ( Text.strip heading
+                     <> " must contain exactly the reviewed reset status "
+                     <> maybe "for a valid sprint ordinal" ("'" <>) ((<> "'") <$> expectedStatus)
+                 )
+             | case expectedStatus of
+                 Just expected -> statuses /= [expected] || not rawStatusIsCanonical || not (null bareStatusClaims)
+                 Nothing -> True
+             ]
+
+isBareCurrentStatusClaim :: Text -> Bool
+isBareCurrentStatusClaim line =
+  normalizedWord `elem` ["active", "blocked", "done", "validated", "complete", "completed"]
+    && (Text.null remainder || Text.head remainder `elem` ['.', ':', '-', '–', '—'])
+ where
+  withoutIcon = stripStatusIcon (Text.strip line)
+  (word, rest) = Text.span (not . isSpace) withoutIcon
+  normalizedWord = Text.toCaseFold (Text.dropWhileEnd (`elem` ['.', ':']) word)
+  remainder = Text.stripStart rest
+
+stripStatusIcon :: Text -> Text
+stripStatusIcon value =
+  case
+      [ Text.stripStart rest
+      | icon <- ["✅", "⏸️", "🔄", "❌", "🟢", "🔴"]
+      , Just rest <- [Text.stripPrefix icon value]
+      ] of
+    stripped : _ -> stripped
+    [] -> value
+
+sprintSectionsFor :: PhaseDocument -> [(Text, [(Int, Text)])]
+sprintSectionsFor phase =
     [ (heading, takeWhile (not . isH2 . snd) (drop (index + 1) (phaseLines phase)))
     | index <- [0 .. length (phaseLines phase) - 1]
     , Just (_, heading) <- [atMay (phaseLines phase) index]
     , "## Sprint " `Text.isPrefixOf` Text.stripStart heading
     ]
-  checkSection (heading, body) =
-    let statuses =
-          [ Text.strip value
-          | (_, line) <- body
-          , Just value <- [Text.stripPrefix "**Status**:" line]
-          ]
-        expectedPrefix = "## Sprint " <> showText (phaseNumber phase) <> "."
-     in [ finding
-            "PLAN-SPRINT-IDENTITY"
-            (phasePath phase)
-            ("sprint heading belongs to another phase: " <> Text.strip heading)
-        | not (expectedPrefix `Text.isPrefixOf` Text.strip heading)
-        ]
-          <> [ finding
-                 "PLAN-SPRINT-STATUS"
-                 (phasePath phase)
-                 (Text.strip heading <> " must contain exactly one non-Done status carrying NOT VALIDATED")
-             | case statuses of
-                 [status] ->
-                   not ("NOT VALIDATED" `Text.isInfixOf` status)
-                     || "Done" `Text.isInfixOf` status
-                     || "✅" `Text.isInfixOf` status
-                 _ -> True
-             ]
+
+parseSprintOrdinal :: Int -> Text -> Maybe Int
+parseSprintOrdinal owner heading = do
+  remainder <- Text.stripPrefix ("## Sprint " <> showText owner <> ".") (Text.strip heading)
+  let (digits, suffix) = Text.span isDigit remainder
+  ordinal <- readMaybe (Text.unpack digits)
+  if ordinal > 0 && ":" `Text.isPrefixOf` suffix
+    then Just ordinal
+    else Nothing
+
+expectedSprintStatus :: Int -> Int -> Text
+expectedSprintStatus phaseNumberValue sprintNumber
+  | phaseNumberValue == 0 && sprintNumber == 1 = "Active — NOT VALIDATED"
+  | otherwise = "Blocked — NOT VALIDATED"
+
+canonicalSprintCounts :: Map Int Int
+canonicalSprintCounts =
+  Map.fromList
+    ( [ (0, 8)
+      , (1, 8)
+      , (2, 6)
+      ]
+        <> [(phase, 1) | phase <- [3 .. 10]]
+        <> [(phase, 2) | phase <- [11 .. 15]]
+        <> [(phase, 3) | phase <- [16 .. 19]]
+        <> [(phase, 1) | phase <- [20 .. 24]]
+        <> [ (25, 4)
+           , (26, 5)
+           , (27, 4)
+           , (28, 4)
+           , (29, 5)
+           , (30, 3)
+           , (31, 4)
+           , (32, 2)
+           , (33, 3)
+           , (34, 9)
+           , (35, 4)
+           , (36, 4)
+           , (37, 3)
+           , (38, 3)
+           , (39, 3)
+           , (40, 3)
+           , (41, 3)
+           ]
+        <> [(phase, 1) | phase <- [42 .. 47]]
+        <> [ (48, 5)
+           , (49, 4)
+           , (50, 4)
+           , (51, 5)
+           , (52, 5)
+           , (53, 5)
+           , (54, 5)
+           , (55, 4)
+           , (56, 4)
+           , (57, 3)
+           , (58, 5)
+           , (59, 5)
+           , (60, 3)
+           , (61, 4)
+           , (62, 3)
+           , (63, 4)
+           , (64, 4)
+           , (65, 4)
+           , (66, 1)
+           , (67, 5)
+           , (68, 1)
+           , (69, 4)
+           , (70, 1)
+           , (71, 4)
+           , (72, 1)
+           , (73, 3)
+           , (74, 2)
+           , (75, 4)
+           , (76, 1)
+           , (77, 4)
+           , (78, 5)
+           , (79, 2)
+           , (80, 8)
+           ]
+        <> [(phase, 1) | phase <- [81 .. 88]]
+        <> [(89, 5)]
+        <> [(phase, 1) | phase <- [90 .. 95]]
+    )
 
 parseTrackerRows :: Text -> [TrackerRow]
 parseTrackerRows contents = mapMaybe parse (map snd (outsideFences contents))
@@ -544,7 +657,7 @@ checkTrackerShape rows =
  where
   grouped = Map.fromListWith (+) [(trackerNumber row, 1 :: Int) | row <- rows]
   actual = Map.keysSet grouped
-  expected = Set.fromList [0 .. 95]
+  expected = Set.fromList [phaseDomainLowerNumber .. phaseDomainUpperNumber]
   duplicateFindings =
     [ finding "PLAN-TRACKER-DUPLICATE" trackerPath ("tracker repeats Phase " <> showText number)
     | (number, count) <- Map.toAscList grouped
@@ -560,7 +673,7 @@ checkTrackerShape rows =
     ]
   statusFindings = concatMap checkStatus rows
   checkStatus row =
-    let expectedStatus = if trackerNumber row == 0 then "🔄 Active — NOT VALIDATED" else "⏸️ Blocked — NOT VALIDATED"
+    let expectedStatus = Policy.resetPhaseStatusText (policyResetStatus (trackerNumber row))
      in [ finding
             "PLAN-TRACKER-STATUS"
             trackerPath
@@ -617,134 +730,11 @@ checkTrackerJoin phases rows = concatMap checkRow rows
         ]
       _ -> []
 
-checkPhaseFortyNine :: Map Int PhaseDocument -> [TrackerRow] -> [Finding]
-checkPhaseFortyNine phases trackerRows =
-  case Map.lookup 49 phases of
-    Nothing -> []
-    Just phase ->
-      claimFindings phase
-        <> subjectFindings phase
-        <> fieldFindings phase
-        <> trackerNameFindings
- where
-  claimFindings phase =
-    case gateValue "Claim" phase of
-      Just claim ->
-        [ finding
-            "PLAN-PHASE49-SPINE"
-            (phasePath phase)
-            "Phase 49 Claim must contain the complete ordered decode-to-fake-apply semantic spine"
-        | not (containsInOrder phaseFortyNineStages (Text.toCaseFold claim))
-        ]
-      Nothing -> []
-  subjectFindings phase =
-    case gateValue "Subject" phase of
-      Just subject ->
-        [ finding
-            "PLAN-PHASE49-SUBJECT"
-            (phasePath phase)
-            ("Phase 49 Subject omits production spine module " <> moduleName)
-        | moduleName <- phaseFortyNineModules
-        , not (moduleName `Text.isInfixOf` subject)
-        ]
-      Nothing -> []
-  fieldFindings phase =
-    concat
-      [ exactField phase "Substrate" "none"
-      , exactField phase "Lane" "none"
-      , exactField phase "Register" "2"
-      ]
-  trackerNameFindings =
-    [ finding
-        "PLAN-PHASE49-TRACKER"
-        trackerPath
-        "Phase 49 tracker row must identify the no-hardware DSL promotion barrier"
-    | row <- trackerRows
-    , trackerNumber row == 49
-    , not ("No-hardware DSL promotion barrier" `Text.isInfixOf` trackerTitle row)
-    ]
-
-phaseFortyNineStages :: [Text]
-phaseFortyNineStages =
-  [ "decode"
-  , "legality"
-  , "bind/expand"
-  , "plan/resolve"
-  , "provision"
-  , "renderall"
-  , "plan"
-  , "dry-run"
-  , "fake-apply"
-  ]
-
-phaseFortyNineModules :: [Text]
-phaseFortyNineModules =
-  [ "Amoebius.Dsl.Decode"
-  , "Amoebius.Dsl.Foreclosure"
-  , "Amoebius.Capability.Binding"
-  , "Amoebius.Capacity.Provision"
-  , "Amoebius.Manifest.RenderAll"
-  , "Amoebius.Kernel.Chain"
-  , "Amoebius.Kernel.Plan"
-  , "Amoebius.Exec.Boundary"
-  , "Amoebius.Validation.DslBarrier"
-  ]
-
-checkPrehardwareBoundary :: Map Int PhaseDocument -> [Finding]
-checkPrehardwareBoundary phases =
-  concatMap checkNoHardware [phase | (number, phase) <- Map.toAscList phases, number <= 51]
-    <> phase52Findings
- where
-  checkNoHardware phase =
-    exactField phase "Substrate" "none"
-      <> exactField phase "Lane" "none"
-      <> [ finding
-             "PLAN-PREHARDWARE-REGISTER"
-             (phasePath phase)
-             "Phases 0-51 may use only no-register, Register 1, or Register 2 before hardware begins"
-         | fieldToken "Register" phase `notElem` [Just "—", Just "1", Just "2"]
-         ]
-  phase52Findings = case Map.lookup 52 phases of
-    Nothing -> []
-    Just phase ->
-      [ finding
-          "PLAN-HARDWARE-CUT"
-          (phasePath phase)
-          "Phase 52 must be the first hardware-bearing contract and use Register 3"
-      | fieldToken "Substrate" phase == Just "none" || fieldToken "Register" phase /= Just "3"
-      ]
-
-exactField :: PhaseDocument -> Text -> Text -> [Finding]
-exactField phase name wanted =
-  [ finding
-      "PLAN-PREHARDWARE-FIELD"
-      (phasePath phase)
-      (name <> " must begin with the canonical value '" <> wanted <> "'")
-  | fieldToken name phase /= Just wanted
-  ]
-
-fieldToken :: Text -> PhaseDocument -> Maybe Text
-fieldToken name phase = case Map.findWithDefault [] name (phaseFields phase) of
-  [value] -> Just (firstToken value)
-  _ -> Nothing
-
-gateValue :: Text -> PhaseDocument -> Maybe Text
-gateValue key phase = case [value | (rowKey, value) <- phaseGateRows phase, rowKey == key] of
-  [value] -> Just value
-  _ -> Nothing
-
 firstToken :: Text -> Text
 firstToken =
   Text.toCaseFold
     . Text.takeWhile (\character -> not (isSpace character) && character `notElem` ['`', '.', ';', ','])
     . Text.dropWhile (\character -> isSpace character || character == '`')
-
-containsInOrder :: [Text] -> Text -> Bool
-containsInOrder [] _ = True
-containsInOrder (wanted : rest) source =
-  let (_, match) = Text.breakOn wanted source
-   in not (Text.null match)
-        && containsInOrder rest (Text.drop (Text.length wanted) match)
 
 markdownTargets :: Text -> ([Text], [Text])
 markdownTargets = go
@@ -915,3 +905,27 @@ showText = Text.pack . show
 
 trackerPath :: FilePath
 trackerPath = "DEVELOPMENT_PLAN/README.md"
+
+policyOrdering :: Policy.OrderingContract
+policyOrdering = Policy.orderingContract Policy.canonicalPolicyContract
+
+policyStatusReset :: Policy.StatusResetContract
+policyStatusReset = Policy.statusResetContract Policy.canonicalPolicyContract
+
+policyResetStatus :: Int -> Policy.ResetPhaseStatus
+policyResetStatus number
+  | number == phaseDomainLowerNumber = Policy.phaseZeroResetStatus policyStatusReset
+  | otherwise = Policy.laterPhaseResetStatus policyStatusReset
+
+phaseDomainLowerNumber :: Int
+phaseDomainLowerNumber = Policy.phaseOrdinalNumber (Policy.phaseDomainLower policyOrdering)
+
+phaseDomainUpperNumber :: Int
+phaseDomainUpperNumber = Policy.phaseOrdinalNumber (Policy.phaseDomainUpper policyOrdering)
+
+phaseDomainLabel :: Text
+phaseDomainLabel = showText phaseDomainLowerNumber <> ".." <> showText phaseDomainUpperNumber
+
+policyPredecessorNumber :: Int -> Int
+policyPredecessorNumber number = case Policy.predecessorRule policyOrdering of
+  Policy.ImmediateNumericPredecessor -> number - 1

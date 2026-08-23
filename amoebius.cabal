@@ -1223,6 +1223,71 @@ flag offline-multizone-continuity-duplicate-blob-dependency-mutant
   default: False
   manual: True
 
+flag validation-policy-alternate-registry-mutant
+  description: Widen the production PolicyContract Registry-provider universe with a second constructor
+  default: False
+  manual: True
+
+flag validation-policy-owner-map-mutant
+  description: Redirect the production Registry policy owner to the wrong doctrine
+  default: False
+  manual: True
+
+flag validation-policy-pb-transport-mutant
+  description: Widen the compiled policy to admit pb as validation transport before Phase 50
+  default: False
+  manual: True
+
+flag validation-document-retired-artifact-mutant
+  description: Remove the production documentation check for retired tracked-artifact syntax
+  default: False
+  manual: True
+
+flag validation-document-inventory-baseline-mutant
+  description: Change the production governed-document inventory baseline
+  default: False
+  manual: True
+
+flag validation-legacy-drop-id-mutant
+  description: Omit one constructor from the production legacy inventory projection
+  default: False
+  manual: True
+
+flag validation-legacy-duplicate-render-mutant
+  description: Give two production LegacyId constructors the same stable encoding
+  default: False
+  manual: True
+
+flag validation-legacy-wrong-owner-mutant
+  description: Redirect one production legacy owner phase
+  default: False
+  manual: True
+
+flag validation-legacy-missing-owner-mutant
+  description: Remove one production legacy owner binding
+  default: False
+  manual: True
+
+flag validation-legacy-dispatch-redirect-mutant
+  description: Redirect one production legacy analyzer dispatch binding
+  default: False
+  manual: True
+
+flag validation-legacy-missing-observation-mutant
+  description: Remove one production legacy observation-rule binding
+  default: False
+  manual: True
+
+flag validation-legacy-missing-closure-mutant
+  description: Remove one production legacy closure-rule binding
+  default: False
+  manual: True
+
+flag validation-legacy-missing-reintroduction-mutant
+  description: Remove one production legacy reintroduction-case binding
+  default: False
+  manual: True
+
 library validation-kernel
   visibility: public
   exposed-modules:
@@ -1233,6 +1298,7 @@ library validation-kernel
       Amoebius.Validation.Gate
       Amoebius.Validation.Legacy
       Amoebius.Validation.PhaseContract
+      Amoebius.Validation.PolicyContract
       Amoebius.Validation.SourceClosure
       Amoebius.Validation.Types
   hs-source-dirs:
@@ -1248,6 +1314,35 @@ library validation-kernel
       filepath >=1.5 && <1.6,
       process >=1.6 && <1.7,
       text >=2.1 && <2.2
+  if !os(windows)
+    build-depends:
+        unix >=2.8 && <2.9
+  if flag(validation-policy-alternate-registry-mutant)
+    cpp-options: -DVALIDATION_POLICY_ALTERNATE_REGISTRY_MUTANT
+  if flag(validation-policy-owner-map-mutant)
+    cpp-options: -DVALIDATION_POLICY_OWNER_MAP_MUTANT
+  if flag(validation-policy-pb-transport-mutant)
+    cpp-options: -DVALIDATION_POLICY_PB_TRANSPORT_MUTANT
+  if flag(validation-document-retired-artifact-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_ARTIFACT_MUTANT
+  if flag(validation-document-inventory-baseline-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_INVENTORY_BASELINE_MUTANT
+  if flag(validation-legacy-drop-id-mutant)
+    cpp-options: -DVALIDATION_LEGACY_DROP_ID_MUTANT
+  if flag(validation-legacy-duplicate-render-mutant)
+    cpp-options: -DVALIDATION_LEGACY_DUPLICATE_RENDER_MUTANT
+  if flag(validation-legacy-wrong-owner-mutant)
+    cpp-options: -DVALIDATION_LEGACY_WRONG_OWNER_MUTANT
+  if flag(validation-legacy-missing-owner-mutant)
+    cpp-options: -DVALIDATION_LEGACY_MISSING_OWNER_MUTANT
+  if flag(validation-legacy-dispatch-redirect-mutant)
+    cpp-options: -DVALIDATION_LEGACY_DISPATCH_REDIRECT_MUTANT
+  if flag(validation-legacy-missing-observation-mutant)
+    cpp-options: -DVALIDATION_LEGACY_MISSING_OBSERVATION_MUTANT
+  if flag(validation-legacy-missing-closure-mutant)
+    cpp-options: -DVALIDATION_LEGACY_MISSING_CLOSURE_MUTANT
+  if flag(validation-legacy-missing-reintroduction-mutant)
+    cpp-options: -DVALIDATION_LEGACY_MISSING_REINTRODUCTION_MUTANT
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
@@ -2771,6 +2866,7 @@ test-suite validation-kernel-component
       EvidenceOracle
       LegacyOracle
       PhaseContractOracle
+      PolicyContractOracle
       QualificationOracle
       SourceClosureOracle
   hs-source-dirs:

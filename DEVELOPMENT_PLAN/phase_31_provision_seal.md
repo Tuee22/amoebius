@@ -48,7 +48,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -123,7 +123,7 @@ inventory, provider realization, and engine resolution remain UNVERIFIED live-ba
 |---|---|
 | `Claim` | Target only — pure Haskell may seal a deployment exactly once against an explicit typed observation-shaped value; any serialized plan or case is generated beneath `.build/**`; authenticity of any live inventory is not claimed here. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 31` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 31` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -229,8 +229,11 @@ already materialized or returns exactly one non-renderable plan owning the close
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Both planner arms, the exact action batch, separate plan/action replay refusals, receipt-bound readback,
-and promised-identity refusals are sealed by the Phase-31 gate.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work
+includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and
+phase-specific obligation in the redesigned gate. Both planner arms, the exact action batch, separate
+plan/action replay refusals, receipt-bound readback, and promised-identity refusals remain target obligations
+requiring fresh evidence.
 
 ## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️
 
@@ -331,8 +334,11 @@ and an impossible target has no deployable value.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The 18 inherited deployments, ten exact negatives, two boundary properties, and ten paired mutants seal
-the post-bind provision fold and its expansion boundary.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work
+includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and
+phase-specific obligation in the redesigned gate. The 18 inherited deployments, ten exact negatives, two
+boundary properties, and ten paired Haskell mutation operators remain unaccepted target coverage for the
+post-bind provision fold and its expansion boundary.
 
 ## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️
 
@@ -360,20 +366,23 @@ identity-keyed render-source set with per-field ownership and a four-stage activ
 - The activation discipline: a later typed diff/enactor must honor activation, so a managed-node
   taint/admission object cannot be swept into the first generic apply; `renderAll` still lists the complete
   desired set. Phase 33 privately maps the unique source set and exposes only whole-deployment `renderAll`.
-- An in-file honesty note: this seal produces the *input* to `renderAll`, not manifests; the byte-for-byte
-  golden-locked render is [Phase 33](phase_33_render_manifest_oracles.md), and the live diff/enact honoring
+- An in-file honesty note: this seal produces the *input* to `renderAll`, not manifests; the independently
+  Haskell-oracled semantic render is [Phase 33](phase_33_render_manifest_oracles.md), and the live diff/enact honoring
   activation is the live band.
 
 ### Validation
 
 1. The full `ProvisionedDeploymentParts` domain contributes exactly one equal-keyed `ProvisionedRenderSource`
    per object identity; duplicate/omitted/key-mismatched/owner-mismatched candidates reject; the independent
-   activation classifier assigns each source its stage from the committed reference table and rejects a
+   activation classifier assigns each source its stage from the separately reviewed Haskell reference table and rejects a
    missing/extra stage, an early-staged managed taint/admission source, or an owner-disagreeing activation.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The opaque source set, exact domain/key/owner correspondence, and all four activation stages are sealed.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work
+includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and
+phase-specific obligation in the redesigned gate. The opaque source set, exact domain/key/owner
+correspondence, and all four activation stages remain target claims requiring fresh evidence.
 
 ## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ⏸️
 
@@ -392,7 +401,7 @@ UNVERIFIED.
 
 - The **concrete provision corpus** (§M.7): the nine per-arm positives (both shapes, inherited) provisioned
   against their declared targets, the pre-existing and creation `ProvisionTargetSupply` boundary fixtures, and
-  the ten named seal-locus negatives. A committed exhaustiveness unit check asserts every positive provisions
+  the ten named seal-locus negatives. A separately authored Haskell exhaustiveness check asserts every positive provisions
   and every negative returns a `Left`.
 - The property battery (`test/spec/capability/ProvisionProps.hs`,
   `test/spec/capability/RuntimeStorageBindingProps.hs`): `provision` is total and its successful values pass an
@@ -410,8 +419,9 @@ UNVERIFIED.
   wrong_generation,wrong_arm}` — each asserting its specific post-bind `ProvisionError` tag (§M.8) and each
   paired with a positive differing only in the foreclosed dimension. The CUDA-on-CPU, VRAM, and overcommit
   negatives fail after binding but **before** `renderAll` with zero provisioned values.
-- **Committed seeded mutants (§M.2)** — the ten inherited deliberately-broken implementations, committed and
-  re-run (not run once), that the gate MUST turn red: `mutant_fixed_prometheus_requests`,
+- **Reviewed Haskell mutation operators (§M.2)** — the ten inherited deliberately broken production
+  transformations, applied beneath `.build/mutants/**` and re-run, that the gate MUST turn red:
+  `mutant_fixed_prometheus_requests`,
   `mutant_provisioned_value_in_bound_deployment`, `mutant_unchecked_prior_ref`, `mutant_drop_execution_replica`,
   `mutant_drop_execution_surge`, `mutant_drop_execution_old_revision`, `mutant_wrong_execution_revision_join`,
   `mutant_double_debit_controller_child`, `mutant_drop_largest_kubelet_metadata`, and
@@ -428,15 +438,17 @@ UNVERIFIED.
    an opaque `ProvisionedSpec` on its positive topology satisfying the three independent reference predicates;
    the two boundary fixtures exercise both planner arms; each seal-locus negative returns its specifically-tagged
    `Left` before `renderAll`, each paired with a minimally-differing positive; exact-fit boundaries accept and
-   one-resource/one-byte-short pairs reject; and every committed mutant is red.
+   one-resource/one-byte-short pairs reject; and every applied Haskell mutant is red.
 2. The validation-locus ledger's coverage assertion turns the suite **red** if any named fixture,
    negative reason, or mutant is missing — so *"honestly classifies"* is a machine oracle, not a hand-written
    attestation.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The eleven-sided Register-1 gate, 40-row locus ledger, 42-unit five-calculus projection, 25 metrics, and
-37-surface/55-item join are sealed.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work
+includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and
+phase-specific obligation in the redesigned gate. The eleven-sided Register-1 gate, 40-row locus ledger,
+42-unit five-calculus projection, 25 metrics, and 37-surface/55-item join remain unaccepted target coverage.
 
 ## Documentation Requirements
 
@@ -460,7 +472,8 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-31 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — only the human authority may change Phase 31 after reviewing a qualified
+  candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-31 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register the `planInfrastructure`/`provision`/`provisionRenderSources`
   additions to `src/Amoebius/Capacity/{Provision,RuntimeStorage,RenderSource}.hs` and the provision-seal

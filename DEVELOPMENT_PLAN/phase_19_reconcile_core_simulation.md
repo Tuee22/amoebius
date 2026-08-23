@@ -46,7 +46,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -86,7 +86,7 @@ three-valued-observation behavior under deterministic modeled schedules. NOT VAL
 |---|---|
 | `Claim` | Target capability only — plan from observed inventory to desired index with a pure Haskell decision core and exercise fixed-point, bounded-convergence, token, reservation, and three-valued-observation behavior under deterministic modeled schedules. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 19` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 19` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -158,7 +158,7 @@ convergent semantic evidence without committing trace bytes.
 ### Validation
 
 1. Require all four schedules to converge to the exact three-object inventory within their authored bound.
-2. Compare only two fresh same-seed encodings; retain no committed generated trace.
+2. Compare only two fresh same-seed encodings; traces remain run-local beneath `.build/**`.
 3. Require a changed seed to change semantic action order.
 4. Require every bounded POR replay to converge.
 
@@ -203,9 +203,9 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md`, `overview.md`, `system_components.md`, and
-  `legacy_tracking_for_deletion.md` — reconcile order, evidence, implementation paths, and retired byte-golden
-  debt.
+- `DEVELOPMENT_PLAN/README.md`, `overview.md`, and `system_components.md` — reconcile order, evidence, and
+  implementation paths; update the reader-facing `legacy_tracking_for_deletion.md` explanation only after the
+  corresponding typed Haskell byte-expectation binding closes.
 
 ## Related Documents
 

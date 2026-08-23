@@ -48,7 +48,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -56,8 +56,8 @@ satisfied and human-approved.
 
 This phase owns one adapter seam: the scoped Phase-91 `ReadyArtifactHandle` and Phase-70 durable-receipt fold
 become a typed UI module and bound ports consumed by the generic runtime. The adapter is a leaf package linked
-one way to `amoebius:dsl-core` and `infernix-lift`; the sibling handwritten SPA is external/untracked UX
-evidence only, not a tracked fixture, executable input, second frontend, or authority source.
+one way to `amoebius:dsl-core` and `infernix-lift`; the sibling handwritten SPA remains an external, untracked
+UX reference only — never repository source, executable gate input, a second frontend, or an authority source.
 
 An authenticated user starts an infernix workflow, observes its bounded progress, receives a server-issued
 `ReadyArtifactHandle` only after successful committed/provenance-compatible completion, and invokes the
@@ -143,6 +143,8 @@ command; it excludes a new generic UI constructor, Phase-91 compute change, or s
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 92.1: Bind the infernix workflow-to-interaction UI adapter ⏸️
 
@@ -158,9 +160,10 @@ sibling SPA's code, transport, credentials, or authority assumptions.
 
 - A linked Haskell infernix UI adapter with typed workflow, ready-artifact, invocation, and public-error ports,
   preserving the original command/workflow identity into the durable terminal receipt.
-- One Dhall UI module using only trusted catalog components and the Phase-72 release path.
-- The Phase-0 public-contract, interaction, scope, and hostile-output oracle corpus.
-- The committed scope and terminal-command-correlation mutants.
+- One Haskell-declared UI module using only trusted catalog components and the Phase-72 release path; any Dhall
+  projection is generated lazily beneath ignored `.build/**` and remains untracked.
+- The Phase-0 Haskell public-contract, interaction, scope, and hostile-output oracle corpus.
+- The Haskell-authored changed-subject scope and terminal-command-correlation mutants.
 - A Register-3 evidence ledger with challenge, credential provenance, external observer digests, and teardown.
 
 ### Validation
@@ -170,7 +173,7 @@ sibling SPA's code, transport, credentials, or authority assumptions.
    exact resend, changed-input conflict, foreign-owner/tenant and stale-scope denial, and hostile output.
 3. Require the fresh live record to bind browser, tenant sessions, retained providers, reference worker,
    ready-last artifact, one-message topics, second-origin receipt recovery, denial, and exact cleanup.
-4. Compile each named mutant independently, require its exact marker to fail, then restore and rerun both
+4. Compile each named Haskell changed subject independently, require its exact marker to fail, then restore and rerun both
    Haskell suites before sealing the enumeration ledger.
 
 ### Remaining Work
@@ -185,8 +188,8 @@ Redis/WebSocket recovery, direct-service NetworkPolicy, and the wider live scope
 
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record only the tested workflow-to-ready-artifact
   UI interaction and exact tenant/scope matrix.
-- `documents/engineering/lift_and_compose_doctrine.md` — keep the sibling SPA a UX fixture and name only the
-  linked Haskell adapter and generic runtime as trusted implementation.
+- `documents/engineering/lift_and_compose_doctrine.md` — keep the sibling SPA an external, untracked UX
+  reference only and name only the linked Haskell adapter and generic runtime as trusted implementation.
 - `documents/engineering/tenancy_doctrine.md` — record the live provider denial without claiming general
   noninterference.
 - `documents/engineering/ui_realtime_coordination_doctrine.md` — record only the tested infernix
@@ -196,7 +199,8 @@ Redis/WebSocket recovery, direct-service NetworkPolicy, and the wider live scope
 
 - `DEVELOPMENT_PLAN/README.md` and `DEVELOPMENT_PLAN/overview.md` — link the phase and report its scoped
   `linux-cpu` Register-3 seal.
-- `DEVELOPMENT_PLAN/system_components.md` — register the infernix UI adapter and its generated Dhall projection under Phase 92.
+- `DEVELOPMENT_PLAN/system_components.md` — register the Haskell infernix UI adapter and Haskell projection
+  emitter under Phase 92; its generated Dhall output remains untracked and is not a component-inventory row.
 
 ## Related Documents
 

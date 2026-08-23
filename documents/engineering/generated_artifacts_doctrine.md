@@ -65,7 +65,7 @@ document explains the generated side of that boundary.
 | Rendered plans, reports, ledgers, receipts, and traces | Haskell execution and observation values | `.build/runs/**`, `.build/docs/**` |
 
 Operator-authored runtime values are a distinct case. They are external or untracked inputs supplied to the
-binary; they are not committed examples, fixtures, or application source within this repository. A gate may
+binary; they are not repository examples, fixtures, or application source. A gate may
 copy such a value into its run root, but that copy remains untracked input or run evidence.
 
 ## 3. The rule
@@ -121,10 +121,10 @@ with every argument unchanged. `pb validate phase NN`, help, version, unknown ve
 opaque to Python; Haskell alone interprets them and owns every verdict. Governance Markdown and minimal
 build/repository metadata are non-source inputs.
 
-There is no committed Dhall, PureScript, JavaScript, shell, Proto, Pulumi, Dockerfile, serialized fixture,
-golden, oracle table, expected diagnostic, mutant body, generated Markdown, or external-language checking
-tool. Independent authorship changes where the Haskell expectation comes from; it does not authorize a second
-tracked file format.
+No Dhall, PureScript, JavaScript, shell, Proto, Pulumi, Dockerfile, serialized fixture, expected-output table,
+expected diagnostic, materialized mutant body, generated Markdown, or external-language checking tool is
+retained in Git. Independent authorship changes where the Haskell expectation comes from; it does not
+authorize a second tracked file format.
 
 ### 5.1 When the reflected schema changes under an operator's `.dhall`
 
@@ -143,8 +143,9 @@ value, not a committed `.dhall` corpus.
 ## 6. Planning ownership
 
 This doctrine carries no implementation or validation status. The development plan owns which phases deliver
-each renderer, source migration, clean-room check, oracle, and sabotage control. A phase cannot close while an
-owned tracked copy remains in the single legacy register.
+each renderer, source migration, clean-room check, oracle, and sabotage control. A phase cannot produce a
+candidate while its typed Haskell legacy observation still finds an owned tracked copy. The single Markdown
+register only explains that binding to readers and cannot alter closure.
 
 ## Related Documents
 

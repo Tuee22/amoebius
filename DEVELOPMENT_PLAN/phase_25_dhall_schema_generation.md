@@ -45,7 +45,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -78,7 +78,7 @@ the generated typechecker observations.
 |---|---|
 | `Claim` | Target only — Haskell declarations generate the Dhall structural language and Haskell-owned cases beneath `.build/dhall/**`; the generated projection has no syntax for the named illegal shapes. Binding, effects, hardware, and runtime enforcement remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 25` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 25` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -150,14 +150,15 @@ an authoring-time boundary that fires before any binary runs.
 
 - The last three schema modules close doctrine surfaces that no phase previously owned, so each is delivered
   here rather than left absent:
-  - `Extension.dhall` carries `ExtensionSpec` with its **mandatory, non-optional**
+  - The Haskell `ExtensionSpec` declaration projects `.build/dhall/amoebius/Extension.dhall` with its
+    **mandatory, non-optional**
     `extMonitoring : NonEmpty MonitoringSurface` and the closed `MonitoringSurface` union
     ([`dsl_doctrine.md §8`](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits)),
     so an extension declaring no monitoring has no inhabitant.
-  - `Consistency.dhall` carries the PACELC surface
+  - The Haskell consistency declaration projects `.build/dhall/amoebius/Consistency.dhall` with the PACELC surface
     ([`consistency_pacelc_doctrine.md`](../documents/engineering/consistency_pacelc_doctrine.md)) that
     [Phase 75](phase_75_gateway_migration_drills.md) consumes.
-  - `Backup.dhall` carries the closed `BackupPolicy`
+  - The Haskell backup declaration projects `.build/dhall/amoebius/Backup.dhall` with the closed `BackupPolicy`
     ([`backup_recovery_doctrine.md`](../documents/engineering/backup_recovery_doctrine.md)), cross-cutting
     invariant #23. Phases 0–95 own the *declarable* policy; its live enactment — the put-only credential and
     the copy/verify `Job` — is the named candidate phase in [`later_phases.md`](later_phases.md), so the
@@ -174,7 +175,8 @@ an authoring-time boundary that fires before any binary runs.
   `NodeSupply = ⟨Fixed (NonEmpty Node)|Elastic { floor, candidates, quota }⟩`;
   mandatory size-triggered `RetentionPolicy` (catalog [§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)); and a `Ingress`/route surface with **no**
   insecure/backdoor arm (catalog [§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)) — each encoded as a closed union, a required field, or a no-arm shape.
-- The **build/image closures** of `dhall/amoebius/Image.dhall`, the same shape applied to the artifact an app
+- The Haskell **build/image closures**, lazily projected as `.build/dhall/amoebius/Image.dhall`, apply the same
+  shape to the artifact an app
   ships as rather than the spec it is described by: the three-arm `ImageIdentity`
   (`KindNode | Base | Runtime { linked }`) with **no foreign, free-digest, or `Url` arm** (catalog
   [§3.74](../documents/illegal_state/illegal_state_lifecycle.md#374-a-container-image-amoebius-did-not-generate)); the
@@ -374,8 +376,9 @@ cache/registry/Vault storage cannot pass.
    well-formed, and each generated union's arm inventory matches a separately authored Haskell arm oracle, so
    no freeform escape arm survives. Every smart constructor elaborates to a value of its
    declared type, and a smart constructor cannot be applied to an out-of-schema argument
-   without a type error — discharged by named Haskell cases that generate `ctor_reject/*.dhall` only beneath
-   `.build/test-corpora/**` (at least one expect-fail application per smart constructor, discovered in both directions), each of
+   without a type error — discharged by named Haskell cases that generate
+   `.build/test-corpora/ctor-reject/*.dhall` (at least one expect-fail application per smart constructor,
+   discovered in both directions), each of
    which MUST fail `dhall type`; this is not discharged by appeal to Dhall function typing alone.
 2. The generated record types match the independent Haskell surface/resource-field oracles semantically (the
    wiring above), red on any missing required foreclosing field or any dropped/collapsed
@@ -399,8 +402,9 @@ cache/registry/Vault storage cannot pass.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The schema modules and independently authored union, required-field, and nested-type inventories agree;
-525 field deletions, 176 required-type substitutions, and the special resource mutants all turn the gate red.
+The pre-reset record said `None`; that statement and its schema/mutant results are permanently invalid for
+promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 25.2: dhall-typecheck positive corpus ⏸️
 
@@ -409,13 +413,15 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 ### Objective
 
 Adopt [`illegal_state_catalog.md §1 — Illegal states fail to type-check`](../documents/illegal_state/illegal_state_catalog.md#1-illegal-states-fail-to-type-check): assemble the
-positive fixtures that a legal amoebius world is authored from and prove they pass the dhall-typecheck typechecker —
+Haskell-declared positive cases that generate legal Dhall values beneath `.build/**` and prove those projections
+pass the dhall-typecheck typechecker —
 the authoring-time demonstration that the schema *admits* every intended world.
 
 ### Deliverables
 
-- Positive fixtures — the explicit representative set `legal_multisubstrate_cluster`, `legal_managed_eks`,
-  `trivial_app`, and `legal_deployment_rules` — each a well-typed Dhall value built entirely through the
+- Positive Haskell case declarations — the explicit representative set `legal_multisubstrate_cluster`,
+  `legal_managed_eks`, `trivial_app`, and `legal_deployment_rules` — each lazily renders a well-typed Dhall
+  value beneath `.build/test-corpora/**` built entirely through the
   Sprint-17.1 smart constructors, and each populating every REQUIRED foreclosing field of its surface record
   (a `Cluster` carrying `Rke2Servers` + `Ingress`; an `App` carrying `List Capability` + `StorageBacking` +
   `RetentionPolicy`; every execution unit carrying `ResourceEnvelope`; every target inventory carrying the
@@ -441,15 +447,16 @@ the authoring-time demonstration that the schema *admits* every intended world.
 ### Validation
 
 1. Every positive fixture type-checks; the harness is red if any positive fixture fails `dhall type`.
-2. Each positive fixture's surface record instantiates every required foreclosing field named in
-   `surface_fields.csv` and every nested resource field named in `resource_fields.csv` (checked by the harness
-   against the committed oracles), so the positives exercise the Sprint-17.1 foreclosures rather than a toy
+2. Each Haskell-declared positive instantiates every required foreclosing field named by the independent
+   Haskell surface-field and resource-field oracles. The harness compares the run-local Dhall projections with
+   those reviewed `.hs` expectations, so the positives exercise the Sprint-17.1 foreclosures rather than a toy
    `{ name : Text }` skeleton or a CPU/memory-only envelope.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. All four positives type-check after wiring the non-empty nested capacity, image, cache, registry, Vault,
-engine, transition, accelerator, and monitoring structures required above.
+The pre-reset record said `None`; that statement and its positive-corpus result are permanently invalid for
+promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ⏸️
 
@@ -466,8 +473,9 @@ at gadt-decode.
 
 ### Deliverables
 
-- The eight canonical dhall-typecheck negatives named in the **Gate** representative set, one committed
-  `illegal_*.dhall` each, MUST fail `dhall type`: product-named capability ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)), insecure/backdoor ingress
+- The eight canonical dhall-typecheck negatives named in the **Gate** representative set are reviewed Haskell
+  case declarations. Each lazily generates one `illegal_*.dhall` beneath `.build/test-corpora/**` and MUST fail
+  `dhall type`: product-named capability ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)), insecure/backdoor ingress
   arm ([§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)), a missing complete resource envelope on an execution unit ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)), unbounded storage backing
   ([§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)), un-tiered / no-retention topic ([§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), capacity-growth-without-scaling-policy ([§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)),
   even/zero-server rke2 control plane ([§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), and an un-offered substrate/topology arm ([§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)/[§3.15](../documents/illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)). The
@@ -511,9 +519,9 @@ at gadt-decode.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Eight paired catalog negatives, two import-policy negatives, and the secret-policy negative are red for
-their authored reasons; the capability-arm and structural mutants are caught; and the run-local ledger records
-the gadt-decode/runtime residue as UNVERIFIED. The historical repository-resident ledger is not consumed.
+The pre-reset record said `None`; that statement and its negative/mutant/ledger results are permanently invalid
+for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ⏸️
 
@@ -527,25 +535,29 @@ production config cannot express a secret value.
 
 ### Deliverables
 
-- `dhall/amoebius/SecretRef.dhall`: the closed union with `Vault`, `TransitKey`, and `Prompt` arms, no
-  inline-value arm, smart constructors, and the `Sensitive` record that types a sensitive field.
+- A reviewed Haskell declaration that lazily projects `.build/dhall/amoebius/SecretRef.dhall`: the closed
+  union with `Vault`, `TransitKey`, and `Prompt` arms, no inline-value arm, smart constructors, and the
+  `Sensitive` record that types a sensitive field.
 - A row in the arm-inventory oracle pinning those three arms, and one in the surface-field oracle pinning
   `Sensitive`.
-- A paired positive and its one-place negative, with a committed error golden and a recorded metric.
+- A Haskell-declared positive and one-place negative with a separately authored Haskell error-class/locus
+  expectation. Any rendered case, raw diagnostic, or metric projection exists only beneath `.build/**`.
 - The `schema-modules` oracle amended from intent to 18 with its reviewed inventory extended.
 
 ### Validation
 
 1. The schema module is `dhall type` and `dhall lint` clean and joins the module inventory.
 2. The positive fixture type-checks with all three arms exercised.
-3. The negative fails `dhall type`, names the sensitive field, and matches its golden byte-exactly.
+3. The negative fails `dhall type`, names the sensitive field, and satisfies the independent Haskell
+   error-class/locus predicate; raw compiler wording is run-local diagnostic output, not a golden source.
 4. The `secret-reference-policy` surface joins to the recorded metric.
 
 ### Remaining Work
 
-None at this register. dhall-typecheck decides shape; the decoder's rejection of a literal is
-[Phase 26](phase_26_gadt_decode_ir.md)'s and the live presence proof is
-[Phase 61](phase_61_vault_pki.md)'s.
+The pre-reset `None` claim is permanently invalid. Current remaining work includes every
+`UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and the Haskell case/oracle/
+mutation obligations above. Decoder rejection remains [Phase 26](phase_26_gadt_decode_ir.md)'s target; live
+presence remains [Phase 61](phase_61_vault_pki.md)'s target.
 
 ## Documentation Requirements
 
@@ -560,10 +572,11 @@ None at this register. dhall-typecheck decides shape; the decoder's rejection of
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase 25 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — only the human authority may change Phase 25 after reviewing a qualified
+  candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-25 `none` gate row.
-- `DEVELOPMENT_PLAN/system_components.md` — register `dhall/amoebius/` and `dhall/examples/` as Phase-25
-  design-first rows.
+- `DEVELOPMENT_PLAN/system_components.md` — register the Phase-25 Haskell declaration/generator/oracle modules;
+  `.build/dhall/amoebius/**` and `.build/dhall/examples/**` are lazy products, never components or source rows.
 
 ## Related Documents
 

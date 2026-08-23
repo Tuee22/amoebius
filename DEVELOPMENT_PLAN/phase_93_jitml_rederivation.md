@@ -30,7 +30,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 93.1: Produce one committed jitML artifact on CUDA ⏸️](#sprint-931-produce-one-committed-jitml-artifact-on-cuda-)
+- [Sprint 93.1: Produce one pointer-committed jitML artifact on CUDA ⏸️](#sprint-931-produce-one-pointer-committed-jitml-artifact-on-cuda-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -49,7 +49,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -66,13 +66,13 @@ ScopedTrainingRequest tenant app
 The scoped leaf compiles the sibling CUDA runtime-operations code generator behind that seam; the full
 numerical, autodiff, SL/RL, tuning, and checkpoint modules remain outside the tested linkage. They do not
 become a standalone service or another binary. A Haskell workload-extension value requires the existing
-`JitBuild`, `Coordination`, and `InferenceEngine` capabilities; any external Dhall projection is generated
-beneath `.build/dhall/**` or supplied external/untracked, never committed as `dhall/jitml/package.dhall`. It has no
+`JitBuild`, `Coordination`, and `InferenceEngine` capabilities; any Dhall projection is generated lazily
+beneath `.build/dhall/**` or supplied as an external, untracked operator input, never repository source. It has no
 replica, region, failover, provider, raw endpoint, bucket, object-key, or arbitrary engine-download field.
 Those decisions remain trusted bind/provision outputs.
 
 The checkpoint adapter uses Phase 69 content digests and canonical component manifests for its pure contract.
-The scoped live driver writes batch and 40 MB checkpoint blobs, a canonical JSON evidence manifest, and a
+The scoped live driver writes batch and 40 MB checkpoint blobs, a canonical JSON runtime-evidence manifest, and a
 create-only conditional pointer to retained MinIO. Only the successful pointer-write witness can construct the opaque
 `CommittedJitMLArtifact tenant app`. In-flight, failed, orphaned, raw-path, and manifest-only states have no
 conversion to that type. The artifact retains its trusted tenant/app scope, manifest SHA, committed pointer
@@ -96,10 +96,11 @@ oracle. `nvidia-smi` independently observes the process and device. The retained
 so the device plugin, owner Pod/resource claim/affinity, native CBOR/Pulsar chain, Vault credential, mutable
 ETag-CAS pointer, full sibling multi-layer trainer/checkpoint format, and failover remain UNVERIFIED.
 
-The output of this phase is the core committed artifact contract. Phase 94 alone owns its downstream
+The output of this phase is the core pointer-committed artifact contract. Here, "committed" always names an
+observed content-store pointer state, never a version-control operation or repository artifact. Phase 94 alone owns its downstream
 presentation and interaction adapter; no interaction-ready handle is produced or accepted here.
 
-The bounded campaign covers one scoped CUDA-microtrainer-to-committed-artifact slice, one package, one pure
+The bounded campaign covers one scoped CUDA-microtrainer-to-pointer-committed-artifact slice, one package, one pure
 suite, one live evidence reader, and one aggregate command; no Phase-94 presentation work is included.
 **Phase scope:** one cohesive claim — *a CUDA training request is bound to a scope, and there is no silent fall back to CPU*. The checkpoint it produces is committed by pointer through the existing seams.
 
@@ -160,8 +161,10 @@ suite, one live evidence reader, and one aggregate command; no Phase-94 presenta
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
-## Sprint 93.1: Produce one committed jitML artifact on CUDA ⏸️
+## Sprint 93.1: Produce one pointer-committed jitML artifact on CUDA ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 
@@ -170,26 +173,27 @@ suite, one live evidence reader, and one aggregate command; no Phase-94 presenta
 Adopt [Lift and Compose Doctrine §5 — The re-derivation map](../documents/engineering/lift_and_compose_doctrine.md#5-the-re-derivation-map)
 and [Content Addressing Doctrine §2 — Three-tier store](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers):
 adapt one real sibling jitML training path to amoebius's existing scoped workflow, closed-catalog CUDA,
-accelerator-owner, and pointer-committed store contracts so the only successful output is an opaque committed
+accelerator-owner, and pointer-committed store contracts so the only successful output is an opaque pointer-committed
 artifact carrying its trusted scope and provenance.
 
 ### Deliverables
 
-- The linked jitML library and closed Dhall workload-extension package, with infrastructure and authority
-  fields absent from its authored surface.
+- The linked jitML library and closed Haskell workload-extension declaration, with infrastructure and authority
+  fields absent from its authored surface; any Dhall package projection is generated lazily beneath ignored
+  `.build/**` and remains untracked.
 - The canonical checkpoint adapter and opaque `CommittedJitMLArtifact tenant app`, constructible only from a
   successful Phase-69 pointer-CAS witness.
 - One scope-qualified command/work-id preserved through the native CBOR command/event chain and the
   idempotent training fold.
 - The substrate-selected CUDA engine binding and provision-derived accelerator-owner allocation, with no CPU
   fallback or arbitrary download path.
-- The Phase-0 oracle corpus, four committed mutants, live harness, and generated Register-3 run ledger with
+- The Phase-0 Haskell oracle corpus, four Haskell-authored changed-subject operators, live Haskell harness, and generated Register-3 run ledger with
   challenge correlation and idempotent teardown.
 
 ### Validation
 
 1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-93 supporting suite must run on `linux-cuda`.
-2. Require pure CPU/floor/capacity/identity/idempotency/commit checks and all four mutants to pass or turn red
+2. Require pure CPU/floor/capacity/identity/idempotency/commit checks and all four Haskell changed subjects to pass or turn red
    at their exact loci.
 3. Require physical CUDA device/process inventory, 10-million-parameter/200-step execution, complete
    checkpoint-oracle equality, retained-MinIO pointer-last/readback/conflict, and cleanup.
@@ -214,7 +218,7 @@ correctness/noninterference remain UNVERIFIED.
 
 - Register the implementation paths in `DEVELOPMENT_PLAN/system_components.md` and retain scoped status until
   the `linux-cuda` Register-3 ledger is green.
-- Keep the Phase-94 dependency on this committed-artifact contract explicit without moving presentation work
+- Keep the Phase-94 dependency on this pointer-committed-artifact contract explicit without moving presentation work
   into Phase 92.
 
 ## Related Documents

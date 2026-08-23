@@ -46,7 +46,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -108,13 +108,16 @@ horizon with no finite server or storage demand is rejected.
 - [`jit_artifact_doctrine.md` §2 — The rule, and the closed exception list](../documents/engineering/jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list) — every artifact offline release and schema evolution emits is a recipe over a content address, never an authored file.
 - Adopt [`browser_offline_runtime_doctrine.md` §11 — Release, schema, and compatibility horizon](../documents/engineering/browser_offline_runtime_doctrine.md#11-release-schema-and-compatibility-horizon): old records remain readable and replayable within a finite horizon.
 - Adopt [`release_lifecycle_doctrine.md` §5 — `RolloutPlan` / `RolloutPhase`: the readiness-gated apply](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply): offline compatibility is a promotion/readiness condition.
-- Adopt [`generated_artifacts_doctrine.md` §3 — The rule](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule): migrations and compatibility manifests are emitted, not a second committed truth.
+- Adopt [`generated_artifacts_doctrine.md` §3 — The rule](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule): migrations and compatibility manifests are emitted lazily from reviewed Haskell beneath ignored
+  `.build/**` and remain untracked; only the Haskell declaration is repository source.
 
 ## Sprints
 
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 87.1: Gate offline-compatible rollout and rollback ⏸️
 
@@ -129,16 +132,17 @@ Roll forward and back without losing or silently invalidating queued offline int
 - Offline compatibility witness and promotion-gate extension.
 - Atomic crash-resumable browser migrations under the active-tab fence.
 - Retained old codecs/handlers that always reauthorize current identity and policy.
-- Live rollout/rollback and incompatible-release mutants.
+- Haskell-authored live rollout/rollback and incompatible-release changed subjects.
 
 ### Validation
 
 1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-87 supporting suite must run; require the scoped canonical trace green
-   and every compatibility mutant red.
+   and every Haskell compatibility changed subject red.
 
 ### Remaining Work
 
-Repeat with real Gateway rollout, Pulsar/provider effects, Keycloak current authority, production PureScript,
+Repeat with real Gateway rollout, Pulsar/provider effects, Keycloak current authority, production PureScript
+generated lazily from reviewed Haskell beneath `.build/**`,
 Kubernetes, and CNI. Those observations remain `UNVERIFIED` here.
 
 ## Documentation Requirements

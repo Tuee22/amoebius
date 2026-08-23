@@ -14,7 +14,7 @@ trusting Python wrappers, tracked generated fixtures, self-reported evidence, or
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, documents/documentation_standards.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, documents/documentation_standards.md, documents/engineering/migration_doctrine.md, pb/README.md
 **Generated sections**: none
 
 </details>
@@ -43,11 +43,13 @@ trusting Python wrappers, tracked generated fixtures, self-reported evidence, or
 
 🔄 Active — NOT VALIDATED.
 
-This phase is active only for the documentation, tracked-source, and validation-authority reset. Every prior
-pass, Done marker, seal, receipt, attestation, hash, completion statement, or implementation result is
-permanently invalid as current validation evidence. Existing machinery is an **Observed footprint / Known
-partial**. No later implementation or promotion gate may open until a qualified Phase-0 candidate is reviewed
-and the human validation authority personally promotes this phase.
+The reset status is exact: Phase 0 is Active — NOT VALIDATED; every Phase 1 through Phase 95 is Blocked — NOT
+VALIDATED; and every sprint in every phase is NOT VALIDATED. Every prior pass, Done marker, seal, receipt,
+attestation, hash, completion statement, or implementation result is permanently invalid as current
+validation evidence. Existing machinery is an **Observed footprint / Known partial**. This phase is active
+only for the documentation, tracked-source, and validation-authority reset. No later implementation or
+promotion gate may open until a qualified Phase-0 candidate is reviewed and the human validation authority
+personally promotes this phase.
 
 ---
 
@@ -61,21 +63,28 @@ active legacy register replaces every archive; and every phase is NOT VALIDATED 
 strict numerical order.
 
 An **Observed footprint / Known partial** of the target Haskell validation kernel now exists beneath
-`src/validation-kernel/Amoebius/Validation/**`. It includes source closure, legacy-register, documentation,
-phase-contract, qualification-report, candidate-evidence, approval-verification, and dispatch modules. The
+`src/validation-kernel/Amoebius/Validation/**`. It includes the typed cross-cutting policy contract, source
+closure, legacy-register, documentation, phase-contract, qualification-report, candidate-evidence,
+approval-verification, and dispatch modules. The
 component-oracle footprint is beneath `test/validation-kernel/**`. Current `pb/**` still parses public verbs,
 contains broader bootstrap/admin/test/check behavior, and exposes no conforming opaque validation handoff.
 All 15 current paths are therefore frozen as `LTD-SRC-008`: token scanning cannot prove the absence of hidden
-Python behavior, so Phase 0 must close and externally observe the exact minimal-platform-discrimination,
-contained-toolchain-establishment, source-bound-build, opaque-exec boundary before any validation handoff is
-eligible. The general classifier also lacks a semantic parser/consumer/effect graph for disguised source, and
-its Git workspace check does not yet reject `assume-unchanged`/`skip-worktree` flags or independently compare
-every tracked worktree byte and mode with the index.
+Python behavior, so Phase 0 must statically prove the exact minimal-platform-discrimination,
+contained-toolchain-establishment, source-bound-build, opaque-exec source graph before `pb` may remain as the
+sole non-Haskell source exception. That source-admission proof does not claim the handoff ran; Phase 50 alone
+owns its external runtime observation. The general classifier also lacks a semantic parser/consumer/effect graph
+for disguised source. Its tracked regular-file reads are descriptor-pinned and its final index binding observes
+concealment flags, but authored-root recursion still uses path-based directory queries and is vulnerable to
+ancestor-symlink and replacement races. All of this remains same-workstream component work that has not been
+independently qualified or externally observed.
 
-A 2026-08-22 supporting `cabal build lib:validation-kernel` diagnostic and
-`cabal test validation-kernel-component` component diagnostic completed successfully. Those observations
-establish only compilation and component behaviour; they are not harness qualification, independent human
-review, clean-room observation, a Phase-0 candidate, or validation. The dispatcher intentionally refuses a
+A 2026-08-22 supporting `cabal build lib:validation-kernel exe:amoebius` diagnostic and unmutated
+`cabal test validation-kernel-component` component diagnostic completed successfully. In each separate build
+that widened the compiled Registry-provider universe, redirected the compiled owner map, or admitted `pb` as
+transport before Phase 50, the runner executed all nine named component oracles; only `PolicyContractOracle`
+failed. The other eight oracles stayed green. Those observations establish only
+compilation and component behaviour; they are not harness qualification, independent human review, clean-room
+observation, a Phase-0 candidate, or validation. The dispatcher intentionally refuses a
 candidate because the fixed sabotage corpus has not been executed against its exact build, independent human
 review and key custody are absent, no external clean-room observer is connected, and the evidence writer is
 not integrated. Its candidate schema also lacks closed typed command, toolchain, substrate, run-identity, and
@@ -86,9 +95,10 @@ predecessor cells: 1,382 fail-closed cells in total. Phase 0 therefore
 remains Active — NOT VALIDATED, and Phase 1 remains shut.
 
 **Phase scope:** one cohesive claim — the governed corpus conforms to the single-source policies, the source
-snapshot is completely partitioned with every violation either owned by Phase 0 or represented by one active
-later-phase legacy row, and the Haskell validation kernel rejects the fixed spoof corpus before producing a
-Phase-0 candidate. It splits if product or live-infrastructure behaviour is required.
+snapshot is completely partitioned, and every violation joins in both directions to a typed Haskell legacy
+binding whose owner is either due now or strictly later. A Phase-0 candidate requires every due binding to be
+zero and the Haskell validation kernel to reject the fixed spoof corpus. The reader-facing register is not a
+join input. It splits if product or live-infrastructure behaviour is required.
 **Substrate:** `none`
 **Lane:** `none`
 **Register:** —
@@ -102,23 +112,23 @@ clean-room observation, evidence integration, independent human review, and key 
 
 | Key | Phase-0 contract |
 |---|---|
-| `Claim` | The governed corpus has one structural owner/link surface; all current statuses are explicitly NOT VALIDATED; the executable cross-cutting decisions live in one reviewed Haskell `PolicyContract`; every tracked path is classified exactly once; every present source-boundary violation is matched bijectively to one active later-phase legacy row; no Phase-0-owned source-policy or validation-integrity violation remains; and the qualified Haskell kernel refuses every specified spoof. Natural-language agreement with `PolicyContract` is a human-review obligation, never a machine-parsed verdict. Phase 0 does not claim that later-owned source migrations, DSL semantics, or runtime behaviour are complete. |
-| `Subject` | Observed production entry points beneath `src/validation-kernel/Amoebius/Validation/**`: `Dispatch.validatePhase`, `Documentation.checkCorpus`, `PhaseContract.checkPhaseContracts`, `SourceClosure.classifySnapshot`, `Legacy.legacyCheck`, `Gate.checkQualificationReport`, `Evidence.candidateFromChecks`, and `Approval.verifyApproval`. This footprint is unqualified. The planned `PolicyContract` and its independent oracle are not integrated; evidence and approval are deliberately refusal-only; all current `pb/**` is Phase-0 debt, not a validation subject. |
-| `Command` | Target contract: `pb validate phase 00`. It is not currently implemented by a conforming public `pb` handoff. The final `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged; the Haskell binary owns discovery, observations, schema checks, and candidate verdict. |
-| `Oracle` | Separately authored component modules exist under `test/validation-kernel/`: `DocumentationOracle.hs`, `PhaseContractOracle.hs`, `SourceClosureOracle.hs`, `LegacyOracle.hs`, `QualificationOracle.hs`, `EvidenceOracle.hs`, and `ApprovalOracle.hs`. A separate `PolicyContractOracle.hs` and integration oracle remain required. All explicitly disclaim independent human review and phase validation; reviewer assignment and custody remain absent and block validation. |
-| `Positive controls` | The complete governed path/link/metadata graph and tracked source snapshot, plus structural parser corpora that are explicitly incapable of becoming candidates. Expected governed-path manifest, phase count, status projection, canonical legacy ID inventory, typed provider choice, complete source partition, Phase-0-owned zero set, and exact frozen path/mode/blob fingerprint for every later-owned source family are stated in Haskell and independently reviewed. Human review separately compares the prose diff with the typed `PolicyContract`. |
-| `Paired negatives` | Minimally different pairs cover a missing/unexpected governed path, malformed metadata, dangling/backlink-missing link, deleted canonical legacy ID, changed or added path inside an open source family, a changed typed registry provider, non-Haskell behavioural source, disguised executable/shebang, widened or hidden `pb` behavior, missing `NOT VALIDATED`, malformed/missing gate row, forward dependency, empty discovery, and generated output in an authored root; each pins code and locus. A prose keyword decoy is the paired negative proving prose cannot affect a behavioral verdict. |
-| `Mutants` | Required changed-production-subject operators weaken source classification, skip one governed document, accept an empty gate table, treat evidence as approval, ignore a legacy row, or accept a second registry. Each records the applied Haskell-source change and must redden only its named oracle row while unaffected controls stay green. |
+| `Claim` | The governed corpus has one structural owner/link surface; all current statuses are explicitly NOT VALIDATED; the executable cross-cutting decisions live in one typed Haskell `PolicyContract` awaiting independent human review; every tracked path is classified exactly once; and every present source-boundary violation joins in both directions to one strictly-later typed Haskell legacy binding. No Phase-0-owned source-policy or validation-integrity violation may remain, and the qualified Haskell kernel must refuse every specified spoof. The Markdown register is reader-facing only: its rows, cells, IDs, owners, predicates, and counts cannot affect the join or closure verdict. Natural-language correspondence is a human-review obligation, never a machine-parsed verdict. Phase 0 does not claim that later-owned source migrations, DSL semantics, or runtime behaviour are complete. |
+| `Subject` | Observed production entry points beneath `src/validation-kernel/Amoebius/Validation/**`: `Dispatch.validatePhase`, `PolicyContract.checkPolicyContract`, `Documentation.checkCorpus`, `PhaseContract.checkPhaseContracts`, `SourceClosure.classifySnapshot`, `Legacy.legacyCheck`, `Gate.checkQualificationReport`, `Evidence.candidateFromChecks`, and `Approval.verifyApproval`. The typed contract feeds dispatch bounds, status syntax, owner-anchor checks, structural register-path/archive checks, source classification, Phase-49 source closure, phase ordering, and promotion authority. `Amoebius.Validation.Legacy` must own a closed 25-constructor legacy-ID universe, total owner/lifecycle/required-analyzer bindings, and total dispatch that returns a typed unavailable state whenever the selected analyzer is absent. A due or retired unavailable analyzer refuses; before its owner an active unavailable analyzer is explicit later-owned debt and cannot claim closure. Sprint 0.2 owns that inventory and delegation seam only; observation/closure analyzers and their domain reintroduction negatives belong to their owning sprints. A retired ID remains in Haskell as a reintroduction guard after its active-only Markdown explanation is removed. Fields for later unimplemented behavior remain typed requirements rather than claims that a consumer exists. This footprint is unqualified; evidence and approval remain refusal-only; all current `pb/**` is Phase-0 debt, not a validation subject. |
+| `Command` | Future public target: `pb validate phase 00`; it is not currently an admissible validation transport. The Phase-0 candidate must build and invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. Phase 50 alone may validate the already source-bounded `pb` ensure/build/unchanged-argv/exec runtime handoff. The Haskell binary owns discovery, observations, schema checks, and the candidate verdict. |
+| `Oracle` | Separate component modules exist under `test/validation-kernel/`, including `PolicyContractOracle.hs`. It separately restates every closed enum universe, the exact selected values and owner map, canonical bytes and digest, and code/subject/detail expectations for focused negatives. The component runner executes every named oracle before aggregating failure, but neither independent authorship nor custody, harness qualification, or human prose-correspondence review is established. Reviewer assignment and custody remain absent and block validation. |
+| `Positive controls` | The complete governed path/link/metadata graph and tracked source snapshot, plus structural parser corpora that are explicitly incapable of becoming candidates. Production and oracle modules separately state every closed policy universe, the typed provider choice, decision-owner map, canonical policy bytes, source partition, and frozen later-owned source fingerprints. No independent human review is claimed. A human must separately compare the prose diff with the typed `PolicyContract`. |
+| `Paired negatives` | Minimally different input pairs cover missing or unexpected governed paths, malformed metadata, broken links, a deleted typed Haskell legacy ID, duplicate stable-ID encoding, a missing or wrong owner/required-analyzer binding, dispatch that accepts an unavailable analyzer, a removed retired-ID guard, changed paths inside an open source family, non-Haskell behavioural source, disguised executables, widened `pb` behavior, missing `NOT VALIDATED`, malformed gate rows, forward dependencies, empty discovery, and generated output in an authored root. Policy value negatives remove one `pb` operation, redirect or omit one owner, select or rename the eliminated archive path, swap two phase roles, or admit hardware at Phase 51; each pins finding code, subject, and a distinguishing detail. Editing any legacy-register row, ID spelling, owner cell, predicate string, or count must leave the behavioral verdict unchanged; human review must still report the prose-correspondence defect. The Registry provider has no runtime alternate-input constructor; widening that closed production type is a changed-subject mutant, not a fabricated paired input. |
+| `Mutants` | Required changed-production-subject operators weaken source classification, skip one governed document, accept an empty gate table, treat evidence as approval, ignore one compiled Haskell legacy binding, or accept a second registry. Each records the applied Haskell-source change and must redden only its named oracle row while unaffected controls stay green. A Markdown register edit is a prose-correspondence case, never this mutation operator. |
 | `Discovery` | The Haskell kernel enumerates all tracked paths and all governed Markdown at run time and joins each in both directions to independently derived expectations. Zero files, a missing root, an unclassified path, a duplicate path, or an unexpected governed file refuses the run. |
 | `Challenge` | Pure claim: a live nonce is inapplicable. Qualification instead selects run-local sabotage cases after the clean snapshot is fixed; the human reviewer must approve this substitution. |
-| `Observer` | The oracle independently reads raw snapshot bytes, modes, shebangs, path inventory, metadata fields, headings, links, anchors, dependencies, status fields, and fixed gate-table shape rather than a compliance summary emitted by the classifier. It never interprets natural-language policy as a verdict. A missing or partial read fails closed. |
+| `Observer` | Component oracles separately inspect the raw snapshot bytes, modes, shebangs, path inventory, metadata fields, headings, links, anchors, dependencies, status fields, and fixed gate-table shape made available at their seams rather than accepting a compliance summary emitted by the classifier. Independent custody is absent. They never interpret natural-language policy as a verdict, and a missing or partial seam read fails closed. |
 | `Authority/bypass` | Source-policy bypass probes cover extensionless files, misleading extensions, executable bits, shebangs, symlinks, ignored inputs, generated copies, widened `pb` behavior, and a policy-looking prose decoy that must have no effect. Only the typed Haskell contract and structured source/config observations govern behavior. Human approval verification rejects absent, automation-authored, wrong-key, wrong-source, stale-contract, and replayed receipts. |
 | `Freshness` | The candidate uses a fresh snapshot and run root with all generated/state roots absent; prior evidence, cached discovery, ignored inputs, and copied status are unusable. Source and contract digests are provenance only. |
 | `Qualification` | Before the clean run, the same Haskell harness must reject constant success, no-op subject, wrong output, empty discovery, missing subject/oracle, skipped/no-op mutant, wrong-locus failure, stale evidence, self-observer, authority bypass, residue, and smuggled generated/legacy input. |
 | `Cleanroom` | Run from the tracked snapshot with `.build/**`, `.data/**`, `.test_data/**`, source-adjacent caches, and condemned legacy copies absent. All compiler output, synthetic corpora, observations, and raw candidate evidence are generated beneath one `.build/runs/phase-00/**` run root; the tracked tree remains unchanged. The current dirty worktree is ineligible. |
-| `Legacy closure` | `LTD-SRC-000`, `LTD-SRC-008`, and `LTD-VAL-001` through `LTD-VAL-004` must satisfy integrated Haskell closure predicates and reintroduction negatives. Closure requires the exact canonical ID inventory, complete source partition, zero unregistered or Phase-0-owned findings, frozen path/mode/blob fingerprints for later-owned source families, and an externally observed ensure/build/identity-argv/exec-only `pb` path. Predicate-shaped Markdown cannot close a row. |
+| `Legacy closure` | Sprint 0.2 must independently pin the closed 25-ID Haskell inventory, total owner/lifecycle/required-analyzer bindings, and total fail-closed dispatch. It does not make an owner-domain query zero. The owning sprint supplies each typed observation/closure analyzer and independently authored domain reintroduction negative; an absent analyzer, missing negative, or open due query refuses. Sprint 0.8 is the first point at which all Phase-0-owned queries—`LTD-SRC-000`, `LTD-SRC-008`, and `LTD-VAL-001` through `LTD-VAL-004`—must jointly be zero, alongside the complete source partition, frozen later-owned source fingerprints, and an exact non-empty static `PbBootstrapGrammar` AST/import/resolved-call/control-flow/potential-effect proof. Runtime effect, executable-identity, unchanged-argv, and exec-replacement evidence is explicitly excluded and remains Phase-50 residue. Retirement changes an ID's lifecycle state but preserves its Haskell reintroduction guard; only its active-only Markdown explanation is removed after human acceptance. The structural seam may require exactly one canonical UTF-8-readable register and no archive alias, while the general documentation checker may enforce ordinary structure. Neither may interpret Markdown row content as a binding or verdict. Human review owns correspondence. |
 | `Predecessor` | `genesis`; there is no prior numbered phase. The human approval trust root predates and is outside the candidate. |
-| `Residue` | `UNVERIFIED`: the `PolicyContract` implementation/oracle and human prose-correspondence review; the `LTD-SRC-008` Python-boundary closure; a semantic parser/consumer/effect graph that detects disguised behavioral content in otherwise admitted non-source files; rejection of Git `assume-unchanged`/`skip-worktree` flags plus independent byte/mode comparison of every tracked worktree path; all product/DSL/runtime semantics; semantic phase-contract joins; per-ID legacy dispatch; execution of the fixed qualification corpus against the exact integrated harness; independent reviewer and key custody; authenticated Git/tool acquisition; external clean-room observation; candidate-evidence integration; a closed typed evidence schema for exact command, toolchain, substrate/lane/architecture, run identity, and cleanup; a reviewed binding between Git object-format identity and SHA-256 evidence provenance; 1,290 unresolved-marker cells plus 92 absent-predecessor cells across 93 later contracts; external approval operation; and every tracked-source migration owned by a later phase. |
+| `Residue` | `UNVERIFIED`: qualification of all three `PolicyContract` changed-subject mutants and human prose-correspondence review; a dispatcher-composition bypass mutant; complete document-shape enforcement assigned to Sprint 0.4; the `LTD-SRC-008` Python-boundary closure; a semantic parser/consumer/effect graph that detects disguised behavioral content in otherwise admitted non-source files; a descriptor-relative `openat`/no-follow authored-root walk with ancestor-symlink, ignored-input, special-file, and replacement-race mutants; changed-subject qualification and external clean-room observation of the Git concealment, descriptor-pinned byte/mode, authored-root, and final index-binding checks; independent Git-blob hashing rather than trust in reported object IDs; all product/DSL/runtime semantics; semantic phase-contract joins; every owner-sprint analyzer and domain reintroduction negative behind the total legacy dispatcher; execution of the fixed qualification corpus against the exact integrated harness; independent reviewer and key custody; authenticated Git/tool acquisition; candidate-evidence integration; a closed typed evidence schema for exact command, toolchain, substrate/lane/architecture, run identity, and cleanup; a reviewed binding between Git object-format identity and SHA-256 evidence provenance; 1,290 unresolved-marker cells plus 92 absent-predecessor cells across 93 later contracts; the sentence-budget backlog; external approval operation; and every tracked-source migration owned by a later phase. |
 | `Human authority` | `human-only`: automation and LLMs may report a candidate but may not create approval, mark a sprint/phase Done, or describe approval as already decided. |
 
 ## Doctrine adopted
@@ -133,73 +143,134 @@ clean-room observation, evidence integration, independent human review, and key 
   no-hardware DSL barrier Phase 0 makes possible but does not claim.
 - [`service_capability_doctrine.md` §3 — canonical providers](../documents/engineering/service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific) — Distribution
   `registry:2` as the sole in-cluster OCI provider, with no alternate provider constructor.
+- [`image_build_doctrine.md` §2 — the single distribution rule](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) — the sole Registry image is
+  separately pinned and preloaded rather than baked into `amoebius-base`.
 
 ## Sprints
 
 ## Sprint 0.1: One documentary policy surface 🔄
 
 **Status**: Active — NOT VALIDATED
-**Implementation**: `AGENTS.md`, `CLAUDE.md`, `README.md`, `documents/**/*.md`, and `DEVELOPMENT_PLAN/**/*.md`
+**Implementation**: `src/validation-kernel/Amoebius/Validation/PolicyContract.hs`, `AGENTS.md`, `CLAUDE.md`, `README.md`, `documents/**/*.md`, and `DEVELOPMENT_PLAN/**/*.md`
 **Blocked by**: `genesis`
-**Independent Validation**: A structurally conforming corpus and typed `PolicyContract` are the positive controls; a changed provider constructor is the paired negative; an applied owner-map mutant reddens its named row; prose correspondence and later implementation remain explicit residue for human review.
-**Oracle**: `test/validation-kernel/DocumentationOracle.hs` plus planned `PolicyContractOracle.hs`; component diagnostics are not human review and the policy oracle is not integrated.
-**Legacy IDs**: `LTD-VAL-002`, `LTD-VAL-003`, `LTD-VAL-004`
+**Independent Validation**: Separately restated closed constructor universes, typed values, bytes, digest, and owner headings pin the component positive control. Constructible negatives cover `pb`, status reset, owners, register/archive, and ordering at code, subject, and detail. In full aggregate runs, the Registry-universe, owner-map, and `pb`-transport production mutants each red only `PolicyContractOracle` while all eight unrelated named oracles execute green. Prose correspondence remains human residue.
+**Oracle**: `test/validation-kernel/PolicyContractOracle.hs`; integrated component diagnostic, not qualified-harness evidence, human review, or validation.
+**Legacy IDs**: none — zero-query policy-surface sprint; `LTD-VAL-002` through `LTD-VAL-004` remain owned by their later Phase-0 seams
 **Docs to update**: all governed documentation owners touched by the reset
 
 ### Objective
 
-Make the Haskell-only source boundary, `pb` exception, lazy generation, `registry:2`, single active legacy
-register, validation reset, strict numerical order, pre-hardware barrier, and human-only promotion agree
-everywhere.
+Make the Haskell-only source boundary, `pb` exception, lazy generation, sole `registry:2` provider, separately
+pinned/preloaded Registry-image placement, single active legacy register, validation reset, strict numerical
+order, pre-hardware barrier, and human-only promotion agree everywhere.
 
 ### Deliverables
 
-- One canonical statement and backlinks for each cross-cutting decision.
-- Zero active references to the eliminated archive.
-- One closed Haskell registry-provider constructor selecting Distribution `registry:2`; human review confirms
-  that the canonical service-capability prose rejects every alternate provider.
+- One closed typed value, constructor universe, and exact decision-to-owner anchor for each cross-cutting decision.
+- One versioned deterministic serialized contract and SHA-256 digest, independently restated by the component oracle.
+- One canonical prose statement and backlinks for each cross-cutting decision.
+- One typed reset keeping Phase 0 Active and every later phase Blocked, all explicitly NOT VALIDATED.
+- One typed requirement that every `LTD-SRC-*` query is zero before the Phase-49 DSL barrier can open.
+- Zero governed prose links or references treating the eliminated archive as a document; its exact path exists
+  only as a typed forbidden target and in rejection diagnostics/negatives.
+- One closed Haskell registry-provider constructor selecting Distribution `registry:2`, plus a distinct
+  placement decision for its separately pinned/preloaded bootstrap image; human review confirms both exact
+  doctrine owners and that the service-capability prose rejects every alternate provider.
 - Phase 0 Active — NOT VALIDATED; Phases 1–95 Blocked — NOT VALIDATED.
 
 ### Validation
 
-Run the qualified Haskell structural oracle over the complete path/metadata/link/status graph and its paired
-single-defect mutations. Separately compare the prose diff to the typed Haskell `PolicyContract`; automation
-must prove that a keyword-only prose decoy cannot change a behavioral verdict.
+Run the unmutated policy component diagnostic and all three changed-production builds from isolated build roots. The
+unmutated build must pass. The aggregate runner must execute all nine named oracles in every build. Each mutant
+must fail only `PolicyContractOracle`; every unrelated oracle must execute and stay green. These are supporting
+diagnostics, not qualification or validation.
+
+```text
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-policy-diagnostic --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-policy-registry-mutant -fvalidation-policy-alternate-registry-mutant --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-policy-owner-mutant -fvalidation-policy-owner-map-mutant --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-policy-pb-transport-mutant -fvalidation-policy-pb-transport-mutant --test-show-details=direct
+```
+
+For acceptance, a human reviewer compares every typed value and owner anchor with the prose diff. The reviewer
+also confirms that no Markdown keyword or machine-oriented projection can affect a behavioral verdict. Full
+corpus-shape validation remains owned by Sprint 0.4, so Sprint 0.1 does not depend on a later sprint.
 
 ### Remaining Work
 
-Qualify and independently review the observed Haskell oracle, resolve every corpus inconsistency it discovers,
-and obtain human acceptance of this sprint within the eventual Phase-0 candidate.
+The unmutated, Registry-universe-mutant, owner-map-mutant, and `pb`-transport-mutant component diagnostics are
+recorded. None is the qualified parent harness: applied-change and changed-binary witnesses remain Sprint-0.5
+residue. Independent human review must compare every typed value and owner heading with the prose, then issue
+an explicit same-phase implementation release for the exact current contract, subject, oracle, observations,
+and residue. That release may open Sprint 0.2 without marking Sprint 0.1 Done. Sprint 0.1 remains Active — NOT
+VALIDATED until the qualified parent gate retains this seam and the human authority promotes it; Sprint 0.2
+remains blocked until the implementation release.
 
 ## Sprint 0.2: One active legacy register ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `src/validation-kernel/Amoebius/Validation/Legacy.hs`
+**Implementation**: `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `src/validation-kernel/Amoebius/Validation/Legacy.hs`, `test/validation-kernel/LegacyOracle.hs`, `amoebius.cabal`
 **Blocked by**: Sprint 0.1
-**Independent Validation**: Haskell discovery proves one active register, the exact frozen ID inventory, stable unique IDs, one owner per row, a separately implemented Haskell closure binding for every ID, no closed rows, and zero archive aliases or inbound references; predicate-shaped Markdown is an explicit negative.
-**Oracle**: `test/validation-kernel/LegacyOracle.hs`; component diagnostic exists, but independent human review is absent.
-**Legacy IDs**: `LTD-SRC-000`, `LTD-SRC-008`
+**Independent Validation**: A structural Haskell check proves that the canonical reader-facing register path occurs exactly once, is UTF-8 readable, and has no forbidden archive path or alias. General documentation checks may still enforce ordinary orientation metadata, headings, links, and anchors. A separate oracle restates the exact 25-constructor Haskell ID universe, stable encodings, owners, lifecycle states, required-analyzer keys, unavailable-analyzer refusals, and retained reintroduction guards; independent authorship and custody are not claimed. Production mutations of that typed inventory/dispatch surface must fail at their named loci while owner-domain analyzers remain explicitly outside this sprint. Any row/cell/ID/owner/count/predicate change remains inert with respect to legacy semantics. Component output is diagnostic only; a human reviewer owns prose correspondence and acceptance.
+**Oracle**: `test/validation-kernel/LegacyOracle.hs`; it separately states the 25 bindings and source baselines. The clean aggregate is green and each of eight isolated production mutants reds only this oracle, but external reviewer authorship/custody and human correspondence review are absent.
+**Legacy IDs**: all 25 typed identities — `LTD-SRC-000` through `LTD-SRC-009`, `LTD-META-001`, `LTD-VAL-001` through `LTD-VAL-006`, `LTD-DOC-001`, `LTD-NAME-001`, `LTD-HOST-001`, `LTD-HOST-002`, `LTD-IMG-001`, `LTD-RUN-001`, `LTD-SEED-001`, and `LTD-SEED-002`; inventory/delegation only, with no owner-domain closure claimed
 **Docs to update**: `DEVELOPMENT_PLAN/development_plan_gate_integrity.md`, `documents/engineering/migration_doctrine.md`
 
 ### Objective
 
-Make current divergence actionable without a second historical source of truth.
+Make current divergence actionable through one closed Haskell lifecycle inventory, one total fail-closed
+dispatcher, and one non-executable reader-facing explanation, without pulling later analyzers into Phase 0 or
+creating a second historical register.
 
 ### Deliverables
 
-- The active-only register contract and stable live rows.
-- Haskell row discovery and closure/reintroduction checks.
+- One canonical active-only Markdown register whose rows explain current work to readers and cannot alter an
+  executable result.
+- A closed 25-constructor Haskell legacy-ID universe with unique stable encodings and total owner, lifecycle,
+  required-analyzer, and dispatch bindings. Missing analyzer evidence always produces a typed unavailable state;
+  it refuses at or beyond the owner and can never represent closure before then.
+- A retained Haskell reintroduction guard for every retired ID. Retirement removes the active Markdown
+  explanation only after the owning analyzer reaches zero and the human accepts the transition.
+- Independent Haskell expectations and changed-production mutants for the inventory/dispatch surface, plus a
+  human correspondence-review obligation. Owner-domain analyzers and their semantic negatives remain work of
+  the owning sprints.
 
 ### Validation
 
-The clean register and generated reintroductions of a deleted canonical ID, duplicate ID, missing owner,
-missing Haskell binding, predicate-shaped Markdown without a binding, closed row, archive filename, and stale
-reference produce the independently expected outcomes.
+Missing or duplicated canonical register paths, non-UTF-8 bytes, and every archive alias fail the legacy
+structural check without parsing row semantics. Changed-production cases for a deleted constructor, duplicate
+stable encoding, missing or wrong owner/required-analyzer binding, non-total dispatch, accepted unavailable
+analyzer, and removed retired-ID guard fail the independent Haskell oracle at distinct loci while unaffected
+controls run. No case may substitute a constant refusal for dispatch coverage: every constructor must reach its
+own typed analyzer key and exact unavailable result. Changing, adding, deleting, or duplicating a Markdown row,
+ID, owner cell, predicate-shaped string, or count leaves those executable outcomes unchanged. The human reviewer
+separately rejects any correspondence mismatch before acceptance. These are component diagnostics and human
+acceptance criteria, not full harness qualification, owner-domain closure, or phase validation.
+
+```text
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-legacy-diagnostic --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-legacy-drop-id-mutant -fvalidation-legacy-drop-id-mutant --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-legacy-duplicate-render-mutant -fvalidation-legacy-duplicate-render-mutant --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-legacy-wrong-owner-mutant -fvalidation-legacy-wrong-owner-mutant --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-legacy-missing-owner-mutant -fvalidation-legacy-missing-owner-mutant --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-legacy-dispatch-redirect-mutant -fvalidation-legacy-dispatch-redirect-mutant --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-legacy-missing-observation-mutant -fvalidation-legacy-missing-observation-mutant --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-legacy-missing-closure-mutant -fvalidation-legacy-missing-closure-mutant --test-show-details=direct
+cabal --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-legacy-missing-reintroduction-mutant -fvalidation-legacy-missing-reintroduction-mutant --test-show-details=direct
+```
 
 ### Remaining Work
 
-The Haskell checker and component oracle are an observed footprint only. Qualify the exact integrated build,
-close all Phase-0-owned findings, and obtain independent human review after Sprint 0.1 is accepted.
+The closed universe, typed lifecycle/analyzer map, retained case identities, source-family baselines, and
+per-constructor fail-closed dispatch are present as an unqualified component footprint. The separately stated
+oracle passes in the clean aggregate. Each of the eight isolated production mutants above exits nonzero with
+only `LegacyOracle` red while the other eight named oracles execute green. These same-workstream component
+diagnostics establish neither external reviewer independence/custody nor parent-harness qualification. Human
+correspondence review and acceptance therefore remain open, and Sprint 0.2 remains Blocked — NOT VALIDATED.
+Owning sprints then implement the actual observation/closure analyzers and execute their domain reintroduction
+negatives. No Phase-0-owned query is claimed zero here: `LTD-SRC-000`, `LTD-SRC-008`, and `LTD-VAL-001` through
+`LTD-VAL-004` must first be delivered by Sprints 0.3 through 0.7 and may jointly reach zero only at the
+integrated Sprint-0.8 candidate.
 
 ## Sprint 0.3: Haskell source-closure classifier ⏸️
 
@@ -207,9 +278,9 @@ close all Phase-0-owned findings, and obtain independent human review after Spri
 **Implementation**: `src/validation-kernel/Amoebius/Validation/SourceClosure.hs`
 **Blocked by**: Sprint 0.2
 **Independent Validation**: Classify every tracked path exactly once by path, extension, mode, shebang,
-content role, and consumer; reject every unregistered, stale, duplicate, Phase-0-owned, or wrongly owned
-source-boundary finding, while requiring an exact bijection between present later-owned findings and active
-legacy rows.
+content role, and consumer; reject every unbound, stale, duplicate, Phase-0-owned, or wrongly owned
+source-boundary finding, while requiring two-way equality between present later-owned findings and the closed
+typed Haskell legacy bindings. The Markdown register is not an input.
 **Oracle**: `test/validation-kernel/SourceClosureOracle.hs`; separately authored as a component diagnostic but not independently human-reviewed.
 **Legacy IDs**: `LTD-SRC-000`, `LTD-SRC-008`
 **Docs to update**: `documents/engineering/repository_layout_doctrine.md`, `documents/engineering/generated_artifacts_doctrine.md`
@@ -220,8 +291,9 @@ Turn the closed tracked-source grammar into a semantic Haskell check that renami
 
 ### Deliverables
 
-- Complete source-snapshot partition and exact later-owned finding/register bijection.
-- Deny-by-default `pb/**` AST/import/effect audit plus external identity-argv/exec process observation.
+- Complete source-snapshot partition and exact later-owned finding/Haskell-binding equality.
+- Exact non-empty deny-by-default `pb/**` AST/import/resolved-call/control-flow/potential-effect graph, with
+  every possible effect statically routed to the declared `BootstrapAdapter`; runtime observation is Phase 50.
 - Lazy-output and authored-root write checks.
 
 ### Validation
@@ -231,15 +303,27 @@ data, shebang source, behavioural metadata, source-adjacent cache, and generated
 
 ### Remaining Work
 
-Qualify the observed classifier against the complete clean tracked snapshot and spoof corpus, connect its raw
-observations to the gate, and obtain independent human review after Sprint 0.2 is accepted.
+The current component footprint rejects assume-unchanged and skip-worktree flags, binds a final tagged index
+observation to mode/object/stage/path, and compares descriptor-pinned tracked-file bytes/kind/owner-execute mode
+with the index. The authored-root inventory sees ignored and untracked material but is still path-based rather
+than descriptor-relative; ancestor-symlink, special-file, and replacement races remain open. Git-reported blob
+bytes are not independently rehashed against object identity. Its generated-repository component cases are
+diagnostics only and have not qualified the harness.
+
+The content-role/consumer/effect graph is still absent. The disconnected experimental external-interpreter
+summary was removed rather than retained as apparent evidence: a self-reported identity and internally
+self-consistent counts cannot authenticate an executable, prove compile validity, or close control flow. Build
+the complete versioned AST and Haskell-owned resolution/effect proof stated above, implement the descriptor-relative
+walker and independent blob binding, add changed-production-subject, forged-report, symlink, special-file, and
+replacement-race cases, connect all raw observations to the gate, and obtain independent review after Sprint 0.2
+is accepted.
 
 ## Sprint 0.4: Haskell documentation and plan-contract checker ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/Documentation.hs`, `src/validation-kernel/Amoebius/Validation/PhaseContract.hs`
 **Blocked by**: Sprint 0.3
-**Independent Validation**: A complete structural corpus is accepted; a minimally different broken dependency is refused; an applied parser mutant reddens only its named row; semantic policy/prose correspondence remains explicit human-review residue.
+**Independent Validation**: Complete structural component corpora are accepted and minimally different dependency, inventory, raw-status, retired-path, wildcard, fence, comment, and line-wrap defects are refused at exact loci. The documentation inventory-baseline and retired-artifact production mutants each red only their named oracle in isolated diagnostics; PhaseContract changed-production-subject qualification and semantic policy/prose correspondence remain open.
 **Oracle**: `test/validation-kernel/DocumentationOracle.hs` and `test/validation-kernel/PhaseContractOracle.hs`; separately authored component diagnostics without independent human review.
 **Legacy IDs**: `LTD-VAL-001`, `LTD-VAL-002`
 **Docs to update**: `documents/documentation_standards.md`, `DEVELOPMENT_PLAN/development_plan_standards.md`
@@ -255,6 +339,7 @@ correspondence remains human review.
 - Governed inventory, metadata, Markdown/link/anchor/status/dependency checker.
 - Fixed gate-contract parser with closed keys and fail-closed `UNRESOLVED` handling.
 - Two-way phase/tracker/substrate/component joins.
+- Haskell-owned sentence and paragraph budget measurement, replacing the condemned Python `p3` implementation.
 
 ### Validation
 
@@ -264,10 +349,18 @@ alter a source, registry, validation, or ordering verdict.
 
 ### Remaining Work
 
-The checkers and component oracles exist but are not qualified or independently human-reviewed. Resolve the
-current corpus, including the 1,290 `UNRESOLVED` cells and 92 `MISSING` predecessor cells across 93
-contracts, after Sprint 0.3 is
-accepted.
+The checkers and component oracles exist but are not qualified or independently human-reviewed. The
+documentation checker separately pins the 195-path governed inventory/count digest and rejects retired tracked
+fixture/golden/oracle/mutant syntax unless it names one exact non-wildcard lowercase-`.hs` file, plus ambiguous
+committed/checked-in artifact wording; raw, fenced, comment-split, and physically wrapped spellings cannot hide
+those defects. Phase and sprint status fields are exact raw reset forms: dual-status wording, extra bare markers,
+fenced decoys, comments, and line wraps refuse. These focused cases and isolated production mutants are component
+diagnostics, not corpus acceptance. Add and qualify changed-production PhaseContract status/gate bypass mutants,
+complete the semantic phase-by-phase body review, and resolve every `UNRESOLVED` or `MISSING` gate cell after
+Sprint 0.3 is accepted. The recorded sentence backlog is 1,613 over forty-five
+words, including 133 over ninety. `python3 tools/doc_lint.py` is the transitional measurement command only;
+it is condemned non-Haskell source, cannot produce acceptance evidence, and must be replaced by the Haskell
+checker in this sprint.
 
 ## Sprint 0.5: Gate-kernel qualification and spoof corpus ⏸️
 
@@ -337,7 +430,7 @@ mechanism without a test-key promotion path, and complete human custody review a
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `DEVELOPMENT_PLAN/phase_[0-9][0-9]_*.md`
 **Blocked by**: Sprint 0.6
-**Independent Validation**: Every phase has one fixed 18-row table; all phase-specific subjects, oracles, controls, mutants, observers, legacy IDs, predecessors, and residue are explicit and independently reviewed. Any `UNRESOLVED` row refuses Phase 0.
+**Independent Validation**: Every phase has one fixed 18-row table, checked only for structure and explicit `UNRESOLVED` state. Separately reviewed Haskell phase contracts pin subjects, oracles, controls, mutants, observers, typed legacy bindings, predecessors, and residue. Human review owns correspondence with the table prose; no cell text supplies semantic authority. Any structural `UNRESOLVED` row or missing Haskell binding refuses Phase 0 at its own locus.
 **Oracle**: `test/validation-kernel/PhaseContractOracle.hs`; component diagnostic exists, and an independent human reviewer remains required for each oracle boundary.
 **Legacy IDs**: `LTD-VAL-002`
 **Docs to update**: all numbered phase contracts and their doctrine owners
@@ -355,8 +448,10 @@ Replace every pre-reset gate with a phase-specific, non-spoofable contract in nu
 
 ### Validation
 
-The contract checker rejects missing/duplicate keys, generic boilerplate, unresolved fields, forward or absent
-predecessors, non-Haskell subject/oracle paths, absent reviewers, and non-executable legacy closure.
+The structural checker rejects missing/duplicate keys, unresolved fields, and forward or absent numerical
+dependencies. Independent Haskell contract oracles reject missing subject/oracle bindings, self-derived
+expectations, absent reviewer custody, and missing typed legacy closure bindings. Generic prose, a semantic
+keyword, or a changed `Legacy IDs` cell cannot create a pass; human review owns semantic prose correspondence.
 
 ### Remaining Work
 
@@ -367,9 +462,9 @@ independent phase-by-phase review after Sprint 0.6 is accepted. Every affected p
 ## Sprint 0.8: Integrated Phase-0 candidate ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/validation-kernel/Amoebius/Validation/Dispatch.hs`, `app/amoebius/Main.hs`, `pb/pb/cli.py`
+**Implementation**: `src/validation-kernel/Amoebius/Validation/Dispatch.hs`, `app/amoebius/Main.hs`
 **Blocked by**: Sprint 0.7
-**Independent Validation**: From an empty generated tree, `pb validate phase 00` qualifies the harness, runs the clean corpus, resolves all Phase-0 legacy rows to zero, emits explicit candidate evidence, and cannot mutate status.
+**Independent Validation**: From an empty generated tree, the exact absolute source-built Haskell executable is invoked directly with `validate phase 00`; it qualifies the harness, runs the clean corpus, resolves every Phase-0-owned typed Haskell legacy binding to zero for the first time, emits explicit candidate evidence, and cannot mutate status. `pb` is unavailable as validation transport. Retired IDs remain compiled reintroduction guards, while their explanations are absent from the active-only Markdown register. Markdown register contents are unavailable to the semantic verdict.
 **Oracle**: `test/validation-kernel/Main.hs` currently composes component diagnostics only; a separate integration oracle, independent reviewer, and final human validation-authority review remain absent.
 **Legacy IDs**: `LTD-SRC-000`, `LTD-SRC-008`, `LTD-VAL-001`, `LTD-VAL-002`, `LTD-VAL-003`, `LTD-VAL-004`
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` only after the human authority decides promotion
@@ -391,7 +486,8 @@ checks it and alone decides whether to sign and promote Phase 0.
 
 ### Remaining Work
 
-The dispatcher and opaque `pb` handoff are observed footprints, not an integrated candidate path. Qualification
+The dispatcher and current nonconforming `pb/**` implementation are observed footprints, not an integrated
+candidate path. The opaque `pb` handoff remains a target with no conforming implementation. Qualification
 execution, clean-room observation, evidence-writer integration, contract resolution, independent review,
 legacy closure, external key custody, and the human decision remain open.
 
@@ -413,7 +509,10 @@ legacy closure, external key custody, and the human decision remain open.
 - [Development-plan tracker](README.md)
 - [Development-plan standards](development_plan_standards.md)
 - [Gate integrity](development_plan_gate_integrity.md)
-- [Active legacy register](legacy_tracking_for_deletion.md)
+- [Reader-facing legacy register](legacy_tracking_for_deletion.md) — active-only prose correspondence; typed
+  Haskell owns lifecycle, dispatch, owner-analyzer closure, and retained reintroduction guards
+- [Migration doctrine](../documents/engineering/migration_doctrine.md) — retirement keeps the compiled guard and
+  removes only the accepted active explanation
 - [Documentation standards](../documents/documentation_standards.md)
 - [Repository layout doctrine](../documents/engineering/repository_layout_doctrine.md)
 - [Testing spoof resistance](../documents/engineering/testing_spoof_resistance.md)

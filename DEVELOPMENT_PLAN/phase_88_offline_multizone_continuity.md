@@ -47,7 +47,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -119,6 +119,8 @@ unbounded replay/fanout/upload demand refuses the campaign.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 88.1: Run the offline multi-zone campaign ⏸️
 
@@ -135,18 +137,19 @@ misrepresenting a host-local role stop as a provider-zone failure.
 - Offline queue/blob/release trace with post-fault current-authority reconnect.
 - Durable receipt, cursor repair, verified upload, one observable effect per accepted command, and
   paired-denial observations.
-- Structural, routing, persistence, authority, isolation, and duplicate-effect mutants.
+- Haskell-authored structural, routing, persistence, authority, isolation, and duplicate-effect changed subjects.
 
 ### Validation
 
 1. Rejected historical observation: the `offline-multizone-continuity` Cabal suite expected the canonical
-   campaign green and every named mutant red.
+   campaign green and every named Haskell changed subject red.
 
 ### Remaining Work
 
 Repeat the campaign with provider-confirmed whole-zone isolation, managed multi-zone placement, real
 Redis/Sentinel, Keycloak/Gateway current authority, Pulsar/SQL/MinIO/workflow observers, Kubernetes/CNI,
-production PureScript, and the separately scoped offline jitML/CUDA path. Those surfaces remain `UNVERIFIED`.
+production PureScript generated lazily from reviewed Haskell beneath `.build/**`, and the separately scoped
+offline jitML/CUDA path. Those surfaces remain `UNVERIFIED`.
 
 ## Documentation Requirements
 

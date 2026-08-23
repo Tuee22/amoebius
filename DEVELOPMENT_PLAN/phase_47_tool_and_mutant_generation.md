@@ -45,7 +45,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -57,7 +57,7 @@ provider-program external form. Existing authored non-Haskell mechanism, mutatio
 bytes are condemned inputs to delete, not references to reproduce or preserve.
 
 **Phase scope:** one target claim — all non-`pb` behavioral source and support metadata have Haskell sources
-and deterministic lazy materializers, while tracked `tools/**`, provider-program YAML, and non-Haskell
+and deterministic lazy materializers, while legacy tracked checking-tool programs, provider-program YAML, and non-Haskell
 fixtures/oracles/mutants are absent. Phase 49 is to qualify and adopt the generated Haskell-owned gate path;
 later provider phases validate provider semantics and live execution, not source migration.
 **Substrate:** `none`
@@ -72,9 +72,9 @@ later provider phases validate provider semantics and live execution, not source
 
 | Key | Contract |
 |---|---|
-| `Claim` | Target only — Haskell declarations and Haskell expectations own all non-`pb` behavioral and support material; every runnable or serialized tool, fixture, oracle, mutant, and provider-program metadata byte is generated beneath `.build/**`. Tracked `tools/**`, tracked Pulumi YAML, and other tracked non-Haskell test/provider mechanisms are absent. Phase-49 qualification and later provider semantics/live execution remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | Target only — Haskell declarations and Haskell expectations own all non-`pb` behavioral and support material; every runnable or serialized tool, fixture, oracle, mutant, and provider-program metadata byte is generated beneath `.build/**`. Legacy tracked checking-tool programs, tracked Pulumi YAML, and other tracked non-Haskell test/provider mechanisms are absent. Phase-49 qualification and later provider semantics/live execution remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 47` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 47` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -126,15 +126,17 @@ consumer needs.
 
 ### Validation
 
-After the predecessor is human-approved, the qualified Haskell harness must start without `tools/**` or
+After the predecessor is human-approved, the qualified Haskell harness must start without the legacy tracked
+checking-tool family or
 tracked serialized corpora, derive every required artifact, execute the semantic controls, and reject omitted
 declarations, copied legacy bytes, no-op mutations, stale roots, empty discovery, and authored-tree writes at
 their distinct loci. This criterion has not run and is not a current candidate.
 
 ### Remaining Work
 
-Remove the tracked `tools/**`, non-Haskell `test/**`, and tracked provider-program YAML families; implement and
-independently review the Haskell subject/oracle; qualify the harness; close all four legacy rows; and obtain
+Remove the legacy tracked checking-tool, non-Haskell test-artifact, and tracked provider-program YAML families;
+implement and
+independently review the Haskell subject/oracle; qualify the harness; close all four typed legacy bindings; and obtain
 human promotion. Phase 49
 then consumes this generated surface; it does not close Phase 47's debt retroactively.
 

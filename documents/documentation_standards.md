@@ -78,14 +78,33 @@ tracked. Name it **external/untracked** or **generated beneath `.build/**`**. A 
 expected output, or mutant is a transport artifact rather than an independently maintained source of truth;
 the semantic expectation and mutation intent are separately reviewed Haskell.
 
+The old repository-path form that places fixture, golden, oracle, negative, or mutant material beneath a
+`test` artifact-family directory is retired. A governed document may use such a path only when it names one
+exact `.hs` file. A directory, wildcard, serialized file, script, patch, or foreign-language file in that
+shape is a documentation defect even when a reset banner elsewhere says the instruction is non-operative.
+Name the reviewed Haskell declaration and its separate lazy `.build/**` materialization instead. The
+documentation checker enforces this path-and-extension syntax over raw document bytes: fences, HTML comments,
+and line wrapping cannot suppress it. It does not infer behavioral meaning from the prose around it.
+
 ### Markdown is never a behavioral input
 
 Governed Markdown is a reader-facing normative explanation, not an executable policy language. Automated
 documentation checks may parse only closed structural facts: governed path inventory, orientation metadata,
-headings, links, anchors, backlinks, exact status syntax, numerical dependencies, and fixed gate-table shape.
-They must not derive a product choice, source classification, provider selection, semantic expectation,
+headings, links, anchors, backlinks, exact status and canonical-command syntax, numerical dependencies,
+explicit unresolved markers, fixed gate-table shape, retired repository-path/extension syntax, and literal
+equality of designated repeated presentation fields. Repeated values remain opaque text; matching two
+projections does not establish their meaning. The
+checks must not derive a product choice, source classification, provider selection, semantic expectation,
 coverage verdict, generator input, legacy closure, or validation result from prose, a table cell, or keyword
 occurrence.
+
+The production structural checker freezes the complete governed path set by exact count and SHA-256 manifest
+digest; a separate component oracle restates both values and observes the production corpus. A missing, extra,
+renamed, or newly exempted governed document therefore refuses until a human reviews the manifest change, and
+an isolated changed-production baseline mutant must make only that oracle red. This same-workstream restatement
+is a diagnostic control, not independent custody or validation. Current phase, sprint, and Gate-summary status
+fields use exact raw one-line forms; a second marker, dual-status phrase, fence, comment, or physical wrap cannot
+supply the required reset syntax.
 
 Cross-cutting executable decisions live in a reviewed Haskell `PolicyContract`; subsystem decisions live in
 their named reviewed Haskell declarations and independently authored Haskell oracles. A human reviewer owns
@@ -244,9 +263,10 @@ Historical text is permanently invalidated: it must not contain a condition such
 Done” that could reactivate it. Doctrine never records a current pass, seal, attestation, completion hash,
 green count, or validation ledger. Those belong to retrievable run evidence and the human-controlled plan
 status projection.
-Every discovered mismatch between doctrine, plan, tests, and code is recorded in
-[`legacy_tracking_for_deletion.md`](../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) under the
-reconciliation policy in
+Every discovered mismatch between doctrine, plan, tests, and code receives a typed Haskell identity, owner,
+observation, closure predicate, and reintroduction negative. Its reader-facing explanation is updated in
+[`legacy_tracking_for_deletion.md`](../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) under the reconciliation
+policy in
 [`development_plan_standards.md` §T](../DEVELOPMENT_PLAN/development_plan_standards.md#t-plan-to-implementation-reconciliation).
 
 **A claim of unrepresentability cites the Haskell declaration that proves it.** A document may state *in the
@@ -626,7 +646,8 @@ tone.
    the gate permanently red, which is how a rule stops being one; declining to measure at all is how the
    corpus reached 1,613 in the first place. Advisory status is the interval between those two failures, not a
    resting state — the backlog and its measurement command are recorded in
-   [`phase_00_documentation_suite.md`](../DEVELOPMENT_PLAN/phase_00_documentation_suite.md) Sprint 0.6.
+   [`phase_00_documentation_suite.md`](../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-04-haskell-documentation-and-plan-contract-checker-)
+   Sprint 0.4, which owns machine-decidable document structure.
 2. **Table cells** are exempt from the mechanical cap but not from its intent. A cell needing more than 45
    words is a section that was compressed into a table.
 3. **Paragraph cap.** A paragraph carries at most **six sentences**.

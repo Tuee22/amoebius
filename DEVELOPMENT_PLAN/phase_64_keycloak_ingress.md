@@ -50,7 +50,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -78,7 +78,7 @@ part of the set.
 **Phase scope:** one cohesive claim — *there is exactly one door, and it is Keycloak's*. A workload that tries to publish its own wild ingress must fail rather than be reviewed.
 
 **Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the edge is wired and gated on a single-node `kind` cluster on a linux-cpu
-host, tracked in [substrates.md](substrates.md). The future gate does not exercise an accelerator lane, but
+host, recorded in [substrates.md](substrates.md). The future gate does not exercise an accelerator lane, but
 `linux-cpu` remains available on every hardware substrate.
 
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
@@ -161,10 +161,11 @@ The whole-deployment provisioner admits the edge only after these demands, names
 attachments, kubelet image/nodefs headroom, Vault backing, and the live-snapshot residual all fit. Rendering
 accepts only the resulting private provisioned projections. Readback normalizes every live Pod, PVC, operator
 child, certificate revision, and provider object to that projection; an unexplained child or byte is an
-`UnknownCommitment`, not free capacity. Boundary fixtures make each CPU, memory, ephemeral, image, log,
+`UnknownCommitment`, not free capacity. Haskell boundary cases make each CPU, memory, ephemeral, image, log,
 pod-slot, attachment, API-object/revision/Event/etcd, SQL object/WAL/recovery/proxy, and ACME/Vault term one unit short
-in turn. Omission mutants that drop the Envoy child, Keycloak Pod, ACME Job, old/new rollout overlap, or
-Patroni WAL/recovery term, and API/etcd mutants that drop one desired object, churn operand, or model, must refuse
+in turn. Haskell changed-production-subject omission mutants that drop the Envoy child, Keycloak Pod, ACME Job,
+old/new rollout overlap, or Patroni WAL/recovery term, and Haskell API/etcd changed-production-subject mutants
+that drop one desired object, churn operand, or model, must refuse
 before the first effect, while their exact-fit twins render and reconcile.
 
 ## Doctrine adopted
@@ -225,19 +226,19 @@ observed as readiness conditions, not durations.
   for its children, and no scalar "database bytes" stands in for the storage structure.
 - The readiness edges wired into the derived DAG: MetalLB address before the Gateway listener; Keycloak ready
   before the edge admits wild traffic — never a `threadDelay`.
-- The route-inventory and realm fixture candidates, retained only after recorded independent review or
-  replacement, plus committed mutant (a) — an OIDC-filter-removed
-  edge variant the gate must show going red.
+- Separately authored Haskell route-inventory and realm case declarations, subject to recorded independent
+  review, plus Haskell changed-production-subject mutant (a) — an OIDC-filter-removed edge variant the gate
+  must show going red. Any serialized representation is generated lazily beneath `.build/**` and untracked.
 
 ### Validation
 
-1. For each surface enumerated in the committed `route-inventory.golden`, complete a real OIDC login as
+1. For each surface enumerated in the separately authored Haskell route inventory, complete a real OIDC login as
    `phase32-tester` and assert the surface's content is served (2xx) only after the request traversed Keycloak;
    assert `LoadBalancer → Envoy/Gateway API → Keycloak` is the only reachable wild path, probed once per origin
    class (WAN, LAN, localhost-browser) from a distinct netns/sidecar with the origin-appropriate source address.
 2. Send an unauthenticated request to each surface; assert it is redirected to the Keycloak login (a specific
-   302/401 to the Keycloak authorize endpoint), never served the surface — this fails against committed mutant
-   (a) (OIDC filter removed), which the gate must show turning red.
+   302/401 to the Keycloak authorize endpoint), never served the surface — this fails against Haskell
+   changed-production-subject mutant (a) (OIDC filter removed), which the gate must show turning red.
 3. Assert the bring-up honoured the ordering edges by an **enforced-gating** experiment: withhold the MetalLB LB
    address and assert (via an external readiness harness) the Gateway listener step blocks; withhold Keycloak
    readiness and assert the wild-admit step blocks; then release each and assert progress. A post-hoc scan of
@@ -247,7 +248,7 @@ observed as readiness conditions, not durations.
    CPU, memory, ephemeral, image/log, pod-slot and rollout term and each Patroni data/WAL/recovery/attachment
    and SQL-proxy/admission term. Compare rendered requests, limits, claims, rollout controls, operator children,
    proxy envelope, and admission witness with live readback;
-   the omission mutants named in the phase contract must reject before any certificate, SQL, or apiserver
+   the Haskell changed-production-subject omission mutants named in the phase contract must reject before any certificate, SQL, or apiserver
    mutation.
 5. Upgrade the platform-owned WebSocket probe with a valid Keycloak session and fresh nonce, exchange a fresh
    challenge, then pair wrong-Origin, replayed-nonce, wrong-subprotocol, unauthenticated, and direct-Service
@@ -255,7 +256,8 @@ observed as readiness conditions, not durations.
 
 ### Remaining Work
 
-Independently review or replace the same-commit route inventory and realm fixtures before revalidation.
+Independently review the separately authored Haskell route inventory and realm case corpus before any future
+validation candidate.
 
 ## Sprint 64.2: No self-published wild ingress + public-edge TLS ⏸️
 
@@ -277,7 +279,7 @@ one carve-out really is a *different type* of endpoint, not a wild one.
 
 - A live audit proving there is no non-Keycloak wild path: no chart opens a backdoor NodePort to the wild, and
   no workload publishes its own `Ingress` — the `WildIngress` constructor is reachable only from the Keycloak
-  edge, per the render invariant golden-locked in Phase 33.
+  edge, per the Haskell render invariant owned by Phase 33.
 - The sole carve-out exercised as a distinct `HostLocalPeer` endpoint (host-origin, localhost-only NodePort, no
   mTLS, no WAN/LAN reach) — owned in full by [`host_cluster_comms_doctrine.md`](../documents/engineering/host_cluster_comms_doctrine.md)
   and referenced here, not re-specified.
@@ -287,8 +289,9 @@ one carve-out really is a *different type* of endpoint, not a wild one.
   key/CSR workspace, certificate/key revision retention, and the resulting Vault Raft/audit high-water; this
   demand is provisioned before the ACME client or Vault mutation can run.
 - A Haskell-declared scanner-validation seed that lazily renders a raw-`kubectl` NodePort/`Ingress` bypass
-  beneath `.build/test-corpora/**`, plus a run-local argv/env-recording ACME fake used to observe EAB provenance from
-  the OS boundary. Neither serialized form is tracked source or an oracle.
+  beneath `.build/test-corpora/**`, plus a Haskell-authored argv/env-recording ACME observer whose executable
+  form is generated lazily beneath `.build/**` and used to observe EAB provenance from the OS boundary. Neither
+  serialized form is tracked source or an oracle.
 
 ### Validation
 
@@ -299,13 +302,16 @@ one carve-out really is a *different type* of endpoint, not a wild one.
 2. Assert the host-origin, localhost-only NodePort is unreachable off the host by an **actual probe from a distinct network namespace with a non-loopback source IP** (which must fail/time out) paired with a
    host-loopback probe that succeeds — differing only in origin; inspecting the bind config alone is not
    sufficient.
-3. Assert the ACME client obtained its EAB material from a Vault `SecretRef`, observed via an **argv/env recording shim** on the client process (the shim shows the SecretRef path, never a literal), and grep the
-   rendered Dhall to assert no EAB literal appears. **Scope for the linux-cpu kind gate:** a staging/stand-in
+3. Assert the ACME client obtained its EAB material from a Vault `SecretRef`, observed via an **argv/env recording
+   observer** on the client process (the observer shows the SecretRef path, never a literal), and have the
+   Haskell validator inspect the complete lazily rendered DSL bytes to assert no EAB literal appears. A Haskell
+   seeded literal-injection negative must turn that check red. **Scope for the linux-cpu kind gate:** a staging/stand-in
    ACME chain is acceptable in place of live public ZeroSSL/route53 issuance (no public DNS zone is required);
    the load-bearing assertion is the **provenance of the EAB material (Vault, not Dhall)**, not that the cert
    was signed by production ZeroSSL.
 4. Make the issuer Job CPU, memory, ephemeral workspace, image/import bytes, log headroom, and Vault revision
-   high-water one unit short in turn; each case refuses before an ACME order is opened. An omission mutant that
+   high-water one unit short in turn; each case refuses before an ACME order is opened. A Haskell
+   changed-production-subject omission mutant that
    drops retry-temporary bytes or the prior certificate revision turns red, while live Job/Vault readback for
    the exact-fit twin equals the provisioned projection.
 
@@ -334,10 +340,11 @@ and every other is denied.
 - The live posture: a service that does not declare consuming `B` cannot reach `B`, and a declared edge is not
   severed — the two shapes [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)
   makes unrepresentable at authoring time, now confirmed on the running cluster.
-- The expected-policy candidate `test/fixture/keycloak_ingress/netpol-expected.golden`, retained only after independent
-  review or replacement; an independent graph-walker that recomputes the expected allow-set from the declared
-  dependency edges, and committed mutant (b) — a `derive` variant that drops one allow-edge and adds one
-  undeclared allow-edge, which the set-equality check must show going red.
+- A separately authored Haskell expected-policy declaration, subject to independent review; an independent
+  Haskell graph-walker that recomputes the expected allow-set from the declared dependency edges; and Haskell
+  changed-production-subject mutant (b) — a `derive` variant that drops one allow-edge and adds one undeclared
+  allow-edge, which the set-equality check must show going red. Any serialized policies are generated lazily
+  beneath `.build/**` and untracked.
 
 ### Validation
 
@@ -347,15 +354,17 @@ and every other is denied.
    re-render/re-apply, and assert the applied policy set gains exactly the corresponding allow and live
    reachability flips on; remove the edge and assert the allow is withdrawn and reachability flips off. The
    applied set must therefore be a total function of the declared graph, not of the fixed Phase-62/42 service
-   names. This fails against committed mutant (b) (drop one allow, add one undeclared allow), which the gate must
+   names. This fails against Haskell changed-production-subject mutant (b) (drop one allow, add one undeclared
+   allow), which the gate must
    show going red.
-4. After independent review, assert set equality between the applied policies and `netpol-expected.golden` and the
-   output of an **independent graph-walker** (distinct from `renderAll`) over the declared dependency edges — not
-   by re-running the implementation's own `derive`.
+4. After independent review, assert set equality between the applied policies, the separately authored Haskell
+   expected-policy declaration, and the output of an **independent Haskell graph-walker** (distinct from
+   `renderAll`) over the declared dependency edges — not by re-running the implementation's own `derive`.
 
 ### Remaining Work
 
-Independently review or replace the same-commit expected-policy fixture before revalidation.
+Independently review the separately authored Haskell expected-policy declaration before any future validation
+candidate.
 
 ## Sprint 64.4: The single-door + storage-rebind regression gate ⏸️
 
@@ -374,10 +383,11 @@ deterministic storage rebind.
 
 - The phase-gate harness: assert an unauthenticated request to any platform surface is rejected at the edge and
   there is no non-Keycloak wild path (no exposed backdoor NodePort).
-- Run-local image provenance that consumes the verified Phase-56 identity and current registry catalog; remove
-  `test/fixture/keycloak_ingress/expected-base-digest.txt` and never replace it with another copied digest.
-- The storage-rebind regression: write the committed marker row (`marker-row.sql`) into the Keycloak Patroni DB
-  and the committed marker object (`marker-object.bin`) into a MinIO bucket. Perform the Phase-60 intermediate
+- Run-local image provenance that consumes the verified Phase-56 identity and current registry catalog; a
+  copied expected-digest input is condemned residue and cannot be recreated.
+- The storage-rebind regression: derive run-unique marker bytes in Haskell, write them as a row into the
+  Keycloak Patroni DB and as an object into a MinIO bucket, and retain the expectation only in the independent
+  run-local observer. Perform the Phase-60 intermediate
   observation while the old apiserver is still running, quiescing the witnesses and stopping each through its
   owning resource's supported stop path — the operator-owned Patroni witness through its
   `PerconaPGCluster`/operator path, never by mutating the operator's child StatefulSet, and the directly owned
@@ -399,20 +409,21 @@ deterministic storage rebind.
    and while the old apiserver remains live; after full deletion, assert from the host boundary that the
    cluster is absent and the retained backing bytes remain. Record the recreate witness (new cluster CA /
    kube-system pod UIDs / `kind` node container ID differ from pre-delete) in the ledger, then assert the
-   read-back bytes are unchanged. This fails against committed mutant (c) (delete no-op'd), which the gate
+   read-back bytes are unchanged. This fails against Haskell changed-production-subject mutant (c) (delete
+   no-op'd), which the gate
    must show going red because the recreate witness finds an identical cluster identity.
 3. Assert the full stack is still up, reachable only through the Keycloak edge, and HA-shaped after the recreate.
 4. Re-run provision against the fresh live snapshot before recreate apply and prove the transition peak includes
    the old and replacement edge Pods, Keycloak Patroni data/WAL/checkpoint state, and ACME/Vault revisions.
-   Removing any one of those operands must fail the committed omission-mutant corpus rather than relying on the
-   successful recreate as evidence of capacity.
+   Removing any one of those operands must fail the Haskell changed-production-subject omission-mutant corpus
+   rather than relying on the successful recreate as evidence of capacity.
 5. Compare CRI-observed image identities with the verified Phase-56 run input and current registry catalog;
    a seeded gate variant that reads an expected-digest file and a side-loaded public image each fail.
 
 ### Remaining Work
 
-Remove the committed expected-base-digest file and gate dependency, then rerun with Phase-56 identity supplied
-as run-local verified input.
+The historical copied expected-base-digest input is condemned residue and cannot be recreated. A future
+candidate must receive the Phase-56 identity directly as authenticated run input.
 
 ## Documentation Requirements
 
@@ -422,8 +433,8 @@ as run-local verified input.
   honesty note and the §11 ordering edges flip from "design intent" to a delivered-status pointer (status stays
   in the plan); the east-west-derived-NetworkPolicy subsection gains its first live amoebius realization.
 - `documents/illegal_state/illegal_state_catalog.md` — record that §3.7 (backdoor ingress) and §3.6 (blocking
-  NetworkPolicy) gain their first *live* confirmation here, complementing the render-time golden lock from
-  Phase 33.
+  NetworkPolicy) gain their first *live* confirmation here, complementing the Haskell render-time invariant
+  from Phase 33.
 - `documents/engineering/ui_realtime_coordination_doctrine.md` — record the live edge proof for authenticated
   WebSocket upgrade routing; cross-pod routing and Redis failure behavior remain later gates.
 - `documents/engineering/pulumi_iac_doctrine.md` — note that the §5 public-edge TLS (ZeroSSL/route53)

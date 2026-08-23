@@ -54,7 +54,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -245,6 +245,8 @@ provider control plane, node group, and executor peaks are provisioned by
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 78.1: Per-PV durable EBS in its own state + node-vs-storage decoupling ⏸️
 
@@ -276,7 +278,8 @@ data" cannot collapse on a routine teardown.
   `ProviderVolumeSlotId { account, cluster, claim, request }`, debits that promised slot's rounded byte/count
   cost against the freshly observed durable residual (separate provider quota ledgers for durable bytes and
   volume count), and records `Promised` in the private backing witness. The real EBS id returned by create is
-  attached and cross-checked into `Materialized`; raw Dhall never fabricates a future `ProviderVolumeId`.
+  attached and cross-checked into `Materialized`; no serialized projection, including lazily generated or
+  operator-supplied Dhall, can fabricate a future `ProviderVolumeId`.
   Retained rebind keeps the logical `BackingId` and slot stable.
 - Node-vs-storage decoupling: a destroyed/replaced EC2 node detaches its EBS and the volume survives; the next
   bring-up re-attaches the same volume to the same `<namespace>/<statefulset>/pv_<integer>` claim.
@@ -293,7 +296,7 @@ data" cannot collapse on a routine teardown.
    least `requiredUsableBytes`.
 2. Assert claim:PVC/PV:EBS identity/cardinality is 1:1:1; PVC and PV capacities equal the provider-rounded
    `provisionedBytes`, EBS reports that same raw size, and the mounted filesystem supplies the witnessed usable
-   bytes. A fixture whose logical bytes are not an integral GiB proves rounding is performed once, and one whose
+   bytes. A Haskell-declared case whose logical bytes are not an integral GiB proves rounding is performed once, and one whose
    filesystem metadata makes raw-equals-usable insufficient is rejected or rounded upward.
 3. Assert the volume's state is a distinct logical checkpoint namespace from the ephemeral cluster stack's
    checkpoint by **distinct MinIO object keys read from the store**, not from the program that wrote them. A slot
@@ -341,11 +344,12 @@ delete authority is the elevated test credential ([Phase 90](phase_90_test_topol
    nothing at the cloud API despite the objective's "unauthorized at the cloud API" framing. Paired positive:
    the same operational credential *can* `ec2:CreateVolume` (a real create succeeds), so the deny is specific to
    the delete dimension (§M.8).
-2. The reference policy expectation (which action → allow/deny) is the committed Phase-0 hand table
-   `test/golden/ebs_credential_matrix.txt`, authored independently of the generated `Amoebius.Pulumi.Credential`
-   policy (§M.1/§M.3); assert the generated operational and CSI-runtime policies match it action-for-action, and
+2. The reference policy expectation (which action → allow/deny) is an independently authored Phase-0 Haskell
+   table. Its reproducible text view is generated lazily at
+   `.build/test-corpora/ebs_credential_matrix.txt` and remains untracked; assert the generated
+   `Amoebius.Pulumi.Credential` operational and CSI-runtime policies match it action-for-action (§M.1/§M.3), and
    that the CSI runtime identity is denied both create and delete.
-3. The committed seeded mutant `mut-46.1-allow-delete` (the operational policy with the `ec2:DeleteVolume` `Deny`
+3. The Haskell-authored changed-subject seeded mutant `mut-46.1-allow-delete` (the operational policy with the `ec2:DeleteVolume` `Deny`
    statement removed) MUST go **red** here — under it the real delete would succeed.
 
 ### Remaining Work
@@ -373,8 +377,9 @@ than building an amoebius attach controller or enabling dynamic provisioning.
 ### Deliverables
 
 - A static-only `Amoebius.Storage.EbsCsi` path: the upstream AWS EBS CSI controller/node binaries and required
-  sidecars are baked into the amoebius base image and installed from typed manifests (no Helm/public image
-  pull), version-pinned by the Phase-0 fixture `test/fixture/provider_ebs_credential/ebs_csi_bake_expected.dhall`; **no**
+  sidecars are baked into the amoebius base image and installed from typed Haskell manifests (no Helm/public
+  image pull), version-pinned by an independently authored Phase-0 Haskell expectation whose reproducible Dhall
+  view is generated lazily at `.build/test-corpora/provider_ebs_credential/ebs_csi_bake_expected.dhall`; **no**
   external-provisioner container is installed; each fresh PV names `spec.csi.driver: ebs.csi.aws.com`, the
   Pulumi-created EBS ID as `volumeHandle`, and node affinity for the volume's Availability Zone.
 - Placement consumes one `ebs.csi.aws.com` attach slot per unique mounted PVC, using the lesser of the declared
@@ -393,10 +398,11 @@ than building an amoebius attach controller or enabling dynamic provisioning.
 2. Assert the cluster still has exactly one StorageClass, `kubernetes.io/no-provisioner`; the EBS CSI install
    contains no external-provisioner; and an independent cloud audit records no `CreateVolume` call under the CSI
    runtime identity.
-3. The provider-driver extension to `BakeInventory` is checked against the independently authored
-   `test/fixture/provider_ebs_credential/ebs_csi_bake_expected.dhall`, and each pinned controller/node/sidecar binary executes
+3. The provider-driver extension to `BakeInventory` is checked against the independently authored Haskell bake
+   expectation (with its untracked lazy projection at
+   `.build/test-corpora/provider_ebs_credential/ebs_csi_bake_expected.dhall`), and each pinned controller/node/sidecar binary executes
    by absolute path with its expected version on both base-image architectures.
-4. The committed seeded mutant `mut-46.1-enable-dynamic-provisioner` (adds the external-provisioner plus an
+4. The Haskell-authored changed-subject seeded mutant `mut-46.1-enable-dynamic-provisioner` (adds the external-provisioner plus an
    `ebs.csi.aws.com` provisioning StorageClass) MUST go **red** on the object-set and cloud-audit assertions.
 
 ### Remaining Work
@@ -430,7 +436,8 @@ durable checkpoint, and static-attachment machinery — and make replacement/shr
   per-backing peak, and witness. Admission charges old+new raw EBS bytes and two provider volume-count slots,
   workspace backing, executor image/CPU/memory/pod-ephemeral/log/writable/mapped inputs, pod slot, and both
   required `ebs.csi.aws.com` attachments simultaneously. Cutover occurs only after byte-for-byte verification;
-  failure keeps both EBS volumes and checkpoints intact and charged, and old capacity remains committed until
+  failure keeps both EBS volumes and checkpoints intact and charged, and old capacity remains
+  accounting-committed in the live state until
   external privileged deletion is freshly observed.
 - The sole `CreateProviderCapacity` enactor for `ValidatedStorageScalingAction`. It immediately rechecks the same
   account/allocation/quota/executor/checkpoint snapshot, requires the transition's exact
@@ -448,14 +455,15 @@ durable checkpoint, and static-attachment machinery — and make replacement/shr
 1. Exercise a provider-volume replacement/shrink whose steady old and target states each fit. Observe that the
    private migration witness and cloud requests charge old+new raw rounded bytes, two volume-count slots,
    workspace, both CSI attachments, and the full copy/verify Job concurrently before creating the replacement.
-   Paired one-short fixtures reduce only durable EBS bytes, durable volume count, workspace backing, executor
+   Paired Haskell-declared one-short cases reduce only durable EBS bytes, durable volume count, workspace backing, executor
    CPU/memory/pod-ephemeral, pod slots, or `ebs.csi.aws.com` attach slots; each rejects before `CreateVolume`,
    Job creation, or checkpoint mutation. The attach check uses the lesser of declaration and live `CSINode`/SKU
    limit and deduplicates repeated mounts of one PVC without deduplicating old versus replacement.
 2. Inject copy failure, verification mismatch, and unobservable post-cutover cleanup separately. Every case
    leaves both EBS IDs, exact checkpoint evidence, and old+new provider quota debits intact; none emits
-   `ReclaimEligible` or spends the old allocation as credit. The committed `mut-46.1-credit-old-before-observed-delete`
-   mutant (admits a transition only by subtracting the old volume) and `mut-46.1-drop-copy-executor` (omits the
+   `ReclaimEligible` or spends the old allocation as credit. The Haskell-authored changed-subject
+   `mut-46.1-credit-old-before-observed-delete` mutant (admits a transition only by subtracting the old volume)
+   and `mut-46.1-drop-copy-executor` (omits the
    copy Job envelope) MUST both go **red**. The success case cuts the static PV over only after byte-for-byte
    verification, while the old backing remains charged until an independent privileged observation proves
    deletion.
@@ -466,7 +474,7 @@ durable checkpoint, and static-attachment machinery — and make replacement/shr
    checkpoint fingerprint, or parent executor residual after validation and assert zero AWS/checkpoint calls. On
    success, assert each scaling and cloud token is consumed once and only receipt-bound EBS/checkpoint readback
    advances the allocation map; replay and lost-response cases re-observe and retain possible commitments. The
-   committed mutant `mut-46.1-bypass-validated-batch` (calls `CreateVolume` directly from the policy/envelope,
+   Haskell-authored changed-subject mutant `mut-46.1-bypass-validated-batch` (calls `CreateVolume` directly from the policy/envelope,
    bypassing the validated batch) MUST go **red**.
 
 ### Remaining Work
@@ -488,7 +496,8 @@ same volume through a freshly rendered static CSI PV and reads its data back unc
 
 ### Deliverables
 
-- The gate over the durable-EBS slice of `test/fixture/dhall/provider_dynamic_nodes/provider_provision.dhall`: spin up the provider
+- The gate over a reviewed Haskell durable-EBS declaration, lazily projected to
+  `.build/test-corpora/dhall/provider_dynamic_nodes/provider_provision.dhall`: spin up the provider
   cluster ([Phase 76](phase_76_provider_deploy_checkpoint.md)); create the per-PV durable EBS (Sprint 78.1);
   render and observe Ready the baked static-only CSI (Sprint 78.3); bind the Pulumi-created EBS through the static
   CSI PV and write a run-unique marker through the retained-EBS claim; record EBS identity + AZ; `pulumi destroy`
@@ -505,7 +514,7 @@ same volume through a freshly rendered static CSI PV and reads its data back unc
 ### Validation
 
 1. Run the future gate end-to-end over a Haskell-declared durable-EBS case materialized only beneath the
-   candidate's `.build/test-corpora/**` root; no committed Dhall fixture may participate:
+   candidate's `.build/test-corpora/**` root; no repository-retained Dhall material may participate:
    assert the per-PV EBS is created in separate durable state, the static PV uses `driver: ebs.csi.aws.com`,
    `volumeHandle: <that EBS volume ID>`, and matching zone affinity, the EBS CSI components are Ready before the
    bind without an external provisioner, and the sole StorageClass is `kubernetes.io/no-provisioner`. Write a
@@ -515,8 +524,10 @@ same volume through a freshly rendered static CSI PV and reads its data back unc
    permitted survivor by class, not a leak.
 3. Issue a **real `ec2:DeleteVolume`** under the operational credential against the live retained/test-flagged
    volume and assert an `AccessDenied`/`UnauthorizedOperation` response with the volume surviving; assert the
-   paired positive `ec2:CreateVolume` succeeds under the same credential; check both against
-   `test/golden/ebs_credential_matrix.txt`. The committed mutant `mut-46.1-allow-delete` MUST go **red**.
+   paired positive `ec2:CreateVolume` succeeds under the same credential; check both against the independent
+   Haskell policy expectation, whose text view is generated lazily at
+   `.build/test-corpora/ebs_credential_matrix.txt`. The Haskell-authored changed-subject mutant
+   `mut-46.1-allow-delete` MUST go **red**.
 4. From the cluster-absent state left by Validation 2, with the durable EBS retained, run a second full
    bring-up → bind → read → teardown cycle. Constrain the recreated node group to the recorded EBS Availability
    Zone, re-render the static PV with the same EBS volume ID as its CSI `volumeHandle`, reattach it, and read the

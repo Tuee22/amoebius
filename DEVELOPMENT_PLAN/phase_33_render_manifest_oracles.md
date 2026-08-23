@@ -30,7 +30,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Sprints](#sprints)
 - [Sprint 33.1: The typed `K8sObject` model + Aeson serialization ⏸️](#sprint-331-the-typed-k8sobject-model--aeson-serialization-)
 - [Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ⏸️](#sprint-332-pure-total-renderall--best-practice-by-construction-)
-- [Sprint 33.3: The rendered-output semantic-oracle battery (`render-golden`) — the gate ⏸️](#sprint-333-the-rendered-output-semantic-oracle-battery-render-golden--the-gate-)
+- [Sprint 33.3: The rendered-output semantic-oracle battery (`render-oracle`) — the gate ⏸️](#sprint-333-the-rendered-output-semantic-oracle-battery-render-oracle--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -46,7 +46,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -119,7 +119,7 @@ separately reviewed Haskell predicate. Renderer output is never its own expectat
 |---|---|
 | `Claim` | Target only — pure total Haskell rendering must satisfy a separately reviewed Haskell semantic projection; any serialized manifest bytes are lazy `.build/**` output and never authority. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 33` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 33` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -180,8 +180,8 @@ separately reviewed Haskell predicate. Renderer output is never its own expectat
   their **rendering enactment** (the derived NetworkPolicy and exact provisioned resource fields on the emitted
   objects), not the rules themselves.
 - [`generated_artifacts_doctrine.md` §3 — The rule](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
-  — generated artifacts are emitted from a Haskell source of truth and **never committed**: the rendered
-  `[K8sObject]` set is never a checked-in deployment artifact; only Haskell semantic expectations are tracked.
+  — generated artifacts are emitted from a Haskell source of truth and **never repository-retained**: the
+  rendered `[K8sObject]` set exists only beneath `.build/**`; only Haskell semantic expectations are source.
 - [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
   — **Register 1** (pure/semantic-oracle, in-process, no cluster): the intended register; and
   [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
@@ -220,8 +220,10 @@ text.
 
 ### Remaining Work
 
-Historical completion claim — permanently invalidated. Live Kubernetes decoding and apiserver
-correspondence remain UNVERIFIED.
+The pre-reset completion claim is permanently invalid for promotion. Current remaining work includes every
+`UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and the typed-object,
+serialization, round-trip, and independent Haskell-oracle obligations above. Live Kubernetes decoding and
+apiserver correspondence remain UNVERIFIED.
 
 ## Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ⏸️
 
@@ -341,10 +343,12 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
 
 ### Remaining Work
 
-Historical completion claim — permanently invalidated. SSA, ApplySet pruning, readiness, and live
-convergence remain Phase-58 work.
+The pre-reset completion claim is permanently invalid for promotion. Current remaining work includes every
+`UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and the pure-render,
+totality, coverage, negative-control, and Haskell mutation obligations above. SSA, ApplySet pruning, readiness,
+and live convergence remain Phase-58 work.
 
-## Sprint 33.3: The rendered-output semantic-oracle battery (`render-golden`) — the gate ⏸️
+## Sprint 33.3: The rendered-output semantic-oracle battery (`render-oracle`) — the gate ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 
@@ -368,9 +372,11 @@ states — directly on the emitted objects, all without a cluster.
 - Only the declared edge may use load-balancer exposure; no bare Ingress arm is emitted.
 - Every NetworkPolicy is default-deny and its edge set equals the independent `DepGraphOracle` result.
 
-#### Twelve committed seeded mutants
+#### Twelve reviewed Haskell mutation operators
 
-Each committed mutant must turn exactly its targeted semantic property red while its unmutated twin stays green:
+Each operator is applied to a temporary production-source copy beneath `.build/mutants/**`. It must turn
+exactly its targeted semantic property red while its unmutated twin stays green and the changed-subject witness
+confirms the intended production locus changed:
 
 - **R1/R2:** alter checked resources or the root-filesystem/ephemeral projection.
 - **R3/R4:** remove bounded scratch or memory-volume accounting.
@@ -387,11 +393,11 @@ Each committed mutant must turn exactly its targeted semantic property red while
 
 ### Validation
 
-1. Rejected historical observation: the `render-golden` Cabal suite was recorded green — output matches the
+1. Rejected historical observation: the `render-oracle` Cabal suite was recorded green — output matches the
    independently authored semantic projection across
    the concrete corpus, canonical round-trip stability holds, shape-completeness and corpus-wide non-zero counts hold (no vacuous
    universal), and every rendered-output invariant holds — the NetworkPolicy check by allow-edge set equality
-   against the independent `DepGraphOracle`. Each of the twelve committed seeded mutants (R1 CPU/memory drift,
+   against the independent `DepGraphOracle`. Each of the twelve applied Haskell mutants (R1 CPU/memory drift,
    R2 pod-ephemeral/private allowance, R3 unbounded scratch/cache, R4 memory-volume lifecycle/accounting,
    R5 image-platform/store accounting, R6 durable-size drift, R7 accelerator projection, R8 CR-child
    projection, R9 monitoring-work projection, S1 unhardened pod, S2 wild/Keycloak-skipping route, and S3
@@ -400,6 +406,9 @@ Each committed mutant must turn exactly its targeted semantic property red while
 
 ### Remaining Work
 
+The pre-reset completion claim is permanently invalid for promotion. Current remaining work includes every
+`UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and the independently authored
+Haskell semantic-oracle, changed-production-subject mutation, discovery, and non-vacuity obligations above.
 Live enforcement remains UNVERIFIED at Phase 58.
 
 ## Documentation Requirements
@@ -416,17 +425,18 @@ Live enforcement remains UNVERIFIED at Phase 58.
   foreclosure layer (rendered-artifact-oracle → Register 1); keep the runtime-checked (layer-3) enforcement
   claim deferred to the live band.
 - `documents/engineering/namespace_layout_doctrine.md` — backlink the one-namespace-per-platform-capability
-  rule: the render-golden battery is the rendered-output enactment that gates the namespace-layout
+  rule: the `render-oracle` battery is the rendered-output enactment that gates the namespace-layout
   foreclosure (every emitted object lands in its doctrine-derived namespace, and a free-text or
   cross-capability namespace is not a value `renderAll` can emit).
-- `documents/engineering/generated_artifacts_doctrine.md` — note that the rendered `[K8sObject]` set is emitted from Haskell and never committed; only the independently authored semantic projection is source.
+- `documents/engineering/generated_artifacts_doctrine.md` — note that the rendered `[K8sObject]` set is emitted from Haskell only beneath `.build/**`; only the independently authored Haskell semantic projection is source.
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-33 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — only the human authority may change Phase 33 after reviewing a qualified
+  candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-33 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Manifest/{K8sObject,Types,Render}.hs` and
-  the `render-golden` test-suite as Phase-33 design-first rows.
+  the `render-oracle` Haskell test suite as Phase-33 design-first rows.
 
 ## Related Documents
 
@@ -442,7 +452,7 @@ Live enforcement remains UNVERIFIED at Phase 58.
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — [§9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) the derived
   NetworkPolicy rule, [§10](../documents/engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope) the complete resource-envelope rule this phase renders by construction
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — why the `renderAll`
-  output is generated and never committed
+  output is generated lazily beneath `.build/**` and is not repository source
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_30](phase_30_capability_bind.md) — the capability→provider→shape binder and provision fold producing
   the opaque whole-deployment `ProvisionedSpec` and its sealed identity-keyed render-source set

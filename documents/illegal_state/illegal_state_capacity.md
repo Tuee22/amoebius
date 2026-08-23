@@ -182,9 +182,10 @@ retention) + `gadt-decode` (the decoder-local zero-progress rolling smart constr
 finite-limit/physical-peak, named-pool, nested-host/build/engine, and monitoring-work folds return
 `Left Overcommit`/`Left StoragePoolOvercommit` before a `ProvisionedSpec` exists) + `live-effect` (residue —
 observed allocatable/backing is cross-checked before mutation, and the running system stays within enforced
-boundaries: no `Pending`, eviction, OOM, or full disk). The committed
-`illegal_hard_ceiling_overcommit` fixture retains its stable historical name but exercises this
-finite-limit/physical-peak relation; the name does not assert synchronous ephemeral quota enforcement.
+boundaries: no `Pending`, eviction, OOM, or full disk). The reviewed Haskell case declaration named
+`illegal_hard_ceiling_overcommit` retains its stable historical name but exercises this
+finite-limit/physical-peak relation; any serialized transport is emitted lazily beneath `.build/**`, and the
+name does not assert synchronous ephemeral quota enforcement.
 
 ### 3.22 A hand-authored (un-derived) toleration
 

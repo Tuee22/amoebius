@@ -157,7 +157,7 @@ red. No serialized compile input or expected diagnostic is tracked.
 
 **Discharge.** The gate requires a Haskell fixture/oracle reference per claim, lazily renders and runs each
 compile-fail case and requires failure *for its pinned reason* rather than any failure, and requires each
-committed Haskell mutant operator to redden a named assertion. This is the [`testing_doctrine.md`](./testing_doctrine.md) evidence discipline applied per
+reviewed `.hs` mutant operator to redden a named assertion. This is the [`testing_doctrine.md`](./testing_doctrine.md) evidence discipline applied per
 extension.
 
 ### Target discharge boundary — NOT VALIDATED
@@ -309,8 +309,10 @@ Phase-20 declarations:
 - C2 compares both empty-composite identities by value; C3 compares both groupings after declaration-key
   normalization.
 - C4 restricts the composite operation, artifact, budget, and flow observations to each part and compares them
-  with its isolated observations. The pure fixture is scanned for a finite set of shared-authority primitives;
-  a committed mutant introduces a real process-global `IORef` through `unsafePerformIO`.
+  with its isolated observations. A reviewed Haskell fixture value is scanned for a finite set of
+  shared-authority primitives; a separately reviewed `.hs` mutation operator introduces a real process-global
+  `IORef` through `unsafePerformIO`. Any rendered diagnostic or compiler transcript is emitted lazily beneath
+  `.build/**` and remains untracked.
 - C5 compares the observed composite resource vector with the exact natural-number sum of its operands.
 - C6 rejects a sink wider than its source. The seeded widening also reddens C1 and C4, because it breaks L4
   closure and changes the affected part's projected behavior.

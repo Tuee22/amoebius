@@ -46,7 +46,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -79,7 +79,7 @@ invocation and the candidate verdict.
 |---|---|
 | `Claim` | Target only — every illegal-state catalog entry is a Haskell-owned case at its exact pure rejection locus or an exact-owner deferral; all non-Haskell case, compiler, oracle, and mutant bytes are generated beneath `.build/**`. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 27` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 27` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -111,7 +111,7 @@ invocation and the candidate verdict.
 - [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
   the **typed spec gates** — dhall-typecheck (the Dhall typechecker) and gadt-decode (the in-process `Dhall.inputFile auto`
   decoder). The target Haskell harness exercises both and generates compile-refusal input beneath `.build/**`;
-  no checked-in golden gives the GADT indices their authority.
+  no serialized golden gives the GADT indices authority; reviewed Haskell expectations do.
 - [`resource_capacity_doctrine.md` §3 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
   and [`resource_capacity_doctrine.md` §4 — The total fold: `fits`, `carve`, `place`, and the nesting](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting):
   the complete resource envelope and opaque post-bind checked boundary. This phase exhausts the resource
@@ -219,8 +219,8 @@ must pass `dhall type` and decode-reject — never billing a gadt-decode-only fo
    `dhall type`.
 2. Every reached gadt-decode negative passes `dhall type` and then decodes to a `Left DecodeError` whose tag
    equals its separately authored Haskell expectation; its legal twin and every positive case decode.
-3. `CorpusSpec` is red if any illegal fixture is admitted at or past its tagged locus, if any twin fails, or
-   if any observed error diverges from its golden.
+3. `CorpusSpec` is red if any illegal Haskell-declared case is admitted at or past its tagged locus, if any twin
+   fails, or if any observed error diverges from its separately authored Haskell expectation.
 4. The coverage note maps each fixture to its catalog entry and foreclosure layer and is reconciled against
    the separately authored Haskell locus inventory, and every exact-owner provisioning row is present in the derived
    deferred set with the exact owner.
@@ -304,7 +304,9 @@ exhausted (the three `Rke2Servers` arms).
   distinct fold with a boundary/near-illegal-but-legal input (≥ 10% per fold); `prop_compositionPreservesWell-
   formedness` covers non-identity compositions of two distinct non-trivial fragments (≥ 25%). Generators that
   emit a single trivial value fail the coverage check and the suite is red.
-- The committed broken-smart-constructor / partialized-fold seeded mutant (d) that must turn each property red.
+- A reviewed Haskell broken-smart-constructor / partialized-fold mutation operator (d), applied to a temporary
+  source copy beneath `.build/mutants/**`, that must turn each property red while the unchanged control stays
+  green.
 
 ### Validation
 
@@ -316,8 +318,8 @@ exhausted (the three `Rke2Servers` arms).
    met, so a generator emitting one trivial value cannot pass.
 3. The exhausted-domain properties are marked PROVEN and the sampled ones TESTED — no sampled property is
    billed as a proof.
-4. The committed broken-smart-constructor / partialized-fold mutant (d) turns each of the four properties
-   red, and the suite is red if that mutant survives any property.
+4. The applied Haskell broken-smart-constructor / partialized-fold mutant (d) turns each of the four properties
+   red, and the suite is red if that mutant survives any property or if the production-change witness is absent.
 
 ### Remaining Work
 
@@ -341,7 +343,7 @@ assigned to their exact owners; `rendered-artifact-oracle` is owned by
 The gate discovers surfaces into `.build/test-surfaces/` and emits its run ledger under `.build/runs/`. The emitted
 validation-locus artifact is a **coverage projection** of the catalog and the modules under test, so by the
 source-based rule of [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
-it is a **generated** Register-1 output and is **never committed**. It is *not* the run-evidence ledger
+it is a **generated** Register-1 output beneath `.build/**` and is not repository source. It is *not* the run-evidence ledger
 [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) requires every gate to emit and
 externally attest: that is a separate artifact recording what this gate established and by what means, and
 its schema, linter, and path are centrally owned rather than re-derived here.
@@ -351,7 +353,8 @@ its schema, linter, and path are centrally owned rather than re-derived here.
 - Consumption of the Sprint-27.1 Haskell catalog enrichment and its run-local generated locus projection; Sprint 27.4 does not
   regenerate or reinterpret their owner/family classification from the emitter.
 - A ledger emitter that classifies each catalog entry into its earliest-sufficient truth-maker locus:
-  `dhall-typecheck` (fails `dhall type`, authoring-time), `gadt-decode` (compile-fail golden or decode
+  `dhall-typecheck` (fails `dhall type`, authoring-time), `gadt-decode` (a `.hs` compile-refusal case checked by
+  an independent Haskell error-class/locus expectation, or decode
   `Left`), `provision-seal` (post-bind `ProvisionError` before `ProvisionedSpec`), `rendered-artifact-oracle`
   (settled on emitted bytes in Phase 33), `live-effect` (settled only by a
   running cluster, deferred to Register 3). A separate disposition records `discharged-here` or

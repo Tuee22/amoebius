@@ -1,7 +1,7 @@
 # Phase 91: The infernix inference core, re-derived
 
 > **Purpose**: Re-derive the infernix inference core as an amoebius-owned extension behind one artifact
-> adapter, and test live that only a committed, owned artifact can drive deterministic CPU inference through
+> adapter, and test live that only a ready-pointer-committed, owned artifact can drive deterministic CPU inference through
 > amoebius services. The guarantee this adds over the seed is an ownership index on the artifact: an adapter
 > cannot be handed one it does not own.
 > **Read this if**: phase 91 is next in the queue, or a later phase depends on what its gate establishes.
@@ -48,7 +48,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -83,7 +83,7 @@ with no unbounded/default resource arm or fictional client Pod.
 The bounded campaign must implement the thin locally re-derived adapter facade and submit it to the Phase-91 aggregate
 gate; the command cannot accept or promote the phase. Split if the work changes sibling inference algorithms, adds a
 platform capability, or creates a server/UI runtime.
-**Phase scope:** one cohesive claim — *only a committed, owned artifact can drive inference through amoebius services*. The re-derivation adds an ownership index the seed's adapter does not carry.
+**Phase scope:** one cohesive claim — *only a ready-pointer-committed, owned artifact can drive inference through amoebius services*. The re-derivation adds an ownership index the seed's adapter does not carry. Here, "committed" names observed content-store pointer state, never a version-control operation or repository artifact.
 
 **Substrate:** linux-cpu
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
@@ -98,7 +98,7 @@ platform capability, or creates a server/UI runtime.
 
 | Key | Contract |
 |---|---|
-| `Claim` | one cohesive claim — *only a committed, owned artifact can drive inference through amoebius services*. The re-derivation adds an ownership index the seed's adapter does not carry. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | one cohesive claim — *only a ready-pointer-committed, owned artifact can drive inference through amoebius services*. The re-derivation adds an ownership index the seed's adapter does not carry. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
 | `Command` | `pb validate phase 91` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
@@ -153,6 +153,8 @@ platform capability, or creates a server/UI runtime.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 91.1: Re-derive infernix behind one scoped artifact adapter ⏸️
 
@@ -171,7 +173,8 @@ already-closed store, transport, secret, engine, workflow, determinism, and reso
 - Native CBOR commands/events preserving one scope-qualified command/work id, Vault secret names, named cached
   engines, deterministic CPU decode, and ready-last content-store publication behind that facade.
 - A finite `CpuInferenceWorkBudget` merged into inherited workflow/cache/store resource owners.
-- Independently reviewed fixtures, four named mutants, a generated Register-3 ledger, and run-local sibling
+- Independently reviewed Haskell cases and expectations, four named Haskell changed-subject operators, a
+  generated Register-3 ledger, and run-local sibling
   source identity observations.
 
 ### Validation
@@ -184,16 +187,17 @@ already-closed store, transport, secret, engine, workflow, determinism, and reso
    command id with a changed input and require the pinned pre-effect idempotency conflict.
 4. Replay the ready reference under tenant B and the pre-commit reference under tenant A; require their exact
    denials and zero forbidden Pulsar, MinIO, cache, or worker effect.
-5. Require the URL-engine and one-short resource fixtures to refuse before effects. Generate the sibling-source
+5. Require the Haskell URL-engine and one-short resource cases to refuse before effects. Generate the sibling-source
    inventory before and after both adapter selections under the run bundle and require it to remain unchanged.
-6. Apply each named mutant and require the unchanged command to fail before a leak-free evidence ledger can be
+6. Apply each named Haskell changed-subject operator and require the unchanged command to fail before a leak-free evidence ledger can be
    emitted.
 
 ### Remaining Work
 
-Remove `frozen_sources.txt`, `expected_hashes.tsv`, `sibling_golden.cbor`, and the gate's duplicated hash
-constants. Generate before/after source identity and reference output per run, and independently review or
-replace the remaining same-commit fixtures before revalidation. Production
+Any pre-reset serialized source inventories, expected hashes, golden outputs, or duplicated hash constants are
+condemned legacy inventory and not implementation instructions. Generate before/after source identity and
+reference output per run beneath ignored `.build/**`, from independently reviewed Haskell expectations that do
+not share the production subject's revision. Production
 TinyLlama-weights inference, linkage of the full sibling inference-engine core, direct Pulsar-command-to-worker
 causality, worker-direct MinIO artifact fetch with a worker-used Vault credential, general noninterference, and
 cross-substrate bit equality remain explicit UNVERIFIED follow-on surfaces.
@@ -210,7 +214,7 @@ cross-substrate bit equality remain explicit UNVERIFIED follow-on surfaces.
 - `documents/engineering/pulsar_client_doctrine.md` and `documents/engineering/vault_pki_doctrine.md` — record
   the live CBOR transport and secrets-by-name observations.
 - `documents/engineering/tenancy_doctrine.md` and `documents/engineering/testing_doctrine.md` — record the
-  tested scope denial, fresh challenge, repository-local evidence, and killed mutants without a general proof claim.
+  tested scope denial, fresh challenge, repository-local evidence, and killed Haskell changed subjects without a general proof claim.
 
 **Cross-references to add:**
 

@@ -49,7 +49,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -57,8 +57,10 @@ This phase's target must complete the standard platform-service set on top of th
 Phase-62 backbone. It must render and reconcile the cluster-wide **Percona operator**, one **Patroni Postgres cluster per consuming capability**
 (each paired with its own **pgAdmin**), and the **Prometheus/Grafana** observability pair — each as the
 byte-identical **HA topology even at `replicas=1`** (Postgres is a Patroni-via-Percona cluster, never a bare
-`postgres` Pod), each rendered as typed Kubernetes objects by the Phase-58 `renderAll` path (no Helm, no
-third-party charts, manifests generated from Haskell and never committed), each served from binaries **baked into the native-architecture base image** with no public-registry pull, and each on the Phase-60 `no-provisioner`
+`postgres` Pod), each rendered as typed Kubernetes objects by the Phase-58 `renderAll` path (no Helm and no
+third-party charts); manifests are generated lazily from Haskell beneath `.build/**`, remain untracked, and are
+absent from the repository. Each service is served from binaries **baked into the native-architecture base
+image** with no public-registry pull and each is placed on the Phase-60 `no-provisioner`
 retained PVs where it holds durable state. Every app, init, and sidecar container and every volume must be rendered
 only from an opaque `ProvisionedServiceSpec`, with exact CPU/memory/ephemeral-storage requests and limits,
 bounded pod-local storage, exact durable capacities, and explicit cache `None` plus accelerator `None` for this
@@ -235,10 +237,9 @@ dashboards.
 - The **mandated Patroni configuration** on every rendered cluster: `synchronous_mode: on`,
   `synchronous_mode_strict: on` (the decided strict stance — no synchronous standby ⇒ the primary refuses new
   writes; the degrade-to-async alternative is rejected), and a bytes-bounded `maximum_lag_on_failover` (a
-  replica lagging past the bound is promotion-ineligible). The existing
-  `test/fixture/platform_services_2/patroni-sync-config.golden` is a regression fixture until independently reviewed or
-  replaced, with the committed seeded mutant
-  `mutant/patroni-async-default` named as the mutant this invariant MUST turn red (on the specific reason that
+  replica lagging past the bound is promotion-ineligible). A separately authored Haskell Patroni configuration
+  expectation must be independently reviewed, with the Haskell changed-production-subject mutant
+  `M-patroni-async-default` named as the mutant this invariant MUST turn red (on the specific reason that
   `synchronous_mode_strict` is not `on`).
 - Prometheus + Grafana scraping platform workloads, with the per-workflow recording/alert rules and
   dashboards **derived, never hand-authored**.
@@ -280,8 +281,8 @@ dashboards.
   `None`/no device claim on linux-cpu; durable bytes live
   on retained PVs.
 - Run-local resolution of the Postgres shared package through Phase 1's compatibility policy. The selected
-  package identity and observed integrity are generated under `.build/toolchain/**`; no checksum fixture is
-  committed or read by the Haskell/live gate.
+  package identity and observed integrity are generated under `.build/toolchain/**`; no repository-retained
+  checksum input is read by the Haskell/live gate.
 
 ### Validation
 
@@ -294,12 +295,13 @@ dashboards.
    Then assert that the consumer uses its cluster end-to-end — Grafana authenticates with the credential from
    its Vault `SecretRef` and a SQL row written through Grafana's datastore is read back from its own Patroni
    cluster — rather than merely that an unattached `PerconaPGCluster` reconciles.
-2. Assert each rendered Patroni config is byte-equal to the committed `patroni-sync-config.golden` oracle
+2. Assert each rendered Patroni config is structurally equal to the separately authored Haskell expectation
    (`synchronous_mode: on`, `synchronous_mode_strict: on`, bounded `maximum_lag_on_failover`), and that the
-   committed `mutant/patroni-async-default` fails the synchronous-mode invariant with the specific reason that
+   Haskell changed-production-subject mutant `M-patroni-async-default` fails the synchronous-mode invariant with the specific reason that
    `synchronous_mode_strict` is not `on` — paired with a positive that differs only in that field.
-3. Assert Prometheus scrapes platform targets and the derived rules/dashboards are present and generated, not
-   committed by hand. Exceed `maxRules`, `maxSeries`, or `maxScrapeSamplesPerSecond` by one and require a
+3. Assert Prometheus scrapes platform targets and the derived rules/dashboards are present and generated lazily
+   from Haskell beneath `.build/**`, never repository-authored static assets. Exceed `maxRules`, `maxSeries`, or
+   `maxScrapeSamplesPerSecond` by one and require a
    pre-effect budget rejection; exceed each query concurrency/series/samples/range/timeout operand and require
    proxy rejection without direct-Prometheus reachability; independently under-size Prometheus or proxy
    CPU/memory for the evaluation + maximum-concurrent-query overlap and require pre-effect rejection; repeat
@@ -307,7 +309,8 @@ dashboards.
    byte below the independently
    rederived retained-block + WAL/head + compaction-overlap + query/temp peak and with raw allocation one
    quantum below the presentation-derived `provisionedBytes`; assert the apiserver audit and
-   backing observer record zero SSA/PV/allocation writes. A committed fixed-Prometheus-requests/tiny-PVC mutant
+   backing observer record zero SSA/PV/allocation writes. A Haskell changed-production-subject
+   fixed-Prometheus-requests/tiny-PVC mutant
    must turn this red. On the positive, read back effective global/rule-group intervals, process argv,
    TSDB/WAL configuration, PVC and PV: interval, `--storage.tsdb.retention.time`,
    `--storage.tsdb.retention.size`, Prometheus query flags, query-proxy limits, direct-query NetworkPolicy,
@@ -323,20 +326,24 @@ dashboards.
    resolve from Vault.
 4. Compare every rendered `PerconaPGCluster` resource/replica/PVC/rollout field with its pure child envelope,
    then independently enumerate the operator-created child StatefulSets/Pods/PVCs after readiness and assert
-   their aggregate request/limit/storage/rollout peak stays within it. A committed mutant dropping the CR
-   resource projection (thereby using operator defaults) must turn both the manifest and live-child oracle red.
+   their aggregate request/limit/storage/rollout peak stays within it. A Haskell changed-production-subject
+   mutant dropping the CR resource projection (thereby using operator defaults) must turn both the manifest and
+   live-child Haskell expectation red.
    Independently recompute the `PatroniSqlDemand` data/WAL/checkpoint/failover/recovery peak and make only the
    controller, webhook, SQL admission proxy, one Patroni member CPU/memory/ephemeral/pod/CSI slot, mounted usable byte, or rounded
-   backing byte one unit short. Each case rejects before CR/volume creation; mutants omitting the webhook or
+   backing byte one unit short. Each case rejects before CR/volume creation; the Haskell changed-production-subject
+   mutants omitting the webhook or
    treating the finite data size as the complete physical peak go red.
-5. Reject a seeded tracked package-checksum input, resolve the Postgres shared package dynamically, and verify
-   its selected identity and integrity only through the run-local toolchain record and repository-local attestation.
+5. Reject a seeded repository-retained package-checksum input, resolve the Postgres shared package dynamically,
+   and verify its selected identity and integrity only through the run-local toolchain record and external
+   attestation bound to that untracked run.
 
 ### Remaining Work
 
-Remove `postgres-share-package.sha256`, route package acquisition through Phase 1's dynamic resolver, and
-retain its integrity observation only in run evidence. Independently review or replace the same-commit Patroni
-and monitoring expectations. The Keycloak browser edge remains Phase 64 and control-plane-owned continuous
+The historical repository-retained Postgres package checksum is condemned residue and cannot be recreated.
+Route package acquisition through Phase 1's dynamic resolver and retain its integrity observation only in
+untracked run evidence. Independently review the separately authored Haskell Patroni and monitoring
+expectations. The Keycloak browser edge remains Phase 64 and control-plane-owned continuous
 reconciliation remains Phase 65, both explicitly UNVERIFIED.
 
 ## Sprint 63.2: Ephemeral Redis/Sentinel realtime coordination ⏸️
@@ -356,8 +363,9 @@ storage, durability, or a new DSL capability.
 - Closed key-class policy with per-class TTL/cleanup, serialized-size/cardinality/rate bounds, Redis
   `maxmemory`, client/output-buffer limits, and a bounded failover/reconnect envelope.
 - No PVC, AOF, RDB snapshot, backup, public Redis image, or application-visible endpoint.
-- Independent failover/config/volume/receipt oracles and the four committed mutants `mutant/redis-pvc`,
-  `mutant/redis-unbounded-buffer`, `mutant/redis-public-image`, and `mutant/redis-receipt-authority`.
+- Separately authored Haskell failover/configuration/volume/receipt expectations and the four Haskell
+  changed-production-subject mutants `M-redis-pvc`, `M-redis-unbounded-buffer`, `M-redis-public-image`, and
+  `M-redis-receipt-authority`; any serialized runtime forms are generated lazily under `.build/**` and untracked.
 
 ### Validation
 
@@ -365,11 +373,11 @@ storage, durability, or a new DSL capability.
    it on a replica, force primary loss, and require Sentinel promotion plus bounded reconnect.
 2. Read live args/config, volume inventory, NetworkPolicy, image digest, memory/client buffers, key TTL, and
    topology; assert no PVC, AOF, RDB, or backup is present and that every key, client, output-buffer, memory,
-   and rate bound exact-matches the independent oracle and the provision witness. Public
-   image/persistence/unbounded mutants fail before readiness.
+   and rate bound exact-matches the independent Haskell expectation and the provision witness. Public
+   Haskell image/persistence/unbounded changed-production-subject mutants fail before readiness.
 3. Run an application command while Redis is flushed and prove its durable receipt/outcome remains solely in
-   the effect-owning provider/Pulsar projection; the receipt-authority mutant must duplicate/lose the oracle
-   outcome and turn red.
+   the effect-owning provider/Pulsar projection; the receipt-authority mutant must duplicate or lose the
+   separately expected Haskell outcome and turn red.
 
 ### Remaining Work
 
@@ -402,17 +410,16 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
   service in its HA-capable shape. It also verifies generated-manifest and baked-binary provenance, exact
   execution-unit/volume projection from `ProvisionedServiceSpec`, and a Register-3 ledger that labels only the
   observed runtime layer *tested*.
-- The gate-oracle candidates, subject to recorded independent review under §M.1: a Register-1 property
+- The Haskell gate-oracle candidates, subject to recorded independent review under §M.1: a Register-1 property
   `prop_bringUpOrderDerivedFromEdges` asserting the derived bring-up order is a pure function of the
   *declared* dependency edges (adding or removing a declared edge changes the order; an introduced cycle is
   rejected) under a §M.4 cover/classify floor forcing a stated minimum fraction of cases through the
-  declared-edge mutation and injected-cycle branches so neither passes vacuously, checked against the committed
-  hand-authored edge→order reference table
-  `test/fixture/platform_services_2/dag-edges.golden` — an oracle **independent of** the `BringUp` fold (§M.3); and the
-  committed
-  seeded mutants **`mutant/dag-drop-edge`** (deletes the `perconaOperator → PerconaPGCluster` declared edge)
-  and **`mutant/dag-inject-cycle`** (adds a back-edge making the declared graph cyclic)
-  which the gate MUST turn red (§M.2 committed mutation quota) — committed and re-run, not run once.
+  declared-edge mutation and injected-cycle branches so neither passes vacuously, checked against a separately
+  authored Haskell edge→order reference table independent of the `BringUp` fold (§M.3); and the Haskell
+  changed-production-subject mutants **`M-dag-drop-edge`** (deletes the
+  `perconaOperator → PerconaPGCluster` declared edge) and **`M-dag-inject-cycle`** (adds a back-edge making the
+  declared graph cyclic), which the gate MUST turn red under the fixed §M.2 mutation quota and re-run on every
+  candidate. Any external representation of cases or results is generated lazily under `.build/**` and untracked.
 
 ### Validation
 
@@ -420,16 +427,16 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
    before its Patroni consumers, Vault-unsealed before secret-dependent startup — with each edge an observed
    condition and no timer standing in for a condition, and the **live order read from an external-observer bring-up trace** (apiserver watch / pod-readiness event stream at the OS boundary), never a compliance trace
    amoebius emits about itself. Beyond the observed order, assert **derivation**: the Register-1 property
-   `prop_bringUpOrderDerivedFromEdges` (checked against the committed `test/fixture/platform_services_2/dag-edges.golden`
-   reference table, independent of the `BringUp` fold) holds — the order is a pure function of the declared
+   `prop_bringUpOrderDerivedFromEdges` (checked against the separately authored Haskell edge→order reference
+   table, independent of the `BringUp` fold) holds — the order is a pure function of the declared
    edges, adding/removing a declared edge changes it, an introduced cycle is rejected — under a §M.4
    cover/classify floor keeping the edge-mutation and injected-cycle branches above a stated minimum fraction
-   of cases, and the committed
-   seeded mutants `mutant/dag-drop-edge` and `mutant/dag-inject-cycle` turn this property (and the live
+   of cases, and the Haskell changed-production-subject mutants `M-dag-drop-edge` and `M-dag-inject-cycle` turn
+   this property (and the live
    precondition assertion) red. A
    hardcoded sequential list with wait-for-ready between steps does not satisfy this and MUST fail the property.
 2. Round-trip MinIO put/get and Pulsar produce/consume against the assembled stack; assert Postgres is a
-   Patroni cluster, never a bare Pod, carrying the mandated synchronous config (the Sprint 63.1 oracle).
+   Patroni cluster, never a bare Pod, carrying the mandated synchronous config (the Sprint 63.1 Haskell expectation).
 3. Assert the complete standard stack is ready and preserves Phase 62's already-gated backbone topology and
    provenance. For the Phase-63 additions, a one-versus-many replica render diff may change only count fields;
    Patroni must remain the multi-member projection rather than switch to a standalone variant. Recompute
@@ -443,8 +450,9 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
 
 ### Remaining Work
 
-Remove `expected-base-digest.txt`, consume the verified Phase-56 identity as run input, and rerun the warm
-reconciliation under universal artifact hygiene. The deterministic scheduler gate owns the cold/partial-
+The historical copied expected-base-digest input is condemned residue and cannot be recreated. Consume the
+verified Phase-56 identity directly as authenticated run input and rerun the warm reconciliation under
+universal artifact hygiene. The deterministic scheduler gate owns the cold/partial-
 failure ordering claim.
 
 ## Sprint 63.4: Register-2.5 readiness-DAG bring-up under simulated partial failure ⏸️
@@ -471,13 +479,13 @@ in-process before the Register-3 live gate ever runs.
   (c) The orchestration **does not report success until every service is Ready**.
   (d) A **concurrency witness**: on at least one explored schedule the bring-up intervals of two
   declared-dependency-independent services overlap — an assertion a hardcoded sequential program cannot
-  satisfy. The committed `mutant/dag-drop-edge` seeded mutant MUST turn assertion (a) red here.
+  satisfy. The Haskell changed-production-subject `M-dag-drop-edge` mutant MUST turn assertion (a) red here.
 - A deterministically replayable seed on any failing schedule and a Register-2.5 ledger recording substrate `none`, the register, and the honest limit that modeled-substrate fidelity is *assumed*.
 
 ### Validation
 
 1. Run the bring-up under `IOSimPOR`; assert across explored schedules that every [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) hard edge (LoadBalancer → edge, Percona operator → Postgres consumer, Vault-unsealed → secret-dependent startup) holds — no dependent observed to start before its precondition on any schedule.
-2. Inject partial failure / restart / partition on a modeled dependency; assert the applicative-concurrent bring-up stays deadlock-free and fails closed on the missing/unhealthy dependency, never reporting success with a service not-Ready. Assert the concurrency witness: on at least one explored schedule the bring-up intervals of MinIO and the Percona operator (declared-dependency-independent) overlap — proving genuine applicative concurrency, not a hand-sequenced total order — and assert the committed `mutant/dag-drop-edge` mutant turns the precondition assertion red.
+2. Inject partial failure / restart / partition on a modeled dependency; assert the applicative-concurrent bring-up stays deadlock-free and fails closed on the missing/unhealthy dependency, never reporting success with a service not-Ready. Assert the concurrency witness: on at least one explored schedule the bring-up intervals of MinIO and the Percona operator (declared-dependency-independent) overlap — proving genuine applicative concurrency, not a hand-sequenced total order — and assert the Haskell changed-production-subject `M-dag-drop-edge` mutant turns the precondition assertion red.
 3. Replay a captured seed and assert a bit-identical schedule and outcome; emit the Register-2.5 ledger — substrate `none`, Register 2.5 — recording the honest limit that modeled-substrate fidelity is *assumed* and is discharged only by this phase's Register-3 live gate (Sprint 63.3).
 
 ### Remaining Work

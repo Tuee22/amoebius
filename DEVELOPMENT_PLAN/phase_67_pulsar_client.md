@@ -52,7 +52,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -205,6 +205,8 @@ provision.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 67.1: Fork supernova → amoebius-pulsar native binary protocol ⏸️
 
@@ -225,7 +227,8 @@ session per broker — the supernova provenance as **sibling evidence, not an am
   optional broker-entry-metadata block behind `0x0e02` + magic `0x0e01` + mandatory CRC32C + `metadata` + raw
   `payload`), rejecting any frame over the 5 MiB maximum; only the framing is hand-written, never the protobuf
   bodies.
-- `proto-lens`-generated `PulsarApi` (`BaseCommand` + message metadata) from `PulsarApi.proto`; hand-rolled
+- `proto-lens`-generated `PulsarApi` (`BaseCommand` + message metadata) from the version-pinned upstream
+  `PulsarApi.proto`, acquired lazily beneath `.build/**` and never retained as repository source; hand-rolled
   protobuf body parsing is forbidden.
 - A `Connection` that performs CONNECT → CONNECTED and resolves topics by looping on `LOOKUP_TOPIC`
   Connect/Redirect responses, multiplexing producers and consumers by `producer_id` / `consumer_id` /
@@ -290,15 +293,17 @@ seek-based replay — over the persistent session from Sprint 67.1, with **every
 3. Consume a prefix, `SEEK` back, and assert the earlier messages are redelivered.
 4. A typed command/event round-trips through the CBOR codec byte-for-byte against the oracle-pinned CBOR
    vector. Non-CBOR foreclosure is proven **by specific reason** (§M.8), not by any compile failure: the
-   compile-fail harness carries one negative fixture **per foreclosed route** — raw `ByteString`, JSON,
-   base64 — each committed in this phase's oracle-pinning sprint with its expected diagnostic (respectively `No instance for (Serialise
+   compile-fail harness carries one reviewed Haskell `.hs` negative **per foreclosed route** — raw
+   `ByteString`, JSON, and base64 — each paired with a separately authored Haskell diagnostic expectation
+   (respectively `No instance for (Serialise
    ByteString)` / `produceRaw not in scope` / `No instance for (Serialise …)` as authored), each paired with a
-   positive fixture that differs only in wrapping the body through `encodeCbor` and does type-check; the harness
-   asserts the diagnostic *matches the committed tag*, so a fixture that fails for an unrelated reason (typo,
-   missing import) does not satisfy the clause. An **API-surface golden** — a committed hand-authored expected
-   listing (independent of the codec source, §M.3) of `amoebius-pulsar`'s exported `produce`/`consume`
-   signatures — is diffed against the package's actual export list and asserts **no exported function accepts an unconstrained `ByteString` payload** and no `produceRaw`/frame-level raw-send is exported. A committed seeded
-   mutant that re-adds a `produceRaw :: ByteString -> …` export (union-arm addition operator) must turn this
+   positive Haskell fixture that differs only in wrapping the body through `encodeCbor` and does type-check.
+   The harness requires the diagnostic to match the Haskell-declared tag, so an unrelated type error does not
+   satisfy the clause. An independently authored Haskell API-surface expectation declares
+   `amoebius-pulsar`'s exported `produce`/`consume` signatures and compares them with the actual export list;
+   any serialized listing is generated lazily beneath `.build/test-corpora/pulsar-client/**`. It asserts no
+   export accepts an unconstrained `ByteString` payload and no raw-send arm exists. An applied Haskell mutant
+   that re-adds a `produceRaw :: ByteString -> …` export must turn this
    validation red. A corrupted CBOR body yields a structured `Left DecodeError` on consume (decode-foreclosed,
    like CRC32C), never a silent misread.
 5. A consumer grants `FLOW` permits, receives `MESSAGE` frames up to those permits, and `ACK`s each one,
@@ -343,21 +348,23 @@ a runtime mystery — the illegal-state-unrepresentable principle applied to the
    the descriptor, which is a tautology. "No code path accepts a literal topic string" is made concrete as a
    **type-level foreclosure that reaches the wire layer**: `Connection`'s `LOOKUP_TOPIC` and the produce/consume
    entry points accept only a `Topic` newtype whose sole constructor is private and produced only by `topicFor`;
-   an **API-surface golden** (committed, hand-authored) asserts no exported function on the reconcile-or-wire
-   path takes a bare `Text`/`String` topic, and a committed compile-fail fixture attempting to build a `Topic`
+   an independently authored Haskell API-surface expectation asserts no exported function on the
+   reconcile-or-wire path takes a bare `Text`/`String` topic. A reviewed Haskell `.hs` compile-fail fixture
+   attempting to build a `Topic`
    from a string literal fails with its expected diagnostic.
 2. Feed validation graphs with seeded duplicate / empty-lane / one-sided-link defects and assert the complete
    violation list (not just the first) is returned. The property generator carries `cover`/`classify`
    obligations (§M.4) forcing each defect class — duplicate, empty-lane, one-sided-link, and the multi-defect
    graph — to fire in **≥20%** of generated cases each, so the reject path is exercised, not a near-constant
-   legal graph. A committed seeded mutant with the one-sided-link clause deleted from `validateTopology`
+   legal graph. A Haskell-authored changed-subject seeded mutant with the one-sided-link clause deleted from `validateTopology`
    (invariant-clause-delete operator) must turn this validation red.
 3. Assert an `emit-only` workflow with unsourced reports validates — the `gc` exemplar, accepted despite
    having reports with no producing input — while the same graph without the exemption
    is rejected: a positive/negative pair differing only in the exemption flag (§M.8).
-4. Prove the algebra is on the gate path, not dead code (§M.3): the gate topology `round_trip_dedup.dhall`
-   carries a committed `RouteEntry` descriptor, and the Sprint 67.4 gate run asserts the actually-produced and
-   actually-consumed topic names equal the committed derived-topic table — the reconcile/gate path derives its
+4. Prove the algebra is on the gate path, not dead code (§M.3): a Haskell-declared gate topology, rendered
+   lazily beneath `.build/test-corpora/pulsar-client/**`, carries a `RouteEntry` descriptor. The Sprint 67.4
+   gate run asserts the actually produced and consumed topic names equal the independent Haskell expected-topic
+   table — the reconcile/gate path derives its
    topics through `topicFor`, never from hand-written strings.
 
 ### Remaining Work
@@ -386,7 +393,8 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
   otherwise fall back to a stable hash of a generated request id paired with a request-scoped producer name.
 - At-least-once consumer discipline: `ACK` only after processing; un-acked messages are redelivered after a
   crash or rebalance.
-- The gate `round_trip_dedup.dhall` `InForceSpec` topology, carrying a committed `RouteEntry` descriptor so its
+- A Haskell-declared `InForceSpec` gate topology, rendered lazily beneath
+  `.build/test-corpora/pulsar-client/**`, carrying a `RouteEntry` descriptor so its
   topics are `topicFor`-derived, not hand-written: bring up against the standing Pulsar service, produce a
   workflow `command`, consume it, produce the corresponding `event`, consume it back — all CBOR — and always
   tear down, emitting a per-run proven/tested/assumed ledger.
@@ -396,7 +404,7 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
   broker socket or namespace mutation occurs on `Left ProvisionError` or live-preflight refusal.
 - The oracle-pinned gate oracles (§M.1), authored before the client exists: the CBOR command/event byte
   vectors, the hand-authored expected derived-topic table, the standing-namespace pre-run policy snapshot, and
-  the committed seeded-mutant set (topicFor-literal, one-sided-link-clause-deleted, produceRaw-re-added) each
+  the Haskell-authored changed-subject seeded-mutant set (topicFor-literal, one-sided-link-clause-deleted, produceRaw-re-added) each
   asserted to turn the gate red (§M.2).
 
 ### Validation
@@ -404,8 +412,9 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
 1. Run the gate topology end-to-end on the `linux-cpu` kind cluster and assert: a workflow command round-trips
    to an event over the native protocol with broker-side dedup enabled; the CBOR payloads round-trip
    byte-for-byte against the oracle-pinned CBOR command/event vectors; the produced and consumed topic
-   names equal the committed derived-topic table (§M.3, algebra on the gate path); a fixture attempting a
-   non-CBOR payload fails to type-check with its committed expected diagnostic (§M.8). A companion negative gate
+   names equal the independently authored Haskell derived-topic expectation (§M.3, algebra on the gate path).
+   A reviewed Haskell `.hs` fixture attempting a non-CBOR payload fails to type-check with its Haskell-declared
+   expected diagnostic (§M.8). A companion negative gate
    run seeds the same topology with a one-sided link and asserts `validateTopology` refuses it **before any broker socket is opened**.
 2. Enable namespace dedup, publish the same `(producer_name, sequence_id)` twice, and assert the broker
    collapses the duplicate; kill a consumer between receive and `ACK` and assert redelivery on reconnect.

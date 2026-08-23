@@ -15,7 +15,7 @@ later. The pre-hardware harness is owned by
 
 **Status**: Authoritative source
 **Supersedes**: the image-first validation-frame rule previously carried by this file
-**Referenced by**: DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/image_build_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/image_build_doctrine.md, documents/glossary.md, pb/README.md
 **Generated sections**: none
 
 </details>
@@ -40,11 +40,13 @@ accelerator, or cloud account exists.
 This ordering is mandatory:
 
 ```text
-pb ensures toolchain and execs Haskell
-  → Haskell source-policy and gate-kernel qualification
+authenticated, network-independent toolchain input builds the exact source-bound Haskell binary
+  → direct Haskell source-policy and gate-kernel qualification
   → Haskell DSL/proof/generator validation
-  → no-hardware promotion barrier
-  → host and image work
+  → Phase 49 no-hardware promotion barrier
+  → Phase 50 externally observes the already source-bounded pb handoff
+  → Phase 51 Haskell host-ensure against fake boundaries
+  → Phase 52 first hardware work
   → optional image parity replay
 ```
 
@@ -69,19 +71,23 @@ or host-floor policy, implement help/version or another public command, perform 
 after establish/build, the exact argv reaches Haskell by exec. A Python exit-code wrapper around another gate
 is prohibited.
 
-The bootstrap source itself is checked against a deny-by-default Haskell AST/import/call/effect grammar and
-observed at its single effect adapter. Unsupported syntax, unresolved calls, dynamic execution/import or
-reflection, and an unobserved side effect fail closed. A keyword scan or command listing cannot establish
-semantic scope. Any new `pb/**` behaviour outside these four operations is a source-closure failure even if
-its extension remains `.py`.
+Phase 0 checks the bootstrap source against an exact non-empty, deny-by-default Haskell-owned
+AST/import/resolved-call/control-flow/potential-effect grammar. Unsupported syntax, unresolved calls, dynamic
+execution/import or reflection, and any potential effect not routed to the declared `BootstrapAdapter`
+boundary fail closed. This static source-admission result does not establish that an effect or exec occurred.
+Phase 49 invokes Haskell directly; Phase 50 alone observes the adapter and ensure/build/executable-identity/
+unchanged-argv/exec runtime handoff. A keyword scan or command listing cannot establish semantic scope. Any
+new `pb/**` behaviour outside the four admitted operations is a source-closure failure even if its extension
+remains `.py`.
 
 ---
 
 ## 3. Why native validation is `Substrate: none`
 
 `Substrate: none` means that the claim does not depend on a hardware-specific or live-infrastructure fact.
-The bootstrapped Haskell toolchain is a build prerequisite, not evidence about Linux, Apple, Windows, CUDA,
-Metal, a container engine, or a published image.
+For Phases 0–49, the directly established Haskell toolchain is a build prerequisite, not evidence about Linux,
+Apple, Windows, CUDA, Metal, a container engine, or a published image. Phase 50 separately observes the
+bounded `pb` runtime handoff; it cannot retroactively strengthen an earlier semantic result.
 
 Pure and fake-boundary gates therefore remain Register 1 or 2 and `Substrate: none`. They record the compiler
 and source snapshot used for provenance, but no toolchain version or host identity strengthens the semantic

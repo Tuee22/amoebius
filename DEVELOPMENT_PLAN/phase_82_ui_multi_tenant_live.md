@@ -46,7 +46,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -98,23 +98,26 @@ releasable runtime feature.
 
 > **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
-- The generic immutable PureScript runtime and same-binary UI-server worker behind Keycloak/Envoy, using paired
-  plans from one sealed `BoundUiProgram`; no per-app image or browser provider client exists.
+- The generic immutable PureScript runtime generated lazily from reviewed Haskell beneath ignored `.build/**`,
+  and the same-binary Haskell UI-server worker behind Keycloak/Envoy, using paired plans from one sealed
+  `BoundUiProgram`; no per-app image or browser provider client exists.
 - Two tenant scopes, two real subjects, equal-shaped data, route/action projections, and one live membership
   change; all handles and caches are scope/subject/epoch keyed.
-- Separate SUT and observer credentials, a foreign CNI probe, bounded Playwright harness, and complete
+- Separate SUT and observer credentials, a foreign CNI probe, and a bounded Haskell browser harness that lazily
+  generates any Playwright transport beneath `.build/**`, with complete
   pod/image/slot/API/etcd/storage/message envelopes admitted before effects.
 
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`; negatives under `test/negative/ui_multi_tenant_live/`.
+- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`; Haskell negative declarations
+  materialize their serialized cases lazily under `.build/test-corpora/ui_multi_tenant_live/`.
 
 ## Doctrine adopted
 
 - [`extension_conformance_security.md` §4 — S1–S6](../documents/engineering/extension_conformance_security.md#4-s1s6) — multi-tenant low-code UI isolation carries an identity boundary, and S1-S6 are what make crossing it unrepresentable.
 - [`low_code_ui_runtime_doctrine.md` §9 — routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge): browser presentation is not authority.
 - [`low_code_ui_runtime_doctrine.md` §10.2 — multi-tenant mode](../documents/engineering/low_code_ui_runtime_doctrine.md#102-multi-tenant-mode): opaque selection rotates scope and invalidates tenant state.
-- [`low_code_ui_runtime_doctrine.md` §13 — Generic PureScript client and amoebius UI server](../documents/engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server): all effects cross the same-origin server boundary.
+- [`low_code_ui_runtime_doctrine.md` §13 — Generic PureScript client and amoebius UI server](../documents/engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server): all effects cross the same-origin server boundary; PureScript is a lazy Haskell-generated `.build/**` output, never repository source.
 - [`low_code_ui_runtime_doctrine.md` §15 — Versioning, rollout, and generated artifacts](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): membership or policy changes invalidate stale authority.
-- [`illegal_state_security.md` §3.79 — A UI action whose server authorization does not match its declaration](../documents/illegal_state/illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration), [`illegal_state_security.md` §3.80 — A subject resolving or mutating another subject's resource without a grant](../documents/illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant), [`illegal_state_capability_messaging.md` §3.82 — A browser effect or provider call escaping the server-mediated capability boundary](../documents/illegal_state/illegal_state_capability_messaging.md#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary), and [`illegal_state_security.md` §3.83 — A UI plan executed after an authority-bearing source changed](../documents/illegal_state/illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed): their live oracles and mutants are mandatory.
+- [`illegal_state_security.md` §3.79 — A UI action whose server authorization does not match its declaration](../documents/illegal_state/illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration), [`illegal_state_security.md` §3.80 — A subject resolving or mutating another subject's resource without a grant](../documents/illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant), [`illegal_state_capability_messaging.md` §3.82 — A browser effect or provider call escaping the server-mediated capability boundary](../documents/illegal_state/illegal_state_capability_messaging.md#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary), and [`illegal_state_security.md` §3.83 — A UI plan executed after an authority-bearing source changed](../documents/illegal_state/illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed): their live Haskell oracles and changed-subject mutation operators are mandatory.
 - [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence): authority and effect evidence come from outside the UI runtime.
 - [`ui_realtime_coordination_doctrine.md` §4 — Typed routing and resume envelope](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): every routed frame/registration exact-matches current tenant/subject/scope/program epochs.
 
@@ -123,6 +126,8 @@ releasable runtime feature.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 82.1: Live opaque tenant switching and stale-scope refusal ⏸️
 
@@ -137,10 +142,11 @@ server-established authority while invalidating every stale client value that co
 
 - Server handling for bounded opaque tenant choices, membership recheck, epoch rotation, handle invalidation,
   request/subscription cancellation, and current route/authorization projection reload.
-- Generic PureScript tenant-choice rendering that stores no tenant authority and clears tenant-scoped state on
-  the server-confirmed transition.
-- Live Playwright/security harness, Keycloak identities, fresh-challenge protocol, independent provider/network
-  and session-epoch observers, explicit mutants, cleanup inventory, and a schema-checked Register-3 ledger.
+- Generic tenant-choice rendering generated lazily as PureScript from reviewed Haskell beneath `.build/**`; it
+  stores no tenant authority and clears tenant-scoped state on the server-confirmed transition.
+- A live Haskell browser/security harness that lazily generates any Playwright transport beneath `.build/**`,
+  Keycloak identities, fresh-challenge protocol, independent provider/network and session-epoch observers,
+  explicit Haskell changed-subject mutations, cleanup inventory, and a Haskell-schema-checked Register-3 ledger.
 
 ### Validation
 

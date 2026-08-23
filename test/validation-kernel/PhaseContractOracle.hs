@@ -25,6 +25,11 @@ runPhaseContractOracle =
             planRoot
             (checkPhaseContracts validCorpus)
         , expectFindingInResult
+            "production contracts pin the complete sprint inventory"
+            "PLAN-SPRINT-INVENTORY"
+            (phasePath 0)
+            (checkPhaseContracts validCorpus)
+        , expectFindingInResult
             "empty phase discovery"
             "PLAN-PHASE-DISCOVERY"
             planRoot
@@ -55,6 +60,16 @@ runPhaseContractOracle =
             (phasePath 10)
             (replaceIn (phasePath 10) blockedStatus activeStatus validCorpus)
         , expectFinding
+            "a second bare phase status cannot hide after the reset line"
+            "PLAN-PHASE-STATUS"
+            (phasePath 10)
+            (replaceIn (phasePath 10) blockedStatus (blockedStatus <> "\n\n✅ Done") validCorpus)
+        , expectFinding
+            "a second phase Status field cannot hide after the reset line"
+            "PLAN-PHASE-STATUS"
+            (phasePath 10)
+            (replaceIn (phasePath 10) blockedStatus (blockedStatus <> "\n\n**Status**: ✅ Done") validCorpus)
+        , expectFinding
             "tracker status reset"
             "PLAN-TRACKER-STATUS"
             trackerPath
@@ -74,16 +89,9 @@ runPhaseContractOracle =
                 "[Phase 8](./phase_08_synthetic_capability.md)"
                 validCorpus
             )
-        , expectFinding
-            "predecessor phase token cannot match a longer ordinal by prefix"
-            "PLAN-GATE-PREDECESSOR"
-            (phasePath 10)
-            ( replaceIn
-                (phasePath 10)
-                (gateRow "Predecessor" "Phase 09")
-                (gateRow "Predecessor" "Phase 090")
-                validCorpus
-            )
+        , expectClean
+            "gate-row prose cannot supply predecessor, residue, or authority semantics"
+            gateSemanticProseDecoyCorpus
         , expectFinding
             "tracker title joins its phase H1"
             "PLAN-TRACKER-TITLE"
@@ -155,30 +163,63 @@ runPhaseContractOracle =
             (phasePath 9)
             ( replaceIn
                 (phasePath 9)
-                ("**Gate:** " <> commandValue 9 <> " — NOT VALIDATED.")
+                (gateSummaryLine 9)
                 "**Gate:** `pb validate phase 9` — NOT VALIDATED."
                 validCorpus
             )
         , expectFinding
-            "Phase 49 ordered hardware-free semantic spine"
-            "PLAN-PHASE49-SPINE"
-            (phasePath 49)
-            ( replaceIn
-                (phasePath 49)
-                "plan/resolve → provision → renderAll"
-                "plan/resolve → renderAll → provision"
-                validCorpus
+            "phase-summary dual Validated and NOT VALIDATED status"
+            "PLAN-GATE-SUMMARY-COMMAND"
+            (phasePath 9)
+            (replaceIn (phasePath 9) (gateSummaryLine 9) ("**Gate:** " <> commandValue 9 <> "; see [Gate integrity](#gate-integrity). Validated — NOT VALIDATED.") validCorpus)
+        , expectFinding
+            "a fenced canonical gate summary cannot mask a contradictory live summary"
+            "PLAN-GATE-SUMMARY-COMMAND"
+            (phasePath 9)
+            ( appendTo
+                (phasePath 9)
+                ("\n```text\n" <> gateSummaryLine 9 <> "\n```\n")
+                (replaceIn (phasePath 9) (gateSummaryLine 9) ("**Gate:** " <> commandValue 9 <> "; see [Gate integrity](#gate-integrity). Validated — NOT VALIDATED.") validCorpus)
             )
         , expectFinding
-            "Phase 51 remains pre-hardware"
-            "PLAN-PREHARDWARE-FIELD"
-            (phasePath 51)
-            (replaceIn (phasePath 51) "**Substrate:** none" "**Substrate:** linux-cpu" validCorpus)
+            "an HTML-comment-spliced reset is not the raw canonical gate summary"
+            "PLAN-GATE-SUMMARY-COMMAND"
+            (phasePath 9)
+            (replaceIn (phasePath 9) (gateSummaryLine 9) (Text.replace "NOT VALIDATED" "NOT<!-- hidden --> VALIDATED" (gateSummaryLine 9)) validCorpus)
         , expectFinding
-            "Phase 52 is the first hardware-bearing contract"
-            "PLAN-HARDWARE-CUT"
-            (phasePath 52)
-            (replaceIn (phasePath 52) "**Substrate:** linux-cpu" "**Substrate:** none" validCorpus)
+            "a line-wrapped reset is not the raw canonical gate summary"
+            "PLAN-GATE-SUMMARY-COMMAND"
+            (phasePath 9)
+            (replaceIn (phasePath 9) (gateSummaryLine 9) (Text.replace "NOT VALIDATED" "NOT\nVALIDATED" (gateSummaryLine 9)) validCorpus)
+        , expectClean
+            "an exact blocked sprint reset status is admitted structurally"
+            (appendTo (phasePath 10) (sprintBlock 10 1 "Blocked — NOT VALIDATED") validCorpus)
+        , expectFinding
+            "a dual Validated and NOT VALIDATED sprint status is refused"
+            "PLAN-SPRINT-STATUS"
+            (phasePath 10)
+            (appendTo (phasePath 10) (sprintBlock 10 1 "Validated — NOT VALIDATED") validCorpus)
+        , expectFinding
+            "an HTML-comment-spliced sprint reset is not the raw canonical field"
+            "PLAN-SPRINT-STATUS"
+            (phasePath 10)
+            (appendTo (phasePath 10) (sprintBlock 10 1 "Blocked — NOT<!-- hidden --> VALIDATED") validCorpus)
+        , expectFinding
+            "a lowercase done sprint status is refused"
+            "PLAN-SPRINT-STATUS"
+            (phasePath 10)
+            (appendTo (phasePath 10) (sprintBlock 10 1 "done — NOT VALIDATED") validCorpus)
+        , expectFinding
+            "a sprint heading cannot claim another phase"
+            "PLAN-SPRINT-IDENTITY"
+            (phasePath 10)
+            (appendTo (phasePath 10) (sprintBlock 9 1 "Blocked — NOT VALIDATED") validCorpus)
+        , expectClean
+            "Phase 49 Claim, Subject, and title prose are semantically inert"
+            phaseFortyNineProseDecoyCorpus
+        , expectClean
+            "Substrate, Lane, and Register projections cannot supply hardware-ordering semantics"
+            phaseProjectionSemanticDecoyCorpus
         ]
     )
 
@@ -200,6 +241,75 @@ markerCorpus =
         validCorpus
     )
 
+gateSemanticProseDecoyCorpus :: [(FilePath, Text)]
+gateSemanticProseDecoyCorpus =
+  replaceIn
+    (phasePath 10)
+    (gateRow "Human authority" "Promotion authority is human-only.")
+    (gateRow "Human authority" "This reader-facing explanation carries no executable policy value.")
+    ( replaceIn
+        (phasePath 10)
+        (gateRow "Residue" "Later layers remain UNVERIFIED.")
+        (gateRow "Residue" "This reader-facing explanation carries no executable coverage value.")
+        ( replaceIn
+            (phasePath 10)
+            (gateRow "Predecessor" "Phase 09")
+            (gateRow "Predecessor" "This reader-facing explanation carries no executable dependency value.")
+            ( replaceIn
+                (phasePath 10)
+                (gateRow "Command" (commandValue 10))
+                (gateRow "Command" (commandValue 10 <> "; Python and tools/ are inert explanatory decoys."))
+                validCorpus
+            )
+        )
+    )
+
+phaseFortyNineProseDecoyCorpus :: [(FilePath, Text)]
+phaseFortyNineProseDecoyCorpus =
+  replaceIn
+    trackerPath
+    "| 49 | No-hardware DSL promotion barrier |"
+    "| 49 | Semantically opaque prose |"
+    ( replaceIn
+        (phasePath 49)
+        "# Phase 49: No-hardware DSL promotion barrier"
+        "# Phase 49: Semantically opaque prose"
+        ( replaceIn
+            (phasePath 49)
+            (gateRow "Subject" phaseFortyNineSubject)
+            (gateRow "Subject" "Harbor and registry:2 are inert prose decoys, not executable provider values.")
+            ( replaceIn
+                (phasePath 49)
+                (gateRow "Claim" phaseFortyNineClaim)
+                (gateRow "Claim" "Module names and fake-apply keywords in this prose carry no executable semantics.")
+                validCorpus
+            )
+        )
+    )
+
+phaseProjectionSemanticDecoyCorpus :: [(FilePath, Text)]
+phaseProjectionSemanticDecoyCorpus =
+  replaceIn
+    trackerPath
+    (trackerRowWith 52 "linux-cpu" "cpu" "3" blockedTrackerStatus)
+    (trackerRowWith 52 "none" "semantically-opaque" "2" blockedTrackerStatus)
+    ( replaceIn
+        (phasePath 52)
+        "**Substrate:** linux-cpu\n\n**Lane:** cpu\n\n**Register:** 3"
+        "**Substrate:** none\n\n**Lane:** semantically-opaque\n\n**Register:** 2"
+        ( replaceIn
+            trackerPath
+            (trackerRowWith 51 "none" "none" "2" blockedTrackerStatus)
+            (trackerRowWith 51 "linux-cpu" "cuda" "3" blockedTrackerStatus)
+            ( replaceIn
+                (phasePath 51)
+                "**Substrate:** none\n\n**Lane:** none\n\n**Register:** 2"
+                "**Substrate:** linux-cpu\n\n**Lane:** cuda\n\n**Register:** 3"
+                validCorpus
+            )
+        )
+    )
+
 phaseDocument :: Int -> Text
 phaseDocument number =
   Text.unlines
@@ -217,7 +327,7 @@ phaseDocument number =
       , ""
       , "**Depends on:** " <> dependencyValue number
       , ""
-      , "**Gate:** " <> commandValue number <> " — NOT VALIDATED."
+      , gateSummaryLine number
       , ""
       , "## Phase Status"
       , ""
@@ -309,6 +419,19 @@ dependencyValue number =
 commandValue :: Int -> Text
 commandValue number = "`pb validate phase " <> formatPhase number <> "`"
 
+gateSummaryLine :: Int -> Text
+gateSummaryLine number =
+  "**Gate:** " <> commandValue number <> "; see [Gate integrity](#gate-integrity). NOT VALIDATED."
+
+sprintBlock :: Int -> Int -> Text -> Text
+sprintBlock phaseNumberValue sprintNumber status =
+  Text.unlines
+    [ ""
+    , "## Sprint " <> showText phaseNumberValue <> "." <> showText sprintNumber <> ": Synthetic seam ⏸️"
+    , ""
+    , "**Status**: " <> status
+    ]
+
 substrateValue :: Int -> Text
 substrateValue number
   | number <= 51 = "none"
@@ -398,6 +521,15 @@ replaceDocument wanted replacement =
     ( \entry@(path, _) ->
         if path == wanted
           then (path, replacement)
+          else entry
+    )
+
+appendTo :: FilePath -> Text -> [(FilePath, Text)] -> [(FilePath, Text)]
+appendTo wanted addition =
+  map
+    ( \entry@(path, contents) ->
+        if path == wanted
+          then (path, contents <> addition)
           else entry
     )
 

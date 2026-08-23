@@ -42,7 +42,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -73,7 +73,7 @@ infrastructure. Any external-language encoding or fake executable is generated r
 |---|---|
 | `Claim` | Target only — Haskell client semantics, server policy, and generated fake domain ports compose over Haskell cases without a browser or live service. Any external-language bytes are lazy `.build/**` output; identity/provider/cluster/deployment behavior is not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 44` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 44` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -101,7 +101,9 @@ infrastructure. Any external-language encoding or fake executable is generated r
 
 ## Sprints
 
-> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+> **Reset validation review.** This sprint remains REJECTED — NOT VALIDATED until its fixed Haskell
+> subject/oracle/reviewer/mutant/legacy contract is complete and independently reviewed. The target boundaries
+> below use Haskell fake interpreters and authorize no browser, OS, network, provider, or hardware process.
 
 ## Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate ⏸️
 
@@ -109,30 +111,34 @@ infrastructure. Any external-language encoding or fake executable is generated r
 
 ### Objective
 
-Adopt the first complete local low-code application path and demonstrate that generic data/workflow/artifact
-ports interoperate without weakening current authorization, scope, public projection, or app/deployment
-separation.
+Define the first complete hardware-free low-code composition over Haskell client semantics, Haskell server
+policy, and typed fake data/workflow/artifact ports. The composition must preserve authorization, scope,
+public projection, and application/deployment separation.
 
 ### Deliverables
 
-- Two bounded authored applications, their authored interaction/expectation sets, and fake typed domain
-  handlers sharing no oracle code with the runtimes.
-- End-to-end harness with ephemeral credentials, post-start workflow challenge, Playwright observer,
-  append-only raw effect observers, OS network capture, surface-enumeration join, and bypass probes.
-- Tenant/subject/artifact paired negatives, mutant configurations, and Register-2 honesty ledger.
+- Two bounded Haskell-authored applications, their Haskell-authored interaction sets, and typed Haskell fake
+  domain handlers. Separately reviewed Haskell expectations share no subject code with the composed runtimes.
+- An in-process Haskell composition harness with run-scoped credential values, a challenge injected after fake
+  initialization, append-only typed effect observations, a two-way surface join, and authority-bypass probes.
+- Haskell-authored tenant/subject/artifact paired negatives and mutation declarations, plus a lazily rendered
+  `.build/**` Register-2 honesty ledger.
 
 ### Validation
 
-1. Rejected historical observation: the `ui-local-composition-spec` Cabal suite expected both applications to
-   reach every authored visible state and exact
-   typed effect sequence, with every generated surface covered and the fresh nonce recovered end to end.
-2. Replay equal-shaped requests under foreign-subject and foreign-tenant credentials and copied/non-ready
-   handles; observe the pinned refusal, zero forbidden backend effect, and no foreign bytes in browser/server
-   output or caches.
+1. Require both Haskell applications to reach every declared visible state and exact typed fake-effect
+   sequence. Two-way discovery must cover every generated surface, and the independent observer must recover
+   the challenge injected after fake initialization.
+2. Replay equal-shaped values under foreign-subject and foreign-tenant credentials and copied or non-ready
+   handles. Require the pinned refusal, zero forbidden fake-domain effect, and no foreign bytes in Haskell
+   client state, server responses, or fake caches.
 3. Run `M-drop-handle-tenant`, `M-direct-workflow-fetch`, `M-mix-client-server-plan`,
-   `M-ready-before-receipt`, and `owner_key_swap`; each turns a distinct independent oracle red.
-4. Verify all browser traffic uses the UI-server edge and the ledger leaves live infernix/jitML, Keycloak,
-   provider storage, release, replica-loss, and HA behavior UNVERIFIED.
+   `M-ready-before-receipt`, and `owner_key_swap`. Each changed production Haskell locus must be witnessed and
+   produce its distinct named Haskell-oracle mismatch. The unaffected control must remain equal to its
+   independently declared observation.
+4. Require every client request-plan value to address only the typed UI-server fake port. No network traffic is
+   generated. Actual browser/server execution, infernix/jitML, Keycloak, provider storage, release,
+   replica-loss, and HA behavior remain post-barrier UNVERIFIED residue.
 
 ### Remaining Work
 
@@ -148,7 +154,7 @@ and HA remain explicitly UNVERIFIED for their owning later phases.
 - `documents/engineering/app_vs_deployment_doctrine.md` — record application-authored expectation evidence
   while preserving the deployment-rule exclusion.
 - `documents/engineering/testing_doctrine.md` — register the generated-surface/authored-interaction join and
-  fresh external workflow observer.
+  fresh Haskell fake-boundary challenge and independent typed-effect observer.
 
 **Cross-references to add:**
 
@@ -160,8 +166,10 @@ and HA remain explicitly UNVERIFIED for their owning later phases.
 ## Related Documents
 
 - [Development Plan Tracker](README.md) — numeric order and current status.
-- [Phase 42](phase_42_ui_browser_interpreter.md) — the required generic browser runtime.
+- [Phase 42](phase_42_ui_browser_interpreter.md) — the required generic Haskell client semantics and lazy
+  runtime projection.
 - [Phase 43](phase_43_ui_server_boundary.md) — the required authenticated scoped server boundary.
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — composition, workflow/artifact, tenancy, and honesty contract.
 - [Application vs Deployment Doctrine](../documents/engineering/app_vs_deployment_doctrine.md) — authored expectations remain app logic; topology remains operator logic.
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — independent oracle, fresh challenge, and external observer rules.
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — independent Haskell oracle, fresh fake
+  challenge, and typed-effect observer rules.

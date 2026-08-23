@@ -6,6 +6,9 @@
 This file owns agent conduct only. Architecture, source classification, phase order, and validation design
 remain owned by the linked doctrine and development-plan standards.
 
+`CLAUDE.md` must remain the exact one-line mechanical import `@AGENTS.md` with one trailing newline. It must
+not duplicate, summarize, qualify, or override this file; the documentation checker compares its exact bytes.
+
 <details>
 <summary>Link-graph metadata</summary>
 
@@ -59,9 +62,14 @@ status procedure.
 No hardware discovery, container-engine bring-up, cluster creation, image execution, or other live validation
 may begin until the development plan records human approval of the Phase-49 hardware-free DSL promotion
 barrier and all of its predecessors. That barrier requires every source-migration query—including the bounded
-`pb` role—to be zero. Phase 50 validates the already-bounded handoff and owns no source migration. Validation
-must follow numeric phase order and fail closed when predecessor evidence or any required trust boundary is
-absent.
+`pb` role—to be zero. Before Phase 50 is approved, `pb` is not an admissible validation transport: Phase 0
+through Phase 49 build and invoke the exact source-bound Haskell executable directly from an authenticated,
+network-independent toolchain input. Their `pb validate phase NN` spelling is the future public target, not
+evidence that the unvalidated bootstrap ran correctly. Phase 50 alone validates the already source-bounded
+runtime ensure/build/identity-argv/exec handoff and owns no source migration. Phase 51 remains a hardware-free
+Haskell host-ensure gate against fake boundaries; Phase 52 is the first hardware-bearing validation phase.
+Validation must follow numeric phase order and fail closed when predecessor evidence or any required trust
+boundary is absent.
 
 ## Registry Provider
 
@@ -85,5 +93,6 @@ not push a commit — publication is an outward-facing act reserved to the human
 This obligation is a consequence of the fixed names, not of publication itself, and it
 retires when a tag becomes the recipe's content address: a changed recipe would then have
 an address the registry does not hold, so a consumer rebuilds instead of pulling something
-stale. That target is stated in `documents/engineering/image_build_doctrine.md` section
-2.1; until a phase delivers it, the prompt above stands unchanged.
+stale. That target is stated in
+[`image_build_doctrine.md` §2.1](documents/engineering/image_build_doctrine.md#21-a-published-tag-is-a-cache-warm-up-and-its-name-is-the-content-address);
+until a phase delivers it, the prompt above stands unchanged.

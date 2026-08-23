@@ -48,7 +48,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -77,7 +77,7 @@ architecture, or cannot be verified against the content it describes exactly as 
 the tag must not be advertised.
 
 What this phase deliberately does not do is re-derive Phase 56's work. The acquisition ladder, bake-inventory
-oracle, registry standup, mutation-admission proxy, and egress boundary may be consumed only as bound to Phase
+Haskell oracle, registry standup, mutation-admission proxy, and egress boundary may be consumed only as bound to Phase
 56's future external human approval. This phase targets one architecture, one publication, and the negatives
 that keep the tag honest.
 
@@ -163,14 +163,15 @@ bake the complementary child from the same typed catalog on hardware that native
 - The complementary-architecture image, built by one plain `docker build` on a host of that architecture.
 - A typed `Attestation` recording the host's detected substrate, selected lane, natural architecture, the
   run nonce, and the per-binary execution and ELF-machine observations for that image.
-- The committed mutants `emulated-build` and `stub-arm64-binary`.
+- The Haskell changed-subject mutants `emulated-build` and `stub-arm64-binary`; any external form is generated
+  lazily beneath `.build/**`.
 
 ### Validation
 
 1. The image's platform is exactly this host's natural platform.
 2. Every baked binary runs natively by absolute path and matches its pinned probe.
 3. The `binfmt_misc` table is unchanged across the run and no emulator binary is executed.
-4. Both committed mutants turn the sprint red for their specific reasons.
+4. Both Haskell mutants turn the sprint red for their specific reasons.
 
 ### Remaining Work
 
@@ -191,14 +192,15 @@ publish one attested, architecture-qualified tag.
 - The pure admission decision: one attested image to one advertised tag, total, with a closed refusal set for
   a missing, foreign, or unverifiable attestation.
 - One immutable digest-pinned, architecture-qualified tag resolving from the in-cluster registry.
-- The committed mutants `foreign-attestation`, `unattested-image`, and `advertise-before-upload`.
+- The Haskell changed-subject mutants `foreign-attestation`, `unattested-image`, and
+  `advertise-before-upload`.
 
 ### Validation
 
-1. The published descriptor set equals the authored oracle, layer for layer.
+1. The published descriptor set equals the separately authored Haskell oracle, layer for layer.
 2. The attestation verifies against the image's content digest and its host's issued nonce.
 3. A `GET /v2/<repo>/tags/list` omits the tag until the whole attested upload lands.
-4. All three committed mutants turn the sprint red for their specific reasons.
+4. All three Haskell mutants turn the sprint red for their specific reasons.
 
 ### Remaining Work
 
@@ -216,14 +218,15 @@ clause 15; seal the phase behind negatives that fail for their stated reasons.
 ### Deliverables
 
 - The phase gate composing both sprints' validations plus the same-catalog reconciliation.
-- The committed mutant `divergent-catalog`.
-- A repository-local attestation recording both hosts' substrate, lane, and natural architecture.
+- The Haskell changed-subject mutant `divergent-catalog`.
+- A run-local attestation beneath `.build/**` recording both hosts' substrate, lane, and natural architecture.
 
 ### Validation
 
 1. Every negative asserts its exact refusal tag, each paired with a positive differing only in the foreclosed
    dimension.
-2. The same-catalog reconciliation joins both children to one `BakeCatalog.dhall` content digest.
+2. The same-catalog reconciliation joins both children to one Haskell `BakeCatalog` declaration digest; any
+   external catalog projection is generated lazily beneath `.build/**`.
 3. `divergent-catalog` turns the gate red.
 4. The universal postconditions of [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate)
    hold on both hosts, including clause 15 on each.

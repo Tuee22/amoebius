@@ -62,10 +62,12 @@ behaviours rather than separate products.
 7. Missing prerequisites fail; they never skip to green. Unreached applicable layers remain UNVERIFIED.
 8. Phase 49 is the complete no-hardware DSL promotion barrier and requires every `LTD-SRC-*` query,
    including the Phase-0-owned `LTD-SRC-008` boundary, to be zero. Phase 50 owns no migration and validates
-   only the runtime behavior of that already-bounded handoff; Phase 51 remains a hardware-free Haskell
-   host-ensure kernel. Phase 52 is the first hardware-bearing gate. No host, image, registry, cluster,
-   accelerator, or cloud validation work may begin before the Phase-49 approval and the intervening numerical
-   predecessor approvals exist.
+   only the runtime behavior of that already-bounded handoff. Phase 0 through Phase 49 invoke the exact
+   source-built Haskell validator directly from an authenticated offline toolchain input; `pb` is unavailable
+   as validation transport until Phase 50 proves it. Phase 51 remains a hardware-free Haskell host-ensure
+   kernel. Phase 52 is the first hardware-bearing gate. No host, image, registry, cluster, accelerator, or
+   cloud validation work may begin before the Phase-49 approval and the intervening numerical predecessor
+   approvals exist.
 9. A gate, CI job, agent, evidence reader, digest, or attestation may produce a Validation candidate only. The
    human validation authority alone may sign approval and personally change a phase or sprint to Done.
 
@@ -110,7 +112,7 @@ substitution.
 | [overview.md](overview.md) | Target architecture and cross-cutting invariants |
 | [system_components.md](system_components.md) | Target-only Haskell component-to-doctrine/phase map; never a present-tree or status ledger |
 | [substrates.md](substrates.md) | Hardware/substrate registry and pristine-host routing |
-| [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) | Current-tree and history divergences, owners, and closure conditions |
+| [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) | The sole reader-facing explanation of active typed Haskell divergence bindings; never executable authority |
 | [Repository Layout and Artifact Provenance](../documents/engineering/repository_layout_doctrine.md) | Complete authored/generated tree, dynamic resolution, and ignore/context contract |
 | [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) | Validation registers and boundary discipline |
 | [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) | Register-2.5 scheduling and replay discipline |
@@ -149,7 +151,8 @@ A phase is Done only after all of the following occur in order:
 6. Discovery is non-empty and joins in both directions; positive controls, paired specific-reason negatives,
    applied changed-subject mutants, freshness, external observers, authority/bypass probes, and cleanup all
    produce their explicit expected observations.
-7. Every legacy ID owned by the phase returns zero findings and its reintroduction negative turns red.
+7. Every typed Haskell legacy binding owned by the phase returns zero findings and its independently authored
+   reintroduction negative turns red; Markdown row content is not an input.
 8. The candidate bundle contains raw per-row observations and explicit `UNVERIFIED` residue. Its digest binds
    provenance only and cannot authorize status.
 9. A human validation authority reviews the source diff, contract, oracle custody, harness qualification, raw
@@ -184,12 +187,15 @@ The current audit makes no validation attribution.
 
 | Phase(s) | Current classification | Meaning |
 |---|---|---|
-| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and component oracles exist. Current `pb/**` remains broadened legacy debt, and no conforming opaque public handoff is implemented. Supporting library-build and component-test diagnostics passed, but qualification, independent human review and key custody, clean-room observation, evidence integration, contract resolution, legacy closure, and human promotion remain absent. |
+| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and component oracles exist. The typed policy contract and closed 25-ID legacy lifecycle/analyzer dispatch are present; clean component diagnostics are green, and the three policy plus eight legacy changed-production builds each red only their named oracle. These same-workstream observations are not qualification or independent review. Current `pb/**` remains broadened legacy debt, no owner-domain legacy query is claimed closed, and no conforming opaque public handoff is implemented. Independent human review/key custody, clean-room observation, evidence integration, contract resolution, legacy closure, and human promotion remain absent. |
 | 1–95 | **Observed footprint / Known partial — NOT VALIDATED** | Existing files and historical run material are migration input only; each phase is blocked behind numerical predecessor validation and human promotion. |
 
-The 2026-08-22 inspection observed successful supporting diagnostics for
-`cabal build lib:validation-kernel` and `cabal test validation-kernel-component`. These are compilation and
-component observations only, never validation. The current dirty worktree is ineligible for clean snapshot
+The 2026-08-23 inspection reran the clean `cabal test validation-kernel-component` aggregate and all three
+policy changed-production aggregates. The clean aggregate was green; each changed-production aggregate exited
+nonzero with only `PolicyContractOracle` red while every other named oracle executed green. The 2026-08-22
+inspection separately observed a successful `cabal build lib:validation-kernel` diagnostic and the eight
+legacy changed-production aggregates red only their intended oracle. These are compilation, component, and
+mutation observations only, never validation or independent reviewer custody. The current dirty worktree is ineligible for clean snapshot
 acquisition, and the dispatcher also carries explicit fail-closed findings for unexecuted qualification,
 missing independent human review/key custody, missing external clean-room observation, and missing evidence
 integration. The evidence schema also lacks closed typed command, toolchain, substrate, run, and cleanup
@@ -199,9 +205,11 @@ predecessor cells, for 1,382 fail-closed cells in total. The Phase-0
 gate must refuse while any of these conditions remains.
 
 Capability-by-capability target ownership remains in the linked phase contracts and the target-only
-[system_components.md](system_components.md). Current divergences live only in the single
-[legacy register](legacy_tracking_for_deletion.md). No historical digest, receipt, attestation, pass statement,
-supporting diagnostic, or component result is a current validation result.
+[system_components.md](system_components.md). Current divergence identity, ownership, and closure are typed
+Haskell bindings; the single
+[legacy register](legacy_tracking_for_deletion.md) is their reader-facing explanation, with correspondence
+owned by human review. No historical digest, receipt, attestation, pass statement, supporting diagnostic, or
+component result is a current validation result.
 
 ## Phase overview
 
@@ -211,102 +219,102 @@ inherits the universal postcondition above.
 
 | Phase | Name | Substrate | Lane | Register | Status | Validation contract |
 |---|---|---|---|---|---|---|
-| 0 | Documentation, source policy, and validation trust root | none | `none` | — | 🔄 Active — NOT VALIDATED; documentation, validation, and source-boundary redesign only | [phase_0](phase_00_documentation_suite.md) |
-| 1 | Haskell toolchain and probe-source closure | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 0 requires independent validation and human promotion first | [phase_1](phase_01_toolchain_spike.md) |
-| 2 | Repository layout conformance and de-phased naming | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 1 requires independent validation and human promotion first | [phase_2](phase_02_repository_layout_conformance.md) |
-| 3 | The artifact calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 2 requires independent validation and human promotion first | [phase_3](phase_03_artifact_calculus.md) |
-| 4 | The budget calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 3 requires independent validation and human promotion first | [phase_4](phase_04_budget_calculus.md) |
-| 5 | The lift calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 4 requires independent validation and human promotion first | [phase_5](phase_05_lift_calculus.md) |
-| 6 | The workflow calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 5 requires independent validation and human promotion first | [phase_6](phase_06_workflow_calculus.md) |
-| 7 | The evidence calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 6 requires independent validation and human promotion first | [phase_7](phase_07_evidence_calculus.md) |
-| 8 | Scoped identity kernel | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 7 requires independent validation and human promotion first | [phase_8](phase_08_scope_index.md) |
-| 9 | Capacity core fold + topology relation | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 8 requires independent validation and human promotion first | [phase_9](phase_09_resource_index.md) |
-| 10 | Composition across the five calculi | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 9 requires independent validation and human promotion first | [phase_10](phase_10_calculus_composition.md) |
-| 11 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 10 requires independent validation and human promotion first | [phase_11](phase_11_formal_model_kernel.md) |
-| 12 | The amoebius explicit-state checker | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 11 requires independent validation and human promotion first | [phase_12](phase_12_explicit_state_checker.md) |
-| 13 | The amoebius symbolic checker | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 12 requires independent validation and human promotion first | [phase_13](phase_13_symbolic_checker.md) |
-| 14 | The amoebius refinement checker | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 13 requires independent validation and human promotion first | [phase_14](phase_14_refinement_checker.md) |
-| 15 | The compile-fail fixture harness | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 14 requires independent validation and human promotion first | [phase_15](phase_15_compile_fail_harness.md) |
-| 16 | Deterministic-simulation substrate | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 15 requires independent validation and human promotion first | [phase_16](phase_16_deterministic_sim_substrate.md) |
-| 17 | Gateway-migration model (both branches) | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 16 requires independent validation and human promotion first | [phase_17](phase_17_gateway_migration_model.md) |
-| 18 | DSL formal model | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 17 requires independent validation and human promotion first | [phase_18](phase_18_dsl_formal_model.md) |
-| 19 | Reconcile decision core under deterministic simulation | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 18 requires independent validation and human promotion first | [phase_19](phase_19_reconcile_core_simulation.md) |
-| 20 | The extension declaration | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 19 requires independent validation and human promotion first | [phase_20](phase_20_extension_declaration.md) |
-| 21 | The per-extension laws L1-L5 | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 20 requires independent validation and human promotion first | [phase_21](phase_21_extension_laws_per_extension.md) |
-| 22 | The compositional laws C1-C7 | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 21 requires independent validation and human promotion first | [phase_22](phase_22_extension_laws_compositional.md) |
-| 23 | The security laws S1-S6 | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 22 requires independent validation and human promotion first | [phase_23](phase_23_extension_security_laws.md) |
-| 24 | The generated conformance gate | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 23 requires independent validation and human promotion first | [phase_24](phase_24_conformance_gate_generator.md) |
-| 25 | Haskell-derived Dhall projection and smart-constructor prelude | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 24 requires independent validation and human promotion first | [phase_25](phase_25_dhall_schema_generation.md) |
-| 26 | Haskell protocol declarations, GADT-indexed IR, and total decoder | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 25 requires independent validation and human promotion first | [phase_26](phase_26_gadt_decode_ir.md) |
-| 27 | Illegal-state corpus + validation-locus ledger | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 26 requires independent validation and human promotion first | [phase_27](phase_27_illegal_state_covering.md) |
-| 28 | Logical→physical storage geometry folds | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 27 requires independent validation and human promotion first | [phase_28](phase_28_storage_geometry_folds.md) |
-| 29 | Execution-epoch + scheduler + accelerator + provider-root folds | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 28 requires independent validation and human promotion first | [phase_29](phase_29_execution_accelerator_folds.md) |
-| 30 | Capability union + representational bind | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 29 requires independent validation and human promotion first | [phase_30](phase_30_capability_bind.md) |
-| 31 | Whole-deployment provision seal + expansion | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 30 requires independent validation and human promotion first | [phase_31](phase_31_provision_seal.md) |
-| 32 | InferenceEngine capability + accelerator provision | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 31 requires independent validation and human promotion first | [phase_32](phase_32_inference_accelerator_provision.md) |
-| 33 | Pure `renderAll` + rendered-artifact oracles | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 32 requires independent validation and human promotion first | [phase_33](phase_33_render_manifest_oracles.md) |
-| 34 | chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 33 requires independent validation and human promotion first | [phase_34](phase_34_chain_kernel_boundary.md) |
-| 35 | The amoebius image recipe | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 34 requires independent validation and human promotion first | [phase_35](phase_35_image_recipe_generation.md) |
-| 36 | The closed transaction vocabulary | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 35 requires independent validation and human promotion first | [phase_36](phase_36_transaction_vocabulary.md) |
-| 37 | Bounded UI-program schema | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 36 requires independent validation and human promotion first | [phase_37](phase_37_ui_program_schema.md) |
-| 38 | UI authorization kernel | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 37 requires independent validation and human promotion first | [phase_38](phase_38_ui_authorization_kernel.md) |
-| 39 | UI effect binding | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 38 requires independent validation and human promotion first | [phase_39](phase_39_ui_effect_binding.md) |
-| 40 | UI plan compiler | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 39 requires independent validation and human promotion first | [phase_40](phase_40_ui_plan_compiler.md) |
-| 41 | Offline language and paired plans | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 40 requires independent validation and human promotion first | [phase_41](phase_41_offline_language_plan.md) |
-| 42 | Haskell browser-interpreter semantics and projection | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 41 requires independent validation and human promotion first | [phase_42](phase_42_ui_browser_interpreter.md) |
-| 43 | Haskell UI-server boundary | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 42 requires independent validation and human promotion first | [phase_43](phase_43_ui_server_boundary.md) |
-| 44 | Hardware-free Haskell UI composition | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 43 requires independent validation and human promotion first | [phase_44](phase_44_ui_local_composition.md) |
-| 45 | Haskell offline-state semantics and runtime projection | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 44 requires independent validation and human promotion first | [phase_45](phase_45_encrypted_browser_runtime.md) |
-| 46 | Haskell-generated browser contracts and bundle | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 45 requires independent validation and human promotion first | [phase_46](phase_46_ui_contract_generation.md) |
-| 47 | Foreign-source generator closure, checking tools, and mutants | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 46 requires independent validation and human promotion first | [phase_47](phase_47_tool_and_mutant_generation.md) |
-| 48 | The test-workflow algebra | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 47 requires independent validation and human promotion first | [phase_48](phase_48_test_workflow_algebra.md) |
-| 49 | No-hardware DSL promotion barrier + self-referential gate suite | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 48 requires independent validation and human promotion first | [phase_49](phase_49_self_referential_gates.md) |
-| 50 | Bounded `pb` bootstrap + Haskell handoff | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 49 requires independent validation and human promotion first | [phase_50](phase_50_host_assert_cli.md) |
-| 51 | The host-ensure kernel | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 50 requires independent validation and human promotion first | [phase_51](phase_51_host_ensure_kernel.md) |
-| 52 | Linux: sudoless Docker and the native image | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 51 requires independent validation and human promotion first | [phase_52](phase_52_linux_engine_bringup.md) |
-| 53 | Apple: Homebrew, Colima, and the native image | apple | `linux-cpu/arm64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 52 requires independent validation and human promotion first | [phase_53](phase_53_apple_engine_bringup.md) |
-| 54 | Windows: WSL2 and the lifted Linux engine | windows | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 53 requires independent validation and human promotion first | [phase_54](phase_54_windows_engine_bringup.md) |
-| 55 | Haskell substrate coordinator + single kind cluster | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 54 requires independent validation and human promotion first | [phase_55](phase_55_bootstrap_coordinator_kind.md) |
-| 56 | The base image, the jit-build resolver, and the in-cluster registry | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 55 requires independent validation and human promotion first | [phase_56](phase_56_base_image_registry.md) |
-| 57 | The complementary-architecture base image | apple | `linux-cpu/arm64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 56 requires independent validation and human promotion first | [phase_57](phase_57_complementary_arch_child.md) |
-| 58 | Typed renderer + object reconciler | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 57 requires independent validation and human promotion first | [phase_58](phase_58_object_reconciler.md) |
-| 59 | amoebius-capacity scheduler + bootstrap cutover | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 58 requires independent validation and human promotion first | [phase_59](phase_59_capacity_scheduler.md) |
-| 60 | No-provisioner retained storage + lossless rebind | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 59 requires independent validation and human promotion first | [phase_60](phase_60_retained_storage.md) |
-| 61 | Root Vault + PKI + built-in Haskell Vault client | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 60 requires independent validation and human promotion first | [phase_61](phase_61_vault_pki.md) |
-| 62 | Platform backbone (MetalLB + MinIO + Pulsar HA) | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 61 requires independent validation and human promotion first | [phase_62](phase_62_platform_backbone.md) |
-| 63 | Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG) | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 62 requires independent validation and human promotion first | [phase_63](phase_63_platform_services_2.md) |
-| 64 | Keycloak-owned ingress | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 63 requires independent validation and human promotion first | [phase_64](phase_64_keycloak_ingress.md) |
-| 65 | Live DSL deploy via the replicas=1 control-plane daemon | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 64 requires independent validation and human promotion first | [phase_65](phase_65_live_dsl_deploy.md) |
-| 66 | Tenant/provider provisioning | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 65 requires independent validation and human promotion first | [phase_66](phase_66_app_tenancy.md) |
-| 67 | Native Pulsar client (CBOR) | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 66 requires independent validation and human promotion first | [phase_67](phase_67_pulsar_client.md) |
-| 68 | Live subject/tenant isolation | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 67 requires independent validation and human promotion first | [phase_68](phase_68_user_tenant_isolation_live.md) |
-| 69 | Content store + workflow runtime (Pulsar-Failover single-writer) | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 68 requires independent validation and human promotion first | [phase_69](phase_69_content_store_workflow.md) |
-| 70 | Owner-scoped UI projection runtime | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 69 requires independent validation and human promotion first | [phase_70](phase_70_ui_projection_runtime.md) |
-| 71 | Release lifecycle | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 70 requires independent validation and human promotion first | [phase_71](phase_71_release_lifecycle.md) |
-| 72 | Atomic immutable UI-program release | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 71 requires independent validation and human promotion first | [phase_72](phase_72_ui_program_release.md) |
-| 73 | WireGuard network fabric | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 72 requires independent validation and human promotion first | [phase_73](phase_73_network_fabric_wireguard.md) |
-| 74 | Multi-cluster spawn + geo-replication | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 73 requires independent validation and human promotion first | [phase_74](phase_74_multicluster_spawn_georepl.md) |
-| 75 | Gateway-migration drills + model-correspondence | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 74 requires independent validation and human promotion first | [phase_75](phase_75_gateway_migration_drills.md) |
-| 76 | Haskell-derived provider Pulumi program and enveloped checkpoint | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 75 requires independent validation and human promotion first | [phase_76](phase_76_provider_deploy_checkpoint.md) |
-| 77 | Hostless provider child + convergence + Lease handoff | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 76 requires independent validation and human promotion first | [phase_77](phase_77_provider_child_bringup.md) |
-| 78 | Per-PV EBS decoupling + create-vs-delete credential | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 77 requires independent validation and human promotion first | [phase_78](phase_78_provider_ebs_credential.md) |
-| 79 | Dynamic node provisioning by signal + leak-free provider gate | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 78 requires independent validation and human promotion first | [phase_79](phase_79_provider_dynamic_nodes.md) |
-| 80 | Determinism kernel + jit-build CacheBudget cache | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 79 requires independent validation and human promotion first | [phase_80](phase_80_determinism_jitcache.md) |
-| 81 | Single-tenant low-code UI live path | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 80 requires independent validation and human promotion first | [phase_81](phase_81_ui_single_tenant_live.md) |
-| 82 | Multi-tenant low-code UI isolation | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 81 requires independent validation and human promotion first | [phase_82](phase_82_ui_multi_tenant_live.md) |
-| 83 | UI rollout, projection catch-up, and reconnect | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 82 requires independent validation and human promotion first | [phase_83](phase_83_ui_rollout_reconnect.md) |
-| 84 | Initial online UI multi-zone high availability | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 83 requires independent validation and human promotion first | [phase_84](phase_84_ui_ha_multizone.md) |
-| 85 | Offline replay and durable receipts | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 84 requires independent validation and human promotion first | [phase_85](phase_85_offline_replay_receipts.md) |
-| 86 | Offline blobs and partition isolation | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 85 requires independent validation and human promotion first | [phase_86](phase_86_offline_blobs_isolation.md) |
-| 87 | Offline release and schema evolution | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 86 requires independent validation and human promotion first | [phase_87](phase_87_offline_release_evolution.md) |
-| 88 | Offline multi-zone continuity | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 87 requires independent validation and human promotion first | [phase_88](phase_88_offline_multizone_continuity.md) |
-| 89 | Apple-Metal host compute daemon | apple | `metal` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 88 requires independent validation and human promotion first | [phase_89](phase_89_apple_metal_host_daemon.md) |
-| 90 | The live test topology and elevated harness | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 89 requires independent validation and human promotion first | [phase_90](phase_90_test_topology_live.md) |
-| 91 | The infernix inference core, re-derived | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 90 requires independent validation and human promotion first | [phase_91](phase_91_infernix_rederivation.md) |
-| 92 | The infernix workflow and artifact contracts, re-derived | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 91 requires independent validation and human promotion first | [phase_92](phase_92_infernix_ui_rederivation.md) |
-| 93 | The jitML numerical core, re-derived | linux-cuda | `cuda` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 92 requires independent validation and human promotion first | [phase_93](phase_93_jitml_rederivation.md) |
-| 94 | The jitML training and checkpoint contracts, re-derived | linux-cuda | `cuda` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 93 requires independent validation and human promotion first | [phase_94](phase_94_jitml_ui_rederivation.md) |
-| 95 | The multi-tenant web application re-derived | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED; redesigned Phase 94 requires independent validation and human promotion first | [phase_95](phase_95_webapp_rederivation.md) |
+| 0 | Documentation, source policy, and validation trust root | none | `none` | — | 🔄 Active — NOT VALIDATED | [phase_0](phase_00_documentation_suite.md) |
+| 1 | Haskell toolchain and probe-source closure | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_1](phase_01_toolchain_spike.md) |
+| 2 | Repository layout conformance and de-phased naming | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_2](phase_02_repository_layout_conformance.md) |
+| 3 | The artifact calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_3](phase_03_artifact_calculus.md) |
+| 4 | The budget calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_4](phase_04_budget_calculus.md) |
+| 5 | The lift calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_5](phase_05_lift_calculus.md) |
+| 6 | The workflow calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_6](phase_06_workflow_calculus.md) |
+| 7 | The evidence calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_7](phase_07_evidence_calculus.md) |
+| 8 | Scoped identity kernel | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_8](phase_08_scope_index.md) |
+| 9 | Capacity core fold + topology relation | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_9](phase_09_resource_index.md) |
+| 10 | Composition across the five calculi | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_10](phase_10_calculus_composition.md) |
+| 11 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_11](phase_11_formal_model_kernel.md) |
+| 12 | The amoebius explicit-state checker | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_12](phase_12_explicit_state_checker.md) |
+| 13 | The amoebius symbolic checker | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_13](phase_13_symbolic_checker.md) |
+| 14 | The amoebius refinement checker | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_14](phase_14_refinement_checker.md) |
+| 15 | The compile-fail fixture harness | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_15](phase_15_compile_fail_harness.md) |
+| 16 | Deterministic-simulation substrate | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [phase_16](phase_16_deterministic_sim_substrate.md) |
+| 17 | Gateway-migration model (both branches) | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_17](phase_17_gateway_migration_model.md) |
+| 18 | DSL formal model | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_18](phase_18_dsl_formal_model.md) |
+| 19 | Reconcile decision core under deterministic simulation | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [phase_19](phase_19_reconcile_core_simulation.md) |
+| 20 | The extension declaration | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_20](phase_20_extension_declaration.md) |
+| 21 | The per-extension laws L1-L5 | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_21](phase_21_extension_laws_per_extension.md) |
+| 22 | The compositional laws C1-C7 | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_22](phase_22_extension_laws_compositional.md) |
+| 23 | The security laws S1-S6 | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_23](phase_23_extension_security_laws.md) |
+| 24 | The generated conformance gate | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_24](phase_24_conformance_gate_generator.md) |
+| 25 | Haskell-derived Dhall projection and smart-constructor prelude | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_25](phase_25_dhall_schema_generation.md) |
+| 26 | Haskell protocol declarations, GADT-indexed IR, and total decoder | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_26](phase_26_gadt_decode_ir.md) |
+| 27 | Illegal-state corpus + validation-locus ledger | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_27](phase_27_illegal_state_covering.md) |
+| 28 | Logical→physical storage geometry folds | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_28](phase_28_storage_geometry_folds.md) |
+| 29 | Execution-epoch + scheduler + accelerator + provider-root folds | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_29](phase_29_execution_accelerator_folds.md) |
+| 30 | Capability union + representational bind | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_30](phase_30_capability_bind.md) |
+| 31 | Whole-deployment provision seal + expansion | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_31](phase_31_provision_seal.md) |
+| 32 | InferenceEngine capability + accelerator provision | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_32](phase_32_inference_accelerator_provision.md) |
+| 33 | Pure `renderAll` + rendered-artifact oracles | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_33](phase_33_render_manifest_oracles.md) |
+| 34 | chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [phase_34](phase_34_chain_kernel_boundary.md) |
+| 35 | The amoebius image recipe | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_35](phase_35_image_recipe_generation.md) |
+| 36 | The closed transaction vocabulary | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_36](phase_36_transaction_vocabulary.md) |
+| 37 | Bounded UI-program schema | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_37](phase_37_ui_program_schema.md) |
+| 38 | UI authorization kernel | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_38](phase_38_ui_authorization_kernel.md) |
+| 39 | UI effect binding | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_39](phase_39_ui_effect_binding.md) |
+| 40 | UI plan compiler | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_40](phase_40_ui_plan_compiler.md) |
+| 41 | Offline language and paired plans | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_41](phase_41_offline_language_plan.md) |
+| 42 | Haskell browser-interpreter semantics and projection | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_42](phase_42_ui_browser_interpreter.md) |
+| 43 | Haskell UI-server boundary | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [phase_43](phase_43_ui_server_boundary.md) |
+| 44 | Hardware-free Haskell UI composition | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [phase_44](phase_44_ui_local_composition.md) |
+| 45 | Haskell offline-state semantics and runtime projection | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_45](phase_45_encrypted_browser_runtime.md) |
+| 46 | Haskell-generated browser contracts and bundle | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_46](phase_46_ui_contract_generation.md) |
+| 47 | Foreign-source generator closure, checking tools, and mutants | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_47](phase_47_tool_and_mutant_generation.md) |
+| 48 | The test-workflow algebra | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [phase_48](phase_48_test_workflow_algebra.md) |
+| 49 | No-hardware DSL promotion barrier + self-referential gate suite | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [phase_49](phase_49_self_referential_gates.md) |
+| 50 | Validate the bounded `pb` → Haskell handoff | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [phase_50](phase_50_host_assert_cli.md) |
+| 51 | The host-ensure kernel | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [phase_51](phase_51_host_ensure_kernel.md) |
+| 52 | Linux: sudoless Docker and the native image | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_52](phase_52_linux_engine_bringup.md) |
+| 53 | Apple: Homebrew, Colima, and the native image | apple | `linux-cpu/arm64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_53](phase_53_apple_engine_bringup.md) |
+| 54 | Windows: WSL2 and the lifted Linux engine | windows | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_54](phase_54_windows_engine_bringup.md) |
+| 55 | Haskell substrate coordinator + single kind cluster | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_55](phase_55_bootstrap_coordinator_kind.md) |
+| 56 | The base image, the jit-build resolver, and the in-cluster registry | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_56](phase_56_base_image_registry.md) |
+| 57 | The complementary-architecture base image | apple | `linux-cpu/arm64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_57](phase_57_complementary_arch_child.md) |
+| 58 | Typed renderer + object reconciler | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_58](phase_58_object_reconciler.md) |
+| 59 | amoebius-capacity scheduler + bootstrap cutover | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_59](phase_59_capacity_scheduler.md) |
+| 60 | No-provisioner retained storage + lossless rebind | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_60](phase_60_retained_storage.md) |
+| 61 | Root Vault + PKI + built-in Haskell Vault client | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_61](phase_61_vault_pki.md) |
+| 62 | Platform backbone (MetalLB + MinIO + Pulsar HA) | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_62](phase_62_platform_backbone.md) |
+| 63 | Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG) | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_63](phase_63_platform_services_2.md) |
+| 64 | Keycloak-owned ingress | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_64](phase_64_keycloak_ingress.md) |
+| 65 | Live DSL deploy via the replicas=1 control-plane daemon | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_65](phase_65_live_dsl_deploy.md) |
+| 66 | Tenant/provider provisioning | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_66](phase_66_app_tenancy.md) |
+| 67 | Native Pulsar client (CBOR) | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_67](phase_67_pulsar_client.md) |
+| 68 | Live subject/tenant isolation | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_68](phase_68_user_tenant_isolation_live.md) |
+| 69 | Content store + workflow runtime (Pulsar-Failover single-writer) | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_69](phase_69_content_store_workflow.md) |
+| 70 | Owner-scoped UI projection runtime | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_70](phase_70_ui_projection_runtime.md) |
+| 71 | Release lifecycle | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_71](phase_71_release_lifecycle.md) |
+| 72 | Atomic immutable UI-program release | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_72](phase_72_ui_program_release.md) |
+| 73 | WireGuard network fabric | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_73](phase_73_network_fabric_wireguard.md) |
+| 74 | Multi-cluster spawn + geo-replication | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_74](phase_74_multicluster_spawn_georepl.md) |
+| 75 | Gateway-migration drills + model-correspondence | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_75](phase_75_gateway_migration_drills.md) |
+| 76 | Haskell-derived provider Pulumi program and enveloped checkpoint | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_76](phase_76_provider_deploy_checkpoint.md) |
+| 77 | Hostless provider child + convergence + Lease handoff | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_77](phase_77_provider_child_bringup.md) |
+| 78 | Per-PV EBS decoupling + create-vs-delete credential | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_78](phase_78_provider_ebs_credential.md) |
+| 79 | Dynamic node provisioning by signal + leak-free provider gate | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_79](phase_79_provider_dynamic_nodes.md) |
+| 80 | Determinism kernel + jit-build CacheBudget cache | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_80](phase_80_determinism_jitcache.md) |
+| 81 | Single-tenant low-code UI live path | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_81](phase_81_ui_single_tenant_live.md) |
+| 82 | Multi-tenant low-code UI isolation | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_82](phase_82_ui_multi_tenant_live.md) |
+| 83 | UI rollout, projection catch-up, and reconnect | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_83](phase_83_ui_rollout_reconnect.md) |
+| 84 | Initial online UI multi-zone high availability | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_84](phase_84_ui_ha_multizone.md) |
+| 85 | Offline replay and durable receipts | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_85](phase_85_offline_replay_receipts.md) |
+| 86 | Offline blobs and partition isolation | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_86](phase_86_offline_blobs_isolation.md) |
+| 87 | Offline release and schema evolution | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_87](phase_87_offline_release_evolution.md) |
+| 88 | Offline multi-zone continuity | linux-cpu | `provider` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_88](phase_88_offline_multizone_continuity.md) |
+| 89 | Apple-Metal host compute daemon | apple | `metal` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_89](phase_89_apple_metal_host_daemon.md) |
+| 90 | The live test topology and elevated harness | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_90](phase_90_test_topology_live.md) |
+| 91 | The infernix inference core, re-derived | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_91](phase_91_infernix_rederivation.md) |
+| 92 | The infernix workflow and artifact contracts, re-derived | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_92](phase_92_infernix_ui_rederivation.md) |
+| 93 | The jitML numerical core, re-derived | linux-cuda | `cuda` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_93](phase_93_jitml_rederivation.md) |
+| 94 | The jitML training and checkpoint contracts, re-derived | linux-cuda | `cuda` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_94](phase_94_jitml_ui_rederivation.md) |
+| 95 | The multi-tenant web application re-derived | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_95](phase_95_webapp_rederivation.md) |
 | 96+ | Later phases | varies | varies | — | 📋 Planned — NOT VALIDATED | [later_phases](later_phases.md) |
 
 ## Related Documents

@@ -48,7 +48,7 @@ Known partial** only.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -90,7 +90,7 @@ generated SQL remains an output rather than authority ([§K](development_plan_ph
 |---|---|
 | `Claim` | Target only — every relational operation is a declared request-scoped Haskell constructor; schema, policy, statement, and mutation bytes are lazy `.build/**` projections constrained by Haskell semantics. No live database or policy-enforcement claim is included. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 36` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 36` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -115,7 +115,8 @@ generated SQL remains an output rather than authority ([§K](development_plan_ph
   request scope is required, row declarations drive schema/policy/statements, results retain the scope index,
   and generations have only additive transitions.
 - [`generated_artifacts_doctrine.md` §2 — What is generated (and from what)](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what):
-  emitted schema, policy, and statement SQL remain generated output constrained by semantic oracles.
+  emitted schema, policy, and statement SQL remain generated output constrained by separately authored Haskell
+  semantic expectations.
 
 ---
 
@@ -139,7 +140,7 @@ Adopt P3 and P4; derive schema and policy from one private row declaration rathe
 
 ### Validation
 
-1. All row semantics join to the independent oracle in both directions.
+1. All row semantics join to the independent Haskell oracle in both directions.
 2. The export and source scans prove the declaration and predicate terms remain private and shared.
 
 ### Remaining Work
@@ -203,13 +204,13 @@ projection.
 
 ### Deliverables
 
-- Three registered mutant descriptors and exact red-locus assertions.
+- Three Haskell-registered changed-subject mutant descriptors and exact red-locus assertions.
 - A 20-entry validation-locus ledger over every bounded item.
 - One real five-calculus composition and a generated-output/attestation gate.
 
 ### Validation
 
-1. Every compiler negative and mutant fails at only its authored reason or locus.
+1. Every Haskell compiler negative and changed-subject mutant fails at only its authored reason or locus.
 2. All metrics and 39 authored surfaces join completely to runtime enumeration.
 
 ### Remaining Work

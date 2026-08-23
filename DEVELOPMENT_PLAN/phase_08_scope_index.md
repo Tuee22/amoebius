@@ -44,7 +44,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -84,7 +84,7 @@ exchange. NOT VALIDATED.
 |---|---|
 | `Claim` | Target capability only — provide a constructor-private Haskell request-scope index and total information-flow relation that reject forging, retagging, widening, and cross-scope exchange. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 08` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 08` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -129,18 +129,21 @@ and [`low_code_ui_runtime_doctrine.md` §10.3 — information-flow labels](../do
 - Constructor-private tenant, subject, membership, owner, grant, resource, and resolved-handle types.
 - Indexed flow labels and witnesses with a total direct and graph-path checker.
 - Stable structured errors for owner, grant, subject-flow, audience, integrity, cycle, missing-member, missing-path, and transitive failures.
-- Five specific-reason compiler-negative fixtures, each paired with a legal twin.
-- An independent finite corpus, nine-class generated coverage, and one registry-backed build-flag mutant.
+- Five reviewed `.hs` specific-reason compile-refusal cases, each paired with a legal `.hs` twin and a
+  separately authored Haskell error-class/locus expectation.
+- An independent Haskell finite corpus, nine-class generated coverage, and one reviewed Haskell mutation
+  operator applied only beneath `.build/mutants/**`.
 - A contained Register-1 gate with architecture, source-snapshot, ledger, surface-join, and artifact-hygiene evidence.
 
 ### Validation
 
 1. Match all six owner rows, both exact swap errors, four flow decisions, and four exact flow diagnostic
-   tag/path rows against independently read fixtures.
+   tag/path rows against separately authored Haskell expectations.
 2. Compile every legal twin and require each illegal twin to fail at its pinned compiler reason.
 3. Meet all nine QuickCheck reject-class floors and require `drop_owner_equality` to redden on both swaps.
-4. Run the suite with OS-observed network denial, scan the public API for twelve closed constructors and no
-   retag/declassification escape, and reject partial or unsafe source tokens.
+4. Run the suite through an injected Haskell effect adapter that refuses every network request, scan the
+   public API for twelve closed constructors and no retag/declassification escape, and reject partial or
+   unsafe source tokens. No OS, host, socket, or hardware observation is admissible.
 5. Join every enumerated item and surface, keep all outputs generated, bind the result to the natural
    architecture and source snapshot, and record provider/runtime layers as `UNVERIFIED`.
 

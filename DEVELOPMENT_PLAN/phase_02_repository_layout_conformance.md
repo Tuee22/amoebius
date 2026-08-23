@@ -30,10 +30,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Sprints](#sprints)
 - [Sprint 2.1: `test/`'s second level collapses to the seven role nouns ⏸️](#sprint-21-tests-second-level-collapses-to-the-seven-role-nouns-)
 - [Sprint 2.2: The package-only roots become cabal stanzas ⏸️](#sprint-22-the-package-only-roots-become-cabal-stanzas-)
-- [Sprint 2.3: `ui-runtime/` merges into `ui/` ⏸️](#sprint-23-ui-runtime-merges-into-ui-)
+- [Sprint 2.3: Tracked UI roots enter typed deletion ownership ⏸️](#sprint-23-tracked-ui-roots-enter-typed-deletion-ownership-)
 - [Sprint 2.4: Every authored name loses its phase ordinal ⏸️](#sprint-24-every-authored-name-loses-its-phase-ordinal-)
 - [Sprint 2.5: One mutant record format, one registry ⏸️](#sprint-25-one-mutant-record-format-one-registry-)
-- [Sprint 2.6: The allowlist and the register reconcile ⏸️](#sprint-26-the-allowlist-and-the-register-reconcile-)
+- [Sprint 2.6: Typed legacy bindings and the register reconcile ⏸️](#sprint-26-typed-legacy-bindings-and-the-register-reconcile-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -49,7 +49,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -91,7 +91,7 @@ NOT VALIDATED.
 |---|---|
 | `Claim` | Target capability only — enforce the target repository layout, including the tracked-source boundary: behavioral source is `.hs` only outside `pb/**`, consumers resolve at canonical Haskell module and package paths, and generated foreign products are absent from Git. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 02` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 02` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -130,18 +130,18 @@ flowchart LR
   %% register: orientation
   s1["2.1 seven role nouns"]
   s2["2.2 one package"]
-  s3["2.3 one spago project"]
+  s3["2.3 UI roots assigned for deletion"]
   s4["2.4 no phase ordinal"]
   s5["2.5 one mutant registry"]
-  s6["2.6 allowlist + register"]
+  s6["2.6 typed closures + register"]
   gate["repository conformance gate"]
-  s1 -->|"a conforming test/ to move sources into"| s2
-  s2 -->|"one package whose flags 2.4 renames"| s3
+  s1 -->|"a Haskell-only test tree"| s2
+  s2 -->|"one Haskell package"| s3
   s2 -->|"the flag set 2.4 de-phases"| s4
-  s3 -->|"no root left outside the tree"| s4
+  s3 -->|"no UI source root retained"| s4
   s4 -->|"final paths, so no registry row is stale"| s5
-  s5 -->|"every mutation reachable through one record"| s6
-  s6 -->|"zero r13/r15 rows left to defer"| gate
+  s5 -->|"every mutation Haskell-declared"| s6
+  s6 -->|"zero typed closure findings"| gate
 ```
 *Orientation. Which sprint produces what the next consumes, ending at the gate; the seam rules are owned by [development_plan_standards.md §F](development_plan_standards.md#f-the-sprint-block-format). The de-phasing precedes the registry because a registry authored first would name a hundred paths the same phase then renames.*
 
@@ -151,26 +151,29 @@ flowchart LR
 
 ### Objective
 
-Fold twenty prefixes into `spec`, `fixture`, `golden`, `negative`, `oracle`, `mutant`, and `harness`, closing
-the singular/plural pairs first because they are the ones a case-insensitive filesystem cannot hold apart.
+Fold the historical test prefixes into Haskell module namespaces for specifications, cases, independent
+oracles, negatives, mutation operators, and harnesses. Serialized fixture, golden, and materialized-mutant
+directories are not target roots; any such transport artifact is rendered lazily beneath
+`.build/test-corpora/**`.
 
 ### Deliverables
 
-- The case-collision check and its mutant, run before any move.
-- Every `test/` second-level name one of the seven, with module hierarchy below `test/spec/`, never at the
-  second level.
-- Every tracked consumer of a moved path updated in the same edit.
+- A Haskell case-collision check and reviewed Haskell mutation operator, run before any move.
+- Every behavioral file retained under `test/**` is `.hs`; roles are represented by Haskell module hierarchy,
+  while serialized cases, expectations, and applied mutants live only beneath `.build/test-corpora/**`.
+- Every Haskell consumer of a moved module is updated in the same edit.
 
 ### Validation
 
-1. The seven-noun assertion above, plus a dangling-reference scan over the whole tree.
+1. Every behavioral file beneath `test/**` is `.hs`, every serialized transport product is contained beneath
+   `.build/**`, and a whole-tree Haskell reference scan finds no dangling consumer.
 2. m1 and m6 redden `target-tree-clean` and `collision-free-tree` respectively, and no other check.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. `test/`'s second level is `fixture`, `golden`, `harness`, `mutant`, `negative`, `oracle`, `spec` over
-1,084 files. The pair the index held as `test/ui/` and `test/Ui/` — one directory on this host's
-case-insensitive filesystem — is one `test/spec/ui/`.
+The pre-reset record said `None`; that statement and its test-tree count are permanently invalid for
+promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+owned legacy closure, and a Haskell-only test tree with lazy transport material beneath `.build/**`.
 
 ## Sprint 2.2: The package-only roots become cabal stanzas ⏸️
 
@@ -184,10 +187,12 @@ already states; the two out-of-tree `hs-source-dirs` become `source-repository-p
 
 ### Deliverables
 
-- Sources under `src/**`, `test/**`, `proto/**`, `dhall/**` as [§2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure) places them.
+- Authored Haskell sources under `src/**` and `test/**`. Proto and Dhall inputs or bindings are generated from
+  Haskell only beneath `.build/proto/**` and `.build/dhall/**`.
 - No `hs-source-dirs` reaching outside the repository.
-- One `amoebius` package carrying thirteen further sub-libraries and thirty-four further suites; `probe/` and
-  `vendor/dual/` stay apart on the two grounds §2.1 admits.
+- One `amoebius` package carrying thirteen further sub-libraries and thirty-four further Haskell suites.
+  Maintained vendor behavior is `.hs` beneath `src/vendor/**`; acquisition and generated probes stay beneath
+  `.build/**`.
 
 ### Validation
 
@@ -196,22 +201,19 @@ already states; the two out-of-tree `hs-source-dirs` become `source-repository-p
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. `cabal.project` lists three packages where it listed sixteen, and the sibling `infernix` and `jitML`
-checkouts are `source-repository-package` entries rather than a `../../` path into the developer's home. Every
-retired root is gone from the worktree, skeleton included — which the gate now checks rather than assumes. The
-second executable is gone: `app/singleton/Main.hs` is an `amoebius control-plane` verb over
-`app/amoebius/Amoebius/Entry/ControlPlane.hs`, which is where the one binary's other entry-point-only
-module already lives and for the same reason — `hs-source-dirs` is a search path, not a module filter.
+The pre-reset record said `None`; that statement and its package/root disposition are permanently invalid for
+promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+owned legacy closure, exact Haskell package/module discovery, and clean-source consumer resolution.
 
 **What this sprint could not carry, and who owns it.** `amoebius-pulsar` was `build-type: Custom`, and its
 `Setup.hs` generated the Pulsar protobuf bindings. A root `Setup.hs` is not in the section 2 tree and
 [§2.1](../documents/engineering/repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package)
 admits no ground for a package that exists only to carry one, so the generator retired with the split. The
-`.proto` schema is at `proto/**` where the target tree puts it, and Phase 67 re-establishes binding generation
-against `.build/proto/**` — which is where the same tree line already sends the rendered bindings. The row is
-in the register.
+condemned tracked Proto schema remains migration debt, and Phase 67 re-establishes both schema projection and
+binding generation from reviewed Haskell declarations beneath `.build/proto/**`. Its typed legacy binding is
+explained in the reader-facing register.
 
-## Sprint 2.3: `ui-runtime/` merges into `ui/` ⏸️
+## Sprint 2.3: Tracked UI roots enter typed deletion ownership ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 
@@ -222,12 +224,14 @@ language or adding to those roots.
 
 ### Deliverables
 
-- One active legacy row assigning removal of all tracked UI/package inputs to Phase 46.
-- No new tracked UI source and no generated UI output beside authored source.
+- One typed Haskell legacy binding assigning removal of all tracked UI/package inputs to Phase 46, plus its
+  reader-facing explanation in the single register.
+- No new tracked UI source; every generated UI output is contained beneath `.build/ui/**`.
 
 ### Validation
 
-1. Every present tracked UI/PureScript/package input is discovered and mapped exactly once to its active row.
+1. Every present tracked UI/PureScript/package input is discovered and joined exactly once to the typed
+   Haskell binding; the explanatory Markdown row is not an operand.
 2. A generated UI tree is required to live beneath `.build/**`; a tracked or source-adjacent reintroduction is
    rejected.
 
@@ -250,7 +254,8 @@ makes every future re-baseline documentation-only.
 ### Deliverables
 
 - Capability-derived names for every ordinal-bearing authored path.
-- Every phase document's `Implementation`, oracle, mutant, golden, and gate command naming the new path.
+- Every phase document's Haskell implementation/oracle/mutation path and lazy `.build/**` materialization
+  destination naming the new capability-derived path.
 
 ### Validation
 
@@ -259,13 +264,10 @@ makes every future re-baseline documentation-only.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. **The ordinal a tree name carried was the *pre*-amendment one**, so the capability came from the same
-join `tools/migration_allowlist.tsv` already recorded between a `tools/phaseNN_*` glob and the phase that now
-owns it — `tools/phase31_gate.py` is `tools/platform_services_2_gate.py`, not Phase 58's anything. A data file
-grouped under its capability directory (`test/mutant/content_store_workflow/lease_election.mutant`), matching
-the already-conforming half of the tree; a Haskell suite main kept its descriptive half
-(a `PhaseNNServicesLiveSpec.hs` became `ServicesLiveSpec.hs`) except where that half was not distinctive on its
-own, and those fourteen took the capability instead.
+The pre-reset record said `None`; that statement and its path-translation account are permanently invalid for
+promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+owned legacy closure, and a reviewed Haskell old-name→capability join. The condemned serialized allowlist and
+Python gates are non-operative debt and may not be copied into the replacement.
 
 **The `-DPHASE31_*` preprocessor symbols are deliberately untouched.** A cpp macro is not a name that becomes
 a path, so [§U](development_plan_gate_integrity.md#u-the-final-repository-layout) clause 3 does not reach it
@@ -279,17 +281,20 @@ edit this phase's scope excludes.
 
 ### Objective
 
-`mutants/`, `test/mutants/`, `test/kernel/mutants/`, and `test/inject/mutants/` become one `test/mutant/**`
-with one record format, and the mutations carried as build flags become registry rows.
+Replace the historical materialized-mutant roots and build-flag-only mutations with one reviewed Haskell
+mutation registry. Applied source copies and any serialized registry projection are generated lazily beneath
+`.build/mutants/**`.
 
 ### Deliverables
 
-- One mutant root, one record format, one registry.
-- Each former build-flag mutation expressed as a registry row.
+- One Haskell registry module with a closed mutation record type.
+- Each former build-flag mutation expressed as a reviewed Haskell value naming its operator and production
+  locus; no materialized mutant is tracked.
 
 ### Validation
 
-1. The registry enumerates every mutation, and every mutant resolves through it.
+1. The Haskell registry enumerates every declared mutation, and every run-local applied mutant resolves through
+   it in both directions.
 2. A mutation reachable only by a build flag fails the gate.
 
 ### Remaining Work
@@ -306,32 +311,31 @@ records what is known and marks the rest `unstated` — and the gate admits `uns
 whose phase the tracker does not mark Done, so the first phase to seal against a mutation must state its
 operator and locus to get past its own gate. That is a ratchet, not a blank.
 
-## Sprint 2.6: The allowlist and the register reconcile ⏸️
+## Sprint 2.6: Typed legacy bindings and the register reconcile ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
-Delete every `r13` and `r15` row, re-own each remaining row under the re-baseline's audit map, and narrow the
-rows whose residue is behavioural rather than positional.
+Close every typed Haskell `r13` and `r15` legacy binding, re-own each remaining binding under the reviewed
+Haskell audit map, and narrow the bindings whose residue is behavioral rather than positional. Reader-facing
+rows explain the values but are never operands.
 
 ### Deliverables
 
-- Zero `r13` and `r15` rows.
-- Each residue row narrowed to the behavioural half its subject-matter phase owns.
+- Zero Haskell findings for the `r13` and `r15` binding families.
+- Each residual Haskell binding narrowed to the behavioral half its subject-matter phase owns.
 
 ### Validation
 
-1. The artifact audit reports zero `r13`/`r15` findings and refuses no row.
-2. The deferral total falls to the deletion class alone.
+1. The Haskell artifact audit reports zero `r13`/`r15` findings and cannot consume a Markdown row or count.
+2. The typed deferral inventory contains only the declared deletion class and rejects an unbound residue.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Seventy `r13`/`r15` rows are deleted, and every surviving row's path glob was translated through the
-same map the tree moved by — so a row that now matches nothing is a closure the audit reports rather than a
-silence. What remains deferred is the deletion class: generated output still written beneath an authored root,
-host state still escaping the checkout, and expectation tables whose provenance their owning phase must
-establish.
+The pre-reset record said `None`; that statement and its row-count result are permanently invalid for
+promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+owned legacy closure, exact Haskell inventory discovery, and the independent no-unbound-residue oracle.
 
 ## Documentation Requirements
 
@@ -351,8 +355,8 @@ establish.
 
 - [README.md](README.md) — the live tracker; its Phase 2 row is the source for this phase's objective and gate.
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys.
-- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — the register whose whole-tree rows this
-  phase exists to make satisfiable.
+- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — the reader-facing explanation of the
+  typed whole-tree bindings this phase exists to close.
 - [`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md) — the target tree
   this phase realises.
 - [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md) — the

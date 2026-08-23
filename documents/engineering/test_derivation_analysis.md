@@ -50,8 +50,9 @@ is a serialization of those Haskell values. It is generated beneath `.build/**` 
 <a id="2-what-exists-today"></a>
 ## 2. Target boundary
 
-This analysis records the required target, not current implementation state. The development plan and the
-single legacy register own the observed tree and migration status.
+This analysis records the required target, not current implementation state. The development-plan tracker
+owns status, typed Haskell legacy bindings own executable observation and migration accounting, and the
+single Markdown legacy register only explains those bindings to readers.
 
 The target test flow is:
 
@@ -166,10 +167,11 @@ built from the DSL cannot be used to establish the earlier DSL's semantics.
 <a id="6-defects-found-in-the-current-corpus"></a>
 ## 6. Anti-patterns a gate must reject
 
-This analysis does not maintain a live defect ledger. The single
-[`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) file owns every
-observed migration obligation and removes a row only after its closure predicate is met. Git history is the
-archive.
+This analysis does not maintain a live defect ledger. Typed Haskell declarations own every stable migration
+ID, numerical owner, observation, and closure predicate. The single
+[`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) file explains that
+active inventory to readers; editing or removing its rows cannot alter a verdict. Human review owns prose
+correspondence, and Git history is the only archive.
 
 The anti-patterns that must remain represented in gate sabotage suites are:
 
@@ -184,7 +186,8 @@ The anti-patterns that must remain represented in gate sabotage suites are:
 - a live/container result used to promote an earlier hardware-free claim.
 
 The analysis carries no resolved-defect subledger. Historical or disputed findings remain available in Git
-history, while any active migration obligation belongs only in the single legacy register.
+history, while executable active migration obligations belong only to the typed Haskell legacy inventory;
+the single Markdown register is its reader-facing explanation.
 
 ## 7. What this analysis does not own
 
@@ -222,4 +225,4 @@ This adoption is a documentation decision only. It does not mark an implementati
 - [Evidence Calculus](./evidence_calculus_doctrine.md) — claim-to-expectation strength
 - [Chaos and Failover](./chaos_failover_doctrine.md) — temporal expectations and live observers
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase contracts and human-controlled status
-- [Legacy Tracking](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) — sole active divergence register
+- [Legacy Tracking](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) — sole reader-facing explanation of active typed Haskell divergence bindings

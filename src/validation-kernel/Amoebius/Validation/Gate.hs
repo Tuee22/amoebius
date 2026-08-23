@@ -10,6 +10,7 @@ module Amoebius.Validation.Gate
   , sabotageName
   ) where
 
+import Amoebius.Validation.PolicyContract qualified as Policy
 import Amoebius.Validation.Types
 import Data.List (group, sort)
 import Data.Map.Strict qualified as Map
@@ -107,7 +108,10 @@ checkQualificationReport baseline runs =
       <> [ finding "QUALIFICATION-SUBJECTS-EMPTY" "production-subjects" "qualification baseline contains no production subject"
          | Map.null (qualificationSubjects baseline)
          ]
-      <> [ finding "QUALIFICATION-SUBJECT-INVALID" subject "baseline subject must be an authored production .hs path"
+      <> [ finding
+             "QUALIFICATION-SUBJECT-INVALID"
+             subject
+             ("baseline subject must be an authored production " <> Text.pack canonicalHaskellSuffix <> " path")
          | subject <- Map.keys (qualificationSubjects baseline)
          , not (productionHaskellPath subject)
          ]
@@ -252,9 +256,14 @@ wellFormedObservation item =
 productionHaskellPath :: FilePath -> Bool
 productionHaskellPath path =
   not (isAbsolute path)
-    && takeExtension path == ".hs"
+    && takeExtension path == canonicalHaskellSuffix
     && case splitDirectories path of
       root : rest -> root `elem` ["src", "app"] && not (null rest) && all validPart rest
       [] -> False
  where
   validPart part = not (null part) && part /= "." && part /= ".."
+
+canonicalHaskellSuffix :: FilePath
+canonicalHaskellSuffix =
+  Policy.behavioralSourceSuffix
+    (Policy.sourceBehavioralLanguage (Policy.sourceContract Policy.canonicalPolicyContract))

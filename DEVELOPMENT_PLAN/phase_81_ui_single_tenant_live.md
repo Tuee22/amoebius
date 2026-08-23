@@ -46,7 +46,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -111,7 +111,7 @@ human-approved predecessor interpreter.
 
 - [`extension_conformance_security.md` §4 — S1–S6](../documents/engineering/extension_conformance_security.md#4-s1s6) — single-tenant low-code UI live path carries an identity boundary, and S1-S6 are what make crossing it unrepresentable.
 - Adopt [`low_code_ui_runtime_doctrine.md` §13 — Generic PureScript client and amoebius UI server](../documents/engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server)
-  and [`low_code_ui_runtime_doctrine.md` §14 — Runtime role, deployment, and high availability](../documents/engineering/low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability): run one checked program without a bespoke frontend or server.
+  and [`low_code_ui_runtime_doctrine.md` §14 — Runtime role, deployment, and high availability](../documents/engineering/low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability): run one checked program without a bespoke frontend or server. The PureScript bundle is generated lazily from reviewed Haskell beneath ignored `.build/**`; it is not repository source.
 - Adopt [`platform_services_doctrine.md` §9 — The LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path): every browser request crosses Keycloak and Envoy.
 - Adopt [`content_addressing_determinism.md` §4.5 — The ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss): expose only an authorized ready infernix handle.
 - Adopt [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence): bind success to fresh provider-observed effects.
@@ -124,6 +124,8 @@ human-approved predecessor interpreter.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 81.1: Complete single-tenant UI slice ⏸️
 
@@ -135,21 +137,23 @@ Deliver the one-tenant generic UI runtime path and its externally observed secur
 
 ### Deliverables
 
-- The resource-complete live topology and exact bound `ClientPlan`/`UiServerPlan` release.
+- The resource-complete Haskell-declared live topology and exact bound `ClientPlan`/`UiServerPlan` release;
+  all browser/runtime bundles and serialized plans are lazy, untracked `.build/**` products.
 - At least two UI-server replicas, authenticated WebSocket connection ownership, cross-pod scoped Redis
   fanout, cursor-gap repair, and durable provider/Pulsar receipt lookup without sticky sessions.
-- Real OIDC Playwright flow, owner/other-subject matrix, valid-session origin/CSRF negatives, and
+- A Haskell-authored real-OIDC browser-flow harness that lazily generates any Playwright transport beneath
+  `.build/**`, plus the Haskell owner/other-subject matrix, valid-session origin/CSRF negatives, and
   direct-provider denial probes.
 - Fresh-nonce SQL/S3/Pulsar/Envoy plus artifact-request/infernix-dispatch evidence capture and a generated,
   externally attested run ledger under `.build/runs/`.
-- Five committed mutants that demonstrate the oracle cannot be passed by a canned UI, forged denial, or open
+- Five Haskell-authored changed-subject mutants that demonstrate the oracle cannot be passed by a canned UI, forged denial, or open
   edge.
 
 ### Validation
 
 1. Rejected historical observation: the `phase55-ui-single-tenant-live` Cabal suite expected all canonical
    observations green on `linux-cpu` and
-   each named mutant red for its pinned reason.
+   each named Haskell changed subject red for its pinned reason.
 2. Force the browser WebSocket onto replica A and event/receipt production through replica B, then flush Redis
    between publish and response. Reconnect/cursor/receipt lookup must recover the authoritative outcome once,
    and neither local-only routing nor Redis-as-receipt may pass.

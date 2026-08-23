@@ -67,13 +67,15 @@ green command, digest, evidence bundle, attestation, or earlier status is only a
 
 ## E. One canonical phase model
 
-- Phases are contiguous `0..N`; fractional identifiers are prohibited.
+- The current numbered plan is the closed contiguous domain `0..95`; fractional identifiers, gaps, and
+  identifiers above 95 are prohibited until one coherent plan change deliberately extends the domain.
 - The gates are considered strictly in numerical order. Except Phase 0, each candidate binds the immediately
   preceding phase's current human approval receipt. A phase may have additional earlier dependencies, but it
   may not skip the predecessor.
 - A sprint belongs to exactly one phase and names only earlier-or-same-phase blockers.
 - A new or reordered sequence carries a complete `old id/path → new id/path(s)` audit map, updates every link
-  and dependency in the same change, and records any still-active mismatch in
+  and dependency in the same change, adds any still-active mismatch to the typed Haskell legacy inventory,
+  and updates its reader explanation in
   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 - A band is a reading aid over a contiguous ordinal range, never a second identifier.
 - `pb/**` is a pre-phase bootstrap boundary, not a delivered language, test framework, or validation
@@ -88,8 +90,9 @@ Haskell source closure
   → DSL, binders, planners, and lazy generators
   → test-workflow algebra
   → Phase 49 no-hardware promotion barrier
-  → fake-host takeover
-  → host and hardware bring-up
+  → Phase 50 bounded pb handoff
+  → Phase 51 fake-boundary Haskell host ensure
+  → Phase 52 first hardware bring-up
   → live platform and domain instances
 ```
 
@@ -102,8 +105,11 @@ GPU, cluster, or cloud resource from being used as proxy evidence that the DSL i
 Phase-0-owned `LTD-SRC-008`, to be zero. The sole remaining non-Haskell behavioral source is the `pb/**`
 Python positively accepted by the deny-by-default Haskell grammar as minimal platform discrimination,
 contained toolchain establishment, source-bound build, and opaque exec handoff. Phase 50 validates that
-already-bounded runtime behavior and owns no source-migration row. Phase 52 is the first hardware-bearing
-phase, so hardware validation cannot start while condemned source remains.
+already-bounded runtime behavior and owns no source-migration binding. Phase 51 validates the Haskell host-ensure
+kernel against fake boundaries with `Substrate: none`; it performs no hardware-specific or live validation.
+Phase 52 is the first hardware-bearing validation phase. These numeric roles are fixed: Phase 49 is the
+hardware-free DSL barrier, Phase 50 is bounded-`pb` handoff validation, Phase 51 is Haskell host ensure, and
+Phase 52 is first hardware validation.
 
 ---
 
@@ -149,8 +155,10 @@ manufactures a run transcript.
 ## L. One-substrate discipline
 
 `Substrate: none` means the claim is decidable without hardware-specific or live infrastructure. It does not
-mean “validated inside a container”: pure validation is available as soon as `pb` has bootstrapped the Haskell
-binary, before any image, container engine, registry, cluster, GPU, or cloud phase.
+mean “validated inside a container.” Before Phase 50 is human-approved, a pure candidate builds and invokes
+the exact source-bound Haskell binary directly from an authenticated, network-independent toolchain input;
+it does not trust `pb` as transport. After Phase 50 approval, later pure work may use that bounded handoff.
+Either route precedes every image, container-engine, registry, cluster, GPU, or cloud phase.
 
 A phase that requires a real substrate declares exactly one of `apple`, `linux-cpu`, `linux-cuda`, or
 `windows`, plus its natural lane. It proves only the lane actually observed. Emulation, cross-building, or a
@@ -163,9 +171,11 @@ architecture as an observation and the managed resources under its Resource-prov
 
 The sequencing rules are strict:
 
-1. Phases through the no-hardware promotion barrier use Register 1 or 2 and `Substrate: none`.
-2. The full DSL pipeline is human-approved before fake-host takeover or hardware bring-up can be validation
-   work.
+1. Phase 0 declares no behavioural register; Phases 1 through 51 use Register 1 or 2 and `Substrate: none`.
+   No phase through Phase 51 may perform hardware-specific or live validation. Phase 52 is the first phase
+   permitted to do so.
+2. The full DSL pipeline is human-approved before the Phase-51 fake-host takeover or Phase-52 hardware
+   bring-up can be validation work.
 3. Hardware-specific checks begin only in their numerically owned phase after all predecessors are approved.
 4. A live phase may run supporting pure, fake, or simulated checks, but its final claim remains Register 3 on
    the one declared substrate.
@@ -187,7 +197,8 @@ changes. Reopening preserves one coherent numerical story:
 2. move the tracker and phase marker together to a non-Done status carrying `NOT VALIDATED`;
 3. reset affected sprints to a non-Done status;
 4. invalidate the prior approval and evidence explicitly;
-5. add every current implementation mismatch to the one active legacy register; and
+5. add every current implementation mismatch to the typed Haskell legacy inventory and update its explanation
+   in the one reader-facing legacy register; and
 6. re-run from that phase forward in numerical order after the human approves each predecessor.
 
 An `Invalidated historical record` block may preserve minimal audit context inside `## Phase Status`. It ends
@@ -220,6 +231,11 @@ Every sprint has:
 - named legacy IDs it must reduce to zero; and
 - explicit `UNVERIFIED` residue.
 
+The distinction between a same-phase implementation release and sprint promotion is owned by
+[`development_plan_standards.md` §F](development_plan_standards.md#f-the-sprint-block-format). A release may
+unblock the next implementation seam, but it changes no status and cannot substitute for parent-gate
+qualification or human promotion.
+
 A large file is not automatically a large phase, and many files are not automatically several phases. The
 unit is the falsifiable seam and its final register.
 
@@ -229,11 +245,12 @@ unit is the falsifiable seam and its final register.
 
 | Invariant | Single source of truth |
 |---|---|
+| Executable cross-cutting policy values and their decision-to-owner map | `Amoebius.Validation.PolicyContract`; human review owns correspondence with the linked prose sections |
 | Current phase and sprint status | [`README.md`](README.md) and the matching phase status blocks |
-| Status vocabulary, order, pre-hardware barrier, substrate honesty | This document |
+| Prose definition of status vocabulary, numerical order, pre-hardware barrier, and substrate honesty | This document |
 | Fixed gate schema, qualification, source/artifact closure, human promotion | [`development_plan_gate_integrity.md`](development_plan_gate_integrity.md) |
 | Phase-document shape | [`development_plan_standards.md`](development_plan_standards.md) |
-| Active implementation divergence | [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) only |
+| Active implementation divergence | Typed inventory, owner, observation, and closure bindings in `Amoebius.Validation.Legacy`; [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) is the human-reviewed reader explanation only |
 | Complete repository tree and file classification | [`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md) |
 | Test registers and runtime test topology | [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) |
 | Spoof-resistance threat model | [`testing_spoof_resistance.md`](../documents/engineering/testing_spoof_resistance.md) |

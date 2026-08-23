@@ -27,6 +27,7 @@ module Amoebius.Validation.Evidence
   , writeCandidateEvidence
   ) where
 
+import Amoebius.Validation.PolicyContract qualified as Policy
 import Amoebius.Validation.Types
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.Aeson (ToJSON (toJSON), Value, encode, object, (.=))
@@ -248,7 +249,7 @@ candidateDigest = hex . SHA256.hash . candidateBytes
 writeCandidateEvidence :: FilePath -> CandidateEvidence -> IO FilePath
 writeCandidateEvidence repositoryRoot evidence = do
   absoluteRoot <- makeAbsolute repositoryRoot >>= canonicalizePath
-  directory <- ensureDirectoryChain absoluteRoot [".build", "runs", "phase-00", "candidates"]
+  directory <- ensureDirectoryChain absoluteRoot [canonicalGeneratedRoot, "runs", "phase-00", "candidates"]
   let encoded = candidateBytes evidence
       destination = directory </> Text.unpack (candidateDigest evidence) <> ".json"
   if not (isAbsolute directory) || not (isContained absoluteRoot directory)
@@ -280,15 +281,20 @@ ensureDirectoryChain root = foldM ensure root
         unless directory (fail "candidate-output-component-is-not-directory")
       else createDirectory candidate
     canonical <- canonicalizePath candidate
-    unless (isContained root canonical || canonical == normalise (root </> ".build"))
+    unless (isContained root canonical || canonical == normalise (root </> canonicalGeneratedRoot))
       (fail "candidate-output-directory-escaped-repository")
     pure canonical
 
 isContained :: FilePath -> FilePath -> Bool
 isContained root path =
   case splitDirectories (makeRelative (normalise root) (normalise path)) of
-    ".build" : "runs" : _ -> True
+    generatedRoot : "runs" : _ | generatedRoot == canonicalGeneratedRoot -> True
     _ -> False
+
+canonicalGeneratedRoot :: FilePath
+canonicalGeneratedRoot =
+  Policy.generationRootPath
+    (Policy.generationRoot (Policy.generationContract Policy.canonicalPolicyContract))
 
 hex :: ByteString -> Text
 hex = Text.pack . concatMap byteHex . ByteString.unpack

@@ -52,7 +52,7 @@ satisfied and human-approved.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -215,7 +215,7 @@ make the frame a consequence of what the run needs, and make the substrate-only 
 
 ### Validation
 
-1. Every workload the oracle names resolves to exactly one provider, and no workload resolves to two.
+1. Every workload the Haskell oracle names resolves to exactly one provider, and no workload resolves to two.
 2. Changing the substrate without changing the workload cannot change the row the selector returns.
 
 ### Remaining Work
@@ -264,7 +264,8 @@ run Phase 51's step list inside the Colima frame and build the native image with
 
 - A lift that parameterizes the existing step list by the frame it runs in, so the Colima path carries no
   step the linux path lacks.
-- A frame delta emitted as a golden, because divergence that is not diffable is divergence discovered late.
+- A frame delta compared with a separately authored Haskell expectation; its diff is emitted lazily beneath
+  `.build/**`, because divergence that is not diffable is divergence discovered late.
 - A native image built at `arm64`, the host's natural architecture — virtualization synthesizes an operating
   system, not an instruction set, so no cross-build and no emulation is available or wanted.
 - A kind cluster created from that image inside the frame, which is what proves the endpoint the frame
@@ -272,7 +273,7 @@ run Phase 51's step list inside the Colima frame and build the native image with
 
 ### Validation
 
-1. The emitted step list differs from the linux one only at lines the golden registers.
+1. The emitted step list differs from the linux one only at rows the Haskell frame-delta expectation admits.
 2. The built image reports `arm64`, and the run records no emulation layer.
 
 ### Remaining Work

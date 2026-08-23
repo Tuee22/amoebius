@@ -6,16 +6,18 @@
 > considered for version control.
 
 This document owns repository placement and the closed tracked-source classification. Generator semantics
-belong to the subsystem that declares each artifact. Phase order, validation status, and migration state live
-only in [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md) and the single
-[`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) register.
+belong to the subsystem that declares each artifact. Phase order and validation status live only in
+[`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). Executable migration identity,
+ownership, and closure live in reviewed Haskell; the single
+[`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) register explains
+that active inventory to readers.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md, pb/README.md, pb/stubs/README.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
 **Generated sections**: none
 
 </details>
@@ -59,13 +61,24 @@ The non-source input set is also closed:
 | Repository metadata | ignore files, attributes, licence, and editor-neutral repository policy |
 
 `pb` is not a general scripting exception. It cannot implement product behavior, calculate or reinterpret a
-gate verdict, host an oracle, select phase status, or remain in control after the Haskell binary exists. Tests
-of the bootstrap boundary are Haskell tests that observe `pb` as an external process.
+gate verdict, host an oracle, select phase status, or remain in control after the Haskell binary exists. Phase
+0 admits its source only through a Haskell-owned static AST/import/resolved-call/control-flow/potential-effect
+proof. Phase 0 through Phase 49 invoke Haskell directly; Phase 50 alone uses Haskell tests and an independent
+OS-boundary observer to validate `pb` as an external process.
 
 Governance prose is not an executable registry. A checker may inspect Markdown structure, links, and status
 syntax, but no product, generator, corpus, semantic oracle, or validation verdict may derive behavioural
 values from a Markdown table, tag, list, or code block. The corresponding executable declarations and
 independent expectations are Haskell.
+
+The legacy register has a narrower semantic boundary. Its legacy-specific structural seam may require exactly
+one tracked canonical `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, require UTF-8 readability, and
+reject the forbidden archive path or an alias. The general documentation checker may separately enforce
+ordinary orientation metadata, headings, links, and anchors. Neither seam may derive a legacy identity,
+owner, observation, closure, source-finding join, predicate, or count from row content. Changing any row,
+cell, ID spelling, owner phrase, predicate-shaped string, order, or row count cannot change a source-closure
+verdict. A human reviewer owns correspondence with the closed Haskell legacy inventory and its independently
+authored oracle.
 
 Operator-supplied values are neither generated source nor repository source. They enter through an explicit
 runtime input, secret store, or ignored local test-input path. They are never committed merely because the
@@ -140,8 +153,10 @@ materialized beneath `.build/**` immediately before use.
 
 ### 2.2 Present-day roots and their required destination
 
-Any current path outside the target tree is a migration surface, not an exception. The single legacy register
-owns its deletion condition. The canonical destinations are:
+Any current path outside the target tree is a migration surface, not an exception. A closed typed Haskell
+legacy inventory owns each migration identity, owner, observation binding, closure binding, and reintroduction
+negative. The single Markdown register explains those bindings to readers and owns no deletion condition. The
+canonical destinations are:
 
 | Present content | Required destination |
 |---|---|
@@ -234,8 +249,8 @@ those formats is authored as Haskell and encoded only for the duration of the ch
 
 ### 3.6 Authored negative corpora and their audit scope
 
-Negative corpora have no file-format exemption. A committed mutant is a Haskell value or source
-transformation with an independently reviewed expected failure. Applying it produces a disposable negative
+Negative corpora have no file-format exemption. A mutation retained in Git is an exact Haskell value or
+`.hs` source transformation with an independently reviewed expected failure. Applying it produces a disposable negative
 under `.build/test-corpora/**`. The gate must prove that the transformation changed the intended production
 locus and that the clean control still succeeds; a copied bad file is not an oracle.
 
@@ -267,8 +282,9 @@ A gate emits candidate evidence beneath `.build/runs/**` and may install a conte
 correctness or authorize a status change.
 
 Only the human user may promote a phase or sprint to Done or Validated. The plan records that decision after
-the gate, oracle-independence review, sabotage controls, predecessor chain, and owned legacy closures have all
-been inspected. Doctrine does not record current validation results.
+the gate, oracle-independence review, sabotage controls, predecessor chain, typed Haskell legacy closures, and
+human review of their reader-facing correspondence have all been inspected. Doctrine does not record current
+validation results.
 
 ## 6. `.gitignore` contract
 
@@ -293,9 +309,10 @@ never broadened to include local state.
 Every candidate phase gate inherits these fail-closed checks:
 
 1. Classify every tracked path by role, extension, executable bit, shebang, and content signature.
-2. Reject behavioral source that is not `.hs`, except bounded Python under `pb/**`, unless the finding maps
-   bijectively to one active migration row owned by a strictly later phase; that temporary accounting rule
-   admits no new input and expires at the owning phase.
+2. Reject behavioral source that is not `.hs`, except bounded Python under `pb/**`, unless the finding joins
+   in both directions to one typed Haskell migration binding owned by a strictly later phase. That temporary
+   accounting rule admits no new input and expires at the typed owner phase; the Markdown register is not an
+   operand.
 3. Reject `pb` logic that decides a validation result or continues past Haskell `exec` handoff.
 4. Reject tracked serialized fixtures, oracles, expected outputs, mutants, or checking programs.
 5. Materialize every required non-Haskell input from Haskell into a fresh `.build/**` tree.
@@ -304,8 +321,10 @@ Every candidate phase gate inherits these fail-closed checks:
 8. Reject any required ignored or untracked worktree input.
 9. Reject generated, evidentiary, secret, cache, or runtime-state bytes in the effective container context.
 10. Leave tracked files unchanged and no unignored output behind.
-11. Require zero findings for rows owned by the candidate or any earlier phase, exact two-way equality between
-    remaining findings and strictly-later active rows, and no stale, duplicate, reassigned, or unregistered row.
+11. Require zero findings for Haskell bindings owned by the candidate or any earlier phase, exact two-way
+    equality between remaining findings and strictly-later typed bindings, and no stale, duplicate,
+    reassigned, missing, or unbound Haskell entry. Row content and count in the reader-facing register cannot
+    affect this result.
 12. Treat receipts and hashes as provenance, never as correctness or promotion authority.
 
 The audit must include no-op, constant-success, extension-renaming, shebang-without-extension, misplaced-source,
@@ -320,13 +339,15 @@ its own recipe or runtime inputs.
 
 The target grammar above does not assert that the current tree conforms. Every current non-Haskell source
 family outside `pb/**`, every serialized behavioral input, and every obsolete source root is an active
-divergence until its row is removed from
-[`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) by satisfying its
-mechanical closure condition.
+divergence until its typed Haskell closure binding reaches zero, its independent Haskell reintroduction case
+fails at the intended locus, and the human accepts the evidence. The corresponding row in
+[`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) is then reconciled
+or removed as a reader-facing change; editing or deleting it cannot close the executable binding.
 
 Documentation adoption, a passing legacy command, or the presence of Haskell wrappers supplies no migration
 evidence. A phase may close only after its old source is absent and its clean-room Haskell materialization is
-independently reviewed. Git history is the archive; no second legacy-register file is admitted.
+independently reviewed. Human review also confirms that the one reader-facing register still corresponds to
+the compiled inventory. Git history is the archive; no second legacy-register file is admitted.
 
 ## Related Documents
 
@@ -335,4 +356,5 @@ independently reviewed. Git history is the archive; no second legacy-register fi
 - [Testing Doctrine](./testing_doctrine.md) — Haskell expectations and generated test encodings
 - [Documentation Standards](../documentation_standards.md) — governed Markdown as an authored non-source input
 - [Development Plan Standards](../../DEVELOPMENT_PLAN/development_plan_standards.md) — phase-gate adoption
-- [Legacy Tracking](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) — the sole active divergence register
+- [Legacy Tracking](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) — the sole reader-facing
+  divergence explanation; reviewed Haskell owns executable bindings

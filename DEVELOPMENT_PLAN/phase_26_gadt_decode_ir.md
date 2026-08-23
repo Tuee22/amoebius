@@ -48,7 +48,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -129,7 +129,7 @@ never a partial result. Generated Dhall/protocol bytes stay beneath `.build/**`;
 |---|---|
 | `Claim` | Target only — Haskell declarations and a total Haskell decoder accept a legal world or return one structured refusal; Haskell-owned cases lazily generate any Dhall/protocol bytes beneath `.build/**`. Later folds, effects, hardware, and runtime remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 26` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 26` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -209,13 +209,14 @@ gadt-decode needs, with **no** chain/reconcile/control-plane daemon kernel.
    successful under GHC 9.12.4 / Cabal 3.16.1.0;
    the phase gate's `strace` observer records absolute Cabal, GHC, and Dhall executable paths.
 2. "No `PATH`-resolved tool" is disambiguated to the one interpretation both engineers now share, since this
-   validation has no amoebius binary of its own: the harness resolves `ghc`/`cabal`/`dhall` to the **absolute
-   paths recorded in the Phase-1 pin manifest** and invokes them by absolute path.
-3. An **OS-boundary argv observer** — an argv-recording shim on `PATH`, per
-   [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 5 — records
-   that every toolchain and `dhall` invocation during this sprint's build and test carried an absolute program
-   path. The shim's own log is red if any invocation resolved a bare name via ambient `PATH`. This is an
-   external-observer trace, not a self-report by the build script.
+   validation has no amoebius binary of its own: the Haskell harness resolves `ghc`/`cabal`/`dhall` to the
+   **absolute paths established from the reviewed Phase-1 Haskell requirements** and records the fresh
+   resolution beneath `.build/runs/phase_26/**` before invoking each path directly.
+3. An **OS-boundary argv observer**, driven by reviewed Haskell code and materialized only beneath `.build/**`
+   per [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 5,
+   records that every toolchain and `dhall` invocation carried an absolute executable path. Its independent
+   raw trace is red if any invocation resolved a bare name via ambient `PATH`; no shell/Python shim or subject
+   build log supplies the verdict.
 
 ### Remaining Work
 
@@ -246,7 +247,8 @@ refined execution retains its exact resource subtree; no provisioned total is sy
 - The **role vocabulary itself, as a closed decoded union**, which the relations below already presuppose and
   which nothing establishes today: `Process`, `InClusterRole`, and `WorkerKind` of
   [daemon_topology_doctrine.md §2](../documents/engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid),
-  decoded total from Phase 25's `dhall/amoebius/Role.dhall`. An arm outside the union is an `OutOfDomainArm`
+  decoded total from Phase 25's Haskell role declaration and its `.build/dhall/amoebius/Role.dhall`
+  projection. An arm outside the union is an `OutOfDomainArm`
   rejection like any other; a `Worker` with no kind and a one-shot command run holding a daemon role have no
   value to decode at all, so the negatives here are closedness negatives, not field checks. Doctrine assigns
   the foreclosure to this gate ([§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon),
@@ -494,17 +496,16 @@ refined execution retains its exact resource subtree; no provisioned total is sy
   folds and Phase 31 invokes them on the fully expanded `BoundDeployment`; only their private constructor
   produces `ProvisionedSpec`. `ClusterIR` and `BoundDeployment` are forbidden renderer inputs and a structural
   type-inventory check rejects any `Provisioned*` field in either.
-- The committed minimal-pair compile-fail fixtures: for each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), a legal twin (compiles; cited to a named `legal_*.dhall` positive it decodes through) and an illegal twin (fails `ghc -fno-code` with a type error naming the same constructor/index), plus each pair's committed expected type-error locus.
+- Reviewed `.hs` minimal-pair compile-fail declarations: for each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), a legal twin compiles and is joined by a Haskell case identity to the named Phase-25 positive it decodes through. Its illegal twin fails `ghc -fno-code` with a type error naming the same constructor/index; a separately authored `.hs` oracle owns the expected error class and locus.
 
 ### Validation
 
-1. For each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant), [§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT transition index), and [§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (ownership index), the phase commits
-   **two source fixtures differing only in the one index** — tenant tag, state index, or owner — and that
-   committed minimal pair holds at compile time: the legal twin compiles
-   **and** is the constructor a named Phase-25 positive fixture is committed to decode through (its header
-   cites which `legal_*.dhall`), and the illegal
-   twin fails `ghc -fno-code` with a type error naming that same constructor/index (matching the committed
-   locus). The compile-time pair is Sprint 26.2's standalone check; the decode-through round-trip to the cited
+1. For each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant), [§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT transition index), and [§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (ownership index), the phase reviews
+   **two `.hs` source declarations differing only in the one index** — tenant tag, state index, or owner. The
+   legal twin compiles and its Haskell case identity joins it to the named Phase-25 positive that must decode
+   through the constructor. The illegal twin fails `ghc -fno-code` with a type error naming that same
+   constructor/index and matching the separately authored Haskell locus expectation. The compile-time pair is
+   Sprint 26.2's standalone check; the decode-through round-trip to the cited
    positive is confirmed at the Sprint 26.4 gate once `decodeCluster` exists (Sprint 26.3). The check is red if
    the legal twin fails to compile, if its cited positive later fails to decode through it at the gate
    (foreclosing absence-by-omission), or if the illegal twin's failure locus does not match. The legal
@@ -512,8 +513,8 @@ refined execution retains its exact resource subtree; no provisioned total is sy
 2. The pair cannot be satisfied by a strawman `mkCrossTenantRef` that was simply never defined. Because the
    legal twin is a required-to-compile, actually-decoded constructor, an impoverished vocabulary that spells
    cross-tenant references freely fails its legal twin, or fails to decode the cited positive. The compile-fail
-   message locus — the expected type-error text — is committed in this phase's oracle-pinning sprint alongside
-   the fixtures, and the exhaustive compile-fail corpus is assembled in Phase 27.
+   diagnostic class and semantic locus are separately authored in a reviewed `.hs` oracle. Raw compiler text
+   is a run-local `.build/**` observation, and the exhaustive compile-fail corpus is assembled in Phase 27.
 3. Every named positive fixture decodes with a complete normalized resource/capacity tree, and a structural
    traversal finds no execution unit without id/revision and one kind/cardinality/policy/resource-compatible
    private body;
@@ -657,9 +658,10 @@ provisioning boundary.
 
 ### Deliverables
 
-- `test/spec/dsl/DecodeSpec.hs` asserting: each `legal_*.dhall` positive fixture decodes to its `ClusterIR`; each
-  `illegal_decode_*.dhall` gadt-decode negative first passes `dhall type` then returns the expected structured
-  `Left DecodeError` whose tag matches its committed header; and every positive's decoded resource/capacity
+- `test/spec/dsl/DecodeSpec.hs` asserting: each Haskell-declared positive lazily rendered as `legal_*.dhall`
+  decodes to its `ClusterIR`; each run-local `illegal_decode_*.dhall` gadt-decode negative first passes
+  `dhall type` then returns the expected structured `Left DecodeError` from the independent Haskell case map;
+  no serialized header supplies the verdict; and every positive's decoded resource/capacity
   traversal exactly preserves execution id/revision and the complete kind-indexed controller/cardinality/
   policy/resource body while proving every kind's progress/render invariant; every deployment retains
   exactly one normalized `FirstDeployment | UpdateFrom PriorExecutionProvisionRef` source with exact
@@ -697,8 +699,9 @@ provisioning boundary.
     source/workload key equality, coexistence-domain equality, structural residency
     byte/shard/interconnect declarations, concrete/template supply raw/reserved/net-VRAM/link declarations,
     and the substrate-indexed host enforcement arm plus finite Apple supervisor operands.
-- An oracle-pinned `test/oracle/gadt_decode_ir/resource_field_inventory.tsv` that names the complete normalized
-  field/union inventory independently of `decodeCluster`, plus committed decoder mutants that drop
+- A separately authored `test/oracle/gadt_decode_ir/ResourceFieldInventory.hs` that names the complete
+  normalized field/union inventory independently of `decodeCluster`, plus reviewed Haskell decoder mutation
+  operators, applied only to temporary production-source copies beneath `.build/mutants/**`, that drop
   `ephemeralStorage`, erase a physical-carve or `allocatableRawBytes` field, erase a `NamedDiskCarve` parent
   index/extent arm/geometry field, erase `kubeletMetadataModel` or one runtime-metadata source identity,
   erase an execution id/revision/controller-kind/cardinality/
@@ -725,8 +728,9 @@ provisioning boundary.
 - The **concretely named representative gadt-decode negative set** ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 7) is a Haskell corpus that must lazily generate beneath `.build/test-corpora/**` **exactly one `illegal_decode_*.dhall` case per named `DecodeError` class** — `illegal_decode_schema.dhall`
   (`SchemaMismatch`), `illegal_decode_domain.dhall` (`OutOfDomainArm`), `illegal_decode_unspellable.dhall`
   (`UnspellableCombination`, a raw
-  `RawDeploymentRolloutPolicy.RollingUpdate { maxSurge = 0, maxUnavailable = 0 }`) — each header citing
-  the `illegal_state_catalog.md` entry it targets and each
+  `RawDeploymentRolloutPolicy.RollingUpdate { maxSurge = 0, maxUnavailable = 0 }`) — each Haskell case identity
+  names the `illegal_state_catalog.md` entry it targets, while serialized case annotations remain diagnostic;
+  each is
   paired with a positive `legal_*.dhall` differing only in the foreclosed dimension ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 8). Every one
   passes `dhall type` (dhall-typecheck-green) by construction; the rollout case has both `{ 1, 0 }` and `{ 0, 1 }`
   legal controls.
@@ -787,9 +791,10 @@ type.
 
 ### Remaining Work
 
-None at this register. Whether a named secret exists is a live question owned by
-[Phase 61](phase_61_vault_pki.md), and the prompt write path that turns a `Prompt` reference into a readable
-one is Phase 61's too.
+The pre-reset `None` claim is permanently invalid. Current remaining work includes every
+`UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and the Haskell case/oracle/
+mutation obligations above. Whether a named secret exists and the prompt write path are
+[Phase 61](phase_61_vault_pki.md) targets.
 
 ## Documentation Requirements
 
@@ -806,7 +811,8 @@ one is Phase 61's too.
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-26 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — only the human authority may change Phase 26 after reviewing a qualified
+  candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-26 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register the `amoebius` cabal package, `src/Amoebius/Dsl/{Types,
   SmartConstructors,Ref,Decode,Error}.hs`, and the bounded `gadt-decode-spec` test-suite as Phase-26 rows.

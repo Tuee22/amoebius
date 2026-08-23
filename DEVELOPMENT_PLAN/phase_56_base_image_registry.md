@@ -51,7 +51,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -281,7 +281,7 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
   compressed layer blob, config, and image manifest is keyed by its registry digest,
   kind-tagged, and carries exact stored bytes. It is a distinct registry-storage projection from the same pure
   provenance, not a second caller-authored aggregate and not an estimate reconstructed from unpacked layers.
-- The **typed bake catalog** `dhall/amoebius/BakeCatalog.dhall` — the **typed source of truth**: every
+- The **typed Haskell `BakeCatalog` declaration** — the behavioral source of truth: every
   stage's `content : NonEmpty BakeStep`
   with its pinned versions for this architecture, decoded by `BakeInventory` into the `BuildExecutionEnvelope`. The union is
   closed with **no `RunShell : Text` arm and no `Url` arm**
@@ -292,29 +292,24 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
   asset, publisher checksum contract, archive shape, target root, and required file. Pulsar's offloader bundle
   is the first instance, with its jcloud NAR required beneath `/pulsar/offloaders` in this architecture's child.
 - `renderDockerfile :: BakeCatalog -> Either CatalogError Dockerfile`, pure and total, emitting the previously
-  hand-authored `ARG`/`RUN … install` blocks from that catalog, plus
-  a **byte-for-byte golden** pinning the emitted Dockerfile as a fixture of the *renderer's* behaviour.
-  **`docker/base/Dockerfile` is no longer committed as source**; the catalog is. The emitted file is a
-  generated artifact stamped generated-by, per
+  hand-authored `ARG`/`RUN … install` blocks from that catalog. A separately authored Haskell expectation pins
+  renderer behaviour, while the Dockerfile and byte-diff view are generated lazily beneath `.build/**`.
+  No Dockerfile or external catalog projection is repository source. The emitted file is stamped generated-by, per
   [`generated_artifacts_doctrine.md` §2](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what).
 - A bake-inventory lint proving the resolver/toolchain are present and every ML engine payload is **absent**.
 - An architecture-native Redis probe on this image platform: absolute-path `redis-server --version` and
-  `redis-cli --version` match the independent catalog pin, and the committed `test/mutant/base_image_registry/omit-redis`
-  plus `test/mutant/base_image_registry/redis-version-skew` each turn the gate red.
-- The oracle-pinned oracle `test/fixture/base_image_registry/bake_inventory_expected.dhall` (the canonical
-  standard-platform-services set + pinned versions for this architecture) and the committed
-  mutants `test/mutant/base_image_registry/stub-arm64-binary`, `test/mutant/base_image_registry/wrong-arch-layer`,
-  `test/mutant/base_image_registry/gxx-version-skew` (the pinned-`g++`-version-skew that bites the native `<bin> --version`
-  match), `test/mutant/base_image_registry/drop-build-scratch-accounting`, and
-  `test/mutant/base_image_registry/dockerfile-handedit` (an edit to the *generated* Dockerfile that the catalog does not
-  license) — which MUST turn the emitted-Dockerfile golden red.
+  `redis-cli --version` match the independent Haskell catalog expectation. The Haskell changed-subject mutants
+  `omitRedis` and `redisVersionSkew` each turn the gate red.
+- A separately authored Haskell bake-inventory expectation containing the canonical standard-platform-services
+  set and pinned versions for this architecture. The Haskell changed-subject mutants `stubArm64Binary`,
+  `wrongArchLayer`, `gxxVersionSkew`, `dropBuildScratchAccounting`, and `dockerfileHandedit` must turn their
+  named checks red. Any mutated Dockerfile or other external form is generated lazily beneath `.build/**`.
 
-  **The oracle stays independent after the promotion.** `BakeInventory` becomes a decode of the committed
-  catalog rather than a hand-maintained Haskell asset map, so the §M.3 obligation — reconcile the image
+  **The oracle stays independent after the promotion.** `BakeInventory` consumes the Haskell `BakeCatalog`
+  subject declaration, so the §M.3 obligation — reconcile the image
   against the Phase-0 table, **never** against the implementer's own value — now requires that
-  `bake_inventory_expected.dhall` remain a *separately authored* copy of the ratified
-  standard-platform-services list, not an import of `BakeCatalog.dhall`. An oracle that imports the source it
-  checks is not a test.
+  the independent Haskell expectation remain separately authored rather than derived from `BakeCatalog`. An
+  oracle that imports the subject value it checks is not a test.
 
 ### Validation
 
@@ -326,7 +321,8 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
    zero scratch/cache writes. The fitting envelope produces one token. An independent Docker-daemon/cgroup/engine-VM configuration
    reader proves the exact CPU/RSS policy and scratch/cache roots match the provision witness; deliberate
    CPU, RSS, scratch, and cache-write overrun stages are throttled, terminated/OOM-killed, or receive bounded-
-   filesystem `ENOSPC` within the declared provision, with no spill outside named backings. A mutant that
+   filesystem `ENOSPC` within the declared provision, with no spill outside named backings. A Haskell
+   changed-subject mutant that
    launches an unbounded builder must turn these OS-boundary assertions red.
 2. Independent local-image inspection reports exactly this host's natural platform, and no other; the image
    reference contains the same architecture rather than relying on a manifest-list selection.
@@ -335,25 +331,24 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
    daemon and bounded builder config both name the cache; neither consults host-global auth or daemon state.
 3. Independently inspect and hash the OCI image manifest, config, every compressed blob, and each unpacked
    snapshot; require exact agreement with `ImageArtifact`. Re-derive `RegistryStoredArtifact` from that value
-   and require the digest/kind/stored-byte map to equal the Phase-0 oracle; a missing object or conflicting
+   and require the digest/kind/stored-byte map to equal the Phase-0 Haskell expectation; a missing object or conflicting
    size for one digest fails before import or publication.
 4. The bake-inventory check is green against a separately authored Haskell service expectation (services,
    resolver, and toolchain present; engine payloads absent), reconciled automatically against the rendered
-   run-local inventory — not against the SUT's own inventory or a tracked Dhall oracle.
+   run-local `.build/**` inventory — not against the SUT's own inventory or a serialized oracle.
 5. Every baked binary runs natively on this gate's own architecture, by absolute path,
    with its pinned harmless probe; no emulator is extracted, mounted, or invoked, and the run registers no
    host-global `binfmt` state; native version endpoints match the pinned version, documented non-version
    diagnostics join to the pinned OCI/SBOM identity, and the layer passes the ELF `e_machine` check.
-6. Reconcile every companion payload against an independently authored OCI-file oracle. Require the Pulsar
+6. Reconcile every companion payload against an independently authored Haskell OCI-file expectation. Require the Pulsar
    jcloud NAR in this platform child, verify its bytes came from the publisher-checksummed offloader
    archive, and make `omit-pulsar-offloaders` fail at the missing-payload locus.
-7. The committed mutants `test/mutant/base_image_registry/stub-arm64-binary`,
-   `test/mutant/base_image_registry/wrong-arch-layer`, `test/mutant/base_image_registry/gxx-version-skew` (the pinned-`g++`-version-skew that
-   makes Validation 5's `<bin> --version` match bite), and `test/mutant/base_image_registry/drop-build-scratch-accounting` turn
-   the validation red (§M.2).
+7. The Haskell `stubArm64Binary`, `wrongArchLayer`, `gxxVersionSkew`, and
+   `dropBuildScratchAccounting` changed-subject mutants turn the validation red (§M.2).
 8. Run both Redis binaries on this architecture by absolute path, verify their pinned versions and SBOM
    digests, and prove that the generated Redis/Sentinel workload image identity is the published
-   monocontainer/base-image digest. The omit/version-skew/public-image mutants fail for their specific reasons.
+   monocontainer/base-image digest. The Haskell omit/version-skew/public-image changed-subject mutants fail for
+   their specific reasons.
 
 ### Remaining Work
 
@@ -403,7 +398,10 @@ whole-deployment spec and creates no public service-render boundary.
 - A `ProvisionedBootstrapRegistry` whose `BootstrapRegistryAction` side-loads the selected image and initializes
   only the provisioned registry/mutation-proxy object domain through the same private serializer used by
   Phase 33. There is no public `render :: ProvisionedServiceSpec -> …` or bootstrap `ProvisionedSpec`; public
-  manifests still cross only `renderAll :: ProvisionedSpec -> [K8sObject]`. The registry is reachable at the host-only registry endpoint via the per-distro registry plumbing (the host-node `registries.yaml`/containerd-mirror rewrite owned by [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md)), with explicit CPU/memory/ephemeral/private allowances and
+  manifests still cross only `renderAll :: ProvisionedSpec -> [K8sObject]`. The registry is reachable at the
+  host-only registry endpoint via per-distro registry plumbing generated lazily from Haskell beneath
+  `.build/**` and materialized only at the host-node runtime destination owned by
+  [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md), with explicit CPU/memory/ephemeral/private allowances and
   an interim filesystem-driver `emptyDir` whose `sizeLimit` covers the derived peak recorded in the private
   `ProvisionedRegistryStorageDemand` and whose volume/pod-request nesting is checked. The underlying
   `RegistryStorageDemand` contains canonical digest-keyed `RegistryStoredArtifact` metadata, finite upload
@@ -423,7 +421,7 @@ whole-deployment spec and creates no public service-render boundary.
 1. Before import or object initialization, the registry-specific read-only snapshot preflight re-observes CPU
    request/finite-limit-policy residual, memory and logical-ephemeral request+ceiling residual, pod slots,
    blob-volume capacity and its resident digest/byte map, the nodefs/imagefs/containerfs layout and
-   capacities, all resident containerd OCI content plus committed/active snapshots, the pinned node-image
+   capacities, all resident containerd OCI content plus both final and active containerd snapshot states, the pinned node-image
    model, and the enforced pull policy.
 2. `provisionBootstrapRegistry` first constructs the opaque resource-complete `ProvisionedBootstrapRegistry`;
    validation then derives the layout-routed import+registry+mutation-proxy transition and returns a
@@ -437,7 +435,7 @@ whole-deployment spec and creates no public service-render boundary.
    each one-field negative must fail the snapshot preflight with zero containerd import and zero apiserver
    writes. The occupied-CPU, occupied-memory, registry/proxy pod-slot or resource shortage,
    registry-volume/ephemeral-overdraw, digest-size-conflict, content/snapshot-byte-over, layout-alias, and
-   pull-policy-mismatch fixtures all behave that way, and a domain/identity/source-digest or
+   pull-policy-mismatch Haskell negative cases all behave that way, and a domain/identity/source-digest or
    initialized-field mismatch mints no action at all.
 5. Then admit the fitting selected-platform image, assert the `BootstrapRegistryAction` is single-use
    and contains exactly the provisioned registry/proxy identities, assert the registry pod's serialized
@@ -498,9 +496,9 @@ not capacity admission.
   `docker login`; the ephemeral publisher capability is supplied over the private proxy channel, and the
   Vault `SecretRef` identity is flagged as the Phase-61+ transport-hardening target.
 - The exclusive registry mutation proxy (the backend has no direct mutating route), with a fault-injecting
-  mode that fails one arch's blob/manifest upload mid-push, and the committed mutant
-  `test/mutant/base_image_registry/record-before-push`, plus the registry access-log capture used for the zero-writes re-run
-  assertion.
+  mode that fails one arch's blob/manifest upload mid-push, the Haskell `recordBeforePush` changed-subject
+  mutant, and the run-local registry access-log observation used for the zero-writes re-run assertion. Any
+  serialized observation is emitted only beneath `.build/**` and remains untracked.
 
 ### Validation
 
@@ -521,8 +519,8 @@ not capacity admission.
    registry access log during the second run; the ref is immutable and digest-pinned, never `:latest` as a
    deployment reference.
 5. The build uses the ephemeral `docker --config <dir>` with no environment variable and no `docker login`.
-6. The committed mutant `test/mutant/base_image_registry/record-before-push` — it records the tag as published before the
-   child manifest lands — turns Validation 2 red (§M.2).
+6. The Haskell `recordBeforePush` mutant — it records the tag as published before the child manifest lands —
+   turns Validation 2 red (§M.2).
 
 ### Remaining Work
 
@@ -551,8 +549,8 @@ later reconciler-owned rendering (Phase 58) and the MinIO-backed blob store (Pha
   from the observer, exact resolution of this phase's architecture-qualified tag, and zero-writes idempotent
   re-run. The complementary architecture is not asserted here; its independently tagged image remains
   exclusively Phase 57's claim.
-- The committed oracle `test/fixture/base_image_registry/public_registry_endpoints.txt` (the concrete public-registry
-  endpoint set the observer checks against) and the committed mutant `test/mutant/base_image_registry/noop-egress-policy`.
+- A separately authored Haskell public-registry endpoint set for the observer and the Haskell
+  `noopEgressPolicy` changed-subject mutant. Any endpoint-list rendering is a lazy `.build/**` artifact.
 - A Register-3 ledger naming the substrate (linux-cpu) and the register, attaching the OS-boundary observer
   evidence, with the interim-storage and reconciler-rehoming residue flagged UNVERIFIED, never green.
 
@@ -564,20 +562,20 @@ later reconciler-owned rendering (Phase 58) and the MinIO-backed blob store (Pha
    ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) ambiguity
    resolution).
 2. That **enforced** denial breaks no registry standup, publication, or in-cluster pull, **while** the
-   `docker.io/library/busybox` negative-control canary FAILS `ImagePull` for its committed expected reason
+   `docker.io/library/busybox` negative-control canary FAILS `ImagePull` for its independently declared reason
    (proving enforcement), paired with the positive that an in-cluster `registry:2` pull of the same shape
    succeeds; zero public pulls are observed at the OS boundary (node `containerd` logs + a packet capture
-   spanning the entire standup-and-publish window) against the committed endpoint set.
+   spanning the entire standup-and-publish window) against the Haskell endpoint expectation.
 3. This gate's architecture-qualified tag resolves to exactly the image independently inspected on this
    phase's native host. It does not resolve through an OCI index or assert the complementary architecture.
    The whole build → side-load → standup → publish flow re-runs as a no-op, asserted as **zero mutating
    requests** in the registry access log during the second run.
-4. The committed mutant `test/mutant/base_image_registry/noop-egress-policy` (unenforced vanilla `NetworkPolicy`) turns
+4. The Haskell `noopEgressPolicy` mutant (unenforced vanilla `NetworkPolicy`) turns
    Validation 2's negative-control assertion red (§M.2).
 
 ### Remaining Work
 
-Revalidate the no-public-pull boundary and seal the amended handoff. The receipt and the acceptance ledger are written into `.build/runs/phase_41/<run-id>/`, the bundle is
+Revalidate the no-public-pull boundary and seal the amended handoff. The receipt and the acceptance ledger are written into `.build/runs/phase_56/<run-id>/`, the bundle is
 externally attested against the run's source snapshot, and the gate ran after Phase 55 closed. The later
 reconciler-owned rendering correspondence and MinIO-backed registry storage correspondence remain
 `UNVERIFIED` and are owned by Phases 58 and 62 respectively.
@@ -608,8 +606,9 @@ reconciler-owned rendering correspondence and MinIO-backed registry storage corr
 
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-56 row from Planned to its delivered status and link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 56's gate substrate (linux-cpu) in the per-phase substrate map.
-- `DEVELOPMENT_PLAN/system_components.md` — register `docker/base/Dockerfile`, `src/Amoebius/Image/*`, and the
-  Distribution `registry:2` standup as Phase-56 design-first rows, reconciled against the component inventory.
+- `DEVELOPMENT_PLAN/system_components.md` — register the Haskell `BakeCatalog`/renderer components and the
+  Distribution `registry:2` standup as Phase-56 design-first rows, reconciled against the component inventory;
+  the Dockerfile is only a lazy `.build/**` projection and is not a component source path.
 
 ## Related Documents
 

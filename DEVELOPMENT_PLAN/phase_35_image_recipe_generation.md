@@ -1,7 +1,7 @@
 # Phase 35: The amoebius image recipe
 
 > **Purpose**: Constrain the generated image recipe with independently authored semantics, and constrain the
-> plain native build invocation token by token, without committing renderer output or running a container
+> plain native build invocation token by token, without retaining renderer output under version control or running a container
 > engine.
 > **Read this if**: the typed bake catalog, Dockerfile projection, base-channel boundary, or image-build argv
 > has to change.
@@ -49,7 +49,7 @@ Known partial** only.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -94,7 +94,7 @@ as authority ([§K](development_plan_phase_model.md#k-honesty-proven--tested--as
 |---|---|
 | `Claim` | Target only — Haskell catalog and oracle values constrain a Dockerfile generated beneath `.build/**`, and the pure argv model admits one supplied native architecture only. No engine, build, registry, publication, or runtime observation is claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 35` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 35` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -114,8 +114,8 @@ as authority ([§K](development_plan_phase_model.md#k-honesty-proven--tested--as
 ## Doctrine adopted
 
 - [`jit_artifact_doctrine.md` §7 — Goldens become oracles](../documents/engineering/jit_artifact_doctrine.md#7-goldens-become-oracles):
-  the image recipe is generated per run and constrained by authored semantics, never by a committed copy of
-  renderer output.
+  the image recipe is generated per run and constrained by a separately authored Haskell semantic expectation,
+  never by a repository-retained copy of renderer output.
 - [`image_build_doctrine.md` §3 — One image per architecture — the tag carries the architecture, not an index](../documents/engineering/image_build_doctrine.md#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index):
   the pure argv emitter produces one plain native-build argv and refuses supplied/requested architecture mismatch;
   observing the host and running the engine are later live obligations.
@@ -145,7 +145,8 @@ make the recipe one total projection over the authored catalog.
 - A closed `BakeStep` union with seven package, nine official-artifact, six built-product, and zero copy-image
   values in the current catalog.
 - A total renderer with incomplete patterns rejected by the compiler.
-- Deterministic catalog-order emission to `.build/**`, with no tracked Dockerfile output.
+- Deterministic catalog-order emission to `.build/**`; the Dockerfile output remains untracked and absent from
+  authored roots.
 
 ### Validation
 
@@ -163,13 +164,15 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 ### Objective
 
 Adopt [`jit_artifact_doctrine.md` §7 — goldens become oracles](../documents/engineering/jit_artifact_doctrine.md#7-goldens-become-oracles);
-constrain what the recipe means without committing a copy of generated bytes.
+constrain what the recipe means with a separately authored Haskell semantic expectation and without retaining
+generated bytes in the repository.
 
 ### Deliverables
 
 - Twenty-two ordered semantic rows, independently authored from the acquisition requirements.
 - Exact stage, rung, directive, package, publisher-value, built-product, and environment projections.
-- One real five-calculus composition and a generated-output check that forbids the retired planned golden.
+- One real five-calculus composition and a generated-output check that forbids the retired serialized
+  renderer-output snapshot.
 
 ### Validation
 
@@ -222,7 +225,7 @@ make a multi-architecture or ambient-path invocation unrepresentable at this bou
 ### Validation
 
 1. The four vectors join to all forty-four oracle rows in both directions.
-2. The buildx and second-platform mutants fail at their separate loci.
+2. The Haskell buildx and second-platform changed-subject mutants fail at their separate loci.
 
 ### Remaining Work
 
@@ -236,8 +239,8 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 
 - `documents/engineering/image_build_doctrine.md` — §3 records the tested pure native-build argv boundary and
   §8 records the tested digest-free recipe boundary while keeping live resolution UNVERIFIED.
-- `documents/engineering/generated_artifacts_doctrine.md` — §3.1 records the renderer-output golden as retired
-  and names the semantic recipe oracle that replaced it.
+- `documents/engineering/generated_artifacts_doctrine.md` — §3.1 records the serialized renderer-output
+  snapshot as retired and names the separately authored Haskell semantic recipe expectation that replaced it.
 
 **Cross-references to add:**
 

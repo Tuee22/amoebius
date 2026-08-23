@@ -51,7 +51,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -61,8 +61,9 @@ platform backbone: the L4 LoadBalancer (MetalLB), the MinIO S3 object substrate,
 native-protocol event/workflow backbone (brokers, ZooKeeper metadata members, BookKeeper bookies, and
 size-triggered S3 offload). Each must be rendered as
 the byte-identical **HA topology even at `replicas=1`** and emitted as typed Kubernetes objects by the
-Phase-58 `renderAll` path (no Helm, no third-party charts, and the emitted manifests are generated from Haskell
-and never committed), served from binaries **baked into the native-architecture base image** with no
+Phase-58 `renderAll` path (no Helm and no third-party charts); emitted manifests are generated lazily from
+Haskell beneath `.build/**`, remain untracked, and are absent from the repository. Each service is served from
+binaries **baked into the native-architecture base image** with no
 public-registry pull, and placed on the Phase-60 `no-provisioner` retained PVs where it holds durable state.
 
 Two deferred gaps from earlier phases must close here. First, the **registry→MinIO S3-driver rehoming**: the
@@ -232,8 +233,8 @@ MinIO S3 driver — closing the Phase-56 deferred gap.
   per drive; and the uniform `volumeClaimTemplate` plan
   (`max rounded provisionedBytes × ordinal count`) that debits the retained backing.
 - The Distribution `registry:2` blob store rehomed onto the MinIO S3 driver — the registry holds no PV of its
-  own, its bytes live in MinIO — asserted against the committed `test/fixture/platform_backbone/registry-storage-driver.golden`
-  storage-stanza oracle, with the committed `mutant/registry-fs-driver` seeded mutant (registry left on the
+  own, its bytes live in MinIO — asserted against a separately authored Haskell storage-stanza expectation,
+  with the Haskell changed-production-subject mutant `M-registry-fs-driver` (registry left on the
   interim filesystem driver) named as the mutant this rehoming assertion MUST turn red. The logical tenant
   extent supplied to MinIO is a private `ProvisionedRegistryStorageDemand` whose logical
   `objectSet`, structured `objectStorePeak`, scalar interim `derivedPeak`, mutation admission, and upload/orphan
@@ -262,11 +263,11 @@ MinIO S3 driver — closing the Phase-56 deferred gap.
    condition as a distributed StatefulSet on identity-named retained PVs.
 2. Round-trip an admitted object-gateway put/get; assert the bytes are unchanged, and assert the same writer
    cannot issue a direct MinIO PUT.
-3. Assert the registry is serving from the MinIO S3 driver: its storage config is byte-equal to the committed
-   `registry-storage-driver.golden` oracle (authored by hand, not read from the running config), every object of
+3. Assert the registry is serving from the MinIO S3 driver: its storage config is structurally equal to the
+   separately authored Haskell expectation (not read from the running config), every object of
    a pre-existing Phase-56 artifact was copied/verified and that artifact still pulls by the same digest, and a
-   new blob pushed after cutover materializes in MinIO without changing the old filesystem. The committed
-   `mutant/registry-fs-driver` mutant turns this red.
+   new blob pushed after cutover materializes in MinIO without changing the old filesystem. The Haskell
+   changed-production-subject mutant `M-registry-fs-driver` turns this red.
    Compare the Phase-56 and Phase-62 private registry witnesses: `objectSet`, structured `objectStorePeak`,
    scalar interim `derivedPeak`, admission, and the upload/orphan witness must match in the replacement while
    its backend differs; then independently validate the additional migration witness and derive the MinIO
@@ -296,9 +297,9 @@ MinIO S3 driver — closing the Phase-56 deferred gap.
    - Direct S3 writes are denied while each in-envelope writer capability succeeds through the gateway.
    - Also make producer storage fit while the gateway pod is one CPU, memory, ephemeral byte, or pod slot
      short; it must reject before any S3 write.
-   - Require zero storage/API writes for every rejection and require `mutant/storage-logical-as-physical`,
-     `mutant/storage-drop-required-fault-scenario`, `mutant/storage-sum-unequal-ordinals`, and
-     `mutant/content-store-immediate-gc` each to turn red.
+   - Require zero storage/API writes for every rejection and require the Haskell changed-production-subject
+     mutants `M-storage-logical-as-physical`, `M-storage-drop-required-fault-scenario`,
+     `M-storage-sum-unequal-ordinals`, and `M-content-store-immediate-gc` each to turn red.
 5. Assert every app/init/sidecar container and volume in the `renderAll`-emitted MetalLB/MinIO/registry objects
    (scope = `amoebius` field-manager-owned objects only) is an **exact** projection of its
    `ProvisionedServiceSpec`: CPU/memory/ephemeral-storage requests+limits, each disk-backed
@@ -349,8 +350,8 @@ drill that the mandatory size-triggered MinIO offload actually bounds the BookKe
   each member's steady/recovery high-water and uniform rounded claim plan; brokers cannot start until every
   member resource/volume fits and the ensemble is Ready. BookKeeper/offload bytes cannot fund this provision.
 - Bounded per-topic retention with a **size-triggered MinIO offload** (no unbounded storage, no time-only
-  trigger), wired to the Sprint-56.1 MinIO substrate; the drill topic's hot-tier size cap committed in
-  `test/fixture/platform_backbone/hot-tier-cap.golden`, with the committed `mutant/offload-time-only` seeded mutant
+  trigger), wired to the Sprint-56.1 MinIO substrate; the drill topic's hot-tier size cap is a separately
+  authored Haskell expectation, with the Haskell changed-production-subject mutant `M-offload-time-only`
   named as the mutant the offload drill MUST turn red.
 - A produce/consume round-trip demonstrating at-least-once delivery with broker-side dedup.
 
@@ -364,10 +365,11 @@ drill that the mandatory size-triggered MinIO offload actually bounds the BookKe
    duplicate (a redelivery of the same producer-sequence id) and assert the consumer observes exactly one
    delivery — not merely that broker-side dedup is enabled on the topic. Assert a CBOR payload round-trips
    byte-for-byte (full native-client proof deferred to Phase 67, marked UNVERIFIED here).
-3. Drill the size-triggered offload: produce past the committed `hot-tier-cap.golden` size high-water mark on
+3. Drill the size-triggered offload: produce past the separately authored Haskell hot-tier-cap expectation on
    the drill topic and assert (a) offloaded ledger objects appear in the MinIO bucket (external observer on the
    object substrate) and (b) BookKeeper/broker hot-tier occupancy — read from broker metrics at the OS boundary,
-   never an amoebius self-report — never exceeds the cap. Assert the committed `mutant/offload-time-only` mutant
+   never an amoebius self-report — never exceeds the cap. Assert the Haskell changed-production-subject
+   `M-offload-time-only` mutant
    (size trigger removed) breaches the cap under the same ingest, since a time-only trigger cannot bound
    occupancy.
 4. Run the independent BookKeeper capacity corpus across unequal quorum choices, segment-boundary rounding,
@@ -375,13 +377,14 @@ drill that the mandatory size-triggered MinIO offload actually bounds the BookKe
    Include exact-fit and one-byte-over per-bookie cases, a logical-hot-total fit whose write-quorum physical
    demand fails, a recovery-only overflow, a filesystem-overhead/one-quantum overflow, and a skewed ordinal
    placement whose unequal pre-presentation sum fits but the uniform
-   `max(provisionedBytes) × ordinalCount` plan fails. Every rejection performs zero storage/API writes;
-   `mutant/storage-logical-as-physical`, `mutant/storage-drop-required-fault-scenario`, and
-   `mutant/storage-sum-unequal-ordinals` each turns red.
+   `max(provisionedBytes) × ordinalCount` plan fails. Every rejection performs zero storage/API writes; the
+   Haskell changed-production-subject mutants `M-storage-logical-as-physical`,
+   `M-storage-drop-required-fault-scenario`, and `M-storage-sum-unequal-ordinals` each turn red.
    Run the independent ZooKeeper corpus across znode payloads, transaction/session/watch bounds, retained
    logs/snapshots, and every failure-recovery case. A topology where brokers, bookies, and offload all fit but
    one ZooKeeper member CPU/memory/ephemeral/PVC/backing is one unit/byte short must reject before any Pulsar
-   object is applied. Mutants dropping the metadata store, a znode class, or recovery overlap go red.
+   object is applied. Haskell changed-production-subject mutants dropping the metadata store, a znode class,
+   or recovery overlap go red.
 5. Assert every app/init/sidecar container and volume is an exact projection of its
    `ProvisionedServiceSpec` across CPU, memory, ephemeral storage, durable presentation/usable/raw storage,
    cache `None`, and accelerator `None`; every BookKeeper PVC/PV capacity equals the recomputed uniform rounded
@@ -411,24 +414,24 @@ and close the phase with the backbone HA gate on a fresh cluster.
   the fail-closed condition of [`vault_pki_doctrine.md §4`](../documents/engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)),
   never a `threadDelay`.
 - The phase-gate harness: bring the whole backbone up on a fresh single-node linux-cpu `kind` cluster and
-  assert the set is up, HA-shaped, from generated (never-committed) manifests and baked binaries, with a
+  assert the set is up, HA-shaped, from manifests generated lazily beneath `.build/**` and absent from the
+  repository, plus baked binaries, with a
   proven/tested/assumed Register-3 ledger that marks the runtime layer *tested* and the Keycloak-edge,
   Postgres/observability (Phase 63), and control-plane-owned reconcile layers UNVERIFIED; the independent
   resource-projection checker compares every applied execution unit/volume exactly to its
   `ProvisionedServiceSpec`. Only the two thin MinIO→registry and Vault-unsealed→Pulsar edges are enacted here;
   the *full* derived readiness-DAG bring-up of the whole standard stack, with the
   [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) hard edges
-  and the `mutant/dag-drop-edge` mutant, is [Phase 63](phase_63_platform_services_2.md)'s.
-- The reviewed gate oracles reused here: the registry storage-stanza oracle
-  `test/fixture/platform_backbone/registry-storage-driver.golden` and the drill-topic hot-tier cap
-  `test/fixture/platform_backbone/hot-tier-cap.golden`, plus the independently computed
-  `test/fixture/platform_backbone/storage-geometry-boundaries.csv` covering BookKeeper/MinIO exact-fit, one-byte-over,
-  recovery/healing, orphan horizon, and uniform-ordinal rounding. The gate also reuses
-  `test/fixture/phase25/registry_storage_demand.dhall` unchanged and pins the expected mapping from its private
-  registry logical witness into the MinIO physical geometry. The committed seeded mutants
-  `mutant/registry-fs-driver`, `mutant/offload-time-only`, `mutant/storage-logical-as-physical`,
-  `mutant/storage-drop-required-fault-scenario`, `mutant/storage-sum-unequal-ordinals`, and
-  `mutant/content-store-immediate-gc` are committed and re-run, not run once.
+  and the `M-dag-drop-edge` Haskell mutant, is [Phase 63](phase_63_platform_services_2.md)'s.
+- The separately authored Haskell gate expectations reused here: the registry storage stanza, the drill-topic
+  hot-tier cap, and the storage-geometry boundary table covering BookKeeper/MinIO exact-fit, one-byte-over,
+  recovery/healing, orphan horizon, and uniform-ordinal rounding. The gate also reconstructs the Phase-25
+  private registry logical witness from its Haskell case declaration and checks the independently authored
+  mapping into MinIO physical geometry. The Haskell changed-production-subject mutants
+  `M-registry-fs-driver`, `M-offload-time-only`, `M-storage-logical-as-physical`,
+  `M-storage-drop-required-fault-scenario`, `M-storage-sum-unequal-ordinals`, and
+  `M-content-store-immediate-gc` are re-run on every candidate; any serialized views are generated lazily under
+  `.build/**` and remain untracked.
 
 ### Validation
 
@@ -437,9 +440,10 @@ and close the phase with the backbone HA gate on a fresh cluster.
    only on its dependency's observed-ready condition, with no timer standing in for a condition.
 2. Round-trip MinIO put/get and Pulsar produce/consume against the assembled backbone; assert the registry
    rehoming holds (a pushed blob is a MinIO object) and the size-triggered offload holds the hot tier under the
-   committed cap; assert the committed mutants `mutant/registry-fs-driver` and `mutant/offload-time-only` each
+   Haskell-declared cap; assert the Haskell changed-production-subject mutants `M-registry-fs-driver` and
+   `M-offload-time-only` each
    turn their assertion red.
-3. Recompute `storage-geometry-boundaries.csv` with the independent checker and compare it with the opaque
+3. Recompute the Haskell storage-geometry boundary table with the independent Haskell checker and compare it with the opaque
    storage provision. Assert every BookKeeper recovery and MinIO healing subset required by its finite fault
    policy is present; every logical extent has its replication/erasure/metadata/workspace amplification; the
    content peak includes concurrent and full-horizon failed writes; the registry tenant's private
@@ -449,7 +453,8 @@ and close the phase with the backbone HA gate on a fresh cluster.
    StatefulSet template's PVC/PV presentation/rounded size and retained-backing debit equal
    `max(provisionedBytes) × ordinalCount`. Re-run all four storage mutants named in the
    deliverable and require each to turn red before any apply path receives a token.
-4. Assert the whole backbone is up and HA-shaped from generated manifests + baked-binary images. "HA-shaped"
+4. Assert the whole backbone is up and HA-shaped from manifests generated lazily beneath `.build/**` plus
+   baked-binary images. "HA-shaped"
    is the render-diff predicate: each service's applied manifest is byte-identical **modulo the replica-count field(s)** to the same service rendered at `replicas=n` (MinIO erasure-set, Pulsar
    multi-broker/ZooKeeper/bookie), not
    a standalone/single-broker variant. **Manifest provenance (§M.3):** re-run the pure `renderAll` in-process at
@@ -470,8 +475,9 @@ and close the phase with the backbone HA gate on a fresh cluster.
 
 ### Remaining Work
 
-Remove `test/fixture/phase30/expected-base-digest.txt`, pass the verified Phase-56 digest into the run without
-copying it into Git, and rerun the gate under universal artifact hygiene.
+The historical copied expected-base-digest input is condemned residue and cannot be recreated. Pass the
+verified Phase-56 digest directly as authenticated run input and rerun only after the gate contract and
+predecessor approval are resolved; any materialized view belongs under ignored `.build/**`.
 
 ## Documentation Requirements
 
@@ -497,8 +503,8 @@ copying it into Git, and rerun the gate under universal artifact hygiene.
 
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-62 status when the gate passes and link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 62's gate substrate (linux-cpu) in the per-phase substrate map.
-- `DEVELOPMENT_PLAN/system_components.md` — reconcile the `src/Amoebius/Platform/*` target module paths named
-  in each sprint against the component inventory once they become concrete.
+- `DEVELOPMENT_PLAN/system_components.md` — reconcile the Phase-62 `Amoebius.Platform` Haskell module names
+  named in each sprint against the component inventory once they become concrete.
 
 ## Related Documents
 

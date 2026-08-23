@@ -42,7 +42,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -75,7 +75,7 @@ service-worker, or WebCrypto fidelity; those are post-Phase-49 live-browser obli
 |---|---|
 | `Claim` | Target only — the pure Haskell state model admits only encrypted-envelope, identity-partitioned, single-fenced-owner transitions and lazily projects runtime source beneath `.build/**`. Actual browser storage, locks, crypto, service-worker, and replay behavior is not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 45` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 45` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -100,7 +100,9 @@ service-worker, or WebCrypto fidelity; those are post-Phase-49 live-browser obli
 
 ## Sprints
 
-> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+> **Reset validation review.** This sprint remains REJECTED — NOT VALIDATED until its fixed Haskell
+> subject/oracle/reviewer/mutant/legacy contract is complete and independently reviewed. The target boundaries
+> below are Haskell-only and authorize no browser, OS, storage-service, network, or hardware process.
 
 ## Sprint 45.1: Build the encrypted local interpreter ⏸️
 
@@ -108,19 +110,36 @@ service-worker, or WebCrypto fidelity; those are post-Phase-49 live-browser obli
 
 ### Objective
 
-Persist and recover bounded offline state without disclosing protected records or creating multiple replay owners.
+Model bounded offline-state persistence and recovery without disclosing protected records or admitting
+multiple replay owners.
 
 ### Deliverables
 
-- Encrypted structured/blob stores and immutable public asset cache.
-- Offline auth/partition state machine and local-unlock binding.
-- Fenced cross-tab ownership with a safe unsupported-browser posture.
-- Quota, eviction, crash-recovery, and migration transactions plus browser tests.
+- Closed Haskell values for encrypted structured/blob records, public asset-cache metadata, identity
+  partitions, local-unlock outcomes, and supported-facility declarations.
+- Pure Haskell transitions for quota, eviction, crash recovery, migration, replay ordering, and single-fenced
+  ownership, including an explicit unsupported-facility outcome.
+- A Haskell projection that lazily materializes IndexedDB, OPFS, service-worker, Web-Locks,
+  BroadcastChannel, and WebCrypto runtime source beneath `.build/**`; no projected code executes in this phase.
+- A closed Haskell case corpus, separately reviewed Haskell expectations, paired negatives, and witnessed
+  changed-subject mutations for the state and projection boundaries.
 
 ### Validation
 
-1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-45 supporting suite must run; require the canonical model and real Chrome
-   traces green and every mutant red.
+1. Compare every declared state transition with a separately authored Haskell expectation. The corpus must
+   cover envelope identity, partition switching, quota, eviction, recovery, migration, replay ordering, and
+   fence acquisition, renewal, expiry, and takeover.
+2. Exercise minimally different Haskell pairs for plaintext protected records, credential persistence,
+   cross-partition access, stale fences, dual owners, replay reordering, and unsupported facilities. Each pair
+   must return its pinned refusal and produce no forbidden transition.
+3. Generate the runtime projection twice from clean Haskell input beneath `.build/**`. A separately authored
+   Haskell structure oracle must constrain the closed facility set, partition-key use, fencing hooks, and
+   absence of credential-bearing storage while accepting the unchanged control.
+4. Witness every changed production Haskell locus before running its state, envelope, fencing, and projection
+   mutant. Each mutant must produce its distinct named Haskell-oracle mismatch, while the unaffected control
+   remains equal to its independently declared observation.
+5. Record IndexedDB, OPFS, Web Locks, BroadcastChannel, service-worker, WebCrypto, cross-tab, and storage
+   fidelity in an actual browser as post-barrier UNVERIFIED residue.
 
 ### Remaining Work
 
@@ -131,13 +150,17 @@ neither is inferred from this local browser boundary.
 
 **Engineering docs to update (when the human promotes the gate, never before):**
 
-- `documents/engineering/browser_offline_runtime_doctrine.md` — record supported facilities and tested assumptions.
-- `documents/engineering/testing_doctrine.md` — link raw-storage and two-tab evidence.
-- `documents/engineering/generated_artifacts_doctrine.md` — record the emitted service-worker manifest.
+- `documents/engineering/browser_offline_runtime_doctrine.md` — record the modeled facility set, pure state
+  semantics, and deferred live-browser fidelity obligations.
+- `documents/engineering/testing_doctrine.md` — link the Haskell transition, partition, and fencing evidence
+  without claiming raw browser-storage or two-tab observation.
+- `documents/engineering/generated_artifacts_doctrine.md` — record the lazy `.build/**` service-worker and
+  runtime projection boundary.
 
 **Cross-references to add:**
 
-- The tracker, substrate map, and component inventory must identify the browser runtime.
+- The tracker, substrate map, and component inventory must identify the Haskell offline-state semantics and
+  lazy browser-runtime projection.
 
 ## Related Documents
 

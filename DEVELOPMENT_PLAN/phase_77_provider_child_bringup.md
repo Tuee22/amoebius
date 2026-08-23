@@ -54,7 +54,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -210,6 +210,8 @@ standard-service convergence and re-runs it; no register-1/2 in-process check di
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 77.1: Two-stage capacity bootstrap for a hostless provider child ⏸️
 
@@ -287,8 +289,9 @@ one capacity-scheduler role, and zero host daemons — no host binary, no host w
   structurally absent (there is no host).
 - Substrate-shape honesty at runtime: a provider child advertises **no** host substrate, confirming the
   `Managed Eks` arm carries no `LinuxHost` / host-worker index — a foreclosure already unrepresentable in the
-  pre-cluster band (the Dhall dhall-typecheck schema and the GADT decoder) and observed here against the committed
-  foreclosure tag `NoHostSubstrateOnManagedEks`.
+  pre-cluster band (the Haskell type schema and GADT decoder; any Dhall representation is a lazy `.build/**`
+  projection) and observed here against the Haskell-declared foreclosure tag
+  `NoHostSubstrateOnManagedEks`.
 
 ### Validation
 
@@ -299,11 +302,11 @@ one capacity-scheduler role, and zero host daemons — no host binary, no host w
    same Lease and report `/readyz`.
 2. The authority audit — read from an **independent** Lease/audit observer, never the handoff code's self-report —
    shows parent bootstrap holder → drained/released → fresh absence → authenticated child control-plane daemon holder, with
-   **zero parent mutations after release** and **zero child mutations before acquire**; each race fixture
+   **zero parent mutations after release** and **zero child mutations before acquire**; each Haskell-declared race case
    converges to one holder or refuses without effects.
 3. The child runs a single in-cluster control-plane daemon, one capacity-scheduler role, and zero host daemons; there is no
-   host NodePort peer and no host substrate advertised — asserted against the committed negative expectation that
-   the `Managed Eks` arm carries no `LinuxHost` witness (the committed foreclosure tag
+   host NodePort peer and no host substrate advertised — asserted against the reviewed Haskell negative expectation that
+   the `Managed Eks` arm carries no `LinuxHost` witness (the Haskell-declared foreclosure tag
    `NoHostSubstrateOnManagedEks`, §M.8), paired with a positive self-managed arm differing only in carrying a host
    witness.
 
@@ -326,8 +329,9 @@ is a structural invariant tested on the provider target.
 
 ### Deliverables
 
-- Post-handoff child admin REST bring-up: initialize/unseal the child Vault, deliver the child's projected
-  `.dhall`, and hand the control-plane daemon its converge loop.
+- Post-handoff child admin REST bring-up: initialize/unseal the child Vault, lazily render the child's Haskell
+  declaration beneath `.build/**`, deliver that generated projection, and hand the control-plane daemon its
+  converge loop.
 - Convergence of the **complete** standard HA platform-service stack — registry (Distribution `registry:2`), MinIO, Vault,
   Pulsar, Redis/Sentinel, Prometheus/Grafana, Percona/Patroni Postgres (with pgAdmin), Envoy/Gateway API, Keycloak, and the cloud
   LoadBalancer — through the Phase-58 reconciler from typed manifests, using the same HA-capable topology at
@@ -341,13 +345,15 @@ is a structural invariant tested on the provider target.
 
 ### Validation
 
-1. The child reaches the standard-service fungible shape — the **explicit** committed service set (registry,
+1. The child reaches the standard-service fungible shape — the **explicit** independently authored Haskell service set (registry,
    MinIO, Vault, Pulsar, Redis/Sentinel, Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud LoadBalancer, §M.7),
    HA and reachable, wild ingress only via Keycloak — asserted by exact-match of the live inventory against
-   `test/golden/standard_service_set.txt`. "No Helm, no public-registry pulls" is read from an **OS-boundary observer** (an argv-recording shim on the convergence path plus a CNI/containerd image-pull log or an egress
+   a lazily generated, untracked text view at `.build/test-corpora/standard_service_set.txt`. "No Helm, no public-registry pulls" is read from an **OS-boundary observer** (an argv-recording shim on the convergence path plus a CNI/containerd image-pull log or an egress
    network trace, §M.5), never a compliance trace the daemon emits about itself: the observer records **zero**
    `helm` invocations and **zero** image pulls from any host outside the in-cluster registry, checked against
-   `test/golden/convergence_argv.txt`. The committed mutant `mut-45.1-public-pull` (a manifest pinned to a
+   the independently authored Haskell argv expectation, whose text view is generated lazily at
+   `.build/test-corpora/convergence_argv.txt`. The Haskell-authored changed-subject mutant
+   `mut-45.1-public-pull` (a typed Haskell manifest pinned to a
    public-registry image) MUST go **red** on the image-pull observer.
 
 ### Remaining Work
@@ -370,8 +376,9 @@ leak-free-sweep layer UNVERIFIED here.
 
 ### Deliverables
 
-- The gate over the committed representative set (§M.7): the provider-child bring-up + standard-service-convergence
-  slice of `test/fixture/dhall/provider_ebs_credential/provider_provision.dhall`, driven end-to-end — bootstrap scheduler readiness,
+- The gate over the reviewed Haskell representative set (§M.7): the provider-child bring-up +
+  standard-service-convergence slice, lazily projected to
+  `.build/test-corpora/dhall/provider_ebs_credential/provider_provision.dhall` and driven end-to-end — bootstrap scheduler readiness,
   complete add-on cutover, full managed authority, parent→child Lease handoff, complete standard-HA convergence,
   hostless topology, and the no-op re-run.
 - The five independent reference predicates wired to OS-boundary observers: the standard-service-set exact-match,
@@ -384,13 +391,15 @@ leak-free-sweep layer UNVERIFIED here.
 
 ### Validation
 
-1. Run the gate `InForceSpec` end-to-end over `test/fixture/dhall/provider_ebs_credential/provider_provision.dhall`
-   (bring-up/convergence slice) from a linux-cpu parent: the
+1. Run the Haskell-declared gate `InForceSpec` end-to-end; its bring-up/convergence slice is lazily projected to
+   `.build/test-corpora/dhall/provider_ebs_credential/provider_provision.dhall` beneath the run-local ignored
+   build root. From a linux-cpu parent, the
    child's scheduler reaches `BootstrapCapacitySchedulerReady`, every bootstrap add-on old UID is released and its
    replacement reservation-joined, full managed authority is read back, and the parent bootstrap Lease holder
    releases and is observed absent before the authenticated child control-plane daemon acquires. Only then does the
-   in-cluster control plane converge the complete standard HA service set, exact-matching
-   `test/golden/standard_service_set.txt`, HA and reachable, wild ingress only via Keycloak. The child runs no
+   in-cluster control plane converge the complete standard HA service set, exact-matching the independently
+   authored Haskell expectation (with its untracked generated text view at
+   `.build/test-corpora/standard_service_set.txt`), HA and reachable, wild ingress only via Keycloak. The child runs no
    host daemon and advertises no host substrate (`NoHostSubstrateOnManagedEks`).
 2. Re-run the bring-up against the converged child and assert a no-op, defined observably as **zero mutating cloud-API/K8s-API calls** on run 2 in the OS-boundary audit trail (§M.5/§M.6) — not exit 0 and not the
    reconciler's self-reported empty diff.
@@ -430,7 +439,7 @@ leak-free provider tag sweep.
   provider substrate (§1 every cluster is the same cluster, §12 substrate equivalence): the same complete HA set,
   reachable, wild ingress only via Keycloak.
 - `documents/illegal_state/illegal_state_catalog.md` — record that the hostless-provider-child topology arm (the
-  `Managed Eks` arm carrying no `LinuxHost` witness) is observed at runtime here against the committed foreclosure
+  `Managed Eks` arm carrying no `LinuxHost` witness) is observed at runtime here against the Haskell-declared foreclosure
   tag `NoHostSubstrateOnManagedEks`.
 - `documents/engineering/testing_doctrine.md` — record the Phase 77 per-run ledger artifact and the explicit
   deferral of the elevated leak-free durable-resource sweep to Phase 78.
@@ -461,8 +470,8 @@ leak-free provider tag sweep.
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — every cluster is the same
   cluster / substrate equivalence: the complete standard HA service set converged on a provider child
 - [Image Build Doctrine](../documents/engineering/image_build_doctrine.md) — bake the binaries, pull only
-  in-cluster: the preloaded scheduler digest and baked platform services `mut-45.1-public-pull` is committed to
-  violate
+  in-cluster: the preloaded scheduler digest and baked platform services are challenged by the Haskell-authored
+  `mut-45.1-public-pull` changed subject
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the hostless-provider-child
   topology arm (no `LinuxHost` witness) observed at runtime
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — Register 3 (live), the spin-up → run →

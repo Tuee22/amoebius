@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.Dispatch
-  ( discoverRepositoryRoot
+  ( checkPhaseZeroSnapshot
+  , discoverRepositoryRoot
   , phaseZeroReadinessBlockers
   , runValidateCommand
   , validatePhase
@@ -10,6 +11,7 @@ module Amoebius.Validation.Dispatch
 import Amoebius.Validation.Documentation (checkDocuments)
 import Amoebius.Validation.Legacy (legacyCheck)
 import Amoebius.Validation.PhaseContract (checkPhaseContracts)
+import Amoebius.Validation.PolicyContract qualified as Policy
 import Amoebius.Validation.SourceClosure
   ( IndexEntry (indexPath)
   , SnapshotProblem
@@ -60,7 +62,7 @@ runValidateCommand arguments =
               [ finding
                   "DISPATCH-ARGV"
                   "amoebius validate"
-                  "expected exactly: validate phase NN, with a two-digit phase ordinal from 00 through 95"
+                  ("expected exactly: validate phase NN, with a two-digit phase ordinal from " <> policyDomainLabel)
               ]
           }
 
@@ -69,7 +71,7 @@ runValidateCommand arguments =
 -- directory after acquisition.
 validatePhase :: FilePath -> FilePath -> Int -> IO CheckResult
 validatePhase gitPath root phase
-  | phase < 0 || phase > 95 =
+  | phase < policyDomainLower || phase > policyDomainUpper =
       pure
         CheckResult
           { checkName = "validation-phase-dispatch"
@@ -78,10 +80,10 @@ validatePhase gitPath root phase
               [ finding
                   "DISPATCH-PHASE-INVALID"
                   ("phase-" <> show phase)
-                  "the phase ordinal must be in the closed repository range 00 through 95"
+                  ("the phase ordinal must be in the closed repository range " <> policyDomainLabel)
               ]
           }
-  | phase /= 0 =
+  | phase /= policyDomainLower =
       pure
         CheckResult
           { checkName = "validation-phase-dispatch"
@@ -100,22 +102,28 @@ validatePhase gitPath root phase
           snapshotResult <- loadGitSnapshot git root
           pure $ case snapshotResult of
             Left problems -> snapshotFailure problems
-            Right snapshot -> phaseZeroChecks snapshot
+            Right snapshot -> checkPhaseZeroSnapshot snapshot
 
-phaseZeroChecks :: SourceSnapshot -> CheckResult
-phaseZeroChecks snapshot =
+-- | Pure component seam used by the public dispatcher and its component
+-- oracle. Supplying a snapshot deliberately bypasses acquisition; the oracle
+-- must prove that both document-decode branches still compose every readiness
+-- refusal. Public acquisition and an applied bypass mutant remain unqualified.
+checkPhaseZeroSnapshot :: SourceSnapshot -> CheckResult
+checkPhaseZeroSnapshot snapshot =
   case snapshotDocuments snapshot of
     Left decodeFindings ->
       mergeChecks
         "phase-00"
-        [ legacyCheck 0 snapshot
+        [ legacyCheck policyDomainLower snapshot
+        , Policy.checkPolicyContract Policy.canonicalPolicyContract
         , CheckResult "documentation-snapshot" [] decodeFindings
         , phaseZeroReadinessBlockers
         ]
     Right documents ->
       mergeChecks
         "phase-00"
-        [ legacyCheck 0 snapshot
+        [ legacyCheck policyDomainLower snapshot
+        , Policy.checkPolicyContract Policy.canonicalPolicyContract
         , checkDocuments documents
         , checkPhaseContracts documents
         , phaseZeroReadinessBlockers
@@ -133,12 +141,12 @@ phaseZeroReadinessBlockers =
     { checkName = "phase-00-readiness"
     , checkObservations =
         [ observation "readiness.harness-qualification" "report consistency checker present; execution not implemented"
-        , observation "readiness.policy-contract" "typed cross-cutting policy and prose-correspondence review not integrated"
-        , observation "readiness.pb-source-grammar" "deny-by-default Python AST/import/effect audit not implemented"
+        , observation "readiness.policy-contract" "typed contract is integrated; changed-subject qualification and human prose-correspondence review are absent"
+        , observation "readiness.pb-source-grammar" "exact nonempty source-bound AST/import/resolved-call/control-flow/potential-effect audit not implemented; no external-interpreter summary is admissible"
         , observation "readiness.source-consumer-graph" "tracked non-Haskell content has no semantic parser/consumer/effect graph"
-        , observation "readiness.worktree-index-observer" "assume-unchanged and skip-worktree flags plus independent byte/mode comparison are not checked"
+        , observation "readiness.worktree-index-observer" "tracked regular-file reads are descriptor-pinned, but the authored-root recursion is path-based and race-prone; qualification remains absent"
         , observation "readiness.phase-contract-semantics" "phase-specific semantic contract audit not implemented"
-        , observation "readiness.legacy-predicate-dispatch" "non-source legacy IDs have no executable per-ID dispatch"
+        , observation "readiness.legacy-owner-analyzers" "closed typed inventory and fail-closed dispatch are integrated; Phase-0 owner-domain analyzers remain unavailable"
         , observation "readiness.independent-review" "reviewer and custody receipt absent"
         , observation "readiness.cleanroom-residue" "external observer absent"
         , observation "readiness.candidate-integration" "evidence writer not connected to dispatcher"
@@ -152,29 +160,29 @@ phaseZeroReadinessBlockers =
             "Amoebius.Validation.Gate"
             "the fixed sabotage corpus has not been executed against the exact dispatcher/harness build"
         , finding
-            "POLICY-CONTRACT-MISSING"
+            "POLICY-CONTRACT-UNQUALIFIED"
             "Amoebius.Validation.PolicyContract"
-            "cross-cutting source, registry, ordering, and authority decisions are not yet integrated as one reviewed typed contract"
+            "the typed cross-cutting contract is integrated, but its Registry-provider, owner-map, and pb-transport changed-subject mutants have not been qualified and no human has reviewed prose correspondence"
         , finding
             "PB-GRAMMAR-UNIMPLEMENTED"
             "Amoebius.Validation.SourceClosure"
-            "the pb exception remains debt until a deny-by-default Python AST/import/call/effect audit and external adapter observer exist"
+            "the pb exception remains debt until exact nonempty tracked bytes have a complete versioned AST, Haskell-resolved bindings/calls/control flow, and deny-by-default potential-effect proof routed only to the declared bootstrap adapter; Phase 50, not Phase 0, owns external runtime handoff observation"
         , finding
             "SOURCE-CONSUMER-GRAPH-MISSING"
             "Amoebius.Validation.SourceClosure"
             "first-line content signatures cannot prove that admitted documentation or metadata is not consumed as executable behavior"
         , finding
-            "WORKTREE-INDEX-OBSERVER-INCOMPLETE"
+            "AUTHORED-ROOT-WALK-UNPINNED"
             "Amoebius.Validation.SourceClosure"
-            "candidate acquisition does not reject assume-unchanged/skip-worktree flags or independently compare every tracked worktree byte and mode with the index"
+            "authored-root recursion uses path lookups rather than a descriptor-relative no-follow walk, so ancestor symlink and replacement races remain unclosed"
         , finding
             "PHASE-CONTRACT-SEMANTICS-MISSING"
             "Amoebius.Validation.PhaseContract"
             "fixed table shape is implemented, but phase-specific subject/oracle/control/mutant/residue semantics are not"
         , finding
-            "LEGACY-PREDICATE-DISPATCH-MISSING"
+            "LEGACY-OWNER-ANALYZERS-MISSING"
             "Amoebius.Validation.Legacy"
-            "canonical row inventory is enforced, but every non-source legacy ID lacks an independently reviewed executable closure binding"
+            "the closed legacy inventory dispatches every ID, but Phase-0 owner-domain analyzers and their independently authored reintroduction executions remain unavailable"
         , finding
             "INDEPENDENT-REVIEW-MISSING"
             "phase-00-oracles"
@@ -301,7 +309,7 @@ parseOrdinal :: String -> Maybe Int
 parseOrdinal value
   | length value == 2 && all asciiDigit value = do
       phase <- readMaybe value
-      if phase <= 95 then Just phase else Nothing
+      if phase >= policyDomainLower && phase <= policyDomainUpper then Just phase else Nothing
   | otherwise = Nothing
  where
   asciiDigit character = character >= '0' && character <= '9'
@@ -310,3 +318,15 @@ formatOrdinal :: Int -> Text
 formatOrdinal phase
   | phase >= 0 && phase < 10 = "0" <> Text.pack (show phase)
   | otherwise = Text.pack (show phase)
+
+policyOrdering :: Policy.OrderingContract
+policyOrdering = Policy.orderingContract Policy.canonicalPolicyContract
+
+policyDomainLower :: Int
+policyDomainLower = Policy.phaseOrdinalNumber (Policy.phaseDomainLower policyOrdering)
+
+policyDomainUpper :: Int
+policyDomainUpper = Policy.phaseOrdinalNumber (Policy.phaseDomainUpper policyOrdering)
+
+policyDomainLabel :: Text
+policyDomainLabel = formatOrdinal policyDomainLower <> " through " <> formatOrdinal policyDomainUpper

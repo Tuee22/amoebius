@@ -1,9 +1,11 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.SourceClosure
   ( ClassifiedPath (..)
   , GitExecutable
   , IndexEntry (..)
+  , IndexFlagObservation (..)
   , IndexMode (..)
   , PbSemanticRole (..)
   , SnapshotProblem (..)
@@ -13,6 +15,7 @@ module Amoebius.Validation.SourceClosure
   , SourceFacet (..)
   , SourceSnapshot (..)
   , TrackedEntry (..)
+  , WorktreeEntryKind (..)
   , classifyEntry
   , classifyPbPythonRoles
   , classifySnapshot
@@ -24,6 +27,8 @@ module Amoebius.Validation.SourceClosure
   , loadGitSnapshot
   , mkGitExecutable
   , parseLsFilesStage
+  , parseLsFilesTaggedStage
+  , parseLsFilesTaggedPaths
   , registeredSourceIds
   , renderSnapshotProblem
   , renderSourceDebtId
@@ -32,6 +37,7 @@ module Amoebius.Validation.SourceClosure
   , sourceClosureCheck
   ) where
 
+import Amoebius.Validation.PolicyContract qualified as Policy
 import Amoebius.Validation.Types
   ( CheckResult (..)
   , Finding
@@ -39,14 +45,14 @@ import Amoebius.Validation.Types
   , observation
   )
 import Control.Concurrent (forkIO, newEmptyMVar, putMVar, takeMVar)
-import Control.Exception (IOException, displayException, finally, try)
-import Control.Monad (foldM)
+import Control.Exception (IOException, bracket, displayException, finally, onException, try)
+import Control.Monad (foldM, forM)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Char8 as ByteString8
 import qualified Crypto.Hash.SHA256 as SHA256
 import Data.Char (intToDigit, isHexDigit)
-import Data.List (sortOn)
+import Data.List (sort, sortOn)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
@@ -55,15 +61,29 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as TextEncoding
 import qualified Data.Text.Encoding.Error as TextError
+import System.Directory
+  ( doesDirectoryExist
+  , doesPathExist
+  , listDirectory
+  , pathIsSymbolicLink
+  )
 import System.Exit (ExitCode (..))
 import System.Environment (getEnvironment)
 import System.FilePath
   ( dropTrailingPathSeparator
   , isAbsolute
   , normalise
+  , takeDirectory
   , takeFileName
+  , (</>)
   )
 import System.IO (Handle, hClose)
+import System.IO.Error (isDoesNotExistError)
+#if !defined(mingw32_HOST_OS)
+import System.Posix.Files qualified as Posix
+import System.Posix.IO qualified as PosixIO
+import System.Posix.Types (Fd)
+#endif
 import System.Process
   ( CreateProcess (..)
   , StdStream (CreatePipe)
@@ -81,6 +101,22 @@ data IndexMode
   = RegularFile
   | ExecutableFile
   | SymbolicLink
+  deriving (Eq, Ord, Show)
+
+-- | The two independent, NUL-delimited index-visibility observations used
+-- during acquisition.  They are distinct because @git ls-files -v@ exposes
+-- assume-unchanged through a lower-case tag, while @git ls-files -t@ exposes
+-- skip-worktree through the @S@ tag.
+data IndexFlagObservation
+  = AssumeUnchangedObservation
+  | SkipWorktreeObservation
+  deriving (Eq, Ord, Show)
+
+data WorktreeEntryKind
+  = WorktreeRegularFile
+  | WorktreeSymbolicLink
+  | WorktreeDirectory
+  | WorktreeOther
   deriving (Eq, Ord, Show)
 
 data IndexEntry = IndexEntry
@@ -106,6 +142,30 @@ data SourceSnapshot = SourceSnapshot
   }
   deriving (Eq, Show)
 
+data WorktreeEntryObservation = WorktreeEntryObservation
+  { worktreeObservedKind :: WorktreeEntryKind
+  , worktreeObservedExecutable :: Bool
+  , worktreeObservedBytes :: ByteString
+  , worktreeObservedStatus :: WorktreeStatusFingerprint
+  }
+  deriving (Eq, Ord, Show)
+
+data WorktreeStatusFingerprint = WorktreeStatusFingerprint
+  { statusDevice :: Text
+  , statusFileIdentity :: Text
+  , statusMode :: Text
+  , statusSize :: Text
+  , statusModified :: Text
+  , statusChanged :: Text
+  }
+  deriving (Eq, Ord, Show)
+
+data WorktreeAcquisitionObservation = WorktreeAcquisitionObservation
+  { acquisitionTrackedEntries :: Map FilePath WorktreeEntryObservation
+  , acquisitionAuthoredPaths :: Map FilePath WorktreeEntryKind
+  }
+  deriving (Eq, Show)
+
 data SnapshotProblem
   = GitExecutableNotAbsolute FilePath
   | RepositoryRootNotAbsolute FilePath
@@ -122,6 +182,26 @@ data SnapshotProblem
   | DuplicateTrackedPath FilePath
   | MissingLoadedBlob Text
   | InvalidSnapshotIdentity Text
+  | MissingIndexFlagNulTerminator IndexFlagObservation
+  | MalformedIndexFlagRecord IndexFlagObservation Int Text
+  | DuplicateIndexFlagPath IndexFlagObservation FilePath
+  | IndexFlagInventoryMismatch IndexFlagObservation [FilePath] [FilePath]
+  | AssumeUnchangedTrackedPaths [FilePath]
+  | SkipWorktreeTrackedPaths [FilePath]
+  | TrackedWorktreePathMissing FilePath
+  | TrackedWorktreeExecutableModeUnavailable FilePath
+  | TrackedWorktreeKindMismatch FilePath IndexMode WorktreeEntryKind
+  | TrackedWorktreeExecutableMismatch FilePath Bool Bool
+  | TrackedWorktreeBytesMismatch FilePath
+  | TrackedWorktreeEntryRace FilePath
+  | TrackedWorktreeIoFailure FilePath Text
+  | InvalidWorktreeSymlinkTarget FilePath
+  | TrackedWorktreeChangedDuringAcquisition [FilePath]
+  | AuthoredRootInventoryIoFailure FilePath Text
+  | InvalidAuthoredRootPath FilePath
+  | AuthoredRootAncestorKindMismatch FilePath WorktreeEntryKind
+  | UnexpectedAuthoredRootMaterial [FilePath]
+  | AuthoredRootChangedDuringAcquisition [FilePath] [FilePath] [FilePath]
   | TrackedWorktreeDivergence [FilePath]
   | UntrackedNonIgnoredPaths [FilePath]
   | IndexChangedDuringAcquisition
@@ -192,8 +272,9 @@ mkGitExecutable executable
   | otherwise = Left (GitExecutableNotAbsolute executable)
 
 -- | Acquire the complete stage-zero index and each referenced blob.  Both the
--- Git binary and repository root must be explicit absolute paths.  No worktree
--- byte is read, and an unmerged entry or unsupported index mode refuses the
+-- Git binary and repository root must be explicit absolute paths.  The blobs
+-- remain classification authority, while independent worktree reads must match
+-- them exactly; an unmerged entry or unsupported index mode refuses the
 -- snapshot rather than being omitted.
 loadGitSnapshot :: GitExecutable -> FilePath -> IO (Either [SnapshotProblem] SourceSnapshot)
 loadGitSnapshot git root
@@ -235,46 +316,530 @@ loadIndex git root = do
               case traverse (attachLoadedBlob byObject) entries of
                 Left problem -> pure (Left [problem])
                 Right tracked -> do
-                  let manifest = renderIndexManifest entries
-                  identityResult <- runGit git root ["hash-object", "--stdin"] manifest
-                  case identityResult of
-                    Left problem -> pure (Left [problem])
-                    Right identityBytes ->
-                      case decodeOneLine identityBytes of
-                        Left detail -> pure (Left [InvalidSnapshotIdentity detail])
-                        Right identityPath
-                          | not (validObjectId (Text.pack identityPath)) ->
-                              pure (Left [InvalidSnapshotIdentity (Text.pack identityPath)])
-                          | otherwise -> do
-                              workspaceProblems <- checkCandidateWorkspace git root
-                              secondListing <-
-                                runGit
-                                  git
-                                  root
-                                  ["ls-files", "--cached", "--full-name", "--stage", "-z"]
-                                  ByteString.empty
-                              let indexProblems = case secondListing of
-                                    Left problem -> [problem]
-                                    Right secondRaw
-                                      | secondRaw == raw -> []
-                                      | otherwise -> [IndexChangedDuringAcquisition]
-                                  finalProblems = workspaceProblems <> indexProblems
-                              pure $
-                                if null finalProblems
-                                  then
-                                    Right
-                                      SourceSnapshot
-                                        { snapshotRoot = root
-                                        , snapshotIdentity = Text.pack identityPath
-                                        , snapshotEntries = tracked
-                                        }
-                                  else Left finalProblems
+                  beforeResult <- observeAcquisitionBoundary git root entries tracked
+                  case beforeResult of
+                    Left problems -> pure (Left problems)
+                    Right before -> do
+                      let manifest = renderIndexManifest entries
+                      identityResult <- runGit git root ["hash-object", "--stdin"] manifest
+                      case identityResult of
+                        Left problem -> pure (Left [problem])
+                        Right identityBytes ->
+                          case decodeOneLine identityBytes of
+                            Left detail -> pure (Left [InvalidSnapshotIdentity detail])
+                            Right identityPath
+                              | not (validObjectId (Text.pack identityPath)) ->
+                                  pure (Left [InvalidSnapshotIdentity (Text.pack identityPath)])
+                              | otherwise -> do
+                                  workspaceProblems <- checkCandidateWorkspace git root
+                                  afterResult <- observeAcquisitionBoundary git root entries tracked
+                                  finalIndexProblems <- observeFinalIndexVisibility git root entries
+                                  let (afterProblems, boundaryProblems) = case afterResult of
+                                        Left problems -> (problems, [])
+                                        Right after -> ([], compareAcquisitionBoundaries before after)
+                                      finalProblems =
+                                        workspaceProblems
+                                          <> afterProblems
+                                          <> boundaryProblems
+                                          <> finalIndexProblems
+                                  pure $
+                                    if null finalProblems
+                                      then
+                                        Right
+                                          SourceSnapshot
+                                            { snapshotRoot = root
+                                            , snapshotIdentity = Text.pack identityPath
+                                            , snapshotEntries = tracked
+                                            }
+                                      else Left finalProblems
 
 attachLoadedBlob :: Map Text ByteString -> IndexEntry -> Either SnapshotProblem TrackedEntry
 attachLoadedBlob byObject entry =
   case Map.lookup (indexObjectId entry) byObject of
     Nothing -> Left (MissingLoadedBlob (indexObjectId entry))
     Just bytes -> Right (TrackedEntry entry bytes)
+
+-- | Observe every acquisition boundary which Git's ordinary dirty-worktree
+-- summary can conceal: index visibility flags, raw worktree bytes/kinds/modes,
+-- and recursively discovered material outside the four explicitly excluded
+-- state/control roots.
+observeAcquisitionBoundary
+  :: GitExecutable
+  -> FilePath
+  -> [IndexEntry]
+  -> [TrackedEntry]
+  -> IO (Either [SnapshotProblem] WorktreeAcquisitionObservation)
+observeAcquisitionBoundary git root entries tracked = do
+  flagProblems <- observeIndexVisibility git root entries
+  trackedResult <- observeTrackedWorktree root tracked
+  authoredResult <- inventoryAuthoredPaths root
+  let (trackedObservationProblems, trackedValues) = case trackedResult of
+        Left foundProblems -> (foundProblems, Nothing)
+        Right values -> ([], Just values)
+      (authoredObservationProblems, authoredValues) = case authoredResult of
+        Left foundProblems -> (foundProblems, Nothing)
+        Right values ->
+          let expectedLeaves = Set.fromList (map indexPath entries)
+              expectedAncestors = Set.fromList (concatMap (trackedPathParents . indexPath) entries)
+              expectedPaths = expectedLeaves `Set.union` expectedAncestors
+              unexpected = Set.toAscList (Map.keysSet values `Set.difference` expectedPaths)
+              wrongAncestors =
+                [ AuthoredRootAncestorKindMismatch path observedKind
+                | path <- Set.toAscList expectedAncestors
+                , Just observedKind <- [Map.lookup path values]
+                , observedKind /= WorktreeDirectory
+                ]
+              foundProblems =
+                wrongAncestors
+                  <> [UnexpectedAuthoredRootMaterial unexpected | not (null unexpected)]
+           in (foundProblems, Just values)
+      allProblems = flagProblems <> trackedObservationProblems <> authoredObservationProblems
+  pure $ case (allProblems, trackedValues, authoredValues) of
+    ([], Just trackedObservation, Just authoredObservation) ->
+      Right
+        WorktreeAcquisitionObservation
+          { acquisitionTrackedEntries = trackedObservation
+          , acquisitionAuthoredPaths = authoredObservation
+          }
+    _ -> Left allProblems
+
+compareAcquisitionBoundaries
+  :: WorktreeAcquisitionObservation
+  -> WorktreeAcquisitionObservation
+  -> [SnapshotProblem]
+compareAcquisitionBoundaries before after = trackedProblems <> authoredProblems
+ where
+  beforeTracked = acquisitionTrackedEntries before
+  afterTracked = acquisitionTrackedEntries after
+  changedTracked =
+    Set.toAscList
+      ( Set.fromList
+          [ path
+          | path <- Set.toAscList (Map.keysSet beforeTracked `Set.union` Map.keysSet afterTracked)
+          , Map.lookup path beforeTracked /= Map.lookup path afterTracked
+          ]
+      )
+  trackedProblems = [TrackedWorktreeChangedDuringAcquisition changedTracked | not (null changedTracked)]
+  beforeAuthored = acquisitionAuthoredPaths before
+  afterAuthored = acquisitionAuthoredPaths after
+  commonAuthored = Map.keysSet beforeAuthored `Set.intersection` Map.keysSet afterAuthored
+  added = Set.toAscList (Map.keysSet afterAuthored `Set.difference` Map.keysSet beforeAuthored)
+  removed = Set.toAscList (Map.keysSet beforeAuthored `Set.difference` Map.keysSet afterAuthored)
+  changed =
+    [ path
+    | path <- Set.toAscList commonAuthored
+    , Map.lookup path beforeAuthored /= Map.lookup path afterAuthored
+    ]
+  authoredProblems =
+    [ AuthoredRootChangedDuringAcquisition added removed changed
+    | not (null added) || not (null removed) || not (null changed)
+    ]
+
+observeIndexVisibility :: GitExecutable -> FilePath -> [IndexEntry] -> IO [SnapshotProblem]
+observeIndexVisibility git root entries = do
+  assumeResult <-
+    runGit
+      git
+      root
+      ["ls-files", "--cached", "--full-name", "-v", "-z"]
+      ByteString.empty
+  skipResult <-
+    runGit
+      git
+      root
+      ["ls-files", "--cached", "--full-name", "-t", "-z"]
+      ByteString.empty
+  let expected = sort (map indexPath entries)
+  pure
+    ( taggedObservationProblems AssumeUnchangedObservation expected isAssumeUnchanged assumeResult
+        <> taggedObservationProblems SkipWorktreeObservation expected isSkipWorktree skipResult
+    )
+
+-- | Make the final index observation one tagged stage listing.  The @-v@ tag
+-- retains @S@ for skip-worktree and lower-cases every assume-unchanged tag, so
+-- this one NUL-delimited stream binds both visibility flags to the exact mode,
+-- object id, stage, and path inventory observed at the end of acquisition.
+observeFinalIndexVisibility :: GitExecutable -> FilePath -> [IndexEntry] -> IO [SnapshotProblem]
+observeFinalIndexVisibility git root expected = do
+  result <-
+    runGit
+      git
+      root
+      ["ls-files", "--cached", "--full-name", "--stage", "-v", "-z"]
+      ByteString.empty
+  pure $ case result of
+    Left problem -> [problem]
+    Right raw -> case parseLsFilesTaggedStage raw of
+      Left problems -> problems
+      Right tagged ->
+        let actual = map snd tagged
+            expectedPaths = sort (map indexPath expected)
+            actualPaths = sort (map indexPath actual)
+            inventoryProblems =
+              [ IndexFlagInventoryMismatch AssumeUnchangedObservation expectedPaths actualPaths
+              | expectedPaths /= actualPaths
+              ]
+            indexProblems = [IndexChangedDuringAcquisition | expected /= actual]
+            assumeUnchanged = sort [indexPath entry | (tag, entry) <- tagged, isAssumeUnchanged tag]
+            skipWorktree = sort [indexPath entry | (tag, entry) <- tagged, isSkipWorktree tag]
+            flagProblems =
+              [AssumeUnchangedTrackedPaths assumeUnchanged | not (null assumeUnchanged)]
+                <> [SkipWorktreeTrackedPaths skipWorktree | not (null skipWorktree)]
+         in inventoryProblems <> indexProblems <> flagProblems
+
+taggedObservationProblems
+  :: IndexFlagObservation
+  -> [FilePath]
+  -> (Char -> Bool)
+  -> Either SnapshotProblem ByteString
+  -> [SnapshotProblem]
+taggedObservationProblems _ _ _ (Left problem) = [problem]
+taggedObservationProblems observationKind expected isFlagged (Right bytes) =
+  case parseLsFilesTaggedPaths observationKind bytes of
+    Left problems -> problems
+    Right tagged ->
+      let actual = sort (map snd tagged)
+          inventoryProblems =
+            [IndexFlagInventoryMismatch observationKind expected actual | expected /= actual]
+          flagged = sort [path | (tag, path) <- tagged, isFlagged tag]
+          flagProblems = case observationKind of
+            AssumeUnchangedObservation -> [AssumeUnchangedTrackedPaths flagged | not (null flagged)]
+            SkipWorktreeObservation -> [SkipWorktreeTrackedPaths flagged | not (null flagged)]
+       in inventoryProblems <> flagProblems
+
+isAssumeUnchanged :: Char -> Bool
+isAssumeUnchanged tag = tag >= 'a' && tag <= 'z'
+
+isSkipWorktree :: Char -> Bool
+isSkipWorktree tag = tag == 'S' || tag == 's'
+
+observeTrackedWorktree
+  :: FilePath
+  -> [TrackedEntry]
+  -> IO (Either [SnapshotProblem] (Map FilePath WorktreeEntryObservation))
+observeTrackedWorktree root entries = do
+  results <- forM entries (observeTrackedEntry root)
+  let problems = concat [items | Left items <- results]
+      observations = [item | Right item <- results]
+  pure $
+    if null problems
+      then Right (Map.fromList observations)
+      else Left problems
+
+observeTrackedEntry
+  :: FilePath
+  -> TrackedEntry
+  -> IO (Either [SnapshotProblem] (FilePath, WorktreeEntryObservation))
+observeTrackedEntry root entry = do
+  let indexed = trackedIndex entry
+      path = indexPath indexed
+      absolute = root </> path
+  result <- readWorktreeEntry root path absolute
+  pure $ case result of
+    Left problem -> Left [problem]
+    Right observed ->
+      let comparisonProblems = compareTrackedEntry entry observed
+       in if null comparisonProblems then Right (path, observed) else Left comparisonProblems
+
+readWorktreeEntry :: FilePath -> FilePath -> FilePath -> IO (Either SnapshotProblem WorktreeEntryObservation)
+#if defined(mingw32_HOST_OS)
+readWorktreeEntry _root path _absolute = pure (Left (TrackedWorktreeExecutableModeUnavailable path))
+#else
+readWorktreeEntry root path absolute = do
+  initialResult <- try (Posix.getSymbolicLinkStatus absolute) :: IO (Either IOException Posix.FileStatus)
+  case initialResult of
+    Left problem
+      | isDoesNotExistError problem -> pure (Left (TrackedWorktreePathMissing path))
+      | otherwise -> pure (Left (TrackedWorktreeIoFailure path (Text.pack (displayException problem))))
+    Right before -> do
+      observedResult <-
+        try (readPresentWorktreeEntry root path absolute before)
+          :: IO (Either IOException (Either SnapshotProblem WorktreeEntryObservation))
+      pure $ case observedResult of
+        Left problem
+          | isDoesNotExistError problem -> Left (TrackedWorktreeEntryRace path)
+          | otherwise -> Left (TrackedWorktreeIoFailure path (Text.pack (displayException problem)))
+        Right result -> result
+
+readPresentWorktreeEntry
+  :: FilePath
+  -> FilePath
+  -> FilePath
+  -> Posix.FileStatus
+  -> IO (Either SnapshotProblem WorktreeEntryObservation)
+readPresentWorktreeEntry root path absolute before
+  | Posix.isSymbolicLink before = readWorktreeSymbolicLink path absolute before
+  | Posix.isRegularFile before = readWorktreeRegularFile root path absolute before
+  | otherwise = readWorktreeNonFile path absolute before
+
+readWorktreeSymbolicLink
+  :: FilePath
+  -> FilePath
+  -> Posix.FileStatus
+  -> IO (Either SnapshotProblem WorktreeEntryObservation)
+readWorktreeSymbolicLink path absolute before = do
+  target <- Posix.readSymbolicLink absolute
+  after <- Posix.getSymbolicLinkStatus absolute
+  pure $
+    if not (Posix.isSymbolicLink after) || statusFingerprint before /= statusFingerprint after
+      then Left (TrackedWorktreeEntryRace path)
+      else case encodeFilesystemPath target of
+        Nothing -> Left (InvalidWorktreeSymlinkTarget path)
+        Just bytes ->
+          Right
+            WorktreeEntryObservation
+              { worktreeObservedKind = WorktreeSymbolicLink
+              , worktreeObservedExecutable = False
+              , worktreeObservedBytes = bytes
+              , worktreeObservedStatus = statusFingerprint after
+              }
+
+readWorktreeRegularFile
+  :: FilePath
+  -> FilePath
+  -> FilePath
+  -> Posix.FileStatus
+  -> IO (Either SnapshotProblem WorktreeEntryObservation)
+readWorktreeRegularFile root path absolute before =
+  withTrackedParentDirectoryFd root path $ \parentFd leaf ->
+    bracket
+      (PosixIO.openFdAt (Just parentFd) leaf PosixIO.ReadOnly regularReadFlags)
+      PosixIO.closeFd
+      (\fd -> do
+          opened <- Posix.getFdStatus fd
+          if not (Posix.isRegularFile opened) || statusFingerprint opened /= statusFingerprint before
+            then pure (Left (TrackedWorktreeEntryRace path))
+            else do
+              bytes <- readStrictFd fd
+              afterFd <- Posix.getFdStatus fd
+              afterPath <- Posix.getSymbolicLinkStatus absolute
+              let expectedStatus = statusFingerprint before
+                  stable =
+                    Posix.isRegularFile afterFd
+                      && Posix.isRegularFile afterPath
+                      && statusFingerprint opened == expectedStatus
+                      && statusFingerprint afterFd == expectedStatus
+                      && statusFingerprint afterPath == expectedStatus
+              pure $
+                if not stable
+                  then Left (TrackedWorktreeEntryRace path)
+                  else
+                    Right
+                      WorktreeEntryObservation
+                        { worktreeObservedKind = WorktreeRegularFile
+                        , worktreeObservedExecutable = rawOwnerExecutable afterFd
+                        , worktreeObservedBytes = bytes
+                        , worktreeObservedStatus = statusFingerprint afterFd
+                        }
+      )
+
+withTrackedParentDirectoryFd
+  :: FilePath
+  -> FilePath
+  -> (Fd -> FilePath -> IO value)
+  -> IO value
+withTrackedParentDirectoryFd root path action =
+  case reverse (map Text.unpack (Text.splitOn "/" (Text.pack path))) of
+    [] -> ioError (userError "tracked path has no final component")
+    leaf : reversedParents ->
+      bracket
+        (PosixIO.openFd root PosixIO.ReadOnly directoryReadFlags)
+        PosixIO.closeFd
+        (\rootFd -> descend rootFd (reverse reversedParents) leaf)
+ where
+  descend parentFd [] leaf = action parentFd leaf
+  descend parentFd (component : rest) leaf =
+    bracket
+      (PosixIO.openFdAt (Just parentFd) component PosixIO.ReadOnly directoryReadFlags)
+      PosixIO.closeFd
+      (\childFd -> descend childFd rest leaf)
+
+directoryReadFlags :: PosixIO.OpenFileFlags
+directoryReadFlags =
+  PosixIO.defaultFileFlags
+    { PosixIO.cloexec = True
+    , PosixIO.directory = True
+    , PosixIO.nofollow = True
+    , PosixIO.nonBlock = True
+    }
+
+regularReadFlags :: PosixIO.OpenFileFlags
+regularReadFlags =
+  PosixIO.defaultFileFlags
+    { PosixIO.cloexec = True
+    , PosixIO.nofollow = True
+    , PosixIO.nonBlock = True
+    }
+
+readStrictFd :: Fd -> IO ByteString
+readStrictFd fd =
+  bracket (duplicateFdHandle fd) hClose (go [])
+ where
+  go chunks handle = do
+    chunk <- ByteString.hGetSome handle (64 * 1024)
+    if ByteString.null chunk
+      then pure (ByteString.concat (reverse chunks))
+      else go (chunk : chunks) handle
+
+duplicateFdHandle :: Fd -> IO Handle
+duplicateFdHandle fd = do
+  duplicate <- PosixIO.dup fd
+  PosixIO.fdToHandle duplicate `onException` PosixIO.closeFd duplicate
+
+readWorktreeNonFile
+  :: FilePath
+  -> FilePath
+  -> Posix.FileStatus
+  -> IO (Either SnapshotProblem WorktreeEntryObservation)
+readWorktreeNonFile path absolute before = do
+  after <- Posix.getSymbolicLinkStatus absolute
+  let beforeKind = worktreeKind before
+  pure $
+    if worktreeKind after /= beforeKind || statusFingerprint before /= statusFingerprint after
+      then Left (TrackedWorktreeEntryRace path)
+      else
+        Right
+          WorktreeEntryObservation
+            { worktreeObservedKind = beforeKind
+            , worktreeObservedExecutable = False
+            , worktreeObservedBytes = ByteString.empty
+            , worktreeObservedStatus = statusFingerprint after
+            }
+
+worktreeKind :: Posix.FileStatus -> WorktreeEntryKind
+worktreeKind status
+  | Posix.isRegularFile status = WorktreeRegularFile
+  | Posix.isSymbolicLink status = WorktreeSymbolicLink
+  | Posix.isDirectory status = WorktreeDirectory
+  | otherwise = WorktreeOther
+
+rawOwnerExecutable :: Posix.FileStatus -> Bool
+rawOwnerExecutable status =
+  Posix.fileMode status `Posix.intersectFileModes` Posix.ownerExecuteMode
+    /= Posix.nullFileMode
+
+statusFingerprint :: Posix.FileStatus -> WorktreeStatusFingerprint
+statusFingerprint status =
+  WorktreeStatusFingerprint
+    { statusDevice = renderStatusField (Posix.deviceID status)
+    , statusFileIdentity = renderStatusField (Posix.fileID status)
+    , statusMode = renderStatusField (Posix.fileMode status)
+    , statusSize = renderStatusField (Posix.fileSize status)
+    , statusModified = renderStatusField (Posix.modificationTimeHiRes status)
+    , statusChanged = renderStatusField (Posix.statusChangeTimeHiRes status)
+    }
+
+renderStatusField :: Show value => value -> Text
+renderStatusField = Text.pack . show
+#endif
+
+compareTrackedEntry :: TrackedEntry -> WorktreeEntryObservation -> [SnapshotProblem]
+compareTrackedEntry entry observed = kindProblems <> executableProblems <> byteProblems
+ where
+  indexed = trackedIndex entry
+  path = indexPath indexed
+  expectedMode = indexMode indexed
+  expectedKind = case expectedMode of
+    RegularFile -> WorktreeRegularFile
+    ExecutableFile -> WorktreeRegularFile
+    SymbolicLink -> WorktreeSymbolicLink
+  expectedExecutable = expectedMode == ExecutableFile
+  actualKind = worktreeObservedKind observed
+  kindProblems = [TrackedWorktreeKindMismatch path expectedMode actualKind | actualKind /= expectedKind]
+  executableProblems =
+    [ TrackedWorktreeExecutableMismatch path expectedExecutable (worktreeObservedExecutable observed)
+    | actualKind == WorktreeRegularFile
+    , worktreeObservedExecutable observed /= expectedExecutable
+    ]
+  byteProblems =
+    [ TrackedWorktreeBytesMismatch path
+    | actualKind `elem` [WorktreeRegularFile, WorktreeSymbolicLink]
+    , worktreeObservedBytes observed /= trackedBytes entry
+    ]
+
+inventoryAuthoredPaths :: FilePath -> IO (Either [SnapshotProblem] (Map FilePath WorktreeEntryKind))
+inventoryAuthoredPaths root = fmap (fmap Map.fromList) (walkAuthoredDirectory root "")
+
+walkAuthoredDirectory
+  :: FilePath
+  -> FilePath
+  -> IO (Either [SnapshotProblem] [(FilePath, WorktreeEntryKind)])
+walkAuthoredDirectory root relativeDirectory = do
+  let absoluteDirectory = if null relativeDirectory then root else root </> relativeDirectory
+      subject = if null relativeDirectory then "." else relativeDirectory
+  listingResult <- try (listDirectory absoluteDirectory) :: IO (Either IOException [FilePath])
+  case listingResult of
+    Left problem -> pure (Left [AuthoredRootInventoryIoFailure subject (Text.pack (displayException problem))])
+    Right names -> do
+      children <- forM (sort names) (walkAuthoredChild root relativeDirectory)
+      pure (combineInventoryResults children)
+
+walkAuthoredChild
+  :: FilePath
+  -> FilePath
+  -> FilePath
+  -> IO (Either [SnapshotProblem] [(FilePath, WorktreeEntryKind)])
+walkAuthoredChild root parent name = do
+  let relative = if null parent then name else parent </> name
+      absolute = root </> relative
+  if null parent && name `elem` excludedRepositoryRoots
+    then pure (Right [])
+    else
+      if not (validFilesystemPath relative)
+        then pure (Left [InvalidAuthoredRootPath relative])
+        else do
+          kindResult <-
+            try
+              ( do
+                  link <- pathIsSymbolicLink absolute
+                  directory <- if link then pure False else doesDirectoryExist absolute
+                  exists <- if link || directory then pure True else doesPathExist absolute
+                  pure (link, directory, exists)
+              ) :: IO (Either IOException (Bool, Bool, Bool))
+          case kindResult of
+            Left problem -> pure (Left [AuthoredRootInventoryIoFailure relative (Text.pack (displayException problem))])
+            Right (_, _, False) -> pure (Left [AuthoredRootInventoryIoFailure relative "path disappeared during recursive inventory"])
+            Right (True, _, _) -> pure (Right [(relative, WorktreeSymbolicLink)])
+            Right (_, True, _) -> fmap (fmap ((relative, WorktreeDirectory) :)) (walkAuthoredDirectory root relative)
+            Right (_, _, _) -> pure (Right [(relative, WorktreeRegularFile)])
+
+combineInventoryResults
+  :: [Either [SnapshotProblem] [(FilePath, WorktreeEntryKind)]]
+  -> Either [SnapshotProblem] [(FilePath, WorktreeEntryKind)]
+combineInventoryResults results =
+  let problems = concat [items | Left items <- results]
+      paths = concat [items | Right items <- results]
+   in if null problems then Right paths else Left problems
+
+excludedRepositoryRoots :: [FilePath]
+excludedRepositoryRoots = [".git", ".build", ".data", ".test_data"]
+
+trackedPathParents :: FilePath -> [FilePath]
+trackedPathParents path = go (takeDirectory path)
+ where
+  go parent
+    | null parent || parent == "." || parent == path = []
+    | otherwise = parent : go (takeDirectory parent)
+
+validFilesystemPath :: FilePath -> Bool
+validFilesystemPath path =
+  safeTrackedPath path
+    && all (not . surrogateCodePoint) path
+    && all safeFilesystemCharacter path
+
+safeFilesystemCharacter :: Char -> Bool
+safeFilesystemCharacter character =
+  character >= ' '
+    && character /= '\DEL'
+    && character /= '\\'
+
+encodeFilesystemPath :: FilePath -> Maybe ByteString
+encodeFilesystemPath path
+  | all (not . surrogateCodePoint) path = Just (TextEncoding.encodeUtf8 (Text.pack path))
+  | otherwise = Nothing
+
+surrogateCodePoint :: Char -> Bool
+surrogateCodePoint character = character >= '\xD800' && character <= '\xDFFF'
 
 -- | Refuse bytes which are visible in the worktree but absent from the index
 -- snapshot.  Ignored paths are deliberately not returned: generated roots are
@@ -338,6 +903,98 @@ parseLsFilesStage raw =
            in if null problems
                 then Right (sortOn indexPath entries)
                 else Left problems
+
+-- | Parse @git ls-files -v/-t -z@ without trusting line delimiters or a locale.
+-- Each record is exactly one ASCII status tag, one space, one UTF-8 repository
+-- path, and one NUL terminator.  The caller independently compares the returned
+-- path inventory with the stage-zero listing.
+parseLsFilesTaggedPaths
+  :: IndexFlagObservation
+  -> ByteString
+  -> Either [SnapshotProblem] [(Char, FilePath)]
+parseLsFilesTaggedPaths observationKind raw =
+  case ByteString.unsnoc raw of
+    Just (_, terminator)
+      | terminator == 0 ->
+          let records = dropFinalSegment (ByteString.split 0 raw)
+              parsed = zipWith (parseTaggedPathRecord observationKind) [1 ..] records
+              parseProblems = [problem | Left problem <- parsed]
+              tagged = [value | Right value <- parsed]
+              duplicateProblems =
+                [ DuplicateIndexFlagPath observationKind path
+                | path <- duplicates (map snd tagged)
+                ]
+              problems = parseProblems <> duplicateProblems
+           in if null problems then Right (sortOn snd tagged) else Left problems
+    _ -> Left [MissingIndexFlagNulTerminator observationKind]
+
+-- | Parse the final @git ls-files --stage -v -z@ observation.  Unlike a
+-- path-only tagged listing, each record binds its visibility tag to the exact
+-- stage-zero index entry which produced it.
+parseLsFilesTaggedStage :: ByteString -> Either [SnapshotProblem] [(Char, IndexEntry)]
+parseLsFilesTaggedStage raw =
+  case ByteString.unsnoc raw of
+    Just (_, terminator)
+      | terminator == 0 ->
+          let records = dropFinalSegment (ByteString.split 0 raw)
+              parsed = zipWith parseTaggedStageRecord [1 ..] records
+              recordProblems = [problem | Left problem <- parsed]
+              tagged = [value | Right value <- parsed]
+              duplicateProblems =
+                [ DuplicateIndexFlagPath AssumeUnchangedObservation path
+                | path <- duplicates (map (indexPath . snd) tagged)
+                ]
+              problems = recordProblems <> duplicateProblems
+           in if null problems
+                then Right (sortOn (indexPath . snd) tagged)
+                else Left problems
+    _ -> Left [MissingIndexFlagNulTerminator AssumeUnchangedObservation]
+
+parseTaggedStageRecord :: Int -> ByteString -> Either SnapshotProblem (Char, IndexEntry)
+parseTaggedStageRecord number record =
+  case ByteString8.uncons record of
+    Nothing -> malformed "empty tagged stage record"
+    Just (tag, withSpace) ->
+      case ByteString8.uncons withSpace of
+        Just (' ', stageRecord)
+          | validIndexTag AssumeUnchangedObservation tag -> do
+              entry <- parseIndexRecord number stageRecord
+              Right (tag, entry)
+          | otherwise -> malformed ("unsupported ls-files tag " <> Text.singleton tag)
+        _ -> malformed "tagged stage record lacks its status/index space"
+ where
+  malformed detail = Left (MalformedIndexFlagRecord AssumeUnchangedObservation number detail)
+
+parseTaggedPathRecord
+  :: IndexFlagObservation
+  -> Int
+  -> ByteString
+  -> Either SnapshotProblem (Char, FilePath)
+parseTaggedPathRecord observationKind number record =
+  case ByteString8.uncons record of
+    Nothing -> malformed "empty tagged record"
+    Just (tag, withSpace) ->
+      case ByteString8.uncons withSpace of
+        Just (' ', pathBytes)
+          | validIndexTag observationKind tag ->
+              case TextEncoding.decodeUtf8' pathBytes of
+                Left _ -> malformed "tagged path is not UTF-8"
+                Right value ->
+                  let path = Text.unpack value
+                   in if safeTrackedPath path
+                        then Right (tag, path)
+                        else malformed ("invalid tagged path " <> Text.pack path)
+          | otherwise -> malformed ("unsupported ls-files tag " <> Text.singleton tag)
+        _ -> malformed "tagged record lacks its status/path space"
+ where
+  malformed detail = Left (MalformedIndexFlagRecord observationKind number detail)
+
+validIndexTag :: IndexFlagObservation -> Char -> Bool
+validIndexTag observationKind tag = case observationKind of
+  AssumeUnchangedObservation ->
+    tag `elem` ['H', 'S', 'M', 'R', 'C', 'K']
+      || tag `elem` ['h', 's', 'm', 'r', 'c', 'k']
+  SkipWorktreeObservation -> tag `elem` ['H', 'S', 'M', 'R', 'C', 'K']
 
 decodeNulPathList :: ByteString -> Either SnapshotProblem [FilePath]
 decodeNulPathList bytes = case ByteString.unsnoc bytes of
@@ -407,6 +1064,7 @@ safeTrackedPath :: FilePath -> Bool
 safeTrackedPath path =
   not (null path)
     && not (isAbsolute path)
+    && all safeFilesystemCharacter path
     && all validPart (Text.splitOn "/" (Text.pack path))
   where
     validPart part = not (Text.null part) && part /= "." && part /= ".."
@@ -485,7 +1143,7 @@ primaryClass path _bytes
   -- The current pb tree remains a frozen Phase-0 migration family until the
   -- deny-by-default AST/import/effect audit and qualified external adapter
   -- observer exist. Lexical diagnostics never authorize the exception.
-  | under "pb" path = RegisteredLegacy SourcePb
+  | under canonicalPbRoot path = RegisteredLegacy SourcePb
   | admittedHaskellPath path = HaskellSource
   | admittedDocumentationPath path = DocumentationInput
   | admittedLicencePath path = DocumentationInput
@@ -494,19 +1152,32 @@ primaryClass path _bytes
 
 inGeneratedRoot :: FilePath -> Bool
 inGeneratedRoot path =
-  any (`under` path) [".build", ".data", ".test_data"]
+  case Policy.trackedGeneratedArtifact (Policy.generationContract Policy.canonicalPolicyContract) of
+    Policy.TrackedGeneratedArtifactForbidden ->
+      any (`under` path) [canonicalGeneratedRoot, ".data", ".test_data"]
+
+canonicalPbRoot :: FilePath
+canonicalPbRoot = Policy.pbRoot (Policy.pbContract Policy.canonicalPolicyContract)
+
+canonicalGeneratedRoot :: FilePath
+canonicalGeneratedRoot =
+  Policy.generationRootPath (Policy.generationRoot (Policy.generationContract Policy.canonicalPolicyContract))
+
+canonicalHaskellSuffix :: FilePath
+canonicalHaskellSuffix =
+  Policy.behavioralSourceSuffix (Policy.sourceBehavioralLanguage (Policy.sourceContract Policy.canonicalPolicyContract))
 
 probeAdmitted :: FilePath -> Bool
 probeAdmitted path =
-  hasSuffix ".hs" path
+  hasSuffix canonicalHaskellSuffix path
     || path == "probe/probe.cabal"
 
 testAdmitted :: FilePath -> Bool
-testAdmitted = hasSuffix ".hs"
+testAdmitted = hasSuffix canonicalHaskellSuffix
 
 admittedHaskellPath :: FilePath -> Bool
 admittedHaskellPath path =
-  hasSuffix ".hs" path
+  hasSuffix canonicalHaskellSuffix path
     && any (`under` path) ["src", "app", "test", "probe"]
 
 admittedDocumentationPath :: FilePath -> Bool
@@ -806,14 +1477,100 @@ renderSnapshotProblem problem = case problem of
   DuplicateTrackedPath path -> "duplicate tracked path: " <> Text.pack path
   MissingLoadedBlob objectId -> "loaded blob map omitted index object " <> objectId
   InvalidSnapshotIdentity detail -> "invalid snapshot identity: " <> detail
+  MissingIndexFlagNulTerminator observationKind ->
+    "index-flag observation lacks its final NUL: " <> renderIndexFlagObservation observationKind
+  MalformedIndexFlagRecord observationKind number detail ->
+    "index-flag observation "
+      <> renderIndexFlagObservation observationKind
+      <> " record "
+      <> Text.pack (show number)
+      <> ": "
+      <> detail
+  DuplicateIndexFlagPath observationKind path ->
+    "index-flag observation "
+      <> renderIndexFlagObservation observationKind
+      <> " duplicated path: "
+      <> Text.pack path
+  IndexFlagInventoryMismatch observationKind expected actual ->
+    "index-flag observation "
+      <> renderIndexFlagObservation observationKind
+      <> " path inventory mismatch: expected="
+      <> renderPaths expected
+      <> ", actual="
+      <> renderPaths actual
+  AssumeUnchangedTrackedPaths paths ->
+    "tracked paths carry assume-unchanged: " <> renderPaths paths
+  SkipWorktreeTrackedPaths paths ->
+    "tracked paths carry skip-worktree: " <> renderPaths paths
+  TrackedWorktreePathMissing path ->
+    "tracked worktree path is missing or sparse: " <> Text.pack path
+  TrackedWorktreeExecutableModeUnavailable path ->
+    "raw owner-executable-mode observation is unavailable for tracked worktree path: " <> Text.pack path
+  TrackedWorktreeKindMismatch path expected actual ->
+    "tracked worktree kind mismatch at "
+      <> Text.pack path
+      <> ": index="
+      <> renderIndexMode expected
+      <> ", worktree="
+      <> renderWorktreeEntryKind actual
+  TrackedWorktreeExecutableMismatch path expected actual ->
+    "tracked worktree executable-mode mismatch at "
+      <> Text.pack path
+      <> ": expected="
+      <> Text.pack (show expected)
+      <> ", actual="
+      <> Text.pack (show actual)
+  TrackedWorktreeBytesMismatch path ->
+    "tracked worktree bytes differ from the acquired index blob: " <> Text.pack path
+  TrackedWorktreeEntryRace path ->
+    "tracked worktree path changed kind, mode, target, size, or timestamp while it was read: " <> Text.pack path
+  TrackedWorktreeIoFailure path detail ->
+    "tracked worktree observation failed at " <> Text.pack path <> ": " <> detail
+  InvalidWorktreeSymlinkTarget path ->
+    "tracked worktree symlink target is not valid UTF-8 at: " <> Text.pack path
+  TrackedWorktreeChangedDuringAcquisition paths ->
+    "tracked worktree observation changed during acquisition: " <> renderPaths paths
+  AuthoredRootInventoryIoFailure path detail ->
+    "authored-root recursive inventory failed at " <> Text.pack path <> ": " <> detail
+  InvalidAuthoredRootPath path ->
+    "authored-root recursive inventory encountered a non-UTF-8 or unsafe path: " <> Text.pack path
+  AuthoredRootAncestorKindMismatch path actual ->
+    "authored-root tracked ancestor is not a directory at "
+      <> Text.pack path
+      <> ": worktree="
+      <> renderWorktreeEntryKind actual
+  UnexpectedAuthoredRootMaterial paths ->
+    "untracked or ignored material exists beneath authored roots: " <> renderPaths paths
+  AuthoredRootChangedDuringAcquisition added removed changed ->
+    "authored-root inventory changed during acquisition: added="
+      <> renderPaths added
+      <> ", removed="
+      <> renderPaths removed
+      <> ", changed-kind="
+      <> renderPaths changed
   TrackedWorktreeDivergence paths ->
-    "tracked worktree/index divergence: " <> Text.intercalate "," (map Text.pack paths)
+    "tracked worktree/index divergence: " <> renderPaths paths
   UntrackedNonIgnoredPaths paths ->
-    "untracked non-ignored paths: " <> Text.intercalate "," (map Text.pack paths)
+    "untracked non-ignored paths: " <> renderPaths paths
   IndexChangedDuringAcquisition -> "Git index changed during snapshot acquisition"
   InvalidWorkspacePath detail -> "invalid workspace path observation: " <> detail
   where
     recordDetail number detail = "index record " <> Text.pack (show number) <> ": " <> detail
+
+renderIndexFlagObservation :: IndexFlagObservation -> Text
+renderIndexFlagObservation observationKind = case observationKind of
+  AssumeUnchangedObservation -> "assume-unchanged"
+  SkipWorktreeObservation -> "skip-worktree"
+
+renderWorktreeEntryKind :: WorktreeEntryKind -> Text
+renderWorktreeEntryKind kind = case kind of
+  WorktreeRegularFile -> "regular-file"
+  WorktreeSymbolicLink -> "symbolic-link"
+  WorktreeDirectory -> "directory"
+  WorktreeOther -> "other"
+
+renderPaths :: [FilePath] -> Text
+renderPaths = Text.pack . show
 
 snapshotFinding :: SnapshotProblem -> Finding
 snapshotFinding problem = finding "SRC-SNAPSHOT" "<git-index>" (renderSnapshotProblem problem)
@@ -982,13 +1739,17 @@ captureProcess command input = do
   _ <- forkIO (writePipe stdin input >>= putMVar inputResult)
   _ <- forkIO (readPipe stdout >>= putMVar outputResult)
   _ <- forkIO (readPipe stderr >>= putMVar errorResult)
-  status <- waitForProcess processHandle
   written <- takeMVar inputResult
+  either ioError pure written
   output <- takeMVar outputResult
   errors <- takeMVar errorResult
-  either ioError pure written
   outputBytes <- either ioError pure output
   errorBytes <- either ioError pure errors
+  -- Reap only after stdin has been closed and both output pipes have reached
+  -- EOF.  Waiting first can deadlock a non-threaded runtime: Git's
+  -- @hash-object --stdin@ waits for EOF while the Haskell writer has not yet
+  -- been scheduled, or a verbose child blocks on an undrained output pipe.
+  status <- waitForProcess processHandle
   pure (ProcessBytes status outputBytes errorBytes)
 
 requirePipe :: String -> Maybe Handle -> IO Handle

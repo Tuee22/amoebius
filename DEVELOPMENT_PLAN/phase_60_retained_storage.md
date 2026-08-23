@@ -52,7 +52,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -223,20 +223,22 @@ only because amoebius placed them and nothing in the normal cluster lifecycle ca
 
 ### Validation
 
-1. Assert post-bring-up the live `kubectl get storageclass -o yaml` is byte-equal to the oracle-pinned golden
-   `test/oracle/retained_storage/storage_class.yaml` (an independently hand-authored oracle, not regenerated from
-   the renderer): exactly one class, `provisioner: kubernetes.io/no-provisioner`, `reclaimPolicy: Retain`,
+1. Assert post-bring-up that the live StorageClass observation is structurally equal to a separately authored
+   Haskell expectation which is not derived from the renderer: exactly one class,
+   `provisioner: kubernetes.io/no-provisioner`, `reclaimPolicy: Retain`,
    `volumeBindingMode: WaitForFirstConsumer`, and no `storageclass.kubernetes.io/is-default-class` annotation on
    any object.
 2. Specific-reason negatives, each paired with the positive differing only in the foreclosed dimension: (a) a
    PVC with no matching PV stays `Pending` **with the specific event reason `WaitForFirstConsumer`** (no
    provisioner attempted) — asserting the reason string, not merely the `Pending` phase; the paired positive is
-   an identical PVC that binds once its PV exists. (b) The negative fixture `two_storageclasses` (a second class
-   plus a default-class annotation, committed in this phase's oracle-pinning sprint) makes assertion 1 fail with the **specific reason `count != 1` / `default-class annotation present`**, distinguishing it from an unrelated golden mismatch.
+   an identical PVC that binds once its PV exists. (b) The Haskell negative case `two_storageclasses` adds a
+   second class and a default-class annotation and makes assertion 1 fail with the **specific reason
+   `count != 1` / `default-class annotation present`**, distinguishing it from an unrelated structural mismatch.
 
 ### Remaining Work
 
-Generate the sprint receipt under `.build/runs/phase_44/` and retain it only through repository-local attestation.
+Generate the sprint receipt lazily under `.build/runs/phase_60/` and bind any attestation to that run-local,
+untracked evidence bundle; neither the receipt nor the attestation has promotion authority.
 
 ## Sprint 60.2: Deterministic retained-PV generation + the explicit bind ⏸️
 
@@ -295,45 +297,46 @@ PVC creation path to exactly one shape.
 
 ### Validation
 
-1. Against the oracle-pinned durable-backing inventory and the Phase-55/37-observed durable backing (cache
+1. Against a separately authored Haskell durable-backing expectation and the Phase-55/37-observed durable backing (cache
    and node ephemeral pools excluded), derive the complete post-reconcile PV inventory
    (existing plus proposed, deduplicated by stable identity) and assert that every named backing
    independently satisfies `Σ(perBackingDebit) <= observedBacking`; an unchanged re-run produces the same
    map, not twice the debit.
    - Run `pv_aggregate_over_backing`; assert the specific `durable-demand-exceeds-backing` error and, from
      independent host/apiserver observers, zero image creation, zero mount, and zero PV/PVC writes.
-   - Then run three boundary fixtures: (a) `presentation_overhead_over_backing`, whose usable demand fits
+   - Then run three Haskell boundary cases: (a) `presentation_overhead_over_backing`, whose usable demand fits
      but filesystem metadata/journal/reserved space does not; (b) `allocation_quantum_over_backing`, whose
      raw need is one byte above a backing quantum and therefore spends the next full quantum; and (c)
      `uniform_claim_skew_over_backing`, whose three ordinal usable demands are intentionally unequal and
      whose per-slot rounded sum fits, but `max(provisionedBytes) × 3` exceeds the backing.
-   - Its second committed case places ordinals on two named backings whose aggregate bytes fit but one
+   - A second Haskell case places ordinals on two named backings whose aggregate bytes fit but one
      member backing is one byte short; it must reject rather than transferring spare capacity.
-   - Assert each pinned rejection and the same zero-write boundary; each positive differs only by sufficient
+   - Assert each separately authored Haskell rejection expectation and the same zero-write boundary; each positive differs only by sufficient
      backing or by one byte on the accepted side of the boundary.
-   - The committed **M-skip-durable-aggregate**, **M-sum-unequal-ordinals**, and
-     **M-uniform-before-allocation**, and **M-collapse-uniform-backing-debits** mutants must turn these
-     checks red.
-   - Run the migration boundary from the Phase-0 `test/fixture/retained_storage/migration/` corpus with steady old and
+   - The Haskell changed-production-subject mutants **M-skip-durable-aggregate**,
+     **M-sum-unequal-ordinals**, **M-uniform-before-allocation**, and
+     **M-collapse-uniform-backing-debits** must turn these checks red.
+   - Run the Haskell migration boundary corpus with steady old and
      target states each fitting but (d) `migration_backing_below_highwater` — backing one byte below
      old+new+workspace, (e) `migration_copy_envelope_short` — copy Job CPU/memory/ephemeral or pod/CSI slots
      one unit short, and (f) `migration_verify_mismatch` — an injected post-copy byte mismatch.
    - Assert each against its pinned reason (`old+new+workspace-exceeds-backing`,
      `copy-job-envelope-exceeds-headroom`, `byte-verification-mismatch`): cases (d)/(e) perform zero
      replacement/Job writes; (f) leaves the old binding live, emits no `ReclaimEligible`, and the next
-     inventory charges both volumes and partial workspace — the fixture's pinned post-ledger, never a bare
+     inventory charges both volumes and partial workspace — the Haskell case's independently authored expected
+     post-ledger, never a bare
      "nothing happened".
-   - **Then drive the positive completion fixture `migration_shrink_complete` and assert the full observed sequence in order:** the copy/verify Job runs, an independent byte verification of the copied extent
+   - **Then drive the positive Haskell case `migration_shrink_complete` and assert the full observed sequence in order:** the copy/verify Job runs, an independent byte verification of the copied extent
      **passes**, the claim cuts over to the new volume, `ReclaimEligible` is emitted **only after** that
      pass, the new volume serves the pre-migration nonce byte-for-byte, and the old extent is retired **only after** its deletion is independently observed — never before.
-   - The committed migration mutants **M-cutover-before-verify** (cuts over / emits `ReclaimEligible` before
+   - The Haskell changed-production-subject migration mutants **M-cutover-before-verify** (cuts over / emits `ReclaimEligible` before
      verification passes), **M-credit-before-cleanup** (retires the old extent before observed deletion),
      and **M-fake-verify** (verification always reports match) must each turn this positive assertion red,
      and **M-fake-verify** and **M-cutover-before-verify** additionally turn `migration_verify_mismatch` red
      by admitting a corrupt copy; a stubbed enactor that skips copy/verify/cutover fails the positive
      assertion, not just the negatives.
 2. Render the accepted multi-ordinal counterpart and assert every PVC/PV projected from the same
-   `volumeClaimTemplate` has byte-identical capacity equal to the fixture's maximum rounded private
+   `volumeClaimTemplate` has byte-identical capacity equal to the Haskell case's maximum rounded private
    `provisionedBytes`, that this supplies the maximum `requiredUsableBytes`, and that the provision witness
    debits the rounded capacity times ordinal count. Then deploy the one-ordinal rebind
    witness StatefulSet; assert its claim binds to the PV whose `metadata.name`,
@@ -346,18 +349,19 @@ PVC creation path to exactly one shape.
    `>= requiredUsableBytes`. Fill the usable filesystem and issue one more byte; assert `ENOSPC` occurs while
    the raw image length, sibling-volume usage, native-host-cache backing, and node-ephemeral usage do not grow.
    An omitted overhead model or a rounded value not divisible by `quantumBytes` fails the pure provision before
-   materialization. Separately, deliberately materialized one-byte-short-raw-image and wrong-fs-type fixtures
+   materialization. Separately, deliberately materialize the one-byte-short-raw-image and wrong-fs-type Haskell
+   cases beneath `.build/**`; those generated forms
    fail the post-create observation before PV/PVC apply or workload start, then are swept by the elevated test
-   harness. The committed **M-raw-host-directory** mutant must turn this red because the overflow succeeds or
+   harness. The Haskell changed-production-subject **M-raw-host-directory** mutant must turn this red because the overflow succeeds or
    spills into shared backing.
 3. Write a nonce byte-string through the claim, then delete the PVC; assert the PV drops to `Released`. **Then exercise re-bind for real:** re-create the identical PVC and assert it re-binds to the same
    identity-named/`claimRef`-pinned PV and that the nonce reads back unchanged through the re-bound claim.
    Assert no PVC exists outside a StatefulSet `volumeClaimTemplate`.
-4. The committed mutant **M-no-rebind** (a reconciler variant that leaves the PV `Released` but never clears the
+4. The Haskell changed-production-subject mutant **M-no-rebind** (a reconciler variant that leaves the PV `Released` but never clears the
    stale `claimRef.uid`, so a re-created PVC cannot bind) must turn assertion 3 red; a validation that checked
-   only `.status.phase == Released` would leave it green and is therefore insufficient. The committed mutant
+   only `.status.phase == Released` would leave it green and is therefore insufficient. The Haskell changed-production-subject mutant
    **M-reclaim-delete** (PV rendered with `reclaimPolicy: Delete`) must turn assertion 3 red (the PV vanishes on
-   PVC delete instead of going `Released`). Negative fixture `pv_capacity_mismatch` changes the PV capacity
+   PVC delete instead of going `Released`). The Haskell negative case `pv_capacity_mismatch` changes the PV capacity
    away from the private uniform `provisionedBytes` while leaving the logical/usable demand unchanged; it must
    fail assertion 2 with the specific reason `capacity != provisioned witness`, paired with the exact-witness
    positive. This forecloses independently upsizing or downsizing a PV without re-running presentation,
@@ -373,8 +377,9 @@ PVC creation path to exactly one shape.
 
 ### Remaining Work
 
-None; the live observation, external reader, ten red mutants, and receipt are retained under
-`.build/runs/phase_44/` for repository-local attestation, never an authored root.
+The pre-reset `None` claim is permanently invalid. Any future live observation, external-reader evidence,
+Haskell mutant result, and receipt is generated under `.build/runs/phase_60/` as an untracked run-local bundle,
+never an authored root and never promotion authority.
 
 ## Sprint 60.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip ⏸️
 
@@ -402,10 +407,10 @@ durable backing and no normal-operation path can.
 - A live `RebindSpec` that asserts the round-trip and, honestly, that this phase never deletes durable bytes:
   the eventual reclaim of the test-flagged witness volumes is the elevated harness's sole prerogative, kept
   out of the normal path.
-- The oracle-pinned gate-integrity artifacts of [Gate integrity](#gate-integrity): the two-witness
-  representative set, the `claimref_table.csv` / `storageclass_expected.yaml` oracles, the
-  `no_retained_delete_check.sh` static check, the `test/fixture/retained_storage/migration/` negatives-plus-positive
-  verified-migration corpus, and the seeded mutants **M-soft-delete**, **M-seed-marker**,
+- The Haskell gate-integrity declarations required by [Gate integrity](#gate-integrity): the two-witness
+  representative set, separately authored claimRef and StorageClass expectations, a Haskell semantic source
+  audit for forbidden reclaim capabilities, the negative-plus-positive verified-migration corpus, and Haskell
+  changed-production-subject mutants **M-soft-delete**, **M-seed-marker**,
   **M-reclaim-delete**, **M-no-rebind**, **M-raw-host-directory**, **M-skip-durable-aggregate**,
   **M-sum-unequal-ordinals**, **M-uniform-before-allocation**, **M-collapse-uniform-backing-debits**,
   **M-cutover-before-verify**, **M-credit-before-cleanup**, and **M-fake-verify** the
@@ -418,14 +423,15 @@ durable backing and no normal-operation path can.
    (`kind get clusters` empty, no kind node container in `docker ps`, apiserver unreachable) while
    `${RETAINED_ROOT}` still holds the bytes, `cluster recreate` as a fresh Phase-55 bootstrap (new apiserver
    UID, PV objects re-rendered and re-applied), then read back; assert the nonce is byte-for-byte unchanged,
-   re-bound by identity against `claimref_table.csv`, and that no witness write path executed post-recreate
-   (apiserver audit log + `strace` observer). The committed mutants **M-soft-delete** and **M-seed-marker** must
+   re-bound by identity against the separately authored Haskell claimRef expectation, and that no witness write
+   path executed post-recreate (apiserver audit log + `strace` observer). The Haskell
+   changed-production-subject mutants **M-soft-delete** and **M-seed-marker** must
    both turn this assertion red.
 2. Assert the full deletion reclaimed no backing volume (fresh PV objects re-appear post-recreate and
    `${RETAINED_ROOT}` bytes persist throughout). The "no normal-operation code path destroys retained backing
-   bytes" universal negative is discharged two concrete ways: (a) a committed static/CI check asserts no
-   non-harness module in `src/` issues a backing-store reclaim/destruction call (grep-level, committed as
-   `tools/no_retained_delete_check.sh`; scoped PVC/PV binding-object deletion and whole-cluster deletion are
+   bytes" universal negative is discharged two concrete ways: (a) an independently reviewed Haskell semantic
+   source audit discovers every non-harness module in `src/` and asserts that none can issue a backing-store
+   reclaim/destruction call; scoped PVC/PV binding-object deletion and whole-cluster deletion are
    allowed because neither deletes the external backing), and (b) post-cycle the fresh PV objects exist and
    host bytes are present. The control-plane daemon is a Phase-65 subject with **no realized instance at Phase 60**, so its "mounts
    no PVC" property is **not asserted as passing here** — it is recorded **UNVERIFIED** in the honesty ledger,
@@ -433,8 +439,8 @@ durable backing and no normal-operation path can.
 
 ### Remaining Work
 
-Migrate the two-service live evidence, audit observation, mutant results, receipt, and phase ledger to
-`.build/runs/phase_44/`; externally attest the bundle and rerun after Phase 59 closes.
+Generate the two-service live evidence, audit observation, mutant results, receipt, and phase ledger lazily under
+`.build/runs/phase_60/`; externally attest that untracked run-local bundle and rerun after Phase 59 closes.
 
 ## Documentation Requirements
 

@@ -49,7 +49,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -167,7 +167,7 @@ workflow crossing an asynchronous boundary.
   — the `project(subtree)` handoff of amoebic spawning, enacted as `discover → diff → enact → re-observe`
   reconciles over a managed-resource registry (never a bespoke lifecycle state machine), so the leak-free child
   teardown of this phase's gate is one `reconcileAbsent` loop with "cannot observe" never collapsed to "absent."
-  The teardown-with-cleanup-vs-chaos distinction ([`cluster_lifecycle_doctrine.md` §5 — Teardown-with-cleanup vs chaos-failover (the central distinction)](../documents/engineering/cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) and the unsatisfiable-`.dhall` push-back ([`cluster_lifecycle_doctrine.md` §6 — Push-back when teardown would break the root `InForceSpec`](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)) belong to the
+  The teardown-with-cleanup-vs-chaos distinction ([`cluster_lifecycle_doctrine.md` §5 — Teardown-with-cleanup vs chaos-failover (the central distinction)](../documents/engineering/cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) and the unsatisfiable Haskell-declared `InForceSpec` push-back ([`cluster_lifecycle_doctrine.md` §6 — Push-back when teardown would break the root `InForceSpec`](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)) belong to the
   gateway-migration drills of [Phase 75](phase_75_gateway_migration_drills.md).
 - [`pulumi_iac_doctrine.md` §1 — Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster),
   [`pulumi_iac_doctrine.md` §2 — The backend: every byte of state is a Vault-enveloped object in MinIO](../documents/engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio), and
@@ -203,6 +203,8 @@ workflow crossing an asynchronous boundary.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 74.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection ⏸️
 
@@ -496,13 +498,14 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
 - A `spawnChild` action: SSH-key `kind` Pulumi deploy from inside the parent, registered as a typed
   managed resource carrying its own `discover`/`destroy`, so a re-run is a no-op and a teardown is one
   `reconcileAbsent` loop.
-- A `SealMode` (`SelfUnseal` | `ParentHeldUnlock`) decoded from the child `.dhall`, per-child Transit key
+- A `SealMode` (`SelfUnseal` | `ParentHeldUnlock`) decoded from the child's Haskell-declared configuration;
+  any Dhall projection is generated lazily beneath `.build/**`. Per-child Transit key
   provisioning with a decrypt-on-that-key-alone policy, and an `injectSecret` action materializing named
   secrets into the child's Vault (in-cluster consumers read via Vault k8s auth).
 
 ### Validation
 
-1. The committed shared-host-overdraw fixture exceeds the one host's image/disk budget by one byte; it returns
+1. The reviewed Haskell shared-host-overdraw fixture exceeds the one host's image/disk budget by one byte; it returns
    `SharedSupplyOvercommit`, exposes no child-create continuation, and the external runtime/cloud audit contains
    zero child mutations and zero checkpoint PUTs. Its paired fitting parent+two-child carve returns three
    owner-distinct budgets.
@@ -517,18 +520,19 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
    match the exact stack/revision object identities and extents. Injecting a failed checkpoint CAS retains the
    bounded partial/orphan object until the declared GC horizon and keeps it charged. A direct checkpoint PUT
    outside the gateway is denied.
-3. The committed `drop-parallel-executor` mutant charges only one of the two simultaneously runnable
+3. The Haskell-authored changed-subject `drop-parallel-executor` mutant charges only one of the two simultaneously runnable
    executor Jobs (or serializes after admitting the parallel declaration) and MUST go red against a parent
    fixture that fits either Job alone but not both. This proves applicative parallelism is represented in the
    resource peak, not merely exercised opportunistically after admission.
 4. A parent brings up two empty child `kind` clusters on linux-cpu; re-running the spawn is a no-op (observed at
    the OS boundary via `pulumi stack ls`); the "no total function producing a `ChildInForceSpec` containing a
-   sibling's branch" claim is discharged as a **committed compile-fail corpus** (not a
-   code-review/parametricity argument): `test/negative/compile_fail/ChildInForceSpec/` ([Gate integrity](#gate-integrity)) holds ≥ 2 negative fixtures
+   sibling's branch" claim is discharged by reviewed Haskell compile-fail fixtures (not a
+   code-review/parametricity argument). Compiler inputs and diagnostics are materialized lazily beneath
+   `.build/test-corpora/compile_fail/ChildInForceSpec/**`; the Haskell corpus holds at least two negatives
    that each attempt to construct a `ChildInForceSpec` carrying a sibling or ancestor-only branch and **must fail to typecheck**, each asserting its **specific expected compile-fail locus/message** (the type error
    naming the absent constructor/field), paired with a positive fixture that differs only in projecting the
-   child's own subtree and **must** compile — authored and committed in this phase's oracle-pinning sprint before `ChildInForceSpec.hs`
-   exists; the committed `project-identity` mutant ([Gate integrity](#gate-integrity)) makes a sibling branch appear in a child's delivered
+   child's own subtree and **must** compile — authored and independently reviewed as Haskell `.hs` before `ChildInForceSpec.hs`
+   exists; the Haskell-authored changed-subject `project-identity` mutant ([Gate integrity](#gate-integrity)) makes a sibling branch appear in a child's delivered
    spec and the runtime subtree-inspection assertion goes red; mode (b) bricks with the parent sealed and
    unseals with it available; cross-child Transit decrypt fails; a graceful child teardown leaves zero surviving
    stacks by the OS-boundary observer, retained backing stores exempt.
@@ -573,8 +577,11 @@ Pulsar log cross freely, while the gateway authority and any CAS "latest" pointe
 ### Validation
 
 1. A workflow round-trips between the two siblings; replaying a duplicate or reordered batch produces the same
-   fold result **and identical blob keys against the committed content-addressed golden ([Gate integrity](#gate-integrity))** (exactly-once for replicated-or-recovered effects); the classifier's output is checked against the **committed independent classification table ([Gate integrity](#gate-integrity))**, not its own re-derivation, an unclassified invariant defaults to non-confluent,
-   and the classifier refuses active-active on a non-confluent invariant; the committed
+   fold result and identical blob keys against a separately authored Haskell content-address expectation
+   ([Gate integrity](#gate-integrity)). The classifier's output is checked against an independent Haskell
+   classification table rather than its own re-derivation; any serialized view is generated lazily beneath
+   `.build/test-corpora/**`. An unclassified invariant defaults to non-confluent,
+   and the classifier refuses active-active on a non-confluent invariant; the applied Haskell changed-subject
    `classifier-default-confluent` mutant ([Gate integrity](#gate-integrity)) — which flips the unclassified default to confluent — wrongly
    admits the unclassified fixture and the classification oracle goes red; the forest tears down leak-free by
    the OS-boundary observer of [Gate integrity](#gate-integrity), retained backing stores exempt.

@@ -1,13 +1,17 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.Documentation
   ( checkCorpus
   , checkDocumentStructure
   , checkDocuments
+  , checkPolicyOwnerReferences
+  , checkPolicyOwnerReferencesFor
   , githubAnchor
   ) where
 
 import Amoebius.Validation.PhaseContract (checkPhaseContracts)
+import Amoebius.Validation.PolicyContract qualified as Policy
 import Amoebius.Validation.Types
   ( CheckResult (..)
   , Finding
@@ -134,9 +138,14 @@ checkDocumentsWithInventory enforceCanonicalInventory supplied =
           <> concatMap checkHeader (filter ((/= "CLAUDE.md") . documentPath) governed)
           <> checkClaudeImport documents
           <> concatMap checkMarkdownSyntax governed
+          <> retiredArtifactCorpusFindings governed
           <> concatMap (checkLinks documents) governed
           <> checkReferencedBy documents governed
           <> checkArchivePolicy documents governed archiveCount
+          <> [ item
+             | enforceCanonicalInventory
+             , item <- policyOwnerFindings Policy.canonicalPolicyContract documents
+             ]
     }
  where
   normalized = [(normalizePath path, contents) | (path, contents) <- supplied]
@@ -183,10 +192,286 @@ checkDocumentsWithInventory enforceCanonicalInventory supplied =
   -- phrase. Cross-cutting policy prose is deliberately not interpreted here:
   -- executable choices belong to PolicyContract and prose correspondence is
   -- an external human-review obligation.
-  archiveCount = sum (map (countFolded archiveAlias . visibleText) governed)
+  archiveCount = sum (map archiveAliasCount governed)
+
+retiredArtifactCorpusFindings :: [Document] -> [Finding]
+#ifdef VALIDATION_DOCUMENT_RETIRED_ARTIFACT_MUTANT
+retiredArtifactCorpusFindings documents =
+  length (concatMap checkRetiredTrackedArtifactSyntax documents) `seq` []
+#else
+retiredArtifactCorpusFindings = concatMap checkRetiredTrackedArtifactSyntax
+#endif
+
+-- | Reject the old repository-path spelling that made serialized fixtures,
+-- goldens, or materialized mutants look like tracked test inputs.  This is a
+-- syntax check only: it does not infer a source role or validation meaning
+-- from prose.  A reviewed Haskell test path remains admissible; generated
+-- transports must instead name their lazy generated-tree destination.
+checkRetiredTrackedArtifactSyntax :: Document -> [Finding]
+checkRetiredTrackedArtifactSyntax document =
+  pathFindings <> wrappedPathFindings <> phraseFindings
+ where
+  rawLines = zip [(1 :: Int) ..] (Text.lines (documentText document))
+  pathOffendersByLine =
+    Map.fromListWith
+      Set.union
+      [ (lineNumber, Set.fromList offenders)
+      | linesToScan <- [rawLines, commentElidedLines (documentText document)]
+      , (lineNumber, line) <- linesToScan
+      , let offenders = retiredTrackedArtifactPathTokens line
+      , not (null offenders)
+      ]
+  pathFindings =
+    [ finding
+        "DOC-RETIRED-TRACKED-ARTIFACT"
+        (documentPath document)
+        ( "line "
+            <> showText lineNumber
+            <> " uses a retired tracked-artifact path: "
+            <> Text.intercalate ", " (Set.toAscList offenders)
+        )
+    | (lineNumber, offenders) <- Map.toAscList pathOffendersByLine
+    ]
+  linePathOffenders = Set.unions (Map.elems pathOffendersByLine)
+  wrappedPathOffenders =
+    Set.fromList
+      ( concatMap
+          retiredTrackedArtifactPathTokens
+          [ joinPhysicalLines (documentText document)
+          , joinPhysicalLines (commentElidedText (documentText document))
+          ]
+      )
+      Set.\\ linePathOffenders
+  wrappedPathFindings =
+    [ finding
+        "DOC-RETIRED-TRACKED-ARTIFACT"
+        (documentPath document)
+        ( "physical line wrapping or a multiline HTML comment conceals a retired tracked-artifact path: "
+            <> Text.intercalate ", " (Set.toAscList wrappedPathOffenders)
+        )
+    | not (Set.null wrappedPathOffenders)
+    ]
+  -- Scan both the literal bytes and a comment-elided projection. Literal
+  -- scanning prevents a fence or comment from hiding a violation; comment
+  -- elision prevents comments from splitting or padding a prohibited phrase.
+  phraseOffenders =
+    Set.toAscList
+      ( Set.fromList
+          ( concatMap
+              retiredCommitPhrases
+              [documentText document, commentElidedText (documentText document)]
+          )
+      )
+  phraseFindings =
+    [ finding
+        "DOC-RETIRED-TRACKED-ARTIFACT"
+        (documentPath document)
+        ( "document uses retired tracked-artifact wording: "
+            <> Text.intercalate ", " phraseOffenders
+        )
+    | not (null phraseOffenders)
+    ]
+
+retiredTrackedArtifactPathTokens :: Text -> [Text]
+retiredTrackedArtifactPathTokens line =
+  Set.toAscList
+    ( Set.fromList
+        (concatMap (`pathOccurrences` line) retiredTrackedArtifactRoots)
+    )
+
+-- These are obsolete repository-source locations, not forbidden words.  An
+-- exact @.hs@ path is allowed because it is Haskell source; a directory,
+-- wildcard, serialized file, script, or foreign-language path is refused.
+retiredTrackedArtifactRoots :: [Text]
+retiredTrackedArtifactRoots =
+  [ "test/fixture/"
+  , "test/fixtures/"
+  , "test/golden/"
+  , "test/goldens/"
+  , "test/mutant/"
+  , "test/mutants/"
+  , "test/negative/"
+  , "test/oracle/"
+  , "test/oracles/"
+  ]
+
+pathOccurrences :: Text -> Text -> [Text]
+pathOccurrences root source =
+  [ occurrence
+  | token <- Text.split (not . retiredPathCharacter) source
+  , occurrence <- occurrencesFromRoot root token
+  , not (isExactHaskellPath root occurrence)
+  ]
+ where
+  retiredPathCharacter character =
+    isAlphaNum character
+      || character `elem` ['/', '.', '_', '-', '*', '?', '{', '}', '~', '$']
+
+-- Return each token suffix beginning at the retired root.  Matching the root
+-- case-insensitively closes spelling-only bypasses while retaining the exact
+-- original bytes for the lower-case @.hs@ and wildcard checks below.
+occurrencesFromRoot :: Text -> Text -> [Text]
+occurrencesFromRoot root = go
+ where
+  foldedRoot = Text.map toLower root
+  go token =
+    let (before, matchingAndAfter) = Text.breakOn foldedRoot (Text.map toLower token)
+     in if Text.null matchingAndAfter
+          then []
+          else
+            let offset = Text.length before
+                occurrence = Text.drop offset token
+                remaining = Text.drop (offset + Text.length root) token
+             in occurrence : go remaining
+
+-- The retired artifact-family roots admit only one concrete Haskell source
+-- path.  A suffix-shaped glob, variable, home expansion, empty segment, or
+-- traversal is not an exact file path even when its final bytes are @.hs@.
+isExactHaskellPath :: Text -> Text -> Bool
+isExactHaskellPath root occurrence =
+  Text.map toLower root `Text.isPrefixOf` Text.map toLower occurrence
+    && Text.all exactPathCharacter relative
+    && not (null segments)
+    && all validSegment segments
+    && maybe False validHaskellBasename (lastMay segments)
+ where
+  relative = Text.drop (Text.length root) occurrence
+  segments = Text.splitOn "/" relative
+  exactPathCharacter character = isAlphaNum character || character `elem` ['/', '.', '_', '-']
+  validSegment segment = not (Text.null segment) && segment `notElem` [".", ".."]
+  validHaskellBasename basename =
+    ".hs" `Text.isSuffixOf` basename
+      && not (Text.null (Text.dropEnd 3 basename))
+
+lastMay :: [a] -> Maybe a
+lastMay [] = Nothing
+lastMay values = Just (last values)
+
+joinPhysicalLines :: Text -> Text
+joinPhysicalLines = Text.concat . map Text.strip . Text.lines
+
+-- These phrases asserted a version-controlled transport without necessarily
+-- naming a path.  State-machine uses such as "transaction committed" do not
+-- match.  The corpus should name reviewed Haskell mutation/oracle source and
+-- its separately generated transport instead.
+retiredCommitPhrases :: Text -> [Text]
+retiredCommitPhrases source = concatMap scanClause (retiredPhraseClauses (Text.toCaseFold source))
+ where
+  scanClause clause =
+    [ prefix <> " … " <> artifact
+    | prefix <- prefixes wordsInClause
+    , artifact <- retiredArtifactWords
+    , artifact `elem` wordsInClause
+    ]
+   where
+    wordsInClause = normalizedWords clause
+
+  prefixes wordsInClause =
+    ["committed" | "committed" `elem` wordsInClause]
+      <> ["checked-in" | anyAdjacent "checked" "in" wordsInClause]
+
+  retiredArtifactWords =
+    [ "mutant"
+    , "mutants"
+    , "oracle"
+    , "oracles"
+    , "golden"
+    , "goldens"
+    , "fixture"
+    , "fixtures"
+    ]
+
+  anyAdjacent first second wordsInClause =
+    any (== [first, second]) (windowsOfTwo wordsInClause)
+
+  windowsOfTwo (first : second : rest) = [first, second] : windowsOfTwo (second : rest)
+  windowsOfTwo _ = []
+
+retiredPhraseClauses :: Text -> [Text]
+retiredPhraseClauses = Text.split (`elem` ['.', '!', '?', ';'])
+
+commentElidedText :: Text -> Text
+commentElidedText = Text.unlines . map snd . commentElidedLines
+
+commentElidedLines :: Text -> [(Int, Text)]
+commentElidedLines contents = reverse rendered
+ where
+  (_, rendered) = foldl' step (False, []) (zip [1 ..] (Text.lines contents))
+  step (inComment, kept) (lineNumber, line) =
+    let (withoutComment, nextComment) = stripHtmlCommentsFromLine inComment line
+     in (nextComment, (lineNumber, withoutComment) : kept)
+
+normalizedWords :: Text -> [Text]
+normalizedWords = Text.words . Text.map normalize
+ where
+  normalize character
+    | isAlphaNum character = character
+    | otherwise = ' '
+
+-- | Structural owner-map seam. It verifies only exact paths, anchors, and
+-- headings. A human, never this parser, owns semantic prose correspondence.
+checkPolicyOwnerReferences :: [(FilePath, Text)] -> CheckResult
+checkPolicyOwnerReferences =
+  checkPolicyOwnerReferencesFor Policy.canonicalPolicyContract
+
+-- | Explicit-contract seam for an independently stated structural oracle.
+-- Production callers use 'checkPolicyOwnerReferences'; supplying a contract
+-- here cannot change the canonical corpus check.
+checkPolicyOwnerReferencesFor :: Policy.PolicyContract -> [(FilePath, Text)] -> CheckResult
+checkPolicyOwnerReferencesFor contract supplied =
+  CheckResult
+    { checkName = "policy-owner-structure"
+    , checkObservations = [observation "policy.owner-document-count" (showText (Map.size documents))]
+    , checkFindings = policyOwnerFindings contract documents
+    }
+ where
+  documents =
+    Map.fromList
+      [ (normalized, makeDocumentFor normalized contents)
+      | (path, contents) <- supplied
+      , let normalized = normalizePath path
+      ]
+
+policyOwnerFindings :: Policy.PolicyContract -> Map FilePath Document -> [Finding]
+policyOwnerFindings contract documents = concatMap checkOwner ([minBound .. maxBound] :: [Policy.PolicyId])
+ where
+  checkOwner identifier =
+    case Policy.policyOwnerReference contract identifier of
+      Nothing ->
+        [ finding
+            "DOC-POLICY-OWNER-MAP"
+            "Amoebius.Validation.PolicyContract"
+            ("the canonical owner map omits " <> showText identifier)
+        ]
+      Just reference ->
+        case Map.lookup (normalizePath (Policy.policyOwnerPath reference)) documents of
+          Nothing ->
+            [ finding
+                "DOC-POLICY-OWNER-PATH"
+                (Policy.policyOwnerPath reference)
+                ("the owner document for " <> showText identifier <> " is absent")
+            ]
+          Just document ->
+            [ finding
+                "DOC-POLICY-OWNER-ANCHOR"
+                (Policy.policyOwnerPath reference)
+                ( "the owner for "
+                    <> showText identifier
+                    <> " must be exact heading '"
+                    <> Policy.policyOwnerSection reference
+                    <> "' at #"
+                    <> Policy.policyOwnerAnchor reference
+                )
+            | (Policy.policyOwnerAnchor reference, Policy.policyOwnerSection reference)
+                `notElem` headingAnchorPairs (documentVisibleLines document)
+            ]
 
 canonicalGovernedPathCount :: Int
+#ifdef VALIDATION_DOCUMENT_INVENTORY_BASELINE_MUTANT
+canonicalGovernedPathCount = 194
+#else
 canonicalGovernedPathCount = 195
+#endif
 
 canonicalGovernedPathDigest :: Text
 canonicalGovernedPathDigest = "51c38807d39526404f678c6a89ccaf6210ff91d7b17d4cde7989f1bc2a9e55f2"
@@ -265,7 +550,7 @@ walkAuxiliaryMarkdown root canonicalRoots = do
                 then pure <$> readDocument root name
                 else pure []
  where
-  excluded = [".build", ".git", "dist-newstyle", "documents", "DEVELOPMENT_PLAN"]
+  excluded = [canonicalGeneratedRoot, ".git", "dist-newstyle", "documents", "DEVELOPMENT_PLAN"]
 
 readIfPresent :: FilePath -> FilePath -> IO (Either Finding (FilePath, Text))
 readIfPresent root relative = do
@@ -303,10 +588,7 @@ walkMarkdown root relative = do
           let child = normalizePath (relative </> name)
           directory <- doesDirectoryExist (root </> child)
           if directory
-            then
-              if isUngovernedPrefix child
-                then pure []
-                else walkMarkdown root child
+            then walkMarkdown root child
             else
               if takeExtension name == ".md"
                 then pure <$> readDocument root child
@@ -325,15 +607,11 @@ readDocument root relative = do
         )
     Right contents -> Right (normalizePath relative, contents)
 
-isUngovernedPrefix :: FilePath -> Bool
-isUngovernedPrefix path =
-  any (`pathPrefixOf` path) ["DEVELOPMENT_PLAN/evidence", "DEVELOPMENT_PLAN/ledgers"]
-
 isGovernedPath :: FilePath -> Bool
 isGovernedPath path =
   path `elem` ["README.md", "AGENTS.md", "CLAUDE.md"]
     || "documents" `pathPrefixOf` path
-    || ("DEVELOPMENT_PLAN" `pathPrefixOf` path && not (isUngovernedPrefix path))
+    || "DEVELOPMENT_PLAN" `pathPrefixOf` path
 
 pathPrefixOf :: FilePath -> FilePath -> Bool
 pathPrefixOf prefix candidate =
@@ -412,9 +690,6 @@ fenceCandidate line
 
 dropFenceIndent :: Text -> Text
 dropFenceIndent = Text.dropWhile (== ' ')
-
-visibleText :: Document -> Text
-visibleText = Text.unlines . map snd . documentVisibleLines
 
 -- Inline code and link labels may cross a soft line break. Parse a paragraph
 -- or one list item as a unit so physical wrapping cannot fabricate an
@@ -671,15 +946,19 @@ isExternal target =
     ]
 
 anchorsFor :: [(Int, Text)] -> Set Text
-anchorsFor visible = Set.fromList (headingAnchors <> explicitAnchors)
+anchorsFor visible = Set.fromList (map fst (headingAnchorPairs visible) <> explicitAnchors)
  where
-  (_, headingAnchors) = foldl' addHeading (Map.empty :: Map Text Int, []) (mapMaybe headingText visible)
+  explicitAnchors = concatMap (anchorTags . snd) visible
+
+headingAnchorPairs :: [(Int, Text)] -> [(Text, Text)]
+headingAnchorPairs visible = pairs
+ where
+  (_, pairs) = foldl' addHeading (Map.empty :: Map Text Int, []) (mapMaybe headingText visible)
   addHeading (seen, anchors) heading =
     let base = githubAnchor heading
         duplicate = Map.findWithDefault 0 base seen
         anchor = if duplicate == 0 then base else base <> "-" <> showText duplicate
-     in (Map.insert base (duplicate + 1) seen, anchors <> [anchor])
-  explicitAnchors = concatMap (anchorTags . snd) visible
+     in (Map.insert base (duplicate + 1) seen, anchors <> [(anchor, heading)])
 
 headingText :: (Int, Text) -> Maybe Text
 headingText (_, line) =
@@ -1112,7 +1391,7 @@ checkArchivePolicy documents governed aliasCount =
       (documentPath document)
       "the eliminated legacy archive filename remains in active Markdown"
   | document <- governed
-  , countFolded archiveAlias (visibleText document) > 0
+  , archiveAliasCount document > 0
   ]
     <> [ finding
            "DOC-LEGACY-REGISTER"
@@ -1135,10 +1414,25 @@ checkArchivePolicy documents governed aliasCount =
     ]
 
 archiveAlias :: Text
-archiveAlias = "legacy_tracking_for_deletion_archive.md"
+archiveAlias =
+  Text.pack
+    (takeFileName (Policy.canonicalForbiddenArchivePath Policy.canonicalPolicyContract))
 
 canonicalLegacyRegister :: FilePath
-canonicalLegacyRegister = "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
+canonicalLegacyRegister =
+  Policy.canonicalActiveRegisterPath Policy.canonicalPolicyContract
+
+archiveAliasCount :: Document -> Int
+archiveAliasCount document =
+  maximum
+    [ countFolded archiveAlias (documentText document)
+    , countFolded archiveAlias (commentElidedText (documentText document))
+    ]
+
+canonicalGeneratedRoot :: FilePath
+canonicalGeneratedRoot =
+  Policy.generationRootPath
+    (Policy.generationRoot (Policy.generationContract Policy.canonicalPolicyContract))
 
 countFolded :: Text -> Text -> Int
 countFolded needle = countOccurrences (Text.toCaseFold needle) . Text.toCaseFold

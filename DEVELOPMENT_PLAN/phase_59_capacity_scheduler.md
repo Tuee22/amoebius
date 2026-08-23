@@ -54,7 +54,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -245,7 +245,7 @@ double-debited, no absent Pod makes a debit disappear, and no unclassified recor
   for `Reserved`, `BindingInFlight`, `Bound`, `Terminating`, or `TerminalRetained` until that state's
   release/cleanup evidence and whole-root CAS succeed. The retained debit is the **padded** debit: a row that
   surrendered its declared headroom while retaining its requests would let a second workload pack into space
-  the first still holds. Positive recovery fixtures cover an absent-Pod row in
+  the first still holds. Positive Haskell recovery cases cover an absent-Pod row in
   every closed ledger state and prove each remains charged until its state-specific CAS.
   The unequal-axis rejection above is correspondingly pad-sensitive — a row whose pad axes disagree with its
   template's fails to construct, exactly as a mismatched request or limit debit does.
@@ -266,17 +266,18 @@ double-debited, no absent Pod makes a debit disappear, and no unclassified recor
 
 ### Validation
 
-1. The normalized ledger for the authored corpus equals the independently authored expected scheduler-state slice of
-   `expected-actions.json`. Seeded mutants — unclassified-orphan record, missing reservation, wrong
+1. The normalized ledger for the Haskell-authored corpus equals the separately authored Haskell expected
+   scheduler-state slice. Haskell changed-production-subject mutants — unclassified-orphan record, missing reservation, wrong
    state/node/template/generation/axes, a `Bound` Pod plus ledger double debit, reservation-only omission, and
    an incorrect terminal released/retained partition — each fail to construct a `ValidatedLiveTarget`.
-2. Positive recovery fixtures cover absent-Pod rows in **every** closed ledger state and prove each remains
+2. Positive Haskell recovery cases cover absent-Pod rows in **every** closed ledger state and prove each remains
    charged until its state-specific CAS. The host-ledger controls reuse the Phase-58 failure classes: missing
    reservation/artifact identities, fabricated process evidence, and post-join double charging. Exact-fit
    controls debit each identity once.
-3. A confirmed-bound-but-still-`BindingInFlight` fixture must use the observed Pod-UID runtime row; the
-   planned-only omission and the planned+observed double-debit mutants both turn red. The
-   `same-UID-double-debit` mutant is caught at normalization by the external "every UID debited once" oracle.
+3. A confirmed-bound-but-still-`BindingInFlight` Haskell case must use the observed Pod-UID runtime row; the
+   planned-only omission and the planned+observed double-debit Haskell changed-subject mutants both turn red.
+   The Haskell `same-UID-double-debit` changed-subject mutant is caught at normalization by the separately authored Haskell
+   "every UID debited once" expectation.
 4. The module imports no writer; the AST/import lint proves `Scheduler/Ledger.hs` is read-only, and a runtime
    observer proves zero apiserver/ledger/Binding writes on every negative.
 
@@ -438,10 +439,10 @@ namespace down leak-free.
 - The idempotent re-run: an immediate re-run of the same spec plans only scheduler no-ops; the external
   apiserver + reservation-CRD observer asserts byte-identical reservation records and CAS version, **no new Binding request**, the same mandatory-`Lease` holder/resourceVersion, and no second default-scheduler
   exception.
-- The committed red-path suite: the mutants `bind-before-reservation-CAS`, `numeric-add-instead-of-whole-ledger-refold`,
+- The Haskell-authored red-path suite: the mutants `bind-before-reservation-CAS`, `numeric-add-instead-of-whole-ledger-refold`,
   `same-UID-double-debit`, `bound-deleted-on-restart`, `default-scheduler-managed-node-bypass`,
   `collapsed-readiness`, and `stage-drop-generic-SSA-before-cutover` MUST turn the suite red; the
-  premature-guarded-workload negative fixture MUST be rejected at admission.
+  Haskell premature-guarded-workload negative case MUST be rejected at admission.
 - A Register-3 proven/tested/assumed ledger recording the live scheduling authority, marking the
   release-ledger/rollback residue and the in-cluster-control-plane ownership (Phase 65) UNVERIFIED (deferred).
 
@@ -453,7 +454,7 @@ namespace down leak-free.
    before the first guarded Pod; every Binding follows a successful reservation CAS; the guarded Deployment
    reaches Bound+Ready; the premature guarded workload is rejected with zero writes; and the immediate re-run is
    byte-stable and Binding-free by the independent observer.
-2. Every committed scheduler mutant above turns the suite red, re-run (not run once). The external observer —
+2. Every Haskell scheduler mutant above turns the suite red and is re-run, not run once. The external observer —
    not the scheduler — is the passing condition for "reserved once / bound once / no-op re-run".
 3. Two simultaneous scheduler candidates cannot race past the ledger residual; both leave zero over-allocation.
    Crash/watch-gap injection at each cutover and reservation edge re-observes and converges without a duplicate
@@ -488,7 +489,7 @@ neither pure-value checks nor the live sample exhausts.
   authority before complete old-UID release/replacement joins; **one reservation debit per Pod UID**; **no Binding before a successful CAS**; no `Bound` record unreserved on restart; no non-authority write without the
   exact mandatory-`Lease` holder; and unchanged snapshot tokens cannot be reused after any observed-state
   transition.
-- Committed mutants for lost-`Lease`/resourceVersion retry (against the reconciler holder the scheduler depends
+- Haskell changed-subject mutants for lost-`Lease`/resourceVersion retry (against the reconciler holder the scheduler depends
   on), collapsed scheduler-readiness stages, premature managed taint/full RBAC, bind-before-CAS, same-UID double
   debit, crash recovery dropping `Bound`, and cached observation. Every mutant must turn red.
 - A Register-2.5 ledger records convergence and fail-closed outcomes only for the explored scheduler traces.
@@ -499,7 +500,7 @@ neither pure-value checks nor the live sample exhausts.
 
 1. Rejected historical observation: the `scheduler-sim` Cabal suite was recorded green at the documented
    exploration bound. The historical criterion required coverage to place each injected
-   fault inside the intended critical section, preserve all safety predicates, kill every committed mutant, and
+   fault inside the intended critical section, preserve all safety predicates, kill every Haskell mutant, and
    deterministically replay any counterexample from its seed.
 
 ### Remaining Work
@@ -547,7 +548,7 @@ this run's bundle under `.build/runs/`.
   layered on
 - [phase_09_resource_index.md](phase_09_resource_index.md) — the `place`/`fits`/`carve` resource
   algebra the scheduler placement re-folds under aggregate CAS
-- [phase_33_render_manifest_oracles.md](phase_33_render_manifest_oracles.md) — the `renderAll` golden corpus
+- [phase_33_render_manifest_oracles.md](phase_33_render_manifest_oracles.md) — the Haskell `renderAll` expectation corpus
   the pinned reconcile corpus is a subset of
 - [phase_55_bootstrap_coordinator_kind.md](phase_55_bootstrap_coordinator_kind.md) — the live single-node `kind`
   cluster this phase's scheduler binds on

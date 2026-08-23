@@ -172,8 +172,8 @@ Phase 16 owns the no-cluster substrate serving this activity. Its target Registe
 reference reconciler across four oracle-pinned schedules plus an independent semantic projection from the
 five-calculus composition; this criterion is scoped to the substrate and cannot pre-claim later Register-2.5
 production-code results. Same-seed encoded traces must be compared between two fresh executions and a changed seed must differ.
-Those bytes are a run-time determinism control, not a committed generated-output golden; schedule verdicts and
-composition facts are the authored semantic oracles.
+Those bytes are a run-time determinism control, not a repository-retained generated-output expectation;
+schedule verdicts and composition facts are the authored Haskell semantic oracles.
 
 Register 2.5 is also where **trace validation** ([formal_model_doctrine.md §8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge))
 first runs against the built daemon: the simulated daemon's observed transitions are checked against the emitted

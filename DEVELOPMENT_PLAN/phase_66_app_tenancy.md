@@ -46,7 +46,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -137,6 +137,8 @@ a separately useful provider feature.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 66.1: Derive, apply, and externally read back tenant provider policy ⏸️
 
@@ -151,18 +153,20 @@ provisioning alone establishes application request isolation.
 
 - The closed, total tenant-policy derivation and private provisioned-action boundary.
 - Provider enactors for the six required arms plus independent normalized read-only observers.
-- Phase-0 projection/oracle fixtures, paired illegal inputs, post-ready challenge protocol, zero-effect checks,
-  authenticated cleanup inventory, and schema-checked Register-3 ledger.
-- Committed `drop_provider_arm` and `collapse_tenant_key` mutants.
+- Reviewed Haskell projection/oracle fixtures, paired illegal inputs, post-ready challenge protocol,
+  zero-effect checks, authenticated cleanup inventory, and a Haskell-schema-checked Register-3 ledger. Any
+  serialized corpus or ledger view is generated lazily beneath ignored `.build/**`.
+- Applied Haskell changed-subject `drop_provider_arm` and `collapse_tenant_key` mutation operators.
 
 ### Validation
 
 1. Rejected historical observation: the `tenant-provider-provisioning-live` Cabal suite expected every
    challenge-qualified object and relation in
-   `provider_projection_matrix.tsv` exactly once under the correct app/tenant parent.
+   the independently authored Haskell provider-projection expectation exactly once under the correct
+   app/tenant parent. Any TSV projection is a lazy `.build/test-corpora/**` product.
 2. Require the hand-authored-grant and tenant-mismatched twins to fail before mutation and externally establish their distinct
    forbidden nonces absent through every provider observer.
-3. Run both committed mutants against the unchanged gate and require the pinned missing-arm and tenant-key
+3. Run both Haskell-authored changed-subject mutants against the unchanged gate and require the pinned missing-arm and tenant-key
    failures.
 4. Tear down and require authenticated provider inventories to equal preflight; persist only hashed evidence
    and explicitly mark application data-path isolation `UNVERIFIED (Phase 68)`.

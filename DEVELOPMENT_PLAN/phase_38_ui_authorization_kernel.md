@@ -47,7 +47,7 @@ Known partial** only.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -89,7 +89,7 @@ relation; identity-provider truth and runtime/provider enforcement remain UNVERI
 |---|---|
 | `Claim` | Target only — Haskell presentation, declaration, policy-snapshot, request-scope, and effect-admission values meet at one pure decision boundary; any serialized case or mutation is generated beneath `.build/**`. Live identity, HTTP, providers, and tenant enforcement are not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 38` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 38` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -161,13 +161,13 @@ interpreter.
 
 - A total authorization transition over registry, policy, scope, owner, permission, and four epochs.
 - Hidden-but-invocable and visible-but-unauthorized canaries plus empty denial traces.
-- Nine generated coverage classes and two paired semantic mutants.
+- Nine generated coverage classes and two paired Haskell semantic changed-subject mutants.
 
 ### Validation
 
 1. All six matrix decisions agree with the independent evaluator and pinned verdict.
 2. Each single-epoch replay fails with its own constructor before an effect is recorded.
-3. Both mutants redden at their exact authored loci.
+3. Both Haskell changed-subject mutants redden at their exact authored loci.
 
 ### Remaining Work
 
@@ -191,7 +191,8 @@ evidence.
 ### Validation
 
 1. Calculus order, names, counts, and resource vector match the authored table.
-2. Normal and isolated runs pass and both explicit mutant processes fail exactly.
+2. Normal and isolated runs accept and both explicit Haskell changed-subject mutant executions fail at their
+   named loci; any external representation is generated lazily beneath `.build/**`.
 3. All universal gate sides pass without changing an authored path.
 
 ### Remaining Work
@@ -225,5 +226,5 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 - [Phase 10](phase_10_calculus_composition.md) — five-calculus composition.
 - [Phase 37](phase_37_ui_program_schema.md) — checked program admission.
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — action ownership and authorization freshness.
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — independent authored expectations.
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — independently authored Haskell expectations.
 - [Illegal-State Security Slice](../documents/illegal_state/illegal_state_security.md) — authorization-parity and visibility-bypass failures.

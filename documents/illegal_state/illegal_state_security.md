@@ -132,7 +132,7 @@ human never writes the policy. **Owner:**
 [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the dependency graph is the single owner of connectivity) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a consumer handle only exists once the dependency edge does).
 
 **Layer:** type-foreclosed at the Haskell IR — NetworkPolicies are derived from the declared dependency graph and never hand-authored, so a severing policy has no constructor; runtime-checked residue — that the live CNI actually admits the traffic. Exact edge-set equality over the emitted policies is `decode-foreclosed`.
-**Validation-locus:** `rendered-artifact-oracle` (the derived NetworkPolicy is checked in the emitted objects —
+**Validation-locus:** `rendered-artifact-oracle` (the oracle compares the derived NetworkPolicy with the emitted objects —
 a declared dependency is never a connection the policy blocks; Phase 33 owns target validation of exact set
 equality against the separately reviewed Haskell
 `expectedNetworkPolicyEdges :: InForceSpec -> Set ServiceEdge`, which does not call the production policy

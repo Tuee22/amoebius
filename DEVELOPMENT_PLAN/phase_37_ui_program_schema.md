@@ -2,7 +2,7 @@
 
 > **Purpose**: Admit bounded declarative UI programs through a total checker and expose only a
 > constructor-private `CheckedUiProgram` to later UI phases.
-> **Read this if**: the UI source algebra, graph checker, program fixture corpus, or checked-program boundary
+> **Read this if**: the UI source algebra, graph checker, Haskell program-case corpus, or checked-program boundary
 > has to change.
 
 This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
@@ -47,7 +47,7 @@ Known partial** only.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -86,7 +86,7 @@ browser, server, identity-provider, and storage-provider enforcement remain UNVE
 |---|---|
 | `Claim` | Target only — Haskell declarations admit bounded UI data before authorization, binding, planning, or effects; any Dhall projection or negative bytes are generated beneath `.build/**`. Browser and server behavior are not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 37` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 37` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -116,8 +116,8 @@ browser, server, identity-provider, and storage-provider enforcement remain UNVE
   event tables and collections are finite and exhaustive.
 - [`dsl_doctrine.md` §2 — Two languages, one system: Dhall carries params, Haskell carries logic](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic):
   Dhall describes the program while Haskell owns the admission logic.
-- [`generated_artifacts_doctrine.md` §5 — Authored vs generated: the committed source](../documents/engineering/generated_artifacts_doctrine.md#5-authored-vs-generated-the-committed-source):
-  authored semantic inputs constrain per-run derived output; rendered wire bytes are not committed evidence.
+- [`generated_artifacts_doctrine.md` §5 — Authored vs generated](../documents/engineering/generated_artifacts_doctrine.md):
+  Haskell-authored semantic inputs constrain per-run derived output; rendered wire bytes are not repository authority.
 
 ---
 
@@ -163,13 +163,14 @@ snapshot of derived bytes.
 
 - Three authored program-semantic rows and three independent graph rows.
 - Ten exact diagnostics and eight generated rejection classes with coverage floors.
-- Six registered paired mutants and a complete 30-entry validation-locus inventory.
+- Six Haskell-registered paired changed-subject mutants and a complete 30-entry validation-locus inventory.
 
 ### Validation
 
 1. Program and graph projections join their authored tables in both directions.
 2. Two repeated decodes/checks agree without becoming the semantic oracle.
-3. The retired normalized-wire golden is absent and every paired mutant reaches only its named locus.
+3. The retired normalized-wire golden is absent and every paired Haskell changed-subject mutant reaches only
+   its named locus; any serialized mutation is generated lazily beneath `.build/**`.
 
 ### Remaining Work
 
@@ -187,14 +188,14 @@ join, and repository-local attestation.
 ### Deliverables
 
 - One five-calculus composition over the phase's actual bounded counts.
-- A gate with Darwin/Linux network observers, exact mutant loci, generated-output containment, and lane
+- A gate with Darwin/Linux network observers, exact Haskell changed-subject mutant loci, generated-output containment, and lane
   declaration.
 - A complete surface map retaining runtime and provider residues as UNVERIFIED.
 
 ### Validation
 
-1. The calculus kind order, component names, counts, and resource vector match the authored oracle.
-2. Normal and network-isolated executions pass; all six explicit mutant executions fail exactly.
+1. The calculus kind order, component names, counts, and resource vector match the separately authored Haskell oracle.
+2. Normal and network-isolated executions pass; all six explicit Haskell changed-subject mutant executions fail exactly.
 3. The universal surface, ledger, containment, write-guard, architecture, and attestation sides pass.
 
 ### Remaining Work
@@ -211,7 +212,7 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
   retaining runtime claims as UNVERIFIED.
 - `documents/engineering/dsl_doctrine.md` — record the checked `UiSource` specialization of Gate 1/2.
 - `documents/engineering/generated_artifacts_doctrine.md` — replace the wire-table language with the semantic
-  program oracle and retain the no-generated-output rule.
+  Haskell program oracle and retain the no-generated-output rule.
 
 **Cross-references to add:**
 

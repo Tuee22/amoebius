@@ -50,7 +50,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -151,7 +151,7 @@ names the refusing axis. It observes no device, host, provider, or cluster.
 |---|---|
 | `Claim` | Target only — the pure Haskell full-resource-vector fold returns a placement witness or one structured refusing axis. It consumes Haskell values; any serialized case or mutation is generated beneath `.build/**`; and it makes no hardware or live-capacity claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 29` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 29` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -524,8 +524,8 @@ Adopt [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the
 limit of [`resource_capacity_doctrine.md §2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed):
 express the composed full-resource-vector `place` witness as QuickCheck properties. For the checks that are
 decidable in **both** directions on this seam — runtime-metadata role grouping, execution-epoch source-unit
-equality, and provider-root arithmetic — assert `accepts ⟺ in-envelope` equivalence against a committed
-hand-authored reference. Reserve **soundness-only** (the witness never admits an over-committed spec, but `place`
+equality, and provider-root arithmetic — assert `accepts ⟺ in-envelope` equivalence against a separately
+reviewed Haskell reference. Reserve **soundness-only** (the witness never admits an over-committed spec, but `place`
 may reject a packable one) for the composed compute `place`, and never claim completeness there.
 
 ### Deliverables
@@ -597,7 +597,7 @@ may reject a packable one) for the composed compute `place`, and never claim com
    [Gate integrity](#gate-integrity) — including the kind-indexed execution,
    scheduler-CAS, runtime-metadata, node-local, physical-partition, accelerator-residency, and
    provider-template mutants, not one hand-picked strawman — makes a property red when re-run individually. The
-   validator carries the reference side of every `accepts ⟺ in-envelope` property as a **committed hand-authored predicate authored in this phase's oracle-pinning sprint, distinct from the fold under test** (§M.1, §M.3), never the
+   validator carries the reference side of every `accepts ⟺ in-envelope` property as a **separately reviewed Haskell predicate authored in this phase's oracle-pinning sprint, distinct from the fold under test** (§M.1, §M.3), never the
    fold's own comparison.
 
 ### Remaining Work
@@ -672,9 +672,9 @@ axis — and emit the per-entry validation-locus ledger that names the honest fo
 
 1. Rejected historical observation: the `execution-accelerator-spec` Cabal suite was recorded green — every
    one of the eighteen execution/accelerator/provider-root/runtime-metadata
-   fold negatives ([Gate integrity](#gate-integrity) representative set) returns its **specific committed** tagged
+   fold negatives ([Gate integrity](#gate-integrity) representative set) returns its **specific Haskell-expected** tagged
    `Left`, both composed positives place feasibly across every axis, the QuickCheck battery holds at its coverage
-   minima, and the committed per-fold seeded-mutant battery ([Gate integrity](#gate-integrity)) turns the suite
+   minima, and the reviewed Haskell per-fold mutation operators, applied beneath `.build/mutants/**`, turn the suite
    red individually. Any negative that produces `Right` or the wrong tag fails the suite. The emitted ledger must
    retain an UNVERIFIED row for every effect that only a runtime observation can settle.
 
@@ -709,7 +709,8 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-29 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — only the human authority may change Phase 29 after reviewing a qualified
+  candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-29 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Capacity/{Scheduler,HostReservation,
   NodeLocalStorage,RuntimeStorage,ProviderRoot,Etcd,PulumiExecution}.hs`, the execution/accelerator/provider-root

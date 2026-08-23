@@ -2,7 +2,8 @@
 
 > **Purpose**: Turn the human-approved pre-cluster DSL into a live deploy — hand the mandatory reconciler Lease from
 > the observed bootstrap host to the Deployment-`replicas=1` control-plane daemon, then have that control-plane daemon
-> decode one `.dhall` and reconcile the platform plus a trivial app onto a real cluster, with single-writer
+> decode one Haskell-declared spec (with any Dhall transport generated lazily beneath `.build/**`) and reconcile
+> the platform plus a trivial app onto a real cluster, with single-writer
 > exclusion delegated to k8s/etcd and no amoebius election.
 > **Read this if**: phase 65 is next in the queue, or a later phase depends on what its gate establishes.
 
@@ -30,7 +31,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 65.1: The control-plane daemon — a Deployment replicas=1, single-instance from k8s/etcd ⏸️](#sprint-651-the-control-plane-daemon--a-deployment-replicas1-single-instance-from-k8setcd-)
-- [Sprint 65.2: Live reconcile of the platform + a trivial app from one `.dhall` ⏸️](#sprint-652-live-reconcile-of-the-platform--a-trivial-app-from-one-dhall-)
+- [Sprint 65.2: Live reconcile of the platform + a trivial app from one Haskell declaration ⏸️](#sprint-652-live-reconcile-of-the-platform--a-trivial-app-from-one-haskell-declaration-)
 - [Sprint 65.3: Phase gate harness — live deploy + the pre-cluster negative corpus as a live regression guard ⏸️](#sprint-653-phase-gate-harness--live-deploy--the-pre-cluster-negative-corpus-as-a-live-regression-guard-)
 - [Sprint 65.4: The admin REST surface — `vault init/unseal`, `dhall update`, secret KV-CRUD ⏸️](#sprint-654-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-)
 - [Documentation Requirements](#documentation-requirements)
@@ -51,7 +52,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -254,6 +255,8 @@ refuse before the first apiserver or object-store mutation.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 65.1: The control-plane daemon — a Deployment replicas=1, single-instance from k8s/etcd ⏸️
 
@@ -364,7 +367,7 @@ bootstrap-host-to-control-plane Lease handoff, and no amoebius election.
 
 The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 65.2: Live reconcile of the platform + a trivial app from one `.dhall` ⏸️
+## Sprint 65.2: Live reconcile of the platform + a trivial app from one Haskell declaration ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 
@@ -381,7 +384,8 @@ itself was proven in-process in the pre-cluster band; here it is exercised, not 
 
 ### Deliverables
 
-- A positive deploy `.dhall` composing the standard platform-service stack (Phases 41–42) and a **trivial**
+- A positive deploy value authored in Haskell and lazily rendered as Dhall beneath `.build/test-corpora/**`,
+  composing the standard platform-service stack (Phases 41–42) and a **trivial**
   single-service app — deliberately narrower than the Phase-66 tenancy projection (no per-app namespace,
   ObjectStore, or in-namespace Sql fanout), but still carrying a complete app Pod/rollout envelope.
 - The control-plane daemon's live reconcile of that spec: decode → capability-bind/expand → `planInfrastructure` →
@@ -397,21 +401,23 @@ itself was proven in-process in the pre-cluster band; here it is exercised, not 
   the observed node runtime/image-storage aggregate before minting `ValidatedLiveTarget`. Any
   `Left ProvisionError` or live-preflight refusal exits before state PUT or SSA apply; no renderer accepts raw
   `InForceSpec`/`BoundDeployment` values.
-- A leak-free teardown obligation carried by the deploy fixture — a test-topology `.dhall` whose postflight
+- A leak-free teardown obligation carried by the Haskell deploy fixture; its generated test-topology Dhall
+  projection remains beneath `.build/test-corpora/**` and its postflight
   sweep asserts every provisioned object (the run-unique-labelled set defined in the validation list below) was
   reclaimed, while the pre-existing Phase-62/42 service set and Phase-64 edge are restored to Ready rather than
   swept.
 
 ### Validation
 
-1. Before the first pass the harness deletes the components named in
-   `test/fixture/live_dsl_deploy/perturb-targets.txt` — at minimum one platform `Deployment` and its `Service`, for
+1. Before the first pass the harness deletes the components named by a separately reviewed Haskell
+   perturbation declaration. Its optional text projection is generated lazily beneath
+   `.build/test-corpora/live_dsl_deploy/**`. It names at minimum one platform `Deployment` and its `Service`, for
    example Prometheus's — so a pre-converged Phase-62/42 stack cannot ride the gate (§M.6). The first pass
    then restores them and brings the platform + trivial app up on the linux-cpu cluster, its created/patched
-   set read from the apiserver audit log rather than the control-plane daemon's self-report (§M.5), non-empty, and equal
-   to `expected-enact-pass1.json`; the app is reachable through the Phase-64 Keycloak-owned edge; and a re-run
-   is a no-op — zero mutating writes under the control-plane daemon field manager in the audit log, matching
-   `expected-enact-pass2.json` — which unchanged end-state readiness alone would not establish.
+   set read from the apiserver audit log rather than the control-plane daemon's self-report (§M.5), non-empty,
+   and equal to the first-pass Haskell expectation. The app is reachable through the Phase-64
+   Keycloak-owned edge; a re-run issues zero mutating writes under the control-plane daemon field manager and
+   equals the second-pass Haskell expectation. Any JSON view is generated lazily beneath `.build/**`.
 2. Teardown leaves no leaked resources. The postflight sweep is scoped to this run's provisioned objects,
    identified by the run-unique label `amoebius.dev/phase33-run=<run-id>` the control-plane daemon stamps on every object
    it creates — that label set is authored here, and Phase-48 flag-at-creation machinery is not assumed — and
@@ -419,7 +425,7 @@ itself was proven in-process in the pre-cluster band; here it is exercised, not 
    Ready so the shared Phase-62/42 stack is left as found, and the apiserver audit log records that **every**
    platform/app write was issued by the control-plane daemon's in-cluster ServiceAccount and none by the harness
    principal.
-3. A committed provision-bypass mutant that renders the raw bound spec, and omission mutants that drop the
+3. A Haskell-authored changed-subject provision-bypass mutant that renders the raw bound spec, and omission mutants that drop the
    control-plane daemon, trivial-app, or gateway envelope, a present producer instance, or a union match branch must turn
    the gate red before apply. The positive run compares normalized live requests/limits/images/local storage,
    controller children, claims, and object keys with the opaque provisioned deployment rather than merely
@@ -436,16 +442,18 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 ### Objective
 
 Adopt [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
-assemble the phase's single live acceptance gate — one `.dhall` deploys the platform + a trivial app on
+assemble the phase's single live acceptance gate — one Haskell-declared topology, rendered lazily as Dhall
+beneath `.build/**`, deploys the platform + a trivial app on
 linux-cpu and the live apiserver admits the rendered manifests — and, as a regression guard, re-run the
-pre-cluster (Phase-27) negative corpus so each deliberately-illegal `.dhall` still fails to type-check or decode
+pre-cluster (Phase-27) Haskell negative corpus so each lazily generated illegal Dhall projection still fails to type-check or decode
 against the live path, and the positive fixtures still decode. That type/decode result was proven in-process in
 the pre-cluster band; here the guard confirms the live deploy path never admits an illegal spec.
 
 ### Deliverables
 
 - The positive gate: the Sprint-60.2 platform + trivial-app deploy driven to ready by the control-plane daemon
-  and torn down leak-free, declared in Haskell with any test-topology `.dhall` rendered beneath `.build/**`.
+  and torn down leak-free, declared in Haskell with any Dhall test-topology transport rendered lazily beneath
+  `.build/**` and left untracked.
 - The negative regression guard: the Phase-27 corpus (a bad PVC↔PV pairing, a Keycloak-bypassing open ingress, a
   product named in application logic, and the capacity/topology/bounded-storage set) **re-run** against the
   live deploy path (the same control-plane daemon `Deploy.hs` entry the positive fixture used), each asserted to fail at
@@ -471,8 +479,9 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
 
 ### Validation
 
-1. After perturbation, the positive `.dhall` restores and brings the platform + trivial app up (first-pass
-   audit-log enact set matches `expected-enact-pass1.json`, all writes attributed to the control-plane daemon SA), the app
+1. After perturbation, the positive Haskell-declared topology restores and brings the platform + trivial app
+   up. Its first-pass audit-log enact set matches the independently authored Haskell expectation and all
+   writes are attributed to the control-plane daemon SA; the app
    is reachable through the Keycloak edge, and teardown leaves no leaked resources over the run-unique label
    set; the applied Haskell `enact-noop` mutant turns this red.
 2. "The live deploy path" is pinned to the identical entry point the positive fixture used, foreclosing the
@@ -538,7 +547,8 @@ is untouched by its existence.
   and a cloud credential carries the IAM permissions and compute/storage/accelerator quotas to provision what
   the spec declares. Rejection is fail-fast, before any reconcile.
 - **`kv put/get/list/delete`** — secret KV-CRUD by name. Operators populate every production `SecretRef` target
-  in Vault before uploading the `.dhall`; this command transports the value into envelope storage, while the
+  in Vault before uploading the run-local transport generated from Haskell beneath `.build/**` or supplied as
+  an external, untracked operator value; this command transports the value into envelope storage, while the
   specification continues to contain only its name
   ([`vault_pki_doctrine.md` §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)).
 - **The Haskell command-mode admin-REST client** — the post-handoff operator client. It shares the one
@@ -574,19 +584,22 @@ is untouched by its existence.
    CLI → NodePort → control-plane daemon and is never persisted, and the observer that settles it is an OS-boundary one
    (§M.5): a write/`strace` observer over the control-plane daemon process and its container filesystem plus the
    apiserver audit log, never a log the endpoint emits about itself. Assert from that observer that the
-   password appears in no file, environment variable, k8s object, or log line; the committed
+   password appears in no file, environment variable, k8s object, or log line; the applied Haskell changed-subject
    `persist-password` mutant MUST turn this red.
 2. **The reach matrix (§M.3).** For every (endpoint family × reach class) cell, assert the observed
-   admit/refuse decision and the exact refusal tag equal `reach-matrix.tsv`. A seal-critical verb attempted over
+   admit/refuse decision and exact refusal tag equal the independently authored Haskell reach matrix. Any TSV
+   projection is generated lazily beneath `.build/test-corpora/**`. A seal-critical verb attempted over
    a fabric or LAN source is refused **before any Vault contact**, with its own reach-violation tag (asserted
-   from the Vault audit device: zero contact for the refused attempt, not merely a failed one). The committed
+   from the Vault audit device: zero contact for the refused attempt, not merely a failed one). The applied
+   Haskell changed-subject
    `reach-any` mutant MUST turn this red.
 3. **Specific-reason admission negatives (§M.8).** Each `dhall update` whose named `SecretRef` fails its
    capability probe is rejected before any reconcile: each of the four `secrets-capability` negatives is
-   rejected with its **own** tag from `admission-tags.tsv` — a generic "rejected" fails the check — and each
+   rejected with its own independently authored Haskell admission tag; any TSV projection is generated
+   lazily beneath `.build/test-corpora/**`. A generic "rejected" fails the check, and each
    is paired with a positive differing only in the foreclosed dimension that is admitted. Assert the apiserver
    audit log records **zero** writes for every rejected attempt (rejection precedes reconcile, not merely
-   precedes convergence). The committed `admit-unproven-secret` mutant MUST turn this red.
+   precedes convergence). The Haskell-authored changed-subject `admit-unproven-secret` mutant MUST turn this red.
 4. **The ledger** is emitted and honestly classifies the admission gate as runtime-checked/live, marking the
    tenant-admin and parent→child uses UNVERIFIED; a ledger reporting either as proven fails the gate.
 
@@ -651,7 +664,7 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
   same surface over its `ParentReachChannel`
 - [phase_58](phase_58_object_reconciler.md) — the typed renderer + SSA reconciler that renders and applies
   the control-plane daemon and its manifests
-- [phase_62](phase_62_platform_backbone.md) — the standard platform-service stack the live `.dhall` deploys
+- [phase_62](phase_62_platform_backbone.md) — the standard platform-service stack the live Haskell-declared spec deploys
 - [phase_64](phase_64_keycloak_ingress.md) — the Keycloak-owned edge the trivial app routes through
 - [phase_66](phase_66_app_tenancy.md) — the app-tenancy projection (namespace + ObjectStore + Sql) deferred
   from this phase

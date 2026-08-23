@@ -119,7 +119,7 @@ what makes the rest of it readable at face value.
 
 The first promotion barrier is hardware-free: the DSL parser/typechecker/decoder, pure semantics, generation
 determinism, independent Haskell expectations, negative controls, and source-boundary audit must be accepted
-before container, cluster, browser, provider, accelerator, or other hardware-specific replay can count as
+before live container, cluster, browser, provider, accelerator, or other hardware-specific replay can count as
 downstream evidence. Later replay checks portability; it cannot stand in for the language result it consumes.
 
 ## Stop 6. The plan

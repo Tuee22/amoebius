@@ -1,6 +1,7 @@
 # Phase 1: Haskell toolchain and probe-source closure
 
-> **Purpose**: Specify the target Haskell capability to derive a compatible toolchain at run time
+> **Purpose**: Specify the target Haskell capability to derive a compatible dependency graph from
+> authenticated, network-independent toolchain inputs
 > and build the required decoder, simulator, resolver, browser-contract, and protocol-codegen probes
 > without committing resolution output, integrity pins, generated code, or host-specific paths.
 > **Read this if**: phase 1 is next in the queue, or a later phase depends on what its gate establishes.
@@ -32,7 +33,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️](#sprint-14-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
 - [Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe ⏸️](#sprint-15-supernova-fork--proto-lens-codegen-build-probe-)
 - [Sprint 1.6: Dynamic resolution and generated-output migration ⏸️](#sprint-16-dynamic-resolution-and-generated-output-migration-)
-- [Sprint 1.7: Discover, then ensure — the resolver acquires what it needs ⏸️](#sprint-17-discover-then-ensure--the-resolver-acquires-what-it-needs-)
+- [Sprint 1.7: Pure discovery/ensure planning over injected inputs ⏸️](#sprint-17-pure-discoveryensure-planning-over-injected-inputs-)
 - [Sprint 1.8: Remove top-level vendor source and own the Haskell fork ⏸️](#sprint-18-remove-top-level-vendor-source-and-own-the-haskell-fork-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
@@ -49,12 +50,13 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
 This phase specifies a Haskell target capability; it does not report a current implementation or
-result. The target is to derive a compatible toolchain at run time and build the required decoder,
+result. The target is to derive a compatible dependency graph from authenticated, network-independent
+toolchain inputs and build the required decoder,
 simulator, resolver, browser-contract, and protocol-codegen probes without committing resolution
 output, integrity pins, generated code, or host-specific paths.
 
@@ -66,10 +68,12 @@ code, or other derived product must be created lazily beneath `.build/**` and re
 evidence contract remain UNRESOLVED and block validation.
 
 This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
-behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
-promote its claim.
+behavior only. It cannot use network, host, hardware, live-service, or cluster observations to validate or
+promote its claim; every build input must already be present through the authenticated, network-independent
+toolchain input.
 
-**Phase scope:** Target capability only — derive a compatible toolchain at run time and build the
+**Phase scope:** Target capability only — derive a compatible dependency graph from authenticated,
+network-independent toolchain inputs and build the
 required decoder, simulator, resolver, browser-contract, and protocol-codegen probes without
 committing resolution output, integrity pins, generated code, or host-specific paths. NOT VALIDATED.
 
@@ -88,9 +92,9 @@ committing resolution output, integrity pins, generated code, or host-specific p
 
 | Key | Contract |
 |---|---|
-| `Claim` | Target capability only — derive a compatible toolchain at run time and build the required decoder, simulator, resolver, browser-contract, and protocol-codegen probes without committing resolution output, integrity pins, generated code, or host-specific paths. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | Target capability only — derive a compatible dependency graph from authenticated, network-independent toolchain inputs and build the required decoder, simulator, resolver, browser-contract, and protocol-codegen probes without committing resolution output, integrity pins, generated code, or host-specific paths. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 01` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 01` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -146,9 +150,9 @@ this phase resolves against one dependency universe rather than a drifting one.
   clean against a stock package set — the baseline, with **no** `allow-newer` yet.
 
 ### Validation
-1. `cabal build` is green on the pin with a stock package set, run from a clean `dist-newstyle`; the retained
-   transcript echoes `ghc --version`/`cabal --version` and the exit-0 status observed by the shell, and the
-   `index-state` is committed as the shared snapshot.
+1. `cabal build` is green on the pin with a stock package set, run from a clean `.build/**` root. The reviewed
+   Haskell toolchain declaration fixes the compatibility requirement, while the selected `index-state`,
+   executable identities, and transcript are fresh run-local observations beneath `.build/runs/phase_1/**`.
 
 ### Remaining Work
 The pre-reset record said `None` and claimed validation by a consolidated Phase-1 gate on 2026-08-08; both
@@ -167,8 +171,9 @@ buildable on the pin before Phase 26 promises an executable decoder. `dhall` his
 `allow-newer` alone may be insufficient and a source patch or fork may be required.
 
 ### Deliverables
-- A recorded resolution: the concrete `allow-newer`/patch/fork/pin that makes `dhall` build on GHC 9.12.4, with
-  the retained green `cabal build` + `cabal run probe:decode` transcripts produced under exactly that set,
+- A recorded resolution: the concrete `allow-newer`/patch/fork/pin that makes `dhall` build on GHC 9.12.4,
+  with fresh `cabal build` + `cabal run probe:decode` transcripts beneath `.build/runs/phase_1/**` produced
+  under exactly that set,
   **or** a recorded blocker carrying the verbatim failing output and one failing transcript per remediation
   class (bare `allow-newer`, source patch, fork/pin).
 - Haskell-declared positive and bad-type probe cases plus separately authored Haskell expected decoded value
@@ -178,9 +183,9 @@ buildable on the pin before Phase 26 promises an executable decoder. `dhall` his
 1. A probe depending on `dhall` builds under the pin from a clean store, and `cabal run probe:decode` decodes
    the generated positive case into its independently expected Haskell value and exits 0. A green `cabal build`
    alone does **not** satisfy this: an executed, exit-checked run is required.
-2. The same binary on `probe/fixtures/bad-type.dhall` — the negative half of a pair differing from
-   `ok.dhall` only in one mistyped field — fails with the committed `dhall` type-error tag (§M.8: the failure
-   is asserted by its specific tag, not by "fails"); the exit-checked transcripts are retained.
+2. The same binary consumes the negative half of a Haskell-declared pair that differs from its positive only
+   in one mistyped field. The pair is rendered beneath `.build/probe/**`, and the observation must match the
+   separately reviewed Haskell `dhall` type-error expectation (§M.8), not merely report a generic failure.
 3. The exact `allow-newer`/source-patch/fork required by `dhall`'s transitive deps (`template-haskell`,
    `aeson`, `megaparsec`, `prettyprinter`) is recorded **together with** the green transcript produced with
    exactly that set. **The "or recorded" branch is evidentiary** per the Gate line — a remediation set counts
@@ -188,8 +193,9 @@ buildable on the pin before Phase 26 promises an executable decoder. `dhall` his
    class. Prose alone never passes.
 
 ### Remaining Work
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The positive decode matched byte-for-byte and the negative failed at `DHALL_TYPE_ERROR` in the retained
-2026-08-08 gate evidence.
+The pre-reset record said `None`; that statement and its 2026-08-08 decode observations are permanently
+invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
+approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ⏸️
 
@@ -203,28 +209,28 @@ the simulation. TLC (`tla2tools.jar`) is pure JVM and version-stable, so the Pha
 by this probe.
 
 ### Deliverables
-- A recorded resolution for `io-sim` + `io-classes` on the pin with its retained green build + `cabal run
-  probe:sim` transcripts, **or** a recorded blocker with verbatim failing output per remediation class.
-- The oracle-pinned `IOSimPOR` schedule name and its expected terminal state serialized as
-  `probe/fixtures/sim-terminal.expected`, the external comparison harness `probe/oracle/check-sim-terminal`, and
-  the seeded sim-path mutant `probe/mutants/perturb-sim-schedule`.
+- A recorded resolution for `io-sim` + `io-classes` on the pin with fresh build + `cabal run probe:sim`
+  transcripts beneath `.build/runs/phase_1/**`, **or** a run-local blocker observation per remediation class.
+- A reviewed Haskell declaration of the `IOSimPOR` schedule and a separately authored Haskell expected
+  terminal state, plus a Haskell comparison oracle and schedule-perturbation mutation operator. Any serialized
+  terminal state or applied mutant is generated only beneath `.build/probe/**`.
 
 ### Validation
 1. A probe depending on `io-sim`/`io-classes` builds under the pin from a clean store, and `cabal run
    probe:sim` runs the Phase-0-named `IOSimPOR` schedule and **emits the terminal state it reaches on
-   stdout**; the external `check-sim-terminal` harness confirms a byte-exact match against the committed
-   `probe/fixtures/sim-terminal.expected` oracle. The leg greens **only** on that match, never on the probe's
+   stdout**; the separately authored Haskell oracle confirms an exact semantic match against its independent
+   terminal-state expectation. The leg greens **only** on that match, never on the probe's
    self-reported exit 0 — a `main = exitSuccess` stub emits no terminal state and fails the diff.
-2. The seeded mutant `probe/mutants/perturb-sim-schedule` (the schedule's step ordering perturbed, one
-   fairness step dropped) is re-run and MUST turn `probe:sim` red at a terminal-state mismatch against the
-   same oracle (§M.2: the mutant is named by path + operator and paired with the terminal-state positive it
-   breaks).
-3. The transcript is retained, **or** the exact remediation/blocker is recorded evidentiarily per the Gate
-   line (matching green transcript, or verbatim failing output per remediation class — prose alone never
-   passes).
+2. The reviewed Haskell schedule-perturbation operator changes the step ordering and drops one fairness step
+   in a temporary subject beneath `.build/probe/**`. Re-running it MUST turn `probe:sim` red at the independent
+   terminal-state oracle (§M.2), while the unchanged positive remains green.
+3. The transcript is retained only beneath `.build/runs/phase_1/**`, **or** the exact remediation/blocker is
+   recorded there per the Gate line. Prose alone never passes.
 
 ### Remaining Work
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The external terminal-state oracle passed and the schedule perturbation mutant was killed on 2026-08-08.
+The pre-reset record said `None`; that statement and its 2026-08-08 simulation observations are permanently
+invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
+approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️
 
@@ -244,34 +250,38 @@ dependency universe — the phase gate.
   `directory`, `filepath` — content-hashing, download-or-build, and process control) + the build-only
   `purescript-bridge` contract generator + the `supernova` fork with its `proto-lens` codegen (the last
   folded in from Sprint 1.5).
-- The recorded-resolution ledger (the `allow-newer`/patch/fork set with its matching green transcripts, or the
-  hard blocker with verbatim per-remediation-class failing output) in the tracker's Toolchain section.
-- The retained `cabal.project` + freeze file, all `cabal build`/`cabal run` transcripts, the external
-  `probe/oracle/check-sim-terminal` harness with its `probe/fixtures/sim-terminal.expected` oracle, and **both**
-  seeded mutants `probe/mutants/drop-allow-newer` and `probe/mutants/perturb-sim-schedule`, under
-  `DEVELOPMENT_PLAN/evidence/phase_1/` (or CI-archived and linked), kept until Phase 26 supersedes them.
+- A run-local recorded-resolution ledger beneath `.build/runs/phase_1/**` (the `allow-newer`/patch/fork set
+  with its matching observations, or the hard blocker with per-remediation-class failing output). The tracker
+  may link a reader to evidence but cannot supply a behavioral input or verdict.
+- Reviewed Haskell compatibility, terminal-state expectation, and mutation declarations. Solver selections,
+  build/run transcripts, any freeze projection, and applied mutant subjects are fresh outputs beneath
+  `.build/runs/phase_1/**`; no evidence bundle or serialized expectation is tracked.
 - A first-class proven/tested/assumed ledger artifact ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) — naming **Register 1**, recording the green build +
   executed-fixture results as *tested*, and marking every runtime, cluster, and gadt-decode-semantics layer
-  **UNVERIFIED** — retained even though the probe package itself is deleted after resolution.
+  **UNVERIFIED** — emitted beneath `.build/runs/phase_1/**` even though the probe package itself is deleted
+  after resolution.
 
 ### Validation
 1. The consolidated probe's `build-depends` matches the Representative-set list exactly — all five clauses
    (i)–(v); a category description, or a set already in the stock closure, does not satisfy this. It builds
    and links under GHC 9.12.4 / Cabal 3.16.1.0 from a clean store.
-2. `cabal run probe:decode` exits 0 on its committed fixture, and `cabal run probe:sim`'s reported terminal
-   state passes the external `check-sim-terminal` diff against the committed
-   `probe/fixtures/sim-terminal.expected` oracle, never the probe's self-exit.
-3. **Both** seeded mutants are re-run and turn the gate red — `probe/mutants/drop-allow-newer` at a
-   version-mismatch/compile-fail locus and `probe/mutants/perturb-sim-schedule` at a terminal-state mismatch —
+2. `cabal run probe:decode` exits 0 on the Haskell-declared positive rendered beneath `.build/probe/**`, and
+   `cabal run probe:sim`'s reported terminal state satisfies the separately authored Haskell expectation,
+   never the probe's self-exit.
+3. **Both** reviewed Haskell mutation operators are applied beneath `.build/probe/**` and re-run: dropping the
+   compatibility allowance reddens the version-resolution locus, while perturbing the simulation schedule
+   reddens the terminal-state locus —
    together proving the gate detects an unbuildable config and a wrong-terminal-state sim rather than
    rubber-stamping a green one.
 4. **Or** the consolidated `allow-newer`/patch/fork set is recorded with its matching green transcripts
    (branch-1), or the exact blocker with verbatim per-remediation-class failing output (branch-2), in the
-   tracker's Toolchain section. All transcripts are retained and the proven/tested/assumed ledger is emitted —
-   the Phase-1 acceptance condition. Prose in the tracker without matching retained transcripts never passes.
+   fresh Phase-1 run bundle. All transcripts and the proven/tested/assumed ledger exist only beneath `.build/**` —
+   the Phase-1 acceptance condition. Prose in the tracker without matching run-local observations never passes.
 
 ### Remaining Work
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The probe remains only as a re-runnable gate harness; it is not a durable amoebius runtime module.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work
+includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and the
+Haskell probe, oracle, and mutation obligations of the redesigned gate.
 
 ## Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe ⏸️
 
@@ -287,30 +297,29 @@ consolidated gate.
 
 ### Deliverables
 - A recorded resolution: the concrete `supernova` fork ref + `proto-lens` `allow-newer`/patch/pin that makes the
-  fork and its codegen build on GHC 9.12.4, with the retained green `cabal build` transcript produced under
-  exactly that set, **or** a recorded blocker carrying the verbatim failing output and one failing transcript
-  per remediation class (bare `allow-newer`, source patch, fork/pin).
-- The generated `proto-lens` protobuf module committed as the codegen's build-only deliverable, plus the
-  retained transcript, under `DEVELOPMENT_PLAN/evidence/phase_1/`.
+  fork and its codegen build on GHC 9.12.4. The fresh `cabal build` transcript is produced beneath
+  `.build/runs/phase_1/**` under exactly that set, or the same run root records a blocker per remediation class.
+- The `proto-lens` protobuf module and build transcript materialized only beneath `.build/proto/**` and
+  `.build/runs/phase_1/**`. Neither generated module nor transcript is tracked source or evidence authority.
 
 ### Validation
 1. The `supernova` fork + `proto-lens` codegen resolve and compile green under the pin from a clean store,
-   with the retained `cabal build` transcript echoing `ghc --version`/`cabal --version` in-band and showing
-   the shell-observed exit 0; the exact fork ref + `allow-newer`/patch/pin is recorded **together with** that
-   green transcript (branch-1 evidentiary rule).
-2. The consolidated seeded mutant `probe/mutants/drop-allow-newer` — a §M.2 dependency-resolution operator,
-   and the committed mutant this build-only leg is paired against — is re-run with the fork ref/patch removed
-   and turns `cabal build` red at the `supernova`/`proto-lens` resolution locus.
+   with the run-local `cabal build` transcript beneath `.build/runs/phase_1/**` echoing the tool identities
+   in-band and showing the independently observed exit 0. The exact fork identity and compatibility requirement
+   are recorded together with that observation.
+2. The reviewed Haskell dependency-resolution operator removes the fork identity or compatibility declaration
+   in a temporary subject beneath `.build/probe/**`. Re-running it turns `cabal build` red at the
+   `supernova`/`proto-lens` resolution locus while the unchanged control remains green.
 3. **Or** the blocker is recorded with the verbatim failing `cabal build` output **plus one failing transcript
    per remediation class** (bare `allow-newer`, source patch, fork/pin), each naming the failing package and
    the compile-fail locus. Prose alone never passes.
 
 ### Remaining Work
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The observed fork identity, compatibility patch application, clean-store transcript, and generated
-protobuf module digests are retained in the Phase-1 run bundle beneath `.build/runs/phase_1/**`.
-[Sprint 1.8](#sprint-18-remove-top-level-vendor-source-and-own-the-haskell-fork-) supersedes the first two of
-those: a maintained Haskell fork has amoebius-owned modules under `src/vendor/**`, while any upstream
-non-Haskell inputs and transformation products are resolved lazily beneath `.build/vendor/**`.
+The pre-reset record said `None`; that statement and every recorded fork/codegen observation are permanently
+invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
+approval, owned legacy closure, and the Haskell provenance/oracle/mutation obligations of the redesigned gate.
+[Sprint 1.8](#sprint-18-remove-top-level-vendor-source-and-own-the-haskell-fork-) owns the target split between
+maintained `.hs` modules under `src/vendor/**` and lazy upstream material beneath `.build/vendor/**`.
 
 ## Sprint 1.6: Dynamic resolution and generated-output migration ⏸️
 
@@ -319,7 +328,7 @@ non-Haskell inputs and transformation products are resolved lazily beneath `.bui
 ### Objective
 
 Replace permanent pins, lock/freeze files, hard-coded package/library SHA values, developer-home paths, and
-committed generated evidence with dynamic run-local resolution and repository-local attestation.
+repository-retained generated evidence with dynamic run-local resolution and repository-local attestation.
 
 ### Deliverables
 
@@ -327,19 +336,21 @@ committed generated evidence with dynamic run-local resolution and repository-lo
 - A reviewed Haskell transformation declaration for each still-required compatibility change; delete the
   tracked patch and top-level vendor copies, and materialize any upstream input or patch encoding beneath
   `.build/vendor/**` only.
-- A `cabal.project` that references only tracked authored inputs and compatibility requirements, with no
-  developer path, fixed dependency commit, or ignored evidence path.
-- Replacement of `toolchain/pins.json`: keep only authored compatibility requirements in a clearly named
-  source manifest and generate every resolved path, version, URL, identity, and integrity observation.
+- A `cabal.project` that references only admitted `.hs` source, minimal build metadata, and Haskell-declared
+  compatibility requirements, with no developer path, fixed dependency identity, or ignored evidence path.
+- Replacement of `toolchain/pins.json`: keep compatibility requirements in a reviewed Haskell declaration and
+  generate every resolved path, version, URL, identity, and integrity observation beneath `.build/toolchain/**`.
 - A resolver that writes the selected graph and tools only beneath `.build/`.
-- Generated protocol bindings and checksums only beneath `.build/proto/` or the build tree.
-- An authored-root write guard and repository-local attestation covering every probe and mutant.
+- Generated protocol bindings and checksums only beneath `.build/proto/**`.
+- An authored-root write guard and run-local attestation beneath `.build/**` covering every probe and applied
+  Haskell mutation operator.
 - Tracked-path and container-context checks that reject every legacy generated class.
 
 ### Validation
 
 1. Begin from the source snapshot — non-ignored files only — and empty probe caches.
-2. Resolve, build, and execute the complete representative set twice.
+2. Resolve, build, and execute the complete representative set twice using only the authenticated,
+   network-independent input.
 3. Confirm that all generated output is ignored and every authored path is unchanged.
 4. Confirm that no lock/freeze file, package integrity pin, or developer-home path is tracked.
 5. Confirm every referenced patch exists in the clone beneath an authored root; a seeded ignored-patch
@@ -348,63 +359,57 @@ committed generated evidence with dynamic run-local resolution and repository-lo
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The pre-reset patch and pin dispositions are historical inventory only. The target keeps toolchain compatibility requirements in Haskell declarations and may render resolution input/output only beneath `.build/toolchain/**`; neither `toolchain/pins.json` nor `tools/toolchain_requirements.json` is admitted source.
-`cabal.project` carries no developer path, frozen `index-state`, fixed revision, or ignored input. The gate
-resolves twice to the same graph, resolves it again from non-ignored source alone, and publishes a verified
-repository-local attestation. Cabal metadata, its package store, build roots, npm dependencies, tool downloads,
-and all temp/cache homes are confined to `.build/**`; the host inventory is unchanged.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work
+includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and
+phase-specific obligation in the redesigned gate. The target must replace the condemned pin/patch inputs with
+reviewed Haskell compatibility declarations, confine every resolved product to `.build/**`, and independently
+demonstrate clean-source repeatability without network or outside-host observation.
 
-## Sprint 1.7: Discover, then ensure — the resolver acquires what it needs ⏸️
+## Sprint 1.7: Pure discovery/ensure planning over injected inputs ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 
 ### Objective
 
-Adopt [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
-in the pre-binary resolver: an absent tool with a supported install plan is installed, and the only things the
-host must already supply are the floor of
-[§3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply).
+Model [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
+as a pure Haskell plan over injected inventories and authenticated provider catalogs. An absent tool with a
+supported plan yields typed acquisition steps; a missing floor prerequisite yields a typed refusal. This
+sprint may neither inspect nor modify a real host. Phase 51 owns the boundary-with-fakes interpreter after the
+Phase-49 barrier, and the later live band owns actual host observation and installation.
 
 ### Deliverables
 
-- The `host` source kind retired, so no requirement can mean "expected on the developer host".
+- The `host` source kind retired from the pure plan, so no requirement can mean "expected on the developer
+  host".
 - A `managed` source kind — a tool installed by another resolved tool, which is asked what it can supply —
   generalizing the `ghcup-managed` kind the authored vocabulary already names but the resolver never
   implemented.
-- The floor expressed as authored data and checked before resolution, with each failure carrying its remedy.
-- One canonical `<os>-<arch>` platform token, replacing the three divergent normalizers and the inconsistent
-  authored keys they compensate for.
+- The floor expressed as a reviewed Haskell value and evaluated only against an injected inventory, with each
+  failure carrying its remedy.
+- One canonical `<os>-<arch>` platform value, supplied as a synthetic case rather than discovered from a host,
+  replacing the three divergent normalizers and the inconsistent keys they compensate for.
 - `node`, `npm`, and `git` declared, having been invoked bare and undeclared.
-- A seeded-negative corpus for resolution behaviour, which today has none: absent tool, out-of-range version,
-  and no asset for the host's architecture.
+- A Haskell-declared negative corpus for resolution behaviour: absent tool, out-of-range version, and no asset
+  for the injected platform value. Any serialized acquisition request or response is generated beneath
+  `.build/**`.
 
 ### Validation
 
-1. Run the phase command on a host missing every acquirable tool and confirm it completes without an operator
-   install, with the outside-host inventory unchanged.
-2. Confirm each seeded resolution negative reddens its own check and no other.
-3. Confirm the architecture refusal fires when the publisher offers no asset for the host's architecture,
-   rather than a foreign asset being selected.
-4. Confirm the surface join stays total after the newly declared tools are added.
+1. Evaluate the Haskell plan against an injected empty-tool inventory and authenticated provider catalog;
+   assert the exact typed acquisition steps without running them.
+2. Each reviewed Haskell resolution mutation operator makes only its independently expected property red.
+3. The architecture-refusal case uses a synthetic platform value and a catalog with no matching asset; it
+   must refuse rather than selecting a foreign asset.
+4. The Haskell surface join stays total after the newly declared tools are added, and the effect observer
+   confirms zero host, hardware, network, package-manager, or filesystem effects outside `.build/**`.
 
 ### Remaining Work
 
-The gate run that seals the phase. What is built:
-
-| Deliverable | Where it landed |
-|---|---|
-| `host` retired | Three providers replace it — `ghc`/`cabal` from `ghcup`, `chromium` from the resolved Playwright driver, `dhall` from its publisher's release. The `no-host-source` check refuses a manifest that reintroduces the kind |
-| `managed` kind | `provider` names one of `ghcup`, `playwright`, `package-manager`; each adapter probes, installs when absent, and asks the provider where it put the tool. `managed-idempotent` requires a second pass to install nothing |
-| Floor as authored data | A `floor` section per substrate, each entry a probe and the remedy that clears it. `floor-decidable` runs every substrate's floor — including ones this host is not — and `floor-satisfied` runs this host's |
-| One platform token | Historical inventory only: `tools/host_platform.py` formerly supplied a shared token to condemned gates and the pre-binary handoff. This is non-operative source debt; the replacement vocabulary and decisions must be Haskell, while Python may make only its minimal adapter-selection distinction. |
-| `node`, `npm`, `git` declared | All three are `managed` by the floor's package-manager root, version-checked, resolved to an absolute path, and joined at `toolchain.floor_supplied` |
-| Resolution negatives | `choose_release` and `choose_offer` are pure and refuse in three distinguishable classes; the corpus drives both selectors with two positive controls and three negatives |
-
-Two defects the sprint found and fixed on the way. The Temurin JRE is an application bundle on macOS, so one
-authored `archive_member` resolved a path that exists on exactly one of the three platforms — the member is now
-per-platform, keyed by the same canonical token. And the release-tarball unpacker stripped the first member's
-first path segment unconditionally, which is right for an archive that unpacks into one versioned directory and
-throws away `bin/` for one that does not.
+The pre-reset completion account and platform table are permanently invalid and are not implementation
+instructions. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+owned legacy closure, reviewed Haskell provider/platform/acquisition declarations, independent Haskell
+expectations, applied mutation controls, and fresh contained observations beneath `.build/**`. Any real host
+or acquisition correspondence remains explicitly UNVERIFIED.
 
 ## Sprint 1.8: Remove top-level vendor source and own the Haskell fork ⏸️
 
@@ -421,8 +426,9 @@ throws away `bin/` for one that does not.
 Adopt [`repository_layout_doctrine.md` §4.1 — a compatibility edit is fixed source, not a patch against a
 moving head](../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-fixed-source-not-a-patch-against-a-moving-head):
 remove the transitional top-level `vendor/**` tree. Re-derive only maintained Haskell behavior under
-`src/vendor/**/*.hs`; acquire any required upstream non-Haskell source at an immutable identity beneath
-`.build/vendor/**` and apply transformations declared in Haskell.
+`src/vendor/**/*.hs`; materialize any required upstream non-Haskell source from an authenticated,
+network-independent input at an immutable identity beneath `.build/vendor/**` and apply transformations
+declared in Haskell.
 
 ### Deliverables
 
@@ -440,7 +446,8 @@ remove the transitional top-level `vendor/**` tree. Re-derive only maintained Ha
 ### Validation
 
 1. From a clean source snapshot and empty `.build/**`, the representative set resolves the immutable upstream
-   input, generates required foreign build inputs, and builds the maintained Haskell fork.
+   input from the authenticated network-independent cache, generates required foreign build inputs, and
+   builds the maintained Haskell fork.
 2. The tracked snapshot contains no `vendor/**`, patch program, Proto input, foreign package description, or
    generated binding; all such material is contained beneath the fresh run root.
 3. Each generated reintroduction negative reddens only its named source-closure or provenance check, while an
@@ -452,7 +459,8 @@ remove the transitional top-level `vendor/**` tree. Re-derive only maintained Ha
 
 `LTD-SRC-009` remains open: the top-level vendor tree is still tracked and the Haskell provenance,
 materialization, independent oracle, and generated reintroduction corpus do not yet exist. This sprint cannot
-become a candidate until Phase 0 is human-approved and the row's exact Haskell closure predicate is green.
+become a candidate until Phase 0 is human-approved and the typed Haskell closure binding explained to readers
+as `LTD-SRC-009` is green.
 
 ## Documentation Requirements
 
@@ -470,9 +478,9 @@ become a candidate until Phase 0 is human-approved and the row's exact Haskell c
 - `documents/engineering/dsl_doctrine.md` — §9's Toolchain note gets a backlink to the recorded `dhall`
   `allow-newer`/patch set once Sprint 1.2/1.4 lands.
 - `documents/engineering/gateway_migration_model_doctrine.md` — §4's io-sim instrument gets a backlink to the
-  proven `io-sim`/`io-classes` build.
+  human-approved buildability evidence.
 - `documents/engineering/content_addressing_doctrine.md` — §4.5's `jit-build` resolver gets a backlink to the
-  proven resolver-deps build.
+  human-approved resolver-dependency evidence.
 - `documents/engineering/repository_layout_doctrine.md` — **historical pre-reset note from 2026-08-20 — permanently invalid for promotion.** The `patches/**` tree row and
   its TRANSITIONAL marker are deleted; §2 records why the root is absent rather than transitional, §2.2 no
   longer carries a destination row for it, and §4.1 states that there is no patch root and no admitted patch.
@@ -484,11 +492,11 @@ become a candidate until Phase 0 is human-approved and the row's exact Haskell c
 
 - `DEVELOPMENT_PLAN/README.md` — the Toolchain section records only the authored compatibility policy or a
   current blocker; resolved `allow-newer`, patch application, source identity, and graph observations remain
-  in the run bundle. Flip the Phase 1 status only when the gate passes.
+  in the run bundle. Only the human authority may change Phase 1 after reviewing a qualified candidate.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-1 `none` gate row.
-- `DEVELOPMENT_PLAN/system_components.md` — register `cabal.project` and the throwaway `probe/` package as
-  Phase-1 pre-flight rows, marked deleted-after-resolution; identify top-level `vendor/**` only as
-  `LTD-SRC-009` migration debt.
+- `DEVELOPMENT_PLAN/system_components.md` — register the Haskell toolchain/probe declarations; throwaway probe
+  packages and products live beneath `.build/**`. Identify top-level `vendor/**` only as `LTD-SRC-009`
+  migration debt.
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves; the sole home of the

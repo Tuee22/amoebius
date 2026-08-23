@@ -70,8 +70,8 @@ fixes. This router owns the declaration. The taxonomy is the product of three cl
   the covering could never report a missing domain. This list is the reader-facing specification of the axis.
   A separately reviewed Haskell declaration must encode exactly these values; the Haskell covering-grid
   generator consumes that declaration, never this Markdown, and may materialize views only beneath
-  `.build/**`. The existing Python/Markdown/TSV mechanisms are condemned
-  migration footprints tracked only by
+  `.build/**`. The existing Python/Markdown/TSV mechanisms are condemned migration footprints observed by
+  typed Haskell legacy bindings and explained to readers in
   [`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). Note that the family axis is **not** a
   refinement of the themed slices and is not meant to be: there is a `tenancy` slice with no `tenancy` family
   (its states are `security`), and `backup`, `image`, `ui` and `accelerator` are families with no slice of
@@ -94,8 +94,8 @@ grid reported 143 occupied cells where the entries assert 64 — occupancy was a
 count a floor, and eleven cells were left owing a reason nobody could honestly write, because each was
 *unknown* rather than empty. The `Cells:` line replaces that estimate with a measurement, and the eleven
 resolved into occupied, inadmissible, and three genuinely empty cells whose reasons are stated below. Those
-numbers are rationale only and cannot be reused as current evidence; the Python/Markdown parser remains
-condemned by the active legacy register.
+numbers are rationale only and cannot be reused as current evidence; a typed Haskell legacy binding continues
+to condemn the Python/Markdown parser, and the Markdown register only explains that state.
 
 ### Which locus can observe which layer
 

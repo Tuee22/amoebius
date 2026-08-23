@@ -49,7 +49,7 @@ Known partial** only.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -78,7 +78,7 @@ type, the reconciler table, the driver, and the lift fold. It splits if a second
 second substrate appears.
 
 **Substrate:** `none` — Haskell declarations generate a fresh run-local fake tool directory beneath
-`.build/**`; it is never committed and the algebra is replayed against it, not a host
+`.build/**`; it is never retained in the repository and the algebra is replayed against it, not a host
 ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
 
 **Lane:** none ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
@@ -126,7 +126,7 @@ second substrate appears.
   a state the types cannot express needs no test, and the ensure algebra is where that contract reaches the
   host surface.
 - [`testing_doctrine.md` §9 — derivation: generated enumeration, authored expectation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation):
-  the substrate cases are enumerated from the type and every expectation is authored, so a new constructor
+  the substrate cases are enumerated from the type and every expectation is authored in Haskell, so a new constructor
   arrives with a missing expectation rather than with silent coverage.
 
 ---
@@ -216,8 +216,8 @@ express a reconciler as a row so its three views cannot disagree with each other
   phrase drifts from the set it describes the first time that set changes.
 - A refusal that fires before any side effect when a reconciler is driven on a substrate its row excludes, so
   a misapplied reconciler costs a message rather than a half-installed host.
-- A golden rendering of the whole table under `test/fixture/host_ensure_kernel/`, so a row change is a
-  reviewable diff rather than a behavioural surprise at run time.
+- A separately authored Haskell table expectation. Its human-readable rendering is generated lazily beneath
+  `.build/**`, so a row change is a reviewable diff without a serialized repository fixture.
 
 ### Validation
 
@@ -275,8 +275,8 @@ without a second deployment path.
   that runs it. Two deployment paths for one step list is how a fix reaches one substrate and not the others.
 - Absolute-path resolution applied to the outermost tool only, with a nested command left as the guest's own
   name against the guest's own environment.
-- A golden argv set per context, so a change to the fold surfaces as a diff rather than as a runtime
-  difference observed on one substrate.
+- A separately authored Haskell argv expectation per context. Any diff rendering is generated lazily beneath
+  `.build/**`, so a fold change is visible without a serialized repository golden.
 
 ### Validation
 
@@ -303,10 +303,10 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 
 - `DEVELOPMENT_PLAN/system_components.md` — the lazy tool-ensure row leaves PARTIAL once the driver has a
   caller and the mechanism is typed, and the new host modules take their rows.
-- `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md` — the
-  [active host obligations](legacy_tracking_for_deletion.md#4-host-image-and-lift-violations) naming the
-  uninterpretable mechanism, the caller-less driver, the thrice-written tool set, and the second discovery
-  helper close here.
+- `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md` — the reader-facing
+  [host-obligation explanations](legacy_tracking_for_deletion.md#4-host-image-and-lift-violations) for the
+  uninterpretable mechanism, caller-less driver, thrice-written tool set, and second discovery helper are
+  reconciled here only after their typed Haskell closure predicates return zero and the human approves.
 
 ---
 

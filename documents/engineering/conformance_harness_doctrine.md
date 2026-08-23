@@ -96,7 +96,8 @@ One cleanroom run exercises every stage, in order, through production entry poin
 
 1. **Decode.** A Haskell-authored source value is encoded through the production codec where serialization is
    part of the contract and decoded through the production entry point. Paired negatives pin exact diagnostic
-   code and locus. No checked-in serialized fixture is read.
+   code and locus. No repository-retained serialized fixture is read; any required encoding is materialized
+   lazily beneath `.build/**` from the Haskell value.
 2. **Legality.** The decoded value passes the complete illegal-state and extension-law checks. Each
    unrepresentability claim has a minimally different positive/compile-fail pair, and runtime refusals have
    exact tags rather than generic failure.

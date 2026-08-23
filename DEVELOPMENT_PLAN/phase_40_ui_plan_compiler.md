@@ -47,7 +47,7 @@ Known partial** only.
 
 ---
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -60,7 +60,7 @@ effect destinations.
 The target compiler exposes no client-only or server-only entry point. Canonical ordering and encoding make repeated
 fresh compilation stable, while changing or omitting an authority-bearing source changes the authority digest.
 All serialized plans, manifests, cases, and mutations are generated lazily beneath `.build/**`. Separately
-reviewed Haskell semantics, never committed JSON or renderer-produced bytes, constrain the projection.
+reviewed Haskell semantics, never repository-retained JSON or renderer-produced bytes, constrain the projection.
 
 **Phase scope:** one target claim — one sealed Haskell program compiles purely and deterministically to one matching,
 finite artifact set. Interpretation, publication, serving, and live freshness split out.
@@ -84,7 +84,7 @@ publication, edge enforcement, and live authority freshness remain UNVERIFIED.
 |---|---|
 | `Claim` | Target only — one sealed Haskell program compiles purely to a matching finite artifact set; serialized output and mutations are lazy `.build/**` products, not tracked authority. Interpretation and live freshness are not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 40` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 40` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -108,7 +108,7 @@ publication, edge enforcement, and live authority freshness remain UNVERIFIED.
 - [`low_code_ui_runtime_doctrine.md` §9 — Routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge): route and action projections retain mandatory policy references.
 - [`low_code_ui_runtime_doctrine.md` §15 — Versioning, rollout, and generated artifacts](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): complete authority/content identities and immutable per-app plans are derived.
 - [`ui_realtime_coordination_doctrine.md` §4 — Typed routing and resume envelope](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): both halves carry the scoped routing identity while Redis remains platform-internal.
-- [`generated_artifacts_doctrine.md` §2 — What is generated (and from what)](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what): plan and manifest output remains generated and uncommitted.
+- [`generated_artifacts_doctrine.md` §2 — What is generated (and from what)](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what): plan and manifest output is generated lazily beneath `.build/**` and remains untracked.
 - [`illegal_state_security.md` §3.83 — A UI plan executed after an authority-bearing source changed](../documents/illegal_state/illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed): complete freshness identity is mandatory.
 
 ---
@@ -152,20 +152,23 @@ semantic intent.
 
 ### Deliverables
 
-- Four canonical JSON regression artifacts and four run-time-derived digest observations.
+- Four canonical JSON regression artifacts generated lazily beneath `.build/**` from Haskell declarations,
+  plus four run-time-derived digest observations.
 - Six finite client/server demand cells.
 - Cache-disabled fresh-process determinism and insertion-order sensitivity control.
 
 ### Validation
 
-1. Every regression artifact is canonical JSON and byte-exact; no committed digest table exists.
-2. The independent adapter derives the four matching digests from the current golden bytes.
+1. Every lazily generated regression artifact is canonical JSON and byte-exact; no tracked digest table or
+   serialized expectation exists.
+2. The independent Haskell oracle derives the four expected digests independently and compares them with the
+   current `.build/**` materializations.
 3. Two fresh processes with opposite insertion order emit identical artifacts, while the deliberately ordered
    control differs.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The same-commit goldens remain regression fixtures and are not credited as independent semantic oracles.
+The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The pre-reset serialized expectation paths are condemned historical inventory. Current work requires independently authored Haskell expectations and lazy untracked `.build/**` materializations.
 
 ## Sprint 40.3: Calculus projection and phase seal ⏸️
 
@@ -179,13 +182,14 @@ evidence.
 ### Deliverables
 
 - A real five-calculus composition over the phase's observed sets.
-- Six paired mutants with exact red tokens.
+- Six Haskell-authored paired changed-subject mutants with exact red tokens.
 - A complete natural-architecture, surface, ledger, containment, write-guard, and attestation record.
 
 ### Validation
 
 1. The authored calculus rows fix kind order, component names, count vector, and resource sum.
-2. Ordinary and Darwin-denied executions accept; all six mutant executions fail at their own loci.
+2. Ordinary and Darwin-denied executions accept; all six Haskell changed-subject mutant executions fail at
+   their own loci.
 3. All 17 metrics and the 61-surface/72-item join pass in the attested run.
 
 ### Remaining Work
@@ -200,11 +204,12 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — pure paired projection, calculus evidence, and
   honest runtime residues.
-- `documents/engineering/generated_artifacts_doctrine.md` — generated artifact boundary and regression-golden
-  limitation.
+- `documents/engineering/generated_artifacts_doctrine.md` — generated artifact boundary and Haskell regression-
+  expectation limitation.
 - `documents/engineering/ui_realtime_coordination_doctrine.md` — finite routing-envelope compilation without
   runtime claims.
-- `documents/illegal_state/illegal_state_security.md` — authority/refusal evidence and exact mutants.
+- `documents/illegal_state/illegal_state_security.md` — authority/refusal evidence and exact Haskell
+  changed-subject mutants.
 
 **Cross-references to add:**
 

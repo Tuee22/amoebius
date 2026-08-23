@@ -14,7 +14,7 @@ provisioned. It does not carry the types themselves, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/resource_capacity_types.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/resource_capacity_types.md
 **Generated sections**: none
 
 </details>

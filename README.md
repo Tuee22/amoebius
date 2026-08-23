@@ -31,8 +31,9 @@ workers**. The only admitted role for Python `pb` is before that binary: make th
 needed to establish the pinned toolchain, build the source-bound binary, and replace itself with that exact
 binary via `exec`, forwarding every user argument unchanged. Haskell owns host-floor decisions, help,
 version, validation, and every operator command. Python may not dispatch those commands, decide a validation
-result, or act as a second runtime; current out-of-bounds `pb` behaviour remains an active finding
-in the [single legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). The target worker set
+result, or act as a second runtime; typed Haskell keeps current out-of-bounds `pb` behaviour as an active
+migration binding, explained to readers in the
+[single legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). The target worker set
 includes the generic UI server and owner-scoped UI projector as well as linked workflow and ML roles; an
 application does not introduce another executable or privileged server.
 
@@ -54,12 +55,18 @@ else — Dhall, PureScript, JavaScript, shell, Proto, Pulumi, Dockerfiles, seria
 manifests, SQL, browser contracts, checking tools, and materialized mutants — must be rendered lazily from
 Haskell beneath `.build/**`, named by a content address that folds in its own rendered text, charged against a
 budget, and reaped when its region ends. Operator values remain external or untracked inputs. **The current
-tree does not yet conform**: every observed foreign-source family is an active, counted migration row in the
-[single legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). Phase 0 owns `LTD-SRC-008` and
-must reduce `pb/**` to the deny-by-default, externally observed toolchain-establish/build/opaque-exec role.
-Every source-migration row, including that one, must be zero before the Phase-49 hardware-free promotion
-barrier may emit a candidate. Phase 50 validates the runtime behavior of the already-bounded handoff and owns
-no source-migration row; Phase 51 onward retains the same closed grammar. That target discipline
+tree does not yet conform**: every observed foreign-source family has a typed Haskell migration binding whose
+reader-facing explanation is in the
+[single legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). That Markdown table supplies no
+executable ID, owner, count, predicate, or closure result; a human reviewer owns its correspondence with the
+Haskell inventory. Phase 0 owns the binding explained as `LTD-SRC-008` and must reduce `pb/**` to an exact
+nonempty path inventory whose complete Python syntax/import/call/control-flow/effect graph statically fits the
+toolchain-establish/build/unchanged-argv-exec role. Every source-migration binding, including that one, must be
+zero before the Phase-49 hardware-free promotion barrier may emit a candidate. Phase 49 builds and invokes the
+Haskell barrier directly; it does not use `pb` as transport. Phase 50 alone validates the runtime behavior of
+the already source-bounded handoff and owns no source-migration binding; Phase 51 onward retains the same
+closed grammar. Phase 51 remains a hardware-free Haskell host-ensure gate against fake boundaries; Phase 52 is
+the first hardware-bearing validation phase. That target discipline
 generalises jitML's just-in-time discipline from machine learning to everything amoebius touches, and it is
 owned by the [JIT artifact doctrine](./documents/engineering/jit_artifact_doctrine.md) and the
 [JIT budget doctrine](./documents/engineering/jit_budget_doctrine.md).
@@ -102,10 +109,11 @@ does not belong in the image every pod runs. The build/publish contract, the acq
 bounded host-bootstrap exception are owned by the
 [image-build doctrine](./documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster).
 
-Current implementation state, phase validation, migration order, and every known divergence are owned only by
-the [development-plan tracker](./DEVELOPMENT_PLAN/README.md) and the single
-[legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). Nothing in this entry point is evidence
-that a target surface has been implemented or validated.
+Current implementation state, phase validation, and migration order are owned by the
+[development-plan tracker](./DEVELOPMENT_PLAN/README.md). Executable divergence identities and closure
+bindings are Haskell; the single
+[legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) explains them to readers. Nothing in
+this entry point is evidence that a target surface has been implemented or validated.
 
 The binary manages Kubernetes cluster lifecycle and interprets external, untracked `.dhall` values into opinionated
 deployments and bounded low-code applications. A low-code app is finite `UiSource` data compiled into matching
@@ -166,7 +174,8 @@ and reattaches retained backing
   expectations · 2 boundary-with-fakes · 3 live), plus a non-gating deterministic-simulation activity.
   A gate emits only a candidate `.build/**` evidence bundle; a receipt or digest proves provenance, not
   correctness, and only the human user may promote plan status. The hardware-free DSL/generator barrier must
-  be accepted before any container, cluster, browser, provider, or accelerator gate begins.
+  be accepted before any live container, cluster, browser, provider, or accelerator gate begins; pure browser
+  semantics and lazy UI generation remain part of the pre-barrier DSL proof.
 - **How the repository is laid out:**
   [`documents/engineering/repository_layout_doctrine.md`](./documents/engineering/repository_layout_doctrine.md)
   — the closed tracked-source grammar, generated-state tree, dependency-resolution policy, and ignore contracts.

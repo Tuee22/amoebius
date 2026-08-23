@@ -1,7 +1,7 @@
 # Development Plan: gate integrity and repository closure
 
 > **Purpose**: Define the non-spoofable phase-gate contract, the universal source and artifact postconditions,
-> the one active divergence register, and the final-tree rule every phase inherits.
+> the typed divergence inventory plus its one reader-facing register, and the final-tree rule every phase inherits.
 > **Read this if**: a phase gate is being written, reviewed, run, or proposed as evidence for a status change.
 
 This slice is authoritative for gate integrity. The phase model and status authority live in
@@ -13,7 +13,7 @@ section lettering lives in [`development_plan_standards.md`](development_plan_st
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -63,7 +63,7 @@ evidence cannot populate authored contract fields.
 |---|---|
 | `Claim` | One falsifiable capability statement and its explicit exclusions. |
 | `Subject` | The production `.hs` module and entry point exercised; a wrapper, manifest, or gate runner alone is not a subject. |
-| `Command` | `pb validate phase NN`; Python treats that and every other argv as opaque, makes only the minimal platform distinction needed to establish/build, then execs the exact Haskell binary with argv unchanged. The binary owns host-floor policy, command dispatch, and every verdict. |
+| `Command` | Future public target: `pb validate phase NN`. Before Phase 50 has current human approval, the executable candidate command is the exact absolute source-bound Haskell binary built directly from an authenticated, network-independent toolchain input; invoking `pb` is inadmissible evidence. Phase 50 alone subjects `pb` to external runtime observation. Phase 51 onward may use `pb` only while binding the current Phase-50 approval. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
 | `Oracle` | A separately authored `.hs` oracle module, its independence boundary, provenance, and human reviewer. |
 | `Positive controls` | A closed named corpus and the exact observations expected for each member. |
 | `Paired negatives` | For every foreclosed dimension, a minimally different positive/negative pair and the exact rejection locus and reason. |
@@ -75,15 +75,18 @@ evidence cannot populate authored contract fields.
 | `Freshness` | How stale state, cached output, prior evidence, and replayed responses are made unable to pass. |
 | `Qualification` | Sabotage cases that qualify the harness before the clean candidate run. |
 | `Cleanroom` | Proof that the gate starts without generated products or condemned legacy copies and derives everything required lazily. |
-| `Legacy closure` | Stable IDs owned by this phase and the exact zero-finding check required before promotion. |
+| `Legacy closure` | Reader-facing references to the typed Haskell IDs due in this phase; the compiled lifecycle/owner/required-analyzer dispatch and the owning analyzer's independent oracle supply the zero-finding decision. An unavailable analyzer for a due or retired ID refuses; before its owner an active unavailable analyzer is explicit later-owned debt and cannot claim closure. Cell text supplies no executable value. |
 | `Predecessor` | The immediately preceding phase's human approval receipt, or `genesis` for Phase 0. |
 | `Residue` | Untested layers and assumptions, stated as `UNVERIFIED`; an empty residue requires reviewer justification. |
 | `Human authority` | Required external approval class; always `human-only`, never a tool-generated assertion. |
 
-The `**Gate:**` summary line contains only the command and a link to this table. A phase-specific command may
-be an argument selected by the Haskell dispatcher, but Python, shell, a data file, or a generated program may
-not decide or wrap the verdict. The standard command is a target contract until Phase 0 implements and
-qualifies it; its presence in a phase document is not a claim that it currently exists or passes.
+The `**Gate:**` summary line contains only the future public command and a link to this table. A
+phase-specific command may be an argument selected by the Haskell dispatcher, but Python, shell, a data file,
+or a generated program may not decide or wrap the verdict. The public spelling is not admissible evidence for
+Phase 0 through Phase 49: those candidates invoke the exact absolute source-built Haskell executable directly.
+Phase 50 validates the `pb` transport itself under an external observer; only its current human approval makes
+that transport eligible for Phase 51 onward. Presence of the target spelling in a phase document is never a
+claim that it exists, ran, or passed.
 
 The structural documentation checker may parse governed inventory, metadata, headings, links, anchors,
 backlinks, status syntax, phase dependencies, and this fixed table shape. It may not infer any row's semantic
@@ -103,10 +106,10 @@ An oracle is independent only when all of the following are true:
 - its provenance predates the candidate implementation or has an explicit independent-review receipt; and
 - changing it is reviewed as a contract change and invalidates affected evidence.
 
-Independent expectations are Haskell source. A second-language copy, a checked-in golden, or a TSV/JSON/YAML/
-Dhall table is not stronger independence; it is additional behavioural source that the Haskell-only rule
-forbids. Byte output is compared by a separately authored Haskell semantic predicate or by bytes derived at
-run time from that predicate under `.build/**`.
+Independent expectations are Haskell source. A second-language copy or repository-retained serialized
+expectation in TSV, JSON, YAML, Dhall, or any other transport format is not stronger independence; it is
+additional behavioural source that the Haskell-only rule forbids. Byte output is compared by a separately
+authored Haskell semantic predicate or by bytes derived at run time from that predicate under `.build/**`.
 
 ### M.3 Mutants must prove that they changed the subject
 
@@ -180,26 +183,39 @@ that approval.
 
 ## S. Universal source and artifact hygiene gate
 
-The final invariant is absolute, but numerical migration needs a fail-closed transition rule: before the final
-source migration closes, a phase candidate may contain only source-boundary findings that are matched
-bijectively to active register rows owned by strictly later phases. An unregistered finding, a finding owned by
-the candidate or an earlier phase, a stale row with no finding, or two rows/findings sharing one locus refuses
-the candidate. This is accounting, not a waiver: the owning phase must reach zero, and no later phase may
-reintroduce the finding.
+The final invariant is absolute, but numerical migration needs a fail-closed transition rule. Before the final
+source migration closes, a phase candidate may contain only source-boundary findings joined in both directions
+to an active ID in the closed Haskell legacy universe whose typed owner is a strictly later phase. The reviewed
+Haskell inventory owns each identity, stable encoding, lifecycle state, owner, required-analyzer key, and total
+dispatch. Dispatch to an absent, mismatched, or unfinished analyzer produces a typed unavailable state;
+inventory setup cannot stand in for that analyzer's observations, closure predicate, or independently authored
+domain negative. An unbound finding, a due or earlier-owned finding, a stale active binding with no finding, a
+duplicated locus, or an unavailable analyzer for a due or retired ID refuses the candidate. Before its owner,
+an active unavailable analyzer is recorded only as explicit later-owned debt and cannot report closure. Defining
+the inventory early therefore creates no dependency on later implementation: the owning sprint implements and
+qualifies its analyzer in numerical order.
+
+Retirement is a typed transition, not deletion of executable memory. After the owner analyzer reports zero, its
+reintroduction negative succeeds, predecessor evidence is present, and the human accepts the transition, the ID
+becomes `Retired`; its constructor, owner, analyzer key, and Haskell reintroduction guard remain compiled. The
+reader-facing Markdown register contributes no identity, owner, lifecycle state, predicate, count, or join
+operand to that decision. It is active-only, so the accepted retired explanation is removed and Git history is
+the only prose archive. This is accounting, not a waiver: the owning phase must reach zero, and no later phase
+may reintroduce the finding.
 
 The transition exception has a hard stop. A Phase-49 candidate must report **zero source-boundary debt**:
 every `LTD-SRC-*` query, including Phase-0-owned `LTD-SRC-008`, is zero. The only remaining non-Haskell
 behavioral source is Python under `pb/**` that a deny-by-default Haskell AST/import/effect audit has positively
 classified into minimal platform discrimination, contained toolchain establishment, source-bound build, and
 opaque exec handoff. Phase 50 validates the runtime behavior of that already-bounded handoff and owns no
-source-migration row. Phase 51 and every later candidate retain the same final source grammar.
+source-migration binding. Phase 51 and every later candidate retain the same final source grammar.
 Consequently no host or hardware phase can open while condemned source remains tracked.
 
 Every phase inherits the following postconditions. They are part of the gate, not optional cleanup:
 
 1. **Closed source language.** The target snapshot contains no tracked executable, behavioural, validation,
    test, fake, oracle, generator, migration, or runtime logic except `.hs`; during the ordered migration, every
-   contrary finding must satisfy the strictly-later active-row transition rule above, which expires before
+   contrary finding must satisfy the strictly-later typed-binding transition rule above, which expires before
    the Phase-49 candidate.
 2. **One bootstrap exception.** Non-Haskell program source is permitted only under `pb/**`, and only to make
    the minimum platform distinction needed to select the establishment adapter, establish the pinned
@@ -207,9 +223,12 @@ Every phase inherits the following postconditions. They are part of the gate, no
    Haskell binary, and exec it with every user argument unchanged. Haskell owns host-floor decisions, public
    commands, help, version, product policy, tests, gates, evidence, and validation verdicts.
 3. **Semantic source scan.** The source-closure check classifies path, extension, executable bit, shebang,
-   imports, call graph, effects, and role. For `pb/**`, a deny-by-default Python AST/import/effect grammar
-   rejects unsupported syntax, unresolved calls, dynamic execution/import/reflection/hooks, and effects
-   outside one externally observed adapter. Renaming another program as data or omitting an extension does
+   imports, resolved call/control-flow graph, potential effects, content role, and consumer. For `pb/**`, a
+   deny-by-default Haskell-owned Python AST/import/call/control-flow/effect grammar rejects unsupported syntax,
+   unresolved calls, dynamic execution/import/reflection/hooks, and every potential effect not routed to the
+   one declared `BootstrapAdapter` boundary. This is a static Phase-0 source-admission result, not evidence that
+   the adapter or handoff ran. Phase 50 alone validates actual effects, binary identity, unchanged argv, and
+   exec replacement under an external observer. Renaming another program as data or omitting an extension does
    not admit it; keyword absence or public-help enumeration is never proof of role.
 4. **Lazy derivation.** Dockerfiles, bake files, Dhall, PureScript, JavaScript, shell, Proto, Pulumi programs,
    manifests, fixtures, goldens, negatives, mutant materializations, inventories, ledgers, and every other
@@ -239,10 +258,20 @@ Every phase inherits the following postconditions. They are part of the gate, no
     architecture; emulation and cross-built evidence cannot establish another lane.
 15. **Complete discovery.** Expected and discovered test/capability/resource surfaces agree in both
     directions, are non-empty where the claim requires behaviour, and contain no implicit “tested” defaults.
-16. **Active legacy closure.** Every divergence has one stable row in
-    [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md), and the owning phase reaches zero
-    matching findings before it may be a validation candidate. Earlier phases prove exact accounting of
-    later-owned findings; findings may not be deferred out of, reassigned by, or survive their owning phase.
+16. **Active legacy closure.** Every divergence has one stable typed identity, one owner, one required-analyzer
+    key, and one total fail-closed dispatch route in reviewed Haskell. The owning sprint supplies the domain
+    observation/closure analyzer and independent reintroduction negative; until then, `AnalyzerUnavailable`
+    cannot be represented as closure and refuses once the binding is due or retired. Before its owner it is
+    explicit later-owned debt only. The owning phase reaches zero matching findings before it
+    may be a validation candidate. Earlier phases account exactly for later-owned findings against those active
+    bindings; findings may not be deferred out of, reassigned by, or survive their owning phase. After accepted
+    retirement, the Haskell ID and reintroduction guard remain even though the active explanation is removed.
+    The single [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) file explains the inventory to
+    readers. The legacy structural seam may enforce that this exact canonical file exists once, is UTF-8
+    readable, and has no archive alias. The general documentation checker may separately enforce ordinary
+    orientation metadata, headings, links, and anchors. Neither seam may interpret a row, table cell, ID
+    spelling, owner phrase, predicate-shaped string, or row count as legacy semantics or use it to alter a
+    closure verdict. Human review owns correspondence between the Haskell bindings and that explanation.
 17. **Predecessor closure.** Except Phase 0, the immediately preceding phase has a valid human approval receipt
     for the exact current contract. Hardware-specific work cannot run as a phase gate before the no-hardware
     DSL promotion barrier is human-approved.
@@ -271,15 +300,25 @@ Every reconciliation follows these rules:
    source/artifact provenance, register, substrate, and cleanup. Similar filenames prove nothing.
 3. Report implementation presence only as an observed footprint or known partial. Compilation, file presence,
    an old run, or a generated bundle is never validation.
-4. Put every current mismatch in the single active register
-   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md), with a stable ID, exact finding,
-   owner phase, detection command, and executable closure check.
-5. Keep that register active-only. Closed or superseded rows are deleted; Git history is the archive. No
-   archive file, archive slice, “closed” appendix, or second deletion list is permitted.
+4. Put every current mismatch in the closed Haskell legacy universe, with a typed stable ID, `Active` lifecycle
+   state, owner phase, required-analyzer key, and total dispatch route whose unavailable state refuses. Then
+   update the corresponding reader-facing explanation in
+   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). Human review, not a parser, owns the
+   correspondence between those two surfaces. The owning sprint implements the exact observation/closure
+   analyzer and independent domain reintroduction negative; registering the obligation does not execute later
+   work or make the mismatch eligible to close.
+5. Keep that reader-facing register active-only. Closed or superseded explanations are deleted after the human
+   confirms the corresponding Haskell transition; the retired constructor, owner, analyzer key, and
+   reintroduction guard remain compiled, while Git history is the prose archive. No archive file, archive slice,
+   “closed” appendix, or second deletion list is permitted. The legacy structural seam checks exact canonical
+   file cardinality, UTF-8 readability, and archive absence; the general documentation checker may still
+   enforce ordinary orientation metadata, headings, links, and anchors. Neither interprets a row, cell, ID,
+   owner, count, or predicate-shaped string into inventory, lifecycle, or closure authority.
 6. Resolve policy ambiguity in doctrine before changing implementation. An audit does not choose product
    policy implicitly.
-7. Update the doctrine owner, phase contract, tracker, component/substrate inventory, and active legacy row
-   together when a decision changes their shared boundary.
+7. Update the doctrine owner, phase contract, tracker, component/substrate inventory, Haskell legacy binding,
+   and reader-facing legacy explanation together when a decision changes their shared boundary. The human
+   correspondence review is required even though the Markdown explanation cannot change an executable result.
 8. Re-run source closure from an empty generated tree. A local ignored file, pre-existing tool, cache, or
    compatibility copy cannot satisfy a prerequisite silently.
 9. Audit revision history separately. Historical blobs may require a human decision, but they never become a
@@ -314,6 +353,9 @@ silently consuming a condemned source language, a pre-generated artifact, or a l
 - [Development-plan standards](development_plan_standards.md) — the family hub and phase-document schema
 - [Phase model](development_plan_phase_model.md) — status, sequence, and human-only promotion
 - [Development-plan tracker](README.md) — the sole current phase-status source
-- [Active legacy register](legacy_tracking_for_deletion.md) — current divergence only
+- [Reader-facing legacy register](legacy_tracking_for_deletion.md) — current divergence explanation only;
+  Haskell owns executable identity, lifecycle, ownership, dispatch, and retained reintroduction guards
+- [Migration doctrine](../documents/engineering/migration_doctrine.md) — distinguishes active prose retirement
+  from permanent executable reintroduction memory
 - [Repository layout doctrine](../documents/engineering/repository_layout_doctrine.md) — the complete tree and source classification
 - [Testing spoof resistance](../documents/engineering/testing_spoof_resistance.md) — the trust and evidence threat model

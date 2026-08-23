@@ -56,7 +56,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -146,7 +146,8 @@ The release ledger/rollback path composes later and does not authorize replaying
 pure provision fold and combines apiserver node allocatable values and all scheduled/live commitments with
 OS-boundary observations of separately-owned durable/object-store/native-host-cache pools (raw size,
 presentation, mounted usable bytes), physical-host VM/process commitments, nodefs/imagefs/containerfs
-identity/capacity, all containerd content objects and committed/active snapshots, node-image model/enforced pull
+identity/capacity, all containerd content objects and both final and active containerd snapshot states,
+node-image model/enforced pull
 policy, current pod/CNI/CSI slot use, serialized API objects/etcd quota, mapped-file payloads/backing, object-store
 residents/incomplete writes, and accelerator device/profile/raw-reserved-allocatable VRAM plus current-free
 memory, exact work-item/device holds, actual Pod UIDs/host-process IDs plus ledger-only `HostReservationId`s,
@@ -245,7 +246,8 @@ Phase 89 respectively).
   `renderAll`/plan/`--dry-run` path stayed cluster-free through Phase 34, and **apply is the first live step** —
   so live prerequisites (a reachable cluster, credentials) belong here, never on the render path.
 - [`generated_artifacts_doctrine.md` §3 — The rule](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
-  — the applied `[K8sObject]` set is emitted from the Haskell source of truth and **never committed**; what reaches the cluster is generated at apply time, not a checked-in manifest.
+  — the applied `[K8sObject]` set is emitted from the Haskell source of truth and absent from the repository;
+  what reaches the cluster is generated lazily beneath `.build/**` at apply time.
 - [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
   — **Register 3** (live infrastructure): the register this phase's gate reaches; and
   [`testing_doctrine.md` §4 — No skips, fail fast, and the per-run ledger artifact](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact),
@@ -330,7 +332,21 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
 
 ### Validation
 
-1. The deployment-global `[K8sObject]` list equals its Phase-33 golden; the separately validated desired map and action plan equal independently authored fixtures. Seeded duplicate object identity, source/emitted-identity mismatch, source/object activation-stage mismatch, generic-SSA-over-full-list, missing global projection, cached observation, and action-domain omission mutants turn red. A Register-1 planner fixture with modeled observed completion still renders the pure Job baseline but plans `CompletedJobNoOp`, proving enactment is not a blind render-list apply; the live fixture instead plans terminal retention because no gateway/readback exists yet. 2. Execution negatives cover missing or spoofed annotations, wrong Deployment ReplicaSet hop, wrong direct controller kind/resourceVersion, map-key/embedded-identity mismatch, planned-slot-as-Pod-UID, and terminator/replacement UID collapse. Host negatives cover omission of Reserved/`LaunchInFlight`/retained-artifact `HostReservationId`, use of a fake process id for a ledger-only row, and double debit after process join. Positive recovery fixtures cover an absent-process host row in each host-supervisor ledger state and prove each remains charged until its state-specific release evidence. Exact-fit controls debit each identity once. (The k8s scheduler reservation-record negatives — unclassified-orphan record, missing reservation, wrong ledger state/node/template, Bound-Pod-plus-ledger double debit — are Phase 59.)
+1. The deployment-global `[K8sObject]` list equals the separately authored Phase-33 Haskell render expectation;
+   the separately validated desired map and action plan equal independently authored Haskell expectations.
+   Haskell changed-production-subject mutants for duplicate object identity, source/emitted-identity mismatch,
+   source/object activation-stage mismatch, generic SSA over the full list, missing global projection, cached
+   observation, and action-domain omission turn red. A Register-1 Haskell planner case with modeled observed
+   completion still renders the pure Job baseline but plans `CompletedJobNoOp`, proving enactment is not a blind
+   render-list apply; the live Haskell case instead plans terminal retention because no gateway/readback exists yet.
+2. Haskell execution negatives cover missing or spoofed annotations, wrong Deployment ReplicaSet hop, wrong
+   direct controller kind/resourceVersion, map-key/embedded-identity mismatch, planned-slot-as-Pod-UID, and
+   terminator/replacement UID collapse. Haskell host negatives cover omission of Reserved/`LaunchInFlight`/
+   retained-artifact `HostReservationId`, use of a fake process id for a ledger-only row, and double debit after
+   process join. Positive Haskell recovery cases cover an absent-process host row in each host-supervisor ledger
+   state and prove each remains charged until its state-specific release evidence. Exact-fit controls debit each
+   identity once. (The Kubernetes scheduler reservation-record negatives — unclassified-orphan record, missing
+   reservation, wrong ledger state/node/template, Bound-Pod-plus-ledger double debit — are Phase 59.)
 3. Runtime-storage negatives cover component drop/role swap, model ownership overlap/hole, Unified alias
    double-debit/drop, SplitRuntime one-byte-short kubelet-nodefs and CRI imagefs/containerfs backings, SplitImage
    routing mismatch, Pending with a node row, and Bound with both a planned and an observed row. Exact fits succeed.
@@ -338,7 +354,7 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
    OCI/snapshot/workspace identities, durable/object/native-cache geometry, controller/webhook/gateway/executor/
    migration peaks, and CUDA/VRAM/Metal holds. Every failure exposes no `ValidatedLiveTarget`, and independent
    observers prove zero writes on every mutation surface.
-5. Mutate any tracked object resourceVersion, Pod UID/owner chain, runtime backing identity, storage-scaling
+5. Mutate any observed object resourceVersion, Pod UID/owner chain, runtime backing identity, storage-scaling
    allocation/quota/fingerprint, content/snapshot set, device-free value, `Lease` holder, or `Lease` resourceVersion
    after validation. The final recheck consumes/discards the token, makes zero writes, and restarts observation; a
    stale-token mutant turns red.
@@ -392,7 +408,8 @@ observed handoff. The scheduler's CAS reservation/Binding path and its two-stage
 
 1. For a scoped SSA action, assert exact `amoebius` field ownership, drift correction of a declared field, and
    preservation of a foreign-owned field. Assert host/delete/Job actions never enter the SSA module, and `NoOp` has
-   no writer capability. A generation-label-stamped-after-diff mutant is caught red by the external apiserver
+   no writer capability. A Haskell generation-label-stamped-after-diff changed-subject mutant is caught red by
+   the external apiserver
    `managedFields`/`resourceVersion`/label comparison, not the engine's self-report.
 2. `Lease` races cover simultaneous bootstrap acquisition, lost acquire/renew response, stale resourceVersion, and
    attempted mutation without the exact bootstrap holder. Assert `ceil(renewalWindow/retryPeriod) <=
@@ -449,8 +466,9 @@ capability.
 ### Validation
 
 1. The linux-cpu serial live test proves delete-one → observe absence/release → resume → observe expected
-   replacement Bound+Ready → advance. Seeded skip-observation, delete-two, wrong replacement UID/slot/source,
-   advance-on-Ready-but-unbound, and stale-fingerprint mutants turn red. The CUDA serial release arm runs against
+   replacement Bound+Ready → advance. Haskell changed-production-subject mutants for skip-observation,
+   delete-two, wrong replacement UID/slot/source, advance-on-Ready-but-unbound, and stale-fingerprint turn red.
+   The CUDA serial release arm runs against
    the deterministic observed-device model, not nonexistent GPU hardware in this phase.
 2. Register-2/2.5 transition tests cover ordinary host exit, CUDA device holds/free VRAM, and Metal drain/allocation/
    cache release; one missing release component and one stale observation reject before start. CUDA/Metal live
@@ -463,7 +481,8 @@ capability.
    object-store/apiserver persist-before-delete proof is the Phase-69 gate.
 4. Remove a service and prove only snapshot-authorized objects/controllers disappear. Unlabeled, spoofed label,
    foreign generation, changed-resourceVersion, retained storage, active serial predecessor, and
-   terminal-before-completion fixtures survive. The `delete-from-owner-label-alone` mutant turns red.
+   terminal-before-completion Haskell cases survive. The Haskell `delete-from-owner-label-alone`
+   changed-production-subject mutant turns red.
 
 ### Remaining Work
 
@@ -496,11 +515,12 @@ This is the phase gate.
   controller-owner enumeration of the actual child Deployment/PVC and an independent normalization proving requests,
   limits, replica/rollout overlap, and storage conform to the provisioned child envelope. Unknown or over-bound
   children prevent convergence — post-ready enumeration is not allowed to be the first detector.
-- The convergence battery over the pinned corpus: enact the exact `renderAll`/action plan → observe workload
+- The convergence battery over the Haskell-declared corpus: enact the exact `renderAll`/action plan → observe workload
   readiness → complete the serial stages in order → observe and retain the terminal Job → re-observe and rerun. The
   rerun asserts **zero effects** on all mutation surfaces and only typed no-op actions. Independent readers compare
   apiserver resourceVersions/managedFields/labels, absence of any Job completion object, the retained terminal UID,
-  the mandatory `Lease` holder, and host/device state. The red-path fixtures/mutants — never-ready Deployment;
+  the mandatory `Lease` holder, and host/device state. The red-path Haskell cases and
+  changed-production-subject mutants — never-ready Deployment;
   `waitForReady = pure ()`; serial advance before replacement Bound+Ready; generation stamped after diff; over-bound
   CR child on amoebius's own capacity/reservation CRD — MUST go red. A Register-3 ledger records the live convergence,
   marking the release-ledger/rollback residue UNVERIFIED (deferred). (The scheduler bootstrap sequencing —
@@ -520,7 +540,7 @@ This is the phase gate.
 2. The forbidden-symbol lint covers
    `src/Amoebius/Manifest/{Preflight,Reconcile,Diff,Actions,Authority,Apply,Enact,Delete,Wait}.hs` and
    `src/Amoebius/Execution/*.hs`; it rejects `threadDelay`, aliases, and clock-polling busy-waits as readiness gates.
-   Every red-path fixture/mutant above turns the suite red.
+   Every red-path Haskell case and changed-production-subject mutant above turns the suite red.
 3. Two simultaneous CR child creates cannot race past namespace quota, and both leave zero over-allocation. A
    compile/decode negative proves two owner envelopes cannot share one `ControllerEnvelopeNamespace`.
 
@@ -550,7 +570,7 @@ open. The scheduler's CAS-race schedules are Phase 59's `SchedulerSim`.
   holder; no next serial delete before replacement Bound+Ready; no host start before its resource-indexed release;
   no terminal cleanup before durable completion/deadline; no delete from label alone; and unchanged snapshot tokens
   cannot be reused after any observed-state transition.
-- Committed mutants for lost `Lease`/resourceVersion retry, mutation without holder, sleep-gated readiness, serial
+- Haskell changed-subject mutants for lost `Lease`/resourceVersion retry, mutation without holder, sleep-gated readiness, serial
   stage collapse, completion cleanup-before-persist, label-only delete, and cached observation. Every mutant must
   turn red. (The scheduler-race mutants — bind-before-CAS, same-UID double debit, crash recovery dropping Bound,
   collapsed scheduler readiness stages, premature managed taint/full RBAC — are Phase 59's `SchedulerSim`.)
@@ -562,7 +582,7 @@ open. The scheduler's CAS-race schedules are Phase 59's `SchedulerSim`.
 
 1. Rejected historical observation: the `reconcile-sim` and `execution-transition-sim` Cabal suites were
    recorded green at the documented exploration bound. The historical coverage claim said
-   every fault enters its critical section; every safety invariant holds; every committed mutant is caught; and each
+   every fault enters its critical section; every safety invariant holds; every Haskell mutant is caught; and each
    discovered counterexample replays identically under its seed.
 
 ### Remaining Work
@@ -584,7 +604,7 @@ Register-3 half supplies the live boundary evidence that bounds it.
 - `documents/engineering/daemon_topology_doctrine.md` — record that Phase 58 drives the reconciler from the host
   binary; the §3 control-plane daemon that *owns* it (Deployment `replicas=1`, delegated single-instance, no election) is stood
   up in Phase 65.
-- `documents/engineering/generated_artifacts_doctrine.md` — note that the applied `[K8sObject]` set is generated at apply time and never committed. - `documents/engineering/resource_capacity_doctrine.md` — record the read-only pre-mutation live inventory cross-check and its zero-write failure path. - `documents/engineering/deterministic_simulation_doctrine.md` — add the Phase-58 Register-2.5 status backlink for the Sprint-43.5 reconciler/execution fault battery.
+- `documents/engineering/generated_artifacts_doctrine.md` — note that the applied `[K8sObject]` set is generated lazily beneath `.build/**` at apply time and is absent from the repository. - `documents/engineering/resource_capacity_doctrine.md` — record the read-only pre-mutation live inventory cross-check and its zero-write failure path. - `documents/engineering/deterministic_simulation_doctrine.md` — add the Phase-58 Register-2.5 status backlink for the Sprint-43.5 reconciler/execution fault battery.
 
 **Cross-references to add:**
 
@@ -612,12 +632,12 @@ Register-3 half supplies the live boundary evidence that bounds it.
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — [§3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure) the invariant that
   rendering never touches live infrastructure; apply is the first live step
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — why the applied object
-  set is generated and never committed
+  set is generated lazily beneath `.build/**` and is absent from the repository
 - [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — [§4](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits) the
   Register-2.5 io-sim environment the reconciler is validated against in Sprint 58.5, before the Register-3 live gate
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 3 (live), [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_33_render_manifest_oracles.md](phase_33_render_manifest_oracles.md) — the pure per-projection renderers and
-  deployment-global `renderAll` owner-union goldens this phase enacts
+  deployment-global Haskell `renderAll` owner-union expectations this phase enacts
 - [phase_34_chain_kernel_boundary.md](phase_34_chain_kernel_boundary.md) — the Register-2 fake-apply this phase
   replaces with real tools, and the `io-classes` seams Sprint 58.5 drives
 - [phase_16_deterministic_sim_substrate.md](phase_16_deterministic_sim_substrate.md) — the `IOSimPOR`

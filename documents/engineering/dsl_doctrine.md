@@ -649,8 +649,8 @@ flowchart TD
 Haskell-rendered schema, Haskell decoding and binding, pure infrastructure-plan construction, modeled
 materialization, whole-deployment provisioning, and the opaque `ProvisionedSpec -> renderAll` boundary. Its
 expectations and negative controls are independently reviewed Haskell, and its generated Dhall/manifests live
-only beneath `.build/**`. This tier must be accepted before any container, cluster, provider, browser, or
-accelerator replay begins.
+only beneath `.build/**`. This tier must be accepted before any live container, cluster, provider, browser, or
+accelerator replay begins; pure browser semantics and lazy projection remain inside this tier.
 
 Live compare-and-swap enactment and provider/host readback form a later runtime-enforcement tier. They can
 show that a particular admitted plan was enacted on the observed target; they cannot retroactively validate

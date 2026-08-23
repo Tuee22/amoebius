@@ -237,8 +237,8 @@ computation to Phase 94.
 Every one of those instances depended on compiling seed source into an amoebius package, which is exactly what
 [§2](#2-the-two-non-dependencies) now forbids. The old reports may inform future challenge design, but they do
 not validate the *seams* or the *lifts*: the thing they exercised is no longer the thing amoebius
-intends to build. Each of those phases owes a re-derivation under [§4](#4-the-re-derivation-rule-name-the-guarantee-you-are-adding) and a re-run of its gate against it; the
-audit map recording that is
+intends to build. Each of those phases owes a re-derivation under [§4](#4-the-re-derivation-rule-name-the-guarantee-you-are-adding) and a re-run of its gate against it. Typed Haskell
+bindings own that executable audit map; their reader-facing explanation is
 [`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md).
 
 ---
@@ -247,8 +247,10 @@ audit map recording that is
 
 This document is normative only. Which phase re-derives which structure is owned by
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and
-[system_components.md](../../DEVELOPMENT_PLAN/system_components.md); the removal ledger and the audit map are
-[legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). Normative shapes are
+[system_components.md](../../DEVELOPMENT_PLAN/system_components.md); typed Haskell bindings own the executable
+removal inventory and audit map, while
+[legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) explains them to
+readers. Normative shapes are
 design intent. Only a phase-specific, independently reviewed candidate plus external human approval could
 establish an amoebius result; every current phase is NOT VALIDATED.
 

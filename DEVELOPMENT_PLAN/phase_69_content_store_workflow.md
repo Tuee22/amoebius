@@ -51,7 +51,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -277,6 +277,8 @@ sprints cite the same sections where they must build on them.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 69.1: Three-tier content-addressed MinIO store ⏸️
 
@@ -319,17 +321,18 @@ store is a single one-object atomic pointer flip.
 - Store keys taken under a caller-supplied `experiment-hash` namespace string within the app's ObjectStore
   bucket; this sprint does **not** build `deriveExperimentHash`, the `ContentAddress` typeclass, or SplitMix
   seed derivation (Phase 80 kernel work).
-- **Independent canonicalization apparatus:** one reviewed logical manifest, the canonical-CBOR convention,
-  and an independent canonicalizer generate the reference bytes and SHA under the run bundle. The tracked
-  `.cbor` and `.sha256` copies are removed. A reviewed mutation definition emits the same logical manifest in
+- **Independent canonicalization apparatus:** one reviewed Haskell logical manifest, the canonical-CBOR
+  convention, and a separately implemented Haskell canonicalizer generate the reference bytes and SHA under
+  the run bundle. No CBOR or SHA transport is repository source. A reviewed Haskell mutation definition emits
+  the same logical manifest in
   non-sorted component order under `.build/test-corpora/`; its expected failure is a byte mismatch at the first
-  component-ordering offset and a different key. Committed seeded mutant:
-  `mutant/insertion-order-encoder` — an encoder that emits map/component bytes in insertion order rather than
+  component-ordering offset and a different key. The applied Haskell `insertion-order-encoder` changed-subject
+  operator emits map/component bytes in insertion order rather than
   sorted order; the gate MUST turn this mutant **red** against the golden vector. The independently authored
-  `test/golden/content_store/write_budget_boundaries.csv` pins committed/concurrent/failed/horizon inputs and
-  expected logical peaks, including one-byte-under/over and a pre-horizon resident orphan. The committed
-  mutants `mutant/orphan-free-on-pointer-conflict` (credits failed PUTs immediately) and
-  `mutant/orphan-budget-omitted` (drops the full-horizon failure term) MUST turn that corpus red.
+  Haskell write-budget expectation pins committed/concurrent/failed/horizon inputs and expected logical
+  peaks, including one-byte-under/over and a pre-horizon resident orphan. Its CSV projection is generated
+  lazily beneath `.build/test-corpora/content_store/**`. The applied Haskell
+  `orphan-free-on-pointer-conflict` and `orphan-budget-omitted` operators must turn that corpus red.
 
 ### Validation
 
@@ -341,16 +344,16 @@ store is a single one-object atomic pointer flip.
    insertion order/permutation**, then compare both with fresh reference bytes and SHA produced by the
    independent canonicalizer under `.build/runs/phase_63/`. Assert the generated noncanonical case fails
    with a **byte mismatch at the first component-ordering offset** (not merely "differs"), and that the
-   committed `mutant/insertion-order-encoder` turns this validation **red**.
+   Haskell-authored `insertion-order-encoder` changed subject turns this validation **red**.
 3. Race two `pointers/latest` `If-Match` updates; assert one commits, the loser gets `412`, re-reads, and the
    typed advance predicate converges both to the same HEAD; assert a reader always observes a 32-byte SHA
    naming an immutable manifest, never a torn pointer body.
-4. Run `write_budget_boundaries.csv`, then upload the maximum blob/manifest set and force its pointer CAS to
+4. Run the Haskell-declared write-budget boundary corpus, then upload the maximum blob/manifest set and force its pointer CAS to
    lose. From an external MinIO inventory, assert the orphan is resident before the configured GC horizon and
    remains in residual capacity; a one-byte-over follow-on admission returns the specific capacity error with
    zero object mutation. After the horizon, run the collector but grant no capacity credit until a fresh
-   inventory observes deletion. Assert `mutant/orphan-free-on-pointer-conflict` and
-   `mutant/orphan-budget-omitted` each turns this validation red.
+   inventory observes deletion. Assert the Haskell-authored `orphan-free-on-pointer-conflict` and
+   `orphan-budget-omitted` changed subjects each turn this validation red.
    Also reject the writer's direct MinIO PUT credential/route, too many same-total-byte objects, a
    missing/conflicting writer admission, and a dropped physical object id before backing usage changes.
    Assert the same SHA under two `experiment-hash` namespaces is charged as two physical objects, that an
@@ -377,9 +380,8 @@ store is a single one-object atomic pointer flip.
 
 ### Remaining Work
 
-Remove the tracked canonical CBOR, SHA, and noncanonical CBOR copies. Retain or create the independently
-reviewed logical input, independently review the write-budget table, generate reference/mutated bytes during
-the run, and rerun the Phase-69 gate.
+Replace the pre-reset transport inventory with reviewed Haskell logical inputs, canonicalization expectations,
+and write-budget declarations. Generate reference and mutated bytes lazily beneath `.build/**` during the run.
 
 ## Sprint 69.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA ⏸️
 
@@ -420,9 +422,9 @@ artifact reference a content address.
    **two-part mechanism** (not code review): (a) a **static dependency/import audit** of the
    `amoebius-runtime` build plan asserting no leader-election or distributed-lock dependency is linked
    (no `etcd`/Raft lease client, no k8s `Lease`/`coordination.k8s.io` client, no ZooKeeper/consensus library)
-   — the reference list of forbidden packages committed as a Phase-0 hand table; and (b) an **OS-boundary runtime trace** (`strace`/network capture at the pod boundary, not a self-emitted compliance log) over a full
+   — the forbidden-package expectation is a separately reviewed Haskell value; and (b) an **OS-boundary runtime trace** (`strace`/network capture at the pod boundary, not a self-emitted compliance log) over a full
    round-trip asserting zero calls to a k8s `Lease`/`coordination.k8s.io` endpoint or any external lock API.
-   Committed seeded mutant (operator: added-effect): `mutant/lease-election` — a worker that acquires a k8s
+   The applied Haskell `lease-election` changed-subject operator adds a worker that acquires a k8s
    `Lease` before consuming; both checks MUST turn it **red**.
 4. Run one-short fixtures for each orchestrator/worker CPU, memory, ephemeral, image/log, projected-file,
    Pulsar-buffer, artifact-workspace, Pod slot, Deployment rollout/failover term, runtime component role, and
@@ -465,15 +467,17 @@ bespoke amoebius election — and assemble the phase gate.
   (iii) **MinIO objects under the run's `experiment-hash` prefix** outside a **named retained-by-design set**
   (the durable test-flagged bytes reclaimed by Phase 48). The sweep emits its **full inventory list and the named retained set** into the per-run ledger; **any non-empty remainder outside the retained set is a hard gate failure**. (Durable-byte reclaim staying with Phase 48 is the *only* exemption, and only for the
   explicitly named retained set — not a blanket class exemption.)
-- **Reference and mutant apparatus:** execute the independent no-fault path during the run and retain its
+- **Reference and mutation apparatus:** execute the independent no-fault path during the run and retain its
   `pointers/latest` HEAD only beneath `.build/runs/phase_63/`; remove
-  `test/golden/workflow_runtime/head_nofault.bin`. Retain the promoted-consumer name table
-  `test/golden/workflow_runtime/failover_rank.txt` only after independent review. Committed seeded
-  mutants the gate MUST turn **red** — `mutant/ack-before-store-write` (operator: effect reorder — worker acks
+  `.build/test-corpora/workflow_runtime/head_nofault.bin`. A separately authored Haskell promoted-consumer
+  expectation may generate a text projection beneath `.build/test-corpora/workflow_runtime/**`. Applied
+  Haskell changed-subject operators the gate must turn red include `ack-before-store-write` (effect reorder — worker acks
   the `event` before the store write completes, so a mid-window kill loses the command) and
-  `mutant/sweep-skips-pulsar` (operator: invariant-clause delete — the sweep omits the Pulsar topic/subscription
+  `sweep-skips-pulsar` (invariant-clause delete — the sweep omits the Pulsar topic/subscription
   class and thus reports leak-free vacuously while topics leak).
-- The gate `round_trip_failover.dhall` test topology — the named **representative service set: one orchestrator + three workers (one active, two name-ordered standbys)** over the standing Pulsar + MinIO — and its
+- A Haskell-declared failover test topology, rendered lazily as Dhall beneath `.build/test-corpora/**` — the
+  named **representative service set: one orchestrator + three workers (one active, two name-ordered standbys)**
+  over the standing Pulsar + MinIO — and its
   `FailoverSpec`: spin up, run the store/fetch-by-manifest-SHA round-trip, inject the critical-window worker
   kill, observe the specific name-ordered standby take over, and always tear down — emitting a per-run ledger
   artifact.
@@ -487,11 +491,11 @@ bespoke amoebius election — and assemble the phase gate.
    SHA and matches. **Land the kill inside the critical window** — after the active worker's store write and
    before its `event` ack, the window verified from broker/consumer state — and assert live that (a) the
    **lexically next-in-name-order** standby (read from the Pulsar admin `subscription/{sub}/consumers` API and
-   matched against the independently reviewed `failover_rank.txt`, so the assertion names the specific
+   matched against the independently reviewed Haskell promoted-consumer expectation, so the assertion names the specific
    expected consumer and not merely "some standby") is promoted; (b) the un-acked command is redelivered with
    **none lost and none double-applied** — an **external Pulsar consumer** (OS-boundary, not the runtime) sees
    it **exactly once**; and (c) the resulting `pointers/latest` HEAD is byte-identical to the fresh no-fault
-   reference retained in the run bundle. Assert the committed `mutant/ack-before-store-write` turns this
+   reference retained in the run bundle. Assert the applied Haskell `ack-before-store-write` operator turns this
    validation **red** (a mid-window kill loses its command).
 2. **Idempotency and leak-free teardown, disambiguated.** "**Idempotent setup**" means a *second `apply` of the
    topology against the still-standing topology is a byte-stable no-op* (the Phase-58 sense — zero fields
@@ -501,7 +505,7 @@ bespoke amoebius election — and assemble the phase gate.
    store-hit of the first run) with the compute path asserted to have executed. Assert leak-free teardown: the
    postflight sweep emits its **full inventory across all three enumerated classes** (ApplySet k8s objects;
    Pulsar topics/subscriptions/consumers/producers; MinIO objects under the run's `experiment-hash` prefix) plus
-   the **named retained set** into the ledger, and **any non-empty remainder outside the retained set fails the gate**. Assert the committed `mutant/sweep-skips-pulsar` turns this validation **red** (leaked Pulsar topics
+   the **named retained set** into the ledger, and **any non-empty remainder outside the retained set fails the gate**. Assert the applied Haskell `sweep-skips-pulsar` operator turns this validation **red** (leaked Pulsar topics
    go undetected under a class-omitting sweep).
 3. Assert the run emits a proven/tested/assumed ledger per
    [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed);
@@ -524,8 +528,8 @@ bespoke amoebius election — and assemble the phase gate.
 
 ### Remaining Work
 
-Remove the tracked no-fault HEAD, generate the comparison run at gate time, independently review or replace
-the failover-rank table, and rerun under universal artifact hygiene.
+Replace the pre-reset no-fault HEAD and failover-rank transport inventory with reviewed Haskell declarations;
+generate comparison material at gate time beneath `.build/**` and rerun under universal artifact hygiene.
 
 ## Sprint 69.4: Register-2.5 workflow failover takeover under simulated fault ⏸️
 
@@ -556,10 +560,10 @@ adversarial schedules instead of a single live wall-clock trace.
   no-double-application properties discharged, feeding the same proven/tested/assumed ledger
   ([`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed))
   as the Sprint-64.3 live gate.
-- **Reviewed seeded mutants the sim MUST turn red:**
-  `mutant/double-apply-on-redelivery` (operator: dropped dedup — the runtime applies the redelivered command a
+- **Reviewed Haskell changed-subject operators the simulation must turn red:**
+  `double-apply-on-redelivery` (dropped dedup — the runtime applies the redelivered command a
   second time, so the pointer HEAD diverges on the fault-firing schedules) and
-  `mutant/orphan-consumer-on-promotion` (operator: leaked effect — the old active worker's consumer handle
+  `orphan-consumer-on-promotion` (leaked effect — the old active worker's consumer handle
   survives the promotion), each of which some explored `IOSimPOR` schedule MUST falsify.
 
 ### Validation
@@ -567,11 +571,11 @@ adversarial schedules instead of a single live wall-clock trace.
 1. Run `WorkflowFailoverSimSpec` under `IOSimPOR` and assert that, on every explored schedule with the
    `kill-worker-mid-workflow` fault, a name-ordered standby takes over the Failover subscription and the run is
    leak-free — no orphaned consumer, producer, or artifact handle outlives the promoted standby. Assert the
-   committed `mutant/orphan-consumer-on-promotion` turns this validation red.
+   applied Haskell `orphan-consumer-on-promotion` operator turns this validation red.
 2. Assert **no double-application**: across all interleavings of redelivery and partition the content-addressed
    re-fetch is a no-op and the log-fold dedup collapses the redelivered command, so the pointer HEAD and
-   downstream state are byte-identical whether or not the fault fired. Assert the committed
-   `mutant/double-apply-on-redelivery` turns this validation red.
+   downstream state are byte-identical whether or not the fault fired. Assert the applied Haskell
+   `double-apply-on-redelivery` operator turns this validation red.
 3. Assert the run emits a Register-2.5 ledger recording the explored-schedule count and the discharged
    properties, and that a failure replays deterministically from its seed and schedule.
 

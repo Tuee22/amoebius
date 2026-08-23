@@ -48,7 +48,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -213,6 +213,8 @@ check discharges it.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 76.1: Provider-cluster Pulumi deploy from inside a parent ⏸️
 
@@ -259,7 +261,8 @@ discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel e
   `systemReserve` and non-empty `carves` in `ProviderUsableDiskCarveTemplate.requiredUsableBytes`, a closed
   kubelet filesystem layout, logical pod-ephemeral capacity, OCI content/snapshot model, image-pull policy,
   zones, price, provider-vCPU cost, base/maximum counts, and closed accelerator offering, via cloud keys
-  resolved from the cluster's Vault (secrets are *names* in the `.dhall`, bytes injected by the parent), landing
+  resolved from the cluster's Vault (secrets are names in the Haskell declaration; any Dhall projection is
+  generated lazily beneath `.build/**`, and bytes are injected by the parent), landing
   the cluster ready for its in-cluster control-plane bootstrap ([phase_77_provider_child_bringup.md](phase_77_provider_child_bringup.md)).
   The canonical class declares `accelerator = None`.
 - A read-only `observeProviderAccount` boundary using the AWS Service Quotas APIs for the applicable regional
@@ -321,8 +324,9 @@ discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel e
    beneath `.build/test-corpora/**` and asserts it **fails with the specific reason** "no in-cluster control-plane
    daemon context" (the independently authored Haskell tag `NoControlPlaneDaemonContext`, §M.8), paired with the positive
    in-cluster path that differs only in being run under the control-plane daemon (§M.8).
-   Before the first cloud call, a declared-fit/observed-account-short fixture and an impossible/SKU-shape-mismatch
-   fixture each fail with a specific tag and an empty mutating CloudTrail log. A race fixture changes current
+   Before the first cloud call, a Haskell-declared declared-fit/observed-account-short case and an
+   impossible/SKU-shape-mismatch case each fail with a specific tag and an empty mutating CloudTrail log. A
+   Haskell-declared race case changes current
    usage or SKU availability after validation; immediate token recheck emits zero Pulumi/AWS mutation.
    After join, an OS-boundary Kubernetes/API/CRI inventory cross-checks the node's allocatable CPU, memory,
    logical ephemeral storage; nodefs/imagefs/containerfs mount, device, filesystem, and quota identities; raw
@@ -337,21 +341,24 @@ discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel e
    public/child-registry scheduler pull, or uncharged import workspace fails.
 2. Cryptographic-dependence assertion (forecloses a locally-keyed envelope with a bolted-on seal precheck):
    (a) every stored checkpoint revision/update object in MinIO is opaque ciphertext that **decrypts only via a direct Vault Transit `decrypt` call with the per-child key** and is **not** decryptable from any key material
-   present on the engine pod's filesystem — asserted against the committed Phase-0 ciphertext-shape oracle
-   `test/golden/checkpoint_envelope.json` (envelope structure authored before the backend exists, §M.1/§M.3);
+   present on the engine pod's filesystem — asserted against an independently authored Phase-0 Haskell
+   ciphertext-shape oracle. Its reproducible JSON view is generated lazily at
+   `.build/test-corpora/checkpoint_envelope.json` and remains untracked (the expectation is authored before the
+   backend exists, §M.1/§M.3);
    (b) an **OS-boundary filesystem observer** (an `inotify`/`fanotify` or `strace` watch on the pod filesystem,
    NOT a self-emitted compliance log, §M.5) records **zero** plaintext-data-key bytes written to disk across a
-   full deploy; (c) a deploy with a sealed Vault refuses *before* any cloud-side create, and the committed
-   seeded mutant `mut-44.1-static-key` (an envelope keyed by a pod-local static key with the seal-status
+   full deploy; (c) a deploy with a sealed Vault refuses *before* any cloud-side create, and the Haskell-authored
+   changed-subject mutant `mut-44.1-static-key` (an envelope keyed by a pod-local static key with the seal-status
    precheck still present) MUST go **red** on assertion (a) and (b) while passing the behavioral seal-gate —
    proving the gate tests cryptographic dependence, not just seal-status (§M.2).
 3. Process-environment assertion read from an **OS-boundary observer** (an `execve` argv/env-recording shim or
    `strace -f -e execve`, §M.5, never a trace the engine emits about itself): the `pulumi` subprocess is spawned
    with an empty/whitelisted environment (no `PULUMI_*`/`AWS_*`/`PULUMI_CONFIG_PASSPHRASE`/`PATH`) and the
-   `pulumi`/plugin paths are absolute, checked against the committed Phase-0 expected-argv/expected-env table
-   `test/golden/engine_execve.txt` authored independently of the engine (§M.1/§M.3). The committed mutant
+   `pulumi`/plugin paths are absolute, checked against an independently authored Phase-0 Haskell
+   expected-argv/expected-env table. Its reproducible text view is generated lazily at
+   `.build/test-corpora/engine_execve.txt` and remains untracked (§M.1/§M.3). The Haskell-authored changed-subject mutant
    `mut-44.1-leak-path` (an engine that exports `PATH` into the child) MUST go red here.
-4. Paired one-short fixtures reduce only parent executor or checkpoint-gateway CPU, memory, pod-ephemeral,
+4. Paired Haskell-declared one-short cases reduce only parent executor or checkpoint-gateway CPU, memory, pod-ephemeral,
    plugin-cache, workspace, or checkpoint `StorageBudget` by one unit. Each returns its specific provision error
    before a Job, checkpoint PUT, or AWS mutation. In the fitting case, Kubernetes API readback of the executor
    Job exactly matches the private witnessed image, requests/limits, ephemeral/log/writable/mapped allowances
@@ -359,8 +366,8 @@ discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel e
    resource-field-derived current, old/new, retained-revision, and partial/orphan identities/extents. A failed
    checkpoint CAS stays charged until its finite GC horizon, and a direct mutating S3 request outside the gateway
    is denied.
-5. A `BoundedParallel 2` fixture with two independent deploy units fits either executor alone but not both and
-   must reject before effects. The committed `mut-44.1-drop-parallel-executor` mutant, which omits one live Job
+5. A Haskell-declared `BoundedParallel 2` case with two independent deploy units fits either executor alone but not both and
+   must reject before effects. The Haskell-authored changed-subject `mut-44.1-drop-parallel-executor` mutant, which omits one live Job
    from the peak or admits parallel demand then silently serializes it, MUST go red. Separately, lower only
    kubelet/CNI pod residual or the `CSINode` `ebs.csi.aws.com` attach limit below the declared SKU policy; the
    lesser live value refuses workload admission even while CPU, memory, and regional EBS count remain ample.

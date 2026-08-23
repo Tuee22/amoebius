@@ -46,7 +46,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -117,6 +117,8 @@ Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 83.1: Execute and verify the coherent UI release transition ⏸️
 
@@ -132,13 +134,13 @@ Deliver one coherent, reversible UI release transition with scope-preserving rec
 - Ordered Gateway API shift, stale-client handling, cursor resume, and CAS rollback.
 - Real three-principal/two-tenant authority plus external API/Gateway/Pulsar/browser/CNI traces with fresh
   nonces.
-- Early-shift, cursor-discard, and tenant-cursor-key mutants.
-- Draining connection-registration lifecycle and stale-registration mutant.
+- Haskell-authored early-shift, cursor-discard, and tenant-cursor-key changed-subject mutations.
+- Draining connection-registration lifecycle and a Haskell-authored stale-registration changed subject.
 
 ### Validation
 
 1. The pre-reset Python command is rejected and must not run. The future Haskell Phase-83 supporting suite must run on `linux-cpu`; the scoped canonical
-   transition must match the pinned custody and local timeline/cursor/scope predicates, all four mutants must
+   transition must match the pinned custody and local timeline/cursor/scope predicates, all four Haskell changed subjects must
    fail at their pinned loci, and unsupported provider observations must remain `UNVERIFIED`.
 
 ### Remaining Work

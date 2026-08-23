@@ -44,7 +44,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -84,7 +84,7 @@ core calculi. NOT VALIDATED.
 |---|---|
 | `Claim` | Target capability only — provide a total Haskell composition boundary that preserves the Phase 8 request-scope index and combines the Phase 9 resource index across all five core calculi. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 10` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 10` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -181,11 +181,14 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 - [Artifact](phase_03_artifact_calculus.md), [Budget](phase_04_budget_calculus.md), [Lift](phase_05_lift_calculus.md), [Workflow](phase_06_workflow_calculus.md), and [Evidence](phase_07_evidence_calculus.md) — the five payload owners.
 - [Scope Index](phase_08_scope_index.md) and [Resource Index](phase_09_resource_index.md) — the two indices composition preserves.
 - [Extension Declaration](phase_20_extension_declaration.md) and [Compositional Laws](phase_22_extension_laws_compositional.md) — later open-extension consumers.
-- [Generic Browser Interpreter](phase_42_ui_browser_interpreter.md) — a later real five-calculus projection.
-- [UI-Server Boundary](phase_43_ui_server_boundary.md) — a later real five-calculus projection.
-- [Local UI Composition](phase_44_ui_local_composition.md) — a later real five-calculus projection across the
-  composed browser/server/fake-adapter boundary.
-- [Encrypted Browser Offline Runtime](phase_45_encrypted_browser_runtime.md) — a later real five-calculus
-  projection across the production PureScript and two-process Chrome boundary.
+- [Generic Browser Interpreter](phase_42_ui_browser_interpreter.md) — later pure Haskell interpreter semantics
+  and a lazy `.build/**` browser-language projection; no browser process is part of its claim.
+- [UI-Server Boundary](phase_43_ui_server_boundary.md) — a later Haskell protocol and authorization boundary
+  observed through Haskell-owned fakes, with browser and live-service behavior deferred.
+- [Local UI Composition](phase_44_ui_local_composition.md) — later composition of the Haskell client/server
+  semantics across fake data, workflow, artifact, and coordination boundaries only.
+- [Encrypted Browser Offline Runtime](phase_45_encrypted_browser_runtime.md) — later pure Haskell offline-state
+  and envelope semantics with a lazy `.build/**` runtime projection; Chrome and all browser fidelity remain
+  explicitly unverified.
 - [Extension Conformance Doctrine](../documents/engineering/extension_conformance_doctrine.md) and [Laws](../documents/engineering/extension_conformance_laws.md) — normative composition claims and honesty boundary.
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — Register-1, finite exhaustion, and sampled-property discipline.

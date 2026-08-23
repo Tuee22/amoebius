@@ -17,7 +17,7 @@ listed here only to be recognised as the same shape. Reading it presumes the hon
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, documents/engineering/README.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -140,6 +140,25 @@ The law is not universal, and the two places it does not hold are named rather t
   are a development-time project activity. They move no durable bytes, take no readiness edge, and are not
   governed by this law.
 
+That development-time activity has its own non-destructive memory rule. The one Markdown register is an
+active-only, non-executable reader explanation: after the owning analyzer reports zero, its independent
+reintroduction negative succeeds, predecessors are approved, and the human accepts retirement, the explanation
+is deleted and Git history is its only prose archive. The closed Haskell universe retains the retired ID,
+stable encoding, owner, analyzer key, and reintroduction guard, so deletion of prose cannot erase the violation
+class or let a later change recreate it silently. Markdown rows, cells, IDs, owners, counts, and predicate-like
+sentences remain unavailable to executable lifecycle or closure decisions.
+
+[Phase 0 Sprint 0.2](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-02-one-active-legacy-register-)
+owns only that closed inventory, total fail-closed analyzer dispatch, structural register check, independent
+inventory/dispatch mutants, and human prose correspondence. Each owning sprint implements and qualifies its
+domain observation/closure analyzer and reintroduction negative in numerical order; an unavailable analyzer
+cannot report closure and refuses at or beyond its owner, while an earlier active binding remains explicit
+later-owned debt rather than a deferred pass. All Phase-0-owned legacy queries may jointly reach zero only at the
+[Sprint-0.8 integrated candidate](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-08-integrated-phase-0-candidate-),
+under the [gate-integrity contract](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate).
+This sequencing statement records target responsibility only; every sprint and phase remains NOT VALIDATED
+until the prescribed human decision.
+
 ---
 
 ## 5. Foreclosure layers and the honest limit
@@ -180,6 +199,10 @@ completion or validation claim. This document adds no phase of its own and maint
 - [Gateway Migration](./gateway_migration_doctrine.md) — the cross-cluster instance and its two branches
 - [Backup & Recovery Doctrine](./backup_recovery_doctrine.md) — restore as a fresh-coordinate seed
 - [Readiness & Ordering Doctrine](./readiness_ordering_doctrine.md) — clause 3, and the structural precedent for this document
+- [Development-plan gate integrity](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md) — the typed
+  inventory, fail-closed analyzer dispatch, and retained reintroduction rule
+- [Phase 0 plan](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md) — the ordered Sprint-0.2 inventory seam
+  and Sprint-0.8 Phase-0 closure point
 - [Consistency & PACELC Doctrine](./consistency_pacelc_doctrine.md) — the one availability-over-consistency boundary
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md)
 - [Documentation Standards](../documentation_standards.md)

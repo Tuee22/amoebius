@@ -47,7 +47,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -115,7 +115,7 @@ graphs when deployment shape differs. Nothing is provisioned, rendered, or obser
 |---|---|
 | `Claim` | Target only — identical app-surface Haskell values bind to structurally different object graphs when deployment shape differs; any Dhall or serialized case is generated beneath `.build/**`; Registry has only the Distribution `registry:2` provider arm. Nothing is provisioned, rendered, or observed live. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 30` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 30` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -167,7 +167,8 @@ graphs when deployment shape differs. Nothing is provisioned, rendered, or obser
 - [`capability_extension_doctrine.md` §3 — The PROVIDE and REQUIRE contract](../documents/engineering/capability_extension_doctrine.md#3-the-provide-and-require-contract)
   — **the extension provide/require capability graph.** The binder validates the `extRequires` provide/require
   graph is total and acyclic and rejects an anti-shadow (shadowing) merge or a provide-and-require self-loop; a
-  cyclic or shadowing extension fixture fails gadt-decode at its committed locus (the closed v1 extension set
+  cyclic or shadowing Haskell-declared extension case fails gadt-decode at its independently expected locus
+  (the closed v1 extension set
   `{infernix, jitML}`).
 - [`illegal_state_catalog.md` §3 — The catalog — states a valid spec cannot represent](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
   ([`illegal_state_capability_messaging.md` §3.12 — An app that names a product instead of a capability](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability) — a product named in application logic) and
@@ -241,7 +242,9 @@ contains.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The closed union, need records, and dhall-typecheck corpus are sealed by the Phase-30 gate.
+The pre-reset record said `None`; that statement and its union/corpus result are permanently invalid for
+promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 30.2: The `CapabilityBinding` + total representational `bind` ⏸️
 
@@ -312,7 +315,8 @@ stopping at the wholly unprovisioned `BoundDeployment`.
    surface fails `dhall type` at its asserted locus; `bind` never throws. A structural inventory proves
    `BoundDeployment` contains no `Provisioned*` field, and the canonical `BoundExecutionSet` equals the expanded
    runnable-source inventory with every controller-lowered child present exactly once and no second debit. This
-   validation must go **red** on the committed `mutant_copy_shape_tag` seeded mutant (Sprint 30.3) — which makes
+   validation must go **red** on the reviewed Haskell `mutant_copy_shape_tag` operator applied to a temporary
+   subject beneath `.build/mutants/**` (Sprint 30.3) — which makes
    `bind` copy the shape tag into a `providerGraph` field instead of selecting a manifest graph, passing a plain
    `/=` but failing the multiset oracle — and on `mutant_provisioned_value_in_bound_deployment` (a `Provisioned*`
    value injected into `BoundDeployment`).
@@ -324,7 +328,9 @@ stopping at the wholly unprovisioned `BoundDeployment`.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The total binder, explicit object graphs, exact execution inventory, and unprovisioned deployment boundary are sealed.
+The pre-reset record said `None`; that statement and its binder/inventory result are permanently invalid for
+promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 30.3: The bind property/corpus + the Register-1 gate ⏸️
 
@@ -346,12 +352,12 @@ honest foreclosure layer of each.
   `test/spec/capability/ShapeOracle.hs` holds the object-node-multiset structural diff — authored separately from
   `bind`, so the oracle is never `bind`'s own fold — and `test/spec/capability/BindGate.hs` holds the gate and the
   validation-locus ledger with its coverage-assertion machinery.
-- The **concrete positive corpus** — **one fixture per each of the nine capability arms** (`ObjectStore`,
+- The **concrete Haskell positive corpus** — **one Haskell-declared case per each of the nine capability arms** (`ObjectStore`,
   `SecretStore`, `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge`, `InferenceEngine`), each
   bound under **both** a `SingleNode` and a `Distributed { nodes = n }` (n ≥ 2) shape — so the corpus is not
-  scope-shrunk to the three named `legal_objectstore_{singlenode,distributed}` / `legal_inference_cuda` fixtures.
-  A committed **exhaustiveness unit check** asserts the fixture→capability-arm map covers the full nine-arm union
-  (red if any arm has no positive fixture), enumerated against the **oracle-pinned hand-authored arm list**
+  scope-shrunk to the three named `legal_objectstore_{singlenode,distributed}` / `legal_inference_cuda` cases.
+  A separately authored Haskell **exhaustiveness check** asserts the case→capability-arm map covers the full nine-arm union
+  (red if any arm has no positive case), enumerated against the **separately authored Haskell arm list**
   (Sprint 30.1), independent of `bind`'s own case analysis.
 - The property battery: the same `CapabilityNeed` bound under two shapes yields two `BoundServiceSpec`s
   **structurally different by the object-node-multiset oracle** (red on scalar-only / copied-shape-tag) with
@@ -374,8 +380,9 @@ honest foreclosure layer of each.
   `illegal_monitoring_work_over_budget`, `illegal_post_bind_expansion_overcommit`,
   `illegal_prior_provision_ref_*`, …) are **not** in this gate — they belong to
   [Phase 31](phase_31_provision_seal.md) and [Phase 32](phase_32_inference_accelerator_provision.md).
-- **Committed seeded mutants (§M.2)** — a defined operator set of **four** deliberately broken implementations,
-  committed and re-run (not run once), that the gate MUST turn red: `mutant_copy_shape_tag` (effect swap: `bind`
+- **Reviewed Haskell mutation operators (§M.2)** — a defined set of **four** deliberately broken production
+  transformations, applied beneath `.build/mutants/**` and re-run, that the gate MUST turn red:
+  `mutant_copy_shape_tag` (effect swap: `bind`
   copies the shape tag into a `providerGraph` field instead of selecting a manifest graph — defeats a `/=`-only
   diff, caught by the multiset oracle); `mutant_catchall_arm` (union-arm addition: a catch-all `bind` arm returns
   a degenerate `BoundServiceSpec` for an arm whose authored need must survive unchanged — caught by the per-arm semantic projection +
@@ -401,7 +408,7 @@ honest foreclosure layer of each.
    negative (`illegal_unbuilt_provider`, `illegal_unbound_capability`, `illegal_cyclic_extension`,
    `illegal_shadowing_extension`) returns its specifically-tagged `Left`, each paired with a minimally-differing
    positive; the suite is red if any product-named, URL-named, or shape-in-app fixture decodes, and red under
-   each of the four committed seeded mutants (`mutant_copy_shape_tag`, `mutant_catchall_arm`,
+   each of the four applied Haskell seeded mutants (`mutant_copy_shape_tag`, `mutant_catchall_arm`,
    `mutant_shared_app_import`, `mutant_provisioned_value_in_bound_deployment`). The validation-locus ledger is
    present and its coverage-assertion machinery (Phase-27 precedent) turns the suite **red** if any named fixture,
    negative reason, or mutant is missing — 'honestly classifies' is thus a machine oracle, not a hand-written
@@ -414,8 +421,9 @@ honest foreclosure layer of each.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The 18 semantic shape observations, three dhall-typecheck negatives, four gadt-decode negatives,
-five-calculus projection, coverage property, exact validation ledger, and four mutants are sealed.
+The pre-reset record said `None`; that statement and every shape/negative/property/ledger result are
+permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row,
+predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
@@ -443,11 +451,12 @@ five-calculus projection, coverage property, exact validation ledger, and four m
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-30 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — only the human authority may change Phase 30 after reviewing a qualified
+  candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-30 `none` gate row.
-- `DEVELOPMENT_PLAN/system_components.md` — register `dhall/amoebius/Capability.dhall`,
-  `src/Amoebius/Capability/{Types,Binding}.hs`, and the capability bind property + gate suites as Phase-30
-  design-first rows.
+- `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Capability/{Types,Binding}.hs`, the Haskell
+  capability-projection declaration, and the Haskell bind property/oracle suites as Phase-30 design-first
+  rows. `.build/dhall/amoebius/Capability.dhall` is a lazy product, not a component row.
 
 ## Related Documents
 

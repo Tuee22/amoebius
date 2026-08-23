@@ -47,7 +47,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -83,7 +83,7 @@ typed teardown continuation, and `suggestTest` is a pure proposal function over 
 |---|---|
 | `Claim` | Target only — a pure Haskell test-topology value carries a typed teardown continuation, and pure Haskell `suggestTest` maps supplied model values to a proposal or structured refusal. Generated external forms remain beneath `.build/**`; live execution, deletion, and observation belong to Phase 90. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 48` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 48` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -135,12 +135,10 @@ supplied model value as authenticated live readback.
 
 ## Sprints
 
-> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
-
-> **Permanently invalidated historical split.** Any `Done`, completion, or live-validation wording in the
-> sprint bodies below is rejected as current status. They inventory pure Haskell value-level targets and
-> effectful obligations transferred to Phase 90 only. Generated output stays beneath `.build/**`; Protocol and
-> Runtime remain UNVERIFIED.
+Every sprint below is hardware-free. Its subject, cases, expectations, and changed-production-subject mutants
+are Haskell; any serialized projection is generated lazily beneath `.build/test-corpora/**`. Phase 48 has no
+effect interpreter and cannot establish that any modeled host, authority, inventory, teardown, or failover
+event occurred. Phase 90 owns those live obligations after all numerical predecessors are human-approved.
 
 ## Sprint 48.1: The test-topology type — a deployment-rules layer that always tears down ⏸️
 
@@ -150,57 +148,45 @@ supplied model value as authenticated live readback.
 
 Adopt [`testing_doctrine.md §3 — the test-topology contract: spin up → run → always tear down`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
 and the framing of [`§1 — a test is an amoebius spec`](../documents/engineering/testing_doctrine.md#1-a-test-is-an-amoebius-spec):
-define a `TestTopology` Dhall type that is an ordinary deployment-rules layer over a production app/platform
-spec, adding three things production omits — a chaos/failover schedule, a typed expectation surface, and a
-mandatory teardown — and a
-Haskell runner whose structured `bracket`/`finally` cleanup makes "always tears down" a property of the type,
-not of operator diligence, with the chaos injection on the deployment-rules surface so the app under test is
-none the wiser ([`app_vs_deployment_doctrine.md §3`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)).
+define the pure Haskell `TestTopology` and workflow-state algebra that a later interpreter must consume. The
+algebra adds a bounded fault-intent schedule, typed expectations, and a non-optional teardown continuation to a
+production app/platform specification. Its phantom states make a terminal workflow result unavailable until a
+teardown outcome has been supplied to the pure transition fold. Phase 48 does not spin up, interrupt, or tear
+down anything.
 
 ### Deliverables
 
-- A `TestTopology` Dhall type wrapping any app/platform spec with the **three** things a test adds to a
-  production deployment — a `chaosSchedule`, an `expectations` surface (the typed `Expectation` values of
-  [`chaos_failover_doctrine.md §11.2`](../documents/engineering/chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation)),
-  and a non-optional `teardown` — reusing the production DSL so an illegal cluster (bad PVC↔PV, open ingress,
-  mis-substrated workload) is unrepresentable in a test exactly as in production and every execution unit
-  carries the same complete `ResourceEnvelope` as production, including `PodRuntimeMetadataSource` and the
-  closed `CudaOwnerDemand`/`MetalOwnerDemand` accelerator arm where applicable.
-- A `runTestTopology` interpreter that spins up, runs the workflow + injects the scheduled faults, **evaluates each `Expectation`'s witness** and tears
-  down inside structured cleanup so a crash or Ctrl-C still reclaims what it built. It accepts only the opaque
-  provisioned topology returned after placement/storage/capability/quota checks, never the unchecked decoded
-  value. The two UNVERIFIED triggers of
-  [`§11.2`](../documents/engineering/chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation) —
-  a derived invariant with no authored witness, and a declared invariant no scheduled fault stresses — are
-  recorded per that section, the first in the ledger's `coverage` array, the second as a Runtime-layer
-  UNVERIFIED.
-- Idempotent destroy (re-running converges to "nothing left", never errors on already-gone resources) and a
-  cleanup-failure-is-a-real-failure result type: a passed workflow with a leaked teardown reports failure,
-  with the workflow failure surfaced first when both fail.
+- A Haskell `TestTopology` type wrapping an app/platform specification with exactly three test-only values:
+  `FaultIntentSchedule`, typed `Expectation` declarations, and `TeardownObligation`. These are descriptions,
+  not effects or observations.
+- Phantom workflow states and a pure transition fold that accepts declared workflow and teardown outcomes,
+  preserves the primary workflow failure when both outcomes fail, and cannot construct a terminal success
+  from a state whose teardown obligation is outstanding.
+- A closed Haskell case corpus and separately authored Haskell transition oracle covering success, workflow
+  failure, modeled interruption, teardown failure, and repeated modeled teardown. Any human-readable trace is
+  a lazy `.build/test-corpora/**` projection of those Haskell values.
+- Changed-production-subject Haskell mutants that omit the teardown transition, convert cleanup failure to
+  success, or replace the primary failure; each must turn the independent transition oracle red while an
+  unaffected control remains green.
 
 ### Validation
 
-1. Forced-failure and SIGINT-abort runs both reach teardown (Register 3); the pre-/post-run substrate-scope
-   inventory diff of Gate criterion 1 is empty afterward, not merely an empty test-owned-tag query.
-2. A second teardown over an already-half-torn-down world is a clean no-op (idempotence), recomputed in a
-   fresh namespace with any content-addressed store bypassed so a store hit cannot substitute for the
-   destroy path executing.
-3. A deliberately-illegal test `.dhall` fails to type-check before any resource is allocated, failing with a
-   Dhall type error at the specific illegal locus (e.g. the PVC↔PV binding), paired with a positive differing
-   only at that locus that type-checks.
-4. Each committed resource negative (CPU, memory, pod-local ephemeral storage, in-cluster-cache nesting,
-   selected-platform content/snapshots/import workspace and filesystem layout, presented durable backing,
-   optional native-host-cache backing, planned/observed runtime-metadata components and node aggregate under the pinned model,
-   accelerator source/workload key equality, coexistence-policy class-domain equality, every policy-derived
-   coexistence epoch, CUDA residency placement/shard integrity and co-resident per-device net-allocatable
-   fit, Metal co-resident shared-memory fit, and quota)
-   reaches its specific provision error with zero
-   Kubernetes, host, or cloud mutating calls; the paired positive differing only on that axis reaches the
-   runner.
+1. The independently authored Haskell oracle enumerates the accepted transition graph and proves by complete
+   constructor discovery that every terminal result follows a supplied teardown outcome; empty discovery is a
+   refusal, not a pass.
+2. Paired Haskell cases differing only in the teardown outcome preserve success versus cleanup failure at the
+   exact result field. A second modeled teardown is classified idempotently without invoking an effect.
+3. Each changed-production-subject mutant named above is observed applied at its production locus and makes
+   the oracle fail for the expected reason. Merely replaying expected output, changing only a fixture, or
+   reporting a mutant count cannot satisfy this criterion.
+4. The generated projection is derived twice from the same Haskell value with the projection cache bypassed;
+   the bytes agree, the second derivation is observed to execute, and both outputs remain beneath `.build/**`.
+   This validates projection determinism only, not live teardown.
 
 ### Remaining Work
 
-The pre-reset `None` claim is permanently invalid; this sprint remains blocked and NOT VALIDATED. Phase 90 owns every live execution and reclamation obligation described above.
+This sprint remains blocked and NOT VALIDATED. Phase 90 owns workflow execution, interruption handling,
+resource reclamation, and external confirmation that teardown occurred.
 
 ## Sprint 48.2: Pure `suggestTest` over supplied models and lazy proposal projection ⏸️
 
@@ -209,114 +195,47 @@ The pre-reset `None` claim is permanently invalid; this sprint remains blocked a
 ### Objective
 
 Adopt [`testing_doctrine.md §5 — suggest-test: detect the world, emit a representative test .dhall`](../documents/engineering/testing_doctrine.md#5-suggest-test-detect-the-world-emit-a-representative-test-dhall):
-turn amoebius's existing introspection into a starting-point test topology. `suggest-test` reads the substrate
-via the same pure classification owned by the substrate doctrine, inventories its full capacity/capability
-shape, probes what SSH + AWS credentials may do (can they create EBS? a hosted zone? how much?), and writes a
-representative test `.dhall` whose worst-case shape provisions inside that supply and authority — a proposal
-the operator reviews, never a self-certifying run. Where the doctrine's prose still
-names "leadership election", amoebius delegates single-instance to k8s/etcd and worker takeover to Pulsar, so
-the emitted chaos schedule injects a *delegated* failover.
+define `suggestTest` as a total, pure proposal function over explicitly supplied Haskell model values. Phase 48
+does not discover a substrate, inventory capacity, inspect hardware, probe authority, resolve a secret, or
+contact a provider. A supplied value is unauthenticated model input here even if a later phase can populate the
+same type from live observation.
 
 ### Deliverables
 
-- A `suggest-test` generator consuming
-  `(SubstrateClassification, ObservedCapacity, CredentialAuthority)` and producing a `TestTopology` value
-  sized on every applicable dimension: CPU requests/limits, memory requests/limits, pod-local
-  ephemeral-storage requests/limits, image content/snapshot/import artifacts and filesystem backing, presented
-  durable volumes/backing, cache budget/backing, one structural `PodRuntimeMetadataSource` per Pod, one derived
-  planned-slot metadata shape under the selected node's pinned model, exact component roles/layout backings,
-  and the scope-indexed node domain/ownership/grouping witness,
-  plus any `CudaOwnerDemand`/`MetalOwnerDemand` and provider quota. Accelerator `sources` and `workloads`
-  must have equal keys; both coexistence-policy maps must have domains exactly equal to the source classes,
-  and provisioning derives all permitted epochs. CUDA keeps structural
-  `Unsharded | ReplicatedPerDevice | Sharded` residencies (including exact unique-shard sum/count
-  constraints) and sums every co-resident residency on each device against net-allocatable VRAM; Metal sums
-  every co-resident component against shared host memory. Inapplicable accelerator demand is an explicit
-  `None`, not an omitted field.
-- Three independent closed emitted fields, exactly as defined by the complete resource contract:
-  `NoRegistryPublication | RegistryPublication` retains the exact platform `ImageArtifact`, structural
-  `RegistryStorageDemand`, backend/budget/admission and full proxy Pod, and its inner build arm carries the
-  named engine/static-process reserve plus complete `BuildExecutionEnvelope`;
-  `NoPulumi | Pulumi` retains the exact deploy/plugin/concurrency/volume `PulumiExecutionDemand`, complete
-  derived executor Jobs, plugin-cache/workspace and exact `PulumiCheckpointObjectDemand` plus mutation
-  admission; and `NoMigration | StorageMigration` retains the old private volume, replacement and structural
-  policy from which old+new+workspace/provider overlap and the complete copy/verify Job are derived. Each
-  negative arm means that effect is absent; an insufficient positive arm returns "no representative topology
-  fits" before emission or review apply.
-- A credential-probe step that *reads* SSH/AWS authority but writes only `SecretRef`-by-name into the output —
-  the secrets-never-in-Dhall contract owned by
-  [`vault_pki_doctrine.md §3`](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value).
-- An emitted chaos schedule that simulates an HA failover appropriate to the detected substrate — kill the
-  active worker, observe a Pulsar-delegated name-ordered standby take over, with no bespoke election —
-  attached on the deployment-rules surface (the app under test is unaware).
+- A pure
+  `suggestTest :: SuppliedTestModel -> Either SuggestionRefusal (TestTopology TeardownRequired)` whose input
+  contains modeled substrate class, capacity, capability, authority names, and provider quotas. The type and
+  function do not claim those values were observed.
+- Closed Haskell resource branches for registry publication, Pulumi execution, storage migration, runtime
+  metadata, and optional accelerator demand. Exact-fit and one-short results are computed solely by the pure
+  resource fold over the supplied model.
+- A symbolic delegated-failover `FaultIntent` and named authority references only. Phase 48 neither resolves
+  those references nor injects the intent.
+- A deterministic Dhall or other serialized proposal generated only beneath `.build/test-corpora/**`. The
+  projection is review material, never repository source, a semantic oracle, or proof that its modeled target
+  exists.
 
 ### Validation
 
-1. The emitted `.dhall` type-checks as a `TestTopology` and obeys the [§3](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down) teardown contract unconditionally.
-   It provisions inside the detected CPU, memory, pod-local logical ephemeral and layout-routed node storage
-   (planned-slot metadata components, their roles and backings, and the exact scope-indexed node aggregate
-   included), presented durable and cache backing, identity-complete policy-derived CUDA/Metal owner epochs,
-   and the distinct provider-quota envelope. It carries explicit `NoRegistryPublication | RegistryPublication`,
-   `NoPulumi | Pulumi`, and `NoMigration | StorageMigration` resource branches, contains a delegated-failover
-   chaos schedule, and references every credential by name only — an inlined credential is unrepresentable.
-2. Property tests perturb each supply axis independently.
-   - Lowering CPU, memory, local ephemeral storage (thereby also reducing in-cluster cache headroom),
-     presented durable backing, native-host-cache backing on a host-worker lane, pinned-model SplitRuntime
-     kubelet-role nodefs headroom, CRI-role imagefs/containerfs headroom, nodefs/imagefs content/snapshot
-     residual, an accelerator device's net allocatable VRAM, Metal shared-memory supply,
-     engine/control-plane/fabric reserve, build CPU/memory/scratch/cache, or one provider quota class either
-     shrinks the emitted representative shape on that axis or yields a structured "no representative
-     topology fits" result; it never emits an overcommitted topology.
-   - Doubling only the durable-storage quota doubles only the permitted representative volume bound.
-   - Removing the selected OS/arch image metadata or reducing the layout-routed content/snapshot backing
-     below the deduplicated resident-plus-pull/import peak rejects.
-   - Removing one planned slot's runtime-metadata demand, charging an alias twice, changing the pinned
-     model, dropping/swapping a role, resolving a role to the wrong backing, mismatching a planned/observed
-     domain, creating a qualified Pod/image ownership hole/overlap, or shortening either SplitRuntime
-     backing by one metadata byte rejects against the independent fixture.
-   - Unified and SplitImage alias controls accept only when their grouped carve is debited once.
-   - A CUDA- or Metal-classified fake target must retain equal source/workload key sets and exact
-     coexistence policy-class domains and derive every allowed source epoch.
-   - CUDA cases exercise indivisible unsharded placement, per-device replication, exact unique shard
-     sum/count/link constraints, co-resident per-device aggregation, and raw-fits-but-net-is-one-byte-short
-     rejection;
-   - Metal cases exercise the co-resident shared-memory peak.
-   - Omitting one source/work item or selecting only a favorable epoch rejects, while the canonical
-     linux-cpu target emits `accelerator = None`.
-   - Reject-branch coverage — that the structured "no representative topology fits" result actually fires —
-     is not left to a randomized generator floor: it is discharged by the enumerated committed one-short
-     mutants (the pinned `phase_77_resource_overcommit_*`/`phase_77_missing_capability` and `drop_*`
-     variants of Validation 3), each of which forces a specific reject before any effect, rather than by a
-     cover/classify fraction over the perturbation generator.
-3. Exercise the closed optional-branch fixture matrix over its four fixed-input shapes — all-three-negative,
-   registry-publication-only, Pulumi-only, and storage-migration-only — where no selected positive arm may be
-   ignored. For registry publication, independently shorten OCI
-   stored bytes, upload workspace/failed-partial retention, backing/quota, build scratch/cache or proxy
-   CPU/memory/ephemeral/image/pod/IP/CSI supply. For Pulumi, shorten executor CPU/memory/ephemeral/log/
-   writable/mapped/image supply, plugin installed/install-peak/cache bytes, workspace, checkpoint object/count/
-   retained/failure bytes, admission-gateway resources or provider quota. For migration, shorten old or
-   replacement backing, workspace, provider volume-count/bytes, copy-Job CPU/memory/ephemeral/image/pod/IP/CSI
-   supply, or retain the old backing while claiming its capacity. Every one-short case returns the pinned
-   provision error with zero effects; the paired exact-fit case equals
-   `phase_77_optional_resource_shapes.json`. The committed
-   `drop_registry_publication_envelope.dhall`, `drop_pulumi_executor_envelope.dhall`,
-   `drop_pulumi_checkpoint_demand.dhall`, `drop_migration_copy_envelope.dhall`, and
-   `drop_migration_old_new_workspace.dhall` mutants each leave their corresponding action present and must
-   turn this validation red before any registry, checkpoint, provider or backing mutation.
-4. The emitted value is immediately passed through `provision`; the canonical generated
-   placement/storage/capability/quota witness matches `test/golden/test_topology_dsl/resource_shape.json`, while every
-   perturbed output independently satisfies the same fold. The overcommit/missing-capability mutants fail with
-   zero effects.
-5. No emitted output contains credential material; every credential is a name, and the chaos schedule names a
-   Pulsar-delegated failover rather than a bespoke election.
-6. Two emits from the same fixed input, over a bypassed content-addressed store, are byte-identical, and the
-   emit path is shown to have executed on the second run rather than served from a memoized store hit (Gate
-   criterion 5). The Register-3 Gate, not this sprint, exercises the credential probe against real SSH/AWS and
-   records the emitted-to-reviewed provenance.
+1. A closed, independently authored Haskell case matrix covers every constructor of `SuppliedTestModel` and
+   every optional resource branch. Runtime discovery must equal the expected constructor set in both
+   directions, and empty discovery refuses validation.
+2. Exact-fit positives and minimally different one-short negatives return the independently expected topology
+   or the exact `SuggestionRefusal` locus for CPU, memory, storage, runtime metadata, accelerator, and provider
+   quota model fields. These are arithmetic claims over supplied values, not hardware validation.
+3. Named changed-production-subject mutants that drop a resource branch, a debit, a teardown obligation, or a
+   refusal path each turn the independent Haskell oracle red; an unaffected control stays green and the gate
+   records the applied production locus.
+4. No result or projection contains secret material: authority is represented only by a symbolic name. This
+   validates the pure representation, not credential existence or permissions.
+5. Two cache-bypassed projections from the same Haskell proposal are byte-identical, are derived during the
+   candidate run, and exist only beneath `.build/test-corpora/**`. Neither output is used as its own oracle.
 
 ### Remaining Work
 
-The pre-reset `None` claim is permanently invalid; this sprint remains blocked and NOT VALIDATED. Phase 90 owns host probing, generated Dhall emission, and live reprovisioning.
+This sprint remains blocked and NOT VALIDATED. Phase 90 owns substrate and hardware discovery, inventory and
+quota readback, credential probing, provider access, allocation, and comparison of a proposal with the live
+world.
 
 ## Sprint 48.3: Flagged-authority and test-owned tagging vocabulary ⏸️
 
@@ -325,39 +244,37 @@ The pre-reset `None` claim is permanently invalid; this sprint remains blocked a
 ### Objective
 
 Adopt [`testing_doctrine.md §6 — flagged test credentials`](../documents/engineering/testing_doctrine.md#6-flagged-test-credentials):
-generalize the prodbox `aws_admin_for_test_simulation` pattern into a distinct, marked test-simulation identity
-that holds the elevated authority a test needs and a running cluster must never hold, and tag every resource a
-topology allocates test-owned at creation so the harness can later find *exactly* what it created. The destroy
-authority itself is withheld from normal operation and granted only to this flagged identity — the testing-side
-requirement of the create-vs-delete model owned by
-[`pulumi_ebs_credential_model.md §6`](../documents/engineering/pulumi_ebs_credential_model.md#6-the-ebs-create-vs-delete-credential-model).
+define the Haskell vocabulary that distinguishes ordinary authority intent from flagged test authority intent
+and ordinary ownership from test-owned ownership. These values describe a later interpreter's required policy;
+they are not credentials, permissions, tags applied to resources, or proof of authorization.
 
 ### Deliverables
 
-- A `TestCredential` type marking an identity as test-simulation, distinct in the type system from the
-  normal-operation credential; normal operation cannot acquire it and the harness never runs workloads under
-  the everyday credential.
-- A test-owned tag applied to every allocated resource (cluster, PV, Pulumi stack, workload) at creation,
-  forming the basis of the leak-free sweep.
-- The flagged credential resolved by name only through Vault (Phase 61) — flagging changes *which* credential
-  and *what it may do*, not *where the secret lives*.
+- Closed Haskell `AuthorityIntent` and `OwnershipIntent` types whose flagged/test-owned constructors cannot be
+  confused with ordinary-operation constructors.
+- A pure rule requiring every modeled allocatable item in a test topology to carry `TestOwnedIntent`, while
+  forbidding credential material and destructive operations from the topology language.
+- Symbolic authority references by name only, plus an explicit `AuthorityUnverified` state that Phase 48 cannot
+  promote. Secret resolution, permission checks, and application of ownership metadata belong to Phase 90.
+- Haskell positives, paired negatives, and changed-production-subject mutants for constructor confusion,
+  missing ownership intent, secret inlining, and an exposed deletion primitive.
 
 ### Validation
 
-1. The flagged and normal identities are non-interchangeable at the type level; a topology attempting to run
-   a workload under the everyday, non-flagged credential is rejected at type-check with a Dhall type error at
-   the credential field — its specific reason, not an unrelated error — paired with a positive using the
-   flagged credential that type-checks and differs only in that field.
-2. A topology run under the flagged identity tags every resource it allocates test-owned at creation: every
-   resource the [Gate integrity](#gate-integrity) representative-set topology allocates carries that tag, and
-   an untagged allocation is rejected at type-check with a Dhall type error at the missing-tag field, paired
-   with a tagged positive that type-checks and differs only in the present tag.
-3. The flagged credential's material never appears in any `.dhall`; it is resolvable only as a Vault
-   `SecretRef`, never inlined.
+1. The Haskell type checker or pure decoder rejects ordinary/flagged authority confusion at the exact field,
+   paired with a positive differing only in that constructor. No runtime identity is used.
+2. Complete Haskell constructor discovery proves that every modeled allocatable item requires ownership intent;
+   the paired missing-intent negative and each bypass mutant fail at the independently expected locus.
+3. The Haskell language and every lazy `.build/**` projection contain authority names only. A secret-bearing
+   changed-subject mutant turns the independent oracle red, while no credential store is contacted.
+4. A production mutant that adds a delete operation to the Phase-48 topology language turns the gate red. This
+   is a language-boundary check only; Phase 48 performs no deletion or permission probe.
 
 ### Remaining Work
 
-The pre-reset `None` claim is permanently invalid; this sprint remains blocked and NOT VALIDATED. Phase 90 owns secret resolution, allocation tagging, and authority readback.
+This sprint remains blocked and NOT VALIDATED. Phase 90 owns acquiring and resolving credentials, verifying
+their external permissions, applying test-owned metadata during allocation, and observing that metadata at the
+live boundary.
 
 ## Sprint 48.4: Phase-90 transfer for destructive cleanup and leak observation ⏸️
 
@@ -368,64 +285,40 @@ The pre-reset `None` claim is permanently invalid; this sprint remains blocked a
 Adopt [`testing_doctrine.md §7 — the elevated harness is the sole automated deleter of test-owned durable storage; leak-free cycles`](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles),
 the named exception delegated by
 [`storage_lifecycle_doctrine.md §7.1 — the single exception: the elevated test harness`](../documents/engineering/storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness):
-make the elevated harness the *one automated* actor that may destroy durable storage — and only storage
-flagged test-owned — via a flag-then-sweep cycle. The DSL surface exposes no "delete this durable volume"
-primitive at all; deletion is an act of the harness, not a value in a `.dhall`. A non-empty flagged sweep or independent
-postflight inventory diff is a hard failure, strengthening the prodbox postflight tag-sweep pattern so
-untagged and backing-only leaks are visible.
+keep destructive cleanup and leak observation outside Phase 48 while defining the pure teardown-result and
+modeled-inventory-difference vocabulary that Phase 90 must interpret. The Phase-48 DSL exposes no deletion
+primitive, holds no destroy authority, and cannot turn modeled inventory values into live evidence.
 
 ### Deliverables
 
-- A delete path reachable only by the elevated harness under the flagged credential of Sprint 48.3, scoped to
-  test-owned resources, with no normal-operation or non-harness test code path able to destroy retained
-  backing bytes; PVC/PV API objects may still disappear through ordinary cluster lifecycle.
-- A postflight sweep that, after teardown, asserts leak-freedom by the implementation-independent inventory
-  diff of Gate criterion 1 — a substrate-scope enumeration (`kubectl get all,pv,pvc`; the external
-  `${RETAINED_ROOT}` allocation inventory; the oracle-pinned service-native AWS `List*`/`Describe*` inventory
-  plus Resource Explorer `tag:none`) taken pre- and post-run and compared, not merely a query for the harness's
-  own test-owned tag — surfacing any resource present post-run but absent pre-run as a leak (with the leak list
-  in the record) while correctly *not* flagging a retained, by-design resource present in both enumerations.
-  The Resource Groups Tagging API is metadata-only here because it does not return untagged resources. The
-  committed seeded mutants
-  `test/mutant/test_topology_dsl/leak_untyped.dhall` (an API resource allocated outside the typed path) and
-  `test/mutant/test_topology_dsl/leak_host_backing.dhall` (API bindings removed, host backing left behind) are the
-  standing red-tests proving this is neither the circular tag query nor an API-object-only check.
-- An explicit scope boundary: this harness reclaims **test-owned** backing only. Production
-  `create-new → verified-migrate → retire-old` emits `ReclaimEligible` and leaves physical deletion to an
-  external privileged operator action
-  ([`storage_lifecycle_doctrine.md §8`](../documents/engineering/storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction));
-  Phase 48 neither holds nor tests authority over production backing.
+- Haskell `TeardownObligation`, `TeardownOutcome`, `InventoryModel`, and `ResidueClassification` types. Every
+  inventory value is explicitly modeled and unauthenticated in this phase.
+- A pure, total inventory-difference fold that distinguishes a resource modeled both before and after from one
+  modeled only after. It accepts a closed set of declared inventory domains so dropping a domain cannot produce
+  an empty-result pass.
+- A result rule that refuses workflow success when teardown failed, inventory-domain coverage is incomplete,
+  or modeled post-run residue is non-empty. It proves only the algebra's response to supplied values.
+- No delete path, resource selector, credential operation, API command, provider operation, host path, or live
+  inventory collector. Phase 90 owns their implementation and independent observation.
 
 ### Validation
 
-1. **Binding-object boundary:** a targeted `kubectl delete pv` from an unrelated everyday workload identity
-   receives a live Kubernetes RBAC `403`, while the scoped lifecycle reconciler may delete the test PV/PVC API
-   bindings during teardown. In both cases the external host-backing inventory and marker bytes remain
-   unchanged. This validates least-privilege Kubernetes object access without pretending the PV object is the
-   durable data.
-2. **Backing boundary:** under the normal identity, the substrate-specific backing-delete operation is denied
-   at the real external boundary — host `${RETAINED_ROOT}` reclaim returns `EACCES`/`EPERM`, and cloud
-   `ec2:DeleteVolume` returns AWS `AccessDenied`; no in-process typed refusal counts. Under the elevated
-   harness, the same operation against the same test-flagged target succeeds. Each negative/positive pair
-   differs only in credential identity; host and EBS pairs are evaluated separately rather than treating a PV
-   API delete as equivalent to deleting backing bytes.
-3. Leak detection uses the Gate-criterion-1 inventory diff, not a test-owned tag query: the committed seeded
-   mutant `test/mutant/test_topology_dsl/leak_untyped.dhall` — a resource allocated *outside* the typed path, hence
-   never tagged — MUST fail the run as a leak (proving the sweep is not circular), while a clean run's pre-/
-   post-run enumeration diff is empty. The committed
-   `test/mutant/test_topology_dsl/leak_host_backing.dhall`, which removes API bindings but leaves the new host backing,
-   MUST also fail on the `${RETAINED_ROOT}` allocation diff. On this `linux-cpu` gate the AWS/cloud leg
-   allocates nothing and is recorded UNVERIFIED in the ledger (never green); its committed red-test — the
-   untagged-AWS-resource mutant `test/mutant/test_topology_dsl/cloud_leak_untyped.dhall` that MUST surface via
-   `List*`/`Describe*` + Resource Explorer `tag:none`, paired with a clean run whose AWS enumeration diff is
-   empty — is carried by a provider-substrate generated test in the sanctioned parent-drives-provider form
-   (Phase 76), keeping this single-substrate `linux-cpu` run's own scope intact ([§L](development_plan_standards.md#l-one-substrate-discipline)).
-4. A retained-by-design (unflagged) volume present in *both* the pre-run and post-run enumeration is not
-   reported as a leak; a resource absent pre-run but present post-run is.
+1. Independently authored Haskell cases cover clean modeled teardown, teardown failure, retained-in-both-models,
+   post-only residue, and missing inventory-domain coverage. Each has an exact expected constructor and reason.
+2. Paired cases differing only by one modeled resource distinguish retained-in-both from post-only residue;
+   paired cases differing only by one inventory-domain declaration distinguish complete from incomplete
+   coverage.
+3. Changed-production-subject mutants that ignore post-only residue, compare only ownership-marked items, drop
+   an inventory domain, or convert teardown failure to success each turn the independent oracle red. The gate
+   records the applied production locus and keeps an unaffected control green.
+4. The candidate output labels every result as a pure model result and leaves live cleanup, authority, and leak
+   evidence UNVERIFIED. No modeled case may be reported as a successful external sweep.
 
 ### Remaining Work
 
-None in this phase. The entire implementation and validation surface belongs to Phase 90.
+This sprint remains blocked and NOT VALIDATED. Phase 90 owns allocation tracking, credentials, destructive
+cleanup, complete live inventory collection, backing-store inspection, leak observation, and independent
+confirmation that cleanup reached the external substrate or provider.
 
 ## Sprint 48.5: Pure evidence algebra and Phase-90 failover transfer ⏸️
 
@@ -435,83 +328,50 @@ None in this phase. The entire implementation and validation surface belongs to 
 
 Adopt [`testing_doctrine.md §4 — no skips, fail fast, and the per-run ledger artifact`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
 and [`§8 — one substrate per validation`](../documents/engineering/testing_doctrine.md#8-one-substrate-per-validation):
-make every topology run emit a first-class proven/tested/assumed ledger beside its pass/fail, fail fast on
-missing prerequisites, and record an applicable-but-unperformed move as UNVERIFIED. The ledger's *grammar* —
-the Extract → Model → Inject moves and the proven/tested/assumed strengths — is owned by
+define the pure Haskell evidence-ledger grammar and refusal rules. The ledger's Extract → Model → Inject moves
+and proven/tested/assumed strengths are owned by
 [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
-and the live-fault Inject move by
-[`§11`](../documents/engineering/chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose);
-this sprint owns only the *per-run artifact contract* and the gate topology that exercises it. The failover it
-injects is delegated to Pulsar (Phase 69), never a bespoke amoebius election.
+and the live-fault Inject move by [`§11`](../documents/engineering/chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose).
+Phase 48 can validate only derivation over supplied Haskell declarations. It cannot award Runtime strength,
+execute a topology, perform preflight, inject a fault, or observe failover.
 
 ### Deliverables
 
-- A `Ledger` emitter producing, per run, a record of which correctness layers were reached and at what strength
-  (proven / tested / assumed / UNVERIFIED), as a first-class output beside pass/fail, whose applicable-move set
-  is **derived** from the topology's `ChaosSchedule`/`FaultTarget` projections and the chaos_failover_doctrine
-  [§11.1](../documents/engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget) `FaultKind`→invariant map — never a set the emitter declares for itself. The externally hand-authored
-  expected-move table `test/oracles/phase_76_expected_moves.json`, authored independently of `Ledger.hs`, is
-  the oracle against which the emitted ledger's applicability/strength projection is matched.
-- A fail-fast prerequisite check: a missing substrate input, credential, or tool fails the run with a message
-  naming what is missing — never a pass-with-skip.
-- The pre-reset committed gate topology and review allowlist are condemned source, not a target deliverable.
-  Phase 48's future pure gate must use a Haskell-declared topology value and may serialize it only beneath
-  `.build/**`; `suggest-test` may emit an external/untracked proposal but neither that proposal nor a diff is an
-  oracle. Live substrate allocation, failover injection, teardown, and Runtime-layer evidence belong to Phase
-  90 after the hardware-free barrier.
-- The finite `suggest-test` and elevated-harness host envelopes and the exact failover epoch (terminating
-  active + promoted standby + policy-authorized replacement) from the phase resource contract, including every
-  image, mapped/local/durable/cache byte, planned-slot/observed-Pod-UID runtime-metadata component/role/backing
-  row and scope-indexed node aggregate, private
-  accelerator owner-epoch witness and pod/IP/CSI/provider-quota debit. The host harness performs the chaos
-  call; no unprovisioned chaos/client Pod is permitted.
+- A Haskell `Ledger` algebra whose applicable-move set is derived from the topology's declared
+  `FaultIntentSchedule` and the closed `FaultKind`-to-invariant map, never supplied by the ledger emitter.
+- Separate evidence constructors for pure proof/model results and future authenticated Runtime observations.
+  The Phase-48 evaluator cannot construct or promote the latter; applicable runtime moves remain UNVERIFIED.
+- A pure refusal when a required declaration, expected move, independent oracle entry, or inventory-domain
+  declaration is absent. Missing input never becomes a skip or pass.
+- A separately authored Haskell expected-move declaration and changed-production-subject ledger mutants. Any
+  serialized ledger table is generated lazily beneath `.build/test-corpora/**` and is not an oracle.
+- An explicit Phase-90 handoff contract for live preflight, allocation, credential and tool checks, topology
+  execution, fault injection, failover observation, teardown, leak observation, and Runtime evidence.
 
 ### Validation
 
-1. The gate topology — captured as the raw `suggest-test` emitted `.dhall` (pre-review), the reviewed `.dhall`,
-   and their diff in the per-run record — runs the failover simulation, the name-ordered standby takes over the
-   Pulsar subscription — confirmed by the external broker subscription/consumer-stats observer of Gate
-   criterion 7 against `test/golden/test_topology_dsl/failover_takeover.json`, not the operator-authored
-   `ExpectationWitness` — and teardown leaves an empty inventory-diff sweep (Gate criterion 1). The pre-review
-   emitted output MUST type-check as a `TestTopology` and carry the delegated-failover chaos schedule, and the
-   emitted→reviewed diff MUST be empty or confined to the committed allowlist
-   `test/fixture/dhall/phase_76_review_allowlist.json`. The simulation kills the active worker and observes the
-   name-ordered standby take over with no bespoke election.
-   Before spin-up, both values' CPU, memory, logical Pod-local ephemeral storage, layout-routed
-   content/snapshot storage, runtime-metadata component/role/backing maps plus node scope/domain/ownership/grouping, presented durable, cache,
-   identity-complete policy-derived CUDA/Metal owner epochs, and quota fields must pass the pure provision fold
-   and the snapshot-bound live preflight and
-   match the pinned witness, all before any allocation; any review edit that breaks resource feasibility fails
-   before allocation even if the field is review-allowlisted.
-2. The run emits a ledger whose applicable-move set is derived (from `ChaosSchedule`/`FaultTarget` + [§11.1](../documents/engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget) `FaultKind`→invariant map, not emitter-declared) and whose applicability/strength projection matches `test/oracles/phase_76_expected_moves.json`;
-   the run-local ledger records the Runtime-layer move *tested on that substrate*, and the fixture's
-   declared-but-unfaulted invariant — an applicable move the run omits — is recorded UNVERIFIED, never green;
-   the cardinal rule "never report tested or assumed as proven" holds. The committed seeded mutant
-   `test/mutant/test_topology_dsl/ledger_all_tested.dhall` (an emitter marking every applicable move tested) MUST fail
-   this field-for-field match.
-3. A run with a deliberately-absent prerequisite fails fast with a naming error, with no silent skip.
-4. The committed overcommit and missing-capability fixtures fail with an empty external mutating-effects trace;
-   no test resource is created merely to discover that the target cannot host it.
-5. Independently make the generator/harness, controller, active, standby, replacement, selected images,
-   Pod/IP/CSI slots, mapped/local/durable/cache storage, either SplitRuntime metadata backing, any derived
-   accelerator epoch/device, or quota short by one unit/byte. Each returns its specific pre-effect `Left`;
-   dropped-harness/standby/replacement-envelope, dropped accelerator source/work item/co-resident debit,
-   favorable-epoch-only, metadata model/role/domain/ownership/alias, premature-run-2-credit, and the
-   structural-takeover-defeat `phase_77_failover_standby_wrong_subscription.dhall` (caught by the external
-   broker-stats observer of Gate criterion 7) mutants turn the gate red. The
-   exact-fit run's live resources and failover epoch equal the opaque projection before teardown can earn any
-   capacity credit.
+1. Complete Haskell discovery equates the expected and derived move sets in both directions. An empty discovered
+   set, an unknown fault intent, or a missing expected-move declaration refuses validation.
+2. Paired pure cases differing only by one declared fault intent produce the exact additional applicable move;
+   a declared-but-unperformed Runtime move remains UNVERIFIED. No Phase-48 case can classify it as tested.
+3. Changed-production-subject mutants that let the emitter declare applicability, mark every move tested,
+   upgrade tested or assumed to proven, or omit an applicable move each fail the independent Haskell oracle at
+   the expected field. Applied-locus witnesses and unaffected controls are required.
+4. A Haskell case with a missing modeled prerequisite returns the exact refusal rather than a skip. This does
+   not validate any live prerequisite check; Phase 90 must probe and observe the real boundary.
+5. Two cache-bypassed ledger projections agree byte-for-byte beneath `.build/test-corpora/**`, while the Haskell
+   oracle—not either projection—determines the verdict.
 
-> **Honesty.** This gate exercises the **intra-cluster** Pulsar `Exclusive`/`Failover` takeover only; the
-> asynchronous cross-cluster gateway-migration obligation (both Planned and Failover branches) is the one
-> formal simulation/proof, owned by
-> [`chaos_failover_second_axis.md §16`](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
-> and must be delivered by human-approved Phase 75 gateway-migration drills, not here. The delegated-failover shape is proven in the sibling `infernix`
-> ML-workflow runtime — sibling evidence, not an amoebius result.
+> **Honesty.** Phase 48 validates no intra-cluster or cross-cluster failover. It represents delegated-failover
+> intent and evidence strengths as pure Haskell values only. Phase 90 owns live test-topology execution and
+> failover observation after its predecessors; the component-specific phase chain remains responsible for
+> making the delegated service available first.
 
 ### Remaining Work
 
-The pre-reset `None` claim is permanently invalid; this sprint remains blocked and NOT VALIDATED. Phase 90 owns the live ledger artifact and delegated-failover topology.
+This sprint remains blocked and NOT VALIDATED. Phase 90 owns authenticated Runtime evidence, live topology and
+preflight, provider or hardware execution, fault injection, failover observation, teardown, and the live ledger
+artifact.
 
 ## Documentation Requirements
 
@@ -525,19 +385,18 @@ The pre-reset `None` claim is permanently invalid; this sprint remains blocked a
   distinguishing Phase 48's nine-axis pure suggestion projection from Phase 90's allocation/readback proof.
 - `documents/engineering/storage_lifecycle_doctrine.md` — leave §7.1's automated test-reclaim owner UNVERIFIED
   until Phase 90; Phase 48 owns no delete authority.
-- `documents/engineering/pulumi_iac_doctrine.md` — §6's create-vs-delete credential model gains the testing-side
-  realization: the flagged test-simulation identity is the sole automated holder of destroy authority for
-  test-owned durable storage. Production backing is outside this harness and remains reclaimable only by the
-  external human-operated break-glass path.
-- `documents/engineering/chaos_failover_doctrine.md` — record the §12 per-run proven/tested/assumed ledger for
-  the intra-cluster failover injection, and that the §16 cross-cluster (gateway-migration) obligation stays in
-  Phase 74.
+- `documents/engineering/pulumi_iac_doctrine.md` — record only Phase 48's pure flagged-authority and ownership
+  vocabulary. Leave credential resolution, permission checks, allocation metadata, and destroy authority
+  UNVERIFIED for Phase 90.
+- `documents/engineering/chaos_failover_doctrine.md` — record Phase 48's pure ledger grammar and explicit
+  inability to award Runtime strength. Leave live fault injection and failover observation to Phase 90; the
+  cross-cluster gateway-migration obligation stays in Phase 75.
 
 **Cross-references to add:**
 
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-48 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/system_components.md` — record `lib:test-workflow-algebra-core` as Phase 48's Decision-layer
-  component and keep live `Amoebius/Test/*` ownership at Phase 90.
+  component and keep live `Amoebius.Test` module-namespace ownership at Phase 90.
 - `DEVELOPMENT_PLAN/substrates.md` — retain Phase 48 at `none`/`none`; Phase 90 owns the generated test's live substrate.
 
 ## Related Documents
@@ -545,21 +404,30 @@ The pre-reset `None` claim is permanently invalid; this sprint remains blocked a
 - [README.md](README.md) — the live tracker; Phase 48 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton, sprint format, the doctrine-citation rule, the register + honesty + one-substrate disciplines)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election; single-instance delegated to k8s/etcd; the no-normal-operation-deletion storage rule)
-- [system_components.md](system_components.md) — the target component inventory for the `Amoebius/Test/*` modules
+- [system_components.md](system_components.md) — the target component inventory for the `Amoebius.Test` modules
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — the test-as-a-topology contract,
-  `suggest-test`, flagged credentials, the elevated harness, and the per-run ledger this phase implements
+  whose pure topology, suggestion, authority-intent, teardown-result, and ledger vocabulary Phase 48 defines;
+  Phase 90 owns the live harness
 - [Storage Lifecycle Doctrine](../documents/engineering/storage_lifecycle_doctrine.md) — the retained PV model,
-  the no-normal-operation-deletion rule, and the elevated-harness exception this phase realizes
+  the no-normal-operation-deletion rule, and the elevated-harness exception that remains deferred to Phase 90
 - [Chaos / Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — the proven/tested/assumed
-  ledger this phase records against and the deferred cross-cluster gateway-migration obligation
+  ledger grammar Phase 48 models without performing either fault injection or failover observation
+- [Chaos / Failover Second Axis](../documents/engineering/chaos_failover_second_axis.md) — the separate
+  intra-cluster and cross-cluster evidence axes represented by the pure ledger; their live exercise remains
+  outside Phase 48
 - [Application Logic vs Deployment Rules](../documents/engineering/app_vs_deployment_doctrine.md) — the
-  deployment-rules surface the chaos schedule attaches to
+  deployment-rules surface on which Phase 48 represents fault intent as data for a later interpreter
 - [Vault / PKI Doctrine](../documents/engineering/vault_pki_doctrine.md) — the `SecretRef`-by-name contract the
-  flagged credential obeys
+  pure authority reference obeys; Phase 48 does not resolve it
+- [Pulumi EBS Credential Model](../documents/engineering/pulumi_ebs_credential_model.md) — the authority and
+  ownership vocabulary Phase 48 can model without resolving credentials, provisioning storage, or observing
+  provider state
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — single-instance delegated
   to k8s/etcd and worker takeover delegated to Pulsar, never a bespoke election
-- [phase_69](phase_69_content_store_workflow.md) — the Pulsar-`Failover` worker takeover this phase's gate injects
-- [phase_75](phase_75_gateway_migration_drills.md) — the cross-cluster gateway-migration obligation, distinct
-  from this phase's intra-cluster failover
-- [phase_79](phase_79_provider_dynamic_nodes.md) — the leak-free provider teardown this harness extends to test cycles
+- [phase_69](phase_69_content_store_workflow.md) — the delegated Pulsar capability that must exist before a
+  later live test can exercise the modeled failover intent
+- [phase_75](phase_75_gateway_migration_drills.md) — the distinct cross-cluster gateway-migration obligation;
+  Phase 48 executes neither axis
+- [phase_79](phase_79_provider_dynamic_nodes.md) — the provider behavior that remains input to Phase 90's live
+  test cycle, not Phase-48 evidence
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine suite these phases adopt

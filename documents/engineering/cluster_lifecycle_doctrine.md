@@ -612,12 +612,14 @@ unassigned Phase-N gate. Phase 74's acceptance forest uses child `kind` clusters
   owns the closed role union), never fused: an rke2 server can run on any
   substrate, and the control-plane daemon's single-instance is delegated to k8s/etcd independently of a node's server/agent role.
 
-> **Honesty (sibling evidence, not an amoebius result).** prodbox proves the **single-node base only**:
-> `~/prodbox/src/Prodbox/CLI/Rke2.hs` installs `rke2-server.service`, writes
-> `/etc/rancher/rke2/config.yaml` + `registries.yaml`, and tracks install markers, an inotify drop-in, and
-> `uninstall.sh`; the golden plan `~/prodbox/test/golden/plans/rke2-reconcile.txt` is exactly the STEP-list
-> `ensure_rke2_server_installed → enable/restart_rke2_service → sync_user_kubeconfig →
-> wait_for_cluster_nodes_ready`. That is single-node `rke2-server` **only**. Multi-node server/agent +
+> **Honesty (external sibling evidence, not repository authority or an amoebius result).** The separately
+> checked-out prodbox sibling demonstrates the **single-node base only**: its Haskell RKE2 implementation
+> installs `rke2-server.service`, renders `/etc/rancher/rke2/config.yaml` and `registries.yaml`, and manages
+> install markers, an inotify drop-in, and uninstall behavior. An externally observed sibling run reports the
+> step sequence `ensure_rke2_server_installed → enable/restart_rke2_service → sync_user_kubeconfig →
+> wait_for_cluster_nodes_ready`. No sibling script, serialized golden, or other non-Haskell file is amoebius
+> repository source, an amoebius oracle, or an exception to the tracked-source rule. This evidence covers
+> single-node `rke2-server` **only**. Multi-node server/agent +
 > etcd-HA + the `Rke2NodeToken` join is **net-new across the whole sibling family** — hostbootstrap has
 > **zero** rke2 code (its `HostTool` enum is Kubectl/Helm/Kind). Read this section as **design intent**, not
 > a tested amoebius result; the plan owns sequencing ([§10](#10-planning-ownership), > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).

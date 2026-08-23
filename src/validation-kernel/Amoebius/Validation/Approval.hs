@@ -9,6 +9,19 @@ module Amoebius.Validation.Approval
   , verifyApproval
   ) where
 
+import Amoebius.Validation.PolicyContract
+  ( AutomationRole (CandidateEvidenceOnly)
+  , StatusMutationAuthority (HumanUserOnly)
+  , automationRole
+  , canonicalPolicyContract
+  , orderingContract
+  , phaseDomainUpper
+  , phaseOrdinalNumber
+  , promotionAuthority
+  , promotionAuthorityMarker
+  , promotionContract
+  , statusMutationAuthority
+  )
 import Crypto.Error (CryptoFailable (CryptoFailed, CryptoPassed))
 import Crypto.PubKey.Ed25519 qualified as Ed25519
 import Data.ByteString (ByteString)
@@ -53,7 +66,8 @@ data Approval = Approval
   deriving (Eq, Show)
 
 data ApprovalError
-  = ApprovalAuthorityNotHuman
+  = ApprovalPolicyContractMismatch
+  | ApprovalAuthorityNotHuman
   | ApprovalTrustRootMismatch
   | ApprovalTrustRootNotPrior
   | ApprovalBindingMalformed
@@ -93,7 +107,8 @@ approvalPayload approval =
 verifyApproval :: TrustRoot -> CandidateBinding -> Set Text -> Approval -> Either ApprovalError ()
 verifyApproval trust candidate consumedNonces approval = do
   require (canonicalBinding trust candidate approval) ApprovalBindingMalformed
-  require (approvalAuthority approval == "human") ApprovalAuthorityNotHuman
+  require canonicalPromotionBoundary ApprovalPolicyContractMismatch
+  require (approvalAuthority approval == canonicalHumanAuthority) ApprovalAuthorityNotHuman
   require (approvalTrustRootId approval == trustRootId trust) ApprovalTrustRootMismatch
   require
     ( not (nullText (trustRootEstablishedBefore trust))
@@ -128,13 +143,24 @@ verifyApproval trust candidate consumedNonces approval = do
   require False problem = Left problem
   nullText = (== "")
 
+canonicalHumanAuthority :: Text
+canonicalHumanAuthority =
+  promotionAuthorityMarker (promotionAuthority (promotionContract canonicalPolicyContract))
+
+canonicalPromotionBoundary :: Bool
+canonicalPromotionBoundary =
+  automationRole contract == CandidateEvidenceOnly
+    && statusMutationAuthority contract == HumanUserOnly
+ where
+  contract = promotionContract canonicalPolicyContract
+
 canonicalBinding :: TrustRoot -> CandidateBinding -> Approval -> Bool
 canonicalBinding trust candidate approval =
   all singleLine fields
     && all (not . Text.null) coreFields
     && Text.length (candidatePhase candidate) == 2
     && Text.all (\character -> character >= '0' && character <= '9') (candidatePhase candidate)
-    && candidatePhase candidate <= "95"
+    && candidatePhase candidate <= canonicalUpperPhaseText
     && all sha256Text candidateDigests
     && sha256Text (trustRootEstablishedBefore trust)
     && all sha256Text (Set.toAscList (candidatePriorSourceDigests candidate))
@@ -183,3 +209,8 @@ canonicalBinding trust candidate approval =
       && Text.all
         (\character -> (character >= '0' && character <= '9') || (character >= 'a' && character <= 'f'))
         value
+
+canonicalUpperPhaseText :: Text
+canonicalUpperPhaseText =
+  let upper = phaseOrdinalNumber (phaseDomainUpper (orderingContract canonicalPolicyContract))
+   in Text.justifyRight 2 '0' (Text.pack (show upper))

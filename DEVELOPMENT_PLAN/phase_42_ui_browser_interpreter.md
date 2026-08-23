@@ -43,7 +43,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -51,7 +51,7 @@ Known partial** only.
 semantics and a Haskell projection that will lazily emit the PureScript implementation beneath `.build/**`.
 The target Haskell semantics are to verify the plan envelope/digest,
 decode only public values, render the trusted component catalog with escaped text, execute bounded
-state/event/route instructions, and emits typed same-origin port requests. Application authors contribute no
+state/event/route instructions, and emit typed same-origin port requests. Application authors contribute no
 tracked PureScript, JavaScript, HTML, CSS, fetch call, or browser-storage code.
 
 The gate is hardware-free: separately authored Haskell expectations consume the same closed Haskell event
@@ -74,7 +74,7 @@ or a network service. Browser execution belongs to the post-Phase-49 live UI ban
 |---|---|
 | `Claim` | Target only — Haskell semantics define one generic interpreter and separately reviewed Haskell expectations constrain its event traces; browser-language source is generated beneath `.build/**`. No browser, OS, network, or runtime observation is claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 42` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | `pb validate phase 42` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -105,7 +105,9 @@ or a network service. Browser execution belongs to the post-Phase-49 live UI ban
 
 ## Sprints
 
-> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+> **Reset validation review.** This sprint remains REJECTED — NOT VALIDATED until its fixed Haskell
+> subject/oracle/reviewer/mutant/legacy contract is complete and independently reviewed. The target boundaries
+> below are Haskell-only and authorize no browser, OS, network, or hardware process.
 
 ## Sprint 42.1: Generic `ClientPlan` interpreter and Haskell semantic boundary ⏸️
 
@@ -113,36 +115,39 @@ or a network service. Browser execution belongs to the post-Phase-49 live UI ban
 
 ### Objective
 
-Adopt the fixed browser runtime so the bounded checked plan is the entire application-specific UI payload and
-no raw rendering, network, authority, or persistence escape is available to app authors.
+Define the generic client semantics so the bounded checked plan is the entire application-specific UI payload.
+The Haskell algebra provides no raw rendering, network, authority, or persistence escape to application
+authors.
 
 ### Deliverables
 
-- Generic plan decoder/interpreter, trusted component renderer, deterministic event/update engine, route
-  machine, HTTPS bootstrap path, and authenticated same-origin WebSocket transport with bounded reconnect and
-  cursor-resume control frames.
-- Generated surface enumerator joined to authored interactions, fresh-challenge fake server, Playwright DOM/
-  accessibility/keyboard reader, independent Haskell trace interpreter, and OS-boundary network observer.
-- Built-bundle scanner, exact CSP/security-header browser harness, boundary corpus, bypass probes, mutant
-  configurations, and Register-2 honesty ledger.
+- A Haskell `ClientPlan` decoder/interpreter, trusted-component rendering semantics, deterministic
+  event/update/route semantics, and typed HTTPS-bootstrap and same-origin WebSocket request-plan values. No
+  socket is opened.
+- A closed Haskell trace corpus joined two ways to separately reviewed Haskell expectations for visible state,
+  accessibility state, keyboard/focus transitions, navigation, cancellation, reconnect, and cursor values.
+- Haskell projection and generated-source structure checks, paired-negative and changed-subject mutation
+  declarations, and a lazily rendered `.build/**` honesty ledger. PureScript, JavaScript, HTML, CSS, and every
+  other external form are generated only beneath `.build/**`.
 
 ### Validation
 
-1. Rejected historical observation: the `ui-browser-interpreter-spec` Cabal suite expected every enumerated
-   event/route/link/port to be covered by an authored
-   interaction and expected state/DOM/accessibility/keyboard/transport row, with no UNVERIFIED coverage entry.
-2. Require every PureScript step to match the independent Haskell trace tuple and execute the pinned keyboard
-   focus sequences without a divergence.
-3. Recover the post-start nonce from the externally observed request and assert packet capture contains no
-   provider/canary connection, unknown destination, or forbidden persistence path.
-4. Scan the built bundle, enforce the pinned CSP in Chromium, and exercise the exact named-link navigation;
-   inline/eval/canary execution, remote imports, forbidden APIs, and link-as-fetch reuse stay absent.
-   The network trace contains the one expected same-origin WebSocket upgrade and no SSE, Redis, Pulsar, or
-   provider connection.
-5. Run every named semantic, accessibility, artifact, freshness, network, and canned-response mutant; each
-   turns its distinct authored expectation red.
-6. Verify the ledger says browser behavior tested with fakes and leaves server authority, provider isolation,
-   live edge, release, and HA UNVERIFIED.
+1. Require two-way equality between the independently declared surface universe and the surfaces discovered
+   from the closed Haskell trace corpus. Empty discovery and every omitted event, route, link, or port fail.
+2. Compare every pure interpreter trace with a separately authored Haskell expectation. The comparison covers
+   exact visible state, accessibility state, keyboard/focus transitions, navigation, cancellation, reconnect,
+   cursor, and typed request-plan values without executing projected browser code.
+3. Exercise minimally different Haskell pairs for invalid envelopes, private-value disclosure, unknown links,
+   raw-fetch attempts, forbidden persistence, stale challenges, and canned responses. Each pair must produce
+   its pinned reason and zero forbidden requested effects.
+4. Generate the browser-language projection twice from a clean input beneath `.build/**`. A separately authored
+   Haskell structure oracle must reject remote imports, inline evaluation, raw provider facilities, forbidden
+   persistence APIs, and link-as-fetch reuse while accepting the unchanged control.
+5. Witness every changed production Haskell locus before running its named semantic, accessibility, artifact,
+   freshness, and request-plan mutant. Each mutant must produce its distinct named Haskell-oracle mismatch,
+   while the unaffected control remains equal to its independently declared observation.
+6. Record browser execution, browser accessibility fidelity, CSP enforcement, OS network isolation, server
+   authority, provider isolation, live edge, release, and HA as post-barrier UNVERIFIED residue.
 
 ### Remaining Work
 
@@ -157,20 +162,20 @@ than Phase-42 work.
   claiming live or server enforcement.
 - `documents/engineering/generated_artifacts_doctrine.md` — record the generic-bundle build and per-app plan
   boundary.
-- `documents/engineering/testing_doctrine.md` — record the independent differential, keyboard/focus,
-  artifact-scan, and browser-enforced CSP evidence.
-- `documents/illegal_state/illegal_state_capability_messaging.md` — attach browser escape fixtures, observer,
-  challenge, and mutants.
+- `documents/engineering/testing_doctrine.md` — record the independent Haskell trace differential,
+  keyboard/focus model, generated-source structure check, and deferred browser-fidelity boundary.
+- `documents/illegal_state/illegal_state_capability_messaging.md` — attach the Haskell browser-escape case
+  declarations and changed-subject mutations, plus the post-barrier observer and challenge obligations.
 
 **Cross-references to add:**
 
 - `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, and
-  `DEVELOPMENT_PLAN/system_components.md` — index the phase, Register 2, `none` substrate, and target modules.
+  `DEVELOPMENT_PLAN/system_components.md` — index the phase, Register 1, `none` substrate, and target modules.
 - Phase 44 — consume this interpreter unchanged in the local composed application.
 
 ## Related Documents
 
-- [Phase 10](phase_10_calculus_composition.md) — the real five-calculus composition projected by this gate.
+- [Phase 10](phase_10_calculus_composition.md) — the five-calculus Haskell composition projected by this gate.
 - [Phase 40](phase_40_ui_plan_compiler.md) — the required immutable `ClientPlan` and public contracts.
 - [Phase 41](phase_41_offline_language_plan.md) — the immediately preceding paired-plan boundary.
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — generic-client boundary and verification obligations.

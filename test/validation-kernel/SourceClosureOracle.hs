@@ -109,6 +109,32 @@ indexParserProblems =
                 <> indexRecord "100644" objectB "0" "README.md"
             )
         )
+    , expectEqual
+        "tagged stage parser binds flags to exact sorted index entries"
+        ( Right
+            [ ('h', IndexEntry "README.md" RegularFile objectA)
+            , ('S', IndexEntry "bin/tool" ExecutableFile objectB)
+            ]
+        )
+        ( parseLsFilesTaggedStage
+            ( taggedStageRecord 'S' "100755" objectB "0" "bin/tool"
+                <> taggedStageRecord 'h' "100644" objectA "0" "README.md"
+            )
+        )
+    , expectLeftContains
+        "empty tagged stage observation lacks its required NUL"
+        (== MissingIndexFlagNulTerminator AssumeUnchangedObservation)
+        (parseLsFilesTaggedStage ByteString.empty)
+    , expectLeftContains
+        "tagged stage observation without final NUL refuses"
+        (== MissingIndexFlagNulTerminator AssumeUnchangedObservation)
+        ( parseLsFilesTaggedStage
+            (ByteString.dropEnd 1 (taggedStageRecord 'H' "100644" objectA "0" "README.md"))
+        )
+    , expectLeftContains
+        "empty path-only flag observation lacks its required NUL"
+        (== MissingIndexFlagNulTerminator AssumeUnchangedObservation)
+        (parseLsFilesTaggedPaths AssumeUnchangedObservation ByteString.empty)
     ]
 
 admittedClassificationProblems :: [String]
@@ -300,10 +326,17 @@ exerciseWorkspace git executable repository = do
   command executable ["-C", repository, "init", "--quiet"]
   let trackedPath = repository </> "tracked.txt"
   ByteString.writeFile trackedPath "indexed bytes\n"
-  objectId <- Text.unpack . Text.strip . Text.pack <$> commandOutput executable ["-C", repository, "hash-object", "-w", "tracked.txt"]
-  command executable ["-C", repository, "update-index", "--add", "--cacheinfo", "100644," <> objectId <> ",tracked.txt"]
+  objectId <- Text.strip . Text.pack <$> commandOutput executable ["-C", repository, "hash-object", "-w", "tracked.txt"]
+  command executable ["-C", repository, "update-index", "--add", "--cacheinfo", "100644," <> Text.unpack objectId <> ",tracked.txt"]
   command executable ["-C", repository, "update-index", "--refresh"]
   clean <- checkCandidateWorkspace git repository
+  cleanSnapshot <- loadGitSnapshot git repository
+  command executable ["-C", repository, "update-index", "--assume-unchanged", "tracked.txt"]
+  assumeUnchangedSnapshot <- loadGitSnapshot git repository
+  command executable ["-C", repository, "update-index", "--no-assume-unchanged", "tracked.txt"]
+  command executable ["-C", repository, "update-index", "--skip-worktree", "tracked.txt"]
+  skipWorktreeSnapshot <- loadGitSnapshot git repository
+  command executable ["-C", repository, "update-index", "--no-skip-worktree", "tracked.txt"]
   ByteString.writeFile trackedPath "changed bytes\n"
   changed <- checkCandidateWorkspace git repository
   ByteString.writeFile trackedPath "indexed bytes\n"
@@ -312,9 +345,39 @@ exerciseWorkspace git executable repository = do
   untracked <- checkCandidateWorkspace git repository
   pure
     ( expectEqual "clean generated workspace" [] clean
+        <> exactAcquiredEntryProblems repository objectId cleanSnapshot
+        <> expectLeftContains
+          "assume-unchanged snapshot refuses"
+          (\problem -> case problem of
+              AssumeUnchangedTrackedPaths ["tracked.txt"] -> True
+              _ -> False
+          )
+          assumeUnchangedSnapshot
+        <> expectLeftContains
+          "skip-worktree snapshot refuses"
+          (\problem -> case problem of
+              SkipWorktreeTrackedPaths ["tracked.txt"] -> True
+              _ -> False
+          )
+          skipWorktreeSnapshot
         <> expectEqual "tracked divergence is exact" [TrackedWorktreeDivergence ["tracked.txt"]] changed
         <> expectEqual "untracked path is exact" [UntrackedNonIgnoredPaths ["untracked.txt"]] untracked
     )
+
+exactAcquiredEntryProblems :: FilePath -> Text -> Either [SnapshotProblem] SourceSnapshot -> [String]
+exactAcquiredEntryProblems repository expectedObjectId result =
+  case result of
+    Left refused -> ["clean snapshot acquisition refused exact indexed regular file as " <> show refused]
+    Right acquired ->
+      expectEqual "acquired snapshot root is the requested repository" repository (snapshotRoot acquired)
+        <> expectEqual "acquired snapshot contains exactly one indexed entry" 1 (length (snapshotEntries acquired))
+        <> case snapshotEntries acquired of
+          [entry] ->
+            expectEqual "acquired indexed path is exact" "tracked.txt" (indexPath (trackedIndex entry))
+              <> expectEqual "acquired indexed mode is exact" RegularFile (indexMode (trackedIndex entry))
+              <> expectEqual "acquired indexed object ID is exact" expectedObjectId (indexObjectId (trackedIndex entry))
+              <> expectEqual "acquired indexed bytes are exact" "indexed bytes\n" (trackedBytes entry)
+          _ -> []
 
 command :: FilePath -> [String] -> IO ()
 command executable arguments = do
@@ -352,6 +415,10 @@ tracked path mode bytes =
 indexRecord :: ByteString -> Text -> ByteString -> ByteString -> ByteString
 indexRecord mode objectId stage path = mode <> " " <> objectBytes objectId <> " " <> stage <> "\t" <> path <> "\0"
 
+taggedStageRecord :: Char -> ByteString -> Text -> ByteString -> ByteString -> ByteString
+taggedStageRecord tag mode objectId stage path =
+  ByteString8.singleton tag <> " " <> indexRecord mode objectId stage path
+
 objectBytes :: Text -> ByteString
 objectBytes = ByteString8.pack . Text.unpack
 
@@ -365,11 +432,11 @@ expectLeft :: Show right => String -> Either left right -> [String]
 expectLeft _ (Left _) = []
 expectLeft label (Right accepted) = [label <> ": malformed input was accepted as " <> show accepted]
 
-expectLeftContains :: String -> (SnapshotProblem -> Bool) -> Either [SnapshotProblem] [IndexEntry] -> [String]
+expectLeftContains :: Show right => String -> (SnapshotProblem -> Bool) -> Either [SnapshotProblem] right -> [String]
 expectLeftContains label predicate result = case result of
   Left problems | any predicate problems -> []
   Left problems -> [label <> ": expected problem was absent from " <> show problems]
-  Right entries -> [label <> ": malformed input was accepted as " <> show entries]
+  Right accepted -> [label <> ": malformed input was accepted as " <> show accepted]
 
 expectFindingAt :: String -> Text -> FilePath -> CheckResult -> [String]
 expectFindingAt label code subject result =

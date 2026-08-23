@@ -47,7 +47,7 @@ Known partial** only.
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
 satisfied and human-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, a checked-in generated fixture/oracle/mutant, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -113,7 +113,8 @@ schema migration, amoebius runtime image build, or independently useful second c
 - [Low-Code UI Runtime §15 — Versioning, rollout, and generated artifacts](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts):
   bind exact identities, immutable plans, compatibility witnesses, and pre-dispatch stale rejection.
 - [Generated Artifacts Doctrine §2 — What is generated and from what](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what):
-  keep plans, contract manifests, dispatch tables, and the generic bundle generated and uncommitted.
+  generate plans, contract manifests, dispatch tables, and the generic bundle lazily beneath ignored
+  `.build/**`; retain only their Haskell declarations and generators.
 - [`release_lifecycle_doctrine.md` §2 — `Release` and the immutable release ledger (`releaseHash`)](../documents/engineering/release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash):
   carry UI content under the existing immutable release identity.
 - [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence):
@@ -125,6 +126,8 @@ schema migration, amoebius runtime image build, or independently useful second c
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
 > **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+>
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 72.1: Release immutable UI plans without rebuilding the runtime ⏸️
 
@@ -142,7 +145,8 @@ per-app frontend image, half-published plan, mixed-plan execution, or stale-plan
   `BoundUiProgram`.
 - Compatibility checking and fail-closed `ReloadRequired` admission before handler lookup.
 - One amoebius runtime image identity shared by the two gate releases.
-- Phase-0 manifests, plan-pair/stale-digest matrices, fresh-action oracle, and three named mutants.
+- Phase-0 Haskell declarations and independent expectations for manifests, plan-pair/stale-digest matrices, the
+  fresh action, and three named Haskell mutation operators; serialized forms are lazy `.build/**` outputs.
 - A Register-3 ledger recording authenticated challenge and repository-local evidence digests.
 
 ### Validation
@@ -150,11 +154,11 @@ per-app frontend image, half-published plan, mixed-plan execution, or stale-plan
 1. Rejected historical observation: the `ui-program-release-live-gate` Cabal suite recorded a linux-cpu path
    through Keycloak and Envoy.
 2. Publish both program revisions and compare both immutable plan objects, release hashes, source keys, and
-   atomic pointer history with the independent fixtures.
+   atomic pointer history with the independent Haskell expectations.
 3. Send matching, stale-authority, stale-content, missing-half, A-client/B-server, and B-client/A-server
    requests; require the two matching canary actions and zero invalid-pair actions.
-4. Assert one unchanged generic client image and no per-program image or committed generated plan.
-5. Re-run each named mutant and require the same command to fail on its owned assertion.
+4. Assert one unchanged generic client image and no per-program image or repository-retained generated plan.
+5. Re-run each named Haskell changed-subject mutation and require the same command to fail on its owned assertion.
 
 ### Remaining Work
 
@@ -168,11 +172,12 @@ their later phases and are not claimed by this gate.
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record the tested stale-plan rejection and
   one-generic-runtime-image boundary.
 - `documents/engineering/generated_artifacts_doctrine.md` — record plans, codecs, dispatch tables, and app
-  manifests as generated, content-addressed, and absent from the committed tree.
+  manifests as content-addressed outputs generated lazily beneath ignored `.build/**` and absent from version
+  control.
 - `documents/engineering/release_lifecycle_doctrine.md` — record the immutable UI objects and two-release
   pointer history under the release hash.
 - `documents/engineering/testing_doctrine.md` — record the fresh action, repository-local evidence, independent
-  manifests, and killed stale-digest/image-rebuild mutants.
+  Haskell manifest expectations, and killed Haskell stale-digest/image-rebuild changed subjects.
 
 **Cross-references to add:**
 
