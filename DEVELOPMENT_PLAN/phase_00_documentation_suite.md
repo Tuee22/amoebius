@@ -1665,12 +1665,13 @@ with `-Wall -Wcompat -Werror`. Every row reached the Documentation subject and c
 error. This proves only that none of the current selector branches wins by making helpers dead; it supplies no
 assigned oracle result, binary witness, Cabal reconciliation, completeness claim, or validation authority.
 
-On 2026-08-24 the Finite Resource Execution Authority Protocol joined the governed engineering corpus as the
+On 2026-08-24 the Shared Host Resource Protocol proposal joined the governed engineering corpus as the
 196th path. The production and independent inventories now pin count 196 and sorted-path digest
 `97964f2fc3e6bf6c98159089f6f2f99683f3ffaab7834504b2a9647d5927d4df`, and source closure names the path
-explicitly. This is documentation-path registration only: the protocol states target shapes, while Phases 29,
-32, 51, and 52–54 retain the compile-fail, pure-boundary, and live-mechanism work. The prose observations and
-finding-manifest digest must be remeasured after this edit, and no sprint or phase status changes.
+explicitly. This is documentation-path registration only. The proposal states a daemonless four-layer target
+topology but amends no phase contract or predecessor edge. Any adoption or evidence obligation must first be
+reconciled into the numeric plan as one coherent change. The prose observations and finding-manifest digest
+must be remeasured after this edit, and no sprint or phase status changes.
 
 The permitted serial `cabal test validation-kernel-component -j1` diagnostic was attempted after that
 registration. Dependency solving and compilation stayed single-worker, but the production
