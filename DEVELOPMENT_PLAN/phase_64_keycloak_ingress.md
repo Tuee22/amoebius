@@ -87,7 +87,7 @@ host, recorded in [substrates.md](substrates.md). The future gate does not exerc
 delete + recreate; a Register-1/2 in-process check cannot discharge it (though the *render-time*
 impossibility of a self-published ingress must first receive Phase-33 and Phase-49 approval).
 
-**Depends on:** [Phase 63](phase_63_platform_services_2.md) — exact current human approval; the numeric chain includes every earlier phase
+**Depends on:** [Phase 63](phase_63_platform_services_2.md)
 **Gate:** `pb validate phase 64`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -96,9 +96,9 @@ impossibility of a self-published ingress must first receive Phase-33 and Phase-
 
 | Key | Contract |
 |---|---|
-| `Claim` | one cohesive claim — *there is exactly one door, and it is Keycloak's*. A workload that tries to publish its own wild ingress must fail rather than be reviewed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: one cohesive claim — *there is exactly one door, and it is Keycloak's*. A workload that tries to publish its own wild ingress must fail rather than be reviewed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 64` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 64` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -111,9 +111,9 @@ impossibility of a self-published ingress must first receive Phase-33 and Phase-
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | MISSING — blocks validation: the current Phase 63 human approval receipt does not exist. |
-| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 63; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Resource provision — UNRESOLVED
 
@@ -201,7 +201,11 @@ before the first effect, while their exact-fit twins render and reconcile.
 ## Sprint 64.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: [Phase 63](phase_63_platform_services_2.md) human approval
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`
 
 ### Objective
@@ -262,7 +266,11 @@ validation candidate.
 ## Sprint 64.2: No self-published wild ingress + public-edge TLS ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: Sprint 64.1
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/illegal_state/illegal_state_catalog.md`, `documents/engineering/pulumi_iac_doctrine.md`
 
 ### Objective
@@ -322,7 +330,11 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 ## Sprint 64.3: East-west NetworkPolicy posture — derived default-deny ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: Sprint 64.2
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/illegal_state/illegal_state_catalog.md`
 
 ### Objective
@@ -369,7 +381,11 @@ candidate.
 ## Sprint 64.4: The single-door + storage-rebind regression gate ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: Sprint 64.3
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/storage_lifecycle_doctrine.md`
 
 ### Objective

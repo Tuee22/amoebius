@@ -49,6 +49,12 @@ qualified-harness digest, and raw-observation digest. It verifies against a huma
 the candidate change cannot amend and use in the same promotion. A path, hash-looking string, or unsigned
 Markdown assertion is not approval.
 
+That receipt binds both the qualified pre-promotion source identity and an exact status-only post-promotion
+projection identity. The projection's closed diff may touch only the tracker, phase, and sprint status fields
+named in the receipt. The human applies it personally; automation may verify but cannot apply it. Any other
+source, contract, oracle, or documentation change requires a new candidate rather than borrowing approval for
+the pre-edit snapshot.
+
 This trust split is intentional. Source in one repository can always be changed so that subject and test
 collude; no program in that same trust domain can prove the absence of such collusion. Independent review and
 human-held signing authority close the authorization gap that mutation testing alone cannot close.
@@ -63,11 +69,11 @@ evidence cannot populate authored contract fields.
 |---|---|
 | `Claim` | One falsifiable capability statement and its explicit exclusions. |
 | `Subject` | The production `.hs` module and entry point exercised; a wrapper, manifest, or gate runner alone is not a subject. |
-| `Command` | Future public target: `pb validate phase NN`. Before Phase 50 has current human approval, the executable candidate command is the exact absolute source-bound Haskell binary built directly from an authenticated, network-independent toolchain input; invoking `pb` is inadmissible evidence. Phase 50 alone subjects `pb` to external runtime observation. Phase 51 onward may use `pb` only while binding the current Phase-50 approval. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
+| `Command` | Future public target: `pb validate phase NN`. Before Phase 50 has current human approval, the executable candidate command is the exact absolute source-bound Haskell binary built directly from an authenticated, network-independent toolchain input; invoking `pb` is inadmissible evidence. Phase 50 starts that exact Haskell OS supervisor directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 approval. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
 | `Oracle` | A separately authored `.hs` oracle module, its independence boundary, provenance, and human reviewer. |
 | `Positive controls` | A closed named corpus and the exact observations expected for each member. |
 | `Paired negatives` | For every foreclosed dimension, a minimally different positive/negative pair and the exact rejection locus and reason. |
-| `Mutants` | For each mutant: operator, production locus, applied-change witness, expected red observation, and controls that must remain green. |
+| `Mutants` | An independently literal oracle-owned selector-to-exact-case registry, exact two-way identity reconciliation against production and build mappings, and, for each mutant, its atomic requirement predicate, operator, production locus, applied-change witness, assigned exact red observation, named rejection locus, and same-harness controls that must remain green. |
 | `Discovery` | The authoritative expected surface, runtime-discovered surface, two-way equality rule, and explicit refusal of empty discovery. |
 | `Challenge` | A post-start nonce/canary for effectful claims, or a reviewed reason that a pure claim uses an independent predicate instead. |
 | `Observer` | The observer outside the subject, raw observation it reads, authenticity check, and fail-closed rule. |
@@ -102,6 +108,10 @@ An oracle is independent only when all of the following are true:
 
 - its expectation is authored from the requirement, not captured or regenerated from subject output;
 - it does not import, call, copy, or mechanically translate the subject's decision function;
+- its fixtures, limits, expected projections, and expected semantic variants use separately authored Haskell
+  types and literals rather than production record constructors, encoders, constants, or shared value lists;
+- every accepted boundary asserts the complete expected projection, and every one-over input asserts one exact
+  refusal reason and locus rather than accepting any failure;
 - its reviewer is not the sole author of the subject behaviour under review;
 - its provenance predates the candidate implementation or has an explicit independent-review receipt; and
 - changing it is reviewed as a contract change and invalidates affected evidence.
@@ -110,6 +120,12 @@ Independent expectations are Haskell source. A second-language copy or repositor
 expectation in TSV, JSON, YAML, Dhall, or any other transport format is not stronger independence; it is
 additional behavioural source that the Haskell-only rule forbids. Byte output is compared by a separately
 authored Haskell semantic predicate or by bytes derived at run time from that predicate under `.build/**`.
+
+An adapter below a missing acquisition, observer, or qualification boundary exposes no success-shaped decoded
+value. Raw parsers, integrity-consistent records, constructors, selectors, and general eliminators are private;
+the public diagnostic front door is an always-refusing `CheckResult` with exact non-empty permanent residue. An
+`Either` right branch, optional finding list, arbitrary-result fold, or detachable getter is non-conforming even
+when its type or function name contains `Diagnostic`.
 
 ### M.3 Mutants must prove that they changed the subject
 
@@ -122,15 +138,22 @@ binary, unexecuted mutant, skipped mutant, or red result at another locus fails 
 The operator set and mutant declarations are Haskell values. The run must demonstrate at least these
 properties:
 
+- an independently literal oracle registry and the production and build inventories contain exactly the same
+  selector identities, with no duplicate, unknown, missing, or unassigned selector or exact-case target;
 - each required mutant is discovered and executed exactly once;
 - each mutant changes the intended production behaviour;
-- the named oracle row turns red for the named reason;
+- the registry-assigned exact oracle row turns red at the named locus for the named reason;
 - unrelated positive controls remain green; and
 - restoring the clean source restores the clean result.
 
 A deliberately broken alternate implementation that production can never select is not a mutant of the
 subject. A build flag is admissible only when the resulting compiled production locus and changed binary are
-both observed.
+both observed. Production or build declarations may be reconciled against the oracle registry, but may not
+generate it or define its expected cardinality. An aggregate oracle red outside the assigned row, a
+warning-as-error caused by dead changed-subject code, or a failure at another boundary is not a mutant kill.
+Every independent acceptance conjunct, permanent refusal, resource and result-retention bound,
+closed-grammar alternative, and routing or composition decision requires an atomic selector; a compound
+challenge is supplemental rather than a substitute.
 
 ### M.4 Harness qualification precedes every candidate
 
@@ -147,7 +170,10 @@ must show that it rejects, at minimum:
 8. a self-reported observer substituted for the external observer;
 9. an authority or bypass violation;
 10. residue or teardown leakage; and
-11. a generated or legacy input smuggled into the cleanroom run.
+11. a generated or legacy input smuggled into the cleanroom run;
+12. a selector omitted from any one of production, the independently literal oracle registry, or the build
+    mapping; and
+13. a changed subject that makes only an unassigned oracle row red.
 
 Qualification and the clean run are separate invocations over the same harness digest. A candidate produced
 by an unqualified harness is rejected regardless of its own result. The qualification corpus is Haskell
@@ -172,10 +198,17 @@ digest binds provenance; it does not make the contents true. The candidate must 
 `green`, `red`, `refused`, or `UNVERIFIED` states. Missing rows, empty arrays, implicit defaults, skipped work,
 or a top-level success bit without row evidence fail schema validation.
 
+An authored `ContractGap` and an observed `EvidenceAbsent` are different typed refusals. A gate-table slot is
+`Bound specification` or `ContractGap`; it never embeds the current presence of a receipt, live host, or run
+artifact. Candidate execution separately records whether each specified input was acquired. In particular,
+`Predecessor` specifies `ImmediatePredecessorApproval Phase N`; a missing or stale receipt is an acquired-run
+finding, not a reason to leave the contract itself as generic `MISSING`. Reader-facing Markdown cannot convert
+either refusal to a satisfied state.
+
 The human reviewer compares the contract, qualification observations, clean observations, source diff,
-unverified residue, and predecessor approval. The reviewer may then issue the external approval receipt and
-personally change status. Automation and LLMs are prohibited from creating, copying, inferring, or claiming
-that approval.
+unverified residue, predecessor approval, and exact proposed status-only projection. The reviewer may then
+issue the external approval receipt and personally apply that projection. Automation and LLMs are prohibited
+from creating, copying, inferring, claiming, or applying that approval.
 
 ---
 
@@ -195,9 +228,14 @@ an active unavailable analyzer is recorded only as explicit later-owned debt and
 the inventory early therefore creates no dependency on later implementation: the owning sprint implements and
 qualifies its analyzer in numerical order.
 
-Retirement is a typed transition, not deletion of executable memory. After the owner analyzer reports zero, its
-reintroduction negative succeeds, predecessor evidence is present, and the human accepts the transition, the ID
-becomes `Retired`; its constructor, owner, analyzer key, and Haskell reintroduction guard remain compiled. The
+The current Sprint-0.2 disposition universe is Active-only. Retirement is a future typed transition, not
+deletion of executable memory. Sprint 0.2 retains a required reintroduction-case identity, not an executed
+guard. An Active zero is admissible only in the owning phase's integrated candidate after the owner analyzer
+implements and passes its independently authored negative; it is candidate readiness, not a status or
+lifecycle transition. After predecessor evidence is present and the human promotes that owning gate, the next
+phase's source records the `Retired` transition. An Active zero before its owner refuses as a stale/missing
+finding, and an Active zero after its owner refuses as an unrecorded post-promotion transition. The retired
+constructor, owner, analyzer key, and qualified Haskell reintroduction negative remain compiled. The
 reader-facing Markdown register contributes no identity, owner, lifecycle state, predicate, count, or join
 operand to that decision. It is active-only, so the accepted retired explanation is removed and Git history is
 the only prose archive. This is accounting, not a waiver: the owning phase must reach zero, and no later phase
@@ -264,12 +302,16 @@ Every phase inherits the following postconditions. They are part of the gate, no
     cannot be represented as closure and refuses once the binding is due or retired. Before its owner it is
     explicit later-owned debt only. The owning phase reaches zero matching findings before it
     may be a validation candidate. Earlier phases account exactly for later-owned findings against those active
-    bindings; findings may not be deferred out of, reassigned by, or survive their owning phase. After accepted
-    retirement, the Haskell ID and reintroduction guard remain even though the active explanation is removed.
+    bindings; findings may not be deferred out of, reassigned by, or survive their owning phase. After promoted
+    retirement, the Haskell ID and qualified owner-domain reintroduction negative remain even though the active explanation is removed.
     The single [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) file explains the inventory to
-    readers. The legacy structural seam may enforce that this exact canonical file exists once, is UTF-8
-    readable, and has no archive alias. The general documentation checker may separately enforce ordinary
-    orientation metadata, headings, links, and anchors. Neither seam may interpret a row, table cell, ID
+    readers. The legacy structural seam enforces that this exact canonical file exists once as a regular
+    non-executable UTF-8 file, that its exact basename occurs nowhere else, and that the exact forbidden archive
+    basename is absent. It does not classify arbitrary renamed prose as a semantic alias. The general
+    documentation checker may separately enforce ordinary orientation metadata, headings, links, and anchors,
+    and it also applies a basename-substring register-cardinality diagnostic and case-folded
+    forbidden-archive-basename content diagnostic. Those documentation findings do not supply legacy semantics.
+    Neither seam may interpret a row, table cell, ID
     spelling, owner phrase, predicate-shaped string, or row count as legacy semantics or use it to alter a
     closure verdict. Human review owns correspondence between the Haskell bindings and that explanation.
 17. **Predecessor closure.** Except Phase 0, the immediately preceding phase has a valid human approval receipt
@@ -308,17 +350,19 @@ Every reconciliation follows these rules:
    analyzer and independent domain reintroduction negative; registering the obligation does not execute later
    work or make the mismatch eligible to close.
 5. Keep that reader-facing register active-only. Closed or superseded explanations are deleted after the human
-   confirms the corresponding Haskell transition; the retired constructor, owner, analyzer key, and
-   reintroduction guard remain compiled, while Git history is the prose archive. No archive file, archive slice,
+   promotes the corresponding owning gate; the retired constructor, owner, analyzer key, and qualified
+   owner-domain reintroduction negative remain compiled, while Git history is the prose archive. No archive file, archive slice,
    “closed” appendix, or second deletion list is permitted. The legacy structural seam checks exact canonical
    file cardinality, UTF-8 readability, and archive absence; the general documentation checker may still
-   enforce ordinary orientation metadata, headings, links, and anchors. Neither interprets a row, cell, ID,
+   enforce ordinary orientation metadata, headings, links, and anchors plus its basename-substring cardinality
+   and forbidden-archive-basename content diagnostics. Neither interprets a row, cell, ID,
    owner, count, or predicate-shaped string into inventory, lifecycle, or closure authority.
 6. Resolve policy ambiguity in doctrine before changing implementation. An audit does not choose product
    policy implicitly.
 7. Update the doctrine owner, phase contract, tracker, component/substrate inventory, Haskell legacy binding,
-   and reader-facing legacy explanation together when a decision changes their shared boundary. The human
-   correspondence review is required even though the Markdown explanation cannot change an executable result.
+   and reader-facing legacy explanation together when a decision changes their shared boundary. The consolidated
+   phase-gate human correspondence review is required even though the Markdown explanation cannot change a
+   legacy binding or closure verdict.
 8. Re-run source closure from an empty generated tree. A local ignored file, pre-existing tool, cache, or
    compatibility copy cannot satisfy a prerequisite silently.
 9. Audit revision history separately. Historical blobs may require a human decision, but they never become a
@@ -354,7 +398,8 @@ silently consuming a condemned source language, a pre-generated artifact, or a l
 - [Phase model](development_plan_phase_model.md) — status, sequence, and human-only promotion
 - [Development-plan tracker](README.md) — the sole current phase-status source
 - [Reader-facing legacy register](legacy_tracking_for_deletion.md) — current divergence explanation only;
-  Haskell owns executable identity, lifecycle, ownership, dispatch, and retained reintroduction guards
+  Haskell owns executable identity, lifecycle, ownership, dispatch, and required reintroduction-case identities;
+  an owning analyzer supplies a qualified executable negative before any retirement
 - [Migration doctrine](../documents/engineering/migration_doctrine.md) — distinguishes active prose retirement
   from permanent executable reintroduction memory
 - [Repository layout doctrine](../documents/engineering/repository_layout_doctrine.md) — the complete tree and source classification

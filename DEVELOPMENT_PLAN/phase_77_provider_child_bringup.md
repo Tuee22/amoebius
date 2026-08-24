@@ -129,7 +129,7 @@ convergence. EKS is the deploy target, not a hardware substrate
 **Register:** 3 (live infrastructure) — the gate brings a real provider child through bootstrap, handoff, and
 standard-service convergence and re-runs it; no register-1/2 in-process check discharges it.
 
-**Depends on:** [Phase 76](phase_76_provider_deploy_checkpoint.md) — exact current human approval; the numeric chain includes every earlier phase
+**Depends on:** [Phase 76](phase_76_provider_deploy_checkpoint.md)
 **Gate:** `pb validate phase 77`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -138,9 +138,9 @@ standard-service convergence and re-runs it; no register-1/2 in-process check di
 
 | Key | Contract |
 |---|---|
-| `Claim` | one cohesive claim — *a provider child is the same shape as any other amoebius cluster*. Hostless means the control-plane daemon has no privileged host beneath it to fall back on. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: one cohesive claim — *a provider child is the same shape as any other amoebius cluster*. Hostless means the control-plane daemon has no privileged host beneath it to fall back on. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 77` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 77` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -153,9 +153,9 @@ standard-service convergence and re-runs it; no register-1/2 in-process check di
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | MISSING — blocks validation: the current Phase 76 human approval receipt does not exist. |
-| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 76; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Resource provision — UNRESOLVED
 
@@ -216,6 +216,12 @@ standard-service convergence and re-runs it; no register-1/2 in-process check di
 ## Sprint 77.1: Two-stage capacity bootstrap for a hostless provider child ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: [Phase 76](phase_76_provider_deploy_checkpoint.md) human approval
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
 
@@ -263,6 +269,12 @@ provider add-on and CRI-preload boundaries. The local and retained-Kubernetes pr
 ## Sprint 77.2: Parent→child Lease handoff + hostless daemon topology ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: Sprint 77.1
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
 
@@ -318,6 +330,12 @@ ordering and no-mutation boundary only; actual provider host foreclosure remains
 ## Sprint 77.3: Standard-HA platform-service convergence from typed manifests ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: Sprint 77.2
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
 
@@ -364,6 +382,12 @@ cloud LoadBalancer behavior, zero Helm calls, and zero public-registry network p
 ## Sprint 77.4: The provider-child bring-up gate ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: Sprint 77.3
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
 

@@ -73,7 +73,7 @@ pure; the canonical Haskell gate has no credentials or network.
 **Register:** 1 — pure/semantic-oracle. Logical projection is independently constrained; interpreter fidelity, release
 publication, edge enforcement, and live authority freshness remain UNVERIFIED.
 
-**Depends on:** [Phase 39](phase_39_ui_effect_binding.md) — exact current human approval; the numeric chain includes every earlier phase
+**Depends on:** [Phase 39](phase_39_ui_effect_binding.md)
 **Gate:** `pb validate phase 40`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -82,9 +82,9 @@ publication, edge enforcement, and live authority freshness remain UNVERIFIED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | Target only — one sealed Haskell program compiles purely to a matching finite artifact set; serialized output and mutations are lazy `.build/**` products, not tracked authority. Interpretation and live freshness are not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Target only — one sealed Haskell program compiles purely to a matching finite artifact set; serialized output and mutations are lazy `.build/**` products, not tracked authority. Interpretation and live freshness are not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 40` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 40` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -97,9 +97,9 @@ publication, edge enforcement, and live authority freshness remain UNVERIFIED.
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | MISSING — blocks validation: the current Phase 39 human approval receipt does not exist. |
-| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 39; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Doctrine adopted
 
@@ -120,6 +120,12 @@ publication, edge enforcement, and live authority freshness remain UNVERIFIED.
 ## Sprint 40.1: Paired semantic projection ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Blocked by**: [Phase 39](phase_39_ui_effect_binding.md) human approval
+**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its human reviewer have not been bound to this sprint.
+**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
 
 ### Objective
 
@@ -144,6 +150,12 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 ## Sprint 40.2: Canonical artifacts, digests, and demand ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Blocked by**: Sprint 40.1
+**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its human reviewer have not been bound to this sprint.
+**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
 
 ### Objective
 
@@ -173,6 +185,12 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 ## Sprint 40.3: Calculus projection and phase seal ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Blocked by**: Sprint 40.2
+**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its human reviewer have not been bound to this sprint.
+**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
 
 ### Objective
 

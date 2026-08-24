@@ -1,574 +1,1029 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module PolicyContractOracle
-  ( runPolicyContractOracle
+  ( policyContractSelectorAssignments
+  , policyContractSelectorNames
+  , runPolicyContractOracle
+  , runPolicyContractSelectorOracle
+  , runPolicyContractUnaffectedControl
   ) where
 
--- Component diagnostics only. The expected values below are stated
--- independently of the production constructor. This is not human prose
--- correspondence review, changed-subject qualification, phase validation, or
--- promotion evidence.
+-- Hardware-free component diagnostics only.  The selector registry, exact
+-- ordered result, and serialized wire below are oracle-owned literals.  This
+-- module imports only the refusal-only public facade.  It performs no ambient
+-- I/O and cannot validate or promote a phase.
 
-import Amoebius.Validation.PolicyContract
-import Amoebius.Validation.Dispatch (checkPhaseZeroSnapshot)
-import Amoebius.Validation.SourceClosure (SourceSnapshot (..))
-import Amoebius.Validation.Types
-  ( CheckResult (..)
-  , Finding (..)
-  , Observation (..)
-  )
+import Amoebius.Validation.PolicyContract (policyContractDiagnostic)
+import Amoebius.Validation.Types (CheckResult (..), Finding (..), Observation (..))
 import Control.Monad (unless)
+import Crypto.Hash qualified as Crypto
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as ByteString8
-import Data.List ((\\))
-import Data.Map.Strict qualified as Map
+import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
+import Data.Text.Encoding qualified as TextEncoding
+
+policyContractSelectorIntents :: [(String, String, String)]
+policyContractSelectorIntents =
+  [ ( "VALIDATION_POLICY_ALTERNATE_REGISTRY_MUTANT"
+    , "closed constructor universe: registry provider"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_CONTRACT_GENERATION_FIELD_MUTANT"
+    , "exact PolicyContract component comparison: generation"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_CONTRACT_ORDERING_FIELD_MUTANT"
+    , "exact PolicyContract component comparison: ordering"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_CONTRACT_PB_FIELD_MUTANT"
+    , "exact PolicyContract component comparison: pb"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_CONTRACT_PROMOTION_FIELD_MUTANT"
+    , "exact PolicyContract component comparison: promotion"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_CONTRACT_REGISTER_FIELD_MUTANT"
+    , "exact PolicyContract component comparison: register"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_CONTRACT_REGISTRY_FIELD_MUTANT"
+    , "exact PolicyContract component comparison: registry"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_CONTRACT_SOURCE_FIELD_MUTANT"
+    , "exact PolicyContract component comparison: source"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_CONTRACT_STATUS_RESET_FIELD_MUTANT"
+    , "exact PolicyContract component comparison: status reset"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_DIGEST_BINDING_MUTANT"
+    , "contract digest binds the exact serialized policy wire"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_FINDING_ORDER_MUTANT"
+    , "public diagnostic finding order"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_ACTIVE_REGISTER_DROP_MUTANT"
+    , "public diagnostic observation retention: active register"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_CONTRACT_SHA256_DROP_MUTANT"
+    , "public diagnostic observation retention: contract sha256"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_DIAGNOSTIC_STATUS_DROP_MUTANT"
+    , "public diagnostic observation retention: diagnostic status"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_DSL_BARRIER_SOURCE_CLOSURE_DROP_MUTANT"
+    , "public diagnostic observation retention: dsl barrier source closure"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_GENERATION_ROOT_DROP_MUTANT"
+    , "public diagnostic observation retention: generation root"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_ORDER_MUTANT"
+    , "public diagnostic observation order"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_OWNER_COUNT_DROP_MUTANT"
+    , "public diagnostic observation retention: owner count"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_PB_OPERATIONS_DROP_MUTANT"
+    , "public diagnostic observation retention: pb operations"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_PB_ROOT_DROP_MUTANT"
+    , "public diagnostic observation retention: pb root"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_PB_SOURCE_LANGUAGE_DROP_MUTANT"
+    , "public diagnostic observation retention: pb source language"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_PB_TRANSPORT_DROP_MUTANT"
+    , "public diagnostic observation retention: pb transport"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_PHASE_ROLES_DROP_MUTANT"
+    , "public diagnostic observation retention: phase roles"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_PHASE_ZERO_STATUS_DROP_MUTANT"
+    , "public diagnostic observation retention: phase zero status"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_PROMOTION_AUTHORITY_DROP_MUTANT"
+    , "public diagnostic observation retention: promotion authority"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_REGISTRY_PROVIDER_DROP_MUTANT"
+    , "public diagnostic observation retention: registry provider"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OBSERVATION_SOURCE_LANGUAGE_DROP_MUTANT"
+    , "public diagnostic observation retention: source language"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_ACTIVE_LEGACY_REGISTER_ANCHOR_MUTANT"
+    , "canonical owner binding: active legacy register anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_ACTIVE_LEGACY_REGISTER_MATCH_MUTANT"
+    , "canonical owner binding: active legacy register match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_ACTIVE_LEGACY_REGISTER_PATH_MUTANT"
+    , "canonical owner binding: active legacy register path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_ACTIVE_LEGACY_REGISTER_SECTION_MUTANT"
+    , "canonical owner binding: active legacy register section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_CLUSTER_REGISTRY_PLACEMENT_ANCHOR_MUTANT"
+    , "canonical owner binding: cluster registry placement anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_CLUSTER_REGISTRY_PLACEMENT_MATCH_MUTANT"
+    , "canonical owner binding: cluster registry placement match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_CLUSTER_REGISTRY_PLACEMENT_PATH_MUTANT"
+    , "canonical owner binding: cluster registry placement path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_CLUSTER_REGISTRY_PLACEMENT_SECTION_MUTANT"
+    , "canonical owner binding: cluster registry placement section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_CLUSTER_REGISTRY_PROVIDER_ANCHOR_MUTANT"
+    , "canonical owner binding: cluster registry provider anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_CLUSTER_REGISTRY_PROVIDER_MATCH_MUTANT"
+    , "canonical owner binding: cluster registry provider match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_CLUSTER_REGISTRY_PROVIDER_PATH_MUTANT"
+    , "canonical owner binding: cluster registry provider path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_CLUSTER_REGISTRY_PROVIDER_SECTION_MUTANT"
+    , "canonical owner binding: cluster registry provider section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_DSL_BARRIER_SOURCE_CLOSURE_ANCHOR_MUTANT"
+    , "canonical owner binding: dsl barrier source closure anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_DSL_BARRIER_SOURCE_CLOSURE_MATCH_MUTANT"
+    , "canonical owner binding: dsl barrier source closure match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_DSL_BARRIER_SOURCE_CLOSURE_PATH_MUTANT"
+    , "canonical owner binding: dsl barrier source closure path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_DSL_BARRIER_SOURCE_CLOSURE_SECTION_MUTANT"
+    , "canonical owner binding: dsl barrier source closure section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_INVENTORY_PREDICATE_MUTANT"
+    , "closed owner inventory predicate"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_LAZY_BUILD_GENERATION_ANCHOR_MUTANT"
+    , "canonical owner binding: lazy build generation anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_LAZY_BUILD_GENERATION_MATCH_MUTANT"
+    , "canonical owner binding: lazy build generation match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_LAZY_BUILD_GENERATION_PATH_MUTANT"
+    , "canonical owner binding: lazy build generation path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_LAZY_BUILD_GENERATION_SECTION_MUTANT"
+    , "canonical owner binding: lazy build generation section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_MAP_MUTANT"
+    , "canonical registry-provider owner row remains independently bound"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_NUMERIC_PHASE_ORDER_ANCHOR_MUTANT"
+    , "canonical owner binding: numeric phase order anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_NUMERIC_PHASE_ORDER_MATCH_MUTANT"
+    , "canonical owner binding: numeric phase order match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_NUMERIC_PHASE_ORDER_PATH_MUTANT"
+    , "canonical owner binding: numeric phase order path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_NUMERIC_PHASE_ORDER_SECTION_MUTANT"
+    , "canonical owner binding: numeric phase order section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PB_BOOTSTRAP_ANCHOR_MUTANT"
+    , "canonical owner binding: pb bootstrap anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PB_BOOTSTRAP_MATCH_MUTANT"
+    , "canonical owner binding: pb bootstrap match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PB_BOOTSTRAP_PATH_MUTANT"
+    , "canonical owner binding: pb bootstrap path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PB_BOOTSTRAP_SECTION_MUTANT"
+    , "canonical owner binding: pb bootstrap section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_ANCHOR_MUTANT"
+    , "canonical owner binding: prehardware promotion barrier anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_MATCH_MUTANT"
+    , "canonical owner binding: prehardware promotion barrier match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_PATH_MUTANT"
+    , "canonical owner binding: prehardware promotion barrier path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_SECTION_MUTANT"
+    , "canonical owner binding: prehardware promotion barrier section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_ANCHOR_MUTANT"
+    , "canonical owner binding: promotion authority anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_MATCH_MUTANT"
+    , "canonical owner binding: promotion authority match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_PATH_MUTANT"
+    , "canonical owner binding: promotion authority path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_SECTION_MUTANT"
+    , "canonical owner binding: promotion authority section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_TRACKED_SOURCE_ANCHOR_MUTANT"
+    , "canonical owner binding: tracked source anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_TRACKED_SOURCE_MATCH_MUTANT"
+    , "canonical owner binding: tracked source match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_TRACKED_SOURCE_PATH_MUTANT"
+    , "canonical owner binding: tracked source path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_TRACKED_SOURCE_SECTION_MUTANT"
+    , "canonical owner binding: tracked source section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_VALIDATION_STATUS_RESET_ANCHOR_MUTANT"
+    , "canonical owner binding: validation status reset anchor"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_VALIDATION_STATUS_RESET_MATCH_MUTANT"
+    , "canonical owner binding: validation status reset match"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_VALIDATION_STATUS_RESET_PATH_MUTANT"
+    , "canonical owner binding: validation status reset path"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_OWNER_VALIDATION_STATUS_RESET_SECTION_MUTANT"
+    , "canonical owner binding: validation status reset section"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_PB_TRANSPORT_MUTANT"
+    , "closed constructor universe: pb transport rule"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_REGISTRY_PLACEMENT_PREDICATE_MUTANT"
+    , "registry contract predicate: placement"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_REGISTRY_REFERENCE_PREDICATE_MUTANT"
+    , "registry contract predicate: reference"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_REGISTRY_SELECTION_PREDICATE_MUTANT"
+    , "registry contract predicate: selection"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_DIAGNOSTIC_ONLY_CODE_MUTANT"
+    , "permanent refusal residue: diagnostic only code"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_DIAGNOSTIC_ONLY_DETAIL_MUTANT"
+    , "permanent refusal residue: diagnostic only detail"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_DIAGNOSTIC_ONLY_DROP_MUTANT"
+    , "permanent refusal residue: diagnostic only drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_DIAGNOSTIC_ONLY_SUBJECT_MUTANT"
+    , "permanent refusal residue: diagnostic only subject"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_CODE_MUTANT"
+    , "permanent refusal residue: human review code"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_DETAIL_MUTANT"
+    , "permanent refusal residue: human review detail"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_DROP_MUTANT"
+    , "permanent refusal residue: human review drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_SUBJECT_MUTANT"
+    , "permanent refusal residue: human review subject"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_QUALIFICATION_CODE_MUTANT"
+    , "permanent refusal residue: qualification code"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_QUALIFICATION_DETAIL_MUTANT"
+    , "permanent refusal residue: qualification detail"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_QUALIFICATION_DROP_MUTANT"
+    , "permanent refusal residue: qualification drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_QUALIFICATION_SUBJECT_MUTANT"
+    , "permanent refusal residue: qualification subject"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_CODE_MUTANT"
+    , "permanent refusal residue: source custody code"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_DETAIL_MUTANT"
+    , "permanent refusal residue: source custody detail"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_DROP_MUTANT"
+    , "permanent refusal residue: source custody drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_SUBJECT_MUTANT"
+    , "permanent refusal residue: source custody subject"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_RESULT_NAME_MUTANT"
+    , "public diagnostic result name"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_GENERATION_ROOT_DROP_MUTANT"
+    , "serialized policy wire: generation root drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_GENERATION_TIMING_DROP_MUTANT"
+    , "serialized policy wire: generation timing drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_GENERATION_TRACKED_ARTIFACT_DROP_MUTANT"
+    , "serialized policy wire: generation tracked artifact drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_HEADER_DROP_MUTANT"
+    , "serialized policy wire: header drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_LEGACY_ACTIVE_REGISTER_CARDINALITY_DROP_MUTANT"
+    , "serialized policy wire: legacy active register cardinality drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_LEGACY_ACTIVE_REGISTER_DROP_MUTANT"
+    , "serialized policy wire: legacy active register drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_LEGACY_ARCHIVE_RULE_DROP_MUTANT"
+    , "serialized policy wire: legacy archive rule drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_LEGACY_FORBIDDEN_ARCHIVE_DROP_MUTANT"
+    , "serialized policy wire: legacy forbidden archive drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_LEGACY_HISTORY_DROP_MUTANT"
+    , "serialized policy wire: legacy history drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_LEGACY_PREDICATE_AUTHORITY_DROP_MUTANT"
+    , "serialized policy wire: legacy predicate authority drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_ORDERING_DOMAIN_DROP_MUTANT"
+    , "serialized policy wire: ordering domain drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_ORDERING_DSL_BARRIER_SOURCE_CLOSURE_DROP_MUTANT"
+    , "serialized policy wire: ordering dsl barrier source closure drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_ORDERING_PB_TRANSPORT_DROP_MUTANT"
+    , "serialized policy wire: ordering pb transport drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_ORDERING_PHASE50_MIGRATION_DROP_MUTANT"
+    , "serialized policy wire: ordering phase50 migration drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_ORDERING_PREDECESSOR_DROP_MUTANT"
+    , "serialized policy wire: ordering predecessor drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_ORDERING_PREHARDWARE_DROP_MUTANT"
+    , "serialized policy wire: ordering prehardware drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_ORDERING_ROLES_DROP_MUTANT"
+    , "serialized policy wire: ordering roles drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_ORDER_MUTANT"
+    , "serialized policy wire: order"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_ACTIVE_LEGACY_REGISTER_DROP_MUTANT"
+    , "serialized policy wire: owner active legacy register drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_CLUSTER_REGISTRY_PLACEMENT_DROP_MUTANT"
+    , "serialized policy wire: owner cluster registry placement drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_CLUSTER_REGISTRY_PROVIDER_DROP_MUTANT"
+    , "serialized policy wire: owner cluster registry provider drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_DSL_BARRIER_SOURCE_CLOSURE_DROP_MUTANT"
+    , "serialized policy wire: owner dsl barrier source closure drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_LAZY_BUILD_GENERATION_DROP_MUTANT"
+    , "serialized policy wire: owner lazy build generation drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_NUMERIC_PHASE_ORDER_DROP_MUTANT"
+    , "serialized policy wire: owner numeric phase order drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_PB_BOOTSTRAP_DROP_MUTANT"
+    , "serialized policy wire: owner pb bootstrap drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_PREHARDWARE_PROMOTION_BARRIER_DROP_MUTANT"
+    , "serialized policy wire: owner prehardware promotion barrier drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_PROMOTION_AUTHORITY_DROP_MUTANT"
+    , "serialized policy wire: owner promotion authority drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_TRACKED_SOURCE_DROP_MUTANT"
+    , "serialized policy wire: owner tracked source drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_VALIDATION_STATUS_RESET_DROP_MUTANT"
+    , "serialized policy wire: owner validation status reset drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_PB_ADMISSION_DROP_MUTANT"
+    , "serialized policy wire: pb admission drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_PB_OPERATIONS_DROP_MUTANT"
+    , "serialized policy wire: pb operations drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_PB_ROOT_DROP_MUTANT"
+    , "serialized policy wire: pb root drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_PB_SOURCE_LANGUAGE_DROP_MUTANT"
+    , "serialized policy wire: pb source language drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_PROMOTION_AUTHORITY_DROP_MUTANT"
+    , "serialized policy wire: promotion authority drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_PROMOTION_AUTOMATION_ROLE_DROP_MUTANT"
+    , "serialized policy wire: promotion automation role drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_PROMOTION_STATUS_MUTATION_DROP_MUTANT"
+    , "serialized policy wire: promotion status mutation drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_REGISTRY_PLACEMENT_DROP_MUTANT"
+    , "serialized policy wire: registry placement drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_REGISTRY_PROVIDER_DROP_MUTANT"
+    , "serialized policy wire: registry provider drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_SOURCE_BEHAVIORAL_LANGUAGE_DROP_MUTANT"
+    , "serialized policy wire: source behavioral language drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_SOURCE_CLASSIFICATION_DROP_MUTANT"
+    , "serialized policy wire: source classification drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_SOURCE_PUBLIC_BEHAVIOR_AUTHORITY_DROP_MUTANT"
+    , "serialized policy wire: source public behavior authority drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_STATUS_HISTORICAL_EVIDENCE_DROP_MUTANT"
+    , "serialized policy wire: status historical evidence drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_STATUS_PHASES_01_95_DROP_MUTANT"
+    , "serialized policy wire: status phases 01 95 drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_STATUS_PHASE_00_DROP_MUTANT"
+    , "serialized policy wire: status phase 00 drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_STATUS_SPRINTS_DROP_MUTANT"
+    , "serialized policy wire: status sprints drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_TRAILING_NEWLINE_MUTANT"
+    , "serialized policy wire: trailing newline"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_ARCHIVE_REGISTER_RULE_DROP_MUTANT"
+    , "serialized policy wire: universe archive register rule drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_AUTOMATION_ROLE_DROP_MUTANT"
+    , "serialized policy wire: universe automation role drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_BEHAVIORAL_LANGUAGE_DROP_MUTANT"
+    , "serialized policy wire: universe behavioral language drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_BOOTSTRAP_OPERATION_DROP_MUTANT"
+    , "serialized policy wire: universe bootstrap operation drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_DSL_BARRIER_SOURCE_CLOSURE_DROP_MUTANT"
+    , "serialized policy wire: universe dsl barrier source closure drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_GENERATION_ROOT_DROP_MUTANT"
+    , "serialized policy wire: universe generation root drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_GENERATION_TIMING_DROP_MUTANT"
+    , "serialized policy wire: universe generation timing drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_HISTORICAL_EVIDENCE_RULE_DROP_MUTANT"
+    , "serialized policy wire: universe historical evidence rule drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PB_ADMISSION_DROP_MUTANT"
+    , "serialized policy wire: universe pb admission drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PB_SOURCE_LANGUAGE_DROP_MUTANT"
+    , "serialized policy wire: universe pb source language drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PB_TRANSPORT_RULE_DROP_MUTANT"
+    , "serialized policy wire: universe pb transport rule drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PHASE50_MIGRATION_RULE_DROP_MUTANT"
+    , "serialized policy wire: universe phase50 migration rule drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PHASE_ROLE_DROP_MUTANT"
+    , "serialized policy wire: universe phase role drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_POLICY_ID_DROP_MUTANT"
+    , "serialized policy wire: universe policy id drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PREDECESSOR_RULE_DROP_MUTANT"
+    , "serialized policy wire: universe predecessor rule drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PREHARDWARE_RULE_DROP_MUTANT"
+    , "serialized policy wire: universe prehardware rule drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PROMOTION_AUTHORITY_DROP_MUTANT"
+    , "serialized policy wire: universe promotion authority drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PUBLIC_BEHAVIOR_AUTHORITY_DROP_MUTANT"
+    , "serialized policy wire: universe public behavior authority drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_REGISTER_CARDINALITY_DROP_MUTANT"
+    , "serialized policy wire: universe register cardinality drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_REGISTER_HISTORY_DROP_MUTANT"
+    , "serialized policy wire: universe register history drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_REGISTER_PREDICATE_AUTHORITY_DROP_MUTANT"
+    , "serialized policy wire: universe register predicate authority drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_REGISTRY_PLACEMENT_DROP_MUTANT"
+    , "serialized policy wire: universe registry placement drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_REGISTRY_PROVIDER_DROP_MUTANT"
+    , "serialized policy wire: universe registry provider drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_RESET_PHASE_STATUS_DROP_MUTANT"
+    , "serialized policy wire: universe reset phase status drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_SOURCE_CLASSIFICATION_DROP_MUTANT"
+    , "serialized policy wire: universe source classification drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_SPRINT_RESET_RULE_DROP_MUTANT"
+    , "serialized policy wire: universe sprint reset rule drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_STATUS_MUTATION_AUTHORITY_DROP_MUTANT"
+    , "serialized policy wire: universe status mutation authority drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_TRACKED_GENERATED_ARTIFACT_DROP_MUTANT"
+    , "serialized policy wire: universe tracked generated artifact drop"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_ARCHIVE_REGISTER_RULE_MUTANT"
+    , "closed constructor universe: archive register rule"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_AUTOMATION_ROLE_MUTANT"
+    , "closed constructor universe: automation role"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_BEHAVIORAL_LANGUAGE_MUTANT"
+    , "closed constructor universe: behavioral language"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_BOOTSTRAP_OPERATION_MUTANT"
+    , "closed constructor universe: bootstrap operation"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_DSL_BARRIER_SOURCE_CLOSURE_MUTANT"
+    , "closed constructor universe: dsl barrier source closure"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_GENERATION_ROOT_MUTANT"
+    , "closed constructor universe: generation root"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_GENERATION_TIMING_MUTANT"
+    , "closed constructor universe: generation timing"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_HISTORICAL_EVIDENCE_RULE_MUTANT"
+    , "closed constructor universe: historical evidence rule"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_PB_ADMISSION_MUTANT"
+    , "closed constructor universe: pb admission"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_PB_SOURCE_LANGUAGE_MUTANT"
+    , "closed constructor universe: pb source language"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_PHASE50_MIGRATION_RULE_MUTANT"
+    , "closed constructor universe: phase50 migration rule"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_PHASE_ROLE_MUTANT"
+    , "closed constructor universe: phase role"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_POLICY_ID_MUTANT"
+    , "closed constructor universe: policy id"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_PREDECESSOR_RULE_MUTANT"
+    , "closed constructor universe: predecessor rule"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_PREHARDWARE_RULE_MUTANT"
+    , "closed constructor universe: prehardware rule"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_PROMOTION_AUTHORITY_MUTANT"
+    , "closed constructor universe: promotion authority"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_PUBLIC_BEHAVIOR_AUTHORITY_MUTANT"
+    , "closed constructor universe: public behavior authority"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_REGISTER_CARDINALITY_MUTANT"
+    , "closed constructor universe: register cardinality"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_REGISTER_HISTORY_MUTANT"
+    , "closed constructor universe: register history"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_REGISTER_PREDICATE_AUTHORITY_MUTANT"
+    , "closed constructor universe: register predicate authority"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_REGISTRY_PLACEMENT_MUTANT"
+    , "closed constructor universe: registry placement"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_RESET_PHASE_STATUS_MUTANT"
+    , "closed constructor universe: reset phase status"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_SOURCE_CLASSIFICATION_MUTANT"
+    , "closed constructor universe: source classification"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_SPRINT_RESET_RULE_MUTANT"
+    , "closed constructor universe: sprint reset rule"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_STATUS_MUTATION_AUTHORITY_MUTANT"
+    , "closed constructor universe: status mutation authority"
+    , "canonical policy diagnostic"
+    )
+  , ( "VALIDATION_POLICY_UNIVERSE_TRACKED_GENERATED_ARTIFACT_MUTANT"
+    , "closed constructor universe: tracked generated artifact"
+    , "canonical policy diagnostic"
+    )
+  ]
+
+policyContractSelectorNames :: [String]
+policyContractSelectorNames =
+  [selector | (selector, _, _) <- policyContractSelectorIntents]
+
+policyContractSelectorAssignments :: [(String, String)]
+policyContractSelectorAssignments =
+  [(selector, target) | (selector, _, target) <- policyContractSelectorIntents]
 
 runPolicyContractOracle :: IO ()
 runPolicyContractOracle =
   finishDiagnostics
     "PolicyContractOracle"
-    ( concat
-        [ expectCanonicalSurface
-        , expectDeltaFindings
-            "missing pb operation"
-            [ ExpectedFinding
-                "POLICY-PB"
-                "policy.pb"
-                "OpaqueArgumentPreservingExec"
+    (policyLiteralIntegrityProblems <> exactPolicyProblems)
+
+runPolicyContractSelectorOracle :: String -> IO ()
+runPolicyContractSelectorOracle selector =
+  finishDiagnostics
+    "PolicyContractOracle selector"
+    ( policyLiteralIntegrityProblems
+        <> case
+          [target | (candidate, _, target) <- policyContractSelectorIntents, candidate == selector] of
+          ["canonical policy diagnostic"] -> exactPolicyProblems
+          targets ->
+            [ "selector intent is not exactly resolvable: selector="
+                <> selector
+                <> "; exact-case-count="
+                <> show (length targets)
             ]
-            ( canonicalPolicyContract
-                { pbContract =
-                    (pbContract canonicalPolicyContract)
-                      { pbOperations = Set.delete OpaqueArgumentPreservingExec (pbOperations (pbContract canonicalPolicyContract))
-                      }
-                }
-            )
-        , expectDeltaFindings
-            "owner-map production value redirected"
-            [ ExpectedFinding
-                "POLICY-OWNER-MISMATCH"
-                "policy.tracked-source-boundary"
-                "documents/engineering/repository_layout_doctrine.md#1-classification-rule"
-            ]
-            ( canonicalPolicyContract
-                { contractOwners =
-                    Map.insert
-                      TrackedSourceBoundary
-                      (PolicyOwnerReference "documents/engineering/image_build_doctrine.md" "2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster" "2. The single Distribution rule")
-                      (contractOwners canonicalPolicyContract)
-                }
-            )
-        , expectDeltaFindings
-            "registry placement owner collapsed into provider owner"
-            [ ExpectedFinding
-                "POLICY-OWNER-MISMATCH"
-                "policy.cluster-registry-placement"
-                "documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster"
-            ]
-            ( canonicalPolicyContract
-                { contractOwners =
-                    Map.insert
-                      ClusterRegistryPlacement
-                      (PolicyOwnerReference "documents/engineering/service_capability_doctrine.md" "3-canonical-providers-extension-is-capability-specific" "3. Canonical providers; extension is capability-specific")
-                      (contractOwners canonicalPolicyContract)
-                }
-            )
-        , expectDeltaFindings
-            "owner-map member omitted"
-            [ ExpectedFinding
-                "POLICY-OWNER-INVENTORY"
-                "policy.owners"
-                "each closed PolicyId exactly once"
-            , ExpectedFinding
-                "POLICY-OWNER-MISMATCH"
-                "policy.promotion-authority"
-                "development_plan_gate_integrity.md#m6-candidate-evidence-and-human-promotion"
-            ]
-            (canonicalPolicyContract {contractOwners = Map.delete PromotionAuthorityPolicy (contractOwners canonicalPolicyContract)})
-        , expectDeltaFindings
-            "legacy register renamed to eliminated archive"
-            [ ExpectedFinding
-                "POLICY-REGISTER"
-                "policy.legacy-register"
-                "observed RegisterContract {activeRegisterPath = \"DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md\""
-            ]
-            ( canonicalPolicyContract
-                { registerContract =
-                    (registerContract canonicalPolicyContract)
-                      { activeRegisterPath = "DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md"
-                      }
-                }
-            )
-        , expectDeltaFindings
-            "forbidden archive path redirected"
-            [ ExpectedFinding
-                "POLICY-REGISTER"
-                "policy.legacy-register"
-                "forbiddenArchivePath = \"DEVELOPMENT_PLAN/legacy_tracking_for_deletion_retired.md\""
-            ]
-            ( canonicalPolicyContract
-                { registerContract =
-                    (registerContract canonicalPolicyContract)
-                      { forbiddenArchivePath = "DEVELOPMENT_PLAN/legacy_tracking_for_deletion_retired.md"
-                      }
-                }
-            )
-        , expectDeltaFindings
-            "Phase 0 reset status changed to Blocked"
-            [ ExpectedFinding
-                "POLICY-STATUS-RESET"
-                "policy.status-reset"
-                "observed StatusResetContract {phaseZeroResetStatus = BlockedNotValidated"
-            ]
-            ( canonicalPolicyContract
-                { statusResetContract =
-                    (statusResetContract canonicalPolicyContract)
-                      { phaseZeroResetStatus = BlockedNotValidated
-                      }
-                }
-            )
-        , expectDeltaFindings
-            "Phase 49 and Phase 50 roles swapped"
-            [ ExpectedFinding
-                "POLICY-ORDERING"
-                "policy.phase-order"
-                "hardwareFreeDslBarrierPhase = PhaseOrdinal 50, boundedPbHandoffValidationPhase = PhaseOrdinal 49"
-            ]
-            ( canonicalPolicyContract
-                { orderingContract =
-                    (orderingContract canonicalPolicyContract)
-                      { hardwareFreeDslBarrierPhase = boundedPbHandoffValidationPhase (orderingContract canonicalPolicyContract)
-                      , boundedPbHandoffValidationPhase = hardwareFreeDslBarrierPhase (orderingContract canonicalPolicyContract)
-                      }
-                }
-            )
-        , expectDeltaFindings
-            "hardware admitted at Phase 51"
-            [ ExpectedFinding
-                "POLICY-ORDERING"
-                "policy.phase-order"
-                "firstHardwareValidationPhase = PhaseOrdinal 51"
-            ]
-            ( canonicalPolicyContract
-                { orderingContract =
-                    (orderingContract canonicalPolicyContract)
-                      { firstHardwareValidationPhase = haskellHostEnsurePhase (orderingContract canonicalPolicyContract)
-                      }
-                }
-            )
-        ]
     )
 
-data ExpectedFinding = ExpectedFinding
-  { expectedFindingCode :: Text
-  , expectedFindingSubject :: FilePath
-  , expectedFindingDetailFragment :: Text
-  }
-  deriving (Eq, Show)
-
-expectedPolicyIds :: [PolicyId]
-expectedPolicyIds =
-  [ TrackedSourceBoundary
-  , PbBootstrapBoundary
-  , LazyBuildGeneration
-  , ClusterRegistryProvider
-  , ClusterRegistryPlacement
-  , ActiveLegacyRegister
-  , ValidationStatusReset
-  , NumericPhaseOrder
-  , DslBarrierSourceClosurePolicy
-  , PrehardwarePromotionBarrier
-  , PromotionAuthorityPolicy
-  ]
-
-expectedBehavioralLanguages :: [BehavioralLanguage]
-expectedBehavioralLanguages = [HaskellDotHs]
-
-expectedSourceClassifications :: [SourceClassification]
-expectedSourceClassifications = [SemanticClosedWorld]
-
-expectedPublicBehaviorAuthorities :: [PublicBehaviorAuthority]
-expectedPublicBehaviorAuthorities = [HaskellBinaryOnly]
-
-expectedPbSourceLanguages :: [PbSourceLanguage]
-expectedPbSourceLanguages = [PythonSourceLanguage]
-
-expectedBootstrapOperations :: [BootstrapOperation]
-expectedBootstrapOperations =
-  [ MinimalPlatformDistinction
-  , ContainedToolchainEstablishment
-  , SourceBoundHaskellBuild
-  , OpaqueArgumentPreservingExec
-  ]
-
-expectedPbAdmissions :: [PbAdmission]
-expectedPbAdmissions = [DenyByDefaultStaticAstImportCallControlFlowPotentialEffect]
-
-expectedGenerationTimings :: [GenerationTiming]
-expectedGenerationTimings = [LazyAtConsumption]
-
-expectedGenerationRoots :: [GenerationRoot]
-expectedGenerationRoots = [IgnoredDotBuild]
-
-expectedTrackedGeneratedArtifacts :: [TrackedGeneratedArtifact]
-expectedTrackedGeneratedArtifacts = [TrackedGeneratedArtifactForbidden]
-
-expectedRegistryProviders :: [RegistryProvider]
-expectedRegistryProviders = [DistributionRegistry2]
-
-expectedRegistryPlacements :: [RegistryPlacement]
-expectedRegistryPlacements = [SeparatelyPinnedAndPreloaded]
-
-expectedRegisterCardinalities :: [RegisterCardinality]
-expectedRegisterCardinalities = [ExactlyOneActiveRegister]
-
-expectedArchiveRegisterRules :: [ArchiveRegisterRule]
-expectedArchiveRegisterRules = [ArchiveRegisterForbidden]
-
-expectedRegisterHistories :: [RegisterHistory]
-expectedRegisterHistories = [GitHistoryOnly]
-
-expectedRegisterPredicateAuthorities :: [RegisterPredicateAuthority]
-expectedRegisterPredicateAuthorities = [HaskellPredicateOnly]
-
-expectedResetPhaseStatuses :: [ResetPhaseStatus]
-expectedResetPhaseStatuses = [ActiveNotValidated, BlockedNotValidated]
-
-expectedSprintResetRules :: [SprintResetRule]
-expectedSprintResetRules = [EverySprintNotValidated]
-
-expectedHistoricalEvidenceRules :: [HistoricalEvidenceRule]
-expectedHistoricalEvidenceRules = [PriorValidationPermanentlyInvalid]
-
-expectedPredecessorRules :: [PredecessorRule]
-expectedPredecessorRules = [ImmediateNumericPredecessor]
-
-expectedPhaseRoles :: [PhaseRole]
-expectedPhaseRoles =
-  [ HardwareFreeDslBarrier
-  , BoundedPbHandoffValidation
-  , HaskellHostEnsure
-  , FirstHardwareValidation
-  ]
-
-expectedPhase50MigrationRules :: [Phase50MigrationRule]
-expectedPhase50MigrationRules = [NoSourceMigration]
-
-expectedDslBarrierSourceClosures :: [DslBarrierSourceClosure]
-expectedDslBarrierSourceClosures = [AllLtdSrcQueriesZeroBeforePhase49]
-
-expectedPrehardwareRules :: [PrehardwareRule]
-expectedPrehardwareRules = [NoHardwareThroughPhase51]
-
-expectedPbTransportRules :: [PbTransportRule]
-expectedPbTransportRules = [DirectHaskellThrough49ObservedPbAt50ApprovalBoundAfter50]
-
-expectedPromotionAuthorities :: [PromotionAuthority]
-expectedPromotionAuthorities = [ExternallyAnchoredHumanOnly]
-
-expectedAutomationRoles :: [AutomationRole]
-expectedAutomationRoles = [CandidateEvidenceOnly]
-
-expectedStatusMutationAuthorities :: [StatusMutationAuthority]
-expectedStatusMutationAuthorities = [HumanUserOnly]
-
-expectedOwners :: Map.Map PolicyId PolicyOwnerReference
-expectedOwners =
-  Map.fromList
-    [ owner TrackedSourceBoundary "documents/engineering/repository_layout_doctrine.md" "1-classification-rule" "1. Classification rule"
-    , owner PbBootstrapBoundary "documents/engineering/substrate_doctrine.md" "6-the-pre-binary-handoff-contract" "6. The pre-binary handoff contract"
-    , owner LazyBuildGeneration "documents/engineering/generated_artifacts_doctrine.md" "3-the-rule" "3. The rule"
-    , owner ClusterRegistryProvider "documents/engineering/service_capability_doctrine.md" "3-canonical-providers-extension-is-capability-specific" "3. Canonical providers; extension is capability-specific"
-    , owner ClusterRegistryPlacement "documents/engineering/image_build_doctrine.md" "2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster" "2. The single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster"
-    , owner ActiveLegacyRegister "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md" "1-register-contract" "1. Register contract"
-    , owner ValidationStatusReset "DEVELOPMENT_PLAN/phase_00_documentation_suite.md" "phase-status" "Phase Status"
-    , owner NumericPhaseOrder "DEVELOPMENT_PLAN/development_plan_phase_model.md" "e-one-canonical-phase-model" "E. One canonical phase model"
-    , owner DslBarrierSourceClosurePolicy "DEVELOPMENT_PLAN/development_plan_phase_model.md" "e-one-canonical-phase-model" "E. One canonical phase model"
-    , owner PrehardwarePromotionBarrier "DEVELOPMENT_PLAN/development_plan_phase_model.md" "l-one-substrate-discipline" "L. One-substrate discipline"
-    , owner PromotionAuthorityPolicy "DEVELOPMENT_PLAN/development_plan_gate_integrity.md" "m6-candidate-evidence-and-human-promotion" "M.6 Candidate evidence and human promotion"
-    ]
- where
-  owner identifier path anchor section = (identifier, PolicyOwnerReference path anchor section)
-
-oracleSourceContract :: SourceContract
-oracleSourceContract = SourceContract HaskellDotHs SemanticClosedWorld HaskellBinaryOnly
-
-oraclePbContract :: PbContract
-oraclePbContract =
-  PbContract
-    "pb"
-    PythonSourceLanguage
-    (Set.fromList [MinimalPlatformDistinction, ContainedToolchainEstablishment, SourceBoundHaskellBuild, OpaqueArgumentPreservingExec])
-    DenyByDefaultStaticAstImportCallControlFlowPotentialEffect
-
-oracleGenerationContract :: GenerationContract
-oracleGenerationContract = GenerationContract LazyAtConsumption IgnoredDotBuild TrackedGeneratedArtifactForbidden
-
-oracleRegistryContract :: RegistryContract
-oracleRegistryContract = RegistryContract DistributionRegistry2 SeparatelyPinnedAndPreloaded
-
-oracleRegisterContract :: RegisterContract
-oracleRegisterContract =
-  RegisterContract
-    "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
-    ExactlyOneActiveRegister
-    "DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md"
-    ArchiveRegisterForbidden
-    GitHistoryOnly
-    HaskellPredicateOnly
-
-oracleStatusResetContract :: StatusResetContract
-oracleStatusResetContract =
-  StatusResetContract
-    ActiveNotValidated
-    BlockedNotValidated
-    EverySprintNotValidated
-    PriorValidationPermanentlyInvalid
-
-oracleOrderingContract :: OrderingContract
-oracleOrderingContract =
-  OrderingContract
-    (maybe (error "oracle phase 0 must be representable") id (mkPhaseOrdinal 0))
-    (maybe (error "oracle phase 95 must be representable") id (mkPhaseOrdinal 95))
-    ImmediateNumericPredecessor
-    (maybe (error "oracle phase 49 must be representable") id (mkPhaseOrdinal 49))
-    (maybe (error "oracle phase 50 must be representable") id (mkPhaseOrdinal 50))
-    (maybe (error "oracle phase 51 must be representable") id (mkPhaseOrdinal 51))
-    (maybe (error "oracle phase 52 must be representable") id (mkPhaseOrdinal 52))
-    NoSourceMigration
-    AllLtdSrcQueriesZeroBeforePhase49
-    NoHardwareThroughPhase51
-    DirectHaskellThrough49ObservedPbAt50ApprovalBoundAfter50
-
-oraclePromotionContract :: PromotionContract
-oraclePromotionContract =
-  PromotionContract ExternallyAnchoredHumanOnly CandidateEvidenceOnly HumanUserOnly
-
-expectedRendering :: ByteString
-expectedRendering =
-  ByteString8.pack
-    ( unlines
-        [ "amoebius-policy-contract-v4"
-        , "universe.policy-id=tracked-source-boundary,pb-bootstrap-boundary,lazy-build-generation,cluster-registry-provider,cluster-registry-placement,active-legacy-register,validation-status-reset,numeric-phase-order,dsl-barrier-source-closure,prehardware-promotion-barrier,promotion-authority"
-        , "universe.behavioral-language=haskell-.hs-only"
-        , "universe.source-classification=semantic-closed-world"
-        , "universe.public-behavior-authority=haskell-binary-only"
-        , "universe.pb-source-language=python"
-        , "universe.bootstrap-operation=minimal-platform-distinction,contained-toolchain-establishment,source-bound-haskell-build,opaque-argument-preserving-exec"
-        , "universe.pb-admission=deny-by-default-static-ast-import-call-control-flow-potential-effect"
-        , "universe.generation-timing=lazy-at-consumption"
-        , "universe.generation-root=.build/**"
-        , "universe.tracked-generated-artifact=forbidden"
-        , "universe.registry-provider=registry:2"
-        , "universe.registry-placement=separately-pinned-and-preloaded"
-        , "universe.register-cardinality=exactly-one-active-register"
-        , "universe.archive-register-rule=forbidden"
-        , "universe.register-history=git-history-only"
-        , "universe.register-predicate-authority=haskell-predicate-only"
-        , "universe.reset-phase-status=active-not-validated,blocked-not-validated"
-        , "universe.sprint-reset-rule=every-sprint-not-validated"
-        , "universe.historical-evidence-rule=prior-validation-permanently-invalid"
-        , "universe.predecessor-rule=immediate-numeric-predecessor"
-        , "universe.phase-role=hardware-free-dsl-barrier,bounded-pb-handoff-validation,haskell-host-ensure,first-hardware-validation"
-        , "universe.phase50-migration-rule=no-source-migration"
-        , "universe.dsl-barrier-source-closure=all-ltd-src-queries-zero-before-phase-49"
-        , "universe.prehardware-rule=no-hardware-through-phase-51"
-        , "universe.pb-transport-rule=direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
-        , "universe.promotion-authority=externally-anchored-human-only"
-        , "universe.automation-role=candidate-evidence-only"
-        , "universe.status-mutation-authority=human-user-only"
-        , "source.behavioral-language=haskell-.hs-only"
-        , "source.classification=semantic-closed-world"
-        , "source.public-behavior-authority=haskell-binary-only"
-        , "pb.root=pb"
-        , "pb.source-language=python"
-        , "pb.operations=minimal-platform-distinction,contained-toolchain-establishment,source-bound-haskell-build,opaque-argument-preserving-exec"
-        , "pb.admission=deny-by-default-static-ast-import-call-control-flow-potential-effect"
-        , "generation.timing=lazy-at-consumption"
-        , "generation.root=.build/**"
-        , "generation.tracked-artifact=forbidden"
-        , "registry.provider=registry:2"
-        , "registry.placement=separately-pinned-and-preloaded"
-        , "legacy.active-register=DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
-        , "legacy.active-register-cardinality=exactly-one-active-register"
-        , "legacy.forbidden-archive=DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md"
-        , "legacy.archive-rule=forbidden"
-        , "legacy.history=git-history-only"
-        , "legacy.predicate-authority=haskell-predicate-only"
-        , "status.phase-00=active-not-validated"
-        , "status.phases-01-95=blocked-not-validated"
-        , "status.sprints=every-sprint-not-validated"
-        , "status.historical-evidence=prior-validation-permanently-invalid"
-        , "ordering.domain=00..95"
-        , "ordering.predecessor=immediate-numeric-predecessor"
-        , "ordering.roles=hardware-free-dsl-barrier=49,bounded-pb-handoff-validation=50,haskell-host-ensure=51,first-hardware-validation=52"
-        , "ordering.phase50-migration=no-source-migration"
-        , "ordering.dsl-barrier-source-closure=all-ltd-src-queries-zero-before-phase-49"
-        , "ordering.prehardware=no-hardware-through-phase-51"
-        , "ordering.pb-transport=direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
-        , "promotion.authority=externally-anchored-human-only"
-        , "promotion.automation-role=candidate-evidence-only"
-        , "promotion.status-mutation=human-user-only"
-        , "owner.tracked-source-boundary=documents/engineering/repository_layout_doctrine.md#1-classification-rule|1. Classification rule"
-        , "owner.pb-bootstrap-boundary=documents/engineering/substrate_doctrine.md#6-the-pre-binary-handoff-contract|6. The pre-binary handoff contract"
-        , "owner.lazy-build-generation=documents/engineering/generated_artifacts_doctrine.md#3-the-rule|3. The rule"
-        , "owner.cluster-registry-provider=documents/engineering/service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific|3. Canonical providers; extension is capability-specific"
-        , "owner.cluster-registry-placement=documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster|2. The single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster"
-        , "owner.active-legacy-register=DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#1-register-contract|1. Register contract"
-        , "owner.validation-status-reset=DEVELOPMENT_PLAN/phase_00_documentation_suite.md#phase-status|Phase Status"
-        , "owner.numeric-phase-order=DEVELOPMENT_PLAN/development_plan_phase_model.md#e-one-canonical-phase-model|E. One canonical phase model"
-        , "owner.dsl-barrier-source-closure=DEVELOPMENT_PLAN/development_plan_phase_model.md#e-one-canonical-phase-model|E. One canonical phase model"
-        , "owner.prehardware-promotion-barrier=DEVELOPMENT_PLAN/development_plan_phase_model.md#l-one-substrate-discipline|L. One-substrate discipline"
-        , "owner.promotion-authority=DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-human-promotion|M.6 Candidate evidence and human promotion"
-        ]
+runPolicyContractUnaffectedControl :: IO ()
+runPolicyContractUnaffectedControl =
+  unless
+    ( sha256Hex (ByteString8.pack "policy-oracle-independent-control-v1")
+        == "0608bebf9a0946a1f3334c7beb7d1e477f3e38acb6217b5c3a2618b3069e2e3b"
     )
-
-expectedDigest :: Text
-expectedDigest = "ba12753bf42242da9b30bc9d58cf81311b230e609741fbbd140a4e534d1959b3"
-
-expectCanonicalSurface :: [String]
-expectCanonicalSurface =
-  case problems of
-    [] -> []
-    _ -> ["canonical policy surface:\n    " <> Text.unpack (Text.intercalate "\n    " (map Text.pack problems))]
- where
-  problems =
-    concat
-      [ expectClean "contract check" canonicalPolicyContract
-      , expectClosedEnumUniverses
-      , expectEqual "independent owner map" expectedOwners (contractOwners canonicalPolicyContract)
-      , expectEqual "typed source contract" oracleSourceContract (sourceContract canonicalPolicyContract)
-      , expectEqual "typed pb contract" oraclePbContract (pbContract canonicalPolicyContract)
-      , expectEqual "selected pb source language" PythonSourceLanguage (pbSourceLanguage (pbContract canonicalPolicyContract))
-      , expectEqual "typed generation contract" oracleGenerationContract (generationContract canonicalPolicyContract)
-      , expectEqual "typed Registry contract" oracleRegistryContract (registryContract canonicalPolicyContract)
-      , expectEqual "typed register contract" oracleRegisterContract (registerContract canonicalPolicyContract)
-      , expectEqual "typed status-reset contract" oracleStatusResetContract (statusResetContract canonicalPolicyContract)
-      , expectEqual "typed ordering contract" oracleOrderingContract (orderingContract canonicalPolicyContract)
-      , expectOrderingSurface
-      , expectEqual "typed promotion contract" oraclePromotionContract (promotionContract canonicalPolicyContract)
-      , expectEqual "selected Registry provider" DistributionRegistry2 (registryProvider (registryContract canonicalPolicyContract))
-      , expectEqual "exact Registry image reference" "registry:2" (registryImageReference DistributionRegistry2)
-      , expectEqual "exact canonical policy rendering" expectedRendering (renderPolicyContract canonicalPolicyContract)
-      , expectEqual "exact canonical policy digest" expectedDigest (policyContractDigest canonicalPolicyContract)
-      , expectDispatchIntegration
-      ]
-
-expectClosedEnumUniverses :: [String]
-expectClosedEnumUniverses =
-  concat
-    [ expectEqual "closed PolicyId universe" expectedPolicyIds ([minBound .. maxBound] :: [PolicyId])
-    , expectEqual "closed BehavioralLanguage universe" expectedBehavioralLanguages ([minBound .. maxBound] :: [BehavioralLanguage])
-    , expectEqual "closed SourceClassification universe" expectedSourceClassifications ([minBound .. maxBound] :: [SourceClassification])
-    , expectEqual "closed PublicBehaviorAuthority universe" expectedPublicBehaviorAuthorities ([minBound .. maxBound] :: [PublicBehaviorAuthority])
-    , expectEqual "closed PbSourceLanguage universe" expectedPbSourceLanguages ([minBound .. maxBound] :: [PbSourceLanguage])
-    , expectEqual "closed BootstrapOperation universe" expectedBootstrapOperations ([minBound .. maxBound] :: [BootstrapOperation])
-    , expectEqual "closed PbAdmission universe" expectedPbAdmissions ([minBound .. maxBound] :: [PbAdmission])
-    , expectEqual "closed GenerationTiming universe" expectedGenerationTimings ([minBound .. maxBound] :: [GenerationTiming])
-    , expectEqual "closed GenerationRoot universe" expectedGenerationRoots ([minBound .. maxBound] :: [GenerationRoot])
-    , expectEqual "closed TrackedGeneratedArtifact universe" expectedTrackedGeneratedArtifacts ([minBound .. maxBound] :: [TrackedGeneratedArtifact])
-    , expectEqual "closed RegistryProvider universe" expectedRegistryProviders ([minBound .. maxBound] :: [RegistryProvider])
-    , expectEqual "closed RegistryPlacement universe" expectedRegistryPlacements ([minBound .. maxBound] :: [RegistryPlacement])
-    , expectEqual "closed RegisterCardinality universe" expectedRegisterCardinalities ([minBound .. maxBound] :: [RegisterCardinality])
-    , expectEqual "closed ArchiveRegisterRule universe" expectedArchiveRegisterRules ([minBound .. maxBound] :: [ArchiveRegisterRule])
-    , expectEqual "closed RegisterHistory universe" expectedRegisterHistories ([minBound .. maxBound] :: [RegisterHistory])
-    , expectEqual "closed RegisterPredicateAuthority universe" expectedRegisterPredicateAuthorities ([minBound .. maxBound] :: [RegisterPredicateAuthority])
-    , expectEqual "closed ResetPhaseStatus universe" expectedResetPhaseStatuses ([minBound .. maxBound] :: [ResetPhaseStatus])
-    , expectEqual "closed SprintResetRule universe" expectedSprintResetRules ([minBound .. maxBound] :: [SprintResetRule])
-    , expectEqual "closed HistoricalEvidenceRule universe" expectedHistoricalEvidenceRules ([minBound .. maxBound] :: [HistoricalEvidenceRule])
-    , expectEqual "closed PredecessorRule universe" expectedPredecessorRules ([minBound .. maxBound] :: [PredecessorRule])
-    , expectEqual "closed PhaseRole universe" expectedPhaseRoles ([minBound .. maxBound] :: [PhaseRole])
-    , expectEqual "closed Phase50MigrationRule universe" expectedPhase50MigrationRules ([minBound .. maxBound] :: [Phase50MigrationRule])
-    , expectEqual "closed DslBarrierSourceClosure universe" expectedDslBarrierSourceClosures ([minBound .. maxBound] :: [DslBarrierSourceClosure])
-    , expectEqual "closed PrehardwareRule universe" expectedPrehardwareRules ([minBound .. maxBound] :: [PrehardwareRule])
-    , expectEqual "closed PbTransportRule universe" expectedPbTransportRules ([minBound .. maxBound] :: [PbTransportRule])
-    , expectEqual "closed PromotionAuthority universe" expectedPromotionAuthorities ([minBound .. maxBound] :: [PromotionAuthority])
-    , expectEqual "closed AutomationRole universe" expectedAutomationRoles ([minBound .. maxBound] :: [AutomationRole])
-    , expectEqual "closed StatusMutationAuthority universe" expectedStatusMutationAuthorities ([minBound .. maxBound] :: [StatusMutationAuthority])
-    ]
-
-expectOrderingSurface :: [String]
-expectOrderingSurface =
-  concat
-    [ expectEqual "ordering phase-domain lower bound" 0 (phaseOrdinalNumber (phaseDomainLower ordering))
-    , expectEqual "ordering phase-domain upper bound" 95 (phaseOrdinalNumber (phaseDomainUpper ordering))
-    , expectEqual "ordering predecessor rule" ImmediateNumericPredecessor (predecessorRule ordering)
-    , expectEqual "hardware-free DSL barrier phase" 49 (phaseOrdinalNumber (hardwareFreeDslBarrierPhase ordering))
-    , expectEqual "bounded pb handoff validation phase" 50 (phaseOrdinalNumber (boundedPbHandoffValidationPhase ordering))
-    , expectEqual "Haskell host ensure phase" 51 (phaseOrdinalNumber (haskellHostEnsurePhase ordering))
-    , expectEqual "first hardware validation phase" 52 (phaseOrdinalNumber (firstHardwareValidationPhase ordering))
-    , expectEqual "Phase 50 migration rule" NoSourceMigration (phase50MigrationRule ordering)
-    , expectEqual "DSL barrier source closure" AllLtdSrcQueriesZeroBeforePhase49 (dslBarrierSourceClosure ordering)
-    , expectEqual "prehardware rule" NoHardwareThroughPhase51 (prehardwareRule ordering)
-    , expectEqual "pb transport rule" DirectHaskellThrough49ObservedPbAt50ApprovalBoundAfter50 (pbTransportRule ordering)
-    ]
- where
-  ordering = orderingContract canonicalPolicyContract
-
-expectDispatchIntegration :: [String]
-expectDispatchIntegration =
-  concat
-    [ expectEqual "dispatch policy provider observation count" 1 (length providerObservations)
-    , expectEqual "dispatch policy provider observation" ["registry:2"] providerObservations
-    , expectEqual "dispatch policy digest observation count" 1 (length digestObservations)
-    , expectEqual "dispatch policy digest observation" [expectedDigest] digestObservations
-    , expectEqual "dispatch canonical policy findings" [] integrityFindings
-    ]
- where
-  result = checkPhaseZeroSnapshot (SourceSnapshot "/synthetic-policy-oracle" "synthetic-policy-oracle" [])
-  valuesFor key = [observationValue item | item <- checkObservations result, observationKey item == key]
-  providerObservations = valuesFor "policy.registry-provider"
-  digestObservations = valuesFor "policy.contract-sha256"
-  integrityFindings =
-    [ findingCode item
-    | item <- checkFindings result
-    , "POLICY-" `Text.isPrefixOf` findingCode item
-    , findingCode item /= "POLICY-CONTRACT-UNQUALIFIED"
-    ]
-
-expectClean :: String -> PolicyContract -> [String]
-expectClean label contract =
-  [label <> ": unexpected findings " <> show (checkFindings result) | not (null (checkFindings result))]
- where
-  result = checkPolicyContract contract
-
-expectDeltaFindings :: String -> [ExpectedFinding] -> PolicyContract -> [String]
-expectDeltaFindings label expected contract =
-  [ label <> ": the negative removed baseline findings " <> show missingBaseline
-  | not (null missingBaseline)
-  ]
-    <> expectEqual (label <> " finding count") (length expected) (length deltaFindings)
-    <> concat (zipWith (expectFinding label) expected deltaFindings)
- where
-  baselineFindings = checkFindings (checkPolicyContract canonicalPolicyContract)
-  observedFindings = checkFindings (checkPolicyContract contract)
-  missingBaseline = baselineFindings \\ observedFindings
-  deltaFindings = observedFindings \\ baselineFindings
-
-expectFinding :: String -> ExpectedFinding -> Finding -> [String]
-expectFinding label expected observed =
-  concat
-    [ expectEqual (label <> " finding code") (expectedFindingCode expected) (findingCode observed)
-    , expectEqual (label <> " finding subject") (expectedFindingSubject expected) (findingSubject observed)
-    , [ label
-          <> ": expected finding detail to contain "
-          <> show (expectedFindingDetailFragment expected)
-          <> ", observed "
-          <> show (findingDetail observed)
-      | not (expectedFindingDetailFragment expected `Text.isInfixOf` findingDetail observed)
-      ]
-    ]
-
-expectEqual :: (Eq value, Show value) => String -> value -> value -> [String]
-expectEqual label expected observed
-  | expected == observed = []
-  | otherwise = [label <> ": expected " <> show expected <> ", observed " <> show observed]
+    (fail "PolicyContractOracle independent SHA-256 control changed")
 
 finishDiagnostics :: String -> [String] -> IO ()
-finishDiagnostics name problems =
-  unless
-    (null problems)
-    (fail (name <> " component diagnostic failures:\n  " <> Text.unpack (Text.intercalate "\n  " (map Text.pack problems))))
+finishDiagnostics label problems =
+  unless (null problems)
+    (fail (unlines (label <> " component diagnostics failed:" : map ("  " <>) problems)))
+
+exactPolicyProblems :: [String]
+exactPolicyProblems =
+  [ "canonical policy diagnostic changed:\nexpected="
+      <> show expectedPolicyResult
+      <> "\nactual="
+      <> show policyContractDiagnostic
+  | policyContractDiagnostic /= expectedPolicyResult
+  ]
+
+expectedPolicyResult :: CheckResult
+expectedPolicyResult =
+  CheckResult
+    { checkName = "policy-contract-diagnostic"
+    , checkObservations =
+        [ Observation "policy.source-language" "haskell-.hs-only"
+        , Observation "policy.pb-root" "pb"
+        , Observation "policy.pb-source-language" "python"
+        , Observation "policy.pb-operations" "minimal-platform-distinction,contained-toolchain-establishment,source-bound-haskell-build,opaque-argument-preserving-exec"
+        , Observation "policy.generation-root" ".build/**"
+        , Observation "policy.registry-provider" "registry:2"
+        , Observation "policy.active-register" "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
+        , Observation "policy.phase-zero-status" "active-not-validated"
+        , Observation "policy.phase-roles" "hardware-free-dsl-barrier=49,bounded-pb-handoff-validation=50,haskell-host-ensure=51,first-hardware-validation=52"
+        , Observation "policy.dsl-barrier-source-closure" "all-ltd-src-queries-zero-before-phase-49"
+        , Observation "policy.pb-transport" "direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
+        , Observation "policy.promotion-authority" "externally-anchored-human-only"
+        , Observation "policy.owner-count" "11"
+        , Observation "policy.contract-sha256" expectedPolicyDigest
+        , Observation "policy.diagnostic-status" "refused"
+        ]
+    , checkFindings =
+        [ Finding "POLICY-DIAGNOSTIC-ONLY"
+            "Amoebius.Validation.PolicyContract.policyContractDiagnostic"
+            ("the public standard-value facade cannot mint candidate evidence" <> commitmentDetail)
+        , Finding "POLICY-SOURCE-CUSTODY-UNAVAILABLE"
+            "Amoebius.Validation.PolicyContract.Internal"
+            ("the canonical policy value is not authenticated source acquisition evidence" <> commitmentDetail)
+        , Finding "POLICY-QUALIFICATION-UNAVAILABLE"
+            "policy-contract-changed-subject-matrix"
+            ("component diagnostics cannot qualify a complete atomic changed-production corpus for this exact subject" <> commitmentDetail)
+        , Finding "POLICY-HUMAN-REVIEW-UNAVAILABLE"
+            "DEVELOPMENT_PLAN/phase_00_documentation_suite.md"
+            ("policy-to-prose correspondence requires independent human review" <> commitmentDetail)
+        ]
+    }
+ where
+  commitmentDetail = "; policy-contract-sha256=" <> expectedPolicyDigest
+
+expectedPolicyDigest :: Text
+expectedPolicyDigest = "ba12753bf42242da9b30bc9d58cf81311b230e609741fbbd140a4e534d1959b3"
+
+literalPolicyLines :: [Text]
+literalPolicyLines =
+  [ "amoebius-policy-contract-v4"
+  , "universe.policy-id=tracked-source-boundary,pb-bootstrap-boundary,lazy-build-generation,cluster-registry-provider,cluster-registry-placement,active-legacy-register,validation-status-reset,numeric-phase-order,dsl-barrier-source-closure,prehardware-promotion-barrier,promotion-authority"
+  , "universe.behavioral-language=haskell-.hs-only"
+  , "universe.source-classification=semantic-closed-world"
+  , "universe.public-behavior-authority=haskell-binary-only"
+  , "universe.pb-source-language=python"
+  , "universe.bootstrap-operation=minimal-platform-distinction,contained-toolchain-establishment,source-bound-haskell-build,opaque-argument-preserving-exec"
+  , "universe.pb-admission=deny-by-default-static-ast-import-call-control-flow-potential-effect"
+  , "universe.generation-timing=lazy-at-consumption"
+  , "universe.generation-root=.build/**"
+  , "universe.tracked-generated-artifact=forbidden"
+  , "universe.registry-provider=registry:2"
+  , "universe.registry-placement=separately-pinned-and-preloaded"
+  , "universe.register-cardinality=exactly-one-active-register"
+  , "universe.archive-register-rule=forbidden"
+  , "universe.register-history=git-history-only"
+  , "universe.register-predicate-authority=haskell-predicate-only"
+  , "universe.reset-phase-status=active-not-validated,blocked-not-validated"
+  , "universe.sprint-reset-rule=every-sprint-not-validated"
+  , "universe.historical-evidence-rule=prior-validation-permanently-invalid"
+  , "universe.predecessor-rule=immediate-numeric-predecessor"
+  , "universe.phase-role=hardware-free-dsl-barrier,bounded-pb-handoff-validation,haskell-host-ensure,first-hardware-validation"
+  , "universe.phase50-migration-rule=no-source-migration"
+  , "universe.dsl-barrier-source-closure=all-ltd-src-queries-zero-before-phase-49"
+  , "universe.prehardware-rule=no-hardware-through-phase-51"
+  , "universe.pb-transport-rule=direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
+  , "universe.promotion-authority=externally-anchored-human-only"
+  , "universe.automation-role=candidate-evidence-only"
+  , "universe.status-mutation-authority=human-user-only"
+  , "source.behavioral-language=haskell-.hs-only"
+  , "source.classification=semantic-closed-world"
+  , "source.public-behavior-authority=haskell-binary-only"
+  , "pb.root=pb"
+  , "pb.source-language=python"
+  , "pb.operations=minimal-platform-distinction,contained-toolchain-establishment,source-bound-haskell-build,opaque-argument-preserving-exec"
+  , "pb.admission=deny-by-default-static-ast-import-call-control-flow-potential-effect"
+  , "generation.timing=lazy-at-consumption"
+  , "generation.root=.build/**"
+  , "generation.tracked-artifact=forbidden"
+  , "registry.provider=registry:2"
+  , "registry.placement=separately-pinned-and-preloaded"
+  , "legacy.active-register=DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
+  , "legacy.active-register-cardinality=exactly-one-active-register"
+  , "legacy.forbidden-archive=DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md"
+  , "legacy.archive-rule=forbidden"
+  , "legacy.history=git-history-only"
+  , "legacy.predicate-authority=haskell-predicate-only"
+  , "status.phase-00=active-not-validated"
+  , "status.phases-01-95=blocked-not-validated"
+  , "status.sprints=every-sprint-not-validated"
+  , "status.historical-evidence=prior-validation-permanently-invalid"
+  , "ordering.domain=00..95"
+  , "ordering.predecessor=immediate-numeric-predecessor"
+  , "ordering.roles=hardware-free-dsl-barrier=49,bounded-pb-handoff-validation=50,haskell-host-ensure=51,first-hardware-validation=52"
+  , "ordering.phase50-migration=no-source-migration"
+  , "ordering.dsl-barrier-source-closure=all-ltd-src-queries-zero-before-phase-49"
+  , "ordering.prehardware=no-hardware-through-phase-51"
+  , "ordering.pb-transport=direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
+  , "promotion.authority=externally-anchored-human-only"
+  , "promotion.automation-role=candidate-evidence-only"
+  , "promotion.status-mutation=human-user-only"
+  , "owner.tracked-source-boundary=documents/engineering/repository_layout_doctrine.md#1-classification-rule|1. Classification rule"
+  , "owner.pb-bootstrap-boundary=documents/engineering/substrate_doctrine.md#6-the-pre-binary-handoff-contract|6. The pre-binary handoff contract"
+  , "owner.lazy-build-generation=documents/engineering/generated_artifacts_doctrine.md#3-the-rule|3. The rule"
+  , "owner.cluster-registry-provider=documents/engineering/service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific|3. Canonical providers; extension is capability-specific"
+  , "owner.cluster-registry-placement=documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster|2. The single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster"
+  , "owner.active-legacy-register=DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md#1-register-contract|1. Register contract"
+  , "owner.validation-status-reset=DEVELOPMENT_PLAN/phase_00_documentation_suite.md#phase-status|Phase Status"
+  , "owner.numeric-phase-order=DEVELOPMENT_PLAN/development_plan_phase_model.md#e-one-canonical-phase-model|E. One canonical phase model"
+  , "owner.dsl-barrier-source-closure=DEVELOPMENT_PLAN/development_plan_phase_model.md#e-one-canonical-phase-model|E. One canonical phase model"
+  , "owner.prehardware-promotion-barrier=DEVELOPMENT_PLAN/development_plan_phase_model.md#l-one-substrate-discipline|L. One-substrate discipline"
+  , "owner.promotion-authority=DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-human-promotion|M.6 Candidate evidence and human promotion"
+  ]
+
+literalPolicyWire :: ByteString
+literalPolicyWire = TextEncoding.encodeUtf8 (Text.unlines literalPolicyLines)
+
+policyLiteralIntegrityProblems :: [String]
+policyLiteralIntegrityProblems =
+  [ "selector intent cardinality changed: expected=194; observed="
+      <> show (length policyContractSelectorIntents)
+  | length policyContractSelectorIntents /= 194
+  ]
+    <> ["duplicate selector intent: " <> value | value <- duplicateStrings policyContractSelectorNames]
+    <> ["duplicate atomic requirement: " <> value | value <- duplicateStrings requirements]
+    <> ["duplicate exact-case label: " <> value | value <- duplicateStrings exactCaseLabels]
+    <> [ "selector target must occur exactly once: selector="
+           <> selector
+           <> "; target="
+           <> target
+           <> "; observed="
+           <> show (occurrenceCount target exactCaseLabels)
+       | (selector, _, target) <- policyContractSelectorIntents
+       , occurrenceCount target exactCaseLabels /= 1
+       ]
+    <> [ "literal serialized line cardinality changed: expected=72; observed="
+           <> show (length literalPolicyLines)
+       | length literalPolicyLines /= 72
+       ]
+    <> [ "literal serialized wire digest changed: expected="
+           <> Text.unpack expectedPolicyDigest
+           <> "; observed="
+           <> Text.unpack (sha256Hex literalPolicyWire)
+       | sha256Hex literalPolicyWire /= expectedPolicyDigest
+       ]
+ where
+  requirements = [requirement | (_, requirement, _) <- policyContractSelectorIntents]
+  exactCaseLabels = ["canonical policy diagnostic"]
+
+duplicateStrings :: [String] -> [String]
+duplicateStrings = Set.toAscList . snd . foldl remember (Set.empty, Set.empty)
+ where
+  remember :: (Set String, Set String) -> String -> (Set String, Set String)
+  remember (seen, repeated) value
+    | Set.member value seen = (seen, Set.insert value repeated)
+    | otherwise = (Set.insert value seen, repeated)
+
+occurrenceCount :: String -> [String] -> Int
+occurrenceCount wanted = go 0
+ where
+  go count values = case values of
+    [] -> count
+    value : rest -> go (if value == wanted then count + 1 else count) rest
+
+sha256Hex :: ByteString -> Text
+sha256Hex = Text.pack . show . Crypto.hashWith Crypto.SHA256

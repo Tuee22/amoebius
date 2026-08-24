@@ -94,11 +94,16 @@ The governed set is closed:
 
 There is one reader-facing legacy register only. Closed and superseded explanations are deleted; Git history
 is the archive. No other file may become a second deletion register. Its legacy-specific structural seam
-enforces exact canonical file cardinality, UTF-8 readability, and absence of an archive alias. The general
-documentation checker may separately enforce ordinary orientation metadata, headings, links, and anchors. A
-closed Haskell legacy inventory owns identities, owners, observation bindings, closure bindings, and
-reintroduction negatives; neither structural seam may interpret a Markdown row, cell, count, ID spelling,
-owner phrase, or predicate-shaped string as legacy semantics or use it in an executable closure verdict.
+enforces exact canonical file cardinality, regular non-executable mode, UTF-8 readability, absence of a second
+exact canonical basename, and absence of the exact forbidden archive basename. It does not infer semantic
+aliases from arbitrary prose or filenames. The general documentation checker may separately enforce ordinary
+orientation metadata, headings, links, and anchors. It also applies a basename-substring
+register-cardinality diagnostic and a case-folded forbidden-archive-basename content diagnostic; those are
+documentation findings, not legacy semantic findings. A closed Haskell legacy inventory owns identities,
+owners, observation bindings, closure bindings, and required reintroduction-case identities. An owning
+analyzer must later qualify the corresponding negative before retirement; neither structural seam may
+interpret a Markdown row, cell, count, ID spelling, owner phrase, or predicate-shaped string as legacy
+semantics or use it in an executable closure verdict.
 Human review owns correspondence between the two surfaces.
 
 All planned implementation paths name authored `.hs` source. The sole non-Haskell source exception is
@@ -125,6 +130,21 @@ sections likewise contain exactly one reviewed `**Status**:` field and no additi
 Historical status is described only as explicitly invalidated prose; it is never restated as a second status
 field or bare marker.
 
+Contract specification, candidate observation, and promotion are distinct state spaces. An authored gate cell
+uses `UNRESOLVED` only when its required specification is incomplete. It must not use `MISSING` to stand for a
+runtime receipt that cannot exist while the contract is being authored; for example, the `Predecessor` cell
+specifies the typed `ImmediatePredecessorApproval` requirement, while a later candidate records an exact
+`EVIDENCE-ABSENT` refusal if that receipt is unavailable. `UNVERIFIED` is permitted only for an explicitly
+named residue layer in candidate evidence; it cannot satisfy a contract slot. Markdown words never transition
+among these states: the compiled Haskell registry and acquired observations do.
+
+A human promotion is a signed status-only projection, not an unbound edit after approving a different source
+snapshot. The approval binds both the exact pre-promotion candidate snapshot and the digest of one exact
+post-promotion projection whose only permitted changes are the tracker, phase, and sprint status fields named
+by the approval. The human applies that projection personally. Automation may verify the two digests and the
+allowed-field diff, but may neither apply the projection nor treat the pre-promotion digest as the resulting
+post-promotion source identity. Any other byte change invalidates the projection and requires a new candidate.
+
 ---
 
 ## D. The per-phase document skeleton
@@ -148,14 +168,14 @@ Every `phase_NN_<slug>.md` uses this order:
 **Substrate:** <none | apple | linux-cpu | linux-cuda | windows>
 **Lane:** <none | linux-cpu/amd64 | linux-cpu/arm64 | metal | cuda | provider>
 **Register:** <— | 1 | 2 | 3>
-**Depends on:** <linked immediate predecessor plus additional earlier dependencies, or genesis for Phase 0>
+**Depends on:** <the exact linked immediate numeric predecessor only, or genesis for Phase 0; additional earlier dependencies belong in typed contract/prose rather than this structural field>
 **Gate:** `pb validate phase NN`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 <the exact §M table; required>
 
 ## Resource provision — <optional suffix>
-<required only when the gate provisions external/live resources>
+<required when phase-specific subject or observer effects provision external/live resources>
 
 ## Doctrine adopted
 ## Sprints
@@ -168,7 +188,9 @@ public-command target, not an assertion that it exists, runs, or passes. Until P
 approval, `pb` is an inadmissible validation transport: Phase 0 through Phase 49 build and invoke the exact
 source-bound Haskell executable directly from an authenticated, network-independent toolchain input. Phase 50
 alone places the already source-bounded `pb` ensure/build/unchanged-argv/exec handoff under external runtime
-observation. Phase 51 and later may use the public `pb validate phase NN` transport only after binding the
+observation: its candidate starts the exact source-built Haskell supervisor directly, and that supervisor
+invokes `pb` as the child subject. The future public spelling cannot supervise its own handoff. Phase 51 and
+later may use the public `pb validate phase NN` transport only after binding the
 current Phase-50 approval. In every case the Haskell binary decides the candidate verdict; Python may never do
 so. A Python or shell verdict is non-conforming.
 
@@ -176,9 +198,17 @@ so. A Python or shell verdict is non-conforming.
 missing trust boundaries mechanically visible; prose, a diagram, or a link to a generic runner cannot replace
 it. `## Resource provision` is the only optional section between Gate integrity and Doctrine adopted.
 
-A phase that may create, change, retain, or delete a process, host, VM, container, cluster, namespace, cloud
-object, credential binding, volume, mount, device allocation, network object, or other live/external state must
-include `## Resource provision`. A resolved section has exactly these closed labels:
+The universal validation envelope does not by itself select that optional section. Starting the exact outer
+source-bound Haskell gate and containing its ordinary generated observations beneath the run-scoped `.build/**`
+root are common gate mechanics governed by `Command`, `Cleanroom`, and candidate-evidence custody. They do not
+make all ninety-six phases resource-provisioning phases.
+
+A phase must include `## Resource provision` when its phase-specific subject, fake, adapter, external observer,
+or cleanup helper may create, change, retain, or delete an additional process, host, VM, container, cluster,
+namespace, cloud object, credential binding, volume, mount, device allocation, network object, or other live/
+external state. Short-lived, local, diagnostic, fake-boundary, and test-only effects are not exceptions. A pure
+in-process predicate requires no section merely because the outer gate process exists. A resolved section has
+exactly these closed labels:
 
 - **Owner marker:** a run-scoped identity that is minted before mutation and binds every resource the phase
   may own;
@@ -252,6 +282,14 @@ HTML comments, and joins wrapped artifact-authority wording across line boundari
 mutant, and residue. The expanded numbered Validation list may provide detail. A command exit code, parent
 gate reference, test count, fixture existence, or hash comparison alone is insufficient.
 
+Where the seam has selectable changed-production subjects, `Independent Validation` also names its
+independently literal oracle-owned selector-to-exact-case registry. The candidate must reconcile exact selector
+identities in both directions across production, that registry, and build mappings; reject duplicates, unknown
+targets, and omissions; and run each changed subject against its assigned exact case and named locus. A registry
+derived from production or build declarations, cardinality-only agreement, or an aggregate oracle that turns
+red outside the assigned case is inadmissible under
+[`testing_spoof_resistance.md` §12.4](../documents/engineering/testing_spoof_resistance.md#124-subject-change-witnesses).
+
 `Blocked by` names plan work. `Requires` names only an environmental fact no phase can build. Its current
 closed vocabulary is `natural-linux-cpu-amd64-host` and `disposable-linux-cpu-amd64-host`; a new fact requires
 a reviewed standards amendment before use. A tool, predecessor capability, prior sprint output, or same-run
@@ -262,13 +300,26 @@ toolchain needed to build and replace itself with that binary; it cannot resolve
 No sprint is Done merely because its isolated check runs. Its candidate must be retained by the qualified
 parent gate, reviewed by the human authority, and promoted by that human.
 
-A same-phase implementation release is distinct from sprint promotion. When a later sprint's `Blocked by`
-field names an earlier sprint, a human reviewer may release that exact seam for downstream implementation
-after reviewing its current contract, subject, oracle, diagnostic observations, and residue. The release
-changes no status and is not candidate evidence, approval, or permission to validate. It binds the exact
-current bytes; any source, contract, or oracle change invalidates it. The qualified parent gate must later
-rerun and retain every sprint seam before human promotion. Without an explicit release, downstream sprint
-implementation remains blocked.
+`Blocked by` orders implementation; it is not a request for human approval between sprints. A downstream
+sprint in the same phase may begin when the predecessor's deliverables exist and its declared component
+diagnostics have produced the observations needed to expose any remaining work. This readiness decision
+changes no status, is not candidate evidence, and is not validation. If the predecessor's implementation,
+contract, oracle, or observations change, its diagnostics rerun before their result is relied on again.
+
+The raw blocker value is closed: Phase 0 Sprint 0.1 uses only `` `genesis` ``; a first sprint in every later
+phase uses only `[Phase N](phase_NN_<slug>.md) human approval` for the immediate predecessor; and every later
+sprint uses only `Sprint N.(Y-1)`. Appended candidate, review, approval, earlier-phase, or additional-sprint
+prose is a second edge and refuses the schema even when the immediate edge also appears.
+
+Human review is consolidated at the phase gate. The qualified parent gate must rerun and retain every sprint
+seam in one complete candidate run, and the human validation authority must review that candidate and
+personally promote status before any sprint or phase is Done. Where `Blocked by` names an earlier phase rather
+than an earlier sprint, that dependency remains predecessor approval and stays human-only.
+
+The reviewer named by a sprint's `Oracle` field declares the independence and custody required in that
+consolidated phase-gate review. It is not an intermediate confirmation request. An agent must continue through
+the phase's implementation-ready sprint seams without asking the human to approve component diagnostics,
+candidate fragments, or readiness decisions.
 
 The `Legacy IDs` field is structural plan prose, not a legacy inventory. Automation may require the field and
 its exact position, but it may not parse its IDs, owner implications, cardinality, or closure wording into a
@@ -326,8 +377,15 @@ Plan automation parses only closed structure: governed paths, metadata, headings
 exact status syntax, numerical dependencies, sprint fields, and the fixed eighteen-row table. It never derives
 a semantic contract, source/provider choice, legacy closure, or validation verdict from prose or keyword
 counts. Executable cross-cutting choices live in the reviewed Haskell `PolicyContract`; phase semantics live
-in separately reviewed Haskell declarations. Human review owns prose correspondence, and a prose decoy must
-be behaviorally inert.
+in separately reviewed Haskell declarations. Human review owns prose correspondence, and a prose decoy must be
+inert with respect to those executable semantics even though ordinary documentation or the disclosed
+filename/content diagnostics may report a documentation finding.
+
+The fixed Gate and tracker tables are each one exact top-level, physically contiguous Markdown frame. The
+structural parser accounts for every raw candidate and retains an opaque boundary for fences, HTML blocks,
+comments, indented code, lists, and blockquotes; it may not trim a container prefix, delete a malformed row, or
+stitch fragments into the required inventory. Header, delimiter, cell cardinality, quoting, ordinal spelling,
+row order, and the structurally closed tracker link are exact rather than prefix-normalized.
 
 ---
 
@@ -378,6 +436,14 @@ A candidate is inadmissible unless the harness first rejects the qualification s
 is observed to change the intended production locus and redden the intended oracle, discovery is non-empty and
 two-way complete, stale evidence and self-reporting fail, and cleanup leaves no residue. The human validation
 authority alone promotes status.
+
+Before an adapter has authenticated every authority its claim requires, its parser and integrity-consistent
+values remain private behind an always-refusing `CheckResult`; it may not export a conventional success branch,
+optional residue, arbitrary-result eliminator, or detachable observation projection. A “diagnostic” name is not
+an authority boundary. Its oracle uses separately authored Haskell fixture types, literal limits, full expected
+projections, and exact boundary/one-over results rather than production constructors, encoders, constants, or
+shared expected lists. A green diagnostic that violates this shape is a gate defect and cannot be retained as
+candidate evidence.
 
 The full rule is in
 [`development_plan_gate_integrity.md` §M](development_plan_gate_integrity.md#m-gate-integrity-a-gate-cannot-authorize-itself).
@@ -466,7 +532,8 @@ identity, owner, observation, closure, and reintroduction bindings only in revie
 `legacy_tracking_for_deletion.md` file explains that active inventory to readers; human correspondence review
 owns its agreement with Haskell. Its legacy-specific structural seam may enforce canonical file cardinality,
 UTF-8 readability, and archive absence, while the general documentation checker may enforce ordinary
-document structure. Neither may interpret row content or count as legacy semantics or use it in a closure
+document structure plus its basename-substring cardinality and forbidden-archive-basename content diagnostics.
+Neither may interpret row content or count as legacy semantics or use it in a closure
 verdict. Closed explanations are deleted after the corresponding reviewed Haskell transition; Git history is
 the archive.
 

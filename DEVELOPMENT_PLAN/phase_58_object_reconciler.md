@@ -178,7 +178,7 @@ Phase 89 respectively).
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 57](phase_57_complementary_arch_child.md) — exact current human approval; the numeric chain includes every earlier phase
+**Depends on:** [Phase 57](phase_57_complementary_arch_child.md)
 **Gate:** `pb validate phase 58`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -187,9 +187,9 @@ Phase 89 respectively).
 
 | Key | Contract |
 |---|---|
-| `Claim` | one cohesive claim — *nothing is mutated until the target's inventory has been re-observed and cross-checked*. The renderer's output is validated and indexed separately from the act of applying it. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: one cohesive claim — *nothing is mutated until the target's inventory has been re-observed and cross-checked*. The renderer's output is validated and indexed separately from the act of applying it. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 58` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 58` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -202,9 +202,9 @@ Phase 89 respectively).
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | MISSING — blocks validation: the current Phase 57 human approval receipt does not exist. |
-| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 57; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Resource provision — UNRESOLVED
 
@@ -274,6 +274,12 @@ Phase 89 respectively).
 ## Sprint 58.1: Deployment-global desired state + authenticated live inventory + typed action plan ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: [Phase 57](phase_57_complementary_arch_child.md) human approval
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
 
@@ -367,6 +373,12 @@ into the plan tree. Sprint 58.2 consumes the typed action/authority boundary.
 ## Sprint 58.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: Sprint 58.1
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
 
@@ -429,6 +441,12 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 ## Sprint 58.3: Staged execution transitions, Job terminal protocol, and authenticated deletion ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: Sprint 58.2
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
 
@@ -491,6 +509,12 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 ## Sprint 58.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: Sprint 58.3
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
 
@@ -553,6 +577,12 @@ and are carried UNVERIFIED, never green.
 ## Sprint 58.5: Register-2.5 reconciler + staged-execution convergence under simulated faults ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: Sprint 58.4
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
 

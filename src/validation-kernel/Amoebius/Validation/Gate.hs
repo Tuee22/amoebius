@@ -1,16 +1,17 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.Gate
-  ( MutationWitness (..)
-  , QualificationBaseline (..)
+  ( DiagnosticMutationWitness (..)
+  , DiagnosticQualificationBaseline (..)
   , Sabotage (..)
-  , SabotageRun (..)
+  , DiagnosticSabotageRun (..)
   , allSabotages
-  , checkQualificationReport
+  , checkQualificationReportDiagnostic
   , sabotageName
   ) where
 
-import Amoebius.Validation.PolicyContract qualified as Policy
+import Amoebius.Validation.PolicyContract.Internal qualified as Policy
 import Amoebius.Validation.Types
 import Data.List (group, sort)
 import Data.Map.Strict qualified as Map
@@ -35,7 +36,7 @@ data Sabotage
   | ResidueSmuggling
   deriving (Bounded, Enum, Eq, Ord, Show)
 
-data MutationWitness = MutationWitness
+data DiagnosticMutationWitness = DiagnosticMutationWitness
   { mutationOperator :: Text
   , mutationBeforeDigest :: Text
   , mutationAfterDigest :: Text
@@ -43,17 +44,17 @@ data MutationWitness = MutationWitness
   }
   deriving (Eq, Ord, Show)
 
-data QualificationBaseline = QualificationBaseline
+data DiagnosticQualificationBaseline = DiagnosticQualificationBaseline
   { qualificationHarnessDigest :: Text
   , qualificationSubjects :: Map.Map FilePath Text
   , qualificationControlNames :: Set Text
   }
   deriving (Eq, Show)
 
-data SabotageRun = SabotageRun
+data DiagnosticSabotageRun = DiagnosticSabotageRun
   { sabotage :: Sabotage
   , sabotageHarnessDigest :: Text
-  , sabotageWitness :: MutationWitness
+  , sabotageWitness :: DiagnosticMutationWitness
   , sabotageResult :: CheckResult
   , sabotageUnaffectedControls :: [CheckResult]
   }
@@ -85,8 +86,11 @@ sabotageName item = case item of
 -- the supplied report is structurally self-consistent.  It cannot retire the
 -- dispatcher's @QUALIFICATION-NOT-EXECUTED@ readiness blocker and must never
 -- be presented as harness qualification or phase-validation evidence.
-checkQualificationReport :: QualificationBaseline -> [SabotageRun] -> CheckResult
-checkQualificationReport baseline runs =
+checkQualificationReportDiagnostic
+  :: DiagnosticQualificationBaseline
+  -> [DiagnosticSabotageRun]
+  -> CheckResult
+checkQualificationReportDiagnostic baseline runs =
   CheckResult
     { checkName = "phase-00-qualification-report-consistency"
     , checkObservations =
@@ -97,7 +101,11 @@ checkQualificationReport baseline runs =
         , observation "qualification-required-count" (Text.pack (show (length allSabotages)))
         ]
           <> fmap runObservation runs
-    , checkFindings = baselineFindings <> inventoryFindings <> concatMap (checkRun baseline) runs
+    , checkFindings =
+        qualificationDiagnosticOnlyFindings
+          <> baselineFindings
+          <> inventoryFindings
+          <> concatMap (checkRun baseline) runs
     }
  where
   byCase = Map.fromListWith (<>) [(sabotage run, [run]) | run <- runs]
@@ -139,7 +147,19 @@ checkQualificationReport baseline runs =
          , supplied `notElem` allSabotages
          ]
 
-runObservation :: SabotageRun -> Observation
+qualificationDiagnosticOnlyFindings :: [Finding]
+#if defined(VALIDATION_QUALIFICATION_DIAGNOSTIC_BYPASS_MUTANT)
+qualificationDiagnosticOnlyFindings = []
+#else
+qualificationDiagnosticOnlyFindings =
+  [ finding
+      "QUALIFICATION-REPORT-DIAGNOSTIC-ONLY"
+      "Amoebius.Validation.Gate.checkQualificationReportDiagnostic"
+      "caller-constructed baselines, mutation witnesses, refusals, and controls cannot establish execution-derived harness qualification"
+  ]
+#endif
+
+runObservation :: DiagnosticSabotageRun -> Observation
 runObservation run =
   observation
     ("qualification." <> sabotageName (sabotage run))
@@ -148,7 +168,7 @@ runObservation run =
         else Text.intercalate "," (fmap findingCode (checkFindings (sabotageResult run)))
     )
 
-checkRun :: QualificationBaseline -> SabotageRun -> [Finding]
+checkRun :: DiagnosticQualificationBaseline -> DiagnosticSabotageRun -> [Finding]
 checkRun baseline run =
   harness <> changed <> subjectBinding <> rawObservation <> resultName <> exactRefusal <> controls
  where

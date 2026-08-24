@@ -66,7 +66,7 @@ dispatch; the browser's digest is an observation, not a capability.
 The pair also pins the WebSocket subprotocol, routing-envelope schema, and cursor codec. A rolling deployment
 cannot admit a frame whose program/ABI/routing epoch does not exact-match an active compatible plan.
 
-**Supporting observation:** the `ui-program-release-live-gate` Haskell component suite may exercise the seam, but the
+Supporting observation: the `ui-program-release-live-gate` Haskell component suite may exercise the seam, but the
 sole acceptance command is `pb validate phase 72`. Split if the work requires a new rollout engine, durable
 schema migration, amoebius runtime image build, or independently useful second claim.
 **Phase scope:** one cohesive claim — *a UI program is released atomically by content address, without rebuilding the runtime image*. A stale or mixed plan identity is refused before any action executes.
@@ -75,7 +75,7 @@ schema migration, amoebius runtime image build, or independently useful second c
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Depends on:** [Phase 71](phase_71_release_lifecycle.md) — exact current human approval; the numeric chain includes every earlier phase
+**Depends on:** [Phase 71](phase_71_release_lifecycle.md)
 **Gate:** `pb validate phase 72`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -84,9 +84,9 @@ schema migration, amoebius runtime image build, or independently useful second c
 
 | Key | Contract |
 |---|---|
-| `Claim` | one cohesive claim — *a UI program is released atomically by content address, without rebuilding the runtime image*. A stale or mixed plan identity is refused before any action executes. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: one cohesive claim — *a UI program is released atomically by content address, without rebuilding the runtime image*. A stale or mixed plan identity is refused before any action executes. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | `pb validate phase 72` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 72` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -99,9 +99,9 @@ schema migration, amoebius runtime image build, or independently useful second c
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | MISSING — blocks validation: the current Phase 71 human approval receipt does not exist. |
-| `Residue` | UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Human authority` | `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 71; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
 ## Resource provision — UNRESOLVED
 
@@ -132,6 +132,12 @@ schema migration, amoebius runtime image build, or independently useful second c
 ## Sprint 72.1: Release immutable UI plans without rebuilding the runtime ⏸️
 
 **Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
+**Blocked by**: [Phase 71](phase_71_release_lifecycle.md) human approval
+**Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
 ### Objective
 

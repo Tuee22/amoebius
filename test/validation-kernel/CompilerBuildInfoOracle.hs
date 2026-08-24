@@ -1,0 +1,2884 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+module CompilerBuildInfoOracle
+  ( runCompilerBuildInfoOracle
+  , runCompilerBuildInfoSelectorOracle
+  , compilerBuildInfoSelectorNames
+  ) where
+
+import Amoebius.Validation.CompilerBuildInfo (compilerBuildInfoDiagnostic)
+import Amoebius.Validation.Types
+  ( CheckResult (..)
+  , Finding (..)
+  , Observation (..)
+  , checkPassed
+  )
+import Control.Monad (unless)
+import Data.ByteString (ByteString)
+import Data.ByteString qualified as ByteString
+import Data.ByteString.Char8 qualified as ByteString8
+import Data.List (group, isPrefixOf, sort)
+import Data.Text (Text)
+import Data.Text qualified as Text
+import Data.Text.Encoding qualified as TextEncoding
+
+-- The subject exposes one function and only an always-refusing CheckResult.
+-- This oracle literalizes the Cabal version and every limit.  Its primary wire
+-- vectors are pinned bytes; multiplicity builders are used only for separately
+-- stated resource boundaries.
+
+runCompilerBuildInfoOracle :: IO ()
+runCompilerBuildInfoOracle =
+  finishDiagnostics
+    "CompilerBuildInfoOracle"
+    ( fixtureIntegrityProblems
+        <> mutationIntentProblems
+        <> problemConstructorInventoryProblems
+        <> opacityInventoryProblems
+        <> concatMap exactCaseProblems allExactCases
+    )
+
+-- Run the one independently named exact case assigned to a selector while
+-- keeping every other case as an unaffected same-harness control.  A clean
+-- subject returns normally.  An isolated changed subject must make only its
+-- assigned case fail; a no-op therefore stays green and a second failing case
+-- is reported as a wrong-locus change rather than as a killed mutant.
+runCompilerBuildInfoSelectorOracle :: String -> IO ()
+runCompilerBuildInfoSelectorOracle selector =
+  case (selectorTargets selector, selectorCases selector) of
+    ([target], [assigned]) -> do
+      let controlProblems =
+            fixtureIntegrityProblems
+              <> mutationIntentProblems
+              <> problemConstructorInventoryProblems
+              <> opacityInventoryProblems
+          assignedProblems = exactCaseProblems assigned
+          wrongLocusProblems =
+            [ problem
+            | problem <- assignedProblems
+            , not (target `isPrefixOf` problem)
+            ]
+      unless (null controlProblems) $ failDiagnostic "unaffected-control" controlProblems
+      unless (null wrongLocusProblems) $
+        failDiagnostic "wrong-locus" wrongLocusProblems
+      unless (null assignedProblems) $
+        failDiagnostic ("assigned-locus:" <> target) assignedProblems
+    (targets, cases) ->
+      failDiagnostic "unresolvable-selector"
+        [ "selector=" <> selector
+        , "targets=" <> show targets
+        , "exact-case-count=" <> show (length cases)
+        ]
+
+failDiagnostic :: String -> [String] -> IO ()
+failDiagnostic label problems =
+  fail (unlines (("CompilerBuildInfoOracle " <> label <> ":") : map ("  " <>) problems))
+
+compilerBuildInfoSelectorNames :: [String]
+compilerBuildInfoSelectorNames = map fst mutationIntent
+
+selectorTargets :: String -> [String]
+selectorTargets selector =
+  [target | (candidate, target) <- mutationIntent, candidate == selector]
+
+selectorCases :: String -> [ExactCase]
+selectorCases selector =
+  [ candidate
+  | target <- selectorTargets selector
+  , candidate <- allExactCases
+  , exactCaseLabel candidate == target
+  ]
+
+data ExactCase = ExactCase
+  { exactCaseLabel :: String
+  , exactCaseProblems :: [String]
+  }
+
+allExactCases :: [ExactCase]
+allExactCases =
+  concat
+    [ positiveCases
+    , expectationCases
+    , schemaAndIdentityCases
+    , argumentCases
+    , pathCases
+    , duplicateCases
+    , constructorCases
+    , schemaPredicateCases
+    , jsonGrammarCases
+    , grammarConjunctionCases
+    , orderingCases
+    , identityConstructorCases
+    , identityLimitCases
+    , closedAlternativeCases
+    , resourceCases
+    , resultEnvelopeCases
+    ]
+
+-- This closed, bounded registry is oracle-owned. Repository diagnostics
+-- reconcile its selector column two-way with the once-only implementation and
+-- Cabal inventories; no production constant or Markdown is parsed here.
+mutationIntent :: [(String, String)]
+mutationIntent =
+  [ ("VALIDATION_COMPILER_BUILDINFO_ABSOLUTE_FILE_TRAILING_BYPASS_MUTANT", "an expected compiler file path with a trailing separator is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_ABSOLUTE_SOURCE_CHILD_SAFETY_BYPASS_MUTANT", "an unsafe absolute source child is retained independently from containment")
+  , ("VALIDATION_COMPILER_BUILDINFO_ARGUMENT_ARRAY_LIMIT_WIDEN_MUTANT", "one compiler argument over its field-specific array bound is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_ARGUMENT_PATH_OBSERVATION_DROP_MUTANT", "an attached path option retains its option token, absent value index, raw token, and path")
+  , ("VALIDATION_COMPILER_BUILDINFO_ARGUMENT_UNIT_LIMIT_WIDEN_MUTANT", "one package argument identity byte over its bound is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_ARRAY_TEXT_EMPTY_BYPASS_MUTANT", "an empty array text is retained with its exact index")
+  , ("VALIDATION_COMPILER_BUILDINFO_ARRAY_TEXT_TYPE_BYPASS_MUTANT", "a non-text array member is retained with its exact index")
+  , ("VALIDATION_COMPILER_BUILDINFO_ATTACHED_EMPTY_PATH_BYPASS_MUTANT", "an empty attached path is not an admitted attached alternative")
+  , ("VALIDATION_COMPILER_BUILDINFO_ATTACHED_HIDIR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_ATTACHED_ODIR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_ATTACHED_OUTPUTDIR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_ATTACHED_PACKAGE_DB_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_ATTACHED_PACKAGE_ENVIRONMENT_HAZARD_BYPASS_MUTANT", "attached package-environment arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_ATTACHED_PATH_SAFETY_BYPASS_MUTANT", "an unsafe attached argument path is refused at its exact option and value")
+  , ("VALIDATION_COMPILER_BUILDINFO_ATTACHED_STUBDIR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_ATTACHED_TMPDIR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_CABAL_EXTENSION_BYPASS_MUTANT", "a non-Cabal optional source path is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_CABAL_FILE_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_CABAL_JOIN_RESIDUE_BYPASS_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_CABAL_VERSION_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_CALLER_COMPILER_FLAVOUR_LIMIT_WIDEN_MUTANT", "one caller compiler-flavour byte over its bound refuses before semantics")
+  , ("VALIDATION_COMPILER_BUILDINFO_CALLER_COMPILER_ID_LIMIT_WIDEN_MUTANT", "one caller compiler-id byte over its bound refuses before semantics")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPILER_ARGUMENTS_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPILER_ARGUMENT_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPILER_IDENTITY_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPILER_INVOCATION_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPILER_PLUGIN_HAZARD_BYPASS_MUTANT", "compiler-plugin arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPONENTS_EMPTY_BYPASS_MUTANT", "an empty observed component universe is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPONENT_LIMIT_WIDEN_MUTANT", "one component over the boundary is refused before identity comparison")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPONENT_NAME_BYPASS_MUTANT", "a malformed component name is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPONENT_OBJECT_BYPASS_MUTANT", "a component value with the wrong type is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPONENT_TYPE_BYPASS_MUTANT", "an unsupported component type is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPONENT_UNIT_BYPASS_MUTANT", "a malformed observed unit retains both independent unit predicates")
+  , ("VALIDATION_COMPILER_BUILDINFO_CONFIGURATION_JOIN_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_CUSTOM_PREPROCESSOR_HAZARD_BYPASS_MUTANT", "custom preprocessor arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_DIAGNOSTIC_ONLY_BYPASS_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_DOT_PATH_SEGMENT_BYPASS_MUTANT", "a dot source-path segment is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_DUPLICATE_KEY_BYPASS_MUTANT", "an escaped duplicate is detected before Aeson normalization")
+  , ("VALIDATION_COMPILER_BUILDINFO_DUPLICATE_KEY_OBSERVER_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_ELABORATED_PLAN_JOIN_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_EMPTY_PATH_SEGMENT_BYPASS_MUTANT", "an empty source-path segment is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_BENCH_TYPE_DROP_MUTANT", "all five closed component kinds are retained on both sides of the join")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_BYPASS_MUTANT", "a changed compiler is bound to the independently stated caller diagnostic")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_FLAVOUR_GRAMMAR_BYPASS_MUTANT", "an unsupported expected compiler flavour is rejected before bytes")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_FLAVOUR_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_ID_GRAMMAR_BYPASS_MUTANT", "a malformed expected compiler id is rejected before bytes")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_ID_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_PATH_BYPASS_MUTANT", "the expected compiler path is joined independently from its id")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_PATH_GRAMMAR_BYPASS_MUTANT", "an unsafe expected compiler path is rejected before bytes")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_PATH_LIMIT_WIDEN_MUTANT", "an over-bound caller path is rejected before lexical path parsing")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_PATH_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPONENT_COUNT_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPONENT_DUPLICATE_BYPASS_MUTANT", "duplicate expected component identities are rejected before bytes")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPONENT_IDENTITY_BYPASS_MUTANT", "an expected unit cannot move to another component identity")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_EXE_TYPE_DROP_MUTANT", "all five closed component kinds are retained on both sides of the join")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_FLIB_TYPE_DROP_MUTANT", "all five closed component kinds are retained on both sides of the join")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_BYPASS_MUTANT", "a changed component unit is bound to the expected identity")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_LIMIT_WIDEN_MUTANT", "one caller identity over the 512-entry bound is rejected before bytes are parsed")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_MISSING_BYPASS_MUTANT", "an independently expected identity may not disappear")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_NAME_BYPASS_MUTANT", "a malformed expected component name is rejected before bytes")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_NAME_LIMIT_WIDEN_MUTANT", "one expected component-name byte over its bound refuses before semantics")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_NAME_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_TYPE_BYPASS_MUTANT", "an unsupported expected component type is rejected before bytes")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_TYPE_LIMIT_WIDEN_MUTANT", "one expected component-type byte over its bound refuses before semantics")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_TYPE_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_UNIT_BYPASS_MUTANT", "a malformed expected unit id is rejected before bytes")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_UNIT_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_LIB_TYPE_DROP_MUTANT", "all five closed component kinds are retained on both sides of the join")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_TEST_TYPE_DROP_MUTANT", "all five closed component kinds are retained on both sides of the join")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_UNIT_DUPLICATE_BYPASS_MUTANT", "duplicate expected unit ids are rejected before bytes")
+  , ("VALIDATION_COMPILER_BUILDINFO_EXPECTED_UNIVERSE_EMPTY_BYPASS_MUTANT", "an empty caller universe is rejected before bytes are parsed")
+  , ("VALIDATION_COMPILER_BUILDINFO_FOREIGN_CALL_HAZARD_BYPASS_MUTANT", "foreign-call arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_FOREIGN_TOOL_HAZARD_BYPASS_MUTANT", "custom foreign-tool arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_GENERATED_INPUT_MISSING_BYPASS_MUTANT", "a missing generated-input value retains explicit absence")
+  , ("VALIDATION_COMPILER_BUILDINFO_GENERATED_INPUT_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_GENERATED_INPUT_PATH_RECOGNITION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_GENERATED_INPUT_PREFIX_RECOGNITION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_GENERATED_INPUT_RECOGNITION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_GENERATED_INPUT_RESIDUE_BYPASS_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_GENERATED_INPUT_SHAPE_BYPASS_MUTANT", "a malformed generated-input candidate is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_GENERATED_INPUT_SUFFIX_RECOGNITION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_GENERATOR_BYTES_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_GENERIC_ARRAY_LIMIT_WIDEN_MUTANT", "one generic array element over the boundary is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_HIDE_ALL_RECOGNITION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_HS_SOURCE_DIRS_BYPASS_MUTANT", "a component without a Haskell source directory is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_HS_SOURCE_DIR_DUPLICATE_BYPASS_MUTANT", "a duplicate Haskell source directory is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_HS_SOURCE_DIR_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_IDENTITY_ARGUMENT_VALUE_GRAMMAR_BYPASS_MUTANT", "a malformed package-id value is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_IDENTITY_ARGUMENT_VALUE_MISSING_BYPASS_MUTANT", "a missing package-id value is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_IDENTITY_LIMIT_WIDEN_MUTANT", "one byte over the identity bound is rejected at expectation admission")
+  , ("VALIDATION_COMPILER_BUILDINFO_INDEPENDENT_COMPILER_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_INDEPENDENT_UNIVERSE_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_INPUT_BYTES_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_INPUT_LIMIT_WIDEN_MUTANT", "one byte over the input boundary refuses before JSON scanning")
+  , ("VALIDATION_COMPILER_BUILDINFO_INTERACTIVE_HAZARD_BYPASS_MUTANT", "interactive compiler arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_INTERPRETER_HAZARD_BYPASS_MUTANT", "external-interpreter arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_JSON_DEPTH_LIMIT_WIDEN_MUTANT", "one JSON level over the depth boundary is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_JSON_SCALAR_LIMIT_WIDEN_MUTANT", "one JSON scalar byte over the boundary is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_JSON_STRING_LIMIT_WIDEN_MUTANT", "one JSON string byte over the boundary is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_LINKER_HAZARD_BYPASS_MUTANT", "linker arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_MACHINE_PATH_STATE_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_MODULE_ARRAY_LIMIT_WIDEN_MUTANT", "one component-array element over the boundary is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_MODULE_DUPLICATE_BYPASS_MUTANT", "a duplicate module is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_MODULE_NAME_BYPASS_MUTANT", "a lowercase module segment leader is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_MODULE_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_NO_USER_BOUNDARY_BYPASS_MUTANT", "a missing no-user package boundary is refused independently")
+  , ("VALIDATION_COMPILER_BUILDINFO_NO_USER_RECOGNITION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBJECT_MEMBER_LIMIT_WIDEN_MUTANT", "one member over the JSON object boundary is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_BENCH_TYPE_DROP_MUTANT", "all five closed component kinds are retained on both sides of the join")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_CABAL_VERSION_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_FLAVOUR_BYPASS_MUTANT", "an unsupported observed compiler flavour is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_FLAVOUR_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_ID_BYPASS_MUTANT", "a malformed observed compiler id is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_ID_LIMIT_WIDEN_MUTANT", "one observed compiler-id byte over its bound is refused by grammar")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_ID_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_PATH_BYPASS_MUTANT", "an unsafe observed compiler path is retained before identity comparison")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_PATH_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPONENT_COUNT_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPONENT_DUPLICATE_BYPASS_MUTANT", "duplicate observed component identities remain distinct from both expected joins")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPONENT_NAME_LIMIT_WIDEN_MUTANT", "one observed component-name byte over its bound is refused by grammar")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPONENT_UNIT_LIMIT_WIDEN_MUTANT", "one observed unit byte over its bound is refused independently")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_EXE_TYPE_DROP_MUTANT", "all five closed component kinds are retained on both sides of the join")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_FLIB_TYPE_DROP_MUTANT", "all five closed component kinds are retained on both sides of the join")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_IDENTITY_NAME_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_IDENTITY_TYPE_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_IDENTITY_UNIT_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_LIB_TYPE_DROP_MUTANT", "all five closed component kinds are retained on both sides of the join")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_MODULE_NAME_LIMIT_WIDEN_MUTANT", "one module-name byte over its bound is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_TEST_TYPE_DROP_MUTANT", "all five closed component kinds are retained on both sides of the join")
+  , ("VALIDATION_COMPILER_BUILDINFO_OBSERVED_UNIT_DUPLICATE_BYPASS_MUTANT", "duplicate observed unit ids remain distinct from expected-unit mismatch")
+  , ("VALIDATION_COMPILER_BUILDINFO_OPTIONAL_TEXT_EMPTY_BYPASS_MUTANT", "an empty optional Cabal path is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_OPTIONAL_TEXT_TYPE_BYPASS_MUTANT", "an optional Cabal path with the wrong type is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_ORACLE_RESIDUE_BYPASS_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_PACKAGE_BOUNDARY_BYPASS_MUTANT", "a missing hide-all boundary is refused at its exact boundary")
+  , ("VALIDATION_COMPILER_BUILDINFO_PACKAGE_DEPENDENCY_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_PACKAGE_ENVIRONMENT_HAZARD_BYPASS_MUTANT", "package-environment arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_PACKAGE_ID_RECOGNITION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_PARENT_PATH_SEGMENT_BYPASS_MUTANT", "a parent source-path segment is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_PATH_ARGUMENT_VALUE_MISSING_BYPASS_MUTANT", "a separated path option without a value is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_PATH_BACKSLASH_BYPASS_MUTANT", "a backslash source path is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_PATH_COLON_BYPASS_MUTANT", "a colon source path is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_PATH_CONTROL_BYPASS_MUTANT", "a control character in a source path is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_PATH_DEPTH_LIMIT_WIDEN_MUTANT", "one segment over the path-depth bound is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_PATH_SEGMENT_LIMIT_WIDEN_MUTANT", "one byte over the path-segment bound is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_PHYSICAL_PATH_CONTAINMENT_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_PLATFORM_RESIDUE_BYPASS_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_PLUGIN_PACKAGE_HAZARD_BYPASS_MUTANT", "plugin-package arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_PRAGMA_SEMANTICS_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_PREPROCESSOR_HAZARD_BYPASS_MUTANT", "unbound preprocessing arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_PROBLEM_LIMIT_WIDEN_MUTANT", "one problem over the diagnostic boundary collapses early")
+  , ("VALIDATION_COMPILER_BUILDINFO_RELATIVE_DOT_ALTERNATIVE_DROP_MUTANT", "the admitted relative-dot Haskell source-directory alternative is retained")
+  , ("VALIDATION_COMPILER_BUILDINFO_RELATIVE_SOURCE_CHILD_SAFETY_BYPASS_MUTANT", "a parent source-path segment is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_REQUIRED_ARRAY_MISSING_BYPASS_MUTANT", "a missing required component array is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_REQUIRED_ARRAY_TYPE_BYPASS_MUTANT", "a required component array with the wrong type is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_REQUIRED_OBJECT_MISSING_BYPASS_MUTANT", "a missing required compiler object is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_REQUIRED_OBJECT_TYPE_BYPASS_MUTANT", "a required compiler object with the wrong type is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_REQUIRED_TEXT_EMPTY_BYPASS_MUTANT", "an empty required compiler field is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_REQUIRED_TEXT_MISSING_BYPASS_MUTANT", "a missing required root field is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_REQUIRED_TEXT_TYPE_BYPASS_MUTANT", "a required text field with the wrong type is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_RESPONSE_FILE_HAZARD_BYPASS_MUTANT", "response-file arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_RESULT_BYTE_LIMIT_WIDEN_MUTANT", "one result payload byte over the envelope refuses at the exact pre-render metric")
+  , ("VALIDATION_COMPILER_BUILDINFO_RESULT_ENTRY_LIMIT_WIDEN_MUTANT", "one result entry over the envelope refuses before the expanded projection is materialized")
+  , ("VALIDATION_COMPILER_BUILDINFO_RETENTION_DROP_MUTANT", "the exact 64-segment relative source path remains fully retained")
+  , ("VALIDATION_COMPILER_BUILDINFO_ROOT_OBJECT_BYPASS_MUTANT", "a non-object root is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SEPARATED_HIDIR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SEPARATED_ODIR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SEPARATED_OUTPUTDIR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SEPARATED_PACKAGE_DB_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SEPARATED_PATH_SAFETY_BYPASS_MUTANT", "an unsafe argument path is refused at its exact option and value")
+  , ("VALIDATION_COMPILER_BUILDINFO_SEPARATED_STUBDIR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SEPARATED_TMPDIR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_CONTAINMENT_BYPASS_MUTANT", "an absolute source path outside the source directory is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_DIR_ABSOLUTE_BYPASS_MUTANT", "a relative component source root is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_DIR_ARRAY_LIMIT_WIDEN_MUTANT", "one Haskell source directory over its field-specific array bound is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_DIR_OBSERVATION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_DIR_SAFETY_BYPASS_MUTANT", "an unsafe absolute component source root is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_DIR_SEPARATOR_BYPASS_MUTANT", "an unterminated component source root is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_DISCOVERY_BYPASS_MUTANT", "a component without a module or source file is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_EXTENSION_BYPASS_MUTANT", "a non-Haskell source path is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_FILE_ARRAY_LIMIT_WIDEN_MUTANT", "one source file over its field-specific array bound is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_FILE_DUPLICATE_BYPASS_MUTANT", "a duplicate source file is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_SOURCE_OWNERSHIP_RESIDUE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_STANDALONE_FNO_CODE_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_STANDALONE_O0_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_STANDALONE_O1_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_STANDALONE_O2_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_STANDALONE_O_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_STANDALONE_WALL_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_STANDALONE_WERROR_DROP_MUTANT", "every admitted standalone and path-taking compiler alternative is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_STRUCTURAL_TOKEN_LIMIT_WIDEN_MUTANT", "one token over the JSON structural boundary is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_TEMPLATE_HASKELL_HAZARD_BYPASS_MUTANT", "Template Haskell arguments are hazardous")
+  , ("VALIDATION_COMPILER_BUILDINFO_THIS_UNIT_BYPASS_MUTANT", "a mismatched this-unit argument cannot impersonate the component")
+  , ("VALIDATION_COMPILER_BUILDINFO_THIS_UNIT_DUPLICATE_BYPASS_MUTANT", "duplicate this-unit arguments retain their complete observed list")
+  , ("VALIDATION_COMPILER_BUILDINFO_THIS_UNIT_MISSING_BYPASS_MUTANT", "a missing this-unit argument is retained exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_THIS_UNIT_RECOGNITION_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_UNEXPECTED_IDENTITY_BYPASS_MUTANT", "an observed identity outside the expected universe is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_UNKNOWN_ARGUMENT_BYPASS_MUTANT", "an unclassified source-search argument is refused at its exact index")
+  , ("VALIDATION_COMPILER_BUILDINFO_UNKNOWN_FIELD_BYPASS_MUTANT", "an unknown component field cannot widen the closed schema")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPILER_ID_CHARACTER_BYPASS_MUTANT", "a non-decimal compiler-id version character is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPILER_ID_EMPTY_SEGMENT_BYPASS_MUTANT", "an empty compiler-id version segment is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPILER_ID_PREFIX_BYPASS_MUTANT", "a compiler id without the ghc prefix is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPONENT_NAME_CHARACTER_BYPASS_MUTANT", "a non-alphanumeric component-name character is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPONENT_NAME_EMPTY_CHUNK_BYPASS_MUTANT", "an empty component-name chunk is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPONENT_NAME_PREFIX_BYPASS_MUTANT", "a qualified component name without its type prefix is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_LIBRARY_NAME_ALTERNATIVE_DROP_MUTANT", "the sole public front door remains a fully retained refusal")
+  , ("VALIDATION_COMPILER_BUILDINFO_MODULE_EMPTY_SEGMENT_BYPASS_MUTANT", "an empty module segment is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_MODULE_LEADING_CHARACTER_BYPASS_MUTANT", "a lowercase module segment leader is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_MODULE_TAIL_CHARACTER_BYPASS_MUTANT", "a module-tail character outside the closed alphabet is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_UNIT_CHARACTER_BYPASS_MUTANT", "a unit-id character outside the closed alphabet is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_UNIT_LEADING_CHARACTER_BYPASS_MUTANT", "a non-alphanumeric unit-id leading character is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_UNIT_TRAILING_CHARACTER_BYPASS_MUTANT", "a non-alphanumeric unit-id trailing character is refused")
+  , ("VALIDATION_COMPILER_BUILDINFO_COMPONENT_ORDER_BYPASS_MUTANT", "observed components are projected in canonical identity order")
+  , ("VALIDATION_COMPILER_BUILDINFO_PROBLEM_ORDER_BYPASS_MUTANT", "independent schema problems are projected in constructor order")
+  , ("VALIDATION_COMPILER_BUILDINFO_JSON_TRAILING_BYTES_BYPASS_MUTANT", "trailing bytes after a complete JSON value are refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_JSON_COLON_BYPASS_MUTANT", "an object member without a colon is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_JSON_OBJECT_SEPARATOR_BYPASS_MUTANT", "an object member without a comma is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_JSON_ARRAY_SEPARATOR_BYPASS_MUTANT", "an array element without a comma is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_JSON_STRING_DECODE_BYPASS_MUTANT", "an invalid JSON string escape is refused exactly")
+  , ("VALIDATION_COMPILER_BUILDINFO_JSON_SCALAR_DECODE_BYPASS_MUTANT", "an invalid JSON scalar is refused exactly")
+  ]
+
+mutationIntentProblems :: [String]
+mutationIntentProblems =
+  [ "expected 220 mutation-intent rows, observed " <> show (length mutationIntent)
+  | length mutationIntent /= 220
+  ]
+    <> ["duplicate mutation-intent selector " <> selector
+       | selector <- duplicates (map fst mutationIntent)]
+    <> ["unbounded mutation-intent selector " <> selector
+       | (selector, _) <- mutationIntent, null selector || length selector > 128]
+    <> ["unbounded mutation-intent target for " <> selector
+       | (selector, target) <- mutationIntent, null target || length target > 128]
+    <> ["duplicate exact-case label " <> label
+       | label <- duplicates (map exactCaseLabel allExactCases)]
+    <> ["mutation-intent target must name exactly one executable exact case: "
+          <> selector <> " -> " <> target <> "; observed " <> show count
+       | (selector, target) <- mutationIntent
+       , let count = length
+              [() | candidate <- allExactCases, exactCaseLabel candidate == target]
+       , count /= 1]
+
+
+
+problemConstructorInventory :: [String]
+problemConstructorInventory =
+  [ "BuildInfoResourceLimitExceeded"
+  , "BuildInfoJsonDuplicateKey"
+  , "BuildInfoDuplicateKeyScanFailed"
+  , "BuildInfoRootNotObject"
+  , "BuildInfoFieldMissing"
+  , "BuildInfoFieldUnknown"
+  , "BuildInfoFieldWrongType"
+  , "BuildInfoArrayElementWrongType"
+  , "BuildInfoTextEmpty"
+  , "BuildInfoArrayTextEmpty"
+  , "BuildInfoCabalLibraryVersionUnsupported"
+  , "BuildInfoCompilerFlavourUnsupported"
+  , "BuildInfoCompilerIdMalformed"
+  , "BuildInfoComponentsEmpty"
+  , "BuildInfoComponentTypeUnsupported"
+  , "BuildInfoComponentNameMalformed"
+  , "BuildInfoComponentSourceDiscoveryEmpty"
+  , "BuildInfoHaskellSourceDirectoriesEmpty"
+  , "BuildInfoUnitIdMalformed"
+  , "BuildInfoModuleNameMalformed"
+  , "BuildInfoModuleNameDuplicate"
+  , "BuildInfoSourceFileDuplicate"
+  , "BuildInfoHaskellSourceDirectoryDuplicate"
+  , "BuildInfoPathUnsafe"
+  , "BuildInfoPathEscapesSourceDirectory"
+  , "BuildInfoSourceDirectoryNotAbsolute"
+  , "BuildInfoSourceDirectoryMissingTrailingSeparator"
+  , "BuildInfoCabalFileExtensionInvalid"
+  , "BuildInfoSourceFileExtensionUnsupported"
+  , "BuildInfoCompilerArgumentHazardous"
+  , "BuildInfoCompilerArgumentUnclassified"
+  , "BuildInfoCompilerArgumentValueMissing"
+  , "BuildInfoCompilerArgumentValueMalformed"
+  , "BuildInfoCompilerArgumentPathUnsafe"
+  , "BuildInfoCompilerGeneratedInputArgumentMalformed"
+  , "BuildInfoCompilerPackageBoundaryMissing"
+  , "BuildInfoCompilerPackageBoundaryDuplicate"
+  , "BuildInfoCompilerThisUnitIdMissing"
+  , "BuildInfoCompilerThisUnitIdDuplicate"
+  , "BuildInfoCompilerThisUnitIdMismatch"
+  , "BuildInfoObservedUnitIdDuplicate"
+  , "BuildInfoObservedComponentIdentityDuplicate"
+  , "BuildInfoExpectedCompilerFlavourUnsupported"
+  , "BuildInfoExpectedCompilerIdMalformed"
+  , "BuildInfoExpectedCompilerPathUnsafe"
+  , "BuildInfoExpectedCompilerIdMismatch"
+  , "BuildInfoExpectedCompilerPathMismatch"
+  , "BuildInfoExpectedIdentityTypeUnsupported"
+  , "BuildInfoExpectedIdentityTextMalformed"
+  , "BuildInfoExpectedIdentityUniverseEmpty"
+  , "BuildInfoExpectedUnitIdDuplicate"
+  , "BuildInfoExpectedComponentIdentityDuplicate"
+  , "BuildInfoExpectedIdentityMissing"
+  , "BuildInfoUnexpectedIdentity"
+  , "BuildInfoExpectedUnitIdentityMismatch"
+  , "BuildInfoExpectedComponentIdentityMismatch"
+  , "BuildInfoGeneratorBytesUnauthenticated"
+  , "BuildInfoCompilerIdentityUnauthenticated"
+  , "BuildInfoIndependentExpectedCompilerUnavailable"
+  , "BuildInfoMachinePathStateUnauthenticated"
+  , "BuildInfoCompilerArgumentsUnauthenticated"
+  , "BuildInfoDuplicateKeyDetectionDiagnosticOnly"
+  , "BuildInfoIndependentExpectedUniverseUnavailable"
+  , "BuildInfoExactModuleSourceOwnershipUnresolved"
+  , "BuildInfoCabalFileSourceJoinUnavailable"
+  , "BuildInfoGeneratedCompilerInputsUnauthenticated"
+  , "BuildInfoPackageDependencyJoinUnavailable"
+  , "BuildInfoConfigurationJoinUnavailable"
+  , "BuildInfoSourcePragmaSemanticsUnavailable"
+  , "BuildInfoPhysicalPathContainmentUnavailable"
+  , "BuildInfoPathPlatformSemanticsUnavailable"
+  , "BuildInfoElaboratedPlanJoinUnavailable"
+  , "BuildInfoCompilerInvocationUnavailable"
+  , "BuildInfoOracleQualificationUnavailable"
+  , "BuildInfoResultEnvelopeExceeded"
+  ]
+
+problemConstructorInventoryProblems :: [String]
+problemConstructorInventoryProblems =
+  [ "expected 75 problem constructors, observed "
+      <> show (length problemConstructorInventory)
+  | length problemConstructorInventory /= 75
+  ]
+    <> ["duplicate problem constructor " <> name
+       | name <- duplicates problemConstructorInventory]
+
+privateFacadeSymbolInventory :: [String]
+privateFacadeSymbolInventory =
+  [ "parseCompilerBuildInfoDiagnostic"
+  , "DiagnosticCompilerBuildInfoRefusal"
+  , "foldDiagnosticCompilerBuildInfoRefusal"
+  , "DiagnosticCompilerBuildInfoExpectations"
+  , "DiagnosticCompilerBuildInfoSnapshot"
+  , "DiagnosticCompilerBuildInfoProblem"
+  , "DiagnosticCompilerBuildInfoExpectedCompiler"
+  , "DiagnosticCompilerBuildInfoExpectedIdentity"
+  , "DiagnosticCompilerBuildInfoComponentIdentity"
+  , "DiagnosticCompilerBuildInfoArgumentObservation"
+  , "DiagnosticCompilerBuildInfoPathObservation"
+  , "DiagnosticCompilerBuildInfoGeneratedInputObservation"
+  , "DiagnosticCompilerBuildInfoPackageObservation"
+  , "DiagnosticCompilerBuildInfoMachinePathObservation"
+  , "DiagnosticCompilerBuildInfoSourceOwnershipObservation"
+  , "DiagnosticCompilerBuildInfoComponentObservation"
+  , "makeDiagnosticCompilerBuildInfoExpectations"
+  , "expectationObservations"
+  , "snapshotObservations"
+  , "componentObservations"
+  , "problemFinding"
+  ]
+
+opacityInventoryProblems :: [String]
+opacityInventoryProblems =
+  [ "expected 21 private facade symbols, observed "
+      <> show (length privateFacadeSymbolInventory)
+  | length privateFacadeSymbolInventory /= 21
+  ]
+    <> ["duplicate private facade symbol " <> name
+       | name <- duplicates privateFacadeSymbolInventory]
+    <> expectEqual "the package-hidden implementation module inventory"
+      ["Amoebius.Validation.CompilerBuildInfo.Internal"]
+      packageHiddenModuleInventory
+
+packageHiddenModuleInventory :: [String]
+packageHiddenModuleInventory =
+  ["Amoebius.Validation.CompilerBuildInfo.Internal"]
+
+
+positiveCases :: [ExactCase]
+positiveCases =
+    [ expectExact
+        "the sole public front door remains a fully retained refusal"
+        (expectedProjection
+          (ByteString.length positiveBytes)
+          expectedCompiler
+          [mainIdentity]
+          expectedCompiler
+          [positiveComponent])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] positiveBytes)
+    , expectExact
+        "an absent optional cabal-file remains retained and has the same mandatory join residue"
+        (expectedProjection
+          (ByteString.length missingCabalBytes)
+          expectedCompiler
+          [mainIdentity]
+          expectedCompiler
+          [positiveComponent { expectedCabalFile = Nothing }])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] missingCabalBytes)
+    , expectExact
+        "an attached path option retains its option token, absent value index, raw token, and path"
+        (expectedProjection
+          (ByteString.length attachedPathBytes)
+          expectedCompiler
+          [mainIdentity]
+          expectedCompiler
+          [attachedPathComponent])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] attachedPathBytes)
+    ]
+
+expectationCases :: [ExactCase]
+expectationCases =
+    [ expectExact
+        "an empty caller universe is rejected before bytes are parsed"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding "BuildInfoExpectedIdentityUniverseEmpty"
+        ]
+        (runDiagnostic expectedCompiler [] positiveBytes)
+    , expectExact
+        "an over-bound caller compiler id is rejected by the private expectation admission"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "expected compiler id exceeds the 512-byte diagnostic bound"
+        ]
+        (runDiagnostic ("ghc", "ghc-" <> Text.replicate 509 "1", compilerPath)
+          [mainIdentity] positiveBytes)
+    , expectExact
+        "an over-bound caller identity field is rejected without traversing repository bytes"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "an expected component identity exceeds the 512-byte per-field diagnostic bound"
+        ]
+        (runDiagnostic expectedCompiler
+          [("test", "test:" <> Text.replicate 508 "a", "unit")]
+          positiveBytes)
+    , expectExact
+        "the exact 4096-byte caller compiler path reaches the diagnostic parser"
+        (malformedProjection expectedCompilerPathBoundaryCompiler [mainIdentity]
+          rootNotObjectBytes)
+        [ diagnosticOnlyFinding
+        , problemFinding "COMPILER-BUILDINFO-ROOT-NOT-OBJECT" "BuildInfoRootNotObject"
+        ]
+        (runDiagnostic expectedCompilerPathBoundaryCompiler [mainIdentity]
+          rootNotObjectBytes)
+    , expectExact
+        "an over-bound caller path is rejected before lexical path parsing"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "expected compiler path exceeds the 4096-byte diagnostic bound"
+        ]
+        (runDiagnostic expectedCompilerPathOverCompiler
+          [mainIdentity] positiveBytes)
+    , expectExact
+        "the exact 512-entry caller identity universe reaches the diagnostic parser"
+        (malformedProjection expectedCompiler (boundaryIdentities 512)
+          rootNotObjectBytes)
+        [ diagnosticOnlyFinding
+        , problemFinding "COMPILER-BUILDINFO-ROOT-NOT-OBJECT" "BuildInfoRootNotObject"
+        ]
+        (runDiagnostic expectedCompiler (boundaryIdentities 512) rootNotObjectBytes)
+    , expectExact
+        "one caller identity over the 512-entry bound is rejected before bytes are parsed"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding "expected-identities exceeds the 512-entry diagnostic bound"
+        ]
+        (runDiagnostic expectedCompiler (boundaryIdentities 513) rootNotObjectBytes)
+    ]
+
+schemaAndIdentityCases :: [ExactCase]
+schemaAndIdentityCases =
+    [ expectMalformedExactly
+        "an unknown component field cannot widen the closed schema"
+        "COMPILER-BUILDINFO-FIELD-UNKNOWN"
+        "BuildInfoFieldUnknown \"build-info.components[0]\" \"hidden-input\""
+        expectedCompiler
+        [mainIdentity]
+        unknownFieldBytes
+    , expectMalformedExactly
+        "a changed compiler is bound to the independently stated caller diagnostic"
+        "COMPILER-BUILDINFO-COMPILER-ID-MISMATCH"
+        "BuildInfoExpectedCompilerIdMismatch \"ghc-9.10.1\" \"ghc-9.12.4\""
+        ("ghc", "ghc-9.10.1", compilerPath)
+        [mainIdentity]
+        positiveBytes
+    , expectMalformedExactly
+        "a changed component unit is bound to the expected identity"
+        "COMPILER-BUILDINFO-EXPECTED-UNIT-MISMATCH"
+        "BuildInfoExpectedUnitIdentityMismatch \"lib\" \"lib\" \"expected-unit\" \"core-unit\""
+        expectedCompiler
+        [("lib", "lib", "expected-unit")]
+        positiveBytes
+    , expectExact
+        "the exact 512-byte unit identity remains fully retained"
+        (expectedProjection
+          (ByteString.length identityBoundaryBytes)
+          expectedCompiler
+          [identityBoundaryIdentity]
+          expectedCompiler
+          [identityBoundaryComponent])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [identityBoundaryIdentity] identityBoundaryBytes)
+    , expectExact
+        "one byte over the identity bound is rejected at expectation admission"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "an expected component identity exceeds the 512-byte per-field diagnostic bound"
+        ]
+        (runDiagnostic expectedCompiler
+          [("lib", "lib", Text.replicate 513 "u")]
+          identityBoundaryBytes)
+    ]
+
+argumentCases :: [ExactCase]
+argumentCases =
+    [ expectMalformedExactly
+        "a missing hide-all boundary is refused at its exact boundary"
+        "COMPILER-BUILDINFO-PACKAGE-BOUNDARY-MISSING"
+        "BuildInfoCompilerPackageBoundaryMissing \"core-unit\" \"-hide-all-packages\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          ["-no-user-package-db", "-this-unit-id", "core-unit"] True])
+    , expectMalformedExactly
+        "a duplicated no-user boundary is refused at its exact boundary"
+        "COMPILER-BUILDINFO-PACKAGE-BOUNDARY-DUPLICATE"
+        "BuildInfoCompilerPackageBoundaryDuplicate \"core-unit\" \"-no-user-package-db\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          ["-hide-all-packages", "-no-user-package-db", "-no-user-package-db",
+           "-this-unit-id", "core-unit"] True])
+    , expectMalformedExactly
+        "a mismatched this-unit argument cannot impersonate the component"
+        "COMPILER-BUILDINFO-THIS-UNIT-MISMATCH"
+        "BuildInfoCompilerThisUnitIdMismatch \"core-unit\" \"other-unit\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          ["-hide-all-packages", "-no-user-package-db", "-this-unit-id", "other-unit"] True])
+    , expectMalformedExactly
+        "an unclassified source-search argument is refused at its exact index"
+        "COMPILER-BUILDINFO-ARGUMENT-UNCLASSIFIED"
+        "BuildInfoCompilerArgumentUnclassified \"core-unit\" 4 \"-i/outside\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          (baseArguments <> ["-i/outside"]) True])
+    , expectMalformedExactly
+        "an unsafe argument path is refused at its exact option and value"
+        "COMPILER-BUILDINFO-ARGUMENT-PATH-UNSAFE"
+        "BuildInfoCompilerArgumentPathUnsafe \"core-unit\" 4 \"-odir\" \"../outside\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          (baseArguments <> ["-odir", "../outside"]) True])
+    , expectMalformedExactly
+        "an unsafe attached argument path is refused at its exact option and value"
+        "COMPILER-BUILDINFO-ARGUMENT-PATH-UNSAFE"
+        "BuildInfoCompilerArgumentPathUnsafe \"core-unit\" 4 \"-odir\" \"../outside\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          (baseArguments <> ["-odir=../outside"]) True])
+    , expectMalformedExactly
+        "a missing generated-input value retains explicit absence"
+        "COMPILER-BUILDINFO-GENERATED-INPUT-ARGUMENT"
+        "BuildInfoCompilerGeneratedInputArgumentMalformed \"core-unit\" 4 \"-optP-include\" Nothing"
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          (baseArguments <> ["-optP-include"]) True])
+    , expectMalformedExactly
+        "a malformed generated-input candidate is retained exactly"
+        "COMPILER-BUILDINFO-GENERATED-INPUT-ARGUMENT"
+        "BuildInfoCompilerGeneratedInputArgumentMalformed \"core-unit\" 4 \"-optP-include\" (Just \"-optP../cabal_macros.h\")"
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          (baseArguments <> ["-optP-include", "-optP../cabal_macros.h"]) True])
+    ]
+
+pathCases :: [ExactCase]
+pathCases =
+    [ expectExact
+        "the exact 64-segment relative source path remains fully retained"
+        (expectedProjection
+          (ByteString.length pathDepthBoundaryBytes)
+          expectedCompiler [mainIdentity] expectedCompiler
+          [sourcePathComponent pathDepthBoundary])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] pathDepthBoundaryBytes)
+    , expectMalformedExactly
+        "one segment over the path-depth bound is refused exactly"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        ("BuildInfoPathUnsafe \"core-unit\" \"src-files\" "
+          <> showText pathDepthOver)
+        expectedCompiler [mainIdentity] pathDepthOverBytes
+    , expectExact
+        "the exact 255-byte path segment remains fully retained"
+        (expectedProjection
+          (ByteString.length pathSegmentBoundaryBytes)
+          expectedCompiler [mainIdentity] expectedCompiler
+          [sourcePathComponent pathSegmentBoundary])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] pathSegmentBoundaryBytes)
+    , expectMalformedExactly
+        "one byte over the path-segment bound is refused exactly"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        ("BuildInfoPathUnsafe \"core-unit\" \"src-files\" "
+          <> showText pathSegmentOver)
+        expectedCompiler [mainIdentity] pathSegmentOverBytes
+    , expectMalformedExactly
+        "an absolute source path outside the source directory is refused"
+        "COMPILER-BUILDINFO-PATH-ESCAPES-SOURCE"
+        "BuildInfoPathEscapesSourceDirectory \"core-unit\" \"src-files\" \"/immutable/source/\" \"/outside/Escape.hs\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          [] ["/outside/Escape.hs"] ["src"] "/immutable/source/" (Just "amoebius.cabal")])
+    ]
+
+duplicateCases :: [ExactCase]
+duplicateCases =
+    [ expectMalformedExactly
+        "an escaped duplicate is detected before Aeson normalization"
+        "COMPILER-BUILDINFO-JSON-DUPLICATE-KEY"
+        "BuildInfoJsonDuplicateKey \"build-info\" \"compiler\""
+        expectedCompiler [mainIdentity] duplicateRootBytes
+    , expectMalformedExactly
+        "duplicate identity wins before a malformed second value is scanned"
+        "COMPILER-BUILDINFO-JSON-DUPLICATE-KEY"
+        "BuildInfoJsonDuplicateKey \"build-info\" \"compiler\""
+        expectedCompiler [mainIdentity] duplicateMalformedBytes
+    ]
+
+constructorCases :: [ExactCase]
+constructorCases =
+    [ expectMalformedExactly
+        "a structurally incomplete object is refused by the bounded scanner"
+        "COMPILER-BUILDINFO-JSON-SCAN-FAILED"
+        "BuildInfoDuplicateKeyScanFailed \"expected object key or '}' in build-info at offset 1\""
+        expectedCompiler [mainIdentity] "{"
+    , expectMalformedExactly
+        "a missing required root field is retained exactly"
+        "COMPILER-BUILDINFO-FIELD-MISSING"
+        "BuildInfoFieldMissing \"build-info\" \"cabal-lib-version\""
+        expectedCompiler [mainIdentity] missingRootVersionBytes
+    , expectMalformedExactly
+        "a required text field with the wrong type is retained exactly"
+        "COMPILER-BUILDINFO-FIELD-WRONG-TYPE"
+        "BuildInfoFieldWrongType \"build-info\" \"cabal-lib-version\" \"text\""
+        expectedCompiler [mainIdentity] wrongRootVersionTypeBytes
+    , expectMalformedExactly
+        "a component value with the wrong type is retained exactly"
+        "COMPILER-BUILDINFO-FIELD-WRONG-TYPE"
+        "BuildInfoFieldWrongType \"build-info.components[0]\" \"<component>\" \"object\""
+        expectedCompiler [mainIdentity] (buildInfoBytes ["null"])
+    , expectMalformedExactly
+        "a non-text array member is retained with its exact index"
+        "COMPILER-BUILDINFO-ARRAY-ELEMENT-WRONG-TYPE"
+        "BuildInfoArrayElementWrongType \"build-info.components[0]\" \"modules\" 0 \"text\""
+        expectedCompiler [mainIdentity] arrayWrongTypeBytes
+    , expectMalformedExactly
+        "an empty required compiler field is retained exactly"
+        "COMPILER-BUILDINFO-TEXT-EMPTY"
+        "BuildInfoTextEmpty \"build-info.compiler\" \"flavour\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytesWith "3.16.1.0" "" "ghc-9.12.4" compilerPath
+          [mainComponent baseArguments True])
+    , expectMalformedExactly
+        "an empty optional Cabal path is retained exactly"
+        "COMPILER-BUILDINFO-TEXT-EMPTY"
+        "BuildInfoTextEmpty \"build-info.components[0]\" \"cabal-file\""
+        expectedCompiler [mainIdentity] optionalTextEmptyBytes
+    , expectMalformedExactly
+        "an empty array text is retained with its exact index"
+        "COMPILER-BUILDINFO-ARRAY-TEXT-EMPTY"
+        "BuildInfoArrayTextEmpty \"build-info.components[0]\" \"modules\" 0"
+        expectedCompiler [mainIdentity] arrayTextEmptyBytes
+    , expectMalformedExactly
+        "an unsupported Cabal build-info version is retained exactly"
+        "COMPILER-BUILDINFO-CABAL-VERSION"
+        "BuildInfoCabalLibraryVersionUnsupported \"3.16.1.0\" \"3.16.1.1\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytesWith "3.16.1.1" "ghc" "ghc-9.12.4" compilerPath
+          [mainComponent baseArguments True])
+    , expectMalformedExactly
+        "an unsupported observed compiler flavour is retained exactly"
+        "COMPILER-BUILDINFO-COMPILER-FLAVOUR"
+        "BuildInfoCompilerFlavourUnsupported \"clang\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytesWith "3.16.1.0" "clang" "ghc-9.12.4" compilerPath
+          [mainComponent baseArguments True])
+    , expectMalformedExactly
+        "a malformed observed compiler id is retained exactly"
+        "COMPILER-BUILDINFO-COMPILER-ID"
+        "BuildInfoCompilerIdMalformed \"ghc-9.x\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytesWith "3.16.1.0" "ghc" "ghc-9.x" compilerPath
+          [mainComponent baseArguments True])
+    , expectMalformedExactly
+        "an empty observed component universe is retained exactly"
+        "COMPILER-BUILDINFO-COMPONENTS-EMPTY"
+        "BuildInfoComponentsEmpty"
+        expectedCompiler [mainIdentity] (buildInfoBytes [])
+    , expectMalformedExactly
+        "an unsupported component type is retained exactly"
+        "COMPILER-BUILDINFO-COMPONENT-TYPE"
+        "BuildInfoComponentTypeUnsupported 0 \"doc\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "doc" "doc:main" "core-unit" baseArguments
+          ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "a malformed component name is retained exactly"
+        "COMPILER-BUILDINFO-COMPONENT-NAME"
+        "BuildInfoComponentNameMalformed \"lib\" \"other\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "other" "core-unit" baseArguments
+          ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "a component without a module or source file is retained exactly"
+        "COMPILER-BUILDINFO-SOURCE-DISCOVERY-EMPTY"
+        "BuildInfoComponentSourceDiscoveryEmpty \"core-unit\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          [] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "a component without a Haskell source directory is retained exactly"
+        "COMPILER-BUILDINFO-HS-SOURCE-DIRS-EMPTY"
+        "BuildInfoHaskellSourceDirectoriesEmpty \"core-unit\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          ["Core"] [] [] "/immutable/source/" (Just "amoebius.cabal")])
+    , expectMalformedFindingsExactly
+        "a malformed observed unit retains both independent unit predicates"
+        [ problemFinding "COMPILER-BUILDINFO-UNIT-ID"
+            "BuildInfoUnitIdMalformed \"bad/unit\""
+        , problemFinding "COMPILER-BUILDINFO-THIS-UNIT-MISMATCH"
+            "BuildInfoCompilerThisUnitIdMismatch \"bad/unit\" \"core-unit\""
+        ]
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "bad/unit" baseArguments
+          ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "a duplicate module is retained exactly"
+        "COMPILER-BUILDINFO-MODULE-DUPLICATE"
+        "BuildInfoModuleNameDuplicate \"core-unit\" \"Core\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          ["Core", "Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "a duplicate source file is retained exactly"
+        "COMPILER-BUILDINFO-SOURCE-FILE-DUPLICATE"
+        "BuildInfoSourceFileDuplicate \"core-unit\" \"Core.hs\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          [] ["Core.hs", "Core.hs"] ["src"] "/immutable/source/" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "a duplicate Haskell source directory is retained exactly"
+        "COMPILER-BUILDINFO-HS-SOURCE-DIR-DUPLICATE"
+        "BuildInfoHaskellSourceDirectoryDuplicate \"core-unit\" \"src\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          ["Core"] [] ["src", "src"] "/immutable/source/" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "a relative component source root is retained exactly"
+        "COMPILER-BUILDINFO-SOURCE-DIR-NOT-ABSOLUTE"
+        "BuildInfoSourceDirectoryNotAbsolute \"core-unit\" \"src/\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          ["Core"] [] ["src"] "src/" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "an unterminated component source root is retained exactly"
+        "COMPILER-BUILDINFO-SOURCE-DIR-SEPARATOR"
+        "BuildInfoSourceDirectoryMissingTrailingSeparator \"core-unit\" \"/immutable/source\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          ["Core"] [] ["src"] "/immutable/source" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "an unsafe absolute component source root is retained exactly"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        "BuildInfoPathUnsafe \"core-unit\" \"src-dir\" \"/immutable:source/\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          ["Core"] [] ["src"] "/immutable:source/" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "a non-Cabal optional source path is retained exactly"
+        "COMPILER-BUILDINFO-CABAL-EXTENSION"
+        "BuildInfoCabalFileExtensionInvalid \"core-unit\" \"amoebius.txt\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.txt")])
+    , expectMalformedExactly
+        "a non-Haskell source path is retained exactly"
+        "COMPILER-BUILDINFO-SOURCE-EXTENSION"
+        "BuildInfoSourceFileExtensionUnsupported \"core-unit\" \"Core.c\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [componentBytes "lib" "lib" "core-unit" baseArguments
+          [] ["Core.c"] ["src"] "/immutable/source/" (Just "amoebius.cabal")])
+    , expectMalformedExactly
+        "a missing package-id value is retained exactly"
+        "COMPILER-BUILDINFO-ARGUMENT-VALUE-MISSING"
+        "BuildInfoCompilerArgumentValueMissing \"core-unit\" 4 \"-package-id\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent (baseArguments <> ["-package-id"]) True])
+    , expectMalformedExactly
+        "a malformed package-id value is retained exactly"
+        "COMPILER-BUILDINFO-ARGUMENT-VALUE-MALFORMED"
+        "BuildInfoCompilerArgumentValueMalformed \"core-unit\" 4 \"-package-id\" \"bad/unit\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent (baseArguments <> ["-package-id", "bad/unit"]) True])
+    , expectMalformedExactly
+        "a missing this-unit argument is retained exactly"
+        "COMPILER-BUILDINFO-THIS-UNIT-MISSING"
+        "BuildInfoCompilerThisUnitIdMissing \"core-unit\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          ["-hide-all-packages", "-no-user-package-db"] True])
+    , expectMalformedExactly
+        "duplicate this-unit arguments retain their complete observed list"
+        "COMPILER-BUILDINFO-THIS-UNIT-DUPLICATE"
+        "BuildInfoCompilerThisUnitIdDuplicate \"core-unit\" [\"core-unit\",\"core-unit\"]"
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          (baseArguments <> ["-this-unit-id", "core-unit"]) True])
+    ]
+
+identityConstructorCases :: [ExactCase]
+identityConstructorCases =
+    [ expectExact
+        "an unsupported expected compiler flavour is rejected before bytes"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding "BuildInfoExpectedCompilerFlavourUnsupported \"clang\""
+        ]
+        (runDiagnostic ("clang", "ghc-9.12.4", compilerPath)
+          [mainIdentity] positiveBytes)
+    , expectExact
+        "a malformed expected compiler id is rejected before bytes"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding "BuildInfoExpectedCompilerIdMalformed \"ghc-9.x\""
+        ]
+        (runDiagnostic ("ghc", "ghc-9.x", compilerPath)
+          [mainIdentity] positiveBytes)
+    , expectExact
+        "an unsafe expected compiler path is rejected before bytes"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding "BuildInfoExpectedCompilerPathUnsafe \"relative/ghc\""
+        ]
+        (runDiagnostic ("ghc", "ghc-9.12.4", "relative/ghc")
+          [mainIdentity] positiveBytes)
+    , expectExact
+        "an expected compiler file path with a trailing separator is refused"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "BuildInfoExpectedCompilerPathUnsafe \"/immutable/toolchain/bin/ghc/\""
+        ]
+        (runDiagnostic ("ghc", "ghc-9.12.4", "/immutable/toolchain/bin/ghc/")
+          [mainIdentity] positiveBytes)
+    , expectMalformedExactly
+        "the expected compiler path is joined independently from its id"
+        "COMPILER-BUILDINFO-COMPILER-PATH-MISMATCH"
+        "BuildInfoExpectedCompilerPathMismatch \"/expected/bin/ghc\" \"/immutable/toolchain/bin/ghc\""
+        ("ghc", "ghc-9.12.4", "/expected/bin/ghc") [mainIdentity]
+        positiveBytes
+    , expectExact
+        "an unsupported expected component type is rejected before bytes"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "BuildInfoExpectedIdentityTypeUnsupported \"doc\" \"doc:main\" \"core-unit\""
+        ]
+        (runDiagnostic expectedCompiler [("doc", "doc:main", "core-unit")] positiveBytes)
+    , expectExact
+        "a malformed expected component name is rejected before bytes"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "BuildInfoExpectedIdentityTextMalformed \"name\" \"lib\" \"other\" \"core-unit\""
+        ]
+        (runDiagnostic expectedCompiler [("lib", "other", "core-unit")] positiveBytes)
+    , expectExact
+        "a malformed expected unit id is rejected before bytes"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "BuildInfoExpectedIdentityTextMalformed \"unit-id\" \"lib\" \"lib\" \"bad/unit\""
+        ]
+        (runDiagnostic expectedCompiler [("lib", "lib", "bad/unit")] positiveBytes)
+    , expectExact
+        "duplicate expected unit ids are rejected before bytes"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding "BuildInfoExpectedUnitIdDuplicate \"core-unit\""
+        ]
+        (runDiagnostic expectedCompiler
+          [mainIdentity, ("test", "test:other", "core-unit")] positiveBytes)
+    , expectExact
+        "duplicate expected component identities are rejected before bytes"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding "BuildInfoExpectedComponentIdentityDuplicate \"lib\" \"lib\""
+        ]
+        (runDiagnostic expectedCompiler
+          [mainIdentity, ("lib", "lib", "other-unit")] positiveBytes)
+    , expectMalformedExactly
+        "an independently expected identity may not disappear"
+        "COMPILER-BUILDINFO-EXPECTED-IDENTITY-MISSING"
+        "BuildInfoExpectedIdentityMissing \"test\" \"test:missing\" \"missing-unit\""
+        expectedCompiler [mainIdentity, ("test", "test:missing", "missing-unit")]
+        positiveBytes
+    , expectMalformedExactly
+        "an observed identity outside the expected universe is refused"
+        "COMPILER-BUILDINFO-UNEXPECTED-IDENTITY"
+        "BuildInfoUnexpectedIdentity \"test\" \"test:extra\" \"extra-unit\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes
+          [ mainComponent baseArguments True
+          , componentBytes "test" "test:extra" "extra-unit"
+              ["-hide-all-packages", "-no-user-package-db", "-this-unit-id", "extra-unit"]
+              [] ["Extra.hs"] ["test"] "/immutable/source/" (Just "amoebius.cabal")
+          ])
+    , expectMalformedExactly
+        "an expected unit cannot move to another component identity"
+        "COMPILER-BUILDINFO-EXPECTED-COMPONENT-MISMATCH"
+        "BuildInfoExpectedComponentIdentityMismatch \"core-unit\" \"test\" \"test:expected\" \"lib\" \"lib\""
+        expectedCompiler [("test", "test:expected", "core-unit")]
+        positiveBytes
+    , expectMalformedFindingsExactly
+        "duplicate observed unit ids remain distinct from expected-unit mismatch"
+        [ problemFinding "COMPILER-BUILDINFO-OBSERVED-UNIT-DUPLICATE"
+            "BuildInfoObservedUnitIdDuplicate \"core-unit\""
+        , problemFinding "COMPILER-BUILDINFO-EXPECTED-UNIT-MISMATCH"
+            "BuildInfoExpectedUnitIdentityMismatch \"test\" \"test:second\" \"other-unit\" \"core-unit\""
+        ]
+        expectedCompiler [mainIdentity, ("test", "test:second", "other-unit")]
+        (buildInfoBytes
+          [ mainComponent baseArguments True
+          , componentBytes "test" "test:second" "core-unit" baseArguments
+              [] ["Second.hs"] ["test"] "/immutable/source/" (Just "amoebius.cabal")
+          ])
+    , expectMalformedFindingsExactly
+        "duplicate observed component identities remain distinct from both expected joins"
+        [ problemFinding "COMPILER-BUILDINFO-OBSERVED-COMPONENT-DUPLICATE"
+            "BuildInfoObservedComponentIdentityDuplicate \"lib\" \"lib\""
+        , problemFinding "COMPILER-BUILDINFO-EXPECTED-UNIT-MISMATCH"
+            "BuildInfoExpectedUnitIdentityMismatch \"lib\" \"lib\" \"core-unit\" \"other-unit\""
+        , problemFinding "COMPILER-BUILDINFO-EXPECTED-COMPONENT-MISMATCH"
+            "BuildInfoExpectedComponentIdentityMismatch \"other-unit\" \"test\" \"test:second\" \"lib\" \"lib\""
+        ]
+        expectedCompiler [mainIdentity, ("test", "test:second", "other-unit")]
+        (buildInfoBytes
+          [ mainComponent baseArguments True
+          , componentBytes "lib" "lib" "other-unit"
+              ["-hide-all-packages", "-no-user-package-db", "-this-unit-id", "other-unit"]
+              [] ["Second.hs"] ["src"] "/immutable/source/" (Just "amoebius.cabal")
+          ])
+    ]
+
+closedAlternativeCases :: [ExactCase]
+closedAlternativeCases =
+    [ expectExact
+        "every admitted standalone and path-taking compiler alternative is retained exactly"
+        (expectedProjection
+          (ByteString.length closedAlternativeBytes)
+          expectedCompiler [mainIdentity] expectedCompiler
+          [closedAlternativeComponent])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] closedAlternativeBytes)
+    , expectExact
+        "all five closed component kinds are retained on both sides of the join"
+        (expectedProjection
+          (ByteString.length componentTypeAlternativeBytes)
+          expectedCompiler componentTypeAlternativeIdentities expectedCompiler
+          componentTypeAlternativeComponents)
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler componentTypeAlternativeIdentities
+          componentTypeAlternativeBytes)
+    , expectMalformedExactly
+        "a missing no-user package boundary is refused independently"
+        "COMPILER-BUILDINFO-PACKAGE-BOUNDARY-MISSING"
+        "BuildInfoCompilerPackageBoundaryMissing \"core-unit\" \"-no-user-package-db\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          ["-hide-all-packages", "-this-unit-id", "core-unit"] True])
+    , expectMalformedExactly
+        "a duplicate hide-all package boundary is refused independently"
+        "COMPILER-BUILDINFO-PACKAGE-BOUNDARY-DUPLICATE"
+        "BuildInfoCompilerPackageBoundaryDuplicate \"core-unit\" \"-hide-all-packages\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent
+          ["-hide-all-packages", "-hide-all-packages", "-no-user-package-db",
+           "-this-unit-id", "core-unit"] True])
+    , expectMalformedExactly
+        "a separated path option without a value is retained exactly"
+        "COMPILER-BUILDINFO-ARGUMENT-VALUE-MISSING"
+        "BuildInfoCompilerArgumentValueMissing \"core-unit\" 4 \"-odir\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent (baseArguments <> ["-odir"]) True])
+    , expectMalformedExactly
+        "an empty attached path is not an admitted attached alternative"
+        "COMPILER-BUILDINFO-ARGUMENT-UNCLASSIFIED"
+        "BuildInfoCompilerArgumentUnclassified \"core-unit\" 4 \"-odir=\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytes [mainComponent (baseArguments <> ["-odir="]) True])
+    , hazardousArgumentCase
+        "response-file arguments are hazardous"
+        "@hidden.rsp"
+        "response files can hide unenumerated compiler arguments"
+    , hazardousArgumentCase
+        "compiler-plugin arguments are hazardous"
+        "-fplugin=Plugin"
+        "compiler plugin execution is not admitted"
+    , hazardousArgumentCase
+        "plugin-package arguments are hazardous"
+        "-plugin-package=plugin-unit"
+        "compiler plugin packages are not admitted"
+    , hazardousArgumentCase
+        "Template Haskell arguments are hazardous"
+        "-XTemplateHaskell"
+        "compile-time Haskell execution is not admitted"
+    , hazardousArgumentCase
+        "external-interpreter arguments are hazardous"
+        "-fexternal-interpreter"
+        "compile-time interpreter execution is not admitted"
+    , hazardousArgumentCase
+        "unbound preprocessing arguments are hazardous"
+        "-cpp"
+        "unbound preprocessing is not admitted"
+    , hazardousArgumentCase
+        "custom preprocessor arguments are hazardous"
+        "-pgmFtool"
+        "custom preprocessing tools are not admitted"
+    , hazardousArgumentCase
+        "foreign-call arguments are hazardous"
+        "-XForeignFunctionInterface"
+        "foreign-call compilation is not admitted"
+    , hazardousArgumentCase
+        "linker arguments are hazardous"
+        "-optl-Wl,unsafe"
+        "linker or foreign-library arguments are not admitted"
+    , hazardousArgumentCase
+        "custom foreign-tool arguments are hazardous"
+        "-pgmcclang"
+        "custom foreign compiler tools are not admitted"
+    , hazardousArgumentCase
+        "package-environment arguments are hazardous"
+        "-package-env"
+        "unbounded package or user environment selection is not admitted"
+    , hazardousArgumentCase
+        "attached package-environment arguments are hazardous"
+        "-package-env=default"
+        "unbounded package or user environment selection is not admitted"
+    , hazardousArgumentCase
+        "interactive compiler arguments are hazardous"
+        "-interactive"
+        "interactive compiler execution is not admitted"
+    ]
+
+hazardousArgumentCase :: String -> Text -> Text -> ExactCase
+hazardousArgumentCase label argument reason =
+  expectMalformedExactly label
+    "COMPILER-BUILDINFO-ARGUMENT-HAZARDOUS"
+    ("BuildInfoCompilerArgumentHazardous \"core-unit\" 4 "
+      <> showText (Text.unpack argument) <> " " <> showText (Text.unpack reason))
+    expectedCompiler [mainIdentity]
+    (buildInfoBytes [mainComponent (baseArguments <> [argument]) True])
+
+schemaPredicateCases :: [ExactCase]
+schemaPredicateCases =
+    [ expectRootNotObjectExactly
+        "a non-object root is refused exactly"
+        expectedCompiler [mainIdentity] rootNotObjectBytes
+    , expectMalformedExactly
+        "a missing required compiler object is retained exactly"
+        "COMPILER-BUILDINFO-FIELD-MISSING"
+        "BuildInfoFieldMissing \"build-info\" \"compiler\""
+        expectedCompiler [mainIdentity] missingCompilerObjectBytes
+    , expectMalformedExactly
+        "a required compiler object with the wrong type is retained exactly"
+        "COMPILER-BUILDINFO-FIELD-WRONG-TYPE"
+        "BuildInfoFieldWrongType \"build-info\" \"compiler\" \"object\""
+        expectedCompiler [mainIdentity] wrongCompilerObjectBytes
+    , expectMalformedExactly
+        "a missing required component array is retained exactly"
+        "COMPILER-BUILDINFO-FIELD-MISSING"
+        "BuildInfoFieldMissing \"build-info\" \"components\""
+        expectedCompiler [mainIdentity] missingComponentsArrayBytes
+    , expectMalformedExactly
+        "a required component array with the wrong type is retained exactly"
+        "COMPILER-BUILDINFO-FIELD-WRONG-TYPE"
+        "BuildInfoFieldWrongType \"build-info\" \"components\" \"array\""
+        expectedCompiler [mainIdentity] wrongComponentsArrayBytes
+    , expectMalformedExactly
+        "an optional Cabal path with the wrong type is retained exactly"
+        "COMPILER-BUILDINFO-FIELD-WRONG-TYPE"
+        "BuildInfoFieldWrongType \"build-info.components[0]\" \"cabal-file\" \"text\""
+        expectedCompiler [mainIdentity] optionalTextWrongTypeBytes
+    , expectMalformedExactly
+        "an unsafe observed compiler path is retained before identity comparison"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        "BuildInfoPathUnsafe \"build-info.compiler\" \"path\" \"relative/ghc\""
+        expectedCompiler [mainIdentity]
+        (buildInfoBytesWith "3.16.1.0" "ghc" "ghc-9.12.4" "relative/ghc"
+          [mainComponent baseArguments True])
+    , expectMalformedExactly
+        "an unsafe absolute source child is retained independently from containment"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        "BuildInfoPathUnsafe \"core-unit\" \"src-files\" \"/immutable/source/../Escape.hs\""
+        expectedCompiler [mainIdentity]
+        (sourcePathBytes "/immutable/source/../Escape.hs")
+    , expectMalformedExactly
+        "an empty source-path segment is refused"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        "BuildInfoPathUnsafe \"core-unit\" \"src-files\" \"dir//Core.hs\""
+        expectedCompiler [mainIdentity] (sourcePathBytes "dir//Core.hs")
+    , expectMalformedExactly
+        "a dot source-path segment is refused"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        "BuildInfoPathUnsafe \"core-unit\" \"src-files\" \"dir/./Core.hs\""
+        expectedCompiler [mainIdentity] (sourcePathBytes "dir/./Core.hs")
+    , expectMalformedExactly
+        "a parent source-path segment is refused"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        "BuildInfoPathUnsafe \"core-unit\" \"src-files\" \"dir/../Core.hs\""
+        expectedCompiler [mainIdentity] (sourcePathBytes "dir/../Core.hs")
+    , expectMalformedExactly
+        "a backslash source path is refused"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        "BuildInfoPathUnsafe \"core-unit\" \"src-files\" \"dir\\\\Core.hs\""
+        expectedCompiler [mainIdentity] backslashSourcePathBytes
+    , expectMalformedExactly
+        "a colon source path is refused"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        "BuildInfoPathUnsafe \"core-unit\" \"src-files\" \"dir:Core.hs\""
+        expectedCompiler [mainIdentity] (sourcePathBytes "dir:Core.hs")
+    , expectMalformedExactly
+        "a control character in a source path is refused"
+        "COMPILER-BUILDINFO-PATH-UNSAFE"
+        "BuildInfoPathUnsafe \"core-unit\" \"src-files\" \"Core\\t.hs\""
+        expectedCompiler [mainIdentity] (sourcePathBytes "Core\\t.hs")
+    , expectExact
+        "the admitted relative-dot Haskell source-directory alternative is retained"
+        (expectedProjection
+          (ByteString.length dotSourceDirectoryBytes)
+          expectedCompiler [mainIdentity] expectedCompiler
+          [dotSourceDirectoryComponent])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] dotSourceDirectoryBytes)
+    ]
+
+identityLimitCases :: [ExactCase]
+identityLimitCases =
+    [ expectExact
+        "the exact 512-byte caller compiler flavour reaches semantic admission"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            ("BuildInfoExpectedCompilerFlavourUnsupported "
+              <> showText (Text.unpack callerFlavourBoundary))
+        ]
+        (runDiagnostic (callerFlavourBoundary, "ghc-9.12.4", compilerPath)
+          [mainIdentity] rootNotObjectBytes)
+    , expectExact
+        "one caller compiler-flavour byte over its bound refuses before semantics"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "expected compiler flavour exceeds the 512-byte diagnostic bound"
+        ]
+        (runDiagnostic (callerFlavourOver, "ghc-9.12.4", compilerPath)
+          [mainIdentity] rootNotObjectBytes)
+    , expectRootNotObjectExactly
+        "the exact 512-byte caller compiler id reaches parsing"
+        callerCompilerIdBoundaryCompiler [mainIdentity] rootNotObjectBytes
+    , expectExact
+        "one caller compiler-id byte over its bound refuses before semantics"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding "expected compiler id exceeds the 512-byte diagnostic bound"
+        ]
+        (runDiagnostic callerCompilerIdOverCompiler [mainIdentity] rootNotObjectBytes)
+    , expectExact
+        "the exact 512-byte expected component type reaches semantic admission"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            ("BuildInfoExpectedIdentityTypeUnsupported "
+              <> showText (Text.unpack expectedTypeBoundary)
+              <> " \"type:name\" \"type-unit\"")
+        ]
+        (runDiagnostic expectedCompiler
+          [(expectedTypeBoundary, "type:name", "type-unit")] rootNotObjectBytes)
+    , expectExact
+        "one expected component-type byte over its bound refuses before semantics"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "an expected component identity exceeds the 512-byte per-field diagnostic bound"
+        ]
+        (runDiagnostic expectedCompiler
+          [(expectedTypeOver, "type:name", "type-unit")] rootNotObjectBytes)
+    , expectRootNotObjectExactly
+        "the exact 512-byte expected component name reaches parsing"
+        expectedCompiler [("test", expectedNameBoundary, "name-unit")]
+        rootNotObjectBytes
+    , expectExact
+        "one expected component-name byte over its bound refuses before semantics"
+        []
+        [ diagnosticOnlyFinding
+        , expectationFinding
+            "an expected component identity exceeds the 512-byte per-field diagnostic bound"
+        ]
+        (runDiagnostic expectedCompiler
+          [("test", expectedNameOver, "name-unit")] rootNotObjectBytes)
+    , expectMalformedExactly
+        "the exact 512-byte observed compiler id reaches the identity join"
+        "COMPILER-BUILDINFO-COMPILER-ID-MISMATCH"
+        ("BuildInfoExpectedCompilerIdMismatch \"ghc-9.12.4\" "
+          <> showText (Text.unpack observedCompilerIdBoundary))
+        expectedCompiler [mainIdentity] observedCompilerIdBoundaryBytes
+    , expectMalformedExactly
+        "one observed compiler-id byte over its bound is refused by grammar"
+        "COMPILER-BUILDINFO-COMPILER-ID"
+        ("BuildInfoCompilerIdMalformed " <> showText (Text.unpack observedCompilerIdOver))
+        expectedCompiler [mainIdentity] observedCompilerIdOverBytes
+    , expectMalformedExactly
+        "the exact 512-byte observed component name reaches the identity join"
+        "COMPILER-BUILDINFO-EXPECTED-COMPONENT-MISMATCH"
+        ("BuildInfoExpectedComponentIdentityMismatch \"core-unit\" \"lib\" \"lib\" \"test\" "
+          <> showText (Text.unpack observedNameBoundary))
+        expectedCompiler [mainIdentity] observedNameBoundaryBytes
+    , expectMalformedExactly
+        "one observed component-name byte over its bound is refused by grammar"
+        "COMPILER-BUILDINFO-COMPONENT-NAME"
+        ("BuildInfoComponentNameMalformed \"test\" "
+          <> showText (Text.unpack observedNameOver))
+        expectedCompiler [mainIdentity] observedNameOverBytes
+    , expectMalformedExactly
+        "the exact 512-byte observed unit reaches the argument identity predicate"
+        "COMPILER-BUILDINFO-THIS-UNIT-MISMATCH"
+        ("BuildInfoCompilerThisUnitIdMismatch "
+          <> showText (Text.unpack observedUnitBoundary) <> " \"core-unit\"")
+        expectedCompiler [mainIdentity] observedUnitBoundaryBytes
+    , expectMalformedFindingsExactly
+        "one observed unit byte over its bound is refused independently"
+        [ problemFinding "COMPILER-BUILDINFO-UNIT-ID"
+            ("BuildInfoUnitIdMalformed " <> showText (Text.unpack observedUnitOver))
+        , problemFinding "COMPILER-BUILDINFO-THIS-UNIT-MISMATCH"
+            ("BuildInfoCompilerThisUnitIdMismatch "
+              <> showText (Text.unpack observedUnitOver) <> " \"core-unit\"")
+        ]
+        expectedCompiler [mainIdentity] observedUnitOverBytes
+    , expectExact
+        "the exact 512-byte package argument identity remains fully retained"
+        (expectedProjection (ByteString.length argumentUnitBoundaryBytes)
+          expectedCompiler [mainIdentity] expectedCompiler [argumentUnitBoundaryComponent])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] argumentUnitBoundaryBytes)
+    , expectMalformedExactly
+        "one package argument identity byte over its bound is refused"
+        "COMPILER-BUILDINFO-ARGUMENT-VALUE-MALFORMED"
+        ("BuildInfoCompilerArgumentValueMalformed \"core-unit\" 4 \"-package-id\" "
+          <> showText (Text.unpack argumentUnitOver))
+        expectedCompiler [mainIdentity] argumentUnitOverBytes
+    , expectExact
+        "the exact 512-byte module name remains fully retained"
+        (expectedProjection (ByteString.length moduleNameBoundaryBytes)
+          expectedCompiler [mainIdentity] expectedCompiler [moduleNameBoundaryComponent])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] moduleNameBoundaryBytes)
+    , expectMalformedExactly
+        "one module-name byte over its bound is refused"
+        "COMPILER-BUILDINFO-MODULE-NAME"
+        ("BuildInfoModuleNameMalformed \"core-unit\" "
+          <> showText (Text.unpack moduleNameOver))
+        expectedCompiler [mainIdentity] moduleNameOverBytes
+    ]
+
+grammarConjunctionCases :: [ExactCase]
+grammarConjunctionCases =
+    [ componentNameGrammarCase
+        "a qualified component name without its type prefix is refused"
+        "spec"
+    , componentNameGrammarCase
+        "an empty component-name chunk is refused"
+        "test:a--b"
+    , componentNameGrammarCase
+        "a non-alphanumeric component-name character is refused"
+        "test:a_b"
+    , unitGrammarCase
+        "a non-alphanumeric unit-id leading character is refused"
+        "-unit"
+    , unitGrammarCase
+        "a non-alphanumeric unit-id trailing character is refused"
+        "unit-"
+    , unitGrammarCase
+        "a unit-id character outside the closed alphabet is refused"
+        "unit/path"
+    , compilerIdGrammarCase
+        "a compiler id without the ghc prefix is refused"
+        "9.12.4"
+    , compilerIdGrammarCase
+        "an empty compiler-id version segment is refused"
+        "ghc-9..4"
+    , compilerIdGrammarCase
+        "a non-decimal compiler-id version character is refused"
+        "ghc-9.x"
+    , moduleGrammarCase
+        "a lowercase module segment leader is refused"
+        "core"
+    , moduleGrammarCase
+        "an empty module segment is refused"
+        "Core..Internal"
+    , moduleGrammarCase
+        "a module-tail character outside the closed alphabet is refused"
+        "Core-Internal"
+    ]
+
+componentNameGrammarCase :: String -> Text -> ExactCase
+componentNameGrammarCase label componentName =
+  expectMalformedExactly label
+    "COMPILER-BUILDINFO-COMPONENT-NAME"
+    ("BuildInfoComponentNameMalformed \"test\" "
+      <> showText (Text.unpack componentName))
+    expectedCompiler [mainIdentity]
+    (buildInfoBytes
+      [componentBytes "test" (Text.unpack componentName) "core-unit" baseArguments
+        ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")])
+
+unitGrammarCase :: String -> Text -> ExactCase
+unitGrammarCase label unitId =
+  expectMalformedFindingsExactly label
+    [ problemFinding "COMPILER-BUILDINFO-UNIT-ID"
+        ("BuildInfoUnitIdMalformed " <> showText (Text.unpack unitId))
+    , problemFinding "COMPILER-BUILDINFO-ARGUMENT-VALUE-MALFORMED"
+        ("BuildInfoCompilerArgumentValueMalformed "
+          <> showText (Text.unpack unitId) <> " 2 \"-this-unit-id\" "
+          <> showText (Text.unpack unitId))
+    ]
+    expectedCompiler [mainIdentity]
+    (buildInfoBytes
+      [componentBytes "lib" "lib" (Text.unpack unitId)
+        ["-hide-all-packages", "-no-user-package-db", "-this-unit-id", unitId]
+        ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")])
+
+compilerIdGrammarCase :: String -> Text -> ExactCase
+compilerIdGrammarCase label compilerId =
+  expectMalformedExactly label
+    "COMPILER-BUILDINFO-COMPILER-ID"
+    ("BuildInfoCompilerIdMalformed " <> showText (Text.unpack compilerId))
+    expectedCompiler [mainIdentity]
+    (buildInfoBytesWith "3.16.1.0" "ghc" compilerId compilerPath
+      [mainComponent baseArguments True])
+
+moduleGrammarCase :: String -> Text -> ExactCase
+moduleGrammarCase label moduleName =
+  expectMalformedExactly label
+    "COMPILER-BUILDINFO-MODULE-NAME"
+    ("BuildInfoModuleNameMalformed \"core-unit\" "
+      <> showText (Text.unpack moduleName))
+    expectedCompiler [mainIdentity]
+    (buildInfoBytes
+      [componentBytes "lib" "lib" "core-unit" baseArguments
+        [Text.unpack moduleName] [] ["src"] "/immutable/source/"
+        (Just "amoebius.cabal")])
+
+orderingCases :: [ExactCase]
+orderingCases =
+    [ expectExact
+        "observed components are projected in canonical identity order"
+        (expectedProjection (ByteString.length reverseComponentOrderBytes)
+          expectedCompiler (boundaryIdentities 2) expectedCompiler
+          (boundaryExpectedComponents 2))
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler (boundaryIdentities 2)
+          reverseComponentOrderBytes)
+    , expectMalformedFindingsExactly
+        "independent schema problems are projected in constructor order"
+        [ problemFinding "COMPILER-BUILDINFO-FIELD-MISSING"
+            "BuildInfoFieldMissing \"build-info\" \"cabal-lib-version\""
+        , problemFinding "COMPILER-BUILDINFO-FIELD-UNKNOWN"
+            "BuildInfoFieldUnknown \"build-info\" \"unknown\""
+        ]
+        expectedCompiler [mainIdentity] problemOrderBytes
+    ]
+
+jsonGrammarCases :: [ExactCase]
+jsonGrammarCases =
+    [ expectMalformedExactly
+        "trailing bytes after a complete JSON value are refused exactly"
+        "COMPILER-BUILDINFO-JSON-SCAN-FAILED"
+        "BuildInfoDuplicateKeyScanFailed \"unexpected bytes after JSON value at offset 5\""
+        expectedCompiler [mainIdentity] "null null"
+    , expectMalformedExactly
+        "an object member without a colon is refused exactly"
+        "COMPILER-BUILDINFO-JSON-SCAN-FAILED"
+        "BuildInfoDuplicateKeyScanFailed \"expected ':' after key in build-info at offset 5\""
+        expectedCompiler [mainIdentity] "{\"a\" 0}"
+    , expectMalformedExactly
+        "an object member without a comma is refused exactly"
+        "COMPILER-BUILDINFO-JSON-SCAN-FAILED"
+        "BuildInfoDuplicateKeyScanFailed \"expected ',' or '}' in build-info at offset 7\""
+        expectedCompiler [mainIdentity] "{\"a\":0 \"b\":1}"
+    , expectMalformedExactly
+        "an array element without a comma is refused exactly"
+        "COMPILER-BUILDINFO-JSON-SCAN-FAILED"
+        "BuildInfoDuplicateKeyScanFailed \"expected ',' or ']' in build-info at offset 3\""
+        expectedCompiler [mainIdentity] "[0 1]"
+    , expectMalformedExactly
+        "an invalid JSON string escape is refused exactly"
+        "COMPILER-BUILDINFO-JSON-SCAN-FAILED"
+        "BuildInfoDuplicateKeyScanFailed \"invalid JSON string at offset 0: Cannot decode input: Data.Text.Internal.Encoding.decodeUtf8: Invalid UTF-8 stream\""
+        expectedCompiler [mainIdentity] "\"\\q\""
+    , expectMalformedExactly
+        "an invalid JSON scalar is refused exactly"
+        "COMPILER-BUILDINFO-JSON-SCAN-FAILED"
+        "BuildInfoDuplicateKeyScanFailed \"invalid JSON scalar in build-info: Unexpected \\\"tru\\\", expecting JSON value\""
+        expectedCompiler [mainIdentity] "tru"
+    ]
+
+resourceCases :: [ExactCase]
+resourceCases =
+    [ expectExact
+        "the exact one-mebibyte boundary retains the full positive projection"
+        (expectedProjection 1048576 expectedCompiler [mainIdentity]
+          expectedCompiler [positiveComponent])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] (padTo 1048576 positiveBytes))
+    , expectMalformedExactly
+        "one byte over the input boundary refuses before JSON scanning"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"input-bytes\" 1048576 1048577"
+        expectedCompiler [mainIdentity] (padTo 1048577 positiveBytes)
+    , expectRootNotObjectExactly
+        "the exact 65536-token JSON structural boundary reaches decoding"
+        expectedCompiler [mainIdentity] structuralTokenBytesBoundary
+    , expectMalformedExactly
+        "one token over the JSON structural boundary is refused exactly"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"json-structural-tokens\" 65536 65537"
+        expectedCompiler [mainIdentity] structuralTokenBytesOver
+    , expectRootNotObjectExactly
+        "the exact 64-member JSON object boundary reaches decoding"
+        expectedCompiler [mainIdentity] objectMemberBytesBoundary
+    , expectMalformedExactly
+        "one member over the JSON object boundary is refused exactly"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"json-object-members\" 64 65"
+        expectedCompiler [mainIdentity] objectMemberBytesOver
+    , expectRootNotObjectExactly
+        "the exact 16-level JSON depth boundary reaches decoding"
+        expectedCompiler [mainIdentity] (nestedArrayBytes 15)
+    , expectMalformedExactly
+        "one JSON level over the depth boundary is refused exactly"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"json-depth\" 16 17"
+        expectedCompiler [mainIdentity] (nestedArrayBytes 16)
+    , expectRootNotObjectExactly
+        "the exact 4096-byte decoded JSON string boundary reaches decoding"
+        expectedCompiler [mainIdentity] (jsonStringBytes 4096)
+    , expectMalformedExactly
+        "one JSON string byte over the boundary is refused exactly"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"json-string-bytes:build-info\" 4096 4097"
+        expectedCompiler [mainIdentity] (jsonStringBytes 4097)
+    , expectRootNotObjectExactly
+        "the exact 4096-byte JSON scalar boundary reaches decoding"
+        expectedCompiler [mainIdentity] (jsonScalarBytes 4096)
+    , expectMalformedExactly
+        "one JSON scalar byte over the boundary is refused exactly"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"json-scalar-bytes:build-info\" 4096 4097"
+        expectedCompiler [mainIdentity] (jsonScalarBytes 4097)
+    , expectRootNotObjectExactly
+        "the exact 8192-element generic JSON array boundary reaches decoding"
+        expectedCompiler [mainIdentity] (zeroArrayBytes 8192)
+    , expectMalformedExactly
+        "one generic array element over the boundary is refused exactly"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"json-array-elements\" 8192 8193"
+        expectedCompiler [mainIdentity] (zeroArrayBytes 8193)
+    , expectExact
+        "the exact 512-component and expected-universe boundary retains every component"
+        (expectedProjection
+          (ByteString.length (buildInfoBytes (boundaryComponentWires 512)))
+          expectedCompiler (boundaryIdentities 512) expectedCompiler
+          (boundaryExpectedComponents 512))
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler (boundaryIdentities 512)
+          (buildInfoBytes (boundaryComponentWires 512)))
+    , expectMalformedExactly
+        "one component over the boundary is refused before identity comparison"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"components\" 512 513"
+        expectedCompiler (boundaryIdentities 512)
+        (buildInfoBytes (boundaryComponentWires 513))
+    , expectExact
+        "the exact 4096-entry component array retains every module"
+        (expectedProjection
+          (ByteString.length (moduleArrayBytes 4096 True))
+          expectedCompiler [mainIdentity] expectedCompiler
+          [moduleBoundaryComponent 4096])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] (moduleArrayBytes 4096 True))
+    , expectMalformedExactly
+        "one component-array element over the boundary is refused exactly"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"build-info.components[0].modules\" 4096 4097"
+        expectedCompiler [mainIdentity] (moduleArrayBytes 4097 True)
+    , expectExact
+        "the exact 4096-entry compiler-argument array retains every argument"
+        (expectedProjection
+          (ByteString.length (argumentArrayBytes 4096))
+          expectedCompiler [mainIdentity] expectedCompiler
+          [argumentBoundaryComponent 4096])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] (argumentArrayBytes 4096))
+    , expectMalformedExactly
+        "one compiler argument over its field-specific array bound is refused exactly"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"build-info.components[0].compiler-args\" 4096 4097"
+        expectedCompiler [mainIdentity] (argumentArrayBytes 4097)
+    , expectExact
+        "the exact 4096-entry source-file array retains every source file"
+        (expectedProjection
+          (ByteString.length (sourceFileArrayBytes 4096))
+          expectedCompiler [mainIdentity] expectedCompiler
+          [sourceFileBoundaryComponent 4096])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] (sourceFileArrayBytes 4096))
+    , expectMalformedExactly
+        "one source file over its field-specific array bound is refused exactly"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"build-info.components[0].src-files\" 4096 4097"
+        expectedCompiler [mainIdentity] (sourceFileArrayBytes 4097)
+    , expectExact
+        "the exact 4096-entry Haskell source-directory array retains every directory"
+        (expectedProjection
+          (ByteString.length (sourceDirectoryArrayBytes 4096))
+          expectedCompiler [mainIdentity] expectedCompiler
+          [sourceDirectoryBoundaryComponent 4096])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] (sourceDirectoryArrayBytes 4096))
+    , expectMalformedExactly
+        "one Haskell source directory over its field-specific array bound is refused exactly"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"build-info.components[0].hs-src-dirs\" 4096 4097"
+        expectedCompiler [mainIdentity] (sourceDirectoryArrayBytes 4097)
+    , expectMalformedFindingsExactly
+        "the exact 256-problem boundary retains every problem"
+        [problemFinding "COMPILER-BUILDINFO-MODULE-NAME"
+          ("BuildInfoModuleNameMalformed \"core-unit\" \"bad"
+            <> paddedDecimal 3 index <> "\"")
+        | index <- [0 :: Int .. 255]]
+        expectedCompiler [mainIdentity] (moduleArrayBytes 256 False)
+    , expectMalformedExactly
+        "one problem over the diagnostic boundary collapses early"
+        "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+        "BuildInfoResourceLimitExceeded \"problem-count\" 256 257"
+        expectedCompiler [mainIdentity] (moduleArrayBytes 257 False)
+    ]
+
+resultEnvelopeCases :: [ExactCase]
+resultEnvelopeCases =
+    [ expectExact
+        "the exact 14877-entry result envelope retains the full 512-component projection"
+        (expectedProjection
+          (ByteString.length (buildInfoBytes (boundaryComponentWires 512)))
+          expectedCompiler (boundaryIdentities 512) expectedCompiler
+          (boundaryExpectedComponents 512))
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler (boundaryIdentities 512)
+          (buildInfoBytes (boundaryComponentWires 512)))
+    , expectExact
+        "one result entry over the envelope refuses before the expanded projection is materialized"
+        (resultEnvelopeProjection "entries" 14878)
+        (expectedPermanentFindings
+          <> [problemFinding "COMPILER-BUILDINFO-RESULT-ENVELOPE"
+                "BuildInfoResultEnvelopeExceeded \"entries\" 14877 14878"])
+        (runDiagnostic expectedCompiler (boundaryIdentities 512)
+          resultEntryBytesOver)
+    , expectExact
+        "the exact 2097152-byte result payload envelope retains its complete projection"
+        (expectedProjection
+          (ByteString.length resultByteBoundaryBytes)
+          expectedCompiler [mainIdentity] expectedCompiler
+          [resultByteBoundaryComponent resultByteBoundarySourceDirectory])
+        expectedPermanentFindings
+        (runDiagnostic expectedCompiler [mainIdentity] resultByteBoundaryBytes)
+    , expectExact
+        "one result payload byte over the envelope refuses at the exact pre-render metric"
+        (resultEnvelopeProjection "payload-bytes" 2097153)
+        (expectedPermanentFindings
+          <> [problemFinding "COMPILER-BUILDINFO-RESULT-ENVELOPE"
+                "BuildInfoResultEnvelopeExceeded \"payload-bytes\" 2097152 2097153"])
+        (runDiagnostic expectedCompiler [mainIdentity] resultByteOverBytes)
+    ]
+
+type CompilerTriple = (Text, Text, FilePath)
+type IdentityTriple = (Text, Text, Text)
+
+fixtureIntegrityProblems :: [String]
+fixtureIntegrityProblems =
+  concat
+    [ expectEqual "the expected compiler path boundary fixture byte count"
+        4096 (length expectedCompilerPathBoundary)
+    , expectEqual "the expected compiler path one-over fixture byte count"
+        4097 (length expectedCompilerPathOver)
+    , expectEqual "the expected identity boundary fixture count"
+        512 (length (boundaryIdentities 512))
+    , expectEqual "the expected identity one-over fixture count"
+        513 (length (boundaryIdentities 513))
+    , expectEqual "the structural-token boundary fixture token count"
+        (65536 :: Int) (1 + 8192 + 6 + (8191 * 7))
+    , expectEqual "the structural-token one-over fixture token count"
+        (65537 :: Int) (1 + 8192 + (8192 * 7))
+    , expectEqual "the structural-token boundary fixture byte count"
+        131071 (ByteString.length structuralTokenBytesBoundary)
+    , expectEqual "the structural-token one-over fixture byte count"
+        131073 (ByteString.length structuralTokenBytesOver)
+    , expectEqual "the object-member boundary fixture member count"
+        64 (length (objectMembers 64))
+    , expectEqual "the object-member one-over fixture member count"
+        65 (length (objectMembers 65))
+    , expectEqual "the exact decoded JSON string fixture payload byte count"
+        4098 (ByteString.length (jsonStringBytes 4096))
+    , expectEqual "the decoded JSON string one-over fixture payload byte count"
+        4099 (ByteString.length (jsonStringBytes 4097))
+    , expectEqual "the exact scalar fixture byte count"
+        4096 (ByteString.length (jsonScalarBytes 4096))
+    , expectEqual "the scalar one-over fixture byte count"
+        4097 (ByteString.length (jsonScalarBytes 4097))
+    , expectEqual "the generic-array boundary fixture element count"
+        8192 (length (replicate 8192 ()))
+    , expectEqual "the generic-array one-over fixture element count"
+        8193 (length (replicate 8193 ()))
+    , expectEqual "the generic-array boundary fixture byte count"
+        16385 (ByteString.length (zeroArrayBytes 8192))
+    , expectEqual "the generic-array one-over fixture byte count"
+        16387 (ByteString.length (zeroArrayBytes 8193))
+    , expectEqual "the compiler-argument boundary fixture element count"
+        4096 (length (argumentArrayValues 4096))
+    , expectEqual "the compiler-argument one-over fixture element count"
+        4097 (length (argumentArrayValues 4097))
+    , expectEqual "the module boundary fixture element count"
+        4096 (length (moduleArrayValues 4096 True))
+    , expectEqual "the module one-over fixture element count"
+        4097 (length (moduleArrayValues 4097 True))
+    , expectEqual "the source-file boundary fixture element count"
+        4096 (length (sourceFileArrayValues 4096))
+    , expectEqual "the source-file one-over fixture element count"
+        4097 (length (sourceFileArrayValues 4097))
+    , expectEqual "the source-directory boundary fixture element count"
+        4096 (length (sourceDirectoryArrayValues 4096))
+    , expectEqual "the source-directory one-over fixture element count"
+        4097 (length (sourceDirectoryArrayValues 4097))
+    , expectEqual "the exact result-entry envelope fixture entry count"
+        14877 (resultEntryCount resultEntryBoundaryProjection expectedPermanentFindings)
+    , expectEqual "the result-entry one-over fixture entry count"
+        14878 (resultEntryCount resultEntryOverProjection expectedPermanentFindings)
+    , expectEqual "the result-byte boundary source-directory length"
+        4096 (length resultByteSourceDirectory)
+    , expectEqual "the result-byte boundary Haskell source-directory length"
+        2499 (length resultByteBoundarySourceDirectory)
+    , expectEqual "the result-byte one-over Haskell source-directory length"
+        2500 (length resultByteOverSourceDirectory)
+    , expectEqual "the result-byte boundary input size"
+        676412 (ByteString.length resultByteBoundaryBytes)
+    , expectEqual "the result-byte one-over input size"
+        676413 (ByteString.length resultByteOverBytes)
+    , expectEqual "the exact result payload envelope fixture byte count"
+        2097152
+        (resultPayloadBytes resultByteBoundaryProjection expectedPermanentFindings)
+    , expectEqual "the result payload one-over fixture byte count"
+        2097153
+        (resultPayloadBytes resultByteOverProjection expectedPermanentFindings)
+    ]
+
+resultEntryCount :: [Observation] -> [Finding] -> Int
+resultEntryCount observations findings = length observations + length findings
+
+resultPayloadBytes :: [Observation] -> [Finding] -> Int
+resultPayloadBytes observations findings =
+  utf8Length "compiler-build-info-diagnostic"
+    + sum
+      [utf8Length key + utf8Length value
+      | Observation key value <- observations]
+    + sum
+      [utf8Length code + utf8Length (Text.pack subject) + utf8Length detail
+      | Finding code subject detail <- findings]
+ where
+  utf8Length = ByteString.length . TextEncoding.encodeUtf8
+
+data ExpectedArgument
+  = ExpectedBoundary Int Text
+  | ExpectedThisUnit Int Text Int Text
+  | ExpectedPackage Int Text Int Text
+  | ExpectedPath Int Text (Maybe Int) Text FilePath
+  | ExpectedGenerated Int Text Int Text FilePath
+  | ExpectedStandalone Int Text
+  deriving (Eq, Show)
+
+data ExpectedPath = ExpectedPathObservation Int Text (Maybe Int) FilePath
+  deriving (Eq, Show)
+
+data ExpectedGenerated = ExpectedGeneratedObservation Int Text Int Text FilePath
+  deriving (Eq, Show)
+
+data ExpectedPackage = ExpectedPackageObservation Int Text Int Text
+  deriving (Eq, Show)
+
+data ExpectedComponent = ExpectedComponent
+  { expectedIdentity :: IdentityTriple
+  , expectedArguments :: [ExpectedArgument]
+  , expectedModules :: [Text]
+  , expectedSourceFiles :: [FilePath]
+  , expectedSourceDirectories :: [FilePath]
+  , expectedSourceDirectory :: FilePath
+  , expectedCabalFile :: Maybe FilePath
+  , expectedArgumentPaths :: [ExpectedPath]
+  , expectedGeneratedInputs :: [ExpectedGenerated]
+  , expectedPackages :: [ExpectedPackage]
+  }
+  deriving (Eq, Show)
+
+expectedCompiler :: CompilerTriple
+expectedCompiler = ("ghc", "ghc-9.12.4", compilerPath)
+
+expectedCompilerPathBoundaryCompiler, expectedCompilerPathOverCompiler :: CompilerTriple
+expectedCompilerPathBoundaryCompiler =
+  ("ghc", "ghc-9.12.4", expectedCompilerPathBoundary)
+expectedCompilerPathOverCompiler =
+  ("ghc", "ghc-9.12.4", expectedCompilerPathOver)
+
+expectedCompilerPathBoundary, expectedCompilerPathOver :: FilePath
+expectedCompilerPathBoundary =
+  '/' : Text.unpack (Text.intercalate "/" (replicate 64 (Text.replicate 63 "a")))
+expectedCompilerPathOver =
+  '/' : Text.unpack
+    (Text.intercalate "/"
+      (replicate 63 (Text.replicate 63 "a") <> [Text.replicate 64 "a"]))
+
+compilerPath :: FilePath
+compilerPath = "/immutable/toolchain/bin/ghc"
+
+mainIdentity :: IdentityTriple
+mainIdentity = ("lib", "lib", "core-unit")
+
+positiveComponent :: ExpectedComponent
+positiveComponent =
+  ExpectedComponent
+    { expectedIdentity = mainIdentity
+    , expectedArguments =
+        [ ExpectedBoundary 0 "-hide-all-packages"
+        , ExpectedBoundary 1 "-no-user-package-db"
+        , ExpectedThisUnit 2 "-this-unit-id" 3 "core-unit"
+        , ExpectedPackage 4 "-package-id" 5 "base-unit"
+        , ExpectedPath 6 "-odir" (Just 7)
+            "/immutable/build/core" "/immutable/build/core"
+        , ExpectedGenerated 8 "-optP-include" 9
+            "-optP/immutable/build/autogen/cabal_macros.h"
+            "/immutable/build/autogen/cabal_macros.h"
+        ]
+    , expectedModules = ["Core"]
+    , expectedSourceFiles = []
+    , expectedSourceDirectories = ["src"]
+    , expectedSourceDirectory = "/immutable/source/"
+    , expectedCabalFile = Just "amoebius.cabal"
+    , expectedArgumentPaths =
+        [ ExpectedPathObservation 6 "-odir" (Just 7) "/immutable/build/core"
+        , ExpectedPathObservation 8 "-optP-include" (Just 9)
+            "/immutable/build/autogen/cabal_macros.h"
+        ]
+    , expectedGeneratedInputs =
+        [ExpectedGeneratedObservation 8 "-optP-include" 9
+          "-optP/immutable/build/autogen/cabal_macros.h"
+          "/immutable/build/autogen/cabal_macros.h"]
+    , expectedPackages =
+        [ExpectedPackageObservation 4 "-package-id" 5 "base-unit"]
+    }
+
+attachedPathComponent :: ExpectedComponent
+attachedPathComponent =
+  positiveComponent
+    { expectedArguments =
+        [ ExpectedBoundary 0 "-hide-all-packages"
+        , ExpectedBoundary 1 "-no-user-package-db"
+        , ExpectedThisUnit 2 "-this-unit-id" 3 "core-unit"
+        , ExpectedPath 4 "-odir" Nothing
+            "-odir=/immutable/build/core" "/immutable/build/core"
+        ]
+    , expectedArgumentPaths =
+        [ExpectedPathObservation 4 "-odir" Nothing "/immutable/build/core"]
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+sourcePathComponent :: FilePath -> ExpectedComponent
+sourcePathComponent path =
+  positiveComponent
+    { expectedArguments = baseExpectedArguments
+    , expectedModules = []
+    , expectedSourceFiles = [path]
+    , expectedArgumentPaths = []
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+baseExpectedArguments :: [ExpectedArgument]
+baseExpectedArguments =
+  [ ExpectedBoundary 0 "-hide-all-packages"
+  , ExpectedBoundary 1 "-no-user-package-db"
+  , ExpectedThisUnit 2 "-this-unit-id" 3 "core-unit"
+  ]
+
+identityBoundaryIdentity :: IdentityTriple
+identityBoundaryIdentity = ("lib", "lib", Text.replicate 512 "u")
+
+identityBoundaryComponent :: ExpectedComponent
+identityBoundaryComponent =
+  positiveComponent
+    { expectedIdentity = identityBoundaryIdentity
+    , expectedArguments =
+        [ ExpectedBoundary 0 "-hide-all-packages"
+        , ExpectedBoundary 1 "-no-user-package-db"
+        , ExpectedThisUnit 2 "-this-unit-id" 3 (Text.replicate 512 "u")
+        ]
+    , expectedArgumentPaths = []
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+callerFlavourBoundary, callerFlavourOver, expectedTypeBoundary,
+  expectedTypeOver, expectedNameBoundary, expectedNameOver,
+  observedCompilerIdBoundary, observedCompilerIdOver,
+  observedNameBoundary, observedNameOver, observedUnitBoundary,
+  observedUnitOver, argumentUnitBoundary, argumentUnitOver,
+  moduleNameBoundary, moduleNameOver :: Text
+callerFlavourBoundary = Text.replicate 512 "g"
+callerFlavourOver = Text.replicate 513 "g"
+expectedTypeBoundary = Text.replicate 512 "t"
+expectedTypeOver = Text.replicate 513 "t"
+expectedNameBoundary = "test:" <> Text.replicate 507 "n"
+expectedNameOver = "test:" <> Text.replicate 508 "n"
+observedCompilerIdBoundary = "ghc-" <> Text.replicate 508 "1"
+observedCompilerIdOver = "ghc-" <> Text.replicate 509 "1"
+observedNameBoundary = "test:" <> Text.replicate 507 "n"
+observedNameOver = "test:" <> Text.replicate 508 "n"
+observedUnitBoundary = Text.replicate 512 "u"
+observedUnitOver = Text.replicate 513 "u"
+argumentUnitBoundary = Text.replicate 512 "p"
+argumentUnitOver = Text.replicate 513 "p"
+moduleNameBoundary = "M" <> Text.replicate 511 "a"
+moduleNameOver = "M" <> Text.replicate 512 "a"
+
+callerCompilerIdBoundaryCompiler, callerCompilerIdOverCompiler :: CompilerTriple
+callerCompilerIdBoundaryCompiler = ("ghc", observedCompilerIdBoundary, compilerPath)
+callerCompilerIdOverCompiler = ("ghc", observedCompilerIdOver, compilerPath)
+
+observedCompilerIdBoundaryBytes, observedCompilerIdOverBytes,
+  observedNameBoundaryBytes, observedNameOverBytes, observedUnitBoundaryBytes,
+  observedUnitOverBytes, argumentUnitBoundaryBytes, argumentUnitOverBytes,
+  moduleNameBoundaryBytes, moduleNameOverBytes :: ByteString
+observedCompilerIdBoundaryBytes =
+  buildInfoBytesWith "3.16.1.0" "ghc" observedCompilerIdBoundary compilerPath
+    [mainComponent baseArguments True]
+observedCompilerIdOverBytes =
+  buildInfoBytesWith "3.16.1.0" "ghc" observedCompilerIdOver compilerPath
+    [mainComponent baseArguments True]
+observedNameBoundaryBytes = buildInfoBytes
+  [componentBytes "test" (Text.unpack observedNameBoundary) "core-unit" baseArguments
+    ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")]
+observedNameOverBytes = buildInfoBytes
+  [componentBytes "test" (Text.unpack observedNameOver) "core-unit" baseArguments
+    ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")]
+observedUnitBoundaryBytes = buildInfoBytes
+  [componentBytes "lib" "lib" (Text.unpack observedUnitBoundary) baseArguments
+    ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")]
+observedUnitOverBytes = buildInfoBytes
+  [componentBytes "lib" "lib" (Text.unpack observedUnitOver) baseArguments
+    ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")]
+argumentUnitBoundaryBytes = buildInfoBytes
+  [mainComponent (baseArguments <> ["-package-id", argumentUnitBoundary]) True]
+argumentUnitOverBytes = buildInfoBytes
+  [mainComponent (baseArguments <> ["-package-id", argumentUnitOver]) True]
+moduleNameBoundaryBytes = buildInfoBytes
+  [componentBytes "lib" "lib" "core-unit" baseArguments
+    [Text.unpack moduleNameBoundary] [] ["src"] "/immutable/source/"
+    (Just "amoebius.cabal")]
+moduleNameOverBytes = buildInfoBytes
+  [componentBytes "lib" "lib" "core-unit" baseArguments
+    [Text.unpack moduleNameOver] [] ["src"] "/immutable/source/"
+    (Just "amoebius.cabal")]
+
+argumentUnitBoundaryComponent, moduleNameBoundaryComponent :: ExpectedComponent
+argumentUnitBoundaryComponent =
+  positiveComponent
+    { expectedArguments =
+        baseExpectedArguments <> [ExpectedPackage 4 "-package-id" 5 argumentUnitBoundary]
+    , expectedArgumentPaths = []
+    , expectedGeneratedInputs = []
+    , expectedPackages =
+        [ExpectedPackageObservation 4 "-package-id" 5 argumentUnitBoundary]
+    }
+moduleNameBoundaryComponent =
+  positiveComponent
+    { expectedArguments = baseExpectedArguments
+    , expectedModules = [moduleNameBoundary]
+    , expectedArgumentPaths = []
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+componentTypeAlternativeIdentities :: [IdentityTriple]
+componentTypeAlternativeIdentities =
+  [ ("bench", "bench:perf", "bench-unit")
+  , ("exe", "exe:app", "exe-unit")
+  , ("flib", "flib:ffi", "flib-unit")
+  , ("lib", "lib", "lib-unit")
+  , ("test", "test:spec", "test-unit")
+  ]
+
+componentTypeAlternativeBytes :: ByteString
+componentTypeAlternativeBytes = buildInfoBytes
+  [ componentBytes (Text.unpack componentType) (Text.unpack componentName)
+      (Text.unpack unitId)
+      ["-hide-all-packages", "-no-user-package-db", "-this-unit-id", unitId]
+      [Text.unpack moduleName] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")
+  | ((componentType, componentName, unitId), moduleName) <-
+      zip componentTypeAlternativeIdentities ["Bench", "App", "Ffi", "Core", "Spec"]
+  ]
+
+componentTypeAlternativeComponents :: [ExpectedComponent]
+componentTypeAlternativeComponents =
+  [ positiveComponent
+      { expectedIdentity = identity
+      , expectedArguments =
+          [ ExpectedBoundary 0 "-hide-all-packages"
+          , ExpectedBoundary 1 "-no-user-package-db"
+          , ExpectedThisUnit 2 "-this-unit-id" 3 unitId
+          ]
+      , expectedModules = [moduleName]
+      , expectedSourceFiles = []
+      , expectedSourceDirectories = ["src"]
+      , expectedSourceDirectory = "/immutable/source/"
+      , expectedCabalFile = Just "amoebius.cabal"
+      , expectedArgumentPaths = []
+      , expectedGeneratedInputs = []
+      , expectedPackages = []
+      }
+  | (identity@(_, _, unitId), moduleName) <-
+      zip componentTypeAlternativeIdentities ["Bench", "App", "Ffi", "Core", "Spec"]
+  ]
+
+expectedProjection
+  :: Int
+  -> CompilerTriple
+  -> [IdentityTriple]
+  -> CompilerTriple
+  -> [ExpectedComponent]
+  -> [Observation]
+expectedProjection inputBytes expectedCompilerTriple identities observedCompiler components =
+  expectedCompilerObservations expectedCompilerTriple
+    <> [observation "expected.component.count" (decimal (length identities))]
+    <> concat
+      [identityObservations ("expected.component." <> decimal index) identity
+      | (index, identity) <- zip [0 :: Int ..] identities]
+    <> [observation "input.bytes" (decimal inputBytes)]
+    <> observedCompilerObservations observedCompiler
+    <> [observation "observed.component.count" (decimal (length components))]
+    <> concat
+      [componentProjection ("observed.component." <> decimal index) component
+      | (index, component) <- zip [0 :: Int ..] components]
+
+expectedCompilerObservations :: CompilerTriple -> [Observation]
+expectedCompilerObservations (flavour, compilerId, path) =
+  [ observation "expected.compiler.flavour" flavour
+  , observation "expected.compiler.id" compilerId
+  , observation "expected.compiler.path" (Text.pack path)
+  ]
+
+observedCompilerObservations :: CompilerTriple -> [Observation]
+observedCompilerObservations (flavour, compilerId, path) =
+  [ observation "observed.cabal-library-version" "3.16.1.0"
+  , observation "observed.compiler.flavour" flavour
+  , observation "observed.compiler.id" compilerId
+  , observation "observed.compiler.path" (Text.pack path)
+  ]
+
+identityObservations :: Text -> IdentityTriple -> [Observation]
+identityObservations prefix (componentType, componentName, unitId) =
+  [ observation (prefix <> ".type") componentType
+  , observation (prefix <> ".name") componentName
+  , observation (prefix <> ".unit-id") unitId
+  ]
+
+componentProjection :: Text -> ExpectedComponent -> [Observation]
+componentProjection prefix component =
+  identityObservations (prefix <> ".identity") (expectedIdentity component)
+    <> argumentProjection prefix (expectedArguments component)
+    <> indexedText (prefix <> ".module") (expectedModules component)
+    <> indexedText (prefix <> ".source-file") (map Text.pack (expectedSourceFiles component))
+    <> indexedText (prefix <> ".haskell-source-directory")
+      (map Text.pack (expectedSourceDirectories component))
+    <> [observation (prefix <> ".source-directory")
+          (Text.pack (expectedSourceDirectory component))]
+    <> case expectedCabalFile component of
+      Nothing -> [observation (prefix <> ".cabal-file.present") "false"]
+      Just path ->
+        [ observation (prefix <> ".cabal-file.present") "true"
+        , observation (prefix <> ".cabal-file.path") (Text.pack path)
+        ]
+    <> pathProjection prefix (expectedArgumentPaths component)
+    <> generatedProjection prefix (expectedGeneratedInputs component)
+    <> packageProjection prefix (expectedPackages component)
+
+argumentProjection :: Text -> [ExpectedArgument] -> [Observation]
+argumentProjection componentPrefix values =
+  observation (componentPrefix <> ".compiler-argument.count") (decimal (length values))
+    : concat
+      [oneArgument (componentPrefix <> ".compiler-argument." <> decimal ordinal) value
+      | (ordinal, value) <- zip [0 :: Int ..] values]
+
+oneArgument :: Text -> ExpectedArgument -> [Observation]
+oneArgument prefix argument = case argument of
+  ExpectedBoundary optionIndex option -> optionOnly "package-boundary" optionIndex option
+  ExpectedThisUnit optionIndex option valueIndex value ->
+    optionValue "this-unit" optionIndex option valueIndex value
+  ExpectedPackage optionIndex option valueIndex value ->
+    optionValue "package" optionIndex option valueIndex value
+  ExpectedPath optionIndex option valueIndex raw path ->
+    optionOnly "path" optionIndex option
+      <> maybe [] (\index -> [observation (prefix <> ".value-index") (decimal index)]) valueIndex
+      <> [ observation (prefix <> ".raw") raw
+         , observation (prefix <> ".path") (Text.pack path)
+         ]
+  ExpectedGenerated optionIndex option valueIndex raw path ->
+    optionValue "generated-input" optionIndex option valueIndex raw
+      <> [observation (prefix <> ".path") (Text.pack path)]
+  ExpectedStandalone optionIndex option -> optionOnly "standalone" optionIndex option
+ where
+  optionOnly kind optionIndex option =
+    [ observation (prefix <> ".kind") kind
+    , observation (prefix <> ".option-index") (decimal optionIndex)
+    , observation (prefix <> ".option") option
+    ]
+  optionValue kind optionIndex option valueIndex value =
+    optionOnly kind optionIndex option
+      <> [ observation (prefix <> ".value-index") (decimal valueIndex)
+         , observation (prefix <> ".value") value
+         ]
+
+pathProjection :: Text -> [ExpectedPath] -> [Observation]
+pathProjection componentPrefix values =
+  observation (componentPrefix <> ".argument-path.count") (decimal (length values))
+    : concat
+      [ case value of
+          ExpectedPathObservation optionIndex option valueIndex path ->
+            [ observation (prefix <> ".option-index") (decimal optionIndex)
+            , observation (prefix <> ".option") option
+            ]
+              <> maybe [] (\index ->
+                [observation (prefix <> ".value-index") (decimal index)]) valueIndex
+              <> [observation (prefix <> ".path") (Text.pack path)]
+      | (ordinal, value) <- zip [0 :: Int ..] values
+      , let prefix = componentPrefix <> ".argument-path." <> decimal ordinal
+      ]
+
+generatedProjection :: Text -> [ExpectedGenerated] -> [Observation]
+generatedProjection componentPrefix values =
+  observation (componentPrefix <> ".generated-input.count") (decimal (length values))
+    : concat
+      [ case value of
+          ExpectedGeneratedObservation optionIndex option valueIndex raw path ->
+            [ observation (prefix <> ".option-index") (decimal optionIndex)
+            , observation (prefix <> ".option") option
+            , observation (prefix <> ".value-index") (decimal valueIndex)
+            , observation (prefix <> ".raw") raw
+            , observation (prefix <> ".path") (Text.pack path)
+            ]
+      | (ordinal, value) <- zip [0 :: Int ..] values
+      , let prefix = componentPrefix <> ".generated-input." <> decimal ordinal
+      ]
+
+packageProjection :: Text -> [ExpectedPackage] -> [Observation]
+packageProjection componentPrefix values =
+  observation (componentPrefix <> ".package.count") (decimal (length values))
+    : concat
+      [ case value of
+          ExpectedPackageObservation optionIndex option valueIndex valueText ->
+            [ observation (prefix <> ".option-index") (decimal optionIndex)
+            , observation (prefix <> ".option") option
+            , observation (prefix <> ".value-index") (decimal valueIndex)
+            , observation (prefix <> ".value") valueText
+            ]
+      | (ordinal, value) <- zip [0 :: Int ..] values
+      , let prefix = componentPrefix <> ".package." <> decimal ordinal
+      ]
+
+indexedText :: Text -> [Text] -> [Observation]
+indexedText prefix values =
+  observation (prefix <> ".count") (decimal (length values))
+    : [observation (prefix <> "." <> decimal index) value
+      | (index, value) <- zip [0 :: Int ..] values]
+
+expectedPermanentFindings :: [Finding]
+expectedPermanentFindings =
+  diagnosticOnlyFinding
+    : [ permanentFinding "COMPILER-BUILDINFO-GENERATOR-BYTES-UNAUTHENTICATED"
+          "generated build-info bytes have no authenticated generator or custody"
+      , permanentFinding "COMPILER-BUILDINFO-COMPILER-UNAUTHENTICATED"
+          "the observed compiler identity has no independent toolchain authority"
+      , permanentFinding "COMPILER-BUILDINFO-INDEPENDENT-COMPILER-UNAVAILABLE"
+          "the expected compiler is caller-constructed rather than independently acquired"
+      , permanentFinding "COMPILER-BUILDINFO-MACHINE-PATHS-UNAUTHENTICATED"
+          "machine paths are lexical observations without authenticated filesystem identity"
+      , permanentFinding "COMPILER-BUILDINFO-ARGUMENTS-UNAUTHENTICATED"
+          "compiler arguments are generated observations without invocation custody"
+      , permanentFinding "COMPILER-BUILDINFO-DUPLICATE-DETECTION-DIAGNOSTIC"
+          "duplicate-key detection is production-local and lacks an independent observer"
+      , permanentFinding "COMPILER-BUILDINFO-INDEPENDENT-UNIVERSE-UNAVAILABLE"
+          "the component universe is caller-constructed rather than independently acquired"
+      , permanentFinding "COMPILER-BUILDINFO-SOURCE-OWNERSHIP-UNRESOLVED"
+          "module and source-file names are not joined to exact acquired source bytes"
+      , permanentFinding "COMPILER-BUILDINFO-CABAL-SOURCE-JOIN-UNAVAILABLE"
+          "every observed optional Cabal-file path lacks an authenticated exact-source join"
+      , permanentFinding "COMPILER-BUILDINFO-GENERATED-INPUTS-UNAUTHENTICATED"
+          "generated compiler inputs are not authenticated against exact generated bytes"
+      , permanentFinding "COMPILER-BUILDINFO-PACKAGE-JOIN-UNAVAILABLE"
+          "package arguments are not joined to an authenticated elaborated dependency graph"
+      , permanentFinding "COMPILER-BUILDINFO-CONFIGURATION-JOIN-UNAVAILABLE"
+          "component configuration is not joined to independently acquired Cabal semantics"
+      , permanentFinding "COMPILER-BUILDINFO-PRAGMA-SEMANTICS-UNAVAILABLE"
+          "source pragmas and compile-time language semantics remain unresolved"
+      , permanentFinding "COMPILER-BUILDINFO-PHYSICAL-PATHS-UNAVAILABLE"
+          "lexical paths are not resolved through physical filesystem identity"
+      , permanentFinding "COMPILER-BUILDINFO-PATH-PLATFORM-UNAVAILABLE"
+          "path grammar is explicitly limited to posix-lexical-only"
+      , permanentFinding "COMPILER-BUILDINFO-PLAN-JOIN-UNAVAILABLE"
+          "component identities are not joined to an authenticated elaborated plan"
+      , permanentFinding "COMPILER-BUILDINFO-COMPILER-INVOCATION-UNAVAILABLE"
+          "the exact compiler has not been invoked under an external observer"
+      , permanentFinding "COMPILER-BUILDINFO-ORACLE-QUALIFICATION-UNAVAILABLE"
+          "the independently reviewed oracle and mutation harness are not qualified"
+      ]
+
+diagnosticOnlyFinding :: Finding
+diagnosticOnlyFinding =
+  permanentFinding "COMPILER-BUILDINFO-DIAGNOSTIC-ONLY"
+    "Cabal build-info and caller expectations are unauthenticated diagnostics and cannot establish compiler or source closure"
+
+expectationFinding :: Text -> Finding
+expectationFinding detail =
+  permanentFinding "COMPILER-BUILDINFO-EXPECTATION-REFUSED" detail
+
+problemFinding :: Text -> Text -> Finding
+problemFinding = permanentFinding
+
+permanentFinding :: Text -> Text -> Finding
+permanentFinding code detail = Finding code diagnosticSubject detail
+
+diagnosticSubject :: FilePath
+diagnosticSubject =
+  "Amoebius.Validation.CompilerBuildInfo.compilerBuildInfoDiagnostic"
+
+runDiagnostic :: CompilerTriple -> [IdentityTriple] -> ByteString -> CheckResult
+runDiagnostic (flavour, compilerId, path) identities =
+  compilerBuildInfoDiagnostic flavour compilerId path identities
+
+expectMalformedExactly
+  :: String -> Text -> Text -> CompilerTriple -> [IdentityTriple] -> ByteString -> ExactCase
+expectMalformedExactly label code detail compiler identities bytes =
+  expectMalformedFindingsExactly label [problemFinding code detail] compiler identities bytes
+
+expectMalformedFindingsExactly
+  :: String -> [Finding] -> CompilerTriple -> [IdentityTriple] -> ByteString -> ExactCase
+expectMalformedFindingsExactly label problems compiler identities bytes =
+  expectExact label
+    (malformedProjection compiler identities bytes)
+    (diagnosticOnlyFinding : problems)
+    (runDiagnostic compiler identities bytes)
+
+expectRootNotObjectExactly
+  :: String -> CompilerTriple -> [IdentityTriple] -> ByteString -> ExactCase
+expectRootNotObjectExactly label compiler identities bytes =
+  expectMalformedExactly label
+    "COMPILER-BUILDINFO-ROOT-NOT-OBJECT" "BuildInfoRootNotObject"
+    compiler identities bytes
+
+malformedProjection
+  :: CompilerTriple -> [IdentityTriple] -> ByteString -> [Observation]
+malformedProjection compiler identities bytes =
+  expectedCompilerObservations compiler
+    <> [observation "expected.component.count" (decimal (length identities))]
+    <> concat
+      [identityObservations ("expected.component." <> decimal index) identity
+      | (index, identity) <- zip [0 :: Int ..] identities]
+    <> [observation "input.bytes" (decimal (ByteString.length bytes))]
+
+resultEnvelopeProjection :: Text -> Int -> [Observation]
+resultEnvelopeProjection dimension observed =
+  [ observation "result-envelope.status"
+      "refused-before-result-materialization"
+  , observation "result-envelope.exceeded" dimension
+  , observation "result-envelope.limit"
+      (if dimension == "entries" then "14877" else "2097152")
+  , observation "result-envelope.observed" (decimal observed)
+  ]
+
+expectExact :: String -> [Observation] -> [Finding] -> CheckResult -> ExactCase
+expectExact label expectedObservations expectedFindings actual =
+  ExactCase label
+    (concat
+      [ expectEqual (label <> " check name") "compiler-build-info-diagnostic" (checkName actual)
+      , [label <> ": the diagnostic unexpectedly became a passing CheckResult"
+        | checkPassed actual]
+      , expectSequenceEqual (label <> " observations")
+          expectedObservations (checkObservations actual)
+      , expectSequenceEqual (label <> " findings")
+          expectedFindings (checkFindings actual)
+      ])
+
+expectSequenceEqual :: (Eq value, Show value) => String -> [value] -> [value] -> [String]
+expectSequenceEqual label expected actual
+  | expected == actual = []
+  | otherwise =
+      [ label <> ": expected count " <> show (length expected)
+          <> ", observed count " <> show (length actual)
+          <> maybe "" renderDifference (firstDifference (0 :: Int) expected actual)
+      ]
+ where
+  renderDifference (index, expectedItem, actualItem) =
+    "; first difference at index " <> show index
+      <> ", expected " <> expectedItem
+      <> ", observed " <> actualItem
+  boundedShow = take 4096 . show
+  firstDifference _ [] [] = Nothing
+  firstDifference index (expectedItem : expectedRest) (actualItem : actualRest)
+    | expectedItem == actualItem = firstDifference (index + 1) expectedRest actualRest
+    | otherwise = Just (index, boundedShow expectedItem, boundedShow actualItem)
+  firstDifference index [] (actualItem : _) =
+    Just (index, "<end-of-sequence>", boundedShow actualItem)
+  firstDifference index (expectedItem : _) [] =
+    Just (index, boundedShow expectedItem, "<end-of-sequence>")
+
+-- Pinned full vectors; these do not use the multiplicity encoder below.
+positiveBytes, missingCabalBytes :: ByteString
+positiveBytes =
+  "{\"cabal-lib-version\":\"3.16.1.0\",\"compiler\":{\"flavour\":\"ghc\",\"compiler-id\":\"ghc-9.12.4\",\"path\":\"/immutable/toolchain/bin/ghc\"},\"components\":[{\"type\":\"lib\",\"name\":\"lib\",\"unit-id\":\"core-unit\",\"compiler-args\":[\"-hide-all-packages\",\"-no-user-package-db\",\"-this-unit-id\",\"core-unit\",\"-package-id\",\"base-unit\",\"-odir\",\"/immutable/build/core\",\"-optP-include\",\"-optP/immutable/build/autogen/cabal_macros.h\"],\"modules\":[\"Core\"],\"src-files\":[],\"hs-src-dirs\":[\"src\"],\"src-dir\":\"/immutable/source/\",\"cabal-file\":\"amoebius.cabal\"}]}"
+missingCabalBytes =
+  "{\"cabal-lib-version\":\"3.16.1.0\",\"compiler\":{\"flavour\":\"ghc\",\"compiler-id\":\"ghc-9.12.4\",\"path\":\"/immutable/toolchain/bin/ghc\"},\"components\":[{\"type\":\"lib\",\"name\":\"lib\",\"unit-id\":\"core-unit\",\"compiler-args\":[\"-hide-all-packages\",\"-no-user-package-db\",\"-this-unit-id\",\"core-unit\",\"-package-id\",\"base-unit\",\"-odir\",\"/immutable/build/core\",\"-optP-include\",\"-optP/immutable/build/autogen/cabal_macros.h\"],\"modules\":[\"Core\"],\"src-files\":[],\"hs-src-dirs\":[\"src\"],\"src-dir\":\"/immutable/source/\"}]}"
+
+baseArguments :: [Text]
+baseArguments = ["-hide-all-packages", "-no-user-package-db", "-this-unit-id", "core-unit"]
+
+missingRootVersionBytes, wrongRootVersionTypeBytes, arrayWrongTypeBytes,
+  optionalTextEmptyBytes, arrayTextEmptyBytes, missingCompilerObjectBytes,
+  wrongCompilerObjectBytes, missingComponentsArrayBytes,
+  wrongComponentsArrayBytes, optionalTextWrongTypeBytes,
+  dotSourceDirectoryBytes, backslashSourcePathBytes :: ByteString
+missingRootVersionBytes =
+  "{\"compiler\":{\"flavour\":\"ghc\",\"compiler-id\":\"ghc-9.12.4\",\"path\":\"/immutable/toolchain/bin/ghc\"},\"components\":["
+    <> mainComponent baseArguments True <> "]}"
+wrongRootVersionTypeBytes =
+  "{\"cabal-lib-version\":0,\"compiler\":{\"flavour\":\"ghc\",\"compiler-id\":\"ghc-9.12.4\",\"path\":\"/immutable/toolchain/bin/ghc\"},\"components\":["
+    <> mainComponent baseArguments True <> "]}"
+arrayWrongTypeBytes = buildInfoBytes
+  [ "{\"type\":\"lib\",\"name\":\"lib\",\"unit-id\":\"core-unit\",\"compiler-args\":[\"-hide-all-packages\",\"-no-user-package-db\",\"-this-unit-id\",\"core-unit\"],\"modules\":[0],\"src-files\":[],\"hs-src-dirs\":[\"src\"],\"src-dir\":\"/immutable/source/\",\"cabal-file\":\"amoebius.cabal\"}"
+  ]
+optionalTextEmptyBytes = buildInfoBytes
+  [componentBytes "lib" "lib" "core-unit" baseArguments ["Core"] [] ["src"]
+    "/immutable/source/" (Just "")]
+arrayTextEmptyBytes = buildInfoBytes
+  [componentBytes "lib" "lib" "core-unit" baseArguments [""] [] ["src"]
+    "/immutable/source/" (Just "amoebius.cabal")]
+missingCompilerObjectBytes =
+  "{\"cabal-lib-version\":\"3.16.1.0\",\"components\":["
+    <> mainComponent baseArguments True <> "]}"
+wrongCompilerObjectBytes =
+  "{\"cabal-lib-version\":\"3.16.1.0\",\"compiler\":0,\"components\":["
+    <> mainComponent baseArguments True <> "]}"
+missingComponentsArrayBytes =
+  "{\"cabal-lib-version\":\"3.16.1.0\",\"compiler\":{\"flavour\":\"ghc\",\"compiler-id\":\"ghc-9.12.4\",\"path\":\"/immutable/toolchain/bin/ghc\"}}"
+wrongComponentsArrayBytes =
+  "{\"cabal-lib-version\":\"3.16.1.0\",\"compiler\":{\"flavour\":\"ghc\",\"compiler-id\":\"ghc-9.12.4\",\"path\":\"/immutable/toolchain/bin/ghc\"},\"components\":{}}"
+optionalTextWrongTypeBytes = buildInfoBytes
+  [ "{\"type\":\"lib\",\"name\":\"lib\",\"unit-id\":\"core-unit\",\"compiler-args\":[\"-hide-all-packages\",\"-no-user-package-db\",\"-this-unit-id\",\"core-unit\"],\"modules\":[\"Core\"],\"src-files\":[],\"hs-src-dirs\":[\"src\"],\"src-dir\":\"/immutable/source/\",\"cabal-file\":0}"
+  ]
+dotSourceDirectoryBytes = buildInfoBytes
+  [componentBytes "lib" "lib" "core-unit" baseArguments ["Core"] [] ["."]
+    "/immutable/source/" (Just "amoebius.cabal")]
+backslashSourcePathBytes =
+  "{\"cabal-lib-version\":\"3.16.1.0\",\"compiler\":{\"flavour\":\"ghc\",\"compiler-id\":\"ghc-9.12.4\",\"path\":\"/immutable/toolchain/bin/ghc\"},\"components\":[{\"type\":\"lib\",\"name\":\"lib\",\"unit-id\":\"core-unit\",\"compiler-args\":[\"-hide-all-packages\",\"-no-user-package-db\",\"-this-unit-id\",\"core-unit\"],\"modules\":[],\"src-files\":[\"dir\\u005cCore.hs\"],\"hs-src-dirs\":[\"src\"],\"src-dir\":\"/immutable/source/\",\"cabal-file\":\"amoebius.cabal\"}]}"
+
+closedAlternativeArguments :: [Text]
+closedAlternativeArguments =
+  baseArguments
+    <> ["-O", "-O0", "-O1", "-O2", "-Wall", "-Werror", "-fno-code"]
+    <> [ "-package-db", "/immutable/pkgdb"
+       , "-outputdir", "/immutable/output"
+       , "-odir", "/immutable/o"
+       , "-hidir", "/immutable/hi"
+       , "-stubdir", "/immutable/stub"
+       , "-tmpdir", "/immutable/tmp"
+       , "-package-db=/immutable/pkgdb-attached"
+       , "-outputdir=/immutable/output-attached"
+       , "-odir=/immutable/o-attached"
+       , "-hidir=/immutable/hi-attached"
+       , "-stubdir=/immutable/stub-attached"
+       , "-tmpdir=/immutable/tmp-attached"
+       ]
+
+closedAlternativeBytes :: ByteString
+closedAlternativeBytes = buildInfoBytes [mainComponent closedAlternativeArguments True]
+
+closedAlternativeComponent :: ExpectedComponent
+closedAlternativeComponent =
+  positiveComponent
+    { expectedArguments =
+        baseExpectedArguments
+          <> [ ExpectedStandalone 4 "-O"
+             , ExpectedStandalone 5 "-O0"
+             , ExpectedStandalone 6 "-O1"
+             , ExpectedStandalone 7 "-O2"
+             , ExpectedStandalone 8 "-Wall"
+             , ExpectedStandalone 9 "-Werror"
+             , ExpectedStandalone 10 "-fno-code"
+             , ExpectedPath 11 "-package-db" (Just 12)
+                 "/immutable/pkgdb" "/immutable/pkgdb"
+             , ExpectedPath 13 "-outputdir" (Just 14)
+                 "/immutable/output" "/immutable/output"
+             , ExpectedPath 15 "-odir" (Just 16) "/immutable/o" "/immutable/o"
+             , ExpectedPath 17 "-hidir" (Just 18) "/immutable/hi" "/immutable/hi"
+             , ExpectedPath 19 "-stubdir" (Just 20)
+                 "/immutable/stub" "/immutable/stub"
+             , ExpectedPath 21 "-tmpdir" (Just 22)
+                 "/immutable/tmp" "/immutable/tmp"
+             , ExpectedPath 23 "-package-db" Nothing
+                 "-package-db=/immutable/pkgdb-attached" "/immutable/pkgdb-attached"
+             , ExpectedPath 24 "-outputdir" Nothing
+                 "-outputdir=/immutable/output-attached" "/immutable/output-attached"
+             , ExpectedPath 25 "-odir" Nothing
+                 "-odir=/immutable/o-attached" "/immutable/o-attached"
+             , ExpectedPath 26 "-hidir" Nothing
+                 "-hidir=/immutable/hi-attached" "/immutable/hi-attached"
+             , ExpectedPath 27 "-stubdir" Nothing
+                 "-stubdir=/immutable/stub-attached" "/immutable/stub-attached"
+             , ExpectedPath 28 "-tmpdir" Nothing
+                 "-tmpdir=/immutable/tmp-attached" "/immutable/tmp-attached"
+             ]
+    , expectedArgumentPaths =
+        [ ExpectedPathObservation 11 "-package-db" (Just 12) "/immutable/pkgdb"
+        , ExpectedPathObservation 13 "-outputdir" (Just 14) "/immutable/output"
+        , ExpectedPathObservation 15 "-odir" (Just 16) "/immutable/o"
+        , ExpectedPathObservation 17 "-hidir" (Just 18) "/immutable/hi"
+        , ExpectedPathObservation 19 "-stubdir" (Just 20) "/immutable/stub"
+        , ExpectedPathObservation 21 "-tmpdir" (Just 22) "/immutable/tmp"
+        , ExpectedPathObservation 23 "-package-db" Nothing "/immutable/pkgdb-attached"
+        , ExpectedPathObservation 24 "-outputdir" Nothing "/immutable/output-attached"
+        , ExpectedPathObservation 25 "-odir" Nothing "/immutable/o-attached"
+        , ExpectedPathObservation 26 "-hidir" Nothing "/immutable/hi-attached"
+        , ExpectedPathObservation 27 "-stubdir" Nothing "/immutable/stub-attached"
+        , ExpectedPathObservation 28 "-tmpdir" Nothing "/immutable/tmp-attached"
+        ]
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+dotSourceDirectoryComponent :: ExpectedComponent
+dotSourceDirectoryComponent =
+  positiveComponent
+    { expectedArguments = baseExpectedArguments
+    , expectedSourceDirectories = ["."]
+    , expectedArgumentPaths = []
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+attachedPathBytes :: ByteString
+attachedPathBytes = buildInfoBytes
+  [mainComponent (baseArguments <> ["-odir=/immutable/build/core"]) True]
+
+unknownFieldBytes :: ByteString
+unknownFieldBytes =
+  buildInfoBytes
+    [ByteString.init (mainComponent baseArguments True) <> ",\"hidden-input\":true}"]
+
+duplicateRootBytes, duplicateMalformedBytes :: ByteString
+duplicateRootBytes =
+  "{\"cabal-lib-version\":\"3.16.1.0\",\"compiler\":{\"flavour\":\"ghc\",\"compiler-id\":\"ghc-9.12.4\",\"path\":\"/immutable/toolchain/bin/ghc\"},\"comp\\u0069ler\":{\"flavour\":\"ghc\",\"compiler-id\":\"ghc-9.12.4\",\"path\":\"/immutable/toolchain/bin/ghc\"},\"components\":[]}"
+duplicateMalformedBytes =
+  "{\"compiler\":0,\"comp\\u0069ler\""
+
+identityBoundaryBytes :: ByteString
+identityBoundaryBytes =
+  buildInfoBytes
+    [componentBytes "lib" "lib" (replicate 512 'u')
+      ["-hide-all-packages", "-no-user-package-db", "-this-unit-id",
+       Text.replicate 512 "u"]
+      ["Core"] [] ["src"] "/immutable/source/" (Just "amoebius.cabal")]
+
+pathDepthBoundary, pathDepthOver, pathSegmentBoundary, pathSegmentOver :: FilePath
+pathDepthBoundary = Text.unpack (Text.intercalate "/" (replicate 63 "a" <> ["Z.hs"]))
+pathDepthOver = Text.unpack (Text.intercalate "/" (replicate 64 "a" <> ["Z.hs"]))
+pathSegmentBoundary = replicate 252 'a' <> ".hs"
+pathSegmentOver = replicate 253 'a' <> ".hs"
+
+pathDepthBoundaryBytes, pathDepthOverBytes, pathSegmentBoundaryBytes, pathSegmentOverBytes :: ByteString
+pathDepthBoundaryBytes = sourcePathBytes pathDepthBoundary
+pathDepthOverBytes = sourcePathBytes pathDepthOver
+pathSegmentBoundaryBytes = sourcePathBytes pathSegmentBoundary
+pathSegmentOverBytes = sourcePathBytes pathSegmentOver
+
+sourcePathBytes :: FilePath -> ByteString
+sourcePathBytes path =
+  buildInfoBytes
+    [componentBytes "lib" "lib" "core-unit" baseArguments [] [path] ["src"]
+      "/immutable/source/" (Just "amoebius.cabal")]
+
+buildInfoBytes :: [ByteString] -> ByteString
+buildInfoBytes = buildInfoBytesWith "3.16.1.0" "ghc" "ghc-9.12.4" compilerPath
+
+buildInfoBytesWith :: Text -> Text -> Text -> FilePath -> [ByteString] -> ByteString
+buildInfoBytesWith version flavour compilerId path components =
+  "{\"cabal-lib-version\":" <> jsonString (Text.unpack version)
+    <> ",\"compiler\":{\"flavour\":" <> jsonString (Text.unpack flavour)
+    <> ",\"compiler-id\":" <> jsonString (Text.unpack compilerId)
+    <> ",\"path\":" <> jsonString path
+    <> "},\"components\":[" <> ByteString8.intercalate "," components <> "]}"
+
+mainComponent :: [Text] -> Bool -> ByteString
+mainComponent arguments includeCabal =
+  componentBytes "lib" "lib" "core-unit" arguments ["Core"] [] ["src"]
+    "/immutable/source/" (if includeCabal then Just "amoebius.cabal" else Nothing)
+
+componentBytes
+  :: String -> String -> String -> [Text] -> [String] -> [String] -> [String]
+  -> String -> Maybe String -> ByteString
+componentBytes componentType componentName unitId arguments modules sourceFiles
+  sourceDirectories sourceDirectory cabalFile =
+    "{\"type\":" <> jsonString componentType
+      <> ",\"name\":" <> jsonString componentName
+      <> ",\"unit-id\":" <> jsonString unitId
+      <> ",\"compiler-args\":" <> jsonTextArray arguments
+      <> ",\"modules\":" <> jsonStringArray modules
+      <> ",\"src-files\":" <> jsonStringArray sourceFiles
+      <> ",\"hs-src-dirs\":" <> jsonStringArray sourceDirectories
+      <> ",\"src-dir\":" <> jsonString sourceDirectory
+      <> maybe "" (\path -> ",\"cabal-file\":" <> jsonString path) cabalFile
+      <> "}"
+
+boundaryComponentWires :: Int -> [ByteString]
+boundaryComponentWires count =
+  [ componentBytes "test" ("test:c" <> ordinal) ("u" <> ordinal)
+      ["-hide-all-packages", "-no-user-package-db", "-this-unit-id",
+       Text.pack ("u" <> ordinal)]
+      [] ["Main" <> ordinal <> ".hs"] ["test"] "/immutable/source/"
+      (Just "amoebius.cabal")
+  | index <- [0 .. count - 1]
+  , let ordinal = Text.unpack (paddedDecimal 3 index)
+  ]
+
+reverseComponentOrderBytes, problemOrderBytes :: ByteString
+reverseComponentOrderBytes = buildInfoBytes (reverse (boundaryComponentWires 2))
+problemOrderBytes =
+  "{\"unknown\":0,\"compiler\":{\"flavour\":\"ghc\",\"compiler-id\":\"ghc-9.12.4\",\"path\":\"/immutable/toolchain/bin/ghc\"},\"components\":["
+    <> mainComponent baseArguments True <> "]}"
+
+boundaryIdentities :: Int -> [IdentityTriple]
+boundaryIdentities count =
+  [("test", "test:c" <> ordinal, "u" <> ordinal)
+  | index <- [0 .. count - 1]
+  , let ordinal = paddedDecimal 3 index]
+
+boundaryExpectedComponents :: Int -> [ExpectedComponent]
+boundaryExpectedComponents count =
+  [ ExpectedComponent
+      { expectedIdentity = identity
+      , expectedArguments =
+          [ ExpectedBoundary 0 "-hide-all-packages"
+          , ExpectedBoundary 1 "-no-user-package-db"
+          , ExpectedThisUnit 2 "-this-unit-id" 3 unitId
+          ]
+      , expectedModules = []
+      , expectedSourceFiles = ["Main" <> Text.unpack ordinal <> ".hs"]
+      , expectedSourceDirectories = ["test"]
+      , expectedSourceDirectory = "/immutable/source/"
+      , expectedCabalFile = Just "amoebius.cabal"
+      , expectedArgumentPaths = []
+      , expectedGeneratedInputs = []
+      , expectedPackages = []
+      }
+  | index <- [0 .. count - 1]
+  , let ordinal = paddedDecimal 3 index
+  , let unitId = "u" <> ordinal
+  , let identity = ("test", "test:c" <> ordinal, unitId)
+  ]
+
+resultEntryBoundaryProjection, resultEntryOverProjection :: [Observation]
+resultEntryBoundaryProjection =
+  expectedProjection
+    (ByteString.length (buildInfoBytes (boundaryComponentWires 512)))
+    expectedCompiler (boundaryIdentities 512) expectedCompiler
+    (boundaryExpectedComponents 512)
+resultEntryOverProjection =
+  expectedProjection (ByteString.length resultEntryBytesOver)
+    expectedCompiler (boundaryIdentities 512) expectedCompiler
+    resultEntryOverExpectedComponents
+
+resultEntryBytesOver :: ByteString
+resultEntryBytesOver =
+  buildInfoBytes (resultEntryFirstWire : drop 1 (boundaryComponentWires 512))
+
+resultEntryFirstWire :: ByteString
+resultEntryFirstWire =
+  componentBytes "test" "test:c000" "u000"
+    ["-hide-all-packages", "-no-user-package-db", "-this-unit-id", "u000"]
+    ["Core"] ["Main000.hs"] ["test"] "/immutable/source/"
+    (Just "amoebius.cabal")
+
+resultEntryOverExpectedComponents :: [ExpectedComponent]
+resultEntryOverExpectedComponents =
+  case boundaryExpectedComponents 512 of
+    [] -> []
+    first : remaining -> first {expectedModules = ["Core"]} : remaining
+
+resultByteBoundaryBytes, resultByteOverBytes :: ByteString
+resultByteBoundaryBytes = resultByteWire resultByteBoundarySourceDirectory
+resultByteOverBytes = resultByteWire resultByteOverSourceDirectory
+
+resultByteWire :: FilePath -> ByteString
+resultByteWire haskellSourceDirectory =
+  buildInfoBytes
+    [ componentBytes "lib" "lib" "core-unit" resultByteArguments
+        [] ["A.hs"] [haskellSourceDirectory] resultByteSourceDirectory
+        (Just "amoebius.cabal")
+    ]
+
+resultByteArguments :: [Text]
+resultByteArguments =
+  baseArguments
+    <> concat
+      (replicate 163 ["-odir", Text.pack expectedCompilerPathBoundary])
+
+resultByteBoundaryComponent :: FilePath -> ExpectedComponent
+resultByteBoundaryComponent haskellSourceDirectory =
+  positiveComponent
+    { expectedArguments =
+        baseExpectedArguments
+          <> [ ExpectedPath optionIndex "-odir" (Just valueIndex)
+                 (Text.pack expectedCompilerPathBoundary) expectedCompilerPathBoundary
+             | ordinal <- [0 :: Int .. 162]
+             , let optionIndex = 4 + (2 * ordinal)
+             , let valueIndex = optionIndex + 1
+             ]
+    , expectedModules = []
+    , expectedSourceFiles = ["A.hs"]
+    , expectedSourceDirectories = [haskellSourceDirectory]
+    , expectedSourceDirectory = resultByteSourceDirectory
+    , expectedArgumentPaths =
+        [ ExpectedPathObservation optionIndex "-odir" (Just valueIndex)
+            expectedCompilerPathBoundary
+        | ordinal <- [0 :: Int .. 162]
+        , let optionIndex = 4 + (2 * ordinal)
+        , let valueIndex = optionIndex + 1
+        ]
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+resultByteBoundaryProjection, resultByteOverProjection :: [Observation]
+resultByteBoundaryProjection =
+  expectedProjection (ByteString.length resultByteBoundaryBytes)
+    expectedCompiler [mainIdentity] expectedCompiler
+    [resultByteBoundaryComponent resultByteBoundarySourceDirectory]
+resultByteOverProjection =
+  expectedProjection (ByteString.length resultByteOverBytes)
+    expectedCompiler [mainIdentity] expectedCompiler
+    [resultByteBoundaryComponent resultByteOverSourceDirectory]
+
+resultByteSourceDirectory :: FilePath
+resultByteSourceDirectory =
+  "/"
+    <> Text.unpack
+      (Text.intercalate "/"
+        (replicate 15 (Text.replicate 255 "a") <> [Text.replicate 254 "a"]))
+    <> "/"
+
+resultByteBoundarySourceDirectory, resultByteOverSourceDirectory :: FilePath
+resultByteBoundarySourceDirectory =
+  Text.unpack
+    (Text.intercalate "/"
+      (replicate 9 (Text.replicate 255 "b") <> [Text.replicate 195 "b"]))
+resultByteOverSourceDirectory =
+  Text.unpack
+    (Text.intercalate "/"
+      (replicate 9 (Text.replicate 255 "b") <> [Text.replicate 196 "b"]))
+
+moduleArrayBytes :: Int -> Bool -> ByteString
+moduleArrayBytes count valid =
+  buildInfoBytes
+    [componentBytes "lib" "lib" "core-unit" baseArguments
+      (moduleArrayValues count valid)
+      [] ["src"] "/immutable/source/" (Just "amoebius.cabal")]
+
+moduleArrayValues :: Int -> Bool -> [String]
+moduleArrayValues count valid =
+  [ if valid
+      then "M" <> show index
+      else "bad" <> Text.unpack (paddedDecimal 3 index)
+  | index <- [0 .. count - 1]
+  ]
+
+moduleBoundaryComponent :: Int -> ExpectedComponent
+moduleBoundaryComponent count =
+  positiveComponent
+    { expectedArguments = baseExpectedArguments
+    , expectedModules = [Text.pack ("M" <> show index) | index <- [0 .. count - 1]]
+    , expectedArgumentPaths = []
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+argumentArrayBytes :: Int -> ByteString
+argumentArrayBytes count =
+  buildInfoBytes [mainComponent (argumentArrayValues count) True]
+
+argumentArrayValues :: Int -> [Text]
+argumentArrayValues count =
+  baseArguments <> replicate (max 0 (count - length baseArguments)) "-O0"
+
+argumentBoundaryComponent :: Int -> ExpectedComponent
+argumentBoundaryComponent count =
+  positiveComponent
+    { expectedArguments =
+        baseExpectedArguments
+          <> [ExpectedStandalone index "-O0"
+             | index <- [length baseArguments .. count - 1]]
+    , expectedArgumentPaths = []
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+sourceFileArrayBytes :: Int -> ByteString
+sourceFileArrayBytes count =
+  buildInfoBytes
+    [componentBytes "lib" "lib" "core-unit" baseArguments []
+      (sourceFileArrayValues count) ["src"] "/immutable/source/"
+      (Just "amoebius.cabal")]
+
+sourceFileArrayValues :: Int -> [String]
+sourceFileArrayValues count = ["F" <> show index <> ".hs" | index <- [0 .. count - 1]]
+
+sourceFileBoundaryComponent :: Int -> ExpectedComponent
+sourceFileBoundaryComponent count =
+  positiveComponent
+    { expectedArguments = baseExpectedArguments
+    , expectedModules = []
+    , expectedSourceFiles = sourceFileArrayValues count
+    , expectedArgumentPaths = []
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+sourceDirectoryArrayBytes :: Int -> ByteString
+sourceDirectoryArrayBytes count =
+  buildInfoBytes
+    [componentBytes "lib" "lib" "core-unit" baseArguments ["Core"] []
+      (sourceDirectoryArrayValues count) "/immutable/source/"
+      (Just "amoebius.cabal")]
+
+sourceDirectoryArrayValues :: Int -> [String]
+sourceDirectoryArrayValues count = ["src/d" <> show index | index <- [0 .. count - 1]]
+
+sourceDirectoryBoundaryComponent :: Int -> ExpectedComponent
+sourceDirectoryBoundaryComponent count =
+  positiveComponent
+    { expectedArguments = baseExpectedArguments
+    , expectedSourceDirectories = sourceDirectoryArrayValues count
+    , expectedArgumentPaths = []
+    , expectedGeneratedInputs = []
+    , expectedPackages = []
+    }
+
+jsonTextArray :: [Text] -> ByteString
+jsonTextArray values =
+  "[" <> ByteString8.intercalate "," (map (jsonString . Text.unpack) values) <> "]"
+
+jsonStringArray :: [String] -> ByteString
+jsonStringArray values =
+  "[" <> ByteString8.intercalate "," (map jsonString values) <> "]"
+
+jsonString :: String -> ByteString
+jsonString value = "\"" <> ByteString8.pack value <> "\""
+
+padTo :: Int -> ByteString -> ByteString
+padTo target bytes =
+  bytes <> ByteString.replicate (max 0 (target - ByteString.length bytes)) 32
+
+rootNotObjectBytes :: ByteString
+rootNotObjectBytes = "null"
+
+structuralTokenBytesBoundary, structuralTokenBytesOver :: ByteString
+structuralTokenBytesBoundary =
+  "[" <> ByteString8.intercalate ","
+    (zeroArrayBytes 6 : replicate 8191 (zeroArrayBytes 7)) <> "]"
+structuralTokenBytesOver =
+  "[" <> ByteString8.intercalate "," (replicate 8192 (zeroArrayBytes 7)) <> "]"
+
+objectMemberBytesBoundary, objectMemberBytesOver :: ByteString
+objectMemberBytesBoundary = "[{" <> objectMembersBytes 64 <> "}]"
+objectMemberBytesOver = "[{" <> objectMembersBytes 65 <> "}]"
+
+objectMembersBytes :: Int -> ByteString
+objectMembersBytes count = ByteString8.intercalate "," (objectMembers count)
+
+objectMembers :: Int -> [ByteString]
+objectMembers count =
+  [jsonString ("k" <> show index) <> ":0" | index <- [0 .. count - 1]]
+
+nestedArrayBytes :: Int -> ByteString
+nestedArrayBytes depth =
+  ByteString.replicate depth 91 <> "0" <> ByteString.replicate depth 93
+
+jsonStringBytes :: Int -> ByteString
+jsonStringBytes size = "\"" <> ByteString.replicate size 97 <> "\""
+
+jsonScalarBytes :: Int -> ByteString
+jsonScalarBytes size = "1" <> ByteString.replicate (max 0 (size - 1)) 48
+
+zeroArrayBytes :: Int -> ByteString
+zeroArrayBytes count =
+  "[" <> ByteString8.intercalate "," (replicate count "0") <> "]"
+
+observation :: Text -> Text -> Observation
+observation = Observation
+
+decimal :: Int -> Text
+decimal = Text.pack . show
+
+paddedDecimal :: Int -> Int -> Text
+paddedDecimal width value =
+  let rendered = show value
+   in Text.pack (replicate (max 0 (width - length rendered)) '0' <> rendered)
+
+showText :: String -> Text
+showText = Text.pack . show
+
+duplicates :: Ord value => [value] -> [value]
+duplicates values =
+  [value | value : _ : _ <- group (sort values)]
+
+expectEqual :: (Eq value, Show value) => String -> value -> value -> [String]
+expectEqual label expected actual
+  | expected == actual = []
+  | otherwise = [label <> ": expected " <> show expected <> ", observed " <> show actual]
+
+finishDiagnostics :: String -> [String] -> IO ()
+finishDiagnostics name problems = do
+  unless (null problems) (fail (unlines (name : problems)))
+  putStrLn
+    (name
+      <> ": the bounded Cabal build-info subject produced only exact diagnostic refusals; no evidence was minted.")

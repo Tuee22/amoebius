@@ -15,7 +15,7 @@ later. The pre-hardware harness is owned by
 
 **Status**: Authoritative source
 **Supersedes**: the image-first validation-frame rule previously carried by this file
-**Referenced by**: DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/image_build_doctrine.md, documents/glossary.md, pb/README.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/image_build_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -75,8 +75,10 @@ Phase 0 checks the bootstrap source against an exact non-empty, deny-by-default 
 AST/import/resolved-call/control-flow/potential-effect grammar. Unsupported syntax, unresolved calls, dynamic
 execution/import or reflection, and any potential effect not routed to the declared `BootstrapAdapter`
 boundary fail closed. This static source-admission result does not establish that an effect or exec occurred.
-Phase 49 invokes Haskell directly; Phase 50 alone observes the adapter and ensure/build/executable-identity/
-unchanged-argv/exec runtime handoff. A keyword scan or command listing cannot establish semantic scope. Any
+Phase 49 invokes Haskell directly; the Phase-50 candidate starts the exact source-built Haskell OS supervisor
+directly, which invokes `pb` as its observed child and records the adapter plus ensure/build/executable-identity/
+unchanged-argv/exec runtime handoff. The future public spelling cannot supervise itself. A keyword scan or
+command listing cannot establish semantic scope. Any
 new `pb/**` behaviour outside the four admitted operations is a source-closure failure even if its extension
 remains `.py`.
 

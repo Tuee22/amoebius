@@ -141,16 +141,21 @@ The law is not universal, and the two places it does not hold are named rather t
   governed by this law.
 
 That development-time activity has its own non-destructive memory rule. The one Markdown register is an
-active-only, non-executable reader explanation: after the owning analyzer reports zero, its independent
-reintroduction negative succeeds, predecessors are approved, and the human accepts retirement, the explanation
-is deleted and Git history is its only prose archive. The closed Haskell universe retains the retired ID,
-stable encoding, owner, analyzer key, and reintroduction guard, so deletion of prose cannot erase the violation
+active-only, non-executable reader explanation. An Active zero is admissible only in the exact owning-phase
+candidate and means ready for human review, not retired; it refuses both before that owner and in a later phase
+whose source failed to record the promoted transition. After the independent reintroduction negative succeeds,
+predecessors are approved, and the human promotes the owning gate, the successor-phase source records retirement,
+the explanation is deleted, and Git history is its only prose archive. The closed Haskell universe retains the retired ID,
+stable encoding, owner, analyzer key, and qualified owner-domain reintroduction negative, so deletion of prose cannot erase the violation
 class or let a later change recreate it silently. Markdown rows, cells, IDs, owners, counts, and predicate-like
 sentences remain unavailable to executable lifecycle or closure decisions.
 
 [Phase 0 Sprint 0.2](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-02-one-active-legacy-register-)
-owns only that closed inventory, total fail-closed analyzer dispatch, structural register check, independent
-inventory/dispatch mutants, and human prose correspondence. Each owning sprint implements and qualifies its
+owns only that closed inventory, total fail-closed analyzer dispatch, structural register check, and independent
+inventory/dispatch mutant declarations. The current lifecycle universe admits only Active, and Sprint 0.2
+retains required reintroduction-case identities rather than claiming executed guards. Human prose
+correspondence is consolidated at the Phase-0 gate and does not itself require an intermediate human
+confirmation. Each owning sprint implements and qualifies its
 domain observation/closure analyzer and reintroduction negative in numerical order; an unavailable analyzer
 cannot report closure and refuses at or beyond its owner, while an earlier active binding remains explicit
 later-owned debt rather than a deferred pass. All Phase-0-owned legacy queries may jointly reach zero only at the
@@ -200,7 +205,7 @@ completion or validation claim. This document adds no phase of its own and maint
 - [Backup & Recovery Doctrine](./backup_recovery_doctrine.md) — restore as a fresh-coordinate seed
 - [Readiness & Ordering Doctrine](./readiness_ordering_doctrine.md) — clause 3, and the structural precedent for this document
 - [Development-plan gate integrity](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md) — the typed
-  inventory, fail-closed analyzer dispatch, and retained reintroduction rule
+  inventory, fail-closed analyzer dispatch, required reintroduction-case identities, and eventual qualified negatives
 - [Phase 0 plan](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md) — the ordered Sprint-0.2 inventory seam
   and Sprint-0.8 Phase-0 closure point
 - [Consistency & PACELC Doctrine](./consistency_pacelc_doctrine.md) — the one availability-over-consistency boundary

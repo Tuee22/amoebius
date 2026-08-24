@@ -27,7 +27,7 @@ module Amoebius.Validation.Evidence
   , writeCandidateEvidence
   ) where
 
-import Amoebius.Validation.PolicyContract qualified as Policy
+import Amoebius.Validation.PolicyContract.Internal qualified as Policy
 import Amoebius.Validation.Types
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.Aeson (ToJSON (toJSON), Value, encode, object, (.=))

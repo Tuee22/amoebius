@@ -106,6 +106,13 @@ is a diagnostic control, not independent custody or validation. Current phase, s
 fields use exact raw one-line forms; a second marker, dual-status phrase, fence, comment, or physical wrap cannot
 supply the required reset syntax.
 
+A structural lexer preserves physical Markdown boundaries. It must never delete a fence, HTML block, comment,
+indented-code line, list continuation, or blockquote and concatenate the visible bytes on either side. Opaque
+content yields a non-removable boundary, and container-owned content cannot be promoted to a top-level heading,
+field, status, Gate row, or tracker row by trimming its prefix. A governed table is one exact top-level,
+physically contiguous header/delimiter/body frame; global row search, `mapMaybe`-style malformed-row deletion,
+fragment stitching, permissive extra cells, and prefix-normalized tracker values are structural defects.
+
 Cross-cutting executable decisions live in a reviewed Haskell `PolicyContract`; subsystem decisions live in
 their named reviewed Haskell declarations and independently authored Haskell oracles. A human reviewer owns
 the correspondence between those values and their prose explanation. A keyword-only prose decoy must never
@@ -616,11 +623,14 @@ default. The fix has to route without defining.
 > **Purpose**: bound the unit of reading. [§8](#8-tone-and-voice) governs the *register* of a sentence; this
 > section governs its *length*. The two are independent and both mandatory.
 
-**The problem.** Measured over paragraphs, the corpus carries 1,613 sentences longer than forty-five words
-across 115 documents, 133 of them longer than ninety and the longest 376. At that length a sentence stops
-being parseable in one pass: a reader holds an unresolved subject across several subordinate clauses and
-re-reads to find it. Almost every one of them is a semicolon-chained enumeration, so the length is a property
-of how the material was arranged rather than of how hard the material is.
+**The problem.** The first 2026-08-23 Haskell worktree diagnostic reported 1,570 sentences longer than
+forty-five words across 195 governed documents; 128 exceeded ninety, and 650 paragraphs exceeded six
+sentences. The longest observed sentence contained 667 words. These figures are mutable-worktree diagnostics
+recorded by
+[`phase_00_documentation_suite.md` Sprint 0.4](../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-04-haskell-documentation-and-plan-contract-checker-),
+not acceptance evidence. At that length a sentence stops being parseable in one pass. A reader holds an
+unresolved subject across several subordinate clauses and re-reads to find it. Most cases are
+semicolon-chained enumerations, so the defect lies in arrangement rather than subject complexity.
 
 **Why the obvious alternative fails.** The alternative is to relax the register instead, reaching for shorter
 sentences by way of direct address and rhetorical framing. [§8](#8-tone-and-voice) forbids both, and neither
@@ -638,16 +648,18 @@ tone.
    sees about eighteen words at a time and can never observe a sentence over any cap above that, which is how
    this rule went unenforced while the corpus held 1,613 violations of it.
 
-   **The rule is 45 words; the check reports and does not yet block.** The corpus meets neither value: 1,613
-   sentences exceed forty-five and 133 exceed ninety. The documentation lint therefore runs `p3` as an
-   **advisory** check — every violation is reported and counted, but none fails the gate. The check blocks
-   once the backlog is cleared to a value the corpus meets, and the number then tightens toward forty-five on
-   the same ratchet [§10](#10-document-shape) runs on. Enforcing at a number the corpus cannot meet would hold
-   the gate permanently red, which is how a rule stops being one; declining to measure at all is how the
-   corpus reached 1,613 in the first place. Advisory status is the interval between those two failures, not a
-   resting state — the backlog and its measurement command are recorded in
-   [`phase_00_documentation_suite.md`](../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-04-haskell-documentation-and-plan-contract-checker-)
-   Sprint 0.4, which owns machine-decidable document structure.
+   The Haskell measurement joins each Markdown paragraph, list item, or blockquote before counting. It removes
+   fences, tables, metadata fields, inline code, and link destinations; visible link labels remain prose.
+   Terminal `.`, `!`, or `?` followed by whitespace ends a sentence, except for the closed abbreviation set
+   and dotted initialisms. A final non-empty fragment also counts as a sentence.
+
+   **The rule is 45 words; the conforming check reports and does not yet block.** Sprint 0.4 must implement
+   paragraph-spanning measurement in Haskell. A foreign-language lint or line-length proxy is not admissible
+   evidence. The Haskell check remains **advisory** until the backlog reaches a value the corpus meets; it then
+   tightens toward forty-five on the same ratchet [§10](#10-document-shape) uses. Enforcing a threshold the
+   corpus cannot meet would hold the gate permanently red. Declining to measure would leave the rule
+   unenforced. The backlog and implementation residue remain recorded in
+   [`phase_00_documentation_suite.md` Sprint 0.4](../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-04-haskell-documentation-and-plan-contract-checker-).
 2. **Table cells** are exempt from the mechanical cap but not from its intent. A cell needing more than 45
    words is a section that was compressed into a table.
 3. **Paragraph cap.** A paragraph carries at most **six sentences**.

@@ -187,22 +187,32 @@ The current audit makes no validation attribution.
 
 | Phase(s) | Current classification | Meaning |
 |---|---|---|
-| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and component oracles exist. The typed policy contract and closed 25-ID legacy lifecycle/analyzer dispatch are present; clean component diagnostics are green, and the three policy plus eight legacy changed-production builds each red only their named oracle. These same-workstream observations are not qualification or independent review. Current `pb/**` remains broadened legacy debt, no owner-domain legacy query is claimed closed, and no conforming opaque public handoff is implemented. Independent human review/key custody, clean-room observation, evidence integration, contract resolution, legacy closure, and human promotion remain absent. |
+| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and eighteen component oracles exist. The typed policy contract, closed 25-ID legacy lifecycle/analyzer dispatch, descriptor-pinned source observer, v2 byte-bound debt observer, one-file static `pb` grammar, compiler/consumer adapters, and typed phase/resource registries are present. Adversarial reviews rejected candidate integration and exposed remaining trust, completeness, and oracle-independence gaps. Source acquisition remains permanently diagnostic without authenticated atomic external authority; the compiler route establishes only four restricted-session facts and cannot reach the repository graph. The worktree has one `pb/__main__.py`; the unstaged Git index still has the condemned fifteen-path bootstrap footprint. The `LTD-SRC-000` and `LTD-SRC-008` analyzers are integrated but unqualified, while `LTD-VAL-001` through `LTD-VAL-004` owner analyzers are absent. Independent human review/key custody, clean-room observation, evidence integration, contract resolution, legacy closure, and human promotion remain absent. |
 | 1–95 | **Observed footprint / Known partial — NOT VALIDATED** | Existing files and historical run material are migration input only; each phase is blocked behind numerical predecessor validation and human promotion. |
 
-The 2026-08-23 inspection reran the clean `cabal test validation-kernel-component` aggregate and all three
-policy changed-production aggregates. The clean aggregate was green; each changed-production aggregate exited
-nonzero with only `PolicyContractOracle` red while every other named oracle executed green. The 2026-08-22
-inspection separately observed a successful `cabal build lib:validation-kernel` diagnostic and the eight
-legacy changed-production aggregates red only their intended oracle. These are compilation, component, and
-mutation observations only, never validation or independent reviewer custody. The current dirty worktree is ineligible for clean snapshot
+The 2026-08-23 inspection reran `cabal build lib:validation-kernel test:validation-kernel-component` and the
+clean `cabal test validation-kernel-component` aggregate after connecting the source-debt, source-consumer,
+compiler-component, compiler-graph, and one-file `pb` grammar modules. All fourteen then-named component oracles
+executed and reported their diagnostic expectations met. The runner now contains eighteen oracles; its latest
+completed aggregate reached every oracle, with a stale Dispatch classifier and the intentionally stale
+Documentation manifest refusing. Subsequent semantic hardening invalidated that aggregate. Earlier policy and
+legacy changed-production runs are stale wherever their production/oracle subjects changed; the current
+clean-plus-twenty legacy matrix and the integrated source/compiler/bootstrap/semantic mutant matrix must be
+rerun before candidate preparation. Supporting
+focused mutant observations are compilation and component diagnostics only, never validation or independent
+reviewer custody. The current dirty worktree and unstaged source transition are ineligible for clean snapshot
 acquisition, and the dispatcher also carries explicit fail-closed findings for unexecuted qualification,
 missing independent human review/key custody, missing external clean-room observation, and missing evidence
 integration. The evidence schema also lacks closed typed command, toolchain, substrate, run, and cleanup
 fields, and no reviewed binding connects Git object-format identity to its required SHA-256 provenance. In
-addition, 93 phase contracts contain 1,290 `UNRESOLVED` gate cells and 92 `MISSING`
-predecessor cells, for 1,382 fail-closed cells in total. The Phase-0
-gate must refuse while any of these conditions remains.
+addition, all 96 phase contracts contain 1,728 exact-prefix `UNRESOLVED` gate cells. The former 92 generic `MISSING`
+predecessor cells now specify typed `ImmediatePredecessorApproval` inputs and leave receipt availability to
+candidate observation; this specification correction supplies no approval or validation. All 270 sprint
+sections now carry the exact ordered reset schema and immediate blocker edge. Unknown implementation, oracle,
+validation, legacy, and documentation bindings remain explicit `UNRESOLVED` values, and no structural rewrite
+claims their semantics are complete. The compiled phase-semantic/resource registry and its independent oracle
+are under adversarial integration review; every remaining gap and missing reviewer-custody value keeps the
+Phase-0 gate refusing.
 
 Capability-by-capability target ownership remains in the linked phase contracts and the target-only
 [system_components.md](system_components.md). Current divergence identity, ownership, and closure are typed
@@ -315,7 +325,9 @@ inherits the universal postcondition above.
 | 93 | The jitML numerical core, re-derived | linux-cuda | `cuda` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_93](phase_93_jitml_rederivation.md) |
 | 94 | The jitML training and checkpoint contracts, re-derived | linux-cuda | `cuda` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_94](phase_94_jitml_ui_rederivation.md) |
 | 95 | The multi-tenant web application re-derived | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [phase_95](phase_95_webapp_rederivation.md) |
-| 96+ | Later phases | varies | varies | — | 📋 Planned — NOT VALIDATED | [later_phases](later_phases.md) |
+
+Unnumbered future work remains in [later_phases.md](later_phases.md). It is not a numbered phase, tracker row,
+predecessor, or validation state until a reviewed standards change assigns it an exact ordinal and contract.
 
 ## Related Documents
 

@@ -51,6 +51,13 @@ or generated document may not make, recommend as already decided, or apply that 
 external signed approval is defined by
 [`development_plan_gate_integrity.md` §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-human-promotion).
 
+The approval binds two explicit source identities: the qualified pre-promotion candidate and one exact
+status-only post-promotion projection. The projection may change only the tracker plus the named phase and
+sprint status fields, and only the human may apply it. This avoids asking a receipt for the old snapshot to
+authorize an unconstrained edit that silently creates a different snapshot. The compiled status checker derives
+the admitted current form from the externally approved projection state; it is not permanently hard-coded to
+the reset markers, and an unsigned Markdown status can never select that state.
+
 Status and implementation progress are separate axes. A dated inspection uses only these terms:
 
 | Progress term | Meaning |
@@ -70,8 +77,9 @@ green command, digest, evidence bundle, attestation, or earlier status is only a
 - The current numbered plan is the closed contiguous domain `0..95`; fractional identifiers, gaps, and
   identifiers above 95 are prohibited until one coherent plan change deliberately extends the domain.
 - The gates are considered strictly in numerical order. Except Phase 0, each candidate binds the immediately
-  preceding phase's current human approval receipt. A phase may have additional earlier dependencies, but it
-  may not skip the predecessor.
+  preceding phase's current human approval receipt. A phase may rely on additional earlier capabilities, but
+  those belong in its typed contract or explanatory prose; the structural `Depends on` field contains only the
+  exact immediate predecessor and may not skip or append another dependency.
 - A sprint belongs to exactly one phase and names only earlier-or-same-phase blockers.
 - A new or reordered sequence carries a complete `old id/path → new id/path(s)` audit map, updates every link
   and dependency in the same change, adds any still-active mismatch to the typed Haskell legacy inventory,
@@ -157,7 +165,9 @@ manufactures a run transcript.
 `Substrate: none` means the claim is decidable without hardware-specific or live infrastructure. It does not
 mean “validated inside a container.” Before Phase 50 is human-approved, a pure candidate builds and invokes
 the exact source-bound Haskell binary directly from an authenticated, network-independent toolchain input;
-it does not trust `pb` as transport. After Phase 50 approval, later pure work may use that bounded handoff.
+it does not trust `pb` as transport. The Phase-50 candidate likewise starts the exact Haskell OS supervisor
+directly; the supervisor invokes `pb` as its observed child, so the public target cannot validate itself. After
+Phase 50 approval, later pure work may use that bounded handoff.
 Either route precedes every image, container-engine, registry, cluster, GPU, or cloud phase.
 
 A phase that requires a real substrate declares exactly one of `apple`, `linux-cpu`, `linux-cuda`, or
@@ -231,10 +241,11 @@ Every sprint has:
 - named legacy IDs it must reduce to zero; and
 - explicit `UNVERIFIED` residue.
 
-The distinction between a same-phase implementation release and sprint promotion is owned by
-[`development_plan_standards.md` §F](development_plan_standards.md#f-the-sprint-block-format). A release may
-unblock the next implementation seam, but it changes no status and cannot substitute for parent-gate
-qualification or human promotion.
+Same-phase implementation readiness and sprint promotion are separate. As defined by
+[`development_plan_standards.md` §F](development_plan_standards.md#f-the-sprint-block-format), observed
+deliverables and component diagnostics may unblock the next implementation seam without any human act. They
+change no status and cannot substitute for the complete candidate run, parent-gate qualification, or human
+promotion.
 
 A large file is not automatically a large phase, and many files are not automatically several phases. The
 unit is the falsifiable seam and its final register.

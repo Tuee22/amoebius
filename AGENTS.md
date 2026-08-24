@@ -59,6 +59,11 @@ predecessor approval must refuse a candidate rather than be represented as a pas
 The [development-plan standards](DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) own the
 status procedure.
 
+Within one phase, a sprint's `Blocked by` edge and named human reviewer are implementation-order and eventual
+phase-gate custody declarations, not requests for intermediate user confirmation. Agents continue through
+implementation-ready sprint seams and ask for one human promotion decision only after the complete integrated
+phase candidate exists. A component diagnostic or partial candidate must never trigger a confirmation prompt.
+
 No hardware discovery, container-engine bring-up, cluster creation, image execution, or other live validation
 may begin until the development plan records human approval of the Phase-49 hardware-free DSL promotion
 barrier and all of its predecessors. That barrier requires every source-migration query—including the bounded
@@ -66,7 +71,9 @@ barrier and all of its predecessors. That barrier requires every source-migratio
 through Phase 49 build and invoke the exact source-bound Haskell executable directly from an authenticated,
 network-independent toolchain input. Their `pb validate phase NN` spelling is the future public target, not
 evidence that the unvalidated bootstrap ran correctly. Phase 50 alone validates the already source-bounded
-runtime ensure/build/identity-argv/exec handoff and owns no source migration. Phase 51 remains a hardware-free
+runtime ensure/build/identity-argv/exec handoff and owns no source migration. Its candidate starts the exact
+source-bound Haskell OS supervisor directly; that supervisor invokes `pb` as the observed child subject, so the
+future public spelling cannot supervise or validate its own handoff. Phase 51 remains a hardware-free
 Haskell host-ensure gate against fake boundaries; Phase 52 is the first hardware-bearing validation phase.
 Validation must follow numeric phase order and fail closed when predecessor evidence or any required trust
 boundary is absent.

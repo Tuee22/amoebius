@@ -9,7 +9,7 @@ module Amoebius.Validation.Approval
   , verifyApproval
   ) where
 
-import Amoebius.Validation.PolicyContract
+import Amoebius.Validation.PolicyContract.Internal
   ( AutomationRole (CandidateEvidenceOnly)
   , StatusMutationAuthority (HumanUserOnly)
   , automationRole

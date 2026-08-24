@@ -14,7 +14,7 @@ development plan, or register definitions, which belong to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -86,6 +86,28 @@ qualified-harness digest, and raw-observation digest. The trust root is human-co
 and used by the candidate in one promotion. An unsigned field, a hash-like token, or a generated attestation
 does not satisfy this boundary.
 
+An integrity adapter that has not crossed its required acquisition, observer, or qualification boundary is a
+diagnostic refusal, not a smaller success type. Its raw decoder, integrity-consistent records, constructors,
+selectors, and eliminators remain private. Its sole public executable front door returns a `CheckResult` with an
+exact non-empty permanent refusal and can never make `checkPassed` true. A conventional `Either ... Right value`,
+`Maybe value`, optional residue list, success constructor, general result-producing fold, or getter that detaches
+observations from mandatory residue is forbidden even when names and comments say “Diagnostic”. Future candidate
+composition consumes a separately authenticated opaque value; it never promotes the diagnostic record.
+
+The oracle describes wire fixtures, expected identities, limits, projections, and semantic variants with its own
+Haskell types and independent literals. It may invoke the one public subject front door, but it does not construct
+fixtures with production record constructors, reuse production encoders or expected-value lists, derive its
+limits from exported production constants, or accept an unrelated refusal at a boundary. Every admitted boundary
+has an exact full projection and every one-over case has an exact reason and locus.
+
+“One-over” means the literal maximum plus one, not an arbitrary larger sample. Every independent acceptance
+conjunct and every alternative in a closed grammar has its own minimally different negative; a neighboring case
+cannot stand in for timestamp, timezone, case, width, separator, ordering, reserved-name, punctuation, or path-
+segment predicates that it does not exercise. Each selected changed-subject operator changes one such production
+locus and must make an otherwise internally consistent path differ. A privacy compile-negative names and uses
+exactly one forbidden symbol, has a same-library public positive control, and cannot pass merely because a second
+private import failed first.
+
 ### 12.3 Harness qualification
 
 Before each clean candidate, the exact harness build is challenged with a reviewed sabotage corpus. It must
@@ -102,7 +124,10 @@ reject all of these:
 9. self-report substituted for external observation;
 10. bypass or foreign-authority success;
 11. teardown or external-resource leakage; and
-12. a generated or legacy input smuggled into an otherwise clean run.
+12. a generated or legacy input smuggled into an otherwise clean run;
+13. a selector present in production, the oracle, or the build mapping but absent from either of the other
+    two inventories; and
+14. a changed subject that makes the broad oracle red while its independently assigned exact row stays green.
 
 Qualification is a separate invocation over the same harness digest, followed by the clean candidate run.
 The sabotage corpus and qualifier are Haskell source; their observations are generated lazily beneath
@@ -125,6 +150,23 @@ the harness must observe:
 
 A missing target, no-op transform, alternate dead implementation, compilation failure unrelated to the claim,
 or blanket red result fails mutation qualification. Mutant count alone carries no evidentiary weight.
+
+Mutation discovery is not its own authority. Each component oracle owns a literal, closed registry mapping
+every expected production selector to the exact independently authored case and rejection locus it is intended
+to change. That registry is not generated from CPP declarations, build flags, Cabal mappings, production
+constructors, or a previous run. Before any matrix executes, the harness rejects duplicate selector identities,
+duplicate or missing exact-case identities, unknown mappings, and every non-empty difference among the
+production-selector, oracle-registry, and build-mapping sets in both directions. Cardinality agreement without
+identity agreement is insufficient.
+
+The registry itself must be complete against the requirement: every independently meaningful acceptance
+conjunct, permanent refusal, resource limit, result-retention rule, closed-grammar alternative, and routing or
+composition decision has its own once-only production selector and assigned exact case. A compound challenge
+may supplement those atomic selectors but cannot replace them. For each isolated changed subject, the harness
+runs the assigned case directly and requires that exact ordered result to differ at the named locus while
+unrelated same-harness controls remain green. A failure reported only by the aggregate oracle, an unassigned
+case, warning-as-error fallout from dead code, or another boundary is a wrong-locus refusal and does not kill
+the mutant.
 
 ### 12.5 Fresh external observation
 

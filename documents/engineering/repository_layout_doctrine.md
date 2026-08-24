@@ -17,7 +17,7 @@ that active inventory to readers.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md, pb/README.md, pb/stubs/README.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
 **Generated sections**: none
 
 </details>
@@ -57,7 +57,7 @@ The non-source input set is also closed:
 | Haskell source | `.hs` under the Haskell roots in [§2](#2-complete-repository-structure) |
 | Bootstrap source | Python under `pb/**`, limited to the minimum platform distinction needed to establish the contained toolchain, build the source-bound Haskell binary, and `exec` that exact binary with every argument unchanged; `pb validate phase NN` is opaque argv, not Python dispatch |
 | Governance prose | Markdown under the root, `documents/**`, and `DEVELOPMENT_PLAN/**` |
-| Build metadata | Cabal package/project descriptions and the minimal `pb` packaging metadata required before Haskell can build |
+| Build metadata | Cabal package/project descriptions; `pb` has no separately tracked packaging metadata |
 | Repository metadata | ignore files, attributes, licence, and editor-neutral repository policy |
 
 `pb` is not a general scripting exception. It cannot implement product behavior, calculate or reinterpret a
@@ -124,7 +124,7 @@ amoebius/
 ├── app/**/*.hs                           the single executable's Haskell entry modules
 ├── test/**/*.hs                          Haskell specs, fixtures, oracles, mutants, and harnesses
 ├── probe/**/*.hs                         separately resolved Haskell probe source, when required
-└── pb/**                                 bounded Python bootstrap plus minimal packaging metadata
+└── pb/__main__.py                        the sole bounded Python bootstrap source
 ```
 
 `dhall/`, `proto/`, `ui/`, `pulumi/`, `tools/`, top-level `vendor/`, and non-Haskell fixture trees are absent

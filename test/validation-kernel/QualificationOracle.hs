@@ -21,7 +21,7 @@ runQualificationOracle =
   finishDiagnostics "QualificationOracle" (structuralProblems <> behaviorProblems <> failClosedProblems)
  where
   cleanRuns = fmap cleanRun requiredCases
-  cleanReportCheck = checkQualificationReport qualificationBaseline cleanRuns
+  cleanReportCheck = checkQualificationReportDiagnostic qualificationBaseline cleanRuns
 
   structuralProblems =
     concat
@@ -35,7 +35,20 @@ runQualificationOracle =
           "report checker disclaims execution and provenance"
           (Just "caller-supplied report consistency only; execution and provenance unverified")
           (observationValueFor "qualification-report-scope" cleanReportCheck)
-      , expectEqual "clean qualification report finding inventory" [] (checkFindings cleanReportCheck)
+      , expectEqual
+          "an internally consistent caller report retains the permanent diagnostic refusal"
+          [ ( qualificationDiagnosticCode
+            , "Amoebius.Validation.Gate.checkQualificationReportDiagnostic"
+            , "caller-constructed baselines, mutation witnesses, refusals, and controls cannot establish execution-derived harness qualification"
+            )
+          ]
+          [ (findingCode item, findingSubject item, findingDetail item)
+          | item <- checkFindings cleanReportCheck
+          ]
+      , expectEqual
+          "a caller-constructed qualification report can never be a passing CheckResult"
+          False
+          (checkPassed cleanReportCheck)
       , expectEqual
           "clean qualification case count observation"
           (Just (Text.pack (show (length requiredCases))))
@@ -48,33 +61,33 @@ runQualificationOracle =
       , expectFindingCode
           "malformed baseline harness digest fails closed"
           "QUALIFICATION-HARNESS-DIGEST"
-          (checkQualificationReport (qualificationBaseline {qualificationHarnessDigest = "not-a-digest"}) cleanRuns)
+          (checkQualificationReportDiagnostic (qualificationBaseline {qualificationHarnessDigest = "not-a-digest"}) cleanRuns)
       , expectFindingCode
           "empty baseline subject inventory fails closed"
           "QUALIFICATION-SUBJECTS-EMPTY"
-          (checkQualificationReport (qualificationBaseline {qualificationSubjects = Map.empty}) cleanRuns)
+          (checkQualificationReportDiagnostic (qualificationBaseline {qualificationSubjects = Map.empty}) cleanRuns)
       , expectFindingCode
           "non-production baseline subject fails closed"
           "QUALIFICATION-SUBJECT-INVALID"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               (qualificationBaseline {qualificationSubjects = Map.singleton ".build/generated-subject.hs" cleanSubjectDigest})
               cleanRuns
           )
       , expectFindingCode
           "malformed baseline subject digest fails closed"
           "QUALIFICATION-SUBJECT-DIGEST"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               (qualificationBaseline {qualificationSubjects = Map.singleton cleanSubject "not-a-digest"})
               cleanRuns
           )
       , expectFindingCode
           "empty baseline control inventory fails closed"
           "QUALIFICATION-CONTROLS-EMPTY"
-          (checkQualificationReport (qualificationBaseline {qualificationControlNames = Set.empty}) cleanRuns)
+          (checkQualificationReportDiagnostic (qualificationBaseline {qualificationControlNames = Set.empty}) cleanRuns)
       , expectFindingCode
           "control-bearing baseline control name fails closed"
           "QUALIFICATION-CONTROL-INVALID"
-          (checkQualificationReport (qualificationBaseline {qualificationControlNames = Set.singleton "bad\ncontrol"}) cleanRuns)
+          (checkQualificationReportDiagnostic (qualificationBaseline {qualificationControlNames = Set.singleton "bad\ncontrol"}) cleanRuns)
       ]
 
   behaviorProblems =
@@ -83,23 +96,23 @@ runQualificationOracle =
           "missing sabotage fails closed"
           "QUALIFICATION-MISSING"
           (Text.unpack (caseName constantSuccessCase))
-          (checkQualificationReport qualificationBaseline (drop 1 cleanRuns))
+          (checkQualificationReportDiagnostic qualificationBaseline (drop 1 cleanRuns))
       , expectSingleQualificationFinding
           "duplicate sabotage fails closed"
           "QUALIFICATION-DUPLICATE"
           (Text.unpack (caseName constantSuccessCase))
-          (checkQualificationReport qualificationBaseline (cleanRun constantSuccessCase : cleanRuns))
+          (checkQualificationReportDiagnostic qualificationBaseline (cleanRun constantSuccessCase : cleanRuns))
       , expectFindingCode
           "wrong harness digest fails closed"
           "QUALIFICATION-HARNESS-MISMATCH"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               (changeRun ConstantSuccess (\run -> run {sabotageHarnessDigest = alternateDigest}) cleanRuns)
           )
       , expectFindingCode
           "unchanged digest fails closed"
           "QUALIFICATION-NO-CHANGE"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   ConstantSuccess
@@ -110,7 +123,7 @@ runQualificationOracle =
       , expectFindingCode
           "empty mutation operator fails closed"
           "QUALIFICATION-NO-CHANGE"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   NoOpSubject
@@ -121,7 +134,7 @@ runQualificationOracle =
       , expectFindingCode
           "empty mutation locus fails closed"
           "QUALIFICATION-SUBJECT-UNKNOWN"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   WrongOutput
@@ -137,7 +150,7 @@ runQualificationOracle =
       , expectFindingCode
           "wrong refusal code fails closed"
           "QUALIFICATION-WRONG-REFUSAL"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   EmptyDiscovery
@@ -148,14 +161,14 @@ runQualificationOracle =
       , expectFindingCode
           "accepted sabotage fails closed"
           "QUALIFICATION-WRONG-REFUSAL"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               (changeRun MissingSubject (\run -> run {sabotageResult = (sabotageResult run) {checkFindings = []}}) cleanRuns)
           )
       , expectFindingCode
           "ambiguous multiple refusals fail closed"
           "QUALIFICATION-WRONG-REFUSAL"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   MissingOracle
@@ -175,7 +188,7 @@ runQualificationOracle =
       , expectFindingCode
           "missing raw refusal observation fails closed"
           "QUALIFICATION-OBSERVATION-EMPTY"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   SkippedMutant
@@ -186,7 +199,7 @@ runQualificationOracle =
       , expectFindingCode
           "synthetic empty raw refusal observation fails closed"
           "QUALIFICATION-OBSERVATION-EMPTY"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   SkippedMutant
@@ -197,7 +210,7 @@ runQualificationOracle =
       , expectFindingCode
           "wrong sabotage result name fails closed"
           "QUALIFICATION-RESULT-NAME"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   EmptyDiscovery
@@ -208,28 +221,28 @@ runQualificationOracle =
       , expectFindingCode
           "red unaffected control fails closed"
           "QUALIFICATION-CONTROL-RED"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               (changeRun WrongLocus (\run -> run {sabotageUnaffectedControls = redControls}) cleanRuns)
           )
       , expectFindingCode
           "missing unaffected control fails closed"
           "QUALIFICATION-CONTROL-SET"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               (changeRun StaleEvidence (\run -> run {sabotageUnaffectedControls = [documentationControl]}) cleanRuns)
           )
       , expectFindingCode
           "duplicate unaffected control fails closed"
           "QUALIFICATION-CONTROL-DUPLICATE"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               (changeRun SelfObserver (\run -> run {sabotageUnaffectedControls = greenControls <> [documentationControl]}) cleanRuns)
           )
       , expectFindingCode
           "unobserved unaffected control fails closed"
           "QUALIFICATION-CONTROL-OBSERVATION-EMPTY"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               (changeRun AuthorityBypass (\run -> run {sabotageUnaffectedControls = unobservedControls}) cleanRuns)
           )
@@ -240,7 +253,7 @@ runQualificationOracle =
       [ expectFindingCode
           "expected code at the wrong locus must fail closed"
           "QUALIFICATION-WRONG-REFUSAL"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   WrongLocus
@@ -259,7 +272,7 @@ runQualificationOracle =
       , expectFindingCodes
           "unsubstantiated digest strings and an unregistered locus must fail closed"
           ["QUALIFICATION-NO-CHANGE", "QUALIFICATION-SUBJECT-UNKNOWN"]
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   StaleEvidence
@@ -285,7 +298,7 @@ runQualificationOracle =
       , expectFindingCode
           "valid but wrong before digest must not bind the baseline subject"
           "QUALIFICATION-BASELINE-MISMATCH"
-          ( checkQualificationReport
+          ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
                   ResidueSmuggling
@@ -320,9 +333,9 @@ requiredCases =
 constantSuccessCase :: RequiredCase
 constantSuccessCase = RequiredCase ConstantSuccess "constant-success" "SABOTAGE-CONSTANT-SUCCESS"
 
-qualificationBaseline :: QualificationBaseline
+qualificationBaseline :: DiagnosticQualificationBaseline
 qualificationBaseline =
-  QualificationBaseline
+  DiagnosticQualificationBaseline
     { qualificationHarnessDigest = fixedHarnessDigest
     , qualificationSubjects = Map.singleton cleanSubject cleanSubjectDigest
     , qualificationControlNames = Set.fromList (fmap checkName greenControls)
@@ -388,13 +401,13 @@ caseFor item = case item of
   AuthorityBypass -> RequiredCase AuthorityBypass "authority-bypass" "SABOTAGE-AUTHORITY-BYPASS"
   ResidueSmuggling -> RequiredCase ResidueSmuggling "residue-or-smuggled-input" "SABOTAGE-RESIDUE"
 
-cleanRun :: RequiredCase -> SabotageRun
+cleanRun :: RequiredCase -> DiagnosticSabotageRun
 cleanRun required =
-  SabotageRun
+  DiagnosticSabotageRun
     { sabotage = caseSabotage required
     , sabotageHarnessDigest = fixedHarnessDigest
     , sabotageWitness =
-        MutationWitness
+        DiagnosticMutationWitness
           { mutationOperator = "replace-production-branch-" <> caseName required
           , mutationBeforeDigest = cleanSubjectDigest
           , mutationAfterDigest = changedSubjectDigest
@@ -412,7 +425,7 @@ refusalResult item subject code =
     , checkFindings = [finding code subject "independently expected refusal"]
     }
 
-changeRun :: Sabotage -> (SabotageRun -> SabotageRun) -> [SabotageRun] -> [SabotageRun]
+changeRun :: Sabotage -> (DiagnosticSabotageRun -> DiagnosticSabotageRun) -> [DiagnosticSabotageRun] -> [DiagnosticSabotageRun]
 changeRun target change = fmap (\run -> if sabotage run == target then change run else run)
 
 checkPublicName :: RequiredCase -> [String]
@@ -434,7 +447,16 @@ observationValueFor key result = observationValue <$> find ((== key) . observati
 
 expectSingleQualificationFinding :: String -> Text -> FilePath -> CheckResult -> [String]
 expectSingleQualificationFinding label code subject result =
-  expectEqual label [(code, subject)] (fmap (\item -> (findingCode item, findingSubject item)) (checkFindings result))
+  expectEqual
+    label
+    [(code, subject)]
+    [ (findingCode item, findingSubject item)
+    | item <- checkFindings result
+    , findingCode item /= qualificationDiagnosticCode
+    ]
+
+qualificationDiagnosticCode :: Text
+qualificationDiagnosticCode = "QUALIFICATION-REPORT-DIAGNOSTIC-ONLY"
 
 expectFindingCode :: String -> Text -> CheckResult -> [String]
 expectFindingCode label code result

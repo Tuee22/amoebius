@@ -60,7 +60,7 @@ service, secret service, GPU claim, or provider deployment is in scope.
 **Substrate:** `linux-cpu`
 **Lane:** `linux-cpu/amd64`
 **Register:** 3
-**Depends on:** [Phase 54](phase_54_windows_engine_bringup.md) — exact current human approval; the numeric chain includes every earlier phase
+**Depends on:** [Phase 54](phase_54_windows_engine_bringup.md)
 **Gate:** `pb validate phase 55`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -71,24 +71,24 @@ the command cannot produce an admissible candidate.
 
 | Key | Contract |
 |---|---|
-| `Claim` | On one natural `linux-cpu/amd64` host, the Haskell subject rejects incompatible declarations before mutation, reconciles exactly one empty single-node kind cluster, repairs named partial states, repeats with an empty diff, and tears down without owned residue. No later platform behavior is claimed. |
-| `Subject` | Planned Haskell entry points `Amoebius.Substrate.observe`, `Amoebius.Cluster.Kind.preflight`, `plan`, and `reconcile`; exact production call graph remains `UNRESOLVED` and blocks validation. |
-| `Command` | `pb validate phase 55`; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged. The Haskell binary owns discovery, plan, effects, observation, cleanup, and verdict. |
-| `Oracle` | A separately authored Haskell capacity/reconcile oracle plus an outside process/resource observer. Module, author, custody boundary, and independent human reviewer are `UNRESOLVED` and block validation. |
-| `Positive controls` | Closed Haskell values for one fitting declaration, already-converged state, stopped-node repair, and missing-context repair, with exact plans and observations independently pinned. Live success requires one Ready node and no platform workload. |
-| `Paired negatives` | Minimally different declarations cover CPU, memory, node storage, engine reserve, backing identity, architecture, and forbidden accelerator mismatch; each must refuse at its named preflight locus with zero cluster mutation. |
-| `Mutants` | Changed-subject operators skip preflight, use a bare executable name, turn reconcile into create-only, ignore a damaged node, suppress a diff, or skip teardown. Applied Haskell-source witnesses and unaffected controls are mandatory. |
-| `Discovery` | Expected cluster/container/context/resource sets are derived independently and compared in both directions with live discovery. Empty, partial, duplicate, or extra discovery refuses the candidate. |
-| `Challenge` | After initial convergence the harness introduces one run-local, named repairable divergence selected after startup; the same subject must observe and repair it, then re-observe an empty diff. |
-| `Observer` | An outside observer reads raw process execution, container identity/state, kind membership, kubeconfig bytes, node readiness/capacity, writes, and owned residue; subject-emitted summaries are not authoritative. |
-| `Authority/bypass` | All external tools are invoked through the prior Haskell `AbsExe` boundary. Bare-name, alternate socket/context, foreign-cluster, over-capacity, direct-create, and `pb`-implemented behavior probes must fail at distinct loci. |
-| `Freshness` | Use a fresh `.build/**` run root and a marker-owned cluster identity bound to the current source, contract, predecessor receipt, host observation, and run challenge. Stale kubeconfig, observations, plans, or evidence are unusable. |
-| `Qualification` | Before live mutation, the same harness must reject the fixed sabotage corpus: constant success, no-op subject, wrong output, empty discovery, missing subject/oracle, skipped/no-op mutant, wrong-locus failure, stale evidence, self-observer, authority bypass, residue, and smuggled generated/legacy input. |
-| `Cleanroom` | Begin with generated outputs absent and no owned cluster. Generate configuration, cases, plans, and observations lazily beneath one `.build/**` run root; refuse repository-retained generated behavioral transport material and writes beside source. |
-| `Legacy closure` | The typed Haskell binding explained to readers as `LTD-RUN-001` must have zero findings and its second-executable/obsolete-identity reintroduction negatives must fail. The source classifier must also report exact accounting and zero due bindings owned by Phase 55 or earlier. Markdown row content is not an input. |
-| `Predecessor` | The exact current Phase 54 human approval and full receipt chain, including Phase 49, must verify. No receipt currently exists; this blocks execution and validation. |
-| `Residue` | `UNVERIFIED`: all Phase-55 behavior until the contract is implemented and reviewed; every registry, image publication, platform service, storage service, workload, GPU, multi-node, provider, and second-substrate claim remains outside scope. |
-| `Human authority` | `human-only`: automation and LLMs may emit a candidate bundle but may not start premature hardware validation, create approval, or mark this sprint/phase Done. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: On one natural `linux-cpu/amd64` host, the Haskell subject rejects incompatible declarations before mutation, reconciles exactly one empty single-node kind cluster, repairs named partial states, repeats with an empty diff, and tears down without owned residue. No later platform behavior is claimed. |
+| `Subject` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Planned Haskell entry points `Amoebius.Substrate.observe`, `Amoebius.Cluster.Kind.preflight`, `plan`, and `reconcile`; exact production call graph remains `UNRESOLVED` and blocks validation. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 55`; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged. The Haskell binary owns discovery, plan, effects, observation, cleanup, and verdict. |
+| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: A separately authored Haskell capacity/reconcile oracle plus an outside process/resource observer. Module, author, custody boundary, and independent human reviewer are `UNRESOLVED` and block validation. |
+| `Positive controls` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Closed Haskell values for one fitting declaration, already-converged state, stopped-node repair, and missing-context repair, with exact plans and observations independently pinned. Live success requires one Ready node and no platform workload. |
+| `Paired negatives` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Minimally different declarations cover CPU, memory, node storage, engine reserve, backing identity, architecture, and forbidden accelerator mismatch; each must refuse at its named preflight locus with zero cluster mutation. |
+| `Mutants` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Changed-subject operators skip preflight, use a bare executable name, turn reconcile into create-only, ignore a damaged node, suppress a diff, or skip teardown. Applied Haskell-source witnesses and unaffected controls are mandatory. |
+| `Discovery` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Expected cluster/container/context/resource sets are derived independently and compared in both directions with live discovery. Empty, partial, duplicate, or extra discovery refuses the candidate. |
+| `Challenge` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: After initial convergence the harness introduces one run-local, named repairable divergence selected after startup; the same subject must observe and repair it, then re-observe an empty diff. |
+| `Observer` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: An outside observer reads raw process execution, container identity/state, kind membership, kubeconfig bytes, node readiness/capacity, writes, and owned residue; subject-emitted summaries are not authoritative. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: All external tools are invoked through the prior Haskell `AbsExe` boundary. Bare-name, alternate socket/context, foreign-cluster, over-capacity, direct-create, and `pb`-implemented behavior probes must fail at distinct loci. |
+| `Freshness` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Use a fresh `.build/**` run root and a marker-owned cluster identity bound to the current source, contract, predecessor receipt, host observation, and run challenge. Stale kubeconfig, observations, plans, or evidence are unusable. |
+| `Qualification` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Before live mutation, the same harness must reject the fixed sabotage corpus: constant success, no-op subject, wrong output, empty discovery, missing subject/oracle, skipped/no-op mutant, wrong-locus failure, stale evidence, self-observer, authority bypass, residue, and smuggled generated/legacy input. |
+| `Cleanroom` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Begin with generated outputs absent and no owned cluster. Generate configuration, cases, plans, and observations lazily beneath one `.build/**` run root; refuse repository-retained generated behavioral transport material and writes beside source. |
+| `Legacy closure` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The typed Haskell binding explained to readers as `LTD-RUN-001` must have zero findings and its second-executable/obsolete-identity reintroduction negatives must fail. The source classifier must also report exact accounting and zero due bindings owned by Phase 55 or earlier. Markdown row content is not an input. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 54, whose verified chain includes Phase 49; candidate execution separately refuses an absent, stale, replayed, or broken-chain receipt. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `UNVERIFIED`: all Phase-55 behavior until the contract is implemented and reviewed; every registry, image publication, platform service, storage service, workload, GPU, multi-node, provider, and second-substrate claim remains outside scope. |
+| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only`: automation and LLMs may emit a candidate bundle but may not start premature hardware validation, create approval, or mark this sprint/phase Done. |
 
 ## Resource provision — UNRESOLVED
 
@@ -124,7 +124,7 @@ the command cannot produce an admissible candidate.
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Substrate/Observe.hs`, `src/Amoebius/Substrate/Classify.hs`
-**Blocked by**: Phase 54 human approval
+**Blocked by**: [Phase 54](phase_54_windows_engine_bringup.md) human approval
 **Requires**: `natural-linux-cpu-amd64-host`
 **Independent Validation**: A separately authored Haskell decision table checks every closed OS/architecture/accelerator cell; paired reason-specific negatives and a changed-classifier mutant must fail without cluster effects.
 **Oracle**: planned `test/Amoebius/Substrate/ClassifyOracle.hs`; separate author and human reviewer unresolved
@@ -154,7 +154,7 @@ Implement the subject and oracle, assign independent custody, and obtain human r
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Cluster/Kind/Preflight.hs`, `src/Amoebius/Cluster/Kind/Plan.hs`
-**Blocked by**: Sprint 55.1 candidate and human sprint review
+**Blocked by**: Sprint 55.1
 **Independent Validation**: Haskell oracles compare exact plans for absent, converged, and repairable states; one-field capacity negatives refuse at named loci, and skip-preflight/create-only mutants redden while unaffected cases stay green.
 **Oracle**: planned `test/Amoebius/Cluster/Kind/PlanOracle.hs`; separate author and reviewer unresolved
 **Legacy IDs**: `LTD-RUN-001`
@@ -183,7 +183,7 @@ Implement and independently review the pure seam and close every unresolved cont
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Cluster/Kind/Reconcile.hs`
-**Blocked by**: Sprint 55.2 candidate and human sprint review; Phase 49 human approval
+**Blocked by**: Sprint 55.2
 **Requires**: `disposable-linux-cpu-amd64-host`
 **Independent Validation**: The Haskell subject reconciles one marker-owned cluster while an outside observer proves absolute-path effects, zero mutation on rejected preflight, one Ready node, no platform workload, and a changed bypass mutant turning red.
 **Oracle**: planned `test/Amoebius/Cluster/Kind/LiveOracle.hs` plus outside observer; custody unresolved
@@ -214,7 +214,7 @@ at the current status.
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Cluster/Kind/Observe.hs`, `src/Amoebius/Cluster/Kind/Teardown.hs`
-**Blocked by**: Sprint 55.3 candidate and human sprint review
+**Blocked by**: Sprint 55.3
 **Independent Validation**: Outside observation proves exact discovery, empty-diff replay, selected divergence repair without recreation, scoped teardown, and zero owned residue; no-op-observer and skip-cleanup mutants must fail.
 **Oracle**: planned `test/Amoebius/Cluster/Kind/LifecycleOracle.hs` plus outside observer; custody unresolved
 **Legacy IDs**: `LTD-RUN-001`
