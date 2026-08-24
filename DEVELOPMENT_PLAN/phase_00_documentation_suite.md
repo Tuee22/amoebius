@@ -1363,7 +1363,7 @@ alter a source, registry, validation, or ordering verdict.
 ### Remaining Work
 
 The checkers and component oracles exist but are not qualified or independently human-reviewed. The
-documentation checker separately pins the 195-path governed inventory/count digest and rejects retired tracked
+documentation checker separately pins the 196-path governed inventory/count digest and rejects retired tracked
 fixture/golden/oracle/mutant syntax unless it names one exact non-wildcard lowercase-`.hs` file, plus ambiguous
 committed/checked-in artifact wording; raw, fenced, comment-split, and physically wrapped spellings cannot hide
 those defects. Phase and sprint status fields are exact raw reset forms: dual-status wording, extra bare markers,
@@ -1664,6 +1664,23 @@ An isolated warning sweep then compiled all 101 selected variants from the clean
 with `-Wall -Wcompat -Werror`. Every row reached the Documentation subject and compiled without warning or
 error. This proves only that none of the current selector branches wins by making helpers dead; it supplies no
 assigned oracle result, binary witness, Cabal reconciliation, completeness claim, or validation authority.
+
+On 2026-08-24 the Finite Resource Execution Authority Protocol joined the governed engineering corpus as the
+196th path. The production and independent inventories now pin count 196 and sorted-path digest
+`97964f2fc3e6bf6c98159089f6f2f99683f3ffaab7834504b2a9647d5927d4df`, and source closure names the path
+explicitly. This is documentation-path registration only: the protocol states target shapes, while Phases 29,
+32, 51, and 52–54 retain the compile-fail, pure-boundary, and live-mechanism work. The prose observations and
+finding-manifest digest must be remeasured after this edit, and no sprint or phase status changes.
+
+The permitted serial `cabal test validation-kernel-component -j1` diagnostic was attempted after that
+registration. Dependency solving and compilation stayed single-worker, but the production
+`Documentation.Internal` module failed before the oracle ran because six referenced header-finding helpers are
+absent: title, purpose, read-this, details, order, and metadata-block. The exact same unresolved references are
+present in `HEAD`; this doctrine change touches only the inventory count and digest in that module. The run is
+therefore a build refusal, not a documentation result, and the prose observations and finding-manifest digest
+remain deliberately unfrozen until the owning Sprint-0.4 implementation repairs and revalidates that seam.
+The separate package-description check exited zero with only its already-declared distribution-metadata
+warnings; it does not substitute for the component diagnostic.
 
 ## Sprint 0.5: Gate-kernel qualification and spoof corpus ⏸️
 

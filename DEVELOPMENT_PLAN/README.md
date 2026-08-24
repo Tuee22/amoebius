@@ -187,7 +187,7 @@ The current audit makes no validation attribution.
 
 | Phase(s) | Current classification | Meaning |
 |---|---|---|
-| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and eighteen component oracles exist. The typed policy contract, closed 25-ID legacy lifecycle/analyzer dispatch, descriptor-pinned source observer, v2 byte-bound debt observer, one-file static `pb` grammar, compiler/consumer adapters, and typed phase/resource registries are present. Adversarial reviews rejected candidate integration and exposed remaining trust, completeness, and oracle-independence gaps. Source acquisition remains permanently diagnostic without authenticated atomic external authority; the compiler route establishes only four restricted-session facts and cannot reach the repository graph. The worktree has one `pb/__main__.py`; the unstaged Git index still has the condemned fifteen-path bootstrap footprint. The `LTD-SRC-000` and `LTD-SRC-008` analyzers are integrated but unqualified, while `LTD-VAL-001` through `LTD-VAL-004` owner analyzers are absent. Independent human review/key custody, clean-room observation, evidence integration, contract resolution, legacy closure, and human promotion remain absent. |
+| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and eighteen component oracles exist. The typed policy contract, closed 25-ID legacy lifecycle/analyzer dispatch, descriptor-pinned source observer, v2 byte-bound debt observer, one-file static `pb` grammar, compiler/consumer adapters, and typed phase/resource registries are present. The governed inventory now registers 196 paths, including the target-only Finite Resource Execution Authority Protocol; its live interpreters and conformance evidence remain owned by later numerical phases. Adversarial reviews rejected candidate integration and exposed remaining trust, completeness, and oracle-independence gaps. Source acquisition remains permanently diagnostic without authenticated atomic external authority; the compiler route establishes only four restricted-session facts and cannot reach the repository graph. The worktree has one `pb/__main__.py`; the unstaged Git index still has the condemned fifteen-path bootstrap footprint. The `LTD-SRC-000` and `LTD-SRC-008` analyzers are integrated but unqualified, while `LTD-VAL-001` through `LTD-VAL-004` owner analyzers are absent. Independent human review/key custody, clean-room observation, evidence integration, contract resolution, legacy closure, and human promotion remain absent. |
 | 1–95 | **Observed footprint / Known partial — NOT VALIDATED** | Existing files and historical run material are migration input only; each phase is blocked behind numerical predecessor validation and human promotion. |
 
 The 2026-08-23 inspection reran `cabal build lib:validation-kernel test:validation-kernel-component` and the
@@ -213,6 +213,11 @@ validation, legacy, and documentation bindings remain explicit `UNRESOLVED` valu
 claims their semantics are complete. The compiled phase-semantic/resource registry and its independent oracle
 are under adversarial integration review; every remaining gap and missing reviewer-custody value keeps the
 Phase-0 gate refusing.
+
+The 2026-08-24 single-worker component rerun made no diagnostic claim: compilation stopped in
+`Documentation.Internal` at six header-finding helpers referenced but absent from `HEAD`. The newly registered
+resource-authority doctrine changes only that module's governed count and path digest, so Sprint 0.4 retains
+this compile refusal and the post-edit prose/finding-manifest remeasurement as explicit residue.
 
 Capability-by-capability target ownership remains in the linked phase contracts and the target-only
 [system_components.md](system_components.md). Current divergence identity, ownership, and closure are typed
