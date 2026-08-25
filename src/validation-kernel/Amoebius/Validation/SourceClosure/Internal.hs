@@ -3456,6 +3456,7 @@ canonicalGovernedDocumentationPaths =
     , "documents/engineering/resource_capacity_types.md"
     , "documents/engineering/service_capability_doctrine.md"
     , "documents/engineering/shared_host_resource_protocol.md"
+    , "documents/engineering/shared_host_resource_protocol_analysis.md"
     , "documents/engineering/single_logical_data_plane_doctrine.md"
     , "documents/engineering/storage_lifecycle_doctrine.md"
     , "documents/engineering/substrate_doctrine.md"

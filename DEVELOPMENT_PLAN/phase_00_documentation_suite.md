@@ -1363,7 +1363,7 @@ alter a source, registry, validation, or ordering verdict.
 ### Remaining Work
 
 The checkers and component oracles exist but are not qualified or independently human-reviewed. The
-documentation checker separately pins the 196-path governed inventory/count digest and rejects retired tracked
+documentation checker separately pins the 197-path governed inventory/count digest and rejects retired tracked
 fixture/golden/oracle/mutant syntax unless it names one exact non-wildcard lowercase-`.hs` file, plus ambiguous
 committed/checked-in artifact wording; raw, fenced, comment-split, and physically wrapped spellings cannot hide
 those defects. Phase and sprint status fields are exact raw reset forms: dual-status wording, extra bare markers,
@@ -1682,6 +1682,14 @@ therefore a build refusal, not a documentation result, and the prose observation
 remain deliberately unfrozen until the owning Sprint-0.4 implementation repairs and revalidates that seam.
 The separate package-description check exited zero with only its already-declared distribution-metadata
 warnings; it does not substitute for the component diagnostic.
+
+On 2026-08-24 the reference-only Shared Host Resource Protocol analysis joined the governed engineering corpus
+as the 197th path. The production and independent inventories now pin count 197 and sorted-path digest
+`6488261ff12df3bf270901b018d4004aa9eef145352d356d274664ba9fc1326d`, and source closure names the path
+explicitly. The analysis records review findings, an outer-host/inner-scheduler ledger seam, and a proposed
+phase-ownership map; it amends no protocol semantics, phase contract, predecessor edge, or status. The known
+documentation-component compile refusal above remains unresolved, and no post-edit component diagnostic has
+been represented as a result.
 
 ## Sprint 0.5: Gate-kernel qualification and spoof corpus ⏸️
 

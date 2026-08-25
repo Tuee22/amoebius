@@ -455,7 +455,7 @@ establishedDocumentationTargetProblems selector =
             ( Finding
                 "DOC-INVENTORY-COUNT"
                 "documents/"
-                "governed path count differs from the reviewed Haskell baseline: expected=196, observed=6"
+                "governed path count differs from the reviewed Haskell baseline: expected=197, observed=6"
             )
             (documentationInventoryDiagnostic linkedCorpus)
         )
@@ -800,10 +800,10 @@ ancestors path = path : if parent == path then [] else ancestors parent
   parent = takeDirectory path
 
 expectedProductionGovernedCount :: Text
-expectedProductionGovernedCount = "196"
+expectedProductionGovernedCount = "197"
 
 expectedProductionGovernedPathDigest :: Text
-expectedProductionGovernedPathDigest = "97964f2fc3e6bf6c98159089f6f2f99683f3ffaab7834504b2a9647d5927d4df"
+expectedProductionGovernedPathDigest = "6488261ff12df3bf270901b018d4004aa9eef145352d356d274664ba9fc1326d"
 
 -- These are open residue, not accepted validation evidence. The exact count
 -- vector prevents an unrecognized code from replacing a declared class; the

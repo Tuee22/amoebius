@@ -16,7 +16,7 @@ familiarity with the project-local resource and lifecycle doctrine routed throug
 
 **Status**: Reference only
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/shared_host_resource_protocol_analysis.md
 **Generated sections**: none
 
 </details>
@@ -1038,6 +1038,8 @@ remain proposals. Unsupported or unobserved claims fail closed.
 
 ## Related Documents
 
+- [Critical Analysis](./shared_host_resource_protocol_analysis.md) — project-specific strengths, conflicts,
+  safety gaps, and adoption prerequisites
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase order, implementation status, and promotion
 - [Lift and Compose Doctrine](./lift_and_compose_doctrine.md) — present seed and amoebius independence
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — amoebius capacity algebra
