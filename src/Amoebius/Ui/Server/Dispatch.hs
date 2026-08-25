@@ -192,7 +192,7 @@ data HandlerInvocation = HandlerInvocation
 data ActionKind = ReadAction | MutateAction
   deriving stock (Eq, Show)
 
--- | The closed action-to-handler table, one row per Phase-19 port effect. A case with no
+-- | The closed action-to-handler table, one row per Phase-20 port effect. A case with no
 -- row has no handler and cannot be reached by spelling one: there is no name-based fallback
 -- and no reflection, so an unknown case is refused by the same non-enumerating response as
 -- a foreign-scope one.

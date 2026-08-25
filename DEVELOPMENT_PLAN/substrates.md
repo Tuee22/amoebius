@@ -16,7 +16,7 @@ phase order by [README.md](README.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, README.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_13_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_14_symbolic_checker.md, DEVELOPMENT_PLAN/phase_35_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_55_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_57_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_62_vault_pki.md, DEVELOPMENT_PLAN/phase_63_platform_backbone.md, DEVELOPMENT_PLAN/phase_64_platform_services_2.md, DEVELOPMENT_PLAN/phase_65_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_66_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_68_pulsar_client.md, DEVELOPMENT_PLAN/phase_74_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_75_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_76_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_77_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_78_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_90_apple_metal_host_daemon.md, README.md
 **Generated sections**: none
 
 </details>
@@ -135,7 +135,7 @@ gates.
 | Operator floor | Homebrew and the Xcode Command Line Tools, and nothing else ([`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply)) |
 | Specialized lane | Apple Metal on-host; additive to, never a replacement for, `linux-cpu` |
 | LoadBalancer | MetalLB (bare-metal / kind / rke2 lane) |
-| What it validates | Phase 53 supplies the Apple-host engine and native arm64 image; Phase 57 supplies the complementary-architecture base-image child; Phase 89 runs an Apple-Silicon **host compute daemon** as an in-cluster Pulsar/MinIO peer over host-only NodePorts ([`substrate_doctrine.md` §5 — host worker nodes](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)) |
+| What it validates | Phase 54 supplies the Apple-host engine and native arm64 image; Phase 58 supplies the complementary-architecture base-image child; Phase 90 runs an Apple-Silicon **host compute daemon** as an in-cluster Pulsar/MinIO peer over host-only NodePorts ([`substrate_doctrine.md` §5 — host worker nodes](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)) |
 | Gate phase(s) | Phases 53, 57, and 89 — the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
 | Delivery note | Target specified; owning phase status lives only in [README.md](README.md) |
 
@@ -150,7 +150,7 @@ gates.
 | Operator floor | a package-manager root, passwordless sudo, and `/dev/kvm` for the guest ([`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply)) |
 | LoadBalancer | MetalLB |
 | What it validates | The **default validation substrate** — bootstrap, platform services and retained storage, the DSL/control-plane daemon, Pulsar/store/workflow, CPU inference, the generic low-code UI server/projector, authenticated single/multi-tenant isolation, rollout/reconnect, encrypted offline replay/blobs/release evolution, and multi-cluster migration |
-| Gate phase(s) | Phases 52, 55–56, 58–75, 80–83, 85–87, 90–92, 95, plus the `linux-cpu` parent side of Phases 76–79, 84, 88 — the live path's default substrate; the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
+| Gate phase(s) | Phases 52, 55–56, 58–75, 80–83, 85–87, 90–92, 95, plus the `linux-cpu` parent side of Phases 77–80, 84, 88 — the live path's default substrate; the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
 | Delivery note | Target specified; owning phase status lives only in [README.md](README.md) |
 
 ### linux-cuda
@@ -163,7 +163,7 @@ gates.
 | Baseline `linux-cpu` route | native CPU-only lane, or a pristine Incus guest with no GPU passthrough |
 | Operator floor | the `linux-cpu` floor plus the NVIDIA kernel driver — whose absence is not a refusal but a different classification ([`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply)) |
 | LoadBalancer | MetalLB |
-| What it validates | The scoped Phase 93 numerical-core slice and Phase 94 training/checkpoint-contract slice on the NVIDIA accelerator lane; all current claims remain NOT VALIDATED. |
+| What it validates | The scoped Phase 94 numerical-core slice and Phase 95 training/checkpoint-contract slice on the NVIDIA accelerator lane; all current claims remain NOT VALIDATED. |
 | Gate phase(s) | Phases 93 and 94 — the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
 | Delivery note | Historical scoped observation from 2026-08-11, invalidated by the artifact-policy amendment; owning phase status lives only in [README.md](README.md) |
 
@@ -177,8 +177,8 @@ gates.
 | Baseline `linux-cpu` route | WSL2 (Ubuntu-24.04 Linux distro) — see [§3](#3-virtualized-substrates-incus--lima--wsl2) |
 | Operator floor | winget, PowerShell, firmware virtualization enabled in BIOS/UEFI, elevation, and the reboot a WSL2 change may need ([`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply)) |
 | LoadBalancer | MetalLB (when acting as a Linux cluster host) |
-| What it validates | [Phase 54](phase_54_windows_engine_bringup.md) keys its single substrate to `windows` at lane `linux-cpu/amd64`, supplied by WSL2; the retired claim that no gate needed to was withdrawn with the host band. Beyond that gate Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 89 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized), [`daemon_topology_doctrine.md` §4](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)). The standalone `windows` gate is a later-phase concern (README later phases) |
-| Gate phase(s) | Phase 54 for the WSL2 `linux-cpu/amd64` engine; Phase 89 owns only the later host-worker doctrine shared with Apple Metal |
+| What it validates | [Phase 55](phase_55_windows_engine_bringup.md) keys its single substrate to `windows` at lane `linux-cpu/amd64`, supplied by WSL2; the retired claim that no gate needed to was withdrawn with the host band. Beyond that gate Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 90 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized), [`daemon_topology_doctrine.md` §4](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)). The standalone `windows` gate is a later-phase concern (README later phases) |
+| Gate phase(s) | Phase 55 for the WSL2 `linux-cpu/amd64` engine; Phase 90 owns only the later host-worker doctrine shared with Apple Metal |
 | Delivery note | Target specified; owning phase status lives only in [README.md](README.md) |
 
 > **Observed implementation.** The original classification seed came from the sibling `hostbootstrap`
@@ -190,7 +190,7 @@ gates.
 > **Why `windows` is not split into `windows-cuda`.**
 > The amoebius four-name catalog keys each member on the **OS / VM-provider + wire strategy**, not on accelerator
 > presence: a Windows host's CUDA reaches the cluster as a **host worker** regardless (CUDA does not run
-> performantly under WSL2), so the deployment-shape-changing axis is captured by the Phase-89 host-worker
+> performantly under WSL2), so the deployment-shape-changing axis is captured by the Phase-90 host-worker
 > elevation, not by a new substrate name. The seed's finer `windows-gpu` member therefore collapses to
 > `windows`, while the seed-attributed `linux-gpu` keeps its `linux-gpu` ⇔ amoebius `linux-cuda` mapping — the
 > seed strings above are quotations and are kept verbatim. `cuda` names the **NVIDIA accelerator family**; a
@@ -212,7 +212,7 @@ it has no host to detect and no `LinuxHost` witness. It is the `Managed Eks` arm
 | Node capacity | From exact declared `ProviderNodeClass { name, sku, allocatable, quotaVcpu, zones, price, baseCount, maxCount }` values, not the managed control plane. `allocatable` is the complete `ProviderNodeCapacityTemplate { allocatableCpu, allocatableMemory, podSlots, cniSlots, attachableVolumes, localDisks, cpuOvercommit, localStorage, accelerator }`; each `localDisks` entry is a `PerInstanceDiskTemplate` with raw `InstanceStore.provisionedRawBytes` or an `EphemeralRootEbs` policy and usable `ProviderUsableDiskCarveTemplate.requiredUsableBytes` system/layout carves. Each selected instance becomes a distinct privately provisioned capacity before folding ([`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)) |
 | Storage ceiling | Three non-interchangeable cases: SKU-pinned `InstanceStore.provisionedRawBytes` is per-instance raw supply and spends no EBS quota; an `EphemeralRootEbs` root derives and spends a provider-rounded raw request under `ProviderQuota.nodeRootStorage`; retained durable EBS uses the `Ebs` `StorageBacking` arm and spends `ProviderQuota.durable`. For either node-disk arm, private `ProvisionedPerInstanceDiskTemplate` derives presentation-pinned `mountedUsableBytes` before proving the usable system reserve plus unique usable carves fit. The `CloudQuota` arm is only provider-object byte/count quota. The never-sum-raw-and-usable ceiling and the quota-bounded `ScalingPolicy` escape valve are owned by [`resource_capacity_doctrine.md` §5](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) / [§6](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm) |
 | LoadBalancer | Cloud LoadBalancer (derived from the `Managed Eks` provider materialization; [`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)) |
-| Gate phase(s) | Phases 76–79, 84, 88 (the provider phases; the `linux-cpu` parent drives the deploy, and the provider target is not a hardware substrate) — owned by [§4](#4-per-phase-substrate-map) |
+| Gate phase(s) | Phases 77–80, 84, 88 (the provider phases; the `linux-cpu` parent drives the deploy, and the provider target is not a hardware substrate) — owned by [§4](#4-per-phase-substrate-map) |
 | Delivery note | Target specified; owning phase status lives only in [README.md](README.md) |
 
 > **Environment preconditions.** A substrate is a fact about the *host*; the same kind of fact can hold about
@@ -238,7 +238,7 @@ The VM is plumbing; the substrate the cluster sees is Linux. These are **provide
 | Provider / tool | Incus |
 | Synthesizes | A newly created Ubuntu-24.04 VM presenting as `linux-cpu` at the parent's natural architecture; no GPU passthrough for the baseline lane |
 | Seed module | `HostBootstrap.Incus` (sibling `hostbootstrap`) |
-| Used by | Every Linux-host gate that requires a pristine Linux machine, including the Phase-55 clean-host gate |
+| Used by | Every Linux-host gate that requires a pristine Linux machine, including the Phase-56 clean-host gate |
 | Delivery note | Sibling seed observed; amoebius materialization remains a target and owning phase status lives only in [README.md](README.md) |
 
 ### lima
@@ -249,7 +249,7 @@ The VM is plumbing; the substrate the cluster sees is Linux. These are **provide
 | Provider / tool | Lima (`limactl`), ensured via `brew install lima` (verified no-op if present) |
 | Synthesizes | A named, project-budget-sized Ubuntu-24.04 Linux VM presenting as `linux-cpu/arm64` |
 | Seed module | `HostBootstrap.Ensure.Lima` / `HostBootstrap.Lima` (sibling `hostbootstrap`) |
-| Used by | Phases 53 and 57 for natural-arm64 Linux engine/image work, and Phase 89 for baseline cluster-side commands only; Phase 89's Metal bridge and workload remain headless on the Apple host, outside Lima |
+| Used by | Phases 53 and 57 for natural-arm64 Linux engine/image work, and Phase 90 for baseline cluster-side commands only; Phase 90's Metal bridge and workload remain headless on the Apple host, outside Lima |
 | Delivery note | Target specified; owning phase status lives only in [README.md](README.md) |
 
 ### wsl2
@@ -306,11 +306,11 @@ tail band — 53, 54, 57, 89, 93 and 94 are interleaved through the live band, e
 belongs rather than grouped by machine. The offline work is bisected by register like every other capability:
 its Register-1/2 halves are Phases **41** and **45**, and its Register-3 halves are Phases **85–88**. Each
 row's full objective, gate, and sprint breakdown lives in its phase document
-(`phase_00_documentation_suite.md` … `phase_95_webapp_rederivation.md`).
+(`phase_00_documentation_suite.md` … `phase_96_webapp_rederivation.md`).
 
 The fourth column records planned lane assignment only. It contains no result, date, checkmark, receipt,
 attestation, or validation status. The tracker in [README.md](README.md) is the sole status owner. Phase 0 is
-active but not validated; Phases 1–95 are blocked and not validated. Hardware execution for promotion is
+active but not validated; Phases 1–96 are blocked and not validated. Hardware execution for promotion is
 prohibited until the hardware-free DSL barrier and every preceding redesigned contract are independently
 satisfied and human-approved.
 
@@ -326,96 +326,97 @@ satisfied and human-approved.
 | 7 | The evidence calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 6 |
 | 8 | Scoped identity kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 7 |
 | 9 | Capacity core fold + topology relation | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 8 |
-| 10 | Composition across the five calculi | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 9 |
-| 11 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 10 |
-| 12 | The amoebius explicit-state checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 11 |
-| 13 | The amoebius symbolic checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 12 |
-| 14 | The amoebius refinement checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 13 |
-| 15 | The compile-fail fixture harness | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 14 |
-| 16 | Deterministic-simulation substrate | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 15 |
-| 17 | Gateway-migration model (both branches) | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 16 |
-| 18 | DSL formal model | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 17 |
-| 19 | Reconcile decision core under deterministic simulation | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 18 |
-| 20 | The extension declaration | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 19 |
-| 21 | The per-extension laws L1-L5 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 20 |
-| 22 | The compositional laws C1-C7 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 21 |
-| 23 | The security laws S1-S6 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 22 |
-| 24 | The generated conformance gate | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 23 |
-| 25 | Haskell-derived Dhall projection and smart-constructor prelude | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 24 |
-| 26 | Haskell protocol declarations, GADT-indexed IR, and total decoder | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 25 |
-| 27 | Illegal-state corpus + validation-locus ledger | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 26 |
-| 28 | Logical→physical storage geometry folds | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 27 |
-| 29 | Execution-epoch + scheduler + accelerator + provider-root folds | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 28 |
-| 30 | Capability union + representational bind | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 29 |
-| 31 | Whole-deployment provision seal + expansion | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 30 |
-| 32 | InferenceEngine capability + accelerator provision | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 31 |
-| 33 | Pure `renderAll` + rendered-artifact oracles | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 32 |
-| 34 | chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 33 |
-| 35 | The amoebius image recipe | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 34 |
-| 36 | The closed transaction vocabulary | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 35 |
-| 37 | Bounded UI-program schema | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 36 |
-| 38 | UI authorization kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 37 |
-| 39 | UI effect binding | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 38 |
-| 40 | UI plan compiler | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 39 |
-| 41 | Offline language and paired plans | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 40 |
-| 42 | Haskell browser-interpreter semantics and projection | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 41 |
-| 43 | Haskell UI-server boundary | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 42 |
-| 44 | Hardware-free Haskell UI composition | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 43 |
-| 45 | Haskell offline-state semantics and runtime projection | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 44 |
-| 46 | Haskell-generated browser contracts and bundle | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 45 |
-| 47 | Foreign-source generator closure, checking tools, and mutants | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 46 |
-| 48 | The test-workflow algebra | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 47 |
-| 49 | No-hardware DSL promotion barrier and self-referential gate suite | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 48 |
-| 50 | Bounded `pb` bootstrap and Haskell handoff | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 49 |
-| 51 | The host-ensure kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 50 |
-| 52 | Linux: sudoless Docker and the native image | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 51, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 53 | Apple: Homebrew, Colima, and the native image | `apple` | `linux-cpu/arm64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 52, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 54 | Windows: WSL2 and the lifted Linux engine | `windows` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 53, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 55 | Haskell substrate coordinator and single kind cluster | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 54, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 56 | The base image, the jit-build resolver, and the in-cluster registry | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 55, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 57 | The complementary-architecture base image | `apple` | `linux-cpu/arm64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 56, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 58 | Typed renderer + object reconciler | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 57, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 59 | amoebius-capacity scheduler + bootstrap cutover | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 58, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 60 | No-provisioner retained storage + lossless rebind | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 59, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 61 | Root Vault + PKI + built-in Haskell Vault client | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 60, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 62 | Platform backbone (MetalLB + MinIO + Pulsar HA) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 61, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 63 | Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 62, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 64 | Keycloak-owned ingress | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 63, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 65 | Live DSL deploy via the replicas=1 control-plane daemon | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 64, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 66 | Tenant/provider provisioning | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 65, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 67 | Native Pulsar client (CBOR) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 66, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 68 | Live subject/tenant isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 67, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 69 | Content store + workflow runtime (Pulsar-Failover single-writer) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 68, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 70 | Owner-scoped UI projection runtime | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 69, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 71 | Release lifecycle | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 70, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 72 | Atomic immutable UI-program release | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 71, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 73 | WireGuard network fabric | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 72, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 74 | Multi-cluster spawn + geo-replication | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 73, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 75 | Gateway-migration drills + model-correspondence | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 74, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 76 | Haskell-derived provider Pulumi program and enveloped checkpoint | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 75, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 77 | Hostless provider child + convergence + Lease handoff | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 76, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 78 | Per-PV EBS decoupling + create-vs-delete credential | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 77, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 79 | Dynamic node provisioning by signal + leak-free provider gate | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 78, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 80 | Determinism kernel + jit-build CacheBudget cache | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 79, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 81 | Single-tenant low-code UI live path | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 80, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 82 | Multi-tenant low-code UI isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 81, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 83 | UI rollout, projection catch-up, and reconnect | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 82, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 84 | Initial online UI multi-zone high availability | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 83, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 85 | Offline replay and durable receipts | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 84, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 86 | Offline blobs and partition isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 85, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 87 | Offline release and schema evolution | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 86, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 88 | Offline multi-zone continuity | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 87, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 89 | Apple-Metal host compute daemon | `apple` | `metal` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 88, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 90 | The live test topology and elevated harness | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 89, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 91 | The infernix inference core, re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 90, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 92 | The infernix workflow and artifact contracts, re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 91, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 93 | The jitML numerical core, re-derived | `linux-cuda` | `cuda` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 92, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 94 | The jitML training and checkpoint contracts, re-derived | `linux-cuda` | `cuda` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 93, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 95 | The multi-tenant web application re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 94, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 10 | The host claim ledger | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 9 |
+| 11 | Composition across the five calculi | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 9 |
+| 12 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 11 |
+| 13 | The amoebius explicit-state checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 12 |
+| 14 | The amoebius symbolic checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 13 |
+| 15 | The amoebius refinement checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 14 |
+| 16 | The compile-fail fixture harness | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 15 |
+| 17 | Deterministic-simulation substrate | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 16 |
+| 18 | Gateway-migration model (both branches) | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 17 |
+| 19 | DSL formal model | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 18 |
+| 20 | Reconcile decision core under deterministic simulation | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 19 |
+| 21 | The extension declaration | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 20 |
+| 22 | The per-extension laws L1-L5 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 21 |
+| 23 | The compositional laws C1-C7 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 22 |
+| 24 | The security laws S1-S6 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 23 |
+| 25 | The generated conformance gate | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 24 |
+| 26 | Haskell-derived Dhall projection and smart-constructor prelude | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 25 |
+| 27 | Haskell protocol declarations, GADT-indexed IR, and total decoder | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 26 |
+| 28 | Illegal-state corpus + validation-locus ledger | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 27 |
+| 29 | Logical→physical storage geometry folds | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 28 |
+| 30 | Execution-epoch + scheduler + accelerator + provider-root folds | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 29 |
+| 31 | Capability union + representational bind | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 30 |
+| 32 | Whole-deployment provision seal + expansion | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 31 |
+| 33 | InferenceEngine capability + accelerator provision | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 32 |
+| 34 | Pure `renderAll` + rendered-artifact oracles | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 33 |
+| 35 | chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 34 |
+| 36 | The amoebius image recipe | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 35 |
+| 37 | The closed transaction vocabulary | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 36 |
+| 38 | Bounded UI-program schema | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 37 |
+| 39 | UI authorization kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 38 |
+| 40 | UI effect binding | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 39 |
+| 41 | UI plan compiler | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 40 |
+| 42 | Offline language and paired plans | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 41 |
+| 43 | Haskell browser-interpreter semantics and projection | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 42 |
+| 44 | Haskell UI-server boundary | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 43 |
+| 45 | Hardware-free Haskell UI composition | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 44 |
+| 46 | Haskell offline-state semantics and runtime projection | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 45 |
+| 47 | Haskell-generated browser contracts and bundle | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 46 |
+| 48 | Foreign-source generator closure, checking tools, and mutants | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 47 |
+| 49 | The test-workflow algebra | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 48 |
+| 50 | No-hardware DSL promotion barrier and self-referential gate suite | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 49 |
+| 51 | Bounded `pb` bootstrap and Haskell handoff | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 50 |
+| 52 | The host-ensure kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 51 |
+| 53 | Linux: sudoless Docker and the native image | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 52, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 54 | Apple: Homebrew, Colima, and the native image | `apple` | `linux-cpu/arm64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 53, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 55 | Windows: WSL2 and the lifted Linux engine | `windows` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 54, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 56 | Haskell substrate coordinator and single kind cluster | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 55, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 57 | The base image, the jit-build resolver, and the in-cluster registry | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 56, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 58 | The complementary-architecture base image | `apple` | `linux-cpu/arm64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 57, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 59 | Typed renderer + object reconciler | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 58, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 60 | amoebius-capacity scheduler + bootstrap cutover | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 59, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 61 | No-provisioner retained storage + lossless rebind | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 60, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 62 | Root Vault + PKI + built-in Haskell Vault client | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 61, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 63 | Platform backbone (MetalLB + MinIO + Pulsar HA) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 62, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 64 | Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 63, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 65 | Keycloak-owned ingress | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 64, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 66 | Live DSL deploy via the replicas=1 control-plane daemon | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 65, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 67 | Tenant/provider provisioning | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 66, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 68 | Native Pulsar client (CBOR) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 67, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 69 | Live subject/tenant isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 68, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 70 | Content store + workflow runtime (Pulsar-Failover single-writer) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 69, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 71 | Owner-scoped UI projection runtime | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 70, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 72 | Release lifecycle | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 71, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 73 | Atomic immutable UI-program release | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 72, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 74 | WireGuard network fabric | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 73, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 75 | Multi-cluster spawn + geo-replication | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 74, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 76 | Gateway-migration drills + model-correspondence | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 75, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 77 | Haskell-derived provider Pulumi program and enveloped checkpoint | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 76, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 78 | Hostless provider child + convergence + Lease handoff | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 77, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 79 | Per-PV EBS decoupling + create-vs-delete credential | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 78, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 80 | Dynamic node provisioning by signal + leak-free provider gate | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 79, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 81 | Determinism kernel + jit-build CacheBudget cache | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 80, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 82 | Single-tenant low-code UI live path | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 81, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 83 | Multi-tenant low-code UI isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 82, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 84 | UI rollout, projection catch-up, and reconnect | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 83, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 85 | Initial online UI multi-zone high availability | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 84, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 86 | Offline replay and durable receipts | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 85, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 87 | Offline blobs and partition isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 86, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 88 | Offline release and schema evolution | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 87, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 89 | Offline multi-zone continuity | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 88, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 90 | Apple-Metal host compute daemon | `apple` | `metal` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 89, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 91 | The live test topology and elevated harness | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 90, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 92 | The infernix inference core, re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 91, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 93 | The infernix workflow and artifact contracts, re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 92, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 94 | The jitML numerical core, re-derived | `linux-cuda` | `cuda` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 93, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 95 | The jitML training and checkpoint contracts, re-derived | `linux-cuda` | `cuda` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 94, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 96 | The multi-tenant web application re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 95, human promotion, and the independently satisfied hardware-free DSL barrier |
 
 The provider/host-side details under three of these rows are owned elsewhere: the cloud-LB and provider-cluster
-provisioning behind Phases 76–79, 84, 88 by the Pulumi IaC doctrine; the host-worker wire behind Phase 89 by the
-host↔cluster comms doctrine; the in-cluster vs on-host GPU split behind Phases 93/89 by
+provisioning behind Phases 77–80, 84, 88 by the Pulumi IaC doctrine; the host-worker wire behind Phase 90 by the
+host↔cluster comms doctrine; the in-cluster vs on-host GPU split behind Phases 94/90 by
 [`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized).
 This map owns only the **one substrate per gate** assignment.
 
@@ -445,7 +446,7 @@ keeps in
 - [Cluster Topology Doctrine](../documents/engineering/cluster_topology_doctrine.md) — the declared compute-engine axis (kind/rke2/EKS) this registry keeps distinct from the detected substrate
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — the fold over the per-host `Capacity` this registry declares
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — [§9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) the LoadBalancer + single wild-ingress path, [§12](../documents/engineering/platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant) substrate equivalence as a structural invariant
-- [Host ↔ Cluster Comms Doctrine](../documents/engineering/host_cluster_comms_doctrine.md) — the host-worker wire (host-only NodePorts, no mTLS) behind Phase 89
+- [Host ↔ Cluster Comms Doctrine](../documents/engineering/host_cluster_comms_doctrine.md) — the host-worker wire (host-only NodePorts, no mTLS) behind Phase 90
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the composition lift and worker-role taxonomy
-- [Pulumi IaC Doctrine](../documents/engineering/pulumi_iac_doctrine.md) — provider-cluster provisioning behind Phases 76–79, 84, 88
+- [Pulumi IaC Doctrine](../documents/engineering/pulumi_iac_doctrine.md) — provider-cluster provisioning behind Phases 77–80, 84, 88
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine the phases adopt

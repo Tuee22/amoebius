@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise Phase-46 retained-storage boundaries without claiming AWS EBS."""
+"""Exercise Phase-47 retained-storage boundaries without claiming AWS EBS."""
 
 from __future__ import annotations
 
@@ -295,7 +295,7 @@ def execute() -> dict[str, Any]:
             "operationalEc2DeleteVolumeDenied": "UNVERIFIED", "awsEbsCsiReady": "UNVERIFIED",
             "providerAttachMount": "UNVERIFIED", "sameEbsHandleReattach": "UNVERIFIED",
             "providerRawAndUsableGeometry": "UNVERIFIED", "cloudAudit": "UNVERIFIED",
-            "reason": "Phase 44 AWS authority invalid",
+            "reason": "Phase 45 AWS authority invalid",
         },
         "bakedCsiBinaryExecution": {"amd64": "UNVERIFIED", "arm64": "UNVERIFIED"},
         "universalLinuxCpu": {

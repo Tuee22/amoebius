@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 19: pure reconcile core and bounded deterministic simulation."""
+"""Phase 20: pure reconcile core and bounded deterministic simulation."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / ".build/dsl/reconcile-core/phase-results.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/reconcile-core-simulation"
-CONTRACT = "DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_20_reconcile_core_simulation.md"
 GATE_COMMAND = "python3 tools/reconcile_core_simulation_gate.py"
 EXPECTATIONS = "test/oracle/reconcile_core_simulation_surfaces.tsv"
 CAPABILITY = "reconcile_core"

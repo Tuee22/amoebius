@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 20: the complete five-calculus extension declaration value."""
+"""Phase 21: the complete five-calculus extension declaration value."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ ACTUAL = ROOT / ".build/dsl/extension-declaration/actual-declarations.tsv"
 INVENTORY = ROOT / "test/oracle/extension_declaration/inventory.tsv"
 CATALOG = ROOT / "test/oracle/extension_declaration/mutation_catalog.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/extension-declaration"
-CONTRACT = "DEVELOPMENT_PLAN/phase_20_extension_declaration.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_21_extension_declaration.md"
 GATE_COMMAND = "python3 tools/extension_declaration_gate.py"
 EXPECTATIONS = "test/oracle/extension_declaration_surfaces.tsv"
 CAPABILITY = "extension_declaration"

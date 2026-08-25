@@ -26,7 +26,7 @@ ninety-six contracts have no executing code behind them, and that is a fact abou
 worth printing rather than hiding.
 
 This file is itself condemned by the generative re-baseline: `tools/**` is emitted from the
-declarations it checks, and Phase 47 owns its closure. Until then it is authored, like the
+declarations it checks, and Phase 48 owns its closure. Until then it is authored, like the
 tools beside it.
 """
 
@@ -151,7 +151,7 @@ def gate_scripts() -> dict[str, dict[str, str]]:
 
 
 def retained_gate_mechanisms() -> dict[str, str]:
-    """Contract path -> independent mechanism retained by the Phase-49 consumer switch."""
+    """Contract path -> independent mechanism retained by the Phase-50 consumer switch."""
     if not SELF_REFERENTIAL_INVENTORY.is_file():
         return {}
     with SELF_REFERENTIAL_INVENTORY.open(encoding="utf-8", newline="") as handle:

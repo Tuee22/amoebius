@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Acceptance gate for Phase 64's scoped offline multi-zone continuity."""
+"""Acceptance gate for Phase 65's scoped offline multi-zone continuity."""
 
 import hashlib
 import json
@@ -10,8 +10,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_64"
-ENUMERATION = ROOT / "test/enumeration/phase_64_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_64_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_65_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_65_ledger.json"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
 FLAGS = (

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the Phase-31 platform services on the retained Phase-30 cluster."""
+"""Exercise the Phase-32 platform services on the retained Phase-31 cluster."""
 
 from __future__ import annotations
 

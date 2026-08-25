@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal Phase 35's project-contained platform-backbone gate."""
+"""Run and seal Phase 36's project-contained platform-backbone gate."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / ".build/dsl/platform-backbone/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/platform_backbone_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_62_platform_backbone.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_63_platform_backbone.md"
 GATE_COMMAND = "python3 tools/platform_backbone_gate.py --execute"
 SIDES = ("toolchain", "oracle", "static", "predecessor", "live", "mutant", "results")
 
@@ -41,8 +41,8 @@ EXPECTED_MUTANTS = {name for name, _flag, _marker in MUTANTS}
 CHECKS = {
     "authored-backbone-oracles": "the storage-driver, hot-tier, geometry, kind, and surface expectations are authored",
     "toolchain-satisfies-requirements": "resolved tools satisfy authored compatibility ranges",
-    "phase29-predecessor-verified": "the exact latest all-pass Phase-33 record is verified",
-    "phase25-image-handoff-verified": "the OCI archive is joined to its all-pass Phase-30 record",
+    "phase29-predecessor-verified": "the exact latest all-pass Phase-34 record is verified",
+    "phase25-image-handoff-verified": "the OCI archive is joined to its all-pass Phase-31 record",
     "pure-backbone-contract": "the topology, storage, migration, render, and readiness contracts pass",
     "live-private-backbone": "a private marker-owned cluster runs the complete backbone",
     "external-live-reader": "the independently compiled Haskell reader accepts the live observation",
@@ -321,7 +321,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         check_results["phase29-predecessor-verified"] = True
         check_results["phase25-image-handoff-verified"] = True
         results["predecessor"] = True
-        print("\npredecessor side — exact Phase-33 seal and Phase-30 OCI handoff\n")
+        print("\npredecessor side — exact Phase-34 seal and Phase-31 OCI handoff\n")
         print(f"  ok    phase29     {predecessor.attestation}")
         print(f"  ok    phase25     {handoff.attestation}")
         print(f"  ok    image-index {handoff.index_digest}")
@@ -352,7 +352,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 timeout=28800,
             )
         elif evidence is None:
-            raise GateFailure("Phase 35 requires --execute or a completed --evidence observation")
+            raise GateFailure("Phase 36 requires --execute or a completed --evidence observation")
         if not evidence.is_file():
             raise GateFailure("platform-backbone-live-evidence-absent")
         live = verify_live_domain(evidence, handoff.index_digest)
@@ -445,7 +445,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         },
         dependencies={
             "cluster": "fresh private marker-owned kind fixture with retained child filesystems",
-            "image": "verified Phase-30 OCI export imported into both fresh nodes",
+            "image": "verified Phase-31 OCI export imported into both fresh nodes",
             **({"phase25Attestation": handoff.attestation, "phase25Index": handoff.index_digest} if handoff else {}),
             **({"phase29Attestation": predecessor.attestation} if predecessor else {}),
         },

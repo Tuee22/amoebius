@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-11 gate — the formal-model kernel and its explorer/TLC differential.
+"""The Phase-12 gate — the formal-model kernel and its explorer/TLC differential.
 
 The capability claim is unchanged from the pre-amendment gate: one reifiable `Model` value
 renders both ways, the in-process explorer and TLC agree on the safety verdict and on the
@@ -42,7 +42,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / ".build" / "tla" / "formal-model-spec" / "phase-results.tsv"
 EMITTED = ROOT / ".build" / "tla" / "formal-model-spec"
-CONTRACT = "DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md"
 GATE_COMMAND = "python3 tools/formal_model_kernel_gate.py"
 EXPECTATIONS = "test/oracle/formal_model_kernel_surfaces.tsv"
 
@@ -55,7 +55,7 @@ CHECKS = {
 
 SIDES = ("toolchain", "suite", "oracle", "artifact")
 
-# The authored oracle. Every value here is read off the Phase-11 contract's Gate paragraph,
+# The authored oracle. Every value here is read off the Phase-12 contract's Gate paragraph,
 # which fixes the hand-derived distinct-state count, the mutation quotas, the differential
 # sample floor, and the per-constructor coverage floor.
 EXPECTED_RESULTS = {
@@ -94,7 +94,7 @@ SURFACE_EVIDENCE = {
     "toy-liveness-under-fairness": ("toy-liveness-under-fairness", "green"),
     "fairness-sensitivity": ("fairness-drop-liveness", "red"),
     "tla-renderer-semantics": ("renderer-semantic-mutants-caught", "2/2"),
-    "phase-10-composition-projection": ("calculus-composition-projection", "green"),
+    "phase-11-composition-projection": ("calculus-composition-projection", "green"),
     "mechanical-model-mutants": ("model-safety-mutants-caught", "5/5"),
     "renderer-mutants": ("renderer-differential-mutants-caught", "2/2"),
     "renderer-mutant-corpus": ("renderer-differential-mutants-caught", "2/2"),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase-38 Keycloak/Pulsar/CNI setup, independent observation, and evidence seal."""
+"""Phase-39 Keycloak/Pulsar/CNI setup, independent observation, and evidence seal."""
 
 from __future__ import annotations
 

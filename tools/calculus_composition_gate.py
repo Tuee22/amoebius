@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-10 gate — index-preserving composition across the five calculi.
+"""The Phase-11 gate — index-preserving composition across the five calculi.
 
 The independently authored table exhausts the 25 ordered calculus pairs.  The suite
 checks their exact resource sums, all 125 ordered triples, identity, label transforms,
@@ -35,7 +35,7 @@ MUTANT_CAPABILITY = "calculus_composition"
 RESULTS = ROOT / ".build/calculus/composition/phase-results.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/calculus-composition"
 SCRATCH = ROOT / ".build/tmp/calculus-composition"
-CONTRACT = "DEVELOPMENT_PLAN/phase_10_calculus_composition.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_11_calculus_composition.md"
 GATE_COMMAND = "python3 tools/calculus_composition_gate.py"
 EXPECTATIONS = "test/oracle/calculus_composition_surfaces.tsv"
 SUITE = "calculus-composition-spec"

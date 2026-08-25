@@ -270,7 +270,7 @@
       "relative_paths": ["purs.bin", "purs"],
       "version_argv": ["--version"],
       "requirement": ">=0.15 <0.16",
-      "reason": "the browser interpreter bundle from Phase 25 on"
+      "reason": "the browser interpreter bundle from Phase 26 on"
     },
     "spago": {
       "source": "node-package",

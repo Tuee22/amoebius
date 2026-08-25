@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 
--- | The Phase-10 suite: all ordered pairs of the five calculi, plus generated
+-- | The Phase-11 suite: all ordered pairs of the five calculi, plus generated
 -- index-preservation properties.
 module Main (main) where
 
@@ -101,9 +101,9 @@ main = do
     Right () -> pure ()
 
 withFixtureScope :: (forall scope. RequestScope scope -> IO result) -> IO (Either String result)
-withFixtureScope continuation = case trustedTenant "phase-10-tenant" of
+withFixtureScope continuation = case trustedTenant "phase-11-tenant" of
   Left problem -> pure (Left (show problem))
-  Right tenant -> case trustedSubject tenant "phase-10-subject" of
+  Right tenant -> case trustedSubject tenant "phase-11-subject" of
     Left problem -> pure (Left (show problem))
     Right subject -> case activeMembership tenant subject of
       Left problem -> pure (Left (show problem))

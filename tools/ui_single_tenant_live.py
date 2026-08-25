@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scoped Phase-55 cross-replica socket and durable-receipt observation."""
+"""Scoped Phase-56 cross-replica socket and durable-receipt observation."""
 import hashlib,json,socket,tempfile,threading
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]; OUT=ROOT/"DEVELOPMENT_PLAN/evidence/phase_55/ui-single-tenant-live.json"

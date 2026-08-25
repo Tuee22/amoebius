@@ -18,7 +18,7 @@ owned by [resource_capacity_storage.md](./resource_capacity_storage.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/content_addressing_determinism.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_31_capability_bind.md, DEVELOPMENT_PLAN/phase_33_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_57_base_image_registry.md, DEVELOPMENT_PLAN/phase_70_content_store_workflow.md, DEVELOPMENT_PLAN/phase_72_release_lifecycle.md, DEVELOPMENT_PLAN/phase_75_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_81_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_92_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/content_addressing_determinism.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
@@ -72,7 +72,7 @@ contract rather than by amendment here.
 *totality typing* that makes names un-forgeable — that is technique [§4.5](../illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) in
 [`illegal_state_catalog.md`](../illegal_state/illegal_state_catalog.md). It does **not** own the per-substrate floating-point
 contract or the JIT cache key — those are owed by
-[Phase 93](../../DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md), which re-derives the numerical core and
+[Phase 94](../../DEVELOPMENT_PLAN/phase_94_jitml_rederivation.md), which re-derives the numerical core and
 states them as amoebius's own. And it
 does **not** own where the bytes physically live (retained-PV MinIO) — that is
 [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md). [§7](#7-what-this-doctrine-deliberately-does-not-own) draws every boundary explicitly.
@@ -190,7 +190,7 @@ and a GC run creates no capacity credit until a subsequent object-store observat
 The finite horizon is thus a required cleanup SLO and failure-envelope bound, not an assumption that GC runs
 immediately or succeeds. Which unreachable checkpoint objects are eligible for
 collection, and the deletion algorithm that removes them, are owed by
-[Phase 94](../../DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md); this doctrine owns the fact that their
+[Phase 95](../../DEVELOPMENT_PLAN/phase_95_jitml_ui_rederivation.md); this doctrine owns the fact that their
 pre-deletion bytes remain provisioned.
 
 **The `If-Match` CAS is an assumed store premise, not a proven property — the single atomic commit point rests on it.** S3 conditional PUT with `If-Match` linearizes the pointer flip *only if* the object store honors the
@@ -250,7 +250,7 @@ because the only mutation is a single atomic PUT of a 32-byte body.
 
 This protocol's per-extension specifics — the dense-weight wire format, the full `CheckpointManifest` CBOR
 shape, the retention/GC reconciler, and the inference-only read path — are owed by
-[Phase 94](../../DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md), which declares them as part of the
+[Phase 95](../../DEVELOPMENT_PLAN/phase_95_jitml_ui_rederivation.md), which declares them as part of the
 extension rather than inheriting them. The bytes themselves live on a `no-provisioner` retained PV
 backing MinIO, owned by [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md); MinIO as an
 HA-always standard service is owned by [`platform_services_doctrine.md`](./platform_services_doctrine.md). This
@@ -272,7 +272,7 @@ and **a pointer is the only mutable object, advanced only by ETag-CAS, namespace
 |-------|------------------|-----------|--------|
 | `experimentHash` | `sha256(resolved-dhall ‖ substrate-fingerprint)` | an ML run / artifact ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) | existing (sibling `jitML`/`infernix`) |
 | `kernelKey` | `sha256(kernel-source ‖ substrate-fingerprint)` | a Tier-3 JIT kernel ([§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) | Phase-N design intent (Q8) |
-| `releaseHash` | `sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fingerprint)`; the resolved deployment includes every pinned UI-program/contract/ABI digest | a deployment generation | target validation owner: Phase 71 |
+| `releaseHash` | `sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fingerprint)`; the resolved deployment includes every pinned UI-program/contract/ABI digest | a deployment generation | target validation owner: Phase 72 |
 | OCI image digest | registry-owned (not amoebius-computed) | a container image | existing ([`image_build_doctrine.md` §5](./image_build_doctrine.md#5-what-the-image-identity-is-given-that-the-tag-is-an-address)) |
 
 **Pointer kinds** — mutable, ETag-CAS only, namespaced by kind:
@@ -285,11 +285,11 @@ and **a pointer is the only mutable object, advanced only by ETag-CAS, namespace
 
 Ownership and honesty for the Haskell inventory and its reader-facing projection:
 
-- `experimentHash` ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) and the `trial` pointer ([§2](#2-the-three-tier-store-blobs--manifests--pointers)) supplied the original sibling pair. Phase 71 owns
+- `experimentHash` ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) and the `trial` pointer ([§2](#2-the-three-tier-store-blobs--manifests--pointers)) supplied the original sibling pair. Phase 72 owns
   the target amoebius `releaseHash` and `environment`-pointer instances; other future members remain design intent.
 - `kernelKey` folds *kernel source* and the substrate fingerprint the same way `experimentHash` folds the
   resolved `.dhall`; the finer JIT cache-key composition is owed by
-  [Phase 93](../../DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md). `kernelKey` is consumed by Tier 3 in [§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).
+  [Phase 94](../../DEVELOPMENT_PLAN/phase_94_jitml_rederivation.md). `kernelKey` is consumed by Tier 3 in [§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).
 - `releaseHash` and the `environment` pointer are specified here for readers, while their constructors and
   namespace/formula entries are defined by the Haskell `HashClass` / `PointerKind` authority. Their *lifecycle*
   — the immutable release ledger, the promotion CAS, the `PromotionGate` — is owned by
@@ -463,14 +463,14 @@ any content hash.
 lattice-join law (commutative/associative/idempotent), per the ledger above. Whether two clusters *produce the same bytes to merge* in the first place is a separate
 question, and its ceiling is [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic).
 
-### Phase-69 target realization — NOT VALIDATED
+### Phase-70 target realization — NOT VALIDATED
 
-Phase 69 must validate the three tiers in `amoebius-store`: immutable components and canonical-CBOR manifests
+Phase 70 must validate the three tiers in `amoebius-store`: immutable components and canonical-CBOR manifests
 must use `If-None-Match: *`; 32-byte HEAD pointers must use ETag `If-Match` CAS with loser reread. A live MinIO
 drill must show that an orphan created before a losing pointer update remains charged through the positive GC
 horizon and earns credit only after a fresh empty inventory. Two independent workflow namespaces must
 converge on the pinned manifest SHA during native Pulsar Failover redelivery. Cross-cluster replication and the
-`deriveExperimentHash`/SplitMix kernel remain UNVERIFIED until Phases 53/58.
+`deriveExperimentHash`/SplitMix kernel remain UNVERIFIED until Phases 54/59.
 
 ---
 
@@ -577,18 +577,18 @@ status ledger; it states the target shape and links back for status. Per
 the model generalizes mechanisms built and tested in the sibling `jitML` and `infernix` libraries into amoebius
 design intent.
 
-The Phase-74 Register-3 target must realize the cross-boundary fold in
+The Phase-75 Register-3 target must realize the cross-boundary fold in
 `Amoebius.Multicluster.GeoReplication`. A separately reviewed Haskell value
 `geoReplicationExpectation` must compute the expected fold and blob-key relation without calling the
 production fold; generated records or encoded observations are materialized only beneath
 `.build/test-corpora/**`. That Haskell oracle must show duplicate/reordered records produce the same fold and
 blob keys; live MinIO must accept the content-addressed object and expose an
 idempotent same-key duplicate, while native Pulsar and Patroni observers must recover the same fresh work
-identity. The target data plane is the retained HA Phase-62–64 platform shared by two real child-cluster projections; a
+identity. The target data plane is the retained HA Phase-63–64 platform shared by two real child-cluster projections; a
 physically independent Pulsar broker set per child remains UNVERIFIED. Every hardware substrate can always run
 this `linux-cpu` lane.
 
-The Phase-80 Register-3 target must make Tier-1 engine materialization content-addressed in
+The Phase-81 Register-3 target must make Tier-1 engine materialization content-addressed in
 `Amoebius.Jit.Resolver` and keep digest constructors and cache keys private. Pure contracts must cover canonical
 field ordering, complete compiler/ISA/libc/RTS fingerprints, SplitMix-derived streams, digest/size conflict
 refusal, first-miss convergence, pin-aware pruning, and capacity admission. A retained-Kubernetes drill must
@@ -598,13 +598,13 @@ payload is a pinned executable engine fixture, not a full production llama.cpp o
 cross-substrate bit equality, cross-node reuse, the Tier-2 model cache, and Tier-3 CUDA kernel cache remain
 UNVERIFIED. Every hardware substrate can always run the `linux-cpu` lane.
 
-The Phase-91 scoped target must stage a pinned 87-byte CPU micro-model as blob → canonical-CBOR manifest →
+The Phase-92 scoped target must stage a pinned 87-byte CPU micro-model as blob → canonical-CBOR manifest →
 ready pointer, refuse a precommit reference, and write two fresh-Job outputs that are byte-equal to an
-independent oracle. A named Phase-80 engine must expose MISS→single materialization→HIT. This targets a
+independent oracle. A named Phase-81 engine must expose MISS→single materialization→HIT. This targets a
 content-addressed adapter and deterministic micro-decoder, not production TinyLlama inference; worker-direct artifact fetch,
 full-engine linkage, general noninterference, and cross-substrate bit equality remain UNVERIFIED.
 
-The scoped Phase-93 target adapter must use Phase-69 content digests and canonical component manifests, and only
+The scoped Phase-94 target adapter must use Phase-70 content digests and canonical component manifests, and only
 a successful pointer witness may expose its opaque committed artifact. A live retained-MinIO challenge must
 store the fresh batch, a fully oracle-checked 40 MB CUDA checkpoint, a canonical JSON evidence manifest, then
 a create-only conditional pointer; a conflicting write must return 412 without changing the pointer. The sibling CBOR

@@ -35,7 +35,7 @@ OUTPUT_ROOT = ROOT / ".build/tools/tool-and-mutant-generation"
 RENDER_ROOT = OUTPUT_ROOT / "renders"
 WORKSPACE_ROOT = OUTPUT_ROOT / "workspace"
 TEMP_ROOT = ROOT / ".build/tmp/tool-and-mutant-generation"
-CONTRACT = "DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_48_tool_and_mutant_generation.md"
 GATE_COMMAND = "python3 tools/tool_and_mutant_generation_gate.py"
 MUTANT_CAPABILITY = "tool_and_mutant_generation"
 SELF = "tools/tool_and_mutant_generation_gate.py"
@@ -219,11 +219,11 @@ def verify_oracles() -> tuple[list[dict[str, str]], list[dict[str, str]], list[d
         if row["# phase"] == "30"
     ]
     if len(custody) != 5 or any(not (ROOT / row["path"]).is_file() for row in custody):
-        raise GateFailure("Phase-0 custody must retain all five Phase-47 preimplementation artifacts")
+        raise GateFailure("Phase-0 custody must retain all five Phase-48 preimplementation artifacts")
     descriptors = {row["expected gate locus"] for row in custody if row["kind"] == "mutant"}
-    wanted_descriptors = {f"gate-red:phase_30_{Path(row['body']).name}" for row in mutants}
+    wanted_descriptors = {f"gate-red:phase_31_{Path(row['body']).name}" for row in mutants}
     if descriptors != wanted_descriptors:
-        raise GateFailure("Phase-47 mutant custody descriptors must name custody phase 30 exactly")
+        raise GateFailure("Phase-48 mutant custody descriptors must name custody phase 31 exactly")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 1 generated checking corpus; protocol and runtime remain UNVERIFIED\n"
@@ -598,7 +598,7 @@ def main() -> int:
         mutants=[
             {"name": row["mutant"], "status": "red" if reddened == len(mutant_rows) else "unrun"}
             for row in mutant_rows
-        ] or [{"name": "phase-47 mutants", "status": "unrun"}],
+        ] or [{"name": "phase-48 mutants", "status": "unrun"}],
         observations=observations,
         extra_status=surface_decisions(expected_rows, rows, classes, results),
     )

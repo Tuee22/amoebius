@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seal Sprint 31.3 aggregate-CAS reservation, Binding, and recovery."""
+"""Seal Sprint 32.3 aggregate-CAS reservation, Binding, and recovery."""
 
 from __future__ import annotations
 

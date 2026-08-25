@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""The Phase-12 gate — amoebius-owned bounded explicit-state checking.
+"""The Phase-13 gate — amoebius-owned bounded explicit-state checking.
 
 Seven hand-enumerated models cover safe, invariant-red, deadlock-red, constraint,
 branching, exact-bound, and exhausted-bound results.  The independent checker may
-consume Phase 11's Model/interpreter semantics but may not call its explorer.  Three
+consume Phase 12's Model/interpreter semantics but may not call its explorer.  Three
 real build mutants weaken a guard, skip invariants, or truncate the frontier.
 """
 
@@ -30,7 +30,7 @@ ORACLE = ROOT / "test/oracle/explicit_state_checker/models.tsv"
 SOURCE = ROOT / "src/explicit-state-checker/Amoebius/Checker/ExplicitState.hs"
 RESULTS = ROOT / ".build/checkers/explicit-state/results.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/explicit-state-checker"
-CONTRACT = "DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_13_explicit_state_checker.md"
 GATE_COMMAND = "python3 tools/explicit_state_checker_gate.py"
 EXPECTATIONS = "test/oracle/explicit_state_checker_surfaces.tsv"
 MUTANT_CAPABILITY = "explicit_state_checker"
@@ -42,7 +42,7 @@ SIDES = ("toolchain", "oracle", "boundary", "suite", "mutant", "results")
 CHECKS = {
     "model-oracle-complete": "seven unique models cover every explicit-check result class",
     "mutant-registry-complete": "three build mutants cover guard, invariant, and frontier defects",
-    "checker-does-not-import-explorer": "the checker owns its frontier rather than delegating to Phase 11",
+    "checker-does-not-import-explorer": "the checker owns its frontier rather than delegating to Phase 12",
     "checker-source-total": "the dedicated checker source has no partial or ambient-read token",
     "suite-acceptance-token": "all fixture, parity, replay, bound, and digest checks complete",
     "mutants-red-at-own-locus": "each build mutant fails at its declared observable",
@@ -153,7 +153,7 @@ def verify_boundary() -> None:
     source = SOURCE.read_text(encoding="utf-8")
     uncommented = re.sub(r"--[^\n]*", "", source)
     if re.search(r"^\s*import\s+(?:qualified\s+)?Amoebius\.Formal\.Explore\b", uncommented, re.M):
-        raise GateFailure("explicit-state checker delegates to the Phase-11 explorer")
+        raise GateFailure("explicit-state checker delegates to the Phase-12 explorer")
     stripped = re.sub(r'"(?:\\.|[^"\\])*"', '""', uncommented)
     prohibited = re.compile(
         r"\b(error|undefined|fromJust|head|tail|unsafePerformIO|unsafeDupablePerformIO|lookupEnv|getEnv|readFile|getLine)\b"
@@ -309,7 +309,7 @@ def main() -> int:
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={SUITE: "cabal build", "formal-model": "Phase-11 interpreter semantics"},
+        dependencies={SUITE: "cabal build", "formal-model": "Phase-12 interpreter semantics"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
         or [{"name": "explicit-state mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}

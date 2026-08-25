@@ -42,7 +42,7 @@ ENTRY_POINT = ROOT / "app/amoebius/Amoebius/Entry/ServeUi.hs"
 HARNESS = ROOT / "test/harness/local_ui_composition/composition.mjs"
 RESULTS = ROOT / ".build/dsl/local-ui-composition/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/local-ui-composition/validation-locus-ledger.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_44_ui_local_composition.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_45_ui_local_composition.md"
 GATE_COMMAND = "python3 tools/local_ui_composition_gate.py"
 EXPECTATIONS = ROOT / "test/oracle/local_ui_composition_surfaces.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/local-ui-composition"
@@ -235,29 +235,29 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure("local-composition five-calculus projection oracle drifted")
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 5 or len({row["mutant"] for row in mutants}) != 5:
-        raise GateFailure("Phase-44 mutant manifest must contain five unique rows")
+        raise GateFailure("Phase-45 mutant manifest must contain five unique rows")
     for row in mutants:
         fixture = ROOT / row["fixture"]
         if not fixture.is_file() or "operator=" not in fixture.read_text(encoding="utf-8"):
             raise GateFailure(f"mutant fixture is absent or malformed: {fixture}")
     locus = read_tsv(LOCUS)
     if len(locus) != 42 or len({row["entry"] for row in locus}) != 42:
-        raise GateFailure("Phase-44 validation locus must contain forty-two unique rows")
+        raise GateFailure("Phase-45 validation locus must contain forty-two unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     custody = [row for row in phase0_rows if row["# phase"] == "27"]
     if len(custody) != 12:
-        raise GateFailure("Phase-0 manifest must pin twelve Phase-44 artifacts under custody phase 27")
+        raise GateFailure("Phase-0 manifest must pin twelve Phase-45 artifacts under custody phase 28")
     missing = [row["path"] for row in custody if not (ROOT / row["path"]).is_file()]
     if missing:
-        raise GateFailure(f"Phase-44 preimplementation artifacts are absent: {missing}")
+        raise GateFailure(f"Phase-45 preimplementation artifacts are absent: {missing}")
     mutant_descriptors = {
         row["expected gate locus"] for row in custody if row["kind"] == "mutant"
     }
     expected_descriptors = {
-        f"gate-red:phase_27_{Path(row['fixture']).name}" for row in mutants
+        f"gate-red:phase_28_{Path(row['fixture']).name}" for row in mutants
     }
     if mutant_descriptors != expected_descriptors:
-        raise GateFailure("Phase-44 mutant custody descriptors do not name custody phase 27 exactly")
+        raise GateFailure("Phase-45 mutant custody descriptors do not name custody phase 28 exactly")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 2 with local Chrome/server/domain fakes; live layers UNVERIFIED\n"
@@ -322,7 +322,7 @@ def build_binaries(cabal: Path) -> tuple[Path, Path, str]:
     executable = Path(run([str(cabal), "list-bin", "exe:amoebius"]).stdout.strip())
     suite = Path(run([str(cabal), "list-bin", "test:ui-local-composition-spec"]).stdout.strip())
     if not executable.is_file() or not suite.is_file():
-        raise GateFailure("Phase-44 executable or suite binary is absent")
+        raise GateFailure("Phase-45 executable or suite binary is absent")
     return executable, suite, build.stdout
 
 
@@ -332,7 +332,7 @@ def run_green(cabal: Path, executable: Path) -> str:
         extra_env={"AMOEBIUS_BIN": str(executable)},
     )
     if ACCEPTANCE_TOKEN not in result.stdout or CALCULUS_TOKEN not in result.stdout:
-        raise GateFailure("Phase-44 acceptance or calculus token is absent")
+        raise GateFailure("Phase-45 acceptance or calculus token is absent")
     return result.stdout
 
 
@@ -393,7 +393,7 @@ def observed_binary(executable: Path, suite: Path) -> tuple[str, str, int]:
                 raise GateFailure("OS observer did not see browser/server/domain composition traffic")
             observed = len(loopback)
     if ACCEPTANCE_TOKEN not in result.stdout or CALCULUS_TOKEN not in result.stdout:
-        raise GateFailure("observed Phase-44 binary missed its acceptance or calculus token")
+        raise GateFailure("observed Phase-45 binary missed its acceptance or calculus token")
     return result.stdout, "loopback-only", observed
 
 
@@ -588,7 +588,7 @@ def main() -> int:
         },
         dependencies={"ui-local-composition-spec": "cabal test", "amoebius": "cabal build exe"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-44 mutants", "status": "unrun"}],
+        or [{"name": "phase-45 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the locally dischargeable Phase-44 gate domains."""
+"""Run and seal the locally dischargeable Phase-45 gate domains."""
 
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_44"
 LIVE = EVIDENCE / "provider-checkpoint-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_44_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_44_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_45_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_45_ledger.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
@@ -218,7 +218,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(oracle_domain())
         rows.append(invoke("pure-contract", contract_args()))
         if args.reuse_fresh_live:
-            rows.append({"name": "scoped-live-boundaries", "command": "sealed just-produced Phase-44 live receipt", "output": "fresh scoped evidence; AWS/EKS UNVERIFIED", "result": "PASS"})
+            rows.append({"name": "scoped-live-boundaries", "command": "sealed just-produced Phase-45 live receipt", "output": "fresh scoped evidence; AWS/EKS UNVERIFIED", "result": "PASS"})
         else:
             rows.append(invoke("scoped-live-boundaries", (sys.executable, "tools/provider_deploy_checkpoint_live.py"), timeout=3600))
         evidence_domain(fresh=args.reuse_fresh_live)

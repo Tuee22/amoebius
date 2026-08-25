@@ -34,7 +34,7 @@ LOCUS = ROOT / "test/oracle/provision_seal/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/provision-seal/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/provision-seal/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/provision-seal"
-CONTRACT = "DEVELOPMENT_PLAN/phase_31_provision_seal.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_32_provision_seal.md"
 GATE_COMMAND = "python3 tools/provision_seal_gate.py"
 EXPECTATIONS = "test/oracle/provision_seal_surfaces.tsv"
 
@@ -123,9 +123,9 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         "WrongArmPriorProvisionRef",
     }
     if len(cases) != 10 or {row["expected"] for row in cases} != expected_tags:
-        raise GateFailure("Phase-31 provision oracle must enumerate ten distinct specific failure tags")
+        raise GateFailure("Phase-32 provision oracle must enumerate ten distinct specific failure tags")
     if len(planner) != 2 or {row["expected"] for row in planner} != {"NoInfrastructureRequired", "InfrastructureRequired"}:
-        raise GateFailure("Phase-31 planner oracle must enumerate pre-existing and creation paths")
+        raise GateFailure("Phase-32 planner oracle must enumerate pre-existing and creation paths")
     expected_activation = {
         ("NamespacePart", "Immediate"),
         ("CapacitySchedulerPart", "BootstrapSchedulerStage"),
@@ -133,7 +133,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         ("ManagedCapacityAdmissionPart", "AfterManagedCapacityReady"),
     }
     if len(activation) != 4 or {(row["witness"], row["activation"]) for row in activation} != expected_activation:
-        raise GateFailure("Phase-31 activation oracle must pin all four deployment-global stages")
+        raise GateFailure("Phase-32 activation oracle must pin all four deployment-global stages")
     expected_calculus = {
         "calculus-kinds": "artifact,budget,lift,workflow,evidence",
         "component-names": "inherited-positives,planner-paths,specific-negatives,provision-properties,mutant-evidence",
@@ -141,9 +141,9 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         "resource-vector": "5,42,0,0",
     }
     if {row["metric"]: row["value"] for row in calculus_projection} != expected_calculus:
-        raise GateFailure("Phase-31 independently authored five-calculus projection drifted")
+        raise GateFailure("Phase-32 independently authored five-calculus projection drifted")
     if len(mutants) != 10 or len({row["mutant"] for row in mutants}) != 10:
-        raise GateFailure("Phase-31 mutant manifest must contain ten unique mutants")
+        raise GateFailure("Phase-32 mutant manifest must contain ten unique mutants")
     positives = {
         f"legal_{row['slug']}_{shape}"
         for row in arms
@@ -153,13 +153,13 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     expected_locus |= {row["case"] for row in cases}
     expected_locus |= {row["mutant"] for row in mutants}
     if len(locus) != len(expected_locus) or {row["entry"] for row in locus} != expected_locus:
-        raise GateFailure("Phase-31 validation-locus ledger has incomplete or duplicate coverage")
+        raise GateFailure("Phase-32 validation-locus ledger has incomplete or duplicate coverage")
     for row in cases:
         for stem in (row["case"], row["legal_twin"]):
             fixture = ROOT / f"dhall/examples/{stem}.dhall"
             checked = run([str(dhall), "type", "--file", str(fixture), "--quiet"], require_success=False)
             if checked.returncode != 0:
-                raise GateFailure(f"Phase-31 corpus fixture is not Dhall-well-typed: {fixture}\n{checked.stdout}")
+                raise GateFailure(f"Phase-32 corpus fixture is not Dhall-well-typed: {fixture}\n{checked.stdout}")
     for row in mutants:
         descriptor = ROOT / f"test/mutant/provision_seal/{row['mutant']}/mutant.txt"
         if not descriptor.is_file() or not descriptor.read_text(encoding="utf-8").strip():
@@ -201,15 +201,15 @@ def run_green_suite(cabal: Path) -> str:
     result = run([str(cabal), "test", "provision-seal-spec", "--test-show-details=direct"])
     token = "provision-seal-spec: PASS (18 inherited positives, 2 planner paths, 10 specific negatives, 4 activation stages, 10 mutants, 2 covered properties)"
     if token not in result.stdout:
-        raise GateFailure(f"Phase-31 acceptance token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-32 acceptance token is absent:\n{result.stdout}")
     if "provision-seal-calculus: PASS (5 kinds, 42 projected units)" not in result.stdout:
-        raise GateFailure("Phase-31 five-calculus projection token is absent")
+        raise GateFailure("Phase-32 five-calculus projection token is absent")
     invariant_token = "provision-seal-invariants: PASS (1 creation batch, 1 plan replay, 1 action replay, 3 receipt classifications, 2 promised-identity rejections, 40 locus rows)"
     if invariant_token not in result.stdout:
-        raise GateFailure("Phase-31 planner/locus invariant token is absent")
+        raise GateFailure("Phase-32 planner/locus invariant token is absent")
     for property_token in ("exact infrastructure vs one-unit-short", "exact backing vs one-byte-short"):
         if property_token not in result.stdout:
-            raise GateFailure(f"Phase-31 property coverage token is absent: {property_token}")
+            raise GateFailure(f"Phase-32 property coverage token is absent: {property_token}")
     return result.stdout
 
 
@@ -456,7 +456,7 @@ def main() -> int:
         },
         dependencies={"battery": "cabal test provision-seal-spec"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-31 mutants", "status": "unrun"}],
+        or [{"name": "phase-32 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

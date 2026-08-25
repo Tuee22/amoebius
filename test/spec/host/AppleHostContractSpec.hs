@@ -57,7 +57,7 @@ verifyPhase0 = do
   assertEqual "Phase-0 row cardinality" 20 (length phaseRows)
   forM_ phaseRows $ \row -> case splitTabs row of
     (_phase : _kind : path : _) -> ByteString.readFile path >> pure ()
-    _ -> die "malformed Phase-53 custody row"
+    _ -> die "malformed Phase-54 custody row"
 
 verifyUniversalCpu :: IO ()
 verifyUniversalCpu = forM_

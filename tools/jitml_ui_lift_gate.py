@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the scoped Phase-52 jitML UI lift gate."""
+"""Run and seal the scoped Phase-53 jitML UI lift gate."""
 
 from __future__ import annotations
 
@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "DEVELOPMENT_PLAN/evidence/phase_52"
 LIVE = EVIDENCE_DIR / "jitml-ui-live.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
-ENUMERATION = ROOT / "test/enumeration/phase_52_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_52_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_53_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_53_ledger.json"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
 DHALL = "/home/matthewnowak/.local/bin/dhall"
@@ -111,7 +111,7 @@ def phase0_domain() -> dict[str, str]:
     require("src/Amoebius/JitML/UiAdapter.hs" in patches and all(locus in patches for locus in
             ("CheckpointInFlight", "contextTenant", "contextSubject", "routePendingReceipt", "authoritativeReceipt")),
             "phase0-mutant-loci")
-    return {"name": "phase0-custody", "command": "read Phase-52 manifest rows",
+    return {"name": "phase0-custody", "command": "read Phase-53 manifest rows",
             "output": "6 oracles; 5 mutants", "result": "PASS"}
 
 
@@ -194,7 +194,7 @@ def external_cleanup() -> dict[str, str]:
                              text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, timeout=30)
     require(process.returncode != 0, "jitml-ui-lift-live-process-still-running")
     return {"name": "external-cleanup-readback", "command": "kind/Kubernetes/process inventories",
-            "output": "no Phase-52 namespace/process; retained kind only", "result": "PASS"}
+            "output": "no Phase-53 namespace/process; retained kind only", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:
@@ -232,7 +232,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(invoke("production-dhall-ui", (DHALL, "type", "--file", "dhall/ui/jitml.dhall", "--quiet")))
         rows.append(invoke("jitml-ui-lift-contract", contract_args()))
         if args.reuse_fresh_live:
-            rows.append({"name": "jitml-ui-live", "command": "sealed just-produced Phase-52 live receipt",
+            rows.append({"name": "jitml-ui-live", "command": "sealed just-produced Phase-53 live receipt",
                          "output": "fresh Chrome/identity/durable-file/host-CUDA evidence", "result": "PASS"})
         else:
             rows.append(invoke("jitml-ui-live", (sys.executable, "tools/jitml_ui_lift_live.py"), timeout=1200))

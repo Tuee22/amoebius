@@ -184,17 +184,17 @@ runPhaseContractOracle =
             planRoot
             (phaseContractDiagnostic [("archive/phase_00_decoy.md", phaseDocument 0)])
         , expectFinding
-            "closed phase domain omits Phase 95"
+            "closed phase domain omits Phase 96"
             "PLAN-PHASE-MISSING"
             planRoot
             (filter ((/= phasePath 95) . fst) validCorpus)
         , expectFinding
-            "closed phase domain rejects Phase 96"
+            "closed phase domain rejects Phase 97"
             "PLAN-PHASE-EXTRA"
             (phasePath 96)
             (validCorpus <> [(phasePath 96, phaseDocument 96)])
         , expectFinding
-            "tracker domain omits Phase 95"
+            "tracker domain omits Phase 96"
             "PLAN-TRACKER-MISSING"
             trackerPath
             (replaceDocument trackerPath (trackerDocument [0 .. 94]) validCorpus)
@@ -720,22 +720,22 @@ runPhaseContractOracle =
             "a downstream sprint cannot bind itself instead of its immediate predecessor"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" "Sprint 10.2") twoSprintCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 11.1") (sprintFieldLine "Blocked by" "Sprint 11.2") twoSprintCorpus)
         , expectFinding
             "a downstream sprint cannot substitute or append a prior-phase sprint edge"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" "Sprint 10.1; Sprint 9.99") twoSprintCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 11.1") (sprintFieldLine "Blocked by" "Sprint 11.1; Sprint 9.99") twoSprintCorpus)
         , expectFinding
             "a downstream sprint cannot append an earlier phase approval after its immediate sprint edge"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" ("Sprint 10.1; " <> phaseApprovalBlocker 9)) twoSprintCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 11.1") (sprintFieldLine "Blocked by" ("Sprint 11.1; " <> phaseApprovalBlocker 9)) twoSprintCorpus)
         , expectFinding
             "a downstream sprint cannot append candidate or human-review prose after its immediate sprint edge"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" "Sprint 10.1 candidate and human sprint review") twoSprintCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 11.1") (sprintFieldLine "Blocked by" "Sprint 11.1 candidate and human sprint review") twoSprintCorpus)
         , expectFinding
             "a first sprint cannot append another earlier phase after its immediate predecessor"
             "PLAN-SPRINT-BLOCKER"
@@ -760,7 +760,7 @@ runPhaseContractOracle =
             "a sprint heading cannot claim another phase"
             "PLAN-SPRINT-IDENTITY"
             (phasePath 10)
-            (replaceIn (phasePath 10) "## Sprint 10.1:" "## Sprint 9.1:" validCorpus)
+            (replaceIn (phasePath 10) "## Sprint 11.1:" "## Sprint 9.1:" validCorpus)
         , expectFinding
             "a sprint heading must carry one of the independently closed five status markers"
             "PLAN-SPRINT-IDENTITY"
@@ -772,7 +772,7 @@ runPhaseContractOracle =
             (phasePath 10)
             (replaceIn (phasePath 10) "Synthetic seam ⏸️" "Synthetic seam ✅" validCorpus)
         , expectDiagnosticOnly
-            "Phase 49 Claim, Subject, and title prose are semantically inert"
+            "Phase 50 Claim, Subject, and title prose are semantically inert"
             phaseFortyNineProseDecoyCorpus
         , expectDiagnosticOnly
             "Substrate, Lane, and Register projections cannot supply hardware-ordering semantics"
@@ -1104,7 +1104,7 @@ twoSprintCorpus =
   insertBefore
     (phasePath 10)
     "## Documentation Requirements"
-    (sprintBlock 10 2 "Blocked — NOT VALIDATED" "Sprint 10.1")
+    (sprintBlock 10 2 "Blocked — NOT VALIDATED" "Sprint 11.1")
     validCorpus
 
 resourceSectionCorpus :: [(FilePath, Text)]
@@ -1151,7 +1151,7 @@ gateSemanticProseDecoyCorpus =
         (gateRow "Residue" "This reader-facing explanation carries no executable coverage value.")
         ( replaceIn
             (phasePath 10)
-            (gateRow "Predecessor" "Phase 09")
+            (gateRow "Predecessor" "Phase 9")
             (gateRow "Predecessor" "This reader-facing explanation carries no executable dependency value.")
             ( replaceIn
                 (phasePath 10)
@@ -1170,8 +1170,8 @@ phaseFortyNineProseDecoyCorpus =
     "| 49 | Semantically opaque prose |"
     ( replaceIn
         (phasePath 49)
-        "# Phase 49: No-hardware DSL promotion barrier"
-        "# Phase 49: Semantically opaque prose"
+        "# Phase 50: No-hardware DSL promotion barrier"
+        "# Phase 50: Semantically opaque prose"
         ( replaceIn
             (phasePath 49)
             (gateRow "Subject" phaseFortyNineSubject)

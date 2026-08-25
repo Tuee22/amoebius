@@ -8,7 +8,7 @@
 -- so a declaration cannot silently substitute (for example) a budget component for its
 -- artifact component.  All five arguments share one request-scope index in the normal
 -- API.  Each component retains its own resource vector and 'declarationResource' is the
--- exact natural-number sum supplied by Phase 10's composition algebra.
+-- exact natural-number sum supplied by Phase 11's composition algebra.
 module Amoebius.Extension.Declaration
   ( ExtensionDeclaration
   , DeclarationError (..)
@@ -67,7 +67,7 @@ data DeclarationError
   deriving stock (Eq, Show)
 
 -- | The semantic projection exposed by every calculus-specific reader.  It contains the
--- component's real Phase 10 observations, not a second authored inventory.
+-- component's real Phase 11 observations, not a second authored inventory.
 data DeclaredComponent = DeclaredComponent
   { declaredCalculus :: Calculus
   , declaredName :: Text

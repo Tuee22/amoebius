@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the Phase-31 scheduler cutover against the Phase-29 kind cluster."""
+"""Exercise the Phase-32 scheduler cutover against the Phase-30 kind cluster."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ CLUSTER_ROLE_BINDING = "amoebius-phase27-binding"
 OWNER = "phase27-live-gate"
 GENERATION = "phase27-generation-1"
 CONFIG_DIGEST = "sha256:fd5c9e99104e9baee88947825f0658d19ef43d62219fdfc692174fcaa71acc12"
-# The digest Phase 30 published on the run that stood the in-cluster registry up,
+# The digest Phase 31 published on the run that stood the in-cluster registry up,
 # supplied by the caller: a constant here named a build that no longer exists, so every
 # scheduled Pod would have failed `ImagePull` on any host but the one that produced it.
 IMAGE = ""
@@ -746,7 +746,7 @@ def execute() -> dict[str, Any]:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="this run's observation")
-    parser.add_argument("--image", required=True, help="the Phase-30 published digest reference")
+    parser.add_argument("--image", required=True, help="the Phase-31 published digest reference")
     arguments = parser.parse_args(argv)
     globals()["IMAGE"] = arguments.image
     try:

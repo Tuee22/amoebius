@@ -40,8 +40,8 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Numeric.Natural (Natural)
 
--- | Package-neutral semantic facts projected from the real Phase-10 composition.
--- Keeping this adapter in its own component avoids confusing the focused Phase-10
+-- | Package-neutral semantic facts projected from the real Phase-11 composition.
+-- Keeping this adapter in its own component avoids confusing the focused Phase-11
 -- packages with the older copies of capacity and scope modules still exposed by
 -- @dsl-core@.
 data CalculusProjection = CalculusProjection
@@ -64,8 +64,8 @@ referenceCalculusModel = withReferenceComposition compositionModel
 
 withReferenceComposition :: (forall scope. Composition scope -> result) -> Either String result
 withReferenceComposition continuation = do
-  tenant <- first show (trustedTenant "phase-16-tenant")
-  subject <- first show (trustedSubject tenant "phase-16-subject")
+  tenant <- first show (trustedTenant "phase-17-tenant")
+  subject <- first show (trustedSubject tenant "phase-17-subject")
   membership <- first show (activeMembership tenant subject)
   first show $ withRequestScope tenant subject membership $ \scope ->
     let composition =

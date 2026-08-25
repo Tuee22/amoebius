@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the Phase-41 raw-kernel WireGuard and Vault-by-name live proof."""
+"""Run the Phase-42 raw-kernel WireGuard and Vault-by-name live proof."""
 
 from __future__ import annotations
 

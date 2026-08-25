@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the Phase-32 Keycloak-owned edge on the retained linux-cpu cluster."""
+"""Exercise the Phase-33 Keycloak-owned edge on the retained linux-cpu cluster."""
 
 from __future__ import annotations
 
@@ -339,7 +339,7 @@ def keycloak_persistent_volume(
 
 
 def apply_keycloak_database_network_policy() -> None:
-    # A prior Phase-32 run may already have default-deny active.  Reconcile the
+    # A prior Phase-33 run may already have default-deny active.  Reconcile the
     # new per-consumer database edge before Keycloak is restarted against it.
     apply({
         "apiVersion": "networking.k8s.io/v1", "kind": "NetworkPolicy",
@@ -1039,7 +1039,7 @@ test -n "$USER_ID"
     kubectl("-n", EDGE_NAMESPACE, "exec", pod, "--", "/bin/bash", "-ec", update_user)
     return {
         "ready": True, "realm": "amoebius", "fixture": str(REALM_FIXTURE.relative_to(ROOT)),
-        "database": "dedicated Phase-32 three-member strict-sync Patroni",
+        "database": "dedicated Phase-33 three-member strict-sync Patroni",
         "wildIngressOwner": True,
     }
 
@@ -2108,7 +2108,7 @@ def execute() -> dict[str, Any]:
     apply(namespace(EDGE_NAMESPACE, **{"amoebius.io/phase": "32"}))
     wan_pod = ensure_origin_pod("keycloak-ingress-wan", "wan")
     lan_pod = ensure_origin_pod("keycloak-ingress-lan", "lan")
-    # Phase 32 makes the edge the only LoadBalancer; MinIO remains reachable through it.
+    # Phase 33 makes the edge the only LoadBalancer; MinIO remains reachable through it.
     kubectl(
         "-n", "platform-system", "patch", "service", "minio", "--type=merge",
         "-p", '{"spec":{"type":"ClusterIP"}}',

@@ -17,6 +17,6 @@ main = do
           if caught
             then do
               putStrLn ("capability-bind-mutant: RED " <> Text.unpack mutant)
-              fail ("Phase-30 mutant rejected: " <> Text.unpack mutant)
+              fail ("Phase-31 mutant rejected: " <> Text.unpack mutant)
             else putStrLn ("capability-bind-mutant: SURVIVED " <> Text.unpack mutant)
     _ -> runBindGate

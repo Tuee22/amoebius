@@ -15,7 +15,7 @@ bridges model and implementation, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_14_refinement_checker.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_13_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_14_symbolic_checker.md, DEVELOPMENT_PLAN/phase_15_refinement_checker.md, DEVELOPMENT_PLAN/phase_18_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_20_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_76_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -70,7 +70,7 @@ invariants, and an optional state constraint that bounds exploration. The expres
 the amoebius safety and liveness properties need — booleans, bounded integer arithmetic and comparison, finite
 sets with cardinality, quantifiers over finite sets, function literals/update/application, and a conditional —
 and no more. The constructor set is declared below rather than described, so the differential generator's
-per-constructor coverage floor ([DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md))
+per-constructor coverage floor ([DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md))
 quantifies over an enumerated set and not over prose.
 
 The owning gate must exercise every constructor below through both renderings and a separately implemented
@@ -351,7 +351,7 @@ declared semantics may change only through the oracle-amendment discipline
 Copying fresh output into an expected fixture remains prohibited. The concrete reference model — its name, its
 protocol, its Haskell oracle modules, and the mutants that must break them — is specified by the
 formal-model phase contract in
-[DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md);
+[DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md);
 this doctrine owns only the obligation and its rationale. The reference model is specified to qualify the
 **kernel**; whether its gate has done so is plan status. It is not an amoebius protocol, and no protocol claim
 follows from it. The obligations intended to ride a qualified kernel are the **cross-cluster gateway migration**

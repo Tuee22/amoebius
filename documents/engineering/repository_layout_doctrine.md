@@ -17,7 +17,7 @@ that active inventory to readers.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_44_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_51_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
 **Generated sections**: none
 
 </details>
@@ -63,7 +63,7 @@ The non-source input set is also closed:
 `pb` is not a general scripting exception. It cannot implement product behavior, calculate or reinterpret a
 gate verdict, host an oracle, select phase status, or remain in control after the Haskell binary exists. Phase
 0 admits its source only through a Haskell-owned static AST/import/resolved-call/control-flow/potential-effect
-proof. Phase 0 through Phase 49 invoke Haskell directly; Phase 50 alone uses Haskell tests and an independent
+proof. Phase 0 through Phase 50 invoke Haskell directly; Phase 51 alone uses Haskell tests and an independent
 OS-boundary observer to validate `pb` as an external process.
 
 Governance prose is not an executable registry. A checker may inspect Markdown structure, links, and status
@@ -334,6 +334,11 @@ applicable sabotage must make the audit red for the intended reason before a cle
 Hardware discovery and live infrastructure are prohibited until the human user accepts the hardware-free DSL
 promotion barrier and every predecessor. A container cannot establish the semantics of the DSL that generates
 its own recipe or runtime inputs.
+
+Exchanging records with the host claim ledger ([hostclaim_spec.md](./hostclaim_spec.md)) is not hardware
+discovery. It observes no device, starts no engine, creates no cluster, and runs no image: it opens one fixed per-user path and reads and writes
+fixed-size records, which is ordinary filesystem work and is admitted before the barrier. Deriving a claim's
+domains or its charges from probed hardware *is* discovery, and that part stays behind it.
 
 ## 9. Migration boundary
 

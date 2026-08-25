@@ -8,7 +8,7 @@
 -- Cryptographic verification and wall-clock timing are represented only by explicit
 -- observations.  The module does enforce the type distinctions, skolem request scope,
 -- mandatory scoped operation shape, one public refusal, injective length framing, and
--- mandatory revocation-or-bound policy that Phase 23 can decide at Register 1.
+-- mandatory revocation-or-bound policy that Phase 24 can decide at Register 1.
 module Amoebius.Extension.Laws.Security
   ( Trust (..)
   , Identity

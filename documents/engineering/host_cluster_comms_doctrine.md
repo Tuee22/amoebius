@@ -17,7 +17,7 @@ Reading it presumes the context and role grid of
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_65_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_66_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_90_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -109,7 +109,7 @@ This takes option (c)'s security goal — *no malicious network traffic can use 
 achieves it by **network restriction** instead of by crypto or by a single bottlenecking socket, while
 keeping option (b)'s bandwidth headroom (a real socket per stream) without paying (b)'s mTLS tax.
 
-> **Honesty — target only, NOT VALIDATED.** Phase 89 must eventually test the exact two-service
+> **Honesty — target only, NOT VALIDATED.** Phase 90 must eventually test the exact two-service
 > `NodePort`/loopback type, all four wild-exposure exclusions, and two real loopback-bound Linux listeners
 > whose routable-interface probes fail. It has no current amoebius result. Apple/Lima NodePorts, native
 > Pulsar, gateway/MinIO flow, and a second physical LAN-host probe remain outside that bounded claim. The
@@ -298,8 +298,8 @@ the comms-relevant requirement each substrate must satisfy:
 - **This generalizes a pattern proven in the sibling prodbox project**, where an in-cluster registry is reached
   by host-origin clients at `127.0.0.1:30080` over a NodePort bound to loopback (prodbox CLAUDE.md,
   "Substrate Equivalence"). That is **evidence from another system, not proof in amoebius** — amoebius has
-  a sibling precedent. Phase 89's future scoped Linux-host probe must test the same bind restriction locally;
-  Phase 89 and the Apple/Lima realization are **NOT VALIDATED**.
+  a sibling precedent. Phase 90's future scoped Linux-host probe must test the same bind restriction locally;
+  Phase 90 and the Apple/Lima realization are **NOT VALIDATED**.
 - **The DSL never lets a substrate "fix" a missing piece by widening exposure.** If a substrate's node
   networking makes the loopback binding awkward, the resolution is to extend that substrate's installer to
   honor the host-only contract — not to publish the port wider. Substrate equivalence is structural
@@ -360,7 +360,7 @@ secrets-by-name, never the method.
 
 This document is normative host↔cluster comms doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) — host
-compute-daemon contracts are assigned to **Phase 89**; its scoped target does not claim the physical Apple
+compute-daemon contracts are assigned to **Phase 90**; its scoped target does not claim the physical Apple
 peer. The target surfaces are `Amoebius.HostComms.{NodePort,Loopback,Illegal}` and
 `Amoebius.HostWorker.{Peer,Auth}`; their assignment is not an implementation or validation result. This doc never
 maintains a competing status ledger; it states the target shape and links back for status.

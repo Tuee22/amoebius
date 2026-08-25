@@ -152,7 +152,7 @@ data ArchiveFormat = Bare | TarGz | Zip
 -- | A publisher-signed companion archive required by an executable distribution.
 -- It is acquired and verified on the same rung as its owning artifact, but is not
 -- itself an executable inventory row. Pulsar's separately published offloader NARs
--- are the first instance: the broker binary is unusable for the Phase-30 S3
+-- are the first instance: the broker binary is unusable for the Phase-31 S3
 -- contract unless that payload is present beside it.
 data PublishedPayload = PublishedPayload
   { name :: Text

@@ -59,7 +59,7 @@ def invoke(
     environment = os.environ.copy()
     if global_inventory:
         # This is a nested regression gate. Its containment baseline is the host,
-        # not the marker-owned live fixture belonging to the Phase-67 parent.
+        # not the marker-owned live fixture belonging to the Phase-68 parent.
         for environment_key in ("DOCKER_HOST", "DOCKER_CONFIG", "KUBECONFIG"):
             environment.pop(environment_key, None)
     result = subprocess.run(

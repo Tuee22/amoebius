@@ -1,7 +1,7 @@
-# Authored expectation for the retained-storage test-surface join (owned by Phase 32).
+# Authored expectation for the retained-storage test-surface join (owned by Phase 33).
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
-# independently authored expectation. Phase 32 had no authored expectation at all — the
+# independently authored expectation. Phase 33 had no authored expectation at all — the
 # retired gate read a surface list out of a committed enumeration file and compared a
 # committed ledger against a derived one. This file is the first authored opinion its gate
 # is checked against.
@@ -13,7 +13,7 @@
 #            reason it was seeded to produce, never by the battery's total
 #   checks   a gate side that either ran or did not
 #
-# The id-less surface is the one this register cannot decide: whether the Phase-37
+# The id-less surface is the one this register cannot decide: whether the Phase-38
 # control-plane daemon carries no PVC is that phase's claim, not this one's.
 inert-single-storage-class	metrics	inert-storage-class
 sprint-seals-complete	metrics	sprint-receipts

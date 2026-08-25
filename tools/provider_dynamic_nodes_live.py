@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise Phase-47 signal/reconcile/sweep seams without claiming AWS."""
+"""Exercise Phase-48 signal/reconcile/sweep seams without claiming AWS."""
 
 from __future__ import annotations
 
@@ -217,9 +217,9 @@ def execute() -> dict[str, Any]:
             "eksCluster": "UNVERIFIED", "realManagedNode": "UNVERIFIED", "signalCorrelatedRunInstances": "UNVERIFIED",
             "cloudNoOpAudit": "UNVERIFIED", "awsRunOwnedDescribeSweep": "UNVERIFIED",
             "ephemeralProviderLeakFreedom": "UNVERIFIED", "durableEbsSoleSurvivor": "UNVERIFIED",
-            "secondFullProviderCycle": "UNVERIFIED", "reason": "Phase 44 AWS authority invalid",
+            "secondFullProviderCycle": "UNVERIFIED", "reason": "Phase 45 AWS authority invalid",
         },
-        "deferred": {"elevatedDurableEbsReclamation": "UNVERIFIED until Phase 54", "spotCostSignal": "UNVERIFIED"},
+        "deferred": {"elevatedDurableEbsReclamation": "UNVERIFIED until Phase 55", "spotCostSignal": "UNVERIFIED"},
         "universalLinuxCpu": {"availableOnEveryHardwareSubstrate": True, "pristineLinuxHost": {"linux": "Incus", "linux-cuda": "Incus", "apple": "Lima", "windows": "WSL2"}},
     }
     evidence["evidenceDigest"] = fingerprint(evidence)

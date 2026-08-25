@@ -86,7 +86,7 @@ resolveSecret transport identity jwt reference ciphertext = do
         -- A prompt reference names material the operator supplies at the CLI and
         -- writes into Vault; nothing is stored at the reference itself, so an
         -- in-cluster consumer resolving one fails closed.  The write path that
-        -- turns it into a readable Vault reference belongs to Phase 29.
+        -- turns it into a readable Vault reference belongs to Phase 30.
         (\_name _purpose -> pure (Left VaultSecretMissing))
         reference
 

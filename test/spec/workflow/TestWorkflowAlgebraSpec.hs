@@ -131,7 +131,7 @@ verifyCustody root = do
     (_phase : _kind : path : _) -> do
       present <- doesFileExist (root </> path)
       assert present ("missing custody artifact: " <> path)
-    _ -> die "invalid Phase-56 custody row"
+    _ -> die "invalid Phase-57 custody row"
 
 parseBranch :: String -> IO Algebra.Branch
 parseBranch value = case value of

@@ -78,7 +78,7 @@ explorerParity :: Expected -> Model -> Verdict -> IO Bool
 explorerParity row model verdict
   | expectedStatus row == "bound-exceeded" || expectedStatus row == "unsafe-deadlock" = pure False
   | otherwise = do
-      explored <- requireRight "Phase-11 explorer parity" (Explorer.explore model)
+      explored <- requireRight "Phase-12 explorer parity" (Explorer.explore model)
       assertEqual (expectedModel row <> " explorer state parity")
         (Map.size (Explorer.exploreStates explored)) (verdictDistinctStates verdict)
       let explorerUnsafe = Explorer.exploreViolation explored /= Nothing

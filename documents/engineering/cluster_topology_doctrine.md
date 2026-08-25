@@ -56,13 +56,13 @@ substrate doctrine already owns (Lima on apple, WSL2 on windows). This document 
 topology it induces; it owns **no** substrate names, no detection, no VM-provider mechanics, and no capacity
 numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and [resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
-The pure relation begins with Phase 9, its reflected schema/decoder consumers arrive in Phases 25–26, and
-runtime engine realization belongs to Phases 52–54.
+The pure relation begins with Phase 9, its reflected schema/decoder consumers arrive in Phases 26–27, and
+runtime engine realization belongs to Phases 53–55.
 The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) must validate
 `Amoebius.Dsl.Topology` at Register 1: seven compile-time index pairs, the exhausted 3×3 engine/environment
 compatibility matrix, host distinctness, fixed placement, and elastic growth must be accepted with their
 mutants red.
-The three corresponding Dhall-typecheck loci remain Phase-25 work rather than a backward dependency.
+The three corresponding Dhall-typecheck loci remain Phase-26 work rather than a backward dependency.
 No EKS resource was created, no VM booted, and no node joined; those runtime facts remain **UNVERIFIED**.
 Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -286,7 +286,7 @@ the virtualization provider.
 - **Honesty.** The witness demand is type-foreclosed (no constructor). That the Lima/WSL2 VM *actually boots* and
   presents a working kernel is runtime-checked, owned by
   [substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
-  and is assigned to Phase 94 for runtime exercise.
+  and is assigned to Phase 95 for runtime exercise.
 
 ---
 
@@ -591,7 +591,7 @@ flowchart LR
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
 ```
 
-*Design intent (Phase 25): a type-level compatibility pipeline. A declared engine meets a substrate-gated `LinuxHost` witness, or a hostless provider slot, at a compatible-pair smart constructor, and an elementwise fold yields a `Topology` or a `Left`. Whether the virtual machine actually boots is runtime-checked, not established here.*
+*Design intent (Phase 26): a type-level compatibility pipeline. A declared engine meets a substrate-gated `LinuxHost` witness, or a hostless provider slot, at a compatible-pair smart constructor, and an elementwise fold yields a `Topology` or a `Left`. Whether the virtual machine actually boots is runtime-checked, not established here.*
 
 ---
 
@@ -631,9 +631,9 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
   `Networking` wire; being stretched is a *networking* fact that never moves the per-host capacity fold.
 
 > **Honesty.** Everything here is Phase-0 design intent. The type demands ([§3](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)-[§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) are type-foreclosed/decode-foreclosed
-> spec-layer properties *when implemented as specified* (Phase 25); the runtime residue — the VM actually
+> spec-layer properties *when implemented as specified* (Phase 26); the runtime residue — the VM actually
 > booting, N rke2 nodes actually joining on N hosts, an EKS cluster actually coming up — is runtime-checked, owned by
-> the Phase 89/54/55 gates and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Where a mechanism
+> the Phase 90/55/55 gates and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Where a mechanism
 > generalizes hostbootstrap's virtualization providers or prodbox's EKS reality, that is sibling evidence,
 > not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -643,11 +643,11 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 
 This document is normative topology doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the `ComputeEngine` /
-`LinuxHost` / `Topology` types and the compatibility relation are assigned to **Phase 25**, with Haskell
+`LinuxHost` / `Topology` types and the compatibility relation are assigned to **Phase 26**, with Haskell
 expectations and generated run-local Dhall negatives; the Lima `LinuxHost` witness is assigned to **Phase
-89** (`apple`) for runtime exercise; first live kind topology is assigned to **Phase 55**, while live
+89** (`apple`) for runtime exercise; first live kind topology is assigned to **Phase 56**, while live
 multi-node rke2 remains an explicitly unassigned
-Phase-N gate; the `Managed Eks` arm is assigned to **Phase 76**. This doc never maintains a competing status ledger; it
+Phase-N gate; the `Managed Eks` arm is assigned to **Phase 77**. This doc never maintains a competing status ledger; it
 states the target shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---

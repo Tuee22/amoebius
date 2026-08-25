@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-14 gate — owned refinement checking over compiled Haskell source."""
+"""The Phase-15 gate — owned refinement checking over compiled Haskell source."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ MODEL_EXECUTABLE = MODEL_BUILD / "refinement-model-projection"
 PROJECTED_INVARIANTS = ROOT / ".build/checkers/refinement/model_invariants.tsv"
 SOURCE = ROOT / "tools/refinement_checker.py"
 RESULTS = ROOT / ".build/checkers/refinement/results.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_14_refinement_checker.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_15_refinement_checker.md"
 GATE_COMMAND = "python3 tools/refinement_checker_gate.py"
 EXPECTATIONS = "test/oracle/refinement_checker_surfaces.tsv"
 MUTANT_CAPABILITY = "refinement_checker"
@@ -39,7 +39,7 @@ SIDES = ("toolchain", "oracle", "boundary", "suite", "mutant", "results")
 CHECKS = {
     "function-oracle-complete": "six unique compiled functions cover every refinement result class",
     "model-invariant-registry-complete": "every required invariant has a proved function correspondence",
-    "compiled-model-projection": "the checker consumes predicates projected from safe Phase-11 Model values",
+    "compiled-model-projection": "the checker consumes predicates projected from safe Phase-12 Model values",
     "mutant-registry-complete": "three checker modes cover hypotheses, correspondence, and postconditions",
     "owned-parser-total": "the checker owns its bounded source grammar and rejects unsupported syntax",
     "solver-resolved-not-ambient": "GHC and Z3 are injected from absolute authored-requirement resolutions",

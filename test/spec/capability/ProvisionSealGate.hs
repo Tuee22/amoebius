@@ -148,8 +148,8 @@ runProvisionSealGate = do
   let inheritedPositiveCount = length capabilityFixtures * 2
       mutantCount = length provisionMutants
       totalPropertyCount = propertyCount + runtimePropertyCount
-  assert (inheritedPositiveCount == 18) "Phase-31 inherited positive count drifted"
-  assert (mutantCount == 10) "Phase-31 mutant count drifted"
+  assert (inheritedPositiveCount == 18) "Phase-32 inherited positive count drifted"
+  assert (mutantCount == 10) "Phase-32 mutant count drifted"
   checkProvisionCalculusProjection inheritedPositiveCount 2 negativeCount totalPropertyCount mutantCount
   putStrLn
     ( "provision-seal-invariants: PASS ("
@@ -182,7 +182,7 @@ runProvisionSealGate = do
 
 fixtureNamed :: Text -> IO CapabilityFixture
 fixtureNamed slug = case find ((== slug) . fixtureSlug) capabilityFixtures of
-  Nothing -> fail ("missing Phase-31 fixture: " <> Text.unpack slug)
+  Nothing -> fail ("missing Phase-32 fixture: " <> Text.unpack slug)
   Just fixture -> pure fixture
 
 checkFixture :: CapabilityFixture -> IO ()
@@ -279,14 +279,14 @@ checkNegativeCorpus observability cuda = do
   let cases = provisionNegatives observability cuda
       caseDomain = Set.fromList (fmap negativeName cases)
       oracleDomain = Set.fromList [name | [name, _expected, _twin] <- oracle]
-  assert (length cases == 10 && length oracle == 10 && caseDomain == oracleDomain) "Phase-31 negative oracle must cover exactly ten cases"
+  assert (length cases == 10 && length oracle == 10 && caseDomain == oracleDomain) "Phase-32 negative oracle must cover exactly ten cases"
   forM_ cases $ \negative -> do
     let matchingRows = [row | row@[name, _expected, _twin] <- oracle, name == negativeName negative]
     case matchingRows of
       [[_name, expected, twin]] -> do
-        assert (expected == negativeExpected negative) "Phase-31 negative expected-tag oracle drifted"
-        assert (twin == negativeTwin negative) "Phase-31 legal-twin oracle drifted"
-      _ -> fail "Phase-31 negative oracle row is missing or duplicated"
+        assert (expected == negativeExpected negative) "Phase-32 negative expected-tag oracle drifted"
+        assert (twin == negativeTwin negative) "Phase-32 legal-twin oracle drifted"
+      _ -> fail "Phase-32 negative oracle row is missing or duplicated"
     assertTag (negativeExpected negative) (negativeOutcome negative)
     assertRight (negativeTwinOutcome negative) ("legal twin rejected: " <> Text.unpack (negativeTwin negative))
     checkDhallGreen ("dhall/examples/" <> Text.unpack (negativeName negative) <> ".dhall")
@@ -385,8 +385,8 @@ checkValidationLocus observability cuda = do
       planner = Set.fromList ["planner_preexisting", "planner_creation"]
       negatives = Set.fromList (fmap negativeName (provisionNegatives observability cuda))
       expected = positives <> planner <> negatives <> Set.fromList provisionMutants
-  assert (observed == expected) "Phase-31 validation-locus ledger does not cover every positive, planner path, negative, and mutant"
-  assert (length rows == 40) "Phase-31 validation-locus ledger must contain exactly 40 rows"
+  assert (observed == expected) "Phase-32 validation-locus ledger does not cover every positive, planner path, negative, and mutant"
+  assert (length rows == 40) "Phase-32 validation-locus ledger must contain exactly 40 rows"
   pure (length rows)
 
 checkProvisionCalculusProjection :: Int -> Int -> Int -> Int -> Int -> IO ()

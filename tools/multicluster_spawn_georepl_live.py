@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the Phase-42 in-cluster Pulumi spawn and sibling data-plane exercise."""
+"""Run the Phase-43 in-cluster Pulumi spawn and sibling data-plane exercise."""
 
 from __future__ import annotations
 
@@ -676,7 +676,7 @@ def phase42_live() -> dict[str, Any]:
         "deferred": {
             "physicallyIndependentPulsarBrokerPerChild": "UNVERIFIED",
             "childLocalVaultProcessPerMode": "UNVERIFIED",
-            "providerManagedChildren": "UNVERIFIED until Phase 44",
+            "providerManagedChildren": "UNVERIFIED until Phase 45",
             "rke2Children": "UNVERIFIED",
         },
         "universalLinuxCpu": {

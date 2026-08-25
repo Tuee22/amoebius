@@ -34,7 +34,7 @@ RENDER_ROOT = ROOT / ".build/dsl/ui-contract-generation/renders"
 BUNDLE_ROOT = ROOT / ".build/ui/ui-contract-generation"
 WORKSPACE_ROOT = BUNDLE_ROOT / "workspace"
 TEMP_ROOT = ROOT / ".build/tmp/ui-contract-generation"
-CONTRACT = "DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_47_ui_contract_generation.md"
 GATE_COMMAND = "python3 tools/ui_contract_generation_gate.py"
 MUTANT_CAPABILITY = "ui_contract_generation"
 
@@ -195,11 +195,11 @@ def verify_oracles() -> tuple[list[dict[str, str]], list[dict[str, str]], list[d
         if row["# phase"] == "29"
     ]
     if len(custody) != 5 or any(not (ROOT / row["path"]).is_file() for row in custody):
-        raise GateFailure("Phase-0 custody must retain all five Phase-46 preimplementation artifacts")
+        raise GateFailure("Phase-0 custody must retain all five Phase-47 preimplementation artifacts")
     descriptors = {row["expected gate locus"] for row in custody if row["kind"] == "mutant"}
-    wanted_descriptors = {f"gate-red:phase_29_{Path(row['body']).name}" for row in mutants}
+    wanted_descriptors = {f"gate-red:phase_30_{Path(row['body']).name}" for row in mutants}
     if descriptors != wanted_descriptors:
-        raise GateFailure("Phase-46 mutant custody descriptors must name custody phase 29 exactly")
+        raise GateFailure("Phase-47 mutant custody descriptors must name custody phase 30 exactly")
     cabal = (ROOT / "amoebius.cabal").read_text(encoding="utf-8")
     for flag in FLAGS:
         macro = flag.upper().replace("-", "_")
@@ -609,7 +609,7 @@ def main() -> int:
         mutants=[
             {"name": row["mutant"], "status": "red" if reddened == len(mutant_rows) else "unrun"}
             for row in mutant_rows
-        ] or [{"name": "phase-46 mutants", "status": "unrun"}],
+        ] or [{"name": "phase-47 mutants", "status": "unrun"}],
         observations=observations,
         extra_status=surface_decisions(expected_rows, rows, classes, results),
     )

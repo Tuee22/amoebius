@@ -80,7 +80,7 @@ verify (Evidence register substrate (Representative count sets table bucket obje
   | not (validDigest digest) || publicPulls /= 0 || any (not . (digest `textIn`)) [pgImage, minioImage] = die "private image provenance drifted"
   | not auditObserved || not (null writeTokens) || readOps /= ["Postgres SELECT", "S3 GET"] = die "post-recreate observer saw a write or missed read"
   | staticCheck /= "tools/no_retained_delete_check.sh" || not postBacking = die "normal delete invariant drifted"
-  | unverified /= "UNVERIFIED (Phase 33 subject absent)" = die "Phase-33 no-PVC claim was made early"
+  | unverified /= "UNVERIFIED (Phase 34 subject absent)" = die "Phase-34 no-PVC claim was made early"
   | not universal || linux /= "Incus" || linuxCuda /= "Incus" || apple /= "Lima" || windows /= "WSL2" = die "universal linux-cpu route drifted"
   | otherwise = pure ()
 

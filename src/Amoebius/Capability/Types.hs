@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- | The Phase-10 capability vocabulary and the wholly-unprovisioned output
+-- | The Phase-11 capability vocabulary and the wholly-unprovisioned output
 -- of representational binding.  Products and deployment shapes are absent
 -- from 'CapabilityNeed'; they enter only through 'CapabilityBinding'.
 module Amoebius.Capability.Types
@@ -153,7 +153,7 @@ newtype RegistryStorageIntent = RegistryStorageIntent
   deriving stock (Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
 
--- | Typed logical inputs retained for Phase 11.  They are not capacity or
+-- | Typed logical inputs retained for Phase 12.  They are not capacity or
 -- storage witnesses and no fold has run at this boundary.
 data ProviderIntent
   = ObjectStoreProducerIntent ObjectStoreProducerKind Text
@@ -208,7 +208,7 @@ newtype PriorRegistryProvisionRef = PriorRegistryProvisionRef Text
 
 -- | The deployment carries only unresolved source references and bound
 -- representations.  Provisioning results have no field and no constructor
--- here; Phase 11 owns that transition.
+-- here; Phase 12 owns that transition.
 data BoundDeployment = BoundDeployment
   { boundDeploymentTransition :: ExecutionTransitionSource
   , boundDeploymentServices :: Map Text BoundServiceSpec

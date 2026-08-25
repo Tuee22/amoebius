@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-41 raw-kernel WireGuard fabric gate."""
+"""Run and seal the Phase-42 raw-kernel WireGuard fabric gate."""
 
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_41"
 LIVE = EVIDENCE / "wireguard-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_41_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_41_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_42_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_42_ledger.json"
 ORACLE_MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
@@ -204,7 +204,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(phase0_domain())
         rows.append(invoke("representative-dhall-typecheck", ("/home/matthewnowak/.local/bin/dhall", "--file", "dhall/examples/wireguard_fabric.dhall")))
         if args.reuse_fresh_live:
-            rows.append({"name": "wireguard-live", "command": "sealed just-produced Phase-41 live receipt", "output": "fresh final live evidence", "result": "PASS"})
+            rows.append({"name": "wireguard-live", "command": "sealed just-produced Phase-42 live receipt", "output": "fresh final live evidence", "result": "PASS"})
         else:
             rows.append(invoke("wireguard-live", (sys.executable, "tools/network_fabric_wireguard_live.py"), timeout=3600))
         evidence_domain(fresh=args.reuse_fresh_live)

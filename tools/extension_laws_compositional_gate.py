@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 22: bounded C1-C7 predicates over composed extension declarations."""
+"""Phase 23: bounded C1-C7 predicates over composed extension declarations."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / ".build/dsl/extension-composition-laws/phase-results.tsv"
 ADDRESSES = ROOT / ".build/dsl/extension-composition-laws/addresses.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/extension-laws-compositional"
-CONTRACT = "DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_23_extension_laws_compositional.md"
 GATE_COMMAND = "python3 tools/extension_laws_compositional_gate.py"
 EXPECTATIONS = "test/oracle/extension_laws_compositional_surfaces.tsv"
 CASES = ROOT / "test/oracle/extension_laws/composition_cases.tsv"

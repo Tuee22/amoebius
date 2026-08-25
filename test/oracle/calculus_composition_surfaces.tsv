@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-10 run-time surface join.
+# Authored expectation for the Phase-11 run-time surface join.
 #
 # The pair oracle is the independent side: it enumerates all 25 ordered pairs of the
 # closed five-calculus set and states their exact resource sums.  The check inventory is

@@ -266,7 +266,7 @@ instance Arbitrary GeneratedRenderCase where
 runRenderGoldenProps :: IO ()
 runRenderGoldenProps = do
   result <- quickCheckWithResult stdArgs {chatty = False, maxSuccess = 1200} propLegalRender
-  unless (isSuccess result) (fail ("Phase-33 render property failed: " <> show result))
+  unless (isSuccess result) (fail ("Phase-34 render property failed: " <> show result))
   putStrLn "render-properties: TESTED sampled (9 capability arms and 2 shapes, each >=4%)"
 
 propLegalRender :: GeneratedRenderCase -> Property

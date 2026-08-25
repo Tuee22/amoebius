@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seal Sprint 31.2 scheduler-system authority and two-stage readiness."""
+"""Seal Sprint 32.2 scheduler-system authority and two-stage readiness."""
 
 from __future__ import annotations
 

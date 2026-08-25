@@ -22,7 +22,7 @@ data Row = Row OsName RawArch Gpu String
 main :: IO ()
 main = do
   rows <- readRows "test/fixture/bootstrap_coordinator/substrate_decision.tsv"
-  unless (length rows == 18) (die "Phase-24 substrate oracle must have 18 cells")
+  unless (length rows == 18) (die "Phase-25 substrate oracle must have 18 cells")
   forM_ rows $ \(Row os arch gpu expected) ->
     assertEqual (show (os, arch, gpu)) expected (renderClassification (classify os arch gpu))
   let mutantFailures =

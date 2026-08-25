@@ -906,8 +906,8 @@ def sha256_file(path: Path) -> str:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="write the run observation beneath .build")
-    parser.add_argument("--artifact", type=Path, required=True, help="verified Phase-30 OCI handoff")
-    parser.add_argument("--image-digest", required=True, help="verified Phase-30 image index digest")
+    parser.add_argument("--artifact", type=Path, required=True, help="verified Phase-31 OCI handoff")
+    parser.add_argument("--image-digest", required=True, help="verified Phase-31 image index digest")
     arguments = parser.parse_args(argv)
     globals()["IMAGE_ARCHIVE"] = arguments.artifact
     globals()["IMAGE_DIGEST"] = arguments.image_digest

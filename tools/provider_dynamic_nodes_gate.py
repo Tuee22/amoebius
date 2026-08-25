@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the locally dischargeable Phase-47 gate domains."""
+"""Run and seal the locally dischargeable Phase-48 gate domains."""
 
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_47"
 LIVE = EVIDENCE / "provider-dynamic-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_47_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_47_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_48_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_48_ledger.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
@@ -118,7 +118,7 @@ def phase0_domain() -> dict[str, str]:
     for row in rows:
         path = ROOT / row.split("\t")[2]
         require(path.is_file() and path.stat().st_size > 0, f"phase0-custody-missing:{path}")
-    return {"name": "phase0-custody", "command": "read Phase-47 manifest rows", "output": "7 oracles; 8 mutants", "result": "PASS"}
+    return {"name": "phase0-custody", "command": "read Phase-48 manifest rows", "output": "7 oracles; 8 mutants", "result": "PASS"}
 
 
 def load_dhall(path: str) -> Any:
@@ -172,7 +172,7 @@ def evidence_domain(*, fresh: bool) -> None:
     provider = live.get("providerMaterialization", {})
     provider_keys = ("eksCluster", "realManagedNode", "signalCorrelatedRunInstances", "cloudNoOpAudit", "awsRunOwnedDescribeSweep", "ephemeralProviderLeakFreedom", "durableEbsSoleSurvivor", "secondFullProviderCycle")
     require({provider.get(key) for key in provider_keys} == {"UNVERIFIED"}, "provider-honesty")
-    require(live.get("deferred") == {"elevatedDurableEbsReclamation": "UNVERIFIED until Phase 54", "spotCostSignal": "UNVERIFIED"}, "deferred")
+    require(live.get("deferred") == {"elevatedDurableEbsReclamation": "UNVERIFIED until Phase 55", "spotCostSignal": "UNVERIFIED"}, "deferred")
     require(live.get("cleanup") == {"phase47NamespaceAbsent": True, "auditNamespaceAbsent": True, "providerResources": "none-created"}, "cleanup")
     require(live.get("universalLinuxCpu") == {"availableOnEveryHardwareSubstrate": True, "pristineLinuxHost": {"linux": "Incus", "linux-cuda": "Incus", "apple": "Lima", "windows": "WSL2"}}, "universal-linux-cpu-and-pristine-routing")
     require(not re.search(r"(?i)(secretAccessKey|root_token|privateKey|unseal_key|kubernetes\.jwt)", LIVE.read_text(encoding="utf-8")), "secret-in-evidence")
@@ -184,7 +184,7 @@ def no_live_residue() -> dict[str, str]:
         require(result.returncode != 0, f"namespace-residue:{namespace}")
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE, check=False, timeout=60).stdout.splitlines()
     require(clusters == ["amoebius-bootstrap-coordinator"], f"unexpected-kind-clusters:{clusters}")
-    return {"name": "external-cleanup-readback", "command": "namespace and kind inventories", "output": "no Phase-47 namespaces; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
+    return {"name": "external-cleanup-readback", "command": "namespace and kind inventories", "output": "no Phase-48 namespaces; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:
@@ -216,7 +216,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(invoke("node-provisioner-contract", runtime_args()))
         rows.append(invoke("teardown-contract", pulumi_args()))
         if args.reuse_fresh_live:
-            rows.append({"name": "scoped-signal-sweep-analogue", "command": "sealed just-produced Phase-47 live receipt", "output": "fresh scoped evidence; AWS node/leak sweep UNVERIFIED", "result": "PASS"})
+            rows.append({"name": "scoped-signal-sweep-analogue", "command": "sealed just-produced Phase-48 live receipt", "output": "fresh scoped evidence; AWS node/leak sweep UNVERIFIED", "result": "PASS"})
         else:
             rows.append(invoke("scoped-signal-sweep-analogue", (sys.executable, "tools/provider_dynamic_nodes_live.py"), timeout=1200))
         evidence_domain(fresh=args.reuse_fresh_live)

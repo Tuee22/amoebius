@@ -1,1 +1,1 @@
-Flip one applied byte; the Phase-13 cross-golden comparison must diverge.
+Flip one applied byte; the Phase-14 cross-golden comparison must diverge.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 24: declaration-derived suite plan, passing verdict, and gated admission."""
+"""Phase 25: declaration-derived suite plan, passing verdict, and gated admission."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ INVENTORY = OUTPUT / "inventory.tsv"
 COVERAGE = OUTPUT / "coverage-observed.tsv"
 VERDICT = OUTPUT / "verdict.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/extension-conformance-gate"
-CONTRACT = "DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_25_conformance_gate_generator.md"
 GATE_COMMAND = "python3 tools/conformance_gate_generator_gate.py"
 EXPECTATIONS = "test/oracle/extension_conformance_gate_surfaces.tsv"
 EXPECTED_INVENTORY = ROOT / "test/oracle/extension_conformance/suite_inventory.tsv"

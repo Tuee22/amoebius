@@ -12,7 +12,7 @@ This slice owns the phase model. [`README.md`](README.md) is the sole current-st
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/validation_frame_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_11_calculus_composition.md, DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_13_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_14_symbolic_checker.md, DEVELOPMENT_PLAN/phase_17_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_18_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_36_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_37_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_38_ui_program_schema.md, DEVELOPMENT_PLAN/phase_39_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_52_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_53_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_windows_engine_bringup.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/validation_frame_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -97,27 +97,27 @@ Haskell source closure
   → calculi and proof stack
   → DSL, binders, planners, and lazy generators
   → test-workflow algebra
-  → Phase 49 no-hardware promotion barrier
-  → Phase 50 bounded pb handoff
-  → Phase 51 fake-boundary Haskell host ensure
-  → Phase 52 first hardware bring-up
+  → Phase 50 no-hardware promotion barrier
+  → Phase 51 bounded pb handoff
+  → Phase 52 fake-boundary Haskell host ensure
+  → Phase 53 first hardware bring-up
   → live platform and domain instances
 ```
 
-Phase 49 is not satisfied by replaying earlier top-level exit codes. It re-exercises, from an empty generated
-tree, the complete Haskell-owned pipeline and its independent oracles. Phase 50 and every later phase remain
+Phase 50 is not satisfied by replaying earlier top-level exit codes. It re-exercises, from an empty generated
+tree, the complete Haskell-owned pipeline and its independent oracles. Phase 51 and every later phase remain
 blocked until the human authority approves that barrier. This ordering prevents a working container engine,
 GPU, cluster, or cloud resource from being used as proxy evidence that the DSL itself is sound.
 
-“Haskell source closure” is literal at the cut. Phase 49 requires every `LTD-SRC-*` query, including
+“Haskell source closure” is literal at the cut. Phase 50 requires every `LTD-SRC-*` query, including
 Phase-0-owned `LTD-SRC-008`, to be zero. The sole remaining non-Haskell behavioral source is the `pb/**`
 Python positively accepted by the deny-by-default Haskell grammar as minimal platform discrimination,
-contained toolchain establishment, source-bound build, and opaque exec handoff. Phase 50 validates that
-already-bounded runtime behavior and owns no source-migration binding. Phase 51 validates the Haskell host-ensure
+contained toolchain establishment, source-bound build, and opaque exec handoff. Phase 51 validates that
+already-bounded runtime behavior and owns no source-migration binding. Phase 52 validates the Haskell host-ensure
 kernel against fake boundaries with `Substrate: none`; it performs no hardware-specific or live validation.
-Phase 52 is the first hardware-bearing validation phase. These numeric roles are fixed: Phase 49 is the
-hardware-free DSL barrier, Phase 50 is bounded-`pb` handoff validation, Phase 51 is Haskell host ensure, and
-Phase 52 is first hardware validation.
+Phase 53 is the first hardware-bearing validation phase. These numeric roles are fixed: Phase 50 is the
+hardware-free DSL barrier, Phase 51 is bounded-`pb` handoff validation, Phase 52 is Haskell host ensure, and
+Phase 53 is first hardware validation.
 
 ---
 
@@ -163,11 +163,11 @@ manufactures a run transcript.
 ## L. One-substrate discipline
 
 `Substrate: none` means the claim is decidable without hardware-specific or live infrastructure. It does not
-mean “validated inside a container.” Before Phase 50 is human-approved, a pure candidate builds and invokes
+mean “validated inside a container.” Before Phase 51 is human-approved, a pure candidate builds and invokes
 the exact source-bound Haskell binary directly from an authenticated, network-independent toolchain input;
-it does not trust `pb` as transport. The Phase-50 candidate likewise starts the exact Haskell OS supervisor
+it does not trust `pb` as transport. The Phase-51 candidate likewise starts the exact Haskell OS supervisor
 directly; the supervisor invokes `pb` as its observed child, so the public target cannot validate itself. After
-Phase 50 approval, later pure work may use that bounded handoff.
+Phase 51 approval, later pure work may use that bounded handoff.
 Either route precedes every image, container-engine, registry, cluster, GPU, or cloud phase.
 
 A phase that requires a real substrate declares exactly one of `apple`, `linux-cpu`, `linux-cuda`, or
@@ -182,9 +182,9 @@ architecture as an observation and the managed resources under its Resource-prov
 The sequencing rules are strict:
 
 1. Phase 0 declares no behavioural register; Phases 1 through 51 use Register 1 or 2 and `Substrate: none`.
-   No phase through Phase 51 may perform hardware-specific or live validation. Phase 52 is the first phase
+   No phase through Phase 52 may perform hardware-specific or live validation. Phase 53 is the first phase
    permitted to do so.
-2. The full DSL pipeline is human-approved before the Phase-51 fake-host takeover or Phase-52 hardware
+2. The full DSL pipeline is human-approved before the Phase-52 fake-host takeover or Phase-53 hardware
    bring-up can be validation work.
 3. Hardware-specific checks begin only in their numerically owned phase after all predecessors are approved.
 4. A live phase may run supporting pure, fake, or simulated checks, but its final claim remains Register 3 on

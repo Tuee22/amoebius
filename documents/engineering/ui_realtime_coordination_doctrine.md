@@ -15,7 +15,7 @@ message bus and projections; nor the application language above it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_41_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_43_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_44_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_57_base_image_registry.md, DEVELOPMENT_PLAN/phase_64_platform_services_2.md, DEVELOPMENT_PLAN/phase_65_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_71_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_73_ui_program_release.md, DEVELOPMENT_PLAN/phase_82_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_84_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_85_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_86_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_89_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_93_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_95_jitml_ui_rederivation.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -111,21 +111,21 @@ and refresh tokens are absent.
 
 ## 4. Typed routing and resume envelope
 
-[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) must eventually validate the pure paired-plan
+[Phase 41](../../DEVELOPMENT_PLAN/phase_41_ui_plan_compiler.md) must eventually validate the pure paired-plan
 and finite-demand compiler that owns this envelope's generated location. Its controls and five-calculus
 projection require reconstruction as independently reviewed Haskell evidence. It cannot execute WebSockets,
-Redis routing, resume, or cross-pod dispatch. Phase 40 is **NOT VALIDATED**.
+Redis routing, resume, or cross-pod dispatch. Phase 41 is **NOT VALIDATED**.
 
-[Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) is limited to hardware-free Haskell
+[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_browser_interpreter.md) is limited to hardware-free Haskell
 browser-interpreter semantics and lazy projection. It must not start a browser, fake server, network service,
-or OS-policy observer before the Phase-49 promotion barrier. Live same-origin WebSocket behavior belongs to a
-later phase. Phase 42 is **NOT VALIDATED**.
+or OS-policy observer before the Phase-50 promotion barrier. Live same-origin WebSocket behavior belongs to a
+later phase. Phase 43 is **NOT VALIDATED**.
 
-[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) is limited to a Haskell server-boundary model
+[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_server_boundary.md) is limited to a Haskell server-boundary model
 and Haskell-owned fakes. Its eventual contract must admit the exact signed-credential/current-scope case and
 refuse minimally different twins without starting a browser, network service, or OS observer. Live server
 admission, Redis routing, resume, durable receipts, cross-pod dispatch, replica drain, and failover belong
-after the Phase-49 barrier. Phase 43 is **NOT VALIDATED**.
+after the Phase-50 barrier. Phase 44 is **NOT VALIDATED**.
 
 Every routed frame carries an envelope equivalent to:
 
@@ -200,7 +200,7 @@ socket closure, cache loss, reauthentication, bounded reconnect, and cursor repa
 durable effect is not permitted. If Redis loss can change whether an application command was accepted, the
 command path is incorrectly designed.
 
-**Phase-63 target coordination boundary — NOT VALIDATED.** One TLS-only primary, two TLS replication
+**Phase-64 target coordination boundary — NOT VALIDATED.** One TLS-only primary, two TLS replication
 followers, and three mutually authenticated Sentinel voters must use Vault-issued certificate and ACL
 material. A least-authority `realtime` identity must write a TTL-bound `amoebius:*` challenge, read it from a
 replica, force Sentinel promotion, and observe the challenge after failover. Live args and volume inventory
@@ -209,7 +209,7 @@ coordination substrate only;
 application-side WebSocket routing, durable cursor repair, and command receipts remain owned by their later
 UI-runtime phases.
 
-**Phase-64 target browser-edge boundary — NOT VALIDATED.** Independently of Redis routing, a valid Keycloak bearer,
+**Phase-65 target browser-edge boundary — NOT VALIDATED.** Independently of Redis routing, a valid Keycloak bearer,
 exact `https://phase32.amoebius.internal` Origin, fresh single-use nonce, and `amoebius.v1` subprotocol
 must receive HTTP 101 and the committed challenge. Replayed nonce, wrong Origin, wrong subprotocol,
 unauthenticated, and direct-Service attempts must produce no backend challenge. This targets the one-door
@@ -255,7 +255,7 @@ authoritative receipt/projection and return the same typed outcome. An unknown o
 socket write. "Effectively once" is earned only by the named idempotency/fold contract at the effect owner;
 Pulsar delivery and Redis routing do not provide a generic exactly-once side-effect guarantee.
 
-[Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md) must validate this receipt primitive live.
+[Phase 71](../../DEVELOPMENT_PLAN/phase_71_ui_projection_runtime.md) must validate this receipt primitive live.
 The original scoped command must survive native CBOR publication, redelivery, workflow work-id/handle
 retention, and compacted receipt materialization. Only effect-owner accepted/terminal events may advance it;
 equal command and input must be idempotent, while changed input must conflict before effect. Owner-keyed
@@ -267,7 +267,7 @@ are deliberately outside this target gate.
 ## 7. Replicas, drain, rollout, and gateway migration
 
 `UiRuntimeServer` is an unelected horizontally scalable worker. At least two ready replicas are required by the
-first live cross-pod routing gate; Phase 84's multi-zone HA claim requires at least three admitted UI-server
+first live cross-pod routing gate; Phase 85's multi-zone HA claim requires at least three admitted UI-server
 replicas across at least three zones. Neither condition makes the control-plane admin REST service replicated;
 that service remains on the `replicas=1` control-plane daemon.
 
@@ -277,11 +277,11 @@ connections, emits a reconnect control frame where possible, removes or expires 
 clients reconnect to any ready replica. Rolling overlap retains every plan/ABI and cursor decoder needed by
 the admitted compatibility window.
 
-[Phase 72](../../DEVELOPMENT_PLAN/phase_72_ui_program_release.md) must eventually validate the admission
+[Phase 73](../../DEVELOPMENT_PLAN/phase_73_ui_program_release.md) must eventually validate the admission
 identity boundary: the paired plan pins the WebSocket subprotocol, routing-envelope schema, and cursor codec
 alongside program, content, contract, and authority identities, and stale or mixed tuples fail before effect.
 Its bounded target cannot establish multiple UI-server replicas, socket drain, rolling overlap, or reconnect.
-Phase 72 is **NOT VALIDATED**.
+Phase 73 is **NOT VALIDATED**.
 
 During a planned gateway migration, the old edge forwards WebSocket upgrades and frames until the drain edge
 is observed or closes connections with a reconnect reason that causes same-hostname resolution. During forced
@@ -314,7 +314,7 @@ not only UI-server or Redis self-reports.
 The routing and failure semantics above are design intent until their phase gates run. Multiple replicas and
 Sentinel configuration are topology evidence, not availability proof. A live fault test may establish tested
 behavior for its declared envelope; it does not prove behavior for every network partition or Redis defect.
-Phase 56.1 owns only the target acceptance criterion that the pinned `redis-server` and `redis-cli` file bytes
+Phase 57.1 owns only the target acceptance criterion that the pinned `redis-server` and `redis-cli` file bytes
 are present, SBOM-joined, and executable by absolute path at their pinned archive version in **both**
 architectures of the published monocontainer; it cannot establish Redis/Sentinel deployment, coordination,
 failover, or realtime availability.
@@ -331,7 +331,7 @@ session fanout into typed app/subject/scope/program envelopes and fenced instanc
 replay records and leases are not copied as authoritative receipts; amoebius requires the durable effect-owner
 rule in [§6](#6-durable-commands-receipts-and-replay). Sibling code is evidence, not an amoebius test result.
 
-Phase 92 owns a deliberately narrower receipt target: the infernix adapter must make the server-derived
+Phase 93 owns a deliberately narrower receipt target: the infernix adapter must make the server-derived
 command id the work id, fold the terminal state into the scoped durable receipt, and have a second loopback
 server origin recover that receipt from retained MinIO. Exact replay must be effect-free and a mutant that
 drops terminal correlation must fail. The target challenge uses real browser and Keycloak sessions plus
@@ -341,29 +341,29 @@ events, and production inference therefore remain UNVERIFIED. There is always a 
 on each hardware substrate. For pristine Linux, use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on
 Windows.
 
-Phase 94 must test the corresponding jitML fold only at a scoped boundary. Its pure routing model must send a
+Phase 95 must test the corresponding jitML fold only at a scoped boundary. Its pure routing model must send a
 terminal receipt from replica identity B to socket identity A, delete transient route state, and repair exactly
 once from the durable receipt while the local-route and Redis-as-receipt mutants fail. Chrome must repeat the
 loss and repair sequence across two loopback origins using an independent temporary durable-file record. The
 target excludes real Redis, WebSocket, Kubernetes replicas, retained Pulsar/MinIO, and Envoy routes, so those runtime claims and
 HA remain UNVERIFIED.
 
-Phase 83's scoped target must add program-epoch registration drain and tenant/owner/stream-keyed cursor resume
+Phase 84's scoped target must add program-epoch registration drain and tenant/owner/stream-keyed cursor resume
 to the coordination kernel. An append-only local observer must confirm watermark-before-shift ordering across
 A→B→A, and all four semantic mutants must turn red. Real Redis registrations, Gateway API/Envoy traffic, Pulsar,
 browser reconnect, Kubernetes, CNI, and provider fault observations remain UNVERIFIED.
 
-Phase 84's scoped target must test admission for one-primary/two-replica/three-Sentinel-shaped ephemeral Redis,
+Phase 85's scoped target must test admission for one-primary/two-replica/three-Sentinel-shaped ephemeral Redis,
 reject Redis as receipt authority, and preserve one durable receipt and cursor across a host-local role
 failure. Real Redis/Sentinel, complete provider-zone, Kubernetes-endpoint, and external-observer failures are
 not covered; online multi-zone HA remains UNVERIFIED.
 
-Phase 85's scoped replay path must physically drop a response after a durable SQLite effect/receipt commit,
+Phase 86's scoped replay path must physically drop a response after a durable SQLite effect/receipt commit,
 clear transient route state, and recover the same receipt through another loopback UI endpoint. Exact retry
 must not duplicate the effect, and Redis-only acknowledgement remains inadmissible. Real Redis/Pulsar and
 provider observers remain UNVERIFIED.
 
-Phase 88's scoped campaign must reconnect Chrome through a surviving host-local endpoint after stopping
+Phase 89's scoped campaign must reconnect Chrome through a surviving host-local endpoint after stopping
 another, clear transient route state, and recover cursor and receipts from SQLite with one effect per command.
 This targets non-sticky/durable-repair behavior but not provider zones or real Redis/Sentinel, which remain
 UNVERIFIED.

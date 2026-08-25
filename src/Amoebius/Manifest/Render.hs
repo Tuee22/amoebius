@@ -30,7 +30,7 @@ import Data.Text qualified as Text
 import Numeric.Natural (Natural)
 import Text.Read (readMaybe)
 
--- | Package-private Phase-25 cycle-break input.  It deliberately lives in
+-- | Package-private Phase-26 cycle-break input.  It deliberately lives in
 -- the private serializer module: callers can obtain bootstrap objects only
 -- through 'ProvisionedBootstrapRegistry', never through a public per-service
 -- render function.

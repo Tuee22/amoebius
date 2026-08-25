@@ -18,7 +18,7 @@ amoebius doctrine that specifies it.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/formal_model_doctrine.md, documents/engineering/host_resource_research.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_92_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_95_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/formal_model_doctrine.md, documents/engineering/host_resource_research.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -230,9 +230,9 @@ observation is the substrate doctrine's. Status lives only in the
 Four phases ran under the old doctrine. Their pre-reset reports are retained only as permanently invalidated
 diagnostic history and cannot establish any current result. Those reports attributed scoped Vault challenges,
 native Pulsar duplicate collapse, object-store publication equality, cache and compute observations, cleanup,
-and mutants to Phase 91; handle/receipt composition and Chrome observations to Phase 92; CUDA code generation,
-PTX execution, and retained object-store publication to Phase 93; and a UI lift, mutants, and host-CUDA
-computation to Phase 94.
+and mutants to Phase 92; handle/receipt composition and Chrome observations to Phase 93; CUDA code generation,
+PTX execution, and retained object-store publication to Phase 94; and a UI lift, mutants, and host-CUDA
+computation to Phase 95.
 
 Every one of those instances depended on compiling seed source into an amoebius package, which is exactly what
 [§2](#2-the-two-non-dependencies) now forbids. The old reports may inform future challenge design, but they do

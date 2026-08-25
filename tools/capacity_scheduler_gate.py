@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-32 `amoebius-capacity` scheduler and bootstrap-cutover gate.
+"""Run and seal the Phase-33 `amoebius-capacity` scheduler and bootstrap-cutover gate.
 
 The capability claim is unchanged: the two-stage bootstrap cutover installs the
 `amoebius-capacity` scheduler in order, every Binding follows a successful whole-ledger
@@ -39,12 +39,12 @@ PLACEMENT_SOURCE = ROOT / "src/Amoebius/Scheduler/Placement.hs"
 RESERVATION_SOURCE = ROOT / "src/Amoebius/Scheduler/Reservation.hs"
 RESULTS = ROOT / ".build/dsl/capacity-scheduler/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/capacity_scheduler_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_60_capacity_scheduler.md"
 GATE_COMMAND = "python3 tools/capacity_scheduler_gate.py --execute"
 
 # The committed mutant domain, each mapped to the sprint whose evidence decides it. The
 # seven pure mutants are decided twice — Sprints 27.2 and 27.3 own the readiness and
-# reservation claims, and Sprint 32.4 re-runs the same seven against the live cutover — so
+# reservation claims, and Sprint 33.4 re-runs the same seven against the live cutover — so
 # one red observation is what either sprint's evidence has to show. The Register-2.5 set
 # has its own seven names because it attacks the same invariants through `IOSim` schedules.
 EXPECTED_MUTANTS = {
@@ -303,7 +303,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if arguments.execute:
             predecessor = project_cluster_fixture.verified_phase_record(26)
             handoff = project_cluster_fixture.verified_image_handoff()
-            print("\npredecessor side — verified Phase-67 seal and Phase-30 OCI handoff\n")
+            print("\npredecessor side — verified Phase-68 seal and Phase-31 OCI handoff\n")
             print(f"  ok    phase26     {predecessor.attestation}")
             print(f"  ok    phase25     {handoff.attestation}")
             print(f"  ok    image-index {handoff.index_digest}")
@@ -337,7 +337,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print("\nlive side — five sprints on this run's private linux-cpu kind cluster\n")
             execute_sprints(evidence, image, fixture.environment)
         elif evidence is None:
-            raise GateFailure("phase-32 needs --execute or an --evidence bundle from a completed live run")
+            raise GateFailure("phase-33 needs --execute or an --evidence bundle from a completed live run")
         else:
             print(f"\nlive side — reusing the completed live run at {evidence}\n")
         if not (evidence / "sprint-27.5-receipt.json").is_file():
@@ -410,7 +410,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         },
         dependencies={
             "cluster": "private marker-owned kind fixture",
-            "registry": "fresh in-cluster distribution from verified Phase-30 handoff",
+            "registry": "fresh in-cluster distribution from verified Phase-31 handoff",
             **(
                 {
                     "phase25Attestation": handoff.attestation,

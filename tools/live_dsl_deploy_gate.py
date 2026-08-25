@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the complete Phase-33 live DSL control-plane daemon acceptance gate."""
+"""Run and seal the complete Phase-34 live DSL control-plane daemon acceptance gate."""
 
 from __future__ import annotations
 
@@ -18,8 +18,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_33"
 LIVE_EVIDENCE = EVIDENCE / "control-plane-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_33_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_33_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_34_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_34_ledger.json"
 EXPECTED = ROOT / "test/fixture/live_dsl_deploy/expected-enact-pass1.json"
 KEYCLOAK_INGRESS_RECEIPT = ROOT / "DEVELOPMENT_PLAN/evidence/phase_32/phase-receipt.json"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"

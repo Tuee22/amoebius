@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-40 atomic UI-program release gate."""
+"""Run and seal the Phase-41 atomic UI-program release gate."""
 
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_40"
 LIVE = EVIDENCE / "ui-program-release-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_40_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_40_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_41_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_41_ledger.json"
 ORACLE_MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 UNVERIFIED = {"future-ui-release-compatibility-witnesses", "rolling-overlap-and-reconnect"}
@@ -186,7 +186,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         ))]
         rows.append(phase0_domain())
         if args.reuse_fresh_live:
-            rows.append({"name": "ui-release-live", "command": "sealed just-produced Phase-40 live receipt", "output": "fresh final live evidence", "result": "PASS"})
+            rows.append({"name": "ui-release-live", "command": "sealed just-produced Phase-41 live receipt", "output": "fresh final live evidence", "result": "PASS"})
         else:
             rows.append(invoke("ui-release-live", (
                 CABAL, "test", "ui-program-release-live-gate", *disabled, "--test-show-details=direct", "-j1", "-v0",

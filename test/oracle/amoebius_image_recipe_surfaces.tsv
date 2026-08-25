@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-35 semantic recipe and build-invocation surface join.
+# Authored expectation for the Phase-36 semantic recipe and build-invocation surface join.
 # Renderer output is generated per run and is deliberately absent from this file.
 # surface<TAB>owner<TAB>ids (comma-separated)
 

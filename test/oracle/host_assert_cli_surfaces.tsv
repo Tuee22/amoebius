@@ -1,9 +1,9 @@
-# Authored expectation for the Phase-50 host-assertion surface join.
+# Authored expectation for the Phase-51 host-assertion surface join.
 #
 # `development_plan_gate_integrity.md` section S clause 2 requires the run to enumerate
 # its test surfaces and join them **completely** to an independently authored
 # expectation. This file is that expectation, and nothing in it is generated: the check
-# ids are read off the Phase-50 contract's Gate integrity section, the mutant ids off the
+# ids are read off the Phase-51 contract's Gate integrity section, the mutant ids off the
 # committed records under `test/mutant/host_assert_cli/`, and the command topology off
 # `substrate_doctrine.md` section 6 plus this phase's Sprint 3.2 deliverables.
 #

@@ -23,189 +23,189 @@
 # (`legacy_tracking_for_deletion.md`, the natural-architecture rebaseline).
 #
 # rule<TAB>path_glob<TAB>message_glob<TAB>owner<TAB>legacy-register anchor
-r5	tools/platform_services_2_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-56	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/platform_services_2_gate.py	names generated path test/enumeration/*	phase-56	`test/enumeration/**`
-r5	tools/platform_services_2_gate.py	names generated path test/golden/*	phase-56	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/platform_services_2_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-56	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/platform_services_2_gate.py	tracked file carries a resolved home path*	phase-56	Absolute developer-home executable paths
-r6	tools/platform_services_2_live.py	tracked file pins a package integrity digest*	phase-56	Hard-coded library/package SHA values
-r5	tools/keycloak_ingress_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-58	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/keycloak_ingress_gate.py	names generated path test/enumeration/*	phase-58	`test/enumeration/**`
-r5	tools/keycloak_ingress_gate.py	names generated path test/golden/*	phase-58	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/keycloak_ingress_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-58	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/keycloak_ingress_rebind_regression.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-58	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	test/fixture/live/keycloak_ingress/rebind-kind.yaml	tracked file carries a resolved home path*	phase-58	Absolute developer-home executable paths
-r6	tools/keycloak_ingress_gate.py	tracked file carries a resolved home path*	phase-58	Absolute developer-home executable paths
-r6	tools/keycloak_ingress_live.py	tracked file pins a package integrity digest*	phase-58	Hard-coded library/package SHA values
-r5	tools/live_dsl_deploy_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-59	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/live_dsl_deploy_gate.py	names generated path test/enumeration/*	phase-59	`test/enumeration/**`
-r5	tools/live_dsl_deploy_gate.py	names generated path test/golden/*	phase-59	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/live_dsl_deploy_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-59	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/live_dsl_deploy_gate.py	tracked file carries a resolved home path*	phase-59	Absolute developer-home executable paths
-r6	tools/live_dsl_deploy_runtime_helper.py	tracked file pins a package integrity digest*	phase-59	Hard-coded library/package SHA values
-r6	tools/live_dsl_deploy_live.py	tracked file carries a resolved home path*	phase-59	Absolute developer-home executable paths
-r6	tools/live_dsl_deploy_live.py	tracked file pins a package integrity digest*	phase-59	Hard-coded library/package SHA values
-r5	tools/app_tenancy_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-60	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/app_tenancy_gate.py	names generated path test/enumeration/*	phase-60	`test/enumeration/**`
-r5	tools/app_tenancy_gate.py	names generated path test/golden/*	phase-60	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/app_tenancy_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-60	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/app_tenancy_gate.py	tracked file carries a resolved home path*	phase-60	Absolute developer-home executable paths
-r5	tools/pulsar_client_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-61	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/pulsar_client_gate.py	names generated path test/enumeration/*	phase-61	`test/enumeration/**`
-r5	tools/pulsar_client_gate.py	names generated path test/golden/*	phase-61	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/pulsar_client_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-61	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	test/spec/pulsar/PulsarClientLiveSpec.hs	tracked file carries a resolved home path*	phase-61	Absolute developer-home executable paths
-r6	tools/pulsar_client_gate.py	tracked file carries a resolved home path*	phase-61	Absolute developer-home executable paths
-r5	tools/user_tenant_isolation_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-62	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/user_tenant_isolation_gate.py	names generated path test/enumeration/*	phase-62	`test/enumeration/**`
-r5	tools/user_tenant_isolation_gate.py	names generated path test/golden/*	phase-62	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/user_tenant_isolation_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-62	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	test/spec/live/UserTenantIsolationSpec.hs	tracked file carries a resolved home path*	phase-62	Absolute developer-home executable paths
-r6	tools/user_tenant_isolation_gate.py	tracked file carries a resolved home path*	phase-62	Absolute developer-home executable paths
-r5	tools/content_store_workflow_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-63	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/content_store_workflow_gate.py	names generated path test/enumeration/*	phase-63	`test/enumeration/**`
-r5	tools/content_store_workflow_gate.py	names generated path test/golden/*	phase-63	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/content_store_workflow_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-63	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	test/spec/runtime/FailoverSpec.hs	tracked file carries a resolved home path*	phase-63	Absolute developer-home executable paths
-r6	tools/content_store_workflow_gate.py	tracked file carries a resolved home path*	phase-63	Absolute developer-home executable paths
-r6	tools/content_store_workflow_live.py	tracked file pins a package integrity digest*	phase-63	Hard-coded library/package SHA values
-r5	tools/ui_projection_runtime_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-64	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/ui_projection_runtime_gate.py	names generated path test/enumeration/*	phase-64	`test/enumeration/**`
-r5	tools/ui_projection_runtime_gate.py	names generated path test/golden/*	phase-64	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/ui_projection_runtime_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-64	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	test/spec/live/UiProjectionRuntimeSpec.hs	tracked file carries a resolved home path*	phase-64	Absolute developer-home executable paths
-r6	tools/ui_projection_runtime_gate.py	tracked file carries a resolved home path*	phase-64	Absolute developer-home executable paths
-r5	tools/release_lifecycle_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-65	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/release_lifecycle_gate.py	names generated path test/enumeration/*	phase-65	`test/enumeration/**`
-r5	tools/release_lifecycle_gate.py	names generated path test/golden/*	phase-65	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/release_lifecycle_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-65	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/release_lifecycle_gate.py	tracked file carries a resolved home path*	phase-65	Absolute developer-home executable paths
-r5	tools/ui_program_release_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-66	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/ui_program_release_gate.py	names generated path test/enumeration/*	phase-66	`test/enumeration/**`
-r5	tools/ui_program_release_gate.py	names generated path test/golden/*	phase-66	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/ui_program_release_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-66	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/ui_program_release_gate.py	tracked file carries a resolved home path*	phase-66	Absolute developer-home executable paths
-r5	tools/network_fabric_wireguard_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-67	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/network_fabric_wireguard_gate.py	names generated path test/enumeration/*	phase-67	`test/enumeration/**`
-r5	tools/network_fabric_wireguard_gate.py	names generated path test/golden/*	phase-67	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/network_fabric_wireguard_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-67	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/network_fabric_wireguard_gate.py	tracked file carries a resolved home path*	phase-67	Absolute developer-home executable paths
-r6	tools/network_fabric_wireguard_live.py	tracked file carries a resolved home path*	phase-67	Absolute developer-home executable paths
-r5	tools/multicluster_spawn_georepl_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-68	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/multicluster_spawn_georepl_gate.py	names generated path test/enumeration/*	phase-68	`test/enumeration/**`
-r5	tools/multicluster_spawn_georepl_gate.py	names generated path test/golden/*	phase-68	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/multicluster_spawn_georepl_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-68	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	test/fixture/multicluster_spawn_georepl/kind-parent.yaml	tracked file carries a resolved home path*	phase-68	Absolute developer-home executable paths
-r6	test/spec/integration/MulticlusterSpawnGeoreplGate.hs	tracked file carries a resolved home path*	phase-68	Absolute developer-home executable paths
-r6	tools/multicluster_spawn_georepl_gate.py	tracked file carries a resolved home path*	phase-68	Absolute developer-home executable paths
-r6	tools/multicluster_spawn_georepl_live.py	tracked file carries a resolved home path*	phase-68	Absolute developer-home executable paths
-r5	tools/gateway_migration_drills_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-69	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/gateway_migration_drills_gate.py	names generated path test/enumeration/*	phase-69	`test/enumeration/**`
-r5	tools/gateway_migration_drills_gate.py	names generated path test/golden/*	phase-69	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/gateway_migration_drills_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-69	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/gateway_migration_drills_gate.py	tracked file carries a resolved home path*	phase-69	Absolute developer-home executable paths
-r6	tools/gateway_migration_drills_live.py	tracked file carries a resolved home path*	phase-69	Absolute developer-home executable paths
-r5	tools/provider_deploy_checkpoint_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-70	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/provider_deploy_checkpoint_gate.py	names generated path test/enumeration/*	phase-70	`test/enumeration/**`
-r5	tools/provider_deploy_checkpoint_gate.py	names generated path test/golden/*	phase-70	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/provider_deploy_checkpoint_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-70	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/provider_deploy_checkpoint_gate.py	tracked file carries a resolved home path*	phase-70	Absolute developer-home executable paths
-r6	tools/provider_deploy_checkpoint_live.py	tracked file carries a resolved home path*	phase-70	Absolute developer-home executable paths
-r6	tools/provider_deploy_checkpoint_live.py	tracked file pins a package integrity digest*	phase-70	Hard-coded library/package SHA values
-r5	tools/provider_child_bringup_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-71	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/provider_child_bringup_gate.py	names generated path test/enumeration/*	phase-71	`test/enumeration/**`
-r5	tools/provider_child_bringup_gate.py	names generated path test/golden/*	phase-71	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/provider_child_bringup_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-71	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/provider_child_bringup_gate.py	tracked file carries a resolved home path*	phase-71	Absolute developer-home executable paths
-r5	tools/provider_ebs_credential_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-72	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/provider_ebs_credential_gate.py	names generated path test/enumeration/*	phase-72	`test/enumeration/**`
-r5	tools/provider_ebs_credential_gate.py	names generated path test/golden/*	phase-72	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/provider_ebs_credential_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-72	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/provider_ebs_credential_gate.py	tracked file carries a resolved home path*	phase-72	Absolute developer-home executable paths
-r6	tools/provider_ebs_credential_live.py	tracked file pins a package integrity digest*	phase-72	Hard-coded library/package SHA values
-r5	tools/provider_dynamic_nodes_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-73	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/provider_dynamic_nodes_gate.py	names generated path test/enumeration/*	phase-73	`test/enumeration/**`
-r5	tools/provider_dynamic_nodes_gate.py	names generated path test/golden/*	phase-73	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/provider_dynamic_nodes_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-73	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/provider_dynamic_nodes_gate.py	tracked file carries a resolved home path*	phase-73	Absolute developer-home executable paths
-r5	tools/determinism_jitcache_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-74	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/determinism_jitcache_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-74	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/determinism_jitcache_gate.py	names generated path test/enumeration/*	phase-74	`test/enumeration/**`
-r5	tools/determinism_jitcache_gate.py	names generated path test/golden/*	phase-74	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r6	test/golden/determinism_jitcache/substrate_fingerprint.schema.json	tracked file carries a resolved home path*	phase-74	Absolute developer-home executable paths
-r6	test/spec/kernel/DeterminismJitcacheContractSpec.hs	tracked file carries a resolved home path*	phase-74	Absolute developer-home executable paths
-r6	tools/determinism_jitcache_live.py	tracked file carries a resolved home path*	phase-74	Absolute developer-home executable paths
-r6	tools/determinism_jitcache_live.py	tracked file pins a package integrity digest*	phase-74	Hard-coded library/package SHA values
-r6	tools/determinism_jitcache_gate.py	tracked file carries a resolved home path*	phase-74	Absolute developer-home executable paths
-r5	tools/infernix_lift_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-75	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/infernix_lift_gate.py	names generated path test/enumeration/*	phase-75	`test/enumeration/**`
-r5	tools/infernix_lift_gate.py	names generated path test/golden/*	phase-75	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/infernix_lift_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-75	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	test/fixture/infernix_lift/expected_hashes.tsv	tracked expected-digest table*	phase-75	Expected base-image digests, canonical-manifest outputs, UI digest tables, and reference traces
-r6	tools/infernix_lift_gate.py	tracked file carries a resolved home path*	phase-75	Absolute developer-home executable paths
-r6	tools/infernix_lift_live.py	tracked file carries a resolved home path*	phase-75	Absolute developer-home executable paths
-r6	tools/infernix_lift_live.py	tracked file pins a package integrity digest*	phase-75	Hard-coded library/package SHA values
-r5	tools/infernix_ui_lift_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-76	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/infernix_ui_lift_gate.py	names generated path test/enumeration/*	phase-76	`test/enumeration/**`
-r5	tools/infernix_ui_lift_gate.py	names generated path test/golden/*	phase-76	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/infernix_ui_lift_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-76	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/infernix_ui_lift_gate.py	tracked file carries a resolved home path*	phase-76	Absolute developer-home executable paths
-r5	tools/jitml_lift_cuda_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-83	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/jitml_lift_cuda_gate.py	names generated path test/enumeration/*	phase-83	`test/enumeration/**`
-r5	tools/jitml_lift_cuda_gate.py	names generated path test/golden/*	phase-83	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/jitml_lift_cuda_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-83	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/jitml_lift_cuda_gate.py	tracked file carries a resolved home path*	phase-83	Absolute developer-home executable paths
-r5	tools/jitml_ui_lift_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-84	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/jitml_ui_lift_gate.py	names generated path test/enumeration/*	phase-84	`test/enumeration/**`
-r5	tools/jitml_ui_lift_gate.py	names generated path test/golden/*	phase-84	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/jitml_ui_lift_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-84	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/jitml_ui_lift_gate.py	tracked file carries a resolved home path*	phase-84	Absolute developer-home executable paths
-r5	tools/apple_metal_host_daemon_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-86	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/apple_metal_host_daemon_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-86	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/apple_metal_host_daemon_gate.py	names generated path test/enumeration/*	phase-86	`test/enumeration/**`
-r5	tools/apple_metal_host_daemon_gate.py	names generated path test/golden/*	phase-86	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r6	tools/apple_metal_host_daemon_gate.py	tracked file carries a resolved home path*	phase-86	Absolute developer-home executable paths
-r5	tools/test_topology_dsl_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-77	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/ui_single_tenant_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-78	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/ui_single_tenant_gate.py	names generated path test/enumeration/*	phase-78	`test/enumeration/**`
-r5	tools/ui_single_tenant_gate.py	names generated path test/golden/*	phase-78	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/ui_single_tenant_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-78	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/ui_single_tenant_gate.py	tracked file carries a resolved home path*	phase-78	Absolute developer-home executable paths
-r5	tools/ui_multi_tenant_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-79	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/ui_multi_tenant_gate.py	names generated path test/enumeration/*	phase-79	`test/enumeration/**`
-r5	tools/ui_multi_tenant_gate.py	names generated path test/golden/*	phase-79	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/ui_multi_tenant_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-79	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/ui_multi_tenant_gate.py	tracked file carries a resolved home path*	phase-79	Absolute developer-home executable paths
-r5	tools/ui_rollout_reconnect_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-80	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/ui_rollout_reconnect_gate.py	names generated path test/enumeration/*	phase-80	`test/enumeration/**`
-r5	tools/ui_rollout_reconnect_gate.py	names generated path test/golden/*	phase-80	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/ui_rollout_reconnect_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-80	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/ui_rollout_reconnect_gate.py	tracked file carries a resolved home path*	phase-80	Absolute developer-home executable paths
-r5	tools/ui_ha_multizone_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-91	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/ui_ha_multizone_gate.py	names generated path test/enumeration/*	phase-91	`test/enumeration/**`
-r5	tools/ui_ha_multizone_gate.py	names generated path test/golden/*	phase-91	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/ui_ha_multizone_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-91	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/ui_ha_multizone_gate.py	tracked file carries a resolved home path*	phase-91	Absolute developer-home executable paths
-r5	tools/offline_replay_receipts_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-92	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/offline_replay_receipts_gate.py	names generated path test/enumeration/*	phase-92	`test/enumeration/**`
-r5	tools/offline_replay_receipts_gate.py	names generated path test/golden/*	phase-92	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/offline_replay_receipts_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-92	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/offline_replay_receipts_gate.py	tracked file carries a resolved home path*	phase-92	Absolute developer-home executable paths
-r5	tools/offline_blobs_isolation_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-48	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/offline_blobs_isolation_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-48	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/offline_blobs_isolation_gate.py	names generated path test/enumeration/*	phase-48	`test/enumeration/**`
-r5	tools/offline_blobs_isolation_gate.py	names generated path test/golden/*	phase-48	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r6	tools/offline_blobs_isolation_gate.py	tracked file carries a resolved home path*	phase-48	Absolute developer-home executable paths
-r5	tools/offline_release_evolution_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-81	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/offline_release_evolution_gate.py	names generated path test/enumeration/*	phase-81	`test/enumeration/**`
-r5	tools/offline_release_evolution_gate.py	names generated path test/golden/*	phase-81	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r5	tools/offline_release_evolution_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-81	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/offline_release_evolution_gate.py	tracked file carries a resolved home path*	phase-81	Absolute developer-home executable paths
-r5	tools/offline_multizone_continuity_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-82	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/offline_multizone_continuity_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-82	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/offline_multizone_continuity_gate.py	names generated path test/enumeration/*	phase-82	`test/enumeration/**`
-r5	tools/offline_multizone_continuity_gate.py	names generated path test/golden/*	phase-82	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r6	tools/offline_multizone_continuity_gate.py	tracked file carries a resolved home path*	phase-82	Absolute developer-home executable paths
+r5	tools/platform_services_2_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-57	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/platform_services_2_gate.py	names generated path test/enumeration/*	phase-57	`test/enumeration/**`
+r5	tools/platform_services_2_gate.py	names generated path test/golden/*	phase-57	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/platform_services_2_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-57	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/platform_services_2_gate.py	tracked file carries a resolved home path*	phase-57	Absolute developer-home executable paths
+r6	tools/platform_services_2_live.py	tracked file pins a package integrity digest*	phase-57	Hard-coded library/package SHA values
+r5	tools/keycloak_ingress_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-59	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/keycloak_ingress_gate.py	names generated path test/enumeration/*	phase-59	`test/enumeration/**`
+r5	tools/keycloak_ingress_gate.py	names generated path test/golden/*	phase-59	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/keycloak_ingress_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-59	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/keycloak_ingress_rebind_regression.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-59	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	test/fixture/live/keycloak_ingress/rebind-kind.yaml	tracked file carries a resolved home path*	phase-59	Absolute developer-home executable paths
+r6	tools/keycloak_ingress_gate.py	tracked file carries a resolved home path*	phase-59	Absolute developer-home executable paths
+r6	tools/keycloak_ingress_live.py	tracked file pins a package integrity digest*	phase-59	Hard-coded library/package SHA values
+r5	tools/live_dsl_deploy_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-60	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/live_dsl_deploy_gate.py	names generated path test/enumeration/*	phase-60	`test/enumeration/**`
+r5	tools/live_dsl_deploy_gate.py	names generated path test/golden/*	phase-60	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/live_dsl_deploy_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-60	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/live_dsl_deploy_gate.py	tracked file carries a resolved home path*	phase-60	Absolute developer-home executable paths
+r6	tools/live_dsl_deploy_runtime_helper.py	tracked file pins a package integrity digest*	phase-60	Hard-coded library/package SHA values
+r6	tools/live_dsl_deploy_live.py	tracked file carries a resolved home path*	phase-60	Absolute developer-home executable paths
+r6	tools/live_dsl_deploy_live.py	tracked file pins a package integrity digest*	phase-60	Hard-coded library/package SHA values
+r5	tools/app_tenancy_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-61	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/app_tenancy_gate.py	names generated path test/enumeration/*	phase-61	`test/enumeration/**`
+r5	tools/app_tenancy_gate.py	names generated path test/golden/*	phase-61	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/app_tenancy_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-61	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/app_tenancy_gate.py	tracked file carries a resolved home path*	phase-61	Absolute developer-home executable paths
+r5	tools/pulsar_client_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-62	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/pulsar_client_gate.py	names generated path test/enumeration/*	phase-62	`test/enumeration/**`
+r5	tools/pulsar_client_gate.py	names generated path test/golden/*	phase-62	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/pulsar_client_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-62	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	test/spec/pulsar/PulsarClientLiveSpec.hs	tracked file carries a resolved home path*	phase-62	Absolute developer-home executable paths
+r6	tools/pulsar_client_gate.py	tracked file carries a resolved home path*	phase-62	Absolute developer-home executable paths
+r5	tools/user_tenant_isolation_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-63	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/user_tenant_isolation_gate.py	names generated path test/enumeration/*	phase-63	`test/enumeration/**`
+r5	tools/user_tenant_isolation_gate.py	names generated path test/golden/*	phase-63	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/user_tenant_isolation_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-63	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	test/spec/live/UserTenantIsolationSpec.hs	tracked file carries a resolved home path*	phase-63	Absolute developer-home executable paths
+r6	tools/user_tenant_isolation_gate.py	tracked file carries a resolved home path*	phase-63	Absolute developer-home executable paths
+r5	tools/content_store_workflow_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-64	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/content_store_workflow_gate.py	names generated path test/enumeration/*	phase-64	`test/enumeration/**`
+r5	tools/content_store_workflow_gate.py	names generated path test/golden/*	phase-64	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/content_store_workflow_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-64	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	test/spec/runtime/FailoverSpec.hs	tracked file carries a resolved home path*	phase-64	Absolute developer-home executable paths
+r6	tools/content_store_workflow_gate.py	tracked file carries a resolved home path*	phase-64	Absolute developer-home executable paths
+r6	tools/content_store_workflow_live.py	tracked file pins a package integrity digest*	phase-64	Hard-coded library/package SHA values
+r5	tools/ui_projection_runtime_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-65	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/ui_projection_runtime_gate.py	names generated path test/enumeration/*	phase-65	`test/enumeration/**`
+r5	tools/ui_projection_runtime_gate.py	names generated path test/golden/*	phase-65	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/ui_projection_runtime_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-65	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	test/spec/live/UiProjectionRuntimeSpec.hs	tracked file carries a resolved home path*	phase-65	Absolute developer-home executable paths
+r6	tools/ui_projection_runtime_gate.py	tracked file carries a resolved home path*	phase-65	Absolute developer-home executable paths
+r5	tools/release_lifecycle_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-66	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/release_lifecycle_gate.py	names generated path test/enumeration/*	phase-66	`test/enumeration/**`
+r5	tools/release_lifecycle_gate.py	names generated path test/golden/*	phase-66	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/release_lifecycle_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-66	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/release_lifecycle_gate.py	tracked file carries a resolved home path*	phase-66	Absolute developer-home executable paths
+r5	tools/ui_program_release_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-67	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/ui_program_release_gate.py	names generated path test/enumeration/*	phase-67	`test/enumeration/**`
+r5	tools/ui_program_release_gate.py	names generated path test/golden/*	phase-67	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/ui_program_release_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-67	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/ui_program_release_gate.py	tracked file carries a resolved home path*	phase-67	Absolute developer-home executable paths
+r5	tools/network_fabric_wireguard_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-68	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/network_fabric_wireguard_gate.py	names generated path test/enumeration/*	phase-68	`test/enumeration/**`
+r5	tools/network_fabric_wireguard_gate.py	names generated path test/golden/*	phase-68	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/network_fabric_wireguard_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-68	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/network_fabric_wireguard_gate.py	tracked file carries a resolved home path*	phase-68	Absolute developer-home executable paths
+r6	tools/network_fabric_wireguard_live.py	tracked file carries a resolved home path*	phase-68	Absolute developer-home executable paths
+r5	tools/multicluster_spawn_georepl_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-69	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/multicluster_spawn_georepl_gate.py	names generated path test/enumeration/*	phase-69	`test/enumeration/**`
+r5	tools/multicluster_spawn_georepl_gate.py	names generated path test/golden/*	phase-69	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/multicluster_spawn_georepl_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-69	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	test/fixture/multicluster_spawn_georepl/kind-parent.yaml	tracked file carries a resolved home path*	phase-69	Absolute developer-home executable paths
+r6	test/spec/integration/MulticlusterSpawnGeoreplGate.hs	tracked file carries a resolved home path*	phase-69	Absolute developer-home executable paths
+r6	tools/multicluster_spawn_georepl_gate.py	tracked file carries a resolved home path*	phase-69	Absolute developer-home executable paths
+r6	tools/multicluster_spawn_georepl_live.py	tracked file carries a resolved home path*	phase-69	Absolute developer-home executable paths
+r5	tools/gateway_migration_drills_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-70	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/gateway_migration_drills_gate.py	names generated path test/enumeration/*	phase-70	`test/enumeration/**`
+r5	tools/gateway_migration_drills_gate.py	names generated path test/golden/*	phase-70	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/gateway_migration_drills_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-70	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/gateway_migration_drills_gate.py	tracked file carries a resolved home path*	phase-70	Absolute developer-home executable paths
+r6	tools/gateway_migration_drills_live.py	tracked file carries a resolved home path*	phase-70	Absolute developer-home executable paths
+r5	tools/provider_deploy_checkpoint_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-71	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/provider_deploy_checkpoint_gate.py	names generated path test/enumeration/*	phase-71	`test/enumeration/**`
+r5	tools/provider_deploy_checkpoint_gate.py	names generated path test/golden/*	phase-71	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/provider_deploy_checkpoint_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-71	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/provider_deploy_checkpoint_gate.py	tracked file carries a resolved home path*	phase-71	Absolute developer-home executable paths
+r6	tools/provider_deploy_checkpoint_live.py	tracked file carries a resolved home path*	phase-71	Absolute developer-home executable paths
+r6	tools/provider_deploy_checkpoint_live.py	tracked file pins a package integrity digest*	phase-71	Hard-coded library/package SHA values
+r5	tools/provider_child_bringup_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-72	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/provider_child_bringup_gate.py	names generated path test/enumeration/*	phase-72	`test/enumeration/**`
+r5	tools/provider_child_bringup_gate.py	names generated path test/golden/*	phase-72	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/provider_child_bringup_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-72	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/provider_child_bringup_gate.py	tracked file carries a resolved home path*	phase-72	Absolute developer-home executable paths
+r5	tools/provider_ebs_credential_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-73	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/provider_ebs_credential_gate.py	names generated path test/enumeration/*	phase-73	`test/enumeration/**`
+r5	tools/provider_ebs_credential_gate.py	names generated path test/golden/*	phase-73	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/provider_ebs_credential_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-73	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/provider_ebs_credential_gate.py	tracked file carries a resolved home path*	phase-73	Absolute developer-home executable paths
+r6	tools/provider_ebs_credential_live.py	tracked file pins a package integrity digest*	phase-73	Hard-coded library/package SHA values
+r5	tools/provider_dynamic_nodes_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-74	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/provider_dynamic_nodes_gate.py	names generated path test/enumeration/*	phase-74	`test/enumeration/**`
+r5	tools/provider_dynamic_nodes_gate.py	names generated path test/golden/*	phase-74	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/provider_dynamic_nodes_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-74	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/provider_dynamic_nodes_gate.py	tracked file carries a resolved home path*	phase-74	Absolute developer-home executable paths
+r5	tools/determinism_jitcache_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-75	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/determinism_jitcache_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-75	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/determinism_jitcache_gate.py	names generated path test/enumeration/*	phase-75	`test/enumeration/**`
+r5	tools/determinism_jitcache_gate.py	names generated path test/golden/*	phase-75	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r6	test/golden/determinism_jitcache/substrate_fingerprint.schema.json	tracked file carries a resolved home path*	phase-75	Absolute developer-home executable paths
+r6	test/spec/kernel/DeterminismJitcacheContractSpec.hs	tracked file carries a resolved home path*	phase-75	Absolute developer-home executable paths
+r6	tools/determinism_jitcache_live.py	tracked file carries a resolved home path*	phase-75	Absolute developer-home executable paths
+r6	tools/determinism_jitcache_live.py	tracked file pins a package integrity digest*	phase-75	Hard-coded library/package SHA values
+r6	tools/determinism_jitcache_gate.py	tracked file carries a resolved home path*	phase-75	Absolute developer-home executable paths
+r5	tools/infernix_lift_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-76	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/infernix_lift_gate.py	names generated path test/enumeration/*	phase-76	`test/enumeration/**`
+r5	tools/infernix_lift_gate.py	names generated path test/golden/*	phase-76	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/infernix_lift_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-76	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	test/fixture/infernix_lift/expected_hashes.tsv	tracked expected-digest table*	phase-76	Expected base-image digests, canonical-manifest outputs, UI digest tables, and reference traces
+r6	tools/infernix_lift_gate.py	tracked file carries a resolved home path*	phase-76	Absolute developer-home executable paths
+r6	tools/infernix_lift_live.py	tracked file carries a resolved home path*	phase-76	Absolute developer-home executable paths
+r6	tools/infernix_lift_live.py	tracked file pins a package integrity digest*	phase-76	Hard-coded library/package SHA values
+r5	tools/infernix_ui_lift_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-77	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/infernix_ui_lift_gate.py	names generated path test/enumeration/*	phase-77	`test/enumeration/**`
+r5	tools/infernix_ui_lift_gate.py	names generated path test/golden/*	phase-77	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/infernix_ui_lift_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-77	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/infernix_ui_lift_gate.py	tracked file carries a resolved home path*	phase-77	Absolute developer-home executable paths
+r5	tools/jitml_lift_cuda_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-84	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/jitml_lift_cuda_gate.py	names generated path test/enumeration/*	phase-84	`test/enumeration/**`
+r5	tools/jitml_lift_cuda_gate.py	names generated path test/golden/*	phase-84	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/jitml_lift_cuda_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-84	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/jitml_lift_cuda_gate.py	tracked file carries a resolved home path*	phase-84	Absolute developer-home executable paths
+r5	tools/jitml_ui_lift_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-85	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/jitml_ui_lift_gate.py	names generated path test/enumeration/*	phase-85	`test/enumeration/**`
+r5	tools/jitml_ui_lift_gate.py	names generated path test/golden/*	phase-85	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/jitml_ui_lift_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-85	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/jitml_ui_lift_gate.py	tracked file carries a resolved home path*	phase-85	Absolute developer-home executable paths
+r5	tools/apple_metal_host_daemon_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-87	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/apple_metal_host_daemon_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-87	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/apple_metal_host_daemon_gate.py	names generated path test/enumeration/*	phase-87	`test/enumeration/**`
+r5	tools/apple_metal_host_daemon_gate.py	names generated path test/golden/*	phase-87	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r6	tools/apple_metal_host_daemon_gate.py	tracked file carries a resolved home path*	phase-87	Absolute developer-home executable paths
+r5	tools/test_topology_dsl_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-78	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/ui_single_tenant_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-79	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/ui_single_tenant_gate.py	names generated path test/enumeration/*	phase-79	`test/enumeration/**`
+r5	tools/ui_single_tenant_gate.py	names generated path test/golden/*	phase-79	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/ui_single_tenant_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-79	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/ui_single_tenant_gate.py	tracked file carries a resolved home path*	phase-79	Absolute developer-home executable paths
+r5	tools/ui_multi_tenant_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-80	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/ui_multi_tenant_gate.py	names generated path test/enumeration/*	phase-80	`test/enumeration/**`
+r5	tools/ui_multi_tenant_gate.py	names generated path test/golden/*	phase-80	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/ui_multi_tenant_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-80	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/ui_multi_tenant_gate.py	tracked file carries a resolved home path*	phase-80	Absolute developer-home executable paths
+r5	tools/ui_rollout_reconnect_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-81	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/ui_rollout_reconnect_gate.py	names generated path test/enumeration/*	phase-81	`test/enumeration/**`
+r5	tools/ui_rollout_reconnect_gate.py	names generated path test/golden/*	phase-81	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/ui_rollout_reconnect_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-81	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/ui_rollout_reconnect_gate.py	tracked file carries a resolved home path*	phase-81	Absolute developer-home executable paths
+r5	tools/ui_ha_multizone_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-92	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/ui_ha_multizone_gate.py	names generated path test/enumeration/*	phase-92	`test/enumeration/**`
+r5	tools/ui_ha_multizone_gate.py	names generated path test/golden/*	phase-92	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/ui_ha_multizone_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-92	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/ui_ha_multizone_gate.py	tracked file carries a resolved home path*	phase-92	Absolute developer-home executable paths
+r5	tools/offline_replay_receipts_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-93	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/offline_replay_receipts_gate.py	names generated path test/enumeration/*	phase-93	`test/enumeration/**`
+r5	tools/offline_replay_receipts_gate.py	names generated path test/golden/*	phase-93	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/offline_replay_receipts_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-93	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/offline_replay_receipts_gate.py	tracked file carries a resolved home path*	phase-93	Absolute developer-home executable paths
+r5	tools/offline_blobs_isolation_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-49	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/offline_blobs_isolation_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-49	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/offline_blobs_isolation_gate.py	names generated path test/enumeration/*	phase-49	`test/enumeration/**`
+r5	tools/offline_blobs_isolation_gate.py	names generated path test/golden/*	phase-49	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r6	tools/offline_blobs_isolation_gate.py	tracked file carries a resolved home path*	phase-49	Absolute developer-home executable paths
+r5	tools/offline_release_evolution_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-82	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/offline_release_evolution_gate.py	names generated path test/enumeration/*	phase-82	`test/enumeration/**`
+r5	tools/offline_release_evolution_gate.py	names generated path test/golden/*	phase-82	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r5	tools/offline_release_evolution_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-82	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r6	tools/offline_release_evolution_gate.py	tracked file carries a resolved home path*	phase-82	Absolute developer-home executable paths
+r5	tools/offline_multizone_continuity_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-83	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/offline_multizone_continuity_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-83	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r5	tools/offline_multizone_continuity_gate.py	names generated path test/enumeration/*	phase-83	`test/enumeration/**`
+r5	tools/offline_multizone_continuity_gate.py	names generated path test/golden/*	phase-83	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r6	tools/offline_multizone_continuity_gate.py	tracked file carries a resolved home path*	phase-83	Absolute developer-home executable paths
 
 # Layout-partition deferrals, added 2026-08-14 with rules r13, r14, and r15.
 #
@@ -220,40 +220,40 @@ r6	tools/offline_multizone_continuity_gate.py	tracked file carries a resolved ho
 # Phase 0 defers nothing of its own here. Its three ordinal-bearing paths were renamed,
 # its `CLAUDE.md` copy became a link, and the ignore rules for paths nothing generates
 # were deleted rather than deferred.
-r16	tools/platform_services_2_*	*	phase-56	Phase-41 through Phase-43 live fixtures and drivers use `/var/tmp/amoebius-phase*`
-r16	tools/keycloak_ingress_*	*	phase-58	Phase-41 through Phase-43 live fixtures and drivers use `/var/tmp/amoebius-phase*`
-r16	tools/live_dsl_deploy_*	*	phase-59	Many gate scripts and tests use `tempfile`
-r16	tools/app_tenancy_*	*	phase-60	Many gate scripts and tests use `tempfile`
-r16	tools/pulsar_client_*	*	phase-61	Many gate scripts and tests use `tempfile`
-r16	tools/user_tenant_isolation_*	*	phase-62	Many gate scripts and tests use `tempfile`
-r16	tools/content_store_workflow_*	*	phase-63	Many gate scripts and tests use `tempfile`
-r16	tools/ui_projection_runtime_*	*	phase-64	Many gate scripts and tests use `tempfile`
-r16	tools/release_lifecycle_*	*	phase-65	Many gate scripts and tests use `tempfile`
-r16	tools/ui_program_release_*	*	phase-66	Many gate scripts and tests use `tempfile`
-r16	tools/network_fabric_wireguard_*	*	phase-67	Many gate scripts and tests use `tempfile`
-r16	tools/multicluster_spawn_georepl_*	*	phase-68	Many gate scripts and tests use `tempfile`
-r16	tools/gateway_migration_drills_*	*	phase-69	Many gate scripts and tests use `tempfile`
-r16	tools/provider_deploy_checkpoint_*	*	phase-70	Many gate scripts and tests use `tempfile`
-r16	tools/provider_child_bringup_*	*	phase-71	Many gate scripts and tests use `tempfile`
-r16	tools/provider_ebs_credential_*	*	phase-72	Many gate scripts and tests use `tempfile`
-r16	tools/provider_dynamic_nodes_*	*	phase-73	Many gate scripts and tests use `tempfile`
-r16	tools/determinism_jitcache_*	*	phase-74	Many gate scripts and tests use `tempfile`
-r16	tools/infernix_lift_*	*	phase-75	Many gate scripts and tests use `tempfile`
-r16	tools/infernix_ui_lift_*	*	phase-76	Many gate scripts and tests use `tempfile`
-r16	tools/jitml_lift_cuda_*	*	phase-83	Many gate scripts and tests use `tempfile`
-r16	tools/jitml_ui_lift_*	*	phase-84	Many gate scripts and tests use `tempfile`
-r16	tools/apple_metal_host_daemon_*	*	phase-86	Many gate scripts and tests use `tempfile`
-r16	tools/test_topology_dsl_*	*	phase-77	Many gate scripts and tests use `tempfile`
-r16	tools/ui_single_tenant_*	*	phase-78	Many gate scripts and tests use `tempfile`
-r16	tools/ui_multi_tenant_*	*	phase-79	Many gate scripts and tests use `tempfile`
-r16	tools/ui_rollout_reconnect_*	*	phase-80	Many gate scripts and tests use `tempfile`
-r16	tools/ui_ha_multizone_*	*	phase-91	Many gate scripts and tests use `tempfile`
-r16	tools/offline_replay_receipts_*	*	phase-92	Many gate scripts and tests use `tempfile`
-r16	tools/offline_blobs_isolation_*	*	phase-48	Many gate scripts and tests use `tempfile`
-r16	tools/offline_release_evolution_*	*	phase-81	Many gate scripts and tests use `tempfile`
-r16	tools/offline_multizone_continuity_*	*	phase-82	Many gate scripts and tests use `tempfile`
-r14	.*ignore	ignore rule *DEVELOPMENT_PLAN/evidence*	phase-82	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r14	.*ignore	ignore rule *test/enumeration*	phase-82	`test/enumeration/**`
-r14	.*ignore	ignore rule *phase_*_ledger.json*	phase-82	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r14	.*ignore	ignore rule *ui/*	phase-79	`ui-runtime/**` holds the one spago project
-r14	.*ignore	ignore rule *gen*	phase-82	Generated output, run bundles, tool acquisition, Cabal builds/stores, Node dependencies, and temporary files were spread across
+r16	tools/platform_services_2_*	*	phase-57	Phase-42 through Phase-44 live fixtures and drivers use `/var/tmp/amoebius-phase*`
+r16	tools/keycloak_ingress_*	*	phase-59	Phase-42 through Phase-44 live fixtures and drivers use `/var/tmp/amoebius-phase*`
+r16	tools/live_dsl_deploy_*	*	phase-60	Many gate scripts and tests use `tempfile`
+r16	tools/app_tenancy_*	*	phase-61	Many gate scripts and tests use `tempfile`
+r16	tools/pulsar_client_*	*	phase-62	Many gate scripts and tests use `tempfile`
+r16	tools/user_tenant_isolation_*	*	phase-63	Many gate scripts and tests use `tempfile`
+r16	tools/content_store_workflow_*	*	phase-64	Many gate scripts and tests use `tempfile`
+r16	tools/ui_projection_runtime_*	*	phase-65	Many gate scripts and tests use `tempfile`
+r16	tools/release_lifecycle_*	*	phase-66	Many gate scripts and tests use `tempfile`
+r16	tools/ui_program_release_*	*	phase-67	Many gate scripts and tests use `tempfile`
+r16	tools/network_fabric_wireguard_*	*	phase-68	Many gate scripts and tests use `tempfile`
+r16	tools/multicluster_spawn_georepl_*	*	phase-69	Many gate scripts and tests use `tempfile`
+r16	tools/gateway_migration_drills_*	*	phase-70	Many gate scripts and tests use `tempfile`
+r16	tools/provider_deploy_checkpoint_*	*	phase-71	Many gate scripts and tests use `tempfile`
+r16	tools/provider_child_bringup_*	*	phase-72	Many gate scripts and tests use `tempfile`
+r16	tools/provider_ebs_credential_*	*	phase-73	Many gate scripts and tests use `tempfile`
+r16	tools/provider_dynamic_nodes_*	*	phase-74	Many gate scripts and tests use `tempfile`
+r16	tools/determinism_jitcache_*	*	phase-75	Many gate scripts and tests use `tempfile`
+r16	tools/infernix_lift_*	*	phase-76	Many gate scripts and tests use `tempfile`
+r16	tools/infernix_ui_lift_*	*	phase-77	Many gate scripts and tests use `tempfile`
+r16	tools/jitml_lift_cuda_*	*	phase-84	Many gate scripts and tests use `tempfile`
+r16	tools/jitml_ui_lift_*	*	phase-85	Many gate scripts and tests use `tempfile`
+r16	tools/apple_metal_host_daemon_*	*	phase-87	Many gate scripts and tests use `tempfile`
+r16	tools/test_topology_dsl_*	*	phase-78	Many gate scripts and tests use `tempfile`
+r16	tools/ui_single_tenant_*	*	phase-79	Many gate scripts and tests use `tempfile`
+r16	tools/ui_multi_tenant_*	*	phase-80	Many gate scripts and tests use `tempfile`
+r16	tools/ui_rollout_reconnect_*	*	phase-81	Many gate scripts and tests use `tempfile`
+r16	tools/ui_ha_multizone_*	*	phase-92	Many gate scripts and tests use `tempfile`
+r16	tools/offline_replay_receipts_*	*	phase-93	Many gate scripts and tests use `tempfile`
+r16	tools/offline_blobs_isolation_*	*	phase-49	Many gate scripts and tests use `tempfile`
+r16	tools/offline_release_evolution_*	*	phase-82	Many gate scripts and tests use `tempfile`
+r16	tools/offline_multizone_continuity_*	*	phase-83	Many gate scripts and tests use `tempfile`
+r14	.*ignore	ignore rule *DEVELOPMENT_PLAN/evidence*	phase-83	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r14	.*ignore	ignore rule *test/enumeration*	phase-83	`test/enumeration/**`
+r14	.*ignore	ignore rule *phase_*_ledger.json*	phase-83	`test/golden/phase_*_ledger.json` and Phase-63 expected-run ledger
+r14	.*ignore	ignore rule *ui/*	phase-80	`ui-runtime/**` holds the one spago project
+r14	.*ignore	ignore rule *gen*	phase-83	Generated output, run bundles, tool acquisition, Cabal builds/stores, Node dependencies, and temporary files were spread across

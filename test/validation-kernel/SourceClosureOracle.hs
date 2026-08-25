@@ -1472,11 +1472,11 @@ canonicalPbFindings =
   Finding
     "PB-GRAMMAR-DIAGNOSTIC-ONLY"
     "Amoebius.Validation.PbBootstrapGrammar.pbBootstrapGrammarDiagnostic"
-    "caller-supplied pb bytes are diagnostic input and cannot establish source custody or Phase-50 runtime truth"
+    "caller-supplied pb bytes are diagnostic input and cannot establish source custody or Phase-51 runtime truth"
     : [ Finding
           "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
           (Text.unpack residue)
-          "static source grammar cannot establish this runtime property; Phase 50 must observe the pb child from the source-bound Haskell supervisor"
+          "static source grammar cannot establish this runtime property; Phase 51 must observe the pb child from the source-bound Haskell supervisor"
       | residue <- canonicalPbResidues
       ]
 

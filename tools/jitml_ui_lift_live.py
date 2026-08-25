@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the scoped Phase-52 browser/authority/durable-file/host-CUDA slice."""
+"""Run the scoped Phase-53 browser/authority/durable-file/host-CUDA slice."""
 
 from __future__ import annotations
 

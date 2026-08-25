@@ -55,7 +55,7 @@ This doctrine resolves the collision by observing that **"run this elsewhere" na
 - **Many data planes, reached by gateway migration.** The remote compute *is* a second cluster, with its
   own Pulsar/MinIO, related to the home cluster only by async geo-replication and the single-gateway
   authority. This is the existing multi-cluster world owned by
-  [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) and Phases 53–53.
+  [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) and Phases 54–54.
 
 This document keeps those two apart, so the cheap case (attach) never drags on the
 expensive case's machinery (geo-replication, the Second-Axis proof obligation, the R9 data-loss budget), and
@@ -85,7 +85,7 @@ opening invariant, unchanged.
 | Cross-boundary cost | **None** — one consistency boundary; no geo-replication | Async geo-replication; the Second-Axis obligation |
 | Data-loss budget (R9) | **Never applies** — nothing un-replicated to lose | Applies to the crash-failover suffix |
 | Canonical use | Batch/ML burst compute on cheap spot capacity | Serving-tier overflow with [gateway migration](./gateway_migration_doctrine.md) |
-| Owned by | **This doc** + [network_fabric_doctrine.md](./network_fabric_doctrine.md) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [gateway_migration_doctrine.md](./gateway_migration_doctrine.md), Phases 53–54 |
+| Owned by | **This doc** + [network_fabric_doctrine.md](./network_fabric_doctrine.md) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [gateway_migration_doctrine.md](./gateway_migration_doctrine.md), Phases 54–55 |
 
 The load-bearing decision: **the worker pool is NOT a fourth arm of the closed `ComputeEngine` union**
 ([cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)). Making it an engine arm would give it a
@@ -289,15 +289,15 @@ fabric to the home store.
 
 This document is normative single-logical-data-plane doctrine only. Delivery sequencing, completion status,
 and validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). For
-orientation only: the attach topology depends on the native Pulsar/MinIO client (Phase 67), the
-host-compute-daemon peer model it generalizes (Phase 89), and cloud spot provisioning + price-shopping
-(Phase 76), and rides the WireGuard fabric promoted from the former later-phase candidate into Phase 73 — but is
-*independent of Phase 74's geo-replication*, precisely because an attach pool is not a second cluster.
+orientation only: the attach topology depends on the native Pulsar/MinIO client (Phase 68), the
+host-compute-daemon peer model it generalizes (Phase 90), and cloud spot provisioning + price-shopping
+(Phase 77), and rides the WireGuard fabric promoted from the former later-phase candidate into Phase 74 — but is
+*independent of Phase 75's geo-replication*, precisely because an attach pool is not a second cluster.
 
 > **Honesty.** Everything here is Phase 0 **design intent**, specified before implementation. The
 > `DataPlane`/`FabricMember` binding, the remote-worker-pool-as-client model, and the attach-vs-second-cluster
 > distinction are **new amoebius design** — the host-compute-daemon peer model they generalize is itself an
-> unbuilt Phase-89 design, and its loopback-NodePort shape has only a prodbox precedent (evidence, not amoebius
+> unbuilt Phase-90 design, and its loopback-NodePort shape has only a prodbox precedent (evidence, not amoebius
 > proof). Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive
 > statement as the contract amoebius intends to satisfy, never as a tested result.
 

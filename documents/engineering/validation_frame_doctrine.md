@@ -15,7 +15,7 @@ later. The pre-hardware harness is owned by
 
 **Status**: Authoritative source
 **Supersedes**: the image-first validation-frame rule previously carried by this file
-**Referenced by**: DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/image_build_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_51_host_assert_cli.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/image_build_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -43,10 +43,10 @@ This ordering is mandatory:
 authenticated, network-independent toolchain input builds the exact source-bound Haskell binary
   → direct Haskell source-policy and gate-kernel qualification
   → Haskell DSL/proof/generator validation
-  → Phase 49 no-hardware promotion barrier
-  → Phase 50 externally observes the already source-bounded pb handoff
-  → Phase 51 Haskell host-ensure against fake boundaries
-  → Phase 52 first hardware work
+  → Phase 50 no-hardware promotion barrier
+  → Phase 51 externally observes the already source-bounded pb handoff
+  → Phase 52 Haskell host-ensure against fake boundaries
+  → Phase 53 first hardware work
   → optional image parity replay
 ```
 
@@ -75,7 +75,7 @@ Phase 0 checks the bootstrap source against an exact non-empty, deny-by-default 
 AST/import/resolved-call/control-flow/potential-effect grammar. Unsupported syntax, unresolved calls, dynamic
 execution/import or reflection, and any potential effect not routed to the declared `BootstrapAdapter`
 boundary fail closed. This static source-admission result does not establish that an effect or exec occurred.
-Phase 49 invokes Haskell directly; the Phase-50 candidate starts the exact source-built Haskell OS supervisor
+Phase 50 invokes Haskell directly; the Phase-51 candidate starts the exact source-built Haskell OS supervisor
 directly, which invokes `pb` as its observed child and records the adapter plus ensure/build/executable-identity/
 unchanged-argv/exec runtime handoff. The future public spelling cannot supervise itself. A keyword scan or
 command listing cannot establish semantic scope. Any
@@ -87,8 +87,8 @@ remains `.py`.
 ## 3. Why native validation is `Substrate: none`
 
 `Substrate: none` means that the claim does not depend on a hardware-specific or live-infrastructure fact.
-For Phases 0–49, the directly established Haskell toolchain is a build prerequisite, not evidence about Linux,
-Apple, Windows, CUDA, Metal, a container engine, or a published image. Phase 50 separately observes the
+For Phases 0–50, the directly established Haskell toolchain is a build prerequisite, not evidence about Linux,
+Apple, Windows, CUDA, Metal, a container engine, or a published image. Phase 51 separately observes the
 bounded `pb` runtime handoff; it cannot retroactively strengthen an earlier semantic result.
 
 Pure and fake-boundary gates therefore remain Register 1 or 2 and `Substrate: none`. They record the compiler

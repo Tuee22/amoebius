@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the locally dischargeable Phase-45 gate domains."""
+"""Run and seal the locally dischargeable Phase-46 gate domains."""
 
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_45"
 LIVE = EVIDENCE / "provider-child-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_45_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_45_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_46_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_46_ledger.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
@@ -207,7 +207,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(oracle_domain())
         rows.append(invoke("pure-contract", contract_args(False)))
         if args.reuse_fresh_live:
-            rows.append({"name": "scoped-kubernetes-child", "command": "sealed just-produced Phase-45 live receipt", "output": "fresh scoped evidence; EKS convergence UNVERIFIED", "result": "PASS"})
+            rows.append({"name": "scoped-kubernetes-child", "command": "sealed just-produced Phase-46 live receipt", "output": "fresh scoped evidence; EKS convergence UNVERIFIED", "result": "PASS"})
         else:
             rows.append(invoke("scoped-kubernetes-child", (sys.executable, "tools/provider_child_bringup_live.py"), timeout=1800))
         evidence_domain(fresh=args.reuse_fresh_live)

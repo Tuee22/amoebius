@@ -12,7 +12,7 @@ import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder (floatLE, toLazyByteString)
 import Data.ByteString.Lazy qualified as LazyByteString
 
--- | The independently pinned Phase-53 numerical contract: y = 2*x + 1,
+-- | The independently pinned Phase-54 numerical contract: y = 2*x + 1,
 -- rounded at Float precision and emitted as little-endian IEEE-754 bytes.
 referenceKernel :: [Float] -> ByteString
 #ifdef APPLE_METAL_HOST_DAEMON_CONST_OUTPUT_MUTANT

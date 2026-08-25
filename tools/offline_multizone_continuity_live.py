@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run one integrated host-local slice of the Phase 64 continuity campaign."""
+"""Run one integrated host-local slice of the Phase 65 continuity campaign."""
 
 import hashlib
 import http.client

@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/engineering/content_addressing_determinism.md, documents/engineering/pulsar_client_doctrine.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_35_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_66_live_dsl_deploy.md, documents/engineering/content_addressing_determinism.md, documents/engineering/pulsar_client_doctrine.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
 **Generated sections**: none
 
 </details>
@@ -51,7 +51,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-50 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -68,7 +68,7 @@ code, or other derived product must be created lazily beneath `.build/**` and re
 `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
 evidence contract remain UNRESOLVED and block validation.
 
-This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+This phase precedes Phase 50 and is confined to pure, build, compiler, or model-level Register-1
 behavior only. It cannot use network, host, hardware, live-service, or cluster observations to validate or
 promote its claim; every build input must already be present through the authenticated, network-independent
 toolchain input.
@@ -78,14 +78,14 @@ network-independent toolchain inputs and build the
 required decoder, simulator, resolver, browser-contract, and protocol-codegen probes without
 committing resolution output, integrity pins, generated code, or host-specific paths. NOT VALIDATED.
 
-**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+**Substrate:** `none` — pre-Phase-50; no host, hardware, live service, or cluster observation.
 
 **Lane:** `none`.
 
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 0](phase_00_documentation_suite.md)
-**Gate:** `pb validate phase 01`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 1`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
@@ -95,7 +95,7 @@ committing resolution output, integrity pins, generated code, or host-specific p
 |---|---|
 | `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Target capability only — derive a compatible dependency graph from authenticated, network-independent toolchain inputs and build the required decoder, simulator, resolver, browser-contract, and protocol-codegen probes without committing resolution output, integrity pins, generated code, or host-specific paths. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 01` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 1` is future public spelling only. Before current human approval of Phase 51, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -108,7 +108,7 @@ committing resolution output, integrity pins, generated code, or host-specific p
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: Phase-1-owned `LTD-SRC-007` and `LTD-SRC-009` remain active; their exact zero-finding checks, reintroduction negatives, and independently reviewed Haskell bindings have not been accepted. Sprint 1.8 names `LTD-SRC-009`, but no rewritten sprint owns `LTD-SRC-007`; that missing assignment is itself blocking. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 00; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 0; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
@@ -184,8 +184,8 @@ contract row, predecessor approval, owned legacy closure, and phase-specific obl
 ### Objective
 Adopt [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note) with
 its [§5 gadt-decode](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): prove
-the in-process `dhall` decoder — the structural gadt-decode leg that must precede Phase-30/18 bind/provision — is
-buildable on the pin before Phase 26 promises an executable decoder. `dhall` historically lags new GHC releases, so
+the in-process `dhall` decoder — the structural gadt-decode leg that must precede Phase-31/19 bind/provision — is
+buildable on the pin before Phase 27 promises an executable decoder. `dhall` historically lags new GHC releases, so
 `allow-newer` alone may be insufficient and a source patch or fork may be required.
 
 ### Deliverables
@@ -228,8 +228,8 @@ approval, owned legacy closure, and phase-specific obligation in the redesigned 
 ### Objective
 Adopt [`gateway_migration_model_doctrine.md §4 — Simulate and prove`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
 amoebius's one formal obligation drives the gateway-migration `Model` against `io-classes`/`IOSimPOR`'s
-deterministic, partial-order-reduced scheduler. Prove that toolchain builds on the pin before Phase 17 authors
-the simulation. TLC (`tla2tools.jar`) is pure JVM and version-stable, so the Phase-11/10 TLC path is **not** gated
+deterministic, partial-order-reduced scheduler. Prove that toolchain builds on the pin before Phase 18 authors
+the simulation. TLC (`tla2tools.jar`) is pure JVM and version-stable, so the Phase-12/11 TLC path is **not** gated
 by this probe.
 
 ### Deliverables
@@ -422,8 +422,8 @@ demonstrate clean-source repeatability without network or outside-host observati
 Model [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
 as a pure Haskell plan over injected inventories and authenticated provider catalogs. An absent tool with a
 supported plan yields typed acquisition steps; a missing floor prerequisite yields a typed refusal. This
-sprint may neither inspect nor modify a real host. Phase 51 owns the boundary-with-fakes interpreter after the
-Phase-49 barrier, and the later live band owns actual host observation and installation.
+sprint may neither inspect nor modify a real host. Phase 52 owns the boundary-with-fakes interpreter after the
+Phase-50 barrier, and the later live band owns actual host observation and installation.
 
 ### Deliverables
 

@@ -13,7 +13,7 @@ section lettering lives in [`development_plan_standards.md`](development_plan_st
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_11_calculus_composition.md, DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_13_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_14_symbolic_checker.md, DEVELOPMENT_PLAN/phase_17_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_18_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_20_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_58_complementary_arch_child.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -69,7 +69,7 @@ evidence cannot populate authored contract fields.
 |---|---|
 | `Claim` | One falsifiable capability statement and its explicit exclusions. |
 | `Subject` | The production `.hs` module and entry point exercised; a wrapper, manifest, or gate runner alone is not a subject. |
-| `Command` | Future public target: `pb validate phase NN`. Before Phase 50 has current human approval, the executable candidate command is the exact absolute source-bound Haskell binary built directly from an authenticated, network-independent toolchain input; invoking `pb` is inadmissible evidence. Phase 50 starts that exact Haskell OS supervisor directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 approval. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
+| `Command` | Future public target: `pb validate phase NN`. Before Phase 51 has current human approval, the executable candidate command is the exact absolute source-bound Haskell binary built directly from an authenticated, network-independent toolchain input; invoking `pb` is inadmissible evidence. Phase 51 starts that exact Haskell OS supervisor directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 52 onward may use `pb` only while binding the current Phase-51 approval. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
 | `Oracle` | A separately authored `.hs` oracle module, its independence boundary, provenance, and human reviewer. |
 | `Positive controls` | A closed named corpus and the exact observations expected for each member. |
 | `Paired negatives` | For every foreclosed dimension, a minimally different positive/negative pair and the exact rejection locus and reason. |
@@ -89,10 +89,20 @@ evidence cannot populate authored contract fields.
 The `**Gate:**` summary line contains only the future public command and a link to this table. A
 phase-specific command may be an argument selected by the Haskell dispatcher, but Python, shell, a data file,
 or a generated program may not decide or wrap the verdict. The public spelling is not admissible evidence for
-Phase 0 through Phase 49: those candidates invoke the exact absolute source-built Haskell executable directly.
-Phase 50 validates the `pb` transport itself under an external observer; only its current human approval makes
-that transport eligible for Phase 51 onward. Presence of the target spelling in a phase document is never a
+Phase 0 through Phase 50: those candidates invoke the exact absolute source-built Haskell executable directly.
+Phase 51 validates the `pb` transport itself under an external observer; only its current human approval makes
+that transport eligible for Phase 52 onward. Presence of the target spelling in a phase document is never a
 claim that it exists, ran, or passed.
+
+**When the oracle must be a second implementation.** Some claims are about interoperation rather than about a
+computed answer, and no checker can falsify them: the question is whether two separately built programs
+actually agree when run against the same object. For such a gate the `Oracle` row names a second
+implementation of the same specification, and independence is established by **authorship**, not by module
+boundary. The second author works from the specification alone, never from the subject's source, and the two
+share no decoder, no arithmetic, and no table. Generating the second from the same declarations, deriving it
+from the first, or reusing the subject's parser produces one implementation under two names, and the gate
+refuses. A shared on-disk format is the case this exists for; its own conformance obligation is stated by
+[`hostclaim_spec.md` §9](../documents/engineering/hostclaim_spec.md#9-conformance) and is not restated here.
 
 The structural documentation checker may parse governed inventory, metadata, headings, links, anchors,
 backlinks, status syntax, phase dependencies, and this fixed table shape. It may not infer any row's semantic
@@ -241,12 +251,12 @@ operand to that decision. It is active-only, so the accepted retired explanation
 the only prose archive. This is accounting, not a waiver: the owning phase must reach zero, and no later phase
 may reintroduce the finding.
 
-The transition exception has a hard stop. A Phase-49 candidate must report **zero source-boundary debt**:
+The transition exception has a hard stop. A Phase-50 candidate must report **zero source-boundary debt**:
 every `LTD-SRC-*` query, including Phase-0-owned `LTD-SRC-008`, is zero. The only remaining non-Haskell
 behavioral source is Python under `pb/**` that a deny-by-default Haskell AST/import/effect audit has positively
 classified into minimal platform discrimination, contained toolchain establishment, source-bound build, and
-opaque exec handoff. Phase 50 validates the runtime behavior of that already-bounded handoff and owns no
-source-migration binding. Phase 51 and every later candidate retain the same final source grammar.
+opaque exec handoff. Phase 51 validates the runtime behavior of that already-bounded handoff and owns no
+source-migration binding. Phase 52 and every later candidate retain the same final source grammar.
 Consequently no host or hardware phase can open while condemned source remains tracked.
 
 Every phase inherits the following postconditions. They are part of the gate, not optional cleanup:
@@ -254,7 +264,7 @@ Every phase inherits the following postconditions. They are part of the gate, no
 1. **Closed source language.** The target snapshot contains no tracked executable, behavioural, validation,
    test, fake, oracle, generator, migration, or runtime logic except `.hs`; during the ordered migration, every
    contrary finding must satisfy the strictly-later typed-binding transition rule above, which expires before
-   the Phase-49 candidate.
+   the Phase-50 candidate.
 2. **One bootstrap exception.** Non-Haskell program source is permitted only under `pb/**`, and only to make
    the minimum platform distinction needed to select the establishment adapter, establish the pinned
    Haskell toolchain, build the source-bound
@@ -265,7 +275,7 @@ Every phase inherits the following postconditions. They are part of the gate, no
    deny-by-default Haskell-owned Python AST/import/call/control-flow/effect grammar rejects unsupported syntax,
    unresolved calls, dynamic execution/import/reflection/hooks, and every potential effect not routed to the
    one declared `BootstrapAdapter` boundary. This is a static Phase-0 source-admission result, not evidence that
-   the adapter or handoff ran. Phase 50 alone validates actual effects, binary identity, unchanged argv, and
+   the adapter or handoff ran. Phase 51 alone validates actual effects, binary identity, unchanged argv, and
    exec replacement under an external observer. Renaming another program as data or omitting an extension does
    not admit it; keyword absence or public-help enumeration is never proof of role.
 4. **Lazy derivation.** Dockerfiles, bake files, Dhall, PureScript, JavaScript, shell, Proto, Pulumi programs,

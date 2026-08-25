@@ -102,6 +102,7 @@ source surface.
 
 - [`resource_capacity_doctrine.md` §1](./engineering/resource_capacity_doctrine.md#1-capacity-is-a-budget-the-fold-consumes-and-overcommit-is-a-checked-rejection) — capacity as a budget a fold consumes, and overcommit as a checked rejection.
 - [`resource_capacity_doctrine.md` §2](./engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed) — the honesty limit that keeps the whole model from overclaiming.
+- [`hostclaim_spec.md` §1](./engineering/hostclaim_spec.md#1-what-this-establishes) — why one machine shared by several programs needs a ledger, and exactly what a granted claim does and does not establish.
 - [`manifest_generation_doctrine.md` §1](./engineering/manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not) — why manifests are rendered from types rather than templated.
 - [`manifest_generation_doctrine.md` §2](./engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) — the sealed value and the single public function that consumes it.
 - [`cluster_lifecycle_doctrine.md` §9](./engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) — the reconcile loop, and why it is deliberately not a state machine.

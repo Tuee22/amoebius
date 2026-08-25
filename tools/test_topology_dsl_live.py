@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scoped live Phase-54 teardown, inventory, and failover-process probes."""
+"""Scoped live Phase-55 teardown, inventory, and failover-process probes."""
 
 from __future__ import annotations
 

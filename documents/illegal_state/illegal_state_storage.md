@@ -15,7 +15,7 @@ once in the type and again by a total check before any effect. The enumeration's
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_26_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_28_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_29_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -72,7 +72,7 @@ foreclosure layer, from [`illegal_state_techniques.md`](./illegal_state_techniqu
 
 ### 3.1 Bad / illegal durable storage
 
-**Delivery-owner:** `Phase-60`
+**Delivery-owner:** `Phase-61`
 
 **Case-family:** `storage`
 
@@ -91,7 +91,7 @@ default class are non-constructible — required-field / no-arm shapes that fail
 
 ### 3.2 PVCs that don't bind PVs
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase-28`
 
 **Case-family:** `storage`
 
@@ -107,12 +107,12 @@ its exactly-matching PV ([§4.1](./illegal_state_techniques.md#41-pvcpv-binding-
 discipline whose teeth Dhall cannot hold — Dhall has no opaque types to hide the raw claim and PV record
 constructors ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)). A tracked Haskell negative declaration lazily
 materializes the mismatched-pair module beneath `.build/test-corpora/**` and requires its exact GHC refusal at
-Phase 27; this is not a `dhall type` failure at authoring) + `live-effect` residue (that the running
+Phase 28; this is not a `dhall type` failure at authoring) + `live-effect` residue (that the running
 PVC actually binds its PV at reconcile, owned by the runtime-enforcement proof).
 
 ### 3.18 Unbounded storage anywhere
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase-26`
 
 **Case-family:** `storage`
 
@@ -135,7 +135,7 @@ the union shape is type-foreclosed.
 
 ### 3.19 An application consuming more storage than its backing (MinIO and Pulsar)
 
-**Delivery-owner:** `Phase-28`
+**Delivery-owner:** `Phase-29`
 
 **Case-family:** `storage`
 
@@ -161,7 +161,7 @@ unboundedness is a closed union checked at authoring).
 
 ### 3.20 A Pulsar topic without a bounded / tiered / retained lifecycle
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase-26`
 
 **Case-family:** `storage`
 
@@ -186,7 +186,7 @@ residue (the burst back-pressure and backlog quota actually holding at runtime).
 
 ### 3.21 Capacity growth without an amoebius-owned scaling policy
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase-26`
 
 **Case-family:** `storage`
 
@@ -214,7 +214,7 @@ cold-seed entries live in the multi-cluster slice ([§3.69](./illegal_state_mult
 
 ### 3.53 A backup larger than its bounded medium
 
-**Delivery-owner:** `Phase-28`
+**Delivery-owner:** `Phase-29`
 
 **Case-family:** `storage`
 
@@ -234,7 +234,7 @@ medium physically caps bytes at runtime).
 
 ### 3.54 Deleting a backup in an append-only system
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -252,7 +252,7 @@ all — the closed-union / no-arm shape that gives the `StorageMutation` surface
 
 ### 3.55 amoebius holding a credential that can delete a backup
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -271,7 +271,7 @@ delete).
 
 ### 3.56 Automatically recovering from a manual air-gapped medium
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -288,7 +288,7 @@ air-gap medium has no inhabitant. **Owner:** [`backup_recovery_doctrine.md` §7]
 
 ### 3.57 A restore that overwrites live durable bytes
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -306,7 +306,7 @@ is empty because its backing was lost. **Owner:** [`backup_recovery_doctrine.md`
 
 ### 3.58 Unbounded backup history
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -321,7 +321,7 @@ a quota. **Owner:** [`backup_recovery_doctrine.md` §2](../engineering/backup_re
 
 ### 3.59 A backup in the same failure domain as its source
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -338,7 +338,7 @@ distinctness technique that rejects a cluster reused as active and standby in th
 
 ### 3.60 Backup bytes double-counted as live durable capacity
 
-**Delivery-owner:** `Phase-28`
+**Delivery-owner:** `Phase-29`
 
 **Case-family:** `storage`
 
@@ -354,7 +354,7 @@ backing and from node ephemeral/cache pools, so the capacity fold cannot spend o
 
 ### 3.61 A plaintext backup at rest
 
-**Delivery-owner:** `Phase-33`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -372,7 +372,7 @@ never inline; a constructor that emitted plaintext bytes to the medium has no in
 
 ### 3.62 A backup whose decryption key is escrowed only in the domain it protects
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -389,7 +389,7 @@ password-encrypted unseal path supplies it for the Vault-seed case. **Owner:** [
 
 ### 3.63 A restore from an unverified backup artifact
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -406,7 +406,7 @@ artifact, fails loud, and is never a valid restore source — the same `.ready`-
 
 ### 3.64 A cross-tenant or re-tagged backup or restore
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -422,7 +422,7 @@ append-only revocable capability edge, never a re-tag. **Owner:** [`backup_recov
 
 ### 3.65 An air-gapped medium carrying a live network credential
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -437,7 +437,7 @@ than a live credential. **Owner:** [`backup_recovery_doctrine.md` §3](../engine
 
 ### 3.66 Retention lowered below the currently-retained generations on an append-only medium
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -454,7 +454,7 @@ probe. The retained-state probe is `runtime-checked`. **Validation-locus:** `gad
 
 ### 3.67 A restore into a target smaller than or presentation-incompatible with the backup extent
 
-**Delivery-owner:** `Phase-28`
+**Delivery-owner:** `Phase-29`
 
 **Case-family:** `storage`
 
@@ -471,7 +471,7 @@ under-sized or presentation-mismatched restore is rejected before render. **Owne
 
 ### 3.68 Two conflicting backup policies on one coordinate
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `backup`
 
@@ -486,7 +486,7 @@ exactly one `BackupPolicy` owner under a total ownership-index fold; a double-cl
 
 ### 3.85 A spec verb that destroys durable bytes
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `storage`
 
@@ -517,7 +517,7 @@ orthogonal to the foreclosure layer above.
 
 ### 3.86 A new generation that orphans a retained coordinate
 
-**Delivery-owner:** `Phase-71`
+**Delivery-owner:** `Phase-72`
 
 **Case-family:** `storage`
 

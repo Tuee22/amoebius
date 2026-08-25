@@ -14,7 +14,7 @@ claimed as evidence is owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_31_provision_seal.md, documents/engineering/README.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_types.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_32_provision_seal.md, documents/engineering/README.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_types.md
 **Generated sections**: none
 
 </details>
@@ -33,7 +33,7 @@ claimed as evidence is owned by
 For overcommit to be a pure checked rejection rather than only a runtime error, the capacity the fold checks
 against must be a **pure-model input** — a demand cannot be provisioned against a number learned only after
 effects. amoebius therefore **declares** capacity in the spec/inventory model, completes bind/expansion, runs
-the fold at the Phase-31 `provision-seal`, and then **cross-checks** the declaration against reality at
+the fold at the Phase-32 `provision-seal`, and then **cross-checks** the declaration against reality at
 reconcile (runtime-checked). gadt-decode decode never constructs `ProvisionedSpec`.
 
 - **Declared in pure input; checked at the provision seal.** Each host/node advertises an **allocatable**
@@ -1341,7 +1341,7 @@ To keep SSoT boundaries crisp:
 | Per-volume presentation, usable/raw hard-cap semantics, backing allocation policy, and the `StorageBacking` union shape | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | Per-container CPU/memory/ephemeral-storage declaration, bounded pod-local scratch/cache, and per-host-worker resource envelope | [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope) |
 | Host image-build stage graph, build scratch/cache semantics, and host-vs-pod builder choice | [image_build_doctrine.md §6](./image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) |
-| Kind bootstrap and enforcement of named engine-process/control-plane storage quotas | [../../DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md](../../DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md) |
+| Kind bootstrap and enforcement of named engine-process/control-plane storage quotas | [../../DEVELOPMENT_PLAN/phase_56_bootstrap_coordinator_kind.md](../../DEVELOPMENT_PLAN/phase_56_bootstrap_coordinator_kind.md) |
 | Cloud quota provisioning; dynamic node provisioning enaction; per-PV EBS | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | The Pulsar topic-lifecycle policy (retention, size-triggered offload, backlog quota) | [pulsar_client_doctrine.md §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
 | The content-addressed MinIO store as a storage backing | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
@@ -1770,7 +1770,7 @@ and one-short mutants for `maxInstances`, `maxVcpu`, each `acceleratorCaps` entr
 `ClusterBudget` or provider action is constructed.
 
 Distributing a workload across clusters is **geo-replication** — *N* independent clusters, each running its own
-`place` over its own `Topology`, related only by async transport (Phase-74 design intent,
+`place` over its own `Topology`, related only by async transport (Phase-75 design intent,
 [app_vs_deployment_doctrine.md §9](./app_vs_deployment_doctrine.md#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change)).
 It is emphatically **not** the stateless attach pool, which is **single-cluster** and lives **inside** `place`'s
 elastic branch: [single_logical_data_plane_doctrine.md §4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology)
@@ -1780,7 +1780,7 @@ forecloses. The **reason** a cluster is the *pod-placement* boundary — the pha
 `FabricMember` — is owned by [single_logical_data_plane_doctrine.md §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)
 and [§3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe); this
 subsection consumes that WHY, it does not restate it. The only runtime-checked residue is the deferred geo-replication
-enaction (Phase 74). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
+enaction (Phase 75). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
 two `Site`s, folded **once** ([§4](./resource_capacity_folds.md#4-the-total-fold-fits-carve-place-and-the-nesting)).
 
 ### 9.2 Monitoring cost folds through the standard machinery, and the forest has no parent-rollup budget

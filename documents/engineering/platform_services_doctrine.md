@@ -17,7 +17,7 @@ set.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_34_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_57_base_image_registry.md, DEVELOPMENT_PLAN/phase_62_vault_pki.md, DEVELOPMENT_PLAN/phase_63_platform_backbone.md, DEVELOPMENT_PLAN/phase_64_platform_services_2.md, DEVELOPMENT_PLAN/phase_65_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_66_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_app_tenancy.md, DEVELOPMENT_PLAN/phase_78_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_82_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_85_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -120,7 +120,7 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
   client's "mock 3-replica" pattern becomes a deployment-rules `replicas=n` value outside the checked UI
   program.
 
-> **Validation reset.** Phase 62 and every later platform phase are NOT VALIDATED. The four-drive MinIO,
+> **Validation reset.** Phase 63 and every later platform phase are NOT VALIDATED. The four-drive MinIO,
 > three-member ZooKeeper, three-bookie BookKeeper, and two-broker Pulsar topology is the target contract;
 > pre-reset run descriptions are diagnostic only and establish neither topology parity nor consensus or
 > multi-zone availability. Status and gates live only in
@@ -141,13 +141,13 @@ either baked into the base container or built by amoebius and served from here. 
   into the node before bring-up ([image_build_doctrine.md §9](./image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)); its binary is not baked into `amoebius-base`, and the service never tries to pull itself.
   Its one runtime dependency is MinIO, which holds the registry's blobs and is itself a preloaded, PV-backed
   service — so the dependency is a plain ordering edge (MinIO before the registry, [§11](#11-bring-up-and-dependency-ordering)), never a pull cycle.
-- **The pre-MinIO bootstrap target is finite — NOT VALIDATED.** Phase 56.2 is required to run the registry backend behind a
+- **The pre-MinIO bootstrap target is finite — NOT VALIDATED.** Phase 57.2 is required to run the registry backend behind a
   read-only service proxy and a sole capability-gated mutation proxy from the side-loaded image. Its temporary
   filesystem blob store is a snapshot-admitted, size-limited `emptyDir`; the exact digest-keyed object,
-  concurrent-upload workspace, and failed-upload/GC peak remain charged. Phase 62 migrates those admitted
+  concurrent-upload workspace, and failed-upload/GC peak remain charged. Phase 63 migrates those admitted
   bytes to MinIO before ordinary whole-deployment ownership, so the bootstrap store is an explicit bounded
-  ordering seam rather than a second storage architecture. Phase 56.3 must publish one architecture-qualified
-  child atomically and demonstrate a zero-mutation rerun; Phase 56.4 must pair an exact private pull with a
+  ordering seam rather than a second storage architecture. Phase 57.3 must publish one architecture-qualified
+  child atomically and demonstrate a zero-mutation rerun; Phase 57.4 must pair an exact private pull with a
   public-pull refusal under an enforcing node firewall. Earlier run descriptions and seals are invalid as
   current evidence. The MinIO-backed driver and migration of those admitted bytes are likewise unverified.
 - **It needs no relational database, and no PV of its own.** Distribution `registry:2` stores its blobs
@@ -232,7 +232,7 @@ classes, key/TTL/buffer bounds, one-primary/two-replica/three-Sentinel topology,
 no-persistence rule, cursor repair, and failure semantics are owned by
 [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md).
 
-The service runs from the Phase-56 monocontainer/base image. It has no PVC, AOF, RDB snapshot, backup, or
+The service runs from the Phase-57 monocontainer/base image. It has no PVC, AOF, RDB snapshot, backup, or
 cross-cluster replication. Losing it may close sockets and discard presence/cache/fanout hints; it must not
 discard a durable receipt or change whether a provider effect occurred. The single-node deployment preserves
 the same role/configuration projection while making no HA claim.
@@ -308,9 +308,9 @@ independent version and lifecycle, and clean per-namespace teardown.
   re-proving it, and the delegation holds **only** with these settings. Absent them an intra-cluster failover
   can promote a replica missing acknowledged commits and thereby lose them — so this is stated as a required
   configuration, not an assumed default.
-- **Canonical consumers.** The Phase-63 target fixes the amoebius database-consumer set to exactly `{Grafana}`;
+- **Canonical consumers.** The Phase-64 target fixes the amoebius database-consumer set to exactly `{Grafana}`;
   its Patroni cluster, pgAdmin surface, and Grafana migrations are NOT VALIDATED. Keycloak is the planned
-  Phase-64 consumer. Other standard services that later need a
+  Phase-65 consumer. Other standard services that later need a
   relational database each get their own Patroni cluster + pgAdmin. The Registry has no Patroni consumer
   because Distribution `registry:2` needs no database ([§3](#3-the-registry--the-single-image-source)). The
   authoritative list is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); this
@@ -346,9 +346,9 @@ The canonical demand shapes are owned by
 the tenant-qualification, empty/diff planner, executor coalescing, target-change retention, MinIO physical fold,
 and sealed provider enactors are owned by [tenancy_doctrine.md §5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored).
 
-Phase 66 must eventually validate provider administrative apply/readback for all six arms with separated live
+Phase 67 must eventually validate provider administrative apply/readback for all six arms with separated live
 observers over equal-shaped tenants. Its Pulsar scope is tenant/namespace/ACL policy, not an application
-client. Phase 67 separately owns the authenticated native-client produce/consume contract. Both phases are
+client. Phase 68 separately owns the authenticated native-client produce/consume contract. Both phases are
 **NOT VALIDATED**, and administrative convergence can never substitute for data-path evidence.
 
 ---
@@ -546,7 +546,7 @@ into a foreclosed illegal state at
   `amoebius-capacity` and waits for old UID absence/release plus replacement reservation joins. Only then are
   the managed-node taint, identity admission, and exclusive Binding RBAC installed and independently read back
   as `ManagedCapacityReady`. No platform-service controller is applied from the general plan before that full
-  witness exists. The finite pre-SSA Phase-56 registry/proxy units are bootstrap inputs, not an exception for
+  witness exists. The finite pre-SSA Phase-57 registry/proxy units are bootstrap inputs, not an exception for
   new workloads: they must be included in the cutover domain and become custom-scheduled before this witness.
 - **LoadBalancer before the Envoy/Gateway edge** — the Gateway needs an LB address to publish a listener.
 - **MinIO before the registry** — Distribution `registry:2` stores its blobs via MinIO's S3 API
@@ -644,24 +644,24 @@ invoked by full path — there is no `PATH`-based discovery anywhere in the brin
 
 ---
 
-### Phase-61 Vault readiness diagnostic — invalidated
+### Phase-62 Vault readiness diagnostic — invalidated
 
 An earlier run reported a secret consumer staying blocked
 while Vault was sealed, then authenticated through `auth/kubernetes/login` and read the exact canary only after
 unseal, plus cluster delete/recreate retaining Vault state and the PKI root without re-initialization. That
-observation is not current Phase-61 evidence. The remaining service-DAG edges are owned by their later phases.
+observation is not current Phase-62 evidence. The remaining service-DAG edges are owned by their later phases.
 
-### Phase-62 backbone diagnostic — invalidated
+### Phase-63 backbone diagnostic — invalidated
 
 An earlier run reported observations of MetalLB, distributed MinIO, the registry's MinIO S3 rehome, and Pulsar's
 ZooKeeper/BookKeeper/broker topology. External observations covered a stable reachable VIP, MinIO byte
 identity, registry source stability and target objects, native Pulsar CBOR/dedup traffic, size-triggered
 offload, and a hot tier below its committed cap. Fifty-three SSA-owned object projections and eleven freshly
 rendered Haskell execution-unit projections were byte-identical to the live fields they own; every runtime
-image ID resolving to the then-recorded Phase-56 digest and no public pull being observed. These are invalidated
+image ID resolving to the then-recorded Phase-57 digest and no public pull being observed. These are invalidated
 diagnostics, not current `linux-cpu` evidence or proof of third-party consensus or multi-zone HA.
 
-### Phase-63 service-set diagnostic — invalidated
+### Phase-64 service-set diagnostic — invalidated
 
 An earlier run reported the database-consumer set `{Grafana}` with a three-member Patroni cluster carrying
 `synchronous_mode: on`, `synchronous_mode_strict: on`, and a bytes-bounded
@@ -678,7 +678,7 @@ trace. These are invalidated diagnostics, not current linux-cpu evidence or proo
 removes the `linux-cpu` fallback. When the run needs a clean guest instead of the existing host, launch it
 through Incus for Linux or Linux-CUDA hardware, Lima for Apple hardware, and WSL2 for Windows hardware.
 
-### Phase-64 authenticated-edge diagnostic — invalidated
+### Phase-65 authenticated-edge diagnostic — invalidated
 
 An earlier run reported one amoebius wild-edge topology with exactly one LoadBalancer:
 `edge-system/envoy` at the MetalLB VIP. The typed Gateway/HTTPRoute inventory covered Grafana, Keycloak,
@@ -698,25 +698,25 @@ WAN Pod. Valid and invalid WebSocket tuples were reported for Origin, one-use no
 authentication, and direct-Service denial. These are invalidated diagnostics, not current Register-3
 linux-cpu evidence or proofs of third-party controller or database consensus.
 
-### Phase-77 provider-child diagnostic — invalidated
+### Phase-78 provider-child diagnostic — invalidated
 
-The Phase-77 contract pins the exact sixteen-object standard service-name set and requires
+The Phase-78 contract pins the exact sixteen-object standard service-name set and requires
 exact-set/no-extra/no-missing validation in the provider-child protocol. A pre-reset retained-kind drill
 reported creating and reading those Service objects with zero second-pass Kubernetes mutations. It is not
 current evidence and does not establish EKS, a cloud LoadBalancer, service data-plane reachability, HA
-behavior, or wild ingress exclusively through provider Keycloak/Envoy. Phase 77 is NOT VALIDATED.
+behavior, or wild ingress exclusively through provider Keycloak/Envoy. Phase 78 is NOT VALIDATED.
 
 ## 13. Planning ownership
 
 This document is normative platform-services doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (the baked service inventory is a
-Phase-56 target; the live backbone, remaining services, identity, and edge are Phase-62–64 targets).
+Phase-57 target; the live backbone, remaining services, identity, and edge are Phase-63–64 targets).
 This doc never maintains a competing status ledger; it states the target shape and links back for status.
 
 ---
 
-Phase 84 is planned to test the three-zone Redis/Sentinel topology and ephemeral-authority rules as a scoped
+Phase 85 is planned to test the three-zone Redis/Sentinel topology and ephemeral-authority rules as a scoped
 admission kernel plus a loopback process campaign. It is NOT VALIDATED; real Redis/Sentinel election,
 provider-zone survival, and observed availability remain unverified.
 
@@ -730,7 +730,7 @@ provider-zone survival, and observed availability remain unverified.
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
 - [Tenancy Doctrine](./tenancy_doctrine.md) — the provider-indexed whole-deployment policy transaction and the
-  Phase-66 administrative-policy / Phase-67 Pulsar data-path boundary
+  Phase-67 administrative-policy / Phase-68 Pulsar data-path boundary
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)

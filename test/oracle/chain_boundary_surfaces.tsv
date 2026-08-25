@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-34 two-register surface join.
+# Authored expectation for the Phase-35 two-register surface join.
 #
 # Renderer-produced plan/descent byte snapshots are deliberately absent. The Register-1
 # oracle is the authored case table plus nineteen ordered semantic Plan entries; runtime

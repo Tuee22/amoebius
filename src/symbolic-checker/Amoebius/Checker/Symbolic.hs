@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP #-}
 
--- | Amoebius-owned inductive safety checking over the Phase-11 formal 'Model'.
+-- | Amoebius-owned inductive safety checking over the Phase-12 formal 'Model'.
 --
 -- The checker owns the translation and induction schema.  A resolved absolute Z3
 -- path is injected by the caller; no executable is discovered through ambient PATH.

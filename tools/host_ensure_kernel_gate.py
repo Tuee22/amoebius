@@ -46,7 +46,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 
 GATE_COMMAND = "python3 tools/host_ensure_kernel_gate.py"
-CONTRACT = "DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_52_host_ensure_kernel.md"
 EXPECTATIONS = "test/oracle/host_ensure_kernel_surfaces.tsv"
 
 PLAN_ORACLE = ROOT / "test/oracle/host_ensure_plans.tsv"

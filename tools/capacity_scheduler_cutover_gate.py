@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seal Sprint 31.4 live scheduler binding and bootstrap-to-managed cutover."""
+"""Seal Sprint 32.4 live scheduler binding and bootstrap-to-managed cutover."""
 
 from __future__ import annotations
 
@@ -101,8 +101,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     # default: a default names a location, and whatever a previous run left there would
     # decide this gate instead of the run in progress.
     parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
-    # The scheduled Pods pull the Phase-30 published digest from the in-cluster registry.
-    parser.add_argument("--image", required=True, help="the Phase-30 published digest reference")
+    # The scheduled Pods pull the Phase-31 published digest from the in-cluster registry.
+    parser.add_argument("--image", required=True, help="the Phase-31 published digest reference")
     arguments = parser.parse_args(argv)
     evidence = arguments.evidence
     evidence.mkdir(parents=True, exist_ok=True)

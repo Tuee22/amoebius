@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-28 test-surface join.
+# Authored expectation for the Phase-29 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
 # independently authored expectation.
@@ -13,7 +13,7 @@
 # token, and the join rejected it — correctly, because one token is not independent
 # evidence for twenty claims.
 #
-# The Phase-28 review retired three provisional associations by adding direct cases for
+# The Phase-29 review retired three provisional associations by adding direct cases for
 # complete failure scenarios, backing allocation rounding, and the Pulsar hot-tier ceiling.
 # The formerly borrowed cases now name their actual claims below.
 #

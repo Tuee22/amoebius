@@ -16,7 +16,7 @@ nor the extensions themselves, owned by [lift_and_compose_doctrine.md](./lift_an
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_31_capability_bind.md, DEVELOPMENT_PLAN/phase_94_jitml_rederivation.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -134,7 +134,7 @@ wired by the same graph every other extension is wired by.
 
 ## 3. The PROVIDE and REQUIRE contract
 
-[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) owns the target two-member link set of `{infernix, jitML}`
+[Phase 31](../../DEVELOPMENT_PLAN/phase_31_capability_bind.md) owns the target two-member link set of `{infernix, jitML}`
 provide/require refinement in `Amoebius.Capability.Binding`: requirements must resolve, duplicate providers
 are rejected as anti-shadow violations, and provider edges must be acyclic. Its paired legal/cyclic/shadowing
 fixtures plus a direct missing-requirement/closed-graph pair establish totality only for the pure gadt-decode
@@ -320,7 +320,7 @@ rejections; amoebius re-derives that algebra and discards the seed's packaging (
 image, no `dlopen`, [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)), and adds the total/acyclic
 graph checks specified here. The graph checks themselves are net-new amoebius design intent.
 
-Phase 93 owns a scoped target Haskell consumer value, not a proof of the whole graph. Its external/untracked
+Phase 94 owns a scoped target Haskell consumer value, not a proof of the whole graph. Its external/untracked
 operator projection must name exactly `JitBuild`, `Coordination`, and `InferenceEngine`, expose no
 infrastructure field, and forbid a CPU fallback; any serialized test projection is generated beneath
 `.build/**`, never tracked as `dhall/jitml/package.dhall`. The leaf package must compile one untouched sibling
@@ -342,7 +342,7 @@ DSL type families and the extension seam of [dsl_doctrine.md §4](./dsl_doctrine
 capabilities the two capability-extensions provide are exercised by their owning doctrines
 ([content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) for `jit-build`, [daemon_topology_doctrine.md §4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) for `coordination`). This doc states the target shape and links back for status.
 
-> **Honesty.** The scoped Phase-93 consumer above is a target contract, not a current instance. This doctrine
+> **Honesty.** The scoped Phase-94 consumer above is a target contract, not a current instance. This doctrine
 > is design intent specified before implementation. The
 > `ProjectSpec` stream algebra and the anti-shadow `validateProjectSpec` are proven in the hostbootstrap
 > sibling; that is **sibling evidence, not a tested amoebius result**, and the total/acyclic PROVIDE/REQUIRE

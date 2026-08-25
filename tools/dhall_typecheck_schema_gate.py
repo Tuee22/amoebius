@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-25 gate — the Dhall Gate-1 schema and its smart-constructor prelude.
+"""The Phase-26 gate — the Dhall Gate-1 schema and its smart-constructor prelude.
 
 The capability claim is unchanged: every positive cluster/app/deployment fixture typechecks,
 every catalog, image/process, and import-policy negative fails at its own specific `dhall`
@@ -38,23 +38,23 @@ RESULTS = DHALL_TYPECHECK / "phase-results.tsv"
 CONFORMANCE_PROJECTION = DHALL_TYPECHECK / "conformance-projection.tsv"
 EXPECTED_CONFORMANCE_PROJECTION = ROOT / "test/oracle/dhall_typecheck_schema/conformance_projection.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/dhall-schema-conformance"
-CONTRACT = "DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_26_dhall_schema_generation.md"
 GATE_COMMAND = "python3 tools/dhall_typecheck_schema_gate.py"
 EXPECTATIONS = "test/oracle/dhall_typecheck_schema_surfaces.tsv"
 
 CHECKS = {
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
-    "phase24-plan-consumed": "the Dhall schema derives all Phase-24 obligations and mints no unsupported verdict",
+    "phase24-plan-consumed": "the Dhall schema derives all Phase-25 obligations and mints no unsupported verdict",
     "toolchain-satisfies-requirements": "the resolved dhall satisfies the authored range",
     "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
 }
 
 SIDES = ("toolchain", "battery", "conformance", "oracle", "artifact")
 
-# The authored oracle, read off the Phase-25 contract.
+# The authored oracle, read off the Phase-26 contract.
 EXPECTED_RESULTS = {
     # Amended 2026-08-12 from intent, not from a failing run. The count moved 14 -> 17
-    # because Phase 19 added SanctionedApi, Phase 24 added UiOffline, and Phase 30 added
+    # because Phase 20 added SanctionedApi, Phase 25 added UiOffline, and Phase 31 added
     # BakeCatalog. A count is not the oracle; the reviewed inventory beside it is, and a
     # module added without review breaks the inventory rather than sliding past a number.
     # Amended again 2026-08-13 by the secrets amendment: 17 -> 18 for the shared
@@ -106,7 +106,7 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
 
 
 def toolchain_side() -> tuple[bool, dict[str, Any]]:
-    print("toolchain side — Dhall and the Phase-24 projection toolchain from authored requirements\n")
+    print("toolchain side — Dhall and the Phase-25 projection toolchain from authored requirements\n")
     try:
         resolved = toolchain.resolve(["dhall", "cabal", "ghc"])
     except toolchain.ResolutionError as error:
@@ -152,7 +152,7 @@ def cabal_command(resolved: dict[str, Any], *arguments: str) -> list[str]:
 
 
 def conformance_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str, str]]:
-    print("\nconformance side — Phase-24 plan is derived and its unsupported verdict stays absent\n")
+    print("\nconformance side — Phase-25 plan is derived and its unsupported verdict stays absent\n")
     env = toolchain.contained_env()
     env["AMOEBIUS_SOURCE_ROOT"] = str(ROOT)
     result = subprocess.run(
@@ -247,7 +247,7 @@ def main() -> int:
         },
         dependencies={
             "dhall-typecheck": "tools/dhall_typecheck.py",
-            "dhall-schema-conformance-spec": "Phase-24 obligation projection",
+            "dhall-schema-conformance-spec": "Phase-25 obligation projection",
         },
         checks=results,
         mutants=[

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the Phase-49 scoped artifact lift on retained linux-cpu services."""
+"""Exercise the Phase-50 scoped artifact lift on retained linux-cpu services."""
 
 from __future__ import annotations
 

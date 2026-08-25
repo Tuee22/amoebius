@@ -119,6 +119,9 @@ as the set its first-use rule ranges over.
 - [`fits` / `carve` / `place`](./engineering/resource_capacity_folds.md#4-the-total-fold-fits-carve-place-and-the-nesting) — the nested total folds that admit a deployment or reject it as infeasible.
 - [`StorageBudget`](./engineering/resource_capacity_storage.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) — the closed union of storage ceilings, each naming exactly one owner.
 - [`Growable` / `ScalingPolicy`](./engineering/resource_capacity_storage.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm) — the quota-capped arm through which capacity is allowed to grow.
+- [claim record / `FREE`](./engineering/hostclaim_spec.md#4-the-claim-record) — the fixed-size host-ledger record whose free state is a positive value, so nothing unreadable can release capacity.
+- [dimension / domain](./engineering/hostclaim_spec.md#5-dimensions-and-domains) — the frozen units a claim is charged in, and the open opaque identifiers it conflicts over by prefix.
+- [`Transient` / `Persistent`](./engineering/hostclaim_spec.md#7-claim-kinds-and-release) — the two claim kinds, each a statement about what the holder's death proves.
 - [deterministic rebind](./engineering/storage_lifecycle_doctrine.md#6-the-lossless-teardown-guarantee-deterministic-rebind) — recreating a cluster onto preserved bytes with no restore step.
 - [shrink as verified migration](./engineering/storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) — contracting storage without any representable destruction of data.
 

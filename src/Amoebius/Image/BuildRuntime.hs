@@ -27,7 +27,7 @@ import GHC.Generics (Generic)
 import System.Exit (ExitCode (..))
 import System.FilePath (isAbsolute, isRelative, makeRelative, normalise, splitDirectories, (</>))
 
--- | The only Phase-25.1 build process shape.  Platforms and OCI output are
+-- | The only Phase-26.1 build process shape.  Platforms and OCI output are
 -- fixed here so callers cannot quietly turn an admitted multi-arch build into
 -- two unrelated image builds or a daemon-local image export.
 data BuildRequest = BuildRequest

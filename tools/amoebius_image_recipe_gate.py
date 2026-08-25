@@ -28,7 +28,7 @@ LOCUS = ROOT / "test/oracle/amoebius_image_recipe/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/image-recipe/phase-results.tsv"
 RENDERED = ROOT / ".build/dsl/image-recipe/Dockerfile"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/image-recipe"
-CONTRACT = "DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_36_image_recipe_generation.md"
 GATE_COMMAND = "python3 tools/amoebius_image_recipe_gate.py"
 EXPECTATIONS = "test/oracle/amoebius_image_recipe_surfaces.tsv"
 MUTANT_CAPABILITY = "amoebius_image_recipe"
@@ -148,7 +148,7 @@ def verify_sources() -> None:
         raise GateFailure("typed build argv source contains a multi-platform escape token")
     retired = ROOT / "test/golden/amoebius_image_recipe/Dockerfile.golden"
     if retired.exists():
-        raise GateFailure("retired Phase-35 renderer-output golden still exists")
+        raise GateFailure("retired Phase-36 renderer-output golden still exists")
     prohibited = re.compile(r"\b(error|undefined|fromJust|unsafePerformIO)\b|!!")
     for relative in (
         "src/Amoebius/Image/BaseChannel.hs",
@@ -236,7 +236,7 @@ CHECKS = {
     "argv-oracle-complete": "the authored argv oracle names all forty-four ordered invocation tokens",
     "renderer-totality-options": "the recipe suite compiles with incomplete patterns as errors",
     "digest-field-absent": "no authored baseDigest field reaches the catalog, inventory, or renderer",
-    "retired-golden-absent": "the planned Phase-35 renderer-output golden is absent",
+    "retired-golden-absent": "the planned Phase-36 renderer-output golden is absent",
     "emitted-results-untracked": "the generated recipe and results stay outside the source snapshot",
     "toolchain-satisfies-requirements": "the resolved cabal, ghc, and dhall satisfy authored requirements",
     "recorded-results-match-oracle": "every recorded metric equals its authored expectation",
@@ -399,7 +399,7 @@ def main() -> int:
         },
         dependencies={"image-recipe-spec": "cabal test image-recipe-spec"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-35 mutants", "status": "unrun"}],
+        or [{"name": "phase-36 mutants", "status": "unrun"}],
         observations={"rendered-recipe": "sha256:" + gate_common.artifact_policy.digest(str(RENDERED))}
         if RENDERED.is_file()
         else {},

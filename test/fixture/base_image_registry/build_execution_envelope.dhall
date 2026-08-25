@@ -1,4 +1,4 @@
--- Phase-25 independent build-admission oracle.  It is authored against the
+-- Phase-26 independent build-admission oracle.  It is authored against the
 -- arithmetic `deriveBuildTransition` must produce, not against the catalog: the
 -- stage names below are the oracle's own, so a catalog that renamed or merged a
 -- stage cannot make this file agree with it by construction.

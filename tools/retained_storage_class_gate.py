@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seal Sprint 32.1's single inert retained StorageClass."""
+"""Seal Sprint 33.1's single inert retained StorageClass."""
 
 from __future__ import annotations
 

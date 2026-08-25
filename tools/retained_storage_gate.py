@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal Phase 33's project-contained retained-storage gate."""
+"""Run and seal Phase 34's project-contained retained-storage gate."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ STORAGE_CLASS_GOLDEN = ROOT / "test/oracle/retained_storage/storage_class.yaml"
 CLAIMREF_TABLE = ROOT / "test/oracle/retained_storage/claimref_table.csv"
 RESULTS = ROOT / ".build/dsl/retained-storage/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/retained_storage_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_60_retained_storage.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_61_retained_storage.md"
 GATE_COMMAND = "python3 tools/retained_storage_gate.py --execute"
 
 EXPECTED_MUTANTS = {
@@ -243,7 +243,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if arguments.execute:
             predecessor = project_cluster_fixture.verified_phase_record(27)
             handoff = project_cluster_fixture.verified_image_handoff()
-            print("\npredecessor side — verified Phase-31 seal and Phase-30 OCI handoff\n")
+            print("\npredecessor side — verified Phase-32 seal and Phase-31 OCI handoff\n")
             print(f"  ok    phase27     {predecessor.attestation}")
             print(f"  ok    phase25     {handoff.attestation}")
             print(f"  ok    image-index {handoff.index_digest}")
@@ -264,7 +264,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print("\nlive side — three retained-storage sprints in one private marker-owned fixture\n")
             execute_sprints(evidence, handoff, fixture.environment)
         elif evidence is None:
-            raise GateFailure("phase-33 needs --execute or a completed --evidence bundle")
+            raise GateFailure("phase-34 needs --execute or a completed --evidence bundle")
         else:
             print(f"\nlive side — reusing completed live evidence at {evidence}\n")
         if not all((evidence / f"sprint-28.{number}-receipt.json").is_file() for number in (1, 2, 3)):
@@ -318,7 +318,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         toolchain={name: {"version": record["version"], "requirement": record["requirement"]} for name, record in resolved.items() if name != "platform"},
         dependencies={
             "cluster": "private marker-owned kind fixture with retained child mounts",
-            "image": "verified Phase-30 OCI export imported into each fresh node",
+            "image": "verified Phase-31 OCI export imported into each fresh node",
             **({"phase25Attestation": handoff.attestation, "phase25Index": handoff.index_digest} if handoff else {}),
             **({"phase27Attestation": predecessor.attestation} if predecessor else {}),
         },

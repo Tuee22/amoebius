@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seal Sprint 31.1 state-indexed scheduler-ledger normalization."""
+"""Seal Sprint 32.1 state-indexed scheduler-ledger normalization."""
 
 from __future__ import annotations
 

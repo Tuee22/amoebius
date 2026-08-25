@@ -32,7 +32,7 @@ instance Arbitrary GeneratedEngineCase where
 runEngineAcceleratorProps :: IO Int
 runEngineAcceleratorProps = do
   result <- quickCheckWithResult stdArgs {chatty = False, maxSuccess = 1200} propSpecificEngineBranches
-  unless (isSuccess result) (fail ("Phase-32 accelerator-provision property failed: " <> show result))
+  unless (isSuccess result) (fail ("Phase-33 accelerator-provision property failed: " <> show result))
   putStrLn "engine-accelerator-properties: TESTED sampled (8 provision branches, each >=9%)"
   pure 1
 

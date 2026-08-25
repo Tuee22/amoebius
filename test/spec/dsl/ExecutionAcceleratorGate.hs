@@ -61,13 +61,13 @@ data OracleRow = OracleRow
 runExecutionAcceleratorGate :: IO ()
 runExecutionAcceleratorGate = do
   rows <- loadOracle "test/oracle/execution_accelerator/execution_accelerator_cases.tsv"
-  assert (length rows == 37) "Phase-29 oracle must contain 37 variant rows"
+  assert (length rows == 37) "Phase-30 oracle must contain 37 variant rows"
   let fixtureMap = Map.fromList [(phase29Variant fixture, fixture) | fixture <- phase29Fixtures]
       families = Set.fromList (fmap oracleFamily rows)
-  assert (Map.keysSet fixtureMap == Set.fromList (fmap oracleVariant rows)) "Phase-29 fixture/oracle variants diverged"
-  assert (families == requiredFamilies) "Phase-29 oracle does not preserve the exact eighteen negative families"
+  assert (Map.keysSet fixtureMap == Set.fromList (fmap oracleVariant rows)) "Phase-30 fixture/oracle variants diverged"
+  assert (families == requiredFamilies) "Phase-30 oracle does not preserve the exact eighteen negative families"
   forM_ rows $ \row -> case Map.lookup (oracleVariant row) fixtureMap of
-    Nothing -> fail ("missing Phase-29 fixture: " <> Text.unpack (oracleVariant row))
+    Nothing -> fail ("missing Phase-30 fixture: " <> Text.unpack (oracleVariant row))
     Just fixture -> do
       assert (phase29Family fixture == oracleFamily row) (drift row "family")
       assert (phase29Operation fixture == oracleOperation row) (drift row "operation")
@@ -79,7 +79,7 @@ runExecutionAcceleratorGate = do
   forM_ phase29PositiveRows $ \(name, result) -> do
     decoded <- decodeCluster ("dhall/examples/" <> Text.unpack name <> ".dhall")
     case decoded of
-      Left problem -> fail (Text.unpack name <> " failed Gate 2 before Phase-29 composition: " <> show problem)
+      Left problem -> fail (Text.unpack name <> " failed Gate 2 before Phase-30 composition: " <> show problem)
       Right _ -> pure ()
     assert (result == Right ()) (Text.unpack name <> " composed placement rejected: " <> show result)
   gate1Count <- checkGate1
@@ -141,10 +141,10 @@ checkGate1 :: IO Int
 checkGate1 = do
   contents <- Text.readFile "test/oracle/execution_accelerator/dhall_typecheck_cases.tsv"
   case Text.lines contents of
-    [] -> fail "Phase-29 Gate-1 oracle is empty"
+    [] -> fail "Phase-30 Gate-1 oracle is empty"
     header : rows -> do
-      assert (header == "entry\tnegative\tlegal\trequired") "Phase-29 Gate-1 oracle header drifted"
-      assert (length rows == 1) "Phase-29 Gate-1 oracle must contain one row"
+      assert (header == "entry\tnegative\tlegal\trequired") "Phase-30 Gate-1 oracle header drifted"
+      assert (length rows == 1) "Phase-30 Gate-1 oracle must contain one row"
       forM_ rows $ \row -> case Text.splitOn "\t" row of
         [_, negative, legal, required] -> do
           dhall <- resolvedDhall
@@ -153,7 +153,7 @@ checkGate1 = do
           (negativeExit, negativeOut, negativeError) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack negative, "--quiet"]) ""
           let observed = Text.pack (negativeOut <> negativeError)
           assert (negativeExit /= ExitSuccess && required `Text.isInfixOf` observed) (Text.unpack negative <> " missed exact Gate-1 locus")
-        _ -> fail ("malformed Phase-29 Gate-1 row: " <> Text.unpack row)
+        _ -> fail ("malformed Phase-30 Gate-1 row: " <> Text.unpack row)
       pure (length rows)
 
 countExecutionAcceleratorMutants :: IO Int
@@ -163,7 +163,7 @@ countExecutionAcceleratorMutants = do
         capability : _ -> capability == "execution_accelerator"
         [] -> False
       count = length (filter isExecutionAccelerator (Text.lines contents))
-  assert (count == 45) "Phase-29 mutant registry must contain 45 rows"
+  assert (count == 45) "Phase-30 mutant registry must contain 45 rows"
   pure count
 
 checkExecutionAcceleratorCalculusProjection :: Int -> Int -> Int -> Int -> IO ()

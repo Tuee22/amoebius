@@ -31,7 +31,7 @@ BUILD_ROOT = ROOT / ".build/dist-newstyle/encrypted-browser-runtime"
 BUNDLE_ROOT = ROOT / ".build/ui/encrypted-browser-runtime"
 WORKSPACE_ROOT = BUNDLE_ROOT / "workspace"
 TEMP_ROOT = ROOT / ".build/tmp/encrypted-browser-runtime"
-CONTRACT = "DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_46_encrypted_browser_runtime.md"
 GATE_COMMAND = "python3 tools/encrypted_browser_runtime_gate.py"
 MUTANT_CAPABILITY = "encrypted_browser_runtime"
 
@@ -198,24 +198,24 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure("encrypted-browser-runtime five-calculus projection drifted")
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 6 or {row["flag"] for row in mutants} != set(FLAGS):
-        raise GateFailure("Phase-45 mutant registry must contain the six exact build flags")
+        raise GateFailure("Phase-46 mutant registry must contain the six exact build flags")
     if any(not row.get("expected_red_locus") for row in mutants):
-        raise GateFailure("each Phase-45 mutant must name its distinct red locus")
+        raise GateFailure("each Phase-46 mutant must name its distinct red locus")
     if any(not (ROOT / row["body"]).is_file() for row in mutants):
-        raise GateFailure("a Phase-45 mutant descriptor body is absent")
+        raise GateFailure("a Phase-46 mutant descriptor body is absent")
     locus = read_tsv(LOCUS)
     if len(locus) != 41 or len({row["entry"] for row in locus}) != 41:
-        raise GateFailure("Phase-45 validation locus must contain forty-one unique rows")
+        raise GateFailure("Phase-46 validation locus must contain forty-one unique rows")
     custody = [row for row in read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv") if row["# phase"] == "28"]
     if len(custody) != 11:
-        raise GateFailure("Phase-0 manifest must pin eleven Phase-45 artifacts under custody phase 28")
+        raise GateFailure("Phase-0 manifest must pin eleven Phase-46 artifacts under custody phase 29")
     missing = [row["path"] for row in custody if not (ROOT / row["path"]).is_file()]
     if missing:
-        raise GateFailure(f"Phase-45 preimplementation artifacts are absent: {missing}")
+        raise GateFailure(f"Phase-46 preimplementation artifacts are absent: {missing}")
     descriptors = {row["expected gate locus"] for row in custody if row["kind"] == "mutant"}
-    wanted_descriptors = {f"gate-red:phase_28_{Path(row['body']).name}" for row in mutants}
+    wanted_descriptors = {f"gate-red:phase_29_{Path(row['body']).name}" for row in mutants}
     if descriptors != wanted_descriptors:
-        raise GateFailure("Phase-45 mutant custody descriptors do not name custody phase 28 exactly")
+        raise GateFailure("Phase-46 mutant custody descriptors do not name custody phase 29 exactly")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 2 production browser runtime; server replay and live multi-zone remain UNVERIFIED\n"
@@ -293,7 +293,7 @@ def run_green(cabal: Path) -> str:
         str(cabal), "test", "offline-browser-runtime-spec", *configuration(), "--test-show-details=direct",
     ])
     if ACCEPTANCE_TOKEN not in result.stdout or CALCULUS_TOKEN not in result.stdout:
-        raise GateFailure("Phase-45 acceptance or calculus token is absent")
+        raise GateFailure("Phase-46 acceptance or calculus token is absent")
     return result.stdout
 
 
@@ -535,7 +535,7 @@ def main() -> int:
                    for name, record in resolved.items() if name != "platform"},
         dependencies={"offline-browser-runtime-spec": "cabal test", "amoebius-ui-runtime": "spago bundle"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-45 mutants", "status": "unrun"}],
+        or [{"name": "phase-46 mutants", "status": "unrun"}],
         observations=observations,
         extra_status=surface_decisions(expected_rows, rows, classes, results),
     )

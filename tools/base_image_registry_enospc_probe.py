@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prove Phase-30 BuildKit scratch and local-cache ENOSPC boundaries."""
+"""Prove Phase-31 BuildKit scratch and local-cache ENOSPC boundaries."""
 
 from __future__ import annotations
 

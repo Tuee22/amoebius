@@ -17,7 +17,7 @@ the fabric makes reachable, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_74_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -44,7 +44,7 @@ Neither covers the case the elastic single-logical-data-plane design needs: **a 
 ([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)) is named "over Pulsar," but the *secure wire* it
 rides — broker↔broker, or a remote worker↔home broker over the WAN — is undescribed. That gap is the open
 pre-plan design-log question *"vpn and linkerd service mesh story (certs?)"*. This doctrine closes it **for the two spans it actually renders** — the remote-worker↔home-broker attach wire (K1, [§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)) and the stretched
-full-node kubelet↔apiserver wire (K2, [§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)/[§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)) — and **defers the cross-cluster broker↔broker geo-replication wire to Phase 74**: it is design-intent, its `render()` obligation is not yet
+full-node kubelet↔apiserver wire (K2, [§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)/[§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)) — and **defers the cross-cluster broker↔broker geo-replication wire to Phase 75**: it is design-intent, its `render()` obligation is not yet
 written, and it carries the same *"witness present, constructor deferred"* posture the `Gateway` arm of the
 `Networking` sum carries in [§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric). The addressing precondition exists (disjoint per-cluster VPN ranges, [§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)); the per-peer render does not.
 
@@ -137,8 +137,8 @@ flowchart TD
 
 *Design intent. Rendered peer configs and Vault-injected keys are Tier-1 in-process; the wg0 interface is the one effectful seam where `wg set` enacts — runtime-checked, not proven here.*
 
-The eventual [Phase-73 gate](../../DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md) must test this v1
-seam on its declared `linux-cpu` lane, but Phase 73 is **NOT VALIDATED**. Its contract must require two fresh
+The eventual [Phase-74 gate](../../DEVELOPMENT_PLAN/phase_74_network_fabric_wireguard.md) must test this v1
+seam on its declared `linux-cpu` lane, but Phase 74 is **NOT VALIDATED**. Its contract must require two fresh
 Vault-KV keypairs resolved by `SecretRef`, exact rendered configuration, a real two-namespace kernel fabric,
 ICMP/TCP reachability, and an underlay observation that sees WireGuard UDP/51820 but not a fresh plaintext
 canary. Independent observations must also cover `wg show`, cgroup-v2, `tc`, bounded logs/nodefs,
@@ -272,7 +272,7 @@ cryptographic identity beyond NetworkPolicy + Vault, revisit — and even then p
 | The fabric that makes the localhost→fabric generalization safe | The channel-2 rule generalization itself → [host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) |
 
 > **Deferred, not delivered here:** the cross-cluster **broker↔broker** geo-replication render obligation is
-> named in-scope ([§1](#1-why-this-doctrine-exists-the-inter-cluster-wire-is-an-open-gap)) but is Phase-74 design intent — the disjoint-per-cluster addressing exists, the
+> named in-scope ([§1](#1-why-this-doctrine-exists-the-inter-cluster-wire-is-an-open-gap)) but is Phase-75 design intent — the disjoint-per-cluster addressing exists, the
 > per-peer `render()` does not. The two spans this doc actually delivers are the attach (K1) and
 > stretched-control-plane (K2) obligations.
 
@@ -282,13 +282,13 @@ cryptographic identity beyond NetworkPolicy + Vault, revisit — and even then p
 
 This document is normative network-fabric doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). For
-orientation only: the fabric was promoted from the former later-phase candidate into Phase 73; the old
+orientation only: the fabric was promoted from the former later-phase candidate into Phase 74; the old
 "WireGuard / Linkerd vs Envoy"
 candidate into a first-class phase (the network fabric is now *load-bearing* for the attach topology, not the
 "redundant, do not adopt" default that candidate assumed when it measured only against north-south
 ingress); the Linkerd half collapses to the written verdict in [§6](#6-the-service-mesh-verdict-no-linkerd-for-v1).
 
-> **Honesty — target only, NOT VALIDATED.** Phase 73 must eventually supply independently observed Register-3
+> **Honesty — target only, NOT VALIDATED.** Phase 74 must eventually supply independently observed Register-3
 > evidence for the static two-peer raw-kernel fabric, Vault-by-name key resolution, gateway-role hub
 > reachability, encrypted underlay, bounded resource controls, and exact teardown. No such evidence is current.
 > Keyless, overlapping, and out-of-CIDR foreclosure also remains unvalidated in the pre-cluster band. Broker

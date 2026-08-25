@@ -80,7 +80,7 @@ verify (Evidence register substrate boundary cycles sweep provider deferred univ
     Provider eks node signal audit sweepResult leaks durable secondCycle ->
       assert (all (== "UNVERIFIED") [eks, node, signal, audit, sweepResult, leaks, durable, secondCycle]) "provider-honesty"
   case deferred of
-    Deferred reclamation spot -> assert (reclamation == "UNVERIFIED until Phase 54" && spot == "UNVERIFIED") "deferred"
+    Deferred reclamation spot -> assert (reclamation == "UNVERIFIED until Phase 55" && spot == "UNVERIFIED") "deferred"
   case universal of
     Universal available (Pristine linux linuxCuda apple windows) ->
       assert (available && linux == "Incus" && linuxCuda == "Incus" && apple == "Lima" && windows == "WSL2") "universal-linux-cpu"

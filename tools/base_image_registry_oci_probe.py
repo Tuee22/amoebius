@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure and verify a two-platform Phase-30 OCI image layout."""
+"""Measure and verify a two-platform Phase-31 OCI image layout."""
 
 from __future__ import annotations
 

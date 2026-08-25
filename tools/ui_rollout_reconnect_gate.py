@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Acceptance gate for Phase 57's scoped rollout/reconnect result."""
+"""Acceptance gate for Phase 58's scoped rollout/reconnect result."""
 
 import hashlib
 import json
@@ -11,8 +11,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_57"
-ENUMERATION = ROOT / "test/enumeration/phase_57_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_57_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_58_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_58_ledger.json"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
 FLAGS = (

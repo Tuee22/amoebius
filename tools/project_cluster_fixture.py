@@ -156,7 +156,7 @@ def verified_phase_record(phase: int) -> VerifiedPhaseRecord:
 
 
 def verified_image_handoff(phase: int = 25) -> VerifiedImageHandoff:
-    """Find the newest all-pass Phase-30 record and its exact producing run.
+    """Find the newest all-pass Phase-31 record and its exact producing run.
 
     An attestation does not carry a mutable pathname.  Its content-addressed ledger
     observation is therefore joined to the digest of each candidate run ledger.  That
@@ -396,7 +396,7 @@ class ProjectCluster:
     def _configure_registry_pull_route(self) -> dict[str, Any]:
         """Route the authored registry name to this run's fresh Service.
 
-        Phase 30 proves the same containerd hosts-directory mechanism under the
+        Phase 31 proves the same containerd hosts-directory mechanism under the
         no-public-pull firewall. Successor phases recreate that runtime-only node
         wiring because a fresh cluster deliberately inherits no predecessor state.
         """

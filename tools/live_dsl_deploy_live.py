@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the Phase-33 control-plane daemon, admin, handoff, and live-deploy acceptance."""
+"""Run the Phase-34 control-plane daemon, admin, handoff, and live-deploy acceptance."""
 
 from __future__ import annotations
 

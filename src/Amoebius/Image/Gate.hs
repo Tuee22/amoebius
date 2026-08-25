@@ -3,7 +3,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- | Pure verdict for the Phase-25 no-public-registry-pull negative control.
+-- | Pure verdict for the Phase-26 no-public-registry-pull negative control.
 module Amoebius.Image.Gate
   ( RegistryDenialMechanism (..)
   , PublicRegistryDenyPlan (..)

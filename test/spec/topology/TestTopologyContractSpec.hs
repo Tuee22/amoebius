@@ -38,7 +38,7 @@ verifyCustody = do
   assertEqual "Phase-0 custody" 20 (length phaseRows)
   forM_ phaseRows $ \row -> case splitTabs row of
     (_ : _ : path : _) -> doesFileExist path >>= flip assert ("missing custody file: " <> path)
-    _ -> die "malformed Phase-54 custody row"
+    _ -> die "malformed Phase-55 custody row"
 
 verifyCredentials :: IO ()
 verifyCredentials = do

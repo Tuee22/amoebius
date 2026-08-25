@@ -49,7 +49,7 @@ completion claim, and implementation result in this document is invalidated as v
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-50 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -65,7 +65,7 @@ code, or other derived product must be created lazily beneath `.build/**` and re
 `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
 evidence contract remain UNRESOLVED and block validation.
 
-This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
+This phase precedes Phase 50 and is confined to pure, build, compiler, or model-level Register-1
 behavior only. It cannot use host, hardware, live-service, or cluster observations to validate or
 promote its claim.
 
@@ -74,14 +74,14 @@ tracked-source boundary: behavioral source is `.hs` only outside `pb/**`, consum
 canonical Haskell module and package paths, and generated foreign products are absent from Git.
 NOT VALIDATED.
 
-**Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
+**Substrate:** `none` — pre-Phase-50; no host, hardware, live service, or cluster observation.
 
 **Lane:** `none`.
 
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 1](phase_01_toolchain_spike.md)
-**Gate:** `pb validate phase 02`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 2`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
@@ -91,7 +91,7 @@ NOT VALIDATED.
 |---|---|
 | `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Target capability only — enforce the target repository layout, including the tracked-source boundary: behavioral source is `.hs` only outside `pb/**`, consumers resolve at canonical Haskell module and package paths, and generated foreign products are absent from Git. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 02` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 2` is future public spelling only. Before current human approval of Phase 51, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
@@ -104,7 +104,7 @@ NOT VALIDATED.
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 01; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 1; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
 
@@ -221,7 +221,7 @@ owned legacy closure, exact Haskell package/module discovery, and clean-source c
 `Setup.hs` generated the Pulsar protobuf bindings. A root `Setup.hs` is not in the section 2 tree and
 [§2.1](../documents/engineering/repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package)
 admits no ground for a package that exists only to carry one, so the generator retired with the split. The
-condemned tracked Proto schema remains migration debt, and Phase 67 re-establishes both schema projection and
+condemned tracked Proto schema remains migration debt, and Phase 68 re-establishes both schema projection and
 binding generation from reviewed Haskell declarations beneath `.build/proto/**`. Its typed legacy binding is
 explained in the reader-facing register.
 
@@ -242,7 +242,7 @@ language or adding to those roots.
 
 ### Deliverables
 
-- One typed Haskell legacy binding assigning removal of all tracked UI/package inputs to Phase 46, plus its
+- One typed Haskell legacy binding assigning removal of all tracked UI/package inputs to Phase 47, plus its
   reader-facing explanation in the single register.
 - No new tracked UI source; every generated UI output is contained beneath `.build/ui/**`.
 
@@ -255,7 +255,7 @@ language or adding to those roots.
 
 ### Remaining Work
 
-Phase 46 must replace the tracked UI/package inputs with Haskell declarations and lazy `.build/ui/**`
+Phase 47 must replace the tracked UI/package inputs with Haskell declarations and lazy `.build/ui/**`
 materialization. Until that owner reaches zero findings, this is only accounted debt and remains NOT VALIDATED.
 
 ## Sprint 2.4: Every authored name loses its phase ordinal ⏸️

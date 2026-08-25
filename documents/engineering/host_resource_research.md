@@ -16,7 +16,7 @@ none is lost.
 
 **Status**: Reference only
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/hostclaim_spec.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_10_host_claim_ledger.md, documents/engineering/README.md, documents/engineering/hostclaim_spec.md
 **Generated sections**: none
 
 </details>
@@ -30,7 +30,7 @@ none is lost.
 - [5. Mechanism coverage](#5-mechanism-coverage)
 - [6. Composing with a participant's own capacity arithmetic](#6-composing-with-a-participants-own-capacity-arithmetic)
 - [7. Authority-gated launch](#7-authority-gated-launch)
-- [8. What amoebius must settle before participating](#8-what-amoebius-must-settle-before-participating)
+- [8. What amoebius settled before participating](#8-what-amoebius-settled-before-participating)
 - [9. Where this work lands](#9-where-this-work-lands)
 - [Related Documents](#related-documents)
 
@@ -210,28 +210,33 @@ mechanisms if it cannot be reached from ordinary paths.
 Both are local corrections. They are worth making in a participant whether or not it ever joins a ledger,
 which is a useful property: nothing here has to wait for agreement.
 
-## 8. What amoebius must settle before participating
+## 8. What amoebius settled before participating
 
-Three things, none of which is a detail.
+Three things, none of which was a detail. Each is now written into the doctrine that owns it; they are
+recorded here with their resolution rather than as open questions.
 
-**The host-global state rule needs an explicit narrow exception.** amoebius forbids falling back to system
+**The host-global state rule needed an explicit narrow exception, and now carries one.** amoebius forbids falling back to system
 temporary directories, a user home, or host-global engine state, and
 [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) states that rule for cluster lifecycles. The
 distinction that has to be written down is that the ban covers amoebius state escaping into the machine,
 while the ledger is operator-owned state that amoebius reads and appends one record to. It holds no amoebius
-bytes and survives amoebius being deleted. The exception must be stated deliberately, not assumed, and it
-must not widen into a general permission.
+bytes and survives amoebius being deleted. That exception is now stated in
+[cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) and is bounded to a declared read and a
+single-writer record: it admits no cluster runtime, kubeconfig, virtual disk, engine datum, or retained
+backing, and it does not widen into a general permission.
 
-**Participation must be a declared seam.** Two components interacting through an undeclared file path are
+**Participation had to be a declared seam, and is one.** Two components interacting through an undeclared file path are
 outside the composition argument that
 [extension_conformance_doctrine.md](./extension_conformance_doctrine.md) makes, and an undeclared side
 channel is an illegal state rather than an untidy one. Reading the ledger incidentally would be exactly that.
-It enters through the declared resource index or it does not enter.
+It enters through the declared resource index or it does not enter, and
+[extension_conformance_doctrine.md](./extension_conformance_doctrine.md) now says so directly.
 
-**One root, not two.** A later phase already describes a host-resident ledger with its own compare-and-swap
+**One root, not two — and the inner ledgers now defer.** A later phase already describes a host-resident ledger with its own compare-and-swap
 root for a host compute daemon, and another describes an in-cluster reservation ledger. Two roots that both
 authorise a host launch recreate double-spending inside one program. The inner ledger references the outer
-claim; it does not compete with it.
+claim; it does not compete with it. Both inner ledgers now record that subordination in their own phase
+contracts, so neither can authorise a host launch on its own.
 
 The seed relationship is unaffected, and this is deliberate.
 [lift_and_compose_doctrine.md](./lift_and_compose_doctrine.md) commits that no seed depends on amoebius and
@@ -242,8 +247,9 @@ scheduled and no exception to that commitment is needed.
 
 ## 9. Where this work lands
 
-Nothing here amends the plan, and no status changes because this document exists. Recorded so the work is
-visible when it is scheduled:
+The plan now schedules this work: [Phase 10](../../DEVELOPMENT_PLAN/phase_10_host_claim_ledger.md) owns the
+ledger calculus and [Phase 52](../../DEVELOPMENT_PLAN/phase_52_host_ensure_kernel.md) owns participation
+against a real root. No status changes because this document exists, and no phase is validated.
 
 | Work | Nature |
 |---|---|
@@ -251,13 +257,18 @@ visible when it is scheduled:
 | Ledger encoding, total decoding, and admission arithmetic | hardware-free |
 | Coverage algebra, residue, and observer readiness | hardware-free model, hardware-bearing evidence |
 | Charge derivation from the existing capacity arithmetic | hardware-free |
-| Reading and writing real records against a real root | hardware-bearing |
+| Reading and writing real records against a real root | hardware-free |
 | Contention between independently built participants | hardware-bearing |
 
-The first four are model work and can proceed under the hardware-free barrier the
-[Development Plan](../../DEVELOPMENT_PLAN/README.md) records. The last two are host work and are ordered by
-that plan like any other host work, behind the barriers it names. No participation, conformance, or
-validation may be claimed from this document.
+All but the last can proceed under the hardware-free barrier the
+[Development Plan](../../DEVELOPMENT_PLAN/README.md) records. Record I/O is on that side of the line
+deliberately: opening a fixed per-user path and exchanging fixed-size records observes no device, starts no
+engine, and creates no cluster, so it is ordinary filesystem work rather than the hardware discovery the
+barrier forecloses. The line falls between the record and the *observation that fills it* — a participant may
+read and write claims before the barrier only with a supplied observed host and an operator-authored budget,
+never with figures derived from probed hardware. Contention between independently built participants stays
+host work, because it needs a second real implementation running on the same machine. No participation,
+conformance, or validation may be claimed from this document.
 
 ## Related Documents
 

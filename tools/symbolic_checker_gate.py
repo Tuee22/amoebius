@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-13 gate — amoebius-owned inductive safety checking through SMT.
+"""The Phase-14 gate — amoebius-owned inductive safety checking through SMT.
 
 Seven authored models separate inductive, base-red, step-red, conservatively
 non-inductive, and explicitly unsupported results.  The checker owns its QF_LIA
@@ -30,7 +30,7 @@ ORACLE = ROOT / "test/oracle/symbolic_checker/models.tsv"
 SOURCE = ROOT / "src/symbolic-checker/Amoebius/Checker/Symbolic.hs"
 RESULTS = ROOT / ".build/checkers/symbolic/results.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/symbolic-checker-gate"
-CONTRACT = "DEVELOPMENT_PLAN/phase_13_symbolic_checker.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_14_symbolic_checker.md"
 GATE_COMMAND = "python3 tools/symbolic_checker_gate.py"
 EXPECTATIONS = "test/oracle/symbolic_checker_surfaces.tsv"
 MUTANT_CAPABILITY = "symbolic_checker"
@@ -329,7 +329,7 @@ def main() -> int:
             for name, record in resolved.items()
             if name in {"cabal", "ghc", "z3"}
         },
-        dependencies={SUITE: "cabal build", "formal-model": "Phase-11 Model semantics", "z3": "SMT-LIB stdin"},
+        dependencies={SUITE: "cabal build", "formal-model": "Phase-12 Model semantics", "z3": "SMT-LIB stdin"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
         or [{"name": "symbolic checker mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}

@@ -94,7 +94,7 @@ loadPredecessorCoverage = do
 -- The last phase whose rows this suite can discharge: the illegal-state corpus completes
 -- the Gate-1/Gate-2 rejection set, so a row owned at or before it is reached here and a
 -- later one is deferred to its owner. This threshold read 6 while the registry said
--- Phase-27, so twenty-six rows the corpus already rejected were read as deferred and the
+-- Phase-28, so twenty-six rows the corpus already rejected were read as deferred and the
 -- coverage comparison diverged from its own registry.
 corpusPhase :: Int
 corpusPhase = 27

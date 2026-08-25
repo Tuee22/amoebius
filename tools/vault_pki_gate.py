@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal Phase 34's project-contained Vault/PKI acceptance gate."""
+"""Run and seal Phase 35's project-contained Vault/PKI acceptance gate."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / ".build/dsl/vault-pki/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/vault_pki_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_61_vault_pki.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_62_vault_pki.md"
 GATE_COMMAND = "python3 tools/vault_pki_gate.py --execute"
 SIDES = ("toolchain", "oracle", "static", "simulation", "live", "mutant", "results")
 
@@ -46,8 +46,8 @@ EXPECTED_MUTANTS = {name for name, _flag, _marker in MUTANTS} | set(STATIC_MUTAN
 CHECKS = {
     "authored-vault-oracles": "the crypto/error/storage fixtures and surface expectation are authored",
     "toolchain-satisfies-requirements": "resolved tools satisfy authored compatibility ranges",
-    "phase28-predecessor-verified": "the exact latest all-pass Phase-32 record is verified",
-    "phase25-image-handoff-verified": "the OCI archive is joined to its all-pass Phase-30 record",
+    "phase28-predecessor-verified": "the exact latest all-pass Phase-33 record is verified",
+    "phase25-image-handoff-verified": "the OCI archive is joined to its all-pass Phase-31 record",
     "prompt-only-secret-boundary": "production refuses the sole cleartext test seam and no sink can copy it",
     "pure-vault-contract": "init, storage, crypto, PKI, client, write, and admission contracts pass",
     "fault-simulation": "the fail-closed model passes all deterministic schedules",
@@ -249,7 +249,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         handoff = project_cluster_fixture.verified_image_handoff()
         check_results["phase28-predecessor-verified"] = True
         check_results["phase25-image-handoff-verified"] = True
-        print("\npredecessor side — exact Phase-32 seal and Phase-30 OCI handoff\n")
+        print("\npredecessor side — exact Phase-33 seal and Phase-31 OCI handoff\n")
         print(f"  ok    phase28     {predecessor.attestation}")
         print(f"  ok    phase25     {handoff.attestation}")
         print(f"  ok    image-index {handoff.index_digest}")
@@ -268,7 +268,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "--artifact", str(handoff.artifact), "--image-digest", handoff.index_digest,
             ), environment=fixture.environment, timeout=21600)
         elif evidence is None:
-            raise GateFailure("Phase 34 requires --execute or a completed --evidence observation")
+            raise GateFailure("Phase 35 requires --execute or a completed --evidence observation")
         if not evidence.is_file():
             raise GateFailure("vault-live-evidence-absent")
         environment["AMOEBIUS_VAULT_PKI_EVIDENCE"] = str(evidence)
@@ -338,7 +338,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         toolchain={name: {"version": record["version"], "requirement": record["requirement"]} for name, record in resolved.items() if name != "platform"},
         dependencies={
             "cluster": "fresh private marker-owned kind fixture with retained child filesystems",
-            "image": "verified Phase-30 OCI export imported into both fresh nodes",
+            "image": "verified Phase-31 OCI export imported into both fresh nodes",
             **({"phase25Attestation": handoff.attestation, "phase25Index": handoff.index_digest} if handoff else {}),
             **({"phase28Attestation": predecessor.attestation} if predecessor else {}),
         },

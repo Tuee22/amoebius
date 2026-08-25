@@ -16,7 +16,7 @@ referenceReconcile :: MonadAsync m => Env m -> m InvariantOutcome
 referenceReconcile = referenceReconcileCommands ["object-store", "sql"]
 
 -- | The same reference program with its intended component sequence supplied as data.
--- Phase 16 uses this seam to consume a real Phase-10 'Composition' projection without
+-- Phase 17 uses this seam to consume a real Phase-11 'Composition' projection without
 -- making the simulation substrate depend on the calculi it can host.
 referenceReconcileCommands :: MonadAsync m => [Text] -> Env m -> m InvariantOutcome
 referenceReconcileCommands commands env = do

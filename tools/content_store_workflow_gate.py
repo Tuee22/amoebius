@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-37 content-store/workflow-runtime gate."""
+"""Run and seal the Phase-38 content-store/workflow-runtime gate."""
 
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_37"
 LIVE = EVIDENCE / "content-store-workflow-live.json"
 SIMULATION = EVIDENCE / "workflow-failover-sim.json"
-ENUMERATION = ROOT / "test/enumeration/phase_37_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_37_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_38_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_38_ledger.json"
 MANIFEST_HEX = ROOT / "test/golden/content_store/manifest_canonical.cbor"
 MANIFEST_SHA = ROOT / "test/golden/content_store/manifest_canonical.sha256"
 NONCANONICAL_HEX = ROOT / "test/golden/content_store/manifest_noncanonical.cbor"
@@ -192,7 +192,7 @@ def evidence_domain(*, fresh: bool) -> None:
     universal = live.get("universalLinuxCpu", {})
     require(universal.get("allHardwareSubstrates") is True, "universal-linux-cpu")
     require(universal.get("pristineLinux") == {"linux": "Incus", "linux-cuda": "Incus", "apple": "Lima", "windows": "WSL2"}, "pristine-linux-routing")
-    require(set(live.get("unverified", [])) == {"cross-cluster content replication", "deriveExperimentHash and SplitMix seed kernel (Phase 48)", "Pulsar broker/BookKeeper/ZooKeeper consensus internals"}, "honesty-domain")
+    require(set(live.get("unverified", [])) == {"cross-cluster content replication", "deriveExperimentHash and SplitMix seed kernel (Phase 49)", "Pulsar broker/BookKeeper/ZooKeeper consensus internals"}, "honesty-domain")
 
 
 def simulation_domain(*, fresh: bool) -> None:
@@ -230,7 +230,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(oracle_domain())
         rows.append(dependency_domain())
         if args.reuse_fresh_live:
-            rows.append({"name": "workflow-live", "command": "sealed just-produced Phase-37 live receipt", "output": "fresh final live evidence", "result": "PASS"})
+            rows.append({"name": "workflow-live", "command": "sealed just-produced Phase-38 live receipt", "output": "fresh final live evidence", "result": "PASS"})
         else:
             rows.append(invoke("workflow-live", (CABAL, "test", "content-store-workflow-live", *disabled, "--test-show-details=direct", "-j1"), timeout=5400))
         evidence_domain(fresh=args.reuse_fresh_live)

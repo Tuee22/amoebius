@@ -1,4 +1,4 @@
--- | A formal-model projection of the Phase-10 calculus composition value.
+-- | A formal-model projection of the Phase-11 calculus composition value.
 --
 -- The formal kernel does not invent a second composition algebra.  It consumes the
 -- ordered calculus sequence and exact resource fold already computed by

@@ -29,7 +29,7 @@ LOCUS = ORACLE_ROOT / "validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/transaction-vocabulary/phase-results.tsv"
 SQL_BUNDLE = ROOT / ".build/sql/transaction-vocabulary/schema.sql"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/transaction-vocabulary"
-CONTRACT = "DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_37_transaction_vocabulary.md"
 GATE_COMMAND = "python3 tools/transaction_vocabulary_gate.py"
 EXPECTATIONS = "test/oracle/transaction_vocabulary_surfaces.tsv"
 MUTANT_CAPABILITY = "transaction_vocabulary"
@@ -470,7 +470,7 @@ def main() -> int:
         },
         dependencies={"transaction-vocabulary-spec": "cabal test transaction-vocabulary-spec transaction-vocabulary-compile"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-36 mutants", "status": "unrun"}],
+        or [{"name": "phase-37 mutants", "status": "unrun"}],
         observations={"generated-sql": "sha256:" + gate_common.artifact_policy.digest(str(SQL_BUNDLE))}
         if SQL_BUNDLE.is_file()
         else {},

@@ -17,7 +17,7 @@ MANIFEST = ROOT / "test" / "oracle" / "preimplementation_artifacts.tsv"
 # discover it rather than the expectation file asserting it unilaterally.
 CHECKS = {"manifest": "every pre-implementation oracle and mutant resolves and is owned"}
 PHASES = {3, *range(19, 31), *range(41, 67), 68, 149}
-# Phase 49 is new in the generative re-baseline, so it has no historical pin-owner
+# Phase 50 is new in the generative re-baseline, so it has no historical pin-owner
 # ordinal to translate.  Prefixing its current ordinal with 1 keeps the four-column
 # manifest unambiguous without reassigning the historical `49` rows that still belong
 # to the provider-deploy checkpoint.  New current owners use this explicit map; they do
