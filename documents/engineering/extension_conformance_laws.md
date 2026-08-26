@@ -16,7 +16,7 @@ discharges them, and the closure argument that consumes C1 are owned by the hub,
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_11_calculus_composition.md, DEVELOPMENT_PLAN/phase_22_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_23_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_32_provision_seal.md, DEVELOPMENT_PLAN/phase_35_chain_kernel_boundary.md, documents/README.md, documents/engineering/README.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, documents/README.md, documents/engineering/README.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -41,28 +41,28 @@ to the hub, and the security and transaction families — which are *instances* 
 seams — belong to [`extension_conformance_security.md`](./extension_conformance_security.md) and
 [`extension_conformance_transactions.md`](./extension_conformance_transactions.md).
 
-[Phase 11](../../DEVELOPMENT_PLAN/phase_11_calculus_composition.md) owns the target base five-calculus operation
+[Phase 10](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md) owns the target base five-calculus operation
 and finite Register-1 instances of C2, C3, C5, and C6: five component arms, 25 ordered pairs, 125 kind triples,
 exact resource addition, and a request-scope compiler barrier. That result is not an extension-law verdict.
-[Phase 21](../../DEVELOPMENT_PLAN/phase_21_extension_declaration.md) owns the complete five-component
+[Phase 20](../../DEVELOPMENT_PLAN/phase_20_extension_declaration.md) owns the complete five-component
 declaration that law observations name.
 
-[Phase 22](../../DEVELOPMENT_PLAN/phase_22_extension_laws_per_extension.md) owns a target pure L1–L5 evaluator
+[Phase 21](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) owns a target pure L1–L5 evaluator
 over explicit operation, artifact, budget, flow, and claim observations joined to that declaration. Its bounded
 Register-1 suite covers two declaration shapes, six authored operation inputs, two independently seeded child-
 process render comparisons, actual budget and evidence values, and five single-law negative subjects. Finite
-source scanners and the Phase-16 pinned claim/fixture compiler negative supplement those observations. This
+source scanners and the Phase-15 pinned claim/fixture compiler negative supplement those observations. This
 does not prove termination or scanner completeness, generate a gate for an arbitrary declaration, certify a
 runtime extension, or mint a conformance verdict.
 
-[Phase 23](../../DEVELOPMENT_PLAN/phase_23_extension_laws_compositional.md) must implement a separate normalized
+[Phase 22](../../DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md) must implement a separate normalized
 composite value and a bounded C1–C7 evaluator. Seven ordered identity/link cases over the two declaration
 fixtures must yield 49 accepted pair-law cells; a separate 63-cell table must cover two lawful address controls
-and seven exact negative subjects. Composition must preserve one request-scope index, union Phase-22
+and seven exact negative subjects. Composition must preserve one request-scope index, union Phase-21
 vocabularies, and fold exact resource vectors. An independent Haskell oracle must check pair sums and four
 SHA-256 addresses. These samples
 do not prove universal C1, arbitrary-link closure, scanner completeness, collision absence, or runtime
-correspondence. Gate generation, verdict sealing, and the universal C1 proof remain owned by Phase 25 and
+correspondence. Gate generation, verdict sealing, and the universal C1 proof remain owned by Phase 24 and
 later proof work. Current status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -162,9 +162,9 @@ extension.
 
 ### Target discharge boundary — NOT VALIDATED
 
-The Phase-22 evaluator must make each L-law a separate typed verdict. Before deciding a verdict, it must require the
+The Phase-21 evaluator must make each L-law a separate typed verdict. Before deciding a verdict, it must require the
 observed operation, artifact, budget, flow, or claim names to cover the corresponding sets derived from the
-Phase-21 declaration. The executable case inventory and expected outcomes are a separately reviewed Haskell
+Phase-20 declaration. The executable case inventory and expected outcomes are a separately reviewed Haskell
 `NonEmpty LawVerdictCase`; neither this list nor an encoded table supplies a verdict. Each case carries its
 subject, expected per-law verdict vector, required negative control, and stable identity. The evaluator joins
 actual results to that Haskell inventory by identity and refuses missing, duplicate, or extra cases. Any
@@ -179,7 +179,7 @@ executable corpus is deliberately finite:
   reapers.
 - L4 evaluates the closed test relation `RequestFlow < TenantFlow < GlobalFlow` and rejects the seeded widening
   from request to tenant flow.
-- L5 constructs two real evidence claims bound to fixtures and reuses the Phase-16 legal/illegal compiler pair
+- L5 constructs two real evidence claims bound to fixtures and reuses the Phase-15 legal/illegal compiler pair
   for a claim with its fixture argument omitted.
 
 The Haskell `LawVerdictCase` inventory must project a 7-by-5 reader-facing verdict table with two all-green
@@ -301,10 +301,10 @@ address with a content comparison.
 
 ### Target compositional discharge boundary — NOT VALIDATED
 
-The Phase-23 evaluator must return one typed verdict per C-law over a scope-preserving composite of complete
-Phase-21 declarations:
+The Phase-22 evaluator must return one typed verdict per C-law over a scope-preserving composite of complete
+Phase-20 declarations:
 
-- C1 evaluates Phase-22 L1–L5 over each operand and the composite vocabulary. Its current seven cases are a
+- C1 evaluates Phase-21 L1–L5 over each operand and the composite vocabulary. Its current seven cases are a
   counterexample search, not the universal implication [C1](#c1-closure) requires.
 - C2 compares both empty-composite identities by value; C3 compares both groupings after declaration-key
   normalization.

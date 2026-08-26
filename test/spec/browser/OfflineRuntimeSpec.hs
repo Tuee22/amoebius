@@ -166,7 +166,7 @@ verifyCustody root = do
   assertEqual "phase-0 custody" 11 (length phaseRows)
   forM_ phaseRows $ \row -> case row of
     (_phase : _kind : path : _) -> doesFileExist (root </> path) >>= flip assert ("missing " <> path)
-    _ -> die "bad Phase-29 custody row"
+    _ -> die "bad Phase-28 custody row"
 
 loadWordsTable :: FilePath -> IO [[String]]
 loadWordsTable path = do

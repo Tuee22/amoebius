@@ -87,7 +87,7 @@ verifyGate fields = case fields of
 
 verifyFailedVerdict :: IO ()
 verifyFailedVerdict = do
-  let declaration = GateDeclaration 49 "DEVELOPMENT_PLAN/phase_50_self_referential_gates.md"
+  let declaration = GateDeclaration 49 "DEVELOPMENT_PLAN/phase_49_self_referential_gates.md"
         "python3 tools/self_referential_gates_gate.py"
       evidence = runEvidence (deriveGate declaration (GateFailed 17))
   assertEqual "failed verdict remains evidence" (GateFailed 17) (evidenceVerdict evidence)

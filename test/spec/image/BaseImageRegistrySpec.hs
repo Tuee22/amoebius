@@ -150,7 +150,7 @@ main = do
   verifyPublication
   verifyRegistryPullGate
   verifyMutantArtifacts
-  putStrLn "base-image-registry-spec: PASS (Phase 26 image build, registry/bootstrap boundaries, immutable atomic publication, enforced private pull, and 13 committed mutants)"
+  putStrLn "base-image-registry-spec: PASS (Phase 25 image build, registry/bootstrap boundaries, immutable atomic publication, enforced private pull, and 13 committed mutants)"
 
 verifyCatalogInjectionClosure :: Catalog.BakeCatalog -> IO ()
 verifyCatalogInjectionClosure catalog = do

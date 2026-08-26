@@ -140,8 +140,8 @@ data LawObservations = LawObservations
 
 -- | The declaration-derived names against which observations are checked.  Its
 -- constructor is private: callers obtain a vocabulary from a complete declaration and
--- combine vocabularies only by set union.  Phase 23 uses that union for a composite
--- without weakening Phase 21's exactly-five-components declaration invariant.
+-- combine vocabularies only by set union.  Phase 22 uses that union for a composite
+-- without weakening Phase 20's exactly-five-components declaration invariant.
 data LawVocabulary = LawVocabulary
   { vocabularyOperations :: Set.Set Text
   , vocabularyArtifacts :: Set.Set Text

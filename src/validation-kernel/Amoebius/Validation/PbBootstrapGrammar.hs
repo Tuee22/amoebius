@@ -4,7 +4,7 @@
 
 -- | A deliberately small, closed parser and static-admission proof for the
 -- pre-binary Python handoff.  This module does not execute Python and its proof
--- does not claim that any effect happened; Phase 51 owns that observation.
+-- does not claim that any effect happened; Phase 50 owns that observation.
 module Amoebius.Validation.PbBootstrapGrammar
   ( pbBootstrapGrammarDiagnostic
   ) where
@@ -148,7 +148,7 @@ diagnosticOnlySubject = diagnosticSubject
 #if defined(VALIDATION_PB_GRAMMAR_DIAGNOSTIC_ONLY_DETAIL_MAPPING_MUTANT)
 diagnosticOnlyDetail = "mutated diagnostic-only detail"
 #else
-diagnosticOnlyDetail = "caller-supplied pb bytes are diagnostic input and cannot establish source custody or Phase-51 runtime truth"
+diagnosticOnlyDetail = "caller-supplied pb bytes are diagnostic input and cannot establish source custody or Phase-50 runtime truth"
 #endif
 
 data PbTrackedMode
@@ -936,7 +936,7 @@ data InjectionSeamProof = InjectionSeamProof
   }
   deriving (Eq, Ord, Show)
 
--- | Declarative Phase-51 caller requirement.  Static source admission carries
+-- | Declarative Phase-50 caller requirement.  Static source admission carries
 -- this contract forward but does not claim that an interpreter used it.
 data Phase50InvocationContract
   = RequiredPhase50PythonDirectoryInvocation
@@ -1916,9 +1916,9 @@ phase50ResidueSubject = show
 
 phase50ResidueDetail :: Text
 #if defined(VALIDATION_PB_GRAMMAR_PHASE50_FINDING_DETAIL_MAPPING_MUTANT)
-phase50ResidueDetail = "mutated Phase-51 residue detail"
+phase50ResidueDetail = "mutated Phase-50 residue detail"
 #else
-phase50ResidueDetail = "static source grammar cannot establish this runtime property; Phase 51 must observe the pb child from the source-bound Haskell supervisor"
+phase50ResidueDetail = "static source grammar cannot establish this runtime property; Phase 50 must observe the pb child from the source-bound Haskell supervisor"
 #endif
 
 renderImportBinding :: ImportBinding -> Text

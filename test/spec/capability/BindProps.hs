@@ -39,7 +39,7 @@ instance Arbitrary GeneratedNeed where
 runBindProps :: IO Int
 runBindProps = do
   result <- quickCheckWithResult stdArgs {chatty = False, maxSuccess = 1200} propBindTotalAndStructural
-  unless (isSuccess result) (fail ("Phase-31 bind property failed: " <> showResult result))
+  unless (isSuccess result) (fail ("Phase-30 bind property failed: " <> showResult result))
   putStrLn "capability-bind-properties: TESTED sampled (1) with each of nine constructors >=8%"
   pure 1
 

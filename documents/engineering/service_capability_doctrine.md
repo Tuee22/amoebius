@@ -18,7 +18,7 @@ never names a product. It does not own how those providers are deployed, owned b
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_26_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_31_capability_bind.md, DEVELOPMENT_PLAN/phase_32_provision_seal.md, DEVELOPMENT_PLAN/phase_33_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_40_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_67_app_tenancy.md, DEVELOPMENT_PLAN/phase_81_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -123,7 +123,7 @@ capability and reference a policy, but it cannot construct a permission, provide
 or resource handle. The UI-specific port and request-context contract is owned by
 [low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations).
 
-[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_effect_binding.md) owns the future Register-1 contract for that
+[Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md) owns the future Register-1 contract for that
 consumer; it is **NOT VALIDATED**. The contract must bind every closed fixture port exactly once through
 independently checked handler/codec/scope/retry/audit tuples and must reject an absent capability and raw
 provider coordinate at distinct loci. All controls, generated classes, paired mutants, metrics, and
@@ -179,7 +179,7 @@ arm, `Sql` could admit a managed cloud Postgres — without any app spec changin
 the provider. But a union arm is not an adapter. amoebius **does not build a provider adapter it does not yet need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
 would be reporting a designed extension point as a built one.
 
-> **Target representation — NOT VALIDATED.** [Phase 31](../../DEVELOPMENT_PLAN/phase_31_capability_bind.md)
+> **Target representation — NOT VALIDATED.** [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md)
 > owns the one-built-arm `CanonicalProvider` representation and the distinct rejection of an unbuilt alternate.
 > Existing source is an observed footprint only; no current evidence establishes binding composition or
 > provider realization.
@@ -188,10 +188,10 @@ would be reporting a designed extension point as a built one.
 
 ## 4. Capability → provider → shape: the binding
 
-[Phase 31](../../DEVELOPMENT_PLAN/phase_31_capability_bind.md) owns this representational seam in
+[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) owns this representational seam in
 `Amoebius.Capability.{Types,Binding}`. Its NOT-VALIDATED contract requires all nine arms under both shapes, 18
 exact graph semantics, app-byte invariance, and an independent object-node-multiset oracle. Provision and
-runtime provider health remain outside that contract. [Phase 32](../../DEVELOPMENT_PLAN/phase_32_provision_seal.md)
+runtime provider health remain outside that contract. [Phase 31](../../DEVELOPMENT_PLAN/phase_31_provision_seal.md)
 owns the post-bind planner/seal in `Amoebius.Capacity.{Provision,RuntimeStorage,RenderSource}`; its
 NOT-VALIDATED contract requires all 18 bound shapes, both planner arms, the opaque identity-keyed source set,
 four activation stages, and ten distinct seal-locus failures. Existing modules and tests are observed
@@ -461,7 +461,7 @@ of these mistakes into unrepresentable states is owned by
 base container, the engine *payload* is not (it is materialized on first miss into the `CacheBudget`-bounded
 content-addressed cache, [content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 
-> **Honesty — target only, NOT VALIDATED.** Phase 33 must eventually test the pure `InferenceEngine` offering
+> **Honesty — target only, NOT VALIDATED.** Phase 32 must eventually test the pure `InferenceEngine` offering
 > quotient, family/lane relation, identity-complete CUDA/Metal owner demands, residency/coexistence checks,
 > and opaque provisioned accelerator. Live jit-resolution and cross-lane weight loading are outside that pure
 > target. The sibling **infernix**
@@ -508,7 +508,7 @@ canonical provider deployed honestly at small scale, never a hand-special-cased 
 single-node `Sql` is a one-member Patroni cluster, never a bare `postgres` Pod. The dial got richer; it did
 not get bypassed.
 
-> **Honesty.** Per-cluster structural shapes are Phase 34 design intent. The sibling **prodbox** project is
+> **Honesty.** Per-cluster structural shapes are Phase 33 design intent. The sibling **prodbox** project is
 > evidence that typed records render the manifests a provider needs — its
 > `prodbox/src/Prodbox/Lib/Storage.hs` (sibling source)
 > renders `Namespace`/`PV`/`PVC`/`StorageClass` from a typed `ChartStorageSpec → ChartStorageBinding →
@@ -657,12 +657,12 @@ surface, never asserted here.
 
 This document is normative capability-model doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
-never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed reconciler that render and apply a chosen shape** land with platform services in **Phase 59**, and the
+never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed reconciler that render and apply a chosen shape** land with platform services in **Phase 58**, and the
 **capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
-shapes** — is assigned to **Phase 31**, which is NOT VALIDATED. This doc states the normative shape; the plan owns the validation
+shapes** — is assigned to **Phase 30**, which is NOT VALIDATED. This doc states the normative shape; the plan owns the validation
 status and ledger.
 
-Phase 81 is planned to validate the CPU arm of the closed engine-runtime binding, including content-digest
+Phase 80 is planned to validate the CPU arm of the closed engine-runtime binding, including content-digest
 convergence and two-client reuse of one owner-managed cache entry. It is NOT VALIDATED; production inference,
 cross-substrate equality, the Tier-2 model cache, and Tier-3 CUDA kernels are likewise unverified.
 `linux-cpu` remains the target always-available option on every hardware substrate.
@@ -686,7 +686,7 @@ cross-substrate equality, the Tier-2 model cache, and Tier-3 CUDA kernels are li
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Existing capability, binder, planner, and provision-seal source is an observed footprint only;
-> Phases 30 and 31 are NOT VALIDATED, and manifest generation plus the typed reconciler remain Phase 59 work.
+> Phases 30 and 31 are NOT VALIDATED, and manifest generation plus the typed reconciler remain Phase 58 work.
 > The design is generalized from evidence in the
 > sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering, a chart-platform planner), and
 > prodbox itself names products and

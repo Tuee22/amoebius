@@ -160,7 +160,7 @@ checkEvidence evidence = do
   assertEqual "rejected twins" 2 (length (rejectedTwins evidence))
   unless (all (\row -> providerEffects row == 0 && forbiddenNonceAbsentAllProviders row) (rejectedTwins evidence)) (die "illegal twin provider effect")
   unless (inventoriesEqual (cleanup evidence) && null (residue (cleanup evidence))) (die "provider cleanup residue")
-  assertEqual "application isolation honesty" "UNVERIFIED (Phase 37)" (applicationDataPath evidence)
+  assertEqual "application isolation honesty" "UNVERIFIED (Phase 36)" (applicationDataPath evidence)
 
 assertLeft :: String -> (errorValue -> Bool) -> Either errorValue value -> IO ()
 assertLeft label predicate result =

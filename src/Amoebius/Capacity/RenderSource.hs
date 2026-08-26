@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
--- | The checked, renderer-independent source inventory sealed by Phase 12.
+-- | The checked, renderer-independent source inventory sealed by Phase 11.
 -- No Kubernetes AST or serialization type is imported here.
 module Amoebius.Capacity.RenderSource
   ( K8sObjectIdentity (..)

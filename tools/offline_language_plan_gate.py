@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase 42 offline-language paired-plan checks.
+"""Run and seal the Phase 41 offline-language paired-plan checks.
 
 This is a Register-1 gate.  It proves the authored continuity language, its finite queue
 contract, deterministic client/replay projection, exact refusal corpus, and five seeded
@@ -36,7 +36,7 @@ RESULTS = ROOT / ".build/dsl/offline-language-plan/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/offline-language-plan/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/offline-language-plan-gate"
 TEMP_ROOT = ROOT / ".build/tmp/offline-language-plan"
-CONTRACT = "DEVELOPMENT_PLAN/phase_42_offline_language_plan.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_41_offline_language_plan.md"
 GATE_COMMAND = "python3 tools/offline_language_plan_gate.py"
 EXPECTATIONS = "test/oracle/offline_language_plan_surfaces.tsv"
 MUTANT_CAPABILITY = "offline_language_plan"
@@ -103,8 +103,8 @@ CHECKS = {
     "dhall-schema-exact": "the Dhall mirror has the six operations, two continuity arms, and four offline fields",
     "authored-product-continuity": "Infernix and jitML author mechanism-free offline contracts",
     "oracle-cardinality-exact": "the three independent language and plan tables have exact row sets",
-    "phase-zero-custody": "all eight Phase-25 preimplementation artifacts remain present",
-    "mutant-registry-exact": "the central registry owns exactly the five Phase-42 mutations",
+    "phase-zero-custody": "all eight Phase-24 preimplementation artifacts remain present",
+    "mutant-registry-exact": "the central registry owns exactly the five Phase-41 mutations",
     "module-ownership-exact": "one dedicated component owns the shared offline language types",
     "cpp-mutant-wiring": "each central registry flag reaches its exact production CPP locus",
     "compiler-partial-token-scan": "no partial or unsafe token survives in the offline compiler modules",
@@ -244,15 +244,15 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     if calculus != expected_calculus:
         raise GateFailure("offline-language five-calculus projection oracle drifted")
     if len(locus) != 38 or len({row["entry"] for row in locus}) != 38:
-        raise GateFailure("Phase-42 validation locus must contain thirty-eight unique rows")
+        raise GateFailure("Phase-41 validation locus must contain thirty-eight unique rows")
 
     phase0 = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     custody = [row for row in phase0 if row["# phase"] == "24"]
     if len(custody) != 8:
-        raise GateFailure("Phase-0 manifest must pin eight Phase-42 artifacts under custody phase 25")
+        raise GateFailure("Phase-0 manifest must pin eight Phase-41 artifacts under custody phase 24")
     missing = [row["path"] for row in custody if not (ROOT / row["path"]).is_file()]
     if missing:
-        raise GateFailure(f"Phase-42 preimplementation artifacts are absent: {missing}")
+        raise GateFailure(f"Phase-41 preimplementation artifacts are absent: {missing}")
 
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 5 or {row["mutant"] for row in mutants} != set(FLAGS):
@@ -345,7 +345,7 @@ def verify_source_boundaries() -> None:
         if macro not in production:
             raise GateFailure(f"cpp-mutant-wiring: production has no locus for {macro}")
     if "PHASE59_" in runtime_stanza or "PHASE59_" in production:
-        raise GateFailure("cpp-mutant-wiring: retired Phase-60 macro survives")
+        raise GateFailure("cpp-mutant-wiring: retired Phase-59 macro survives")
     if "continuity :: Continuity" not in source.read_text(encoding="utf-8"):
         raise GateFailure("dhall-schema-exact: UiSource does not carry Continuity")
 
@@ -428,7 +428,7 @@ def run_green(cabal: Path) -> tuple[str, str]:
     ])
     isolated, observer = isolated_green(cabal)
     if not acceptance_present(suite.stdout) or not acceptance_present(isolated):
-        raise GateFailure("Phase-42 acceptance tokens are absent from normal or isolated execution")
+        raise GateFailure("Phase-41 acceptance tokens are absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 
@@ -537,7 +537,7 @@ def main() -> int:
         mutant_rows, counts = verify_oracles()
         classes = item_classes()
         print("  ok    oracle-cardinality-exact          3 positive, 13 negative, 8 plan rows")
-        print("  ok    phase-zero-custody                all eight Phase-25 artifacts exist")
+        print("  ok    phase-zero-custody                all eight Phase-24 artifacts exist")
         print("  ok    semantic-oracles-complete         exact language, plan, and calculus tables")
         print(f"  ok    mutant-registry-exact             {len(mutant_rows)} central registry rows")
         print(f"  ok    {len(classes)} enumerated items")
@@ -622,7 +622,7 @@ def main() -> int:
         mutants=[
             {"name": row["mutant"], "status": "red" if row["mutant"] in reddened else "unrun"}
             for row in mutant_rows
-        ] or [{"name": "phase-42 mutants", "status": "unrun"}],
+        ] or [{"name": "phase-41 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

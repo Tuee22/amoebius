@@ -14,7 +14,7 @@ document each invariant cites. It presumes nothing.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_11_calculus_composition.md, DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_13_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_14_symbolic_checker.md, DEVELOPMENT_PLAN/phase_17_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_18_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_26_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_28_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_29_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_capability_bind.md, DEVELOPMENT_PLAN/phase_32_provision_seal.md, DEVELOPMENT_PLAN/phase_33_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_34_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_35_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_49_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_57_base_image_registry.md, DEVELOPMENT_PLAN/phase_59_object_reconciler.md, DEVELOPMENT_PLAN/phase_60_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_61_retained_storage.md, DEVELOPMENT_PLAN/phase_62_vault_pki.md, DEVELOPMENT_PLAN/phase_63_platform_backbone.md, DEVELOPMENT_PLAN/phase_64_platform_services_2.md, DEVELOPMENT_PLAN/phase_65_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_66_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_68_pulsar_client.md, DEVELOPMENT_PLAN/phase_70_content_store_workflow.md, DEVELOPMENT_PLAN/phase_72_release_lifecycle.md, DEVELOPMENT_PLAN/phase_74_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_75_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_76_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_77_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_78_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_81_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_90_apple_metal_host_daemon.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -129,8 +129,8 @@ authorization decision, tenant claim, or deployment knob — see
 [`app_vs_deployment_doctrine.md` §6 — The proof case: a low-code workflow UI as application-logic-only](../documents/engineering/app_vs_deployment_doctrine.md#6-the-proof-case-a-low-code-workflow-ui-as-application-logic-only).
 
 Their shared execution path is fixed: a UI server admits a typed start under one scope-qualified `CommandId`;
-the infernix/jitML adapter preserves it as the Phase-70 work-id through native-CBOR Pulsar commands, redelivery,
-progress, and terminal events; the effect owner commits the artifact and Phase 71 folds the terminal event into
+the infernix/jitML adapter preserves it as the Phase-69 work-id through native-CBOR Pulsar commands, redelivery,
+progress, and terminal events; the effect owner commits the artifact and Phase 70 folds the terminal event into
 a durable owner/command-qualified receipt. Redis only wakes or routes to the replica owning the authenticated
 WebSocket, and any replica repairs loss from the Pulsar-backed projection/receipt. For the initial offline
 surface, only infernix workflow start and jitML training start may opt into a complete bounded queue contract;
@@ -209,12 +209,12 @@ here goes stale the moment a gate runs, which is what happened to the sentence t
 The DSL is designed to be validated and **simulated per phase**, never as a monolithic pre-implementation: each pre-cluster
 phase discharges an in-process Register-1/2 gate and each live-band phase a Register-3 gate before the next
 opens. A bounded DSL decision/protocol tranche is model-checked in
-[Phase 19](phase_19_dsl_formal_model.md), and the actual reconcile decision core is replayed under
-`IOSim`/`IOSimPOR` in [Phase 20](phase_20_reconcile_core_simulation.md), both inside the DSL-validation band.
+[Phase 18](phase_18_dsl_formal_model.md), and the actual reconcile decision core is replayed under
+`IOSim`/`IOSimPOR` in [Phase 19](phase_19_reconcile_core_simulation.md), both inside the DSL-validation band.
 The **Register-2.5 deterministic-simulation activity is never a phase gate**
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)); where a
 live-band phase eventually runs it, the activity may compare built code with the independently validated
-Phase-20 model only after Phase 20 has been human-promoted. Phase 20 is currently **NOT VALIDATED**.
+Phase-19 model only after Phase 19 has been human-promoted. Phase 19 is currently **NOT VALIDATED**.
 Front-loading a *design* model ahead of its runtime is legitimate only while correspondence and runtime
 fidelity remain explicitly unverified
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed), [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)).
@@ -232,127 +232,126 @@ fidelity remain explicitly unverified
 - **Phase 7 — The evidence calculus** → [phase_7](phase_07_evidence_calculus.md).
 - **Phase 8 — Scope index / scoped identity kernel** → [phase_8](phase_08_scope_index.md).
 - **Phase 9 — Capacity core fold + topology relation** → [phase_9](phase_09_resource_index.md).
-- **Phase 10 — The host claim ledger** → [phase_10](phase_10_host_claim_ledger.md).
-- **Phase 11 — Composition across the five calculi** → [phase_11](phase_11_calculus_composition.md).
+- **Phase 10 — Composition across the five calculi** → [phase_10](phase_10_calculus_composition.md).
 
 *The proof stack — the checkers amoebius owns (substrate `none`, Registers 1–2):*
-- **Phase 12 — Formal-model EDSL (`Model`/`interpret`/`emitTLA`)**, consuming the Phase-11 indexed composition through a dedicated formal projection → [phase_12](phase_12_formal_model_kernel.md).
-- **Phase 13 — The amoebius explicit-state checker**, independently enumerating the shared `Model` and producing replayable bound/model-bound verdicts → [phase_13](phase_13_explicit_state_checker.md).
-- **Phase 14 — The amoebius symbolic checker**, owning QF_LIA/boolean induction obligations while injecting a dynamically resolved SMT decision procedure → [phase_14](phase_14_symbolic_checker.md).
-- **Phase 15 — The amoebius refinement checker**, targeted to compile bounded-fragment Haskell functions and
-  check preservation plus implication to invariant expressions projected from safe Phase-12 `Model` values
-  → [phase_15](phase_15_refinement_checker.md).
-- **Phase 16 — The compile-fail fixture harness**, targeted to bind Haskell-authored legal/illegal twins to
-  independently specified structured GHC rejection reasons → [phase_16](phase_16_compile_fail_harness.md).
-- **Phase 17 — Deterministic-simulation substrate**, targeted to exercise one polymorphic reference
+- **Phase 11 — Formal-model EDSL (`Model`/`interpret`/`emitTLA`)**, consuming the Phase-10 indexed composition through a dedicated formal projection → [phase_11](phase_11_formal_model_kernel.md).
+- **Phase 12 — The amoebius explicit-state checker**, independently enumerating the shared `Model` and producing replayable bound/model-bound verdicts → [phase_12](phase_12_explicit_state_checker.md).
+- **Phase 13 — The amoebius symbolic checker**, owning QF_LIA/boolean induction obligations while injecting a dynamically resolved SMT decision procedure → [phase_13](phase_13_symbolic_checker.md).
+- **Phase 14 — The amoebius refinement checker**, targeted to compile bounded-fragment Haskell functions and
+  check preservation plus implication to invariant expressions projected from safe Phase-11 `Model` values
+  → [phase_14](phase_14_refinement_checker.md).
+- **Phase 15 — The compile-fail fixture harness**, targeted to bind Haskell-authored legal/illegal twins to
+  independently specified structured GHC rejection reasons → [phase_15](phase_15_compile_fail_harness.md).
+- **Phase 16 — Deterministic-simulation substrate**, targeted to exercise one polymorphic reference
   reconciler through injected-client and `IOSim` interpreters with generated controls; modeled fidelity
-  remains outside the claim → [phase_17](phase_17_deterministic_sim_substrate.md).
-- **Phase 18 — Gateway-migration model (both branches)**, targeted to compare independently read bounded
+  remains outside the claim → [phase_16](phase_16_deterministic_sim_substrate.md).
+- **Phase 17 — Gateway-migration model (both branches)**, targeted to compare independently read bounded
   model semantics and generated model-checker projections; runtime fidelity remains UNVERIFIED →
-  [phase_18](phase_18_gateway_migration_model.md).
-- **Phase 19 — DSL formal model**, targeted to join decoder, capacity, render, and protocol readings to
-  bounded Haskell models; runtime fidelity remains UNVERIFIED → [phase_19](phase_19_dsl_formal_model.md).
-- **Phase 20 — Reconcile decision core under deterministic simulation**, targeted to compare a Haskell
+  [phase_17](phase_17_gateway_migration_model.md).
+- **Phase 18 — DSL formal model**, targeted to join decoder, capacity, render, and protocol readings to
+  bounded Haskell models; runtime fidelity remains UNVERIFIED → [phase_18](phase_18_dsl_formal_model.md).
+- **Phase 19 — Reconcile decision core under deterministic simulation**, targeted to compare a Haskell
   planner with independently authored modeled schedules; live fidelity remains UNVERIFIED →
-  [phase_20](phase_20_reconcile_core_simulation.md).
+  [phase_19](phase_19_reconcile_core_simulation.md).
 
 *The extension contract (substrate `none`, Register 1):*
-- **Phase 21 — The extension declaration**, targeted to define one opaque same-scope Haskell value and
+- **Phase 20 — The extension declaration**, targeted to define one opaque same-scope Haskell value and
   independently recomputed content identity; law verdicts and runtime fidelity remain outside the claim →
-  [phase_21](phase_21_extension_declaration.md).
-- **Phase 22 — The per-extension laws L1–L5**, targeted to evaluate separately authored Haskell controls,
+  [phase_20](phase_20_extension_declaration.md).
+- **Phase 21 — The per-extension laws L1–L5**, targeted to evaluate separately authored Haskell controls,
   paired defects, generated observations, and changed-subject mutants; runtime conformance remains UNVERIFIED
-  → [phase_22](phase_22_extension_laws_per_extension.md).
-- **Phase 23 — The compositional laws C1–C7**, targeted to evaluate normalized Haskell composites against
+  → [phase_21](phase_21_extension_laws_per_extension.md).
+- **Phase 22 — The compositional laws C1–C7**, targeted to evaluate normalized Haskell composites against
   independent expectations and changed-subject mutants; universal and runtime claims remain UNVERIFIED →
-  [phase_23](phase_23_extension_laws_compositional.md).
-- **Phase 24 — The security laws S1–S6**, targeted to exercise Haskell scope and authority boundaries;
+  [phase_22](phase_22_extension_laws_compositional.md).
+- **Phase 23 — The security laws S1–S6**, targeted to exercise Haskell scope and authority boundaries;
   cryptographic, timing, persistence, composition, and runtime fidelity remain UNVERIFIED →
-  [phase_24](phase_24_extension_security_laws.md).
-- **Phase 25 — The generated conformance gate**, targeted to derive a closed Haskell suite plan and opaque
+  [phase_23](phase_23_extension_security_laws.md).
+- **Phase 24 — The generated conformance gate**, targeted to derive a closed Haskell suite plan and opaque
   pure-link verdict; execution, observer authenticity, proof, and runtime fidelity remain UNVERIFIED →
-  [phase_25](phase_25_conformance_gate_generator.md).
+  [phase_24](phase_24_conformance_gate_generator.md).
 
 *The generative surface — every artifact class becomes a recipe (substrate `none`, Registers 1–2):*
-- **Phase 26 — Haskell-derived Dhall projection and smart-constructor prelude** → [phase_26](phase_26_dhall_schema_generation.md).
-- **Phase 27 — Haskell protocol declarations, GADT-indexed IR, and total decoder** → [phase_27](phase_27_gadt_decode_ir.md).
-- **Phase 28 — Illegal-state corpus + validation-locus ledger** → [phase_28](phase_28_illegal_state_covering.md).
-- **Phase 29 — Logical→physical storage geometry folds** → [phase_29](phase_29_storage_geometry_folds.md).
-- **Phase 30 — Execution-epoch + scheduler + accelerator + provider-root folds** → [phase_30](phase_30_execution_accelerator_folds.md).
-- **Phase 31 — Capability union + representational bind** → [phase_31](phase_31_capability_bind.md).
-- **Phase 32 — Whole-deployment provision seal + expansion** → [phase_32](phase_32_provision_seal.md).
-- **Phase 33 — InferenceEngine capability + accelerator provision** → [phase_33](phase_33_inference_accelerator_provision.md).
-- **Phase 34 — Pure `renderAll` + rendered-artifact oracles** → [phase_34](phase_34_render_manifest_oracles.md).
-- **Phase 35 — chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker** → [phase_35](phase_35_chain_kernel_boundary.md).
-- **Phase 36 — The amoebius image recipe** → [phase_36](phase_36_image_recipe_generation.md).
-- **Phase 37 — The closed transaction vocabulary** → [phase_37](phase_37_transaction_vocabulary.md).
-- **Phase 38 — Bounded UI-program schema** → [phase_38](phase_38_ui_program_schema.md).
-- **Phase 39 — UI authorization kernel** → [phase_39](phase_39_ui_authorization_kernel.md).
-- **Phase 40 — UI effect binding** → [phase_40](phase_40_ui_effect_binding.md).
-- **Phase 41 — UI plan compiler** → [phase_41](phase_41_ui_plan_compiler.md).
-- **Phase 42 — Offline language and paired plans** → [phase_42](phase_42_offline_language_plan.md).
-- **Phase 43 — Haskell browser-interpreter semantics and projection** → [phase_43](phase_43_ui_browser_interpreter.md).
-- **Phase 44 — Haskell UI-server boundary** → [phase_44](phase_44_ui_server_boundary.md).
-- **Phase 45 — Hardware-free Haskell UI composition** → [phase_45](phase_45_ui_local_composition.md).
-- **Phase 46 — Haskell offline-state semantics and runtime projection** → [phase_46](phase_46_encrypted_browser_runtime.md).
-- **Phase 47 — Haskell-generated browser contracts and bundle** → [phase_47](phase_47_ui_contract_generation.md).
-- **Phase 48 — Foreign-source generator closure, checking tools, and mutants** → [phase_48](phase_48_tool_and_mutant_generation.md).
+- **Phase 25 — Haskell-derived Dhall projection and smart-constructor prelude** → [phase_25](phase_25_dhall_schema_generation.md).
+- **Phase 26 — Haskell protocol declarations, GADT-indexed IR, and total decoder** → [phase_26](phase_26_gadt_decode_ir.md).
+- **Phase 27 — Illegal-state corpus + validation-locus ledger** → [phase_27](phase_27_illegal_state_covering.md).
+- **Phase 28 — Logical→physical storage geometry folds** → [phase_28](phase_28_storage_geometry_folds.md).
+- **Phase 29 — Execution-epoch + scheduler + accelerator + provider-root folds** → [phase_29](phase_29_execution_accelerator_folds.md).
+- **Phase 30 — Capability union + representational bind** → [phase_30](phase_30_capability_bind.md).
+- **Phase 31 — Whole-deployment provision seal + expansion** → [phase_31](phase_31_provision_seal.md).
+- **Phase 32 — InferenceEngine capability + accelerator provision** → [phase_32](phase_32_inference_accelerator_provision.md).
+- **Phase 33 — Pure `renderAll` + rendered-artifact oracles** → [phase_33](phase_33_render_manifest_oracles.md).
+- **Phase 34 — chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker** → [phase_34](phase_34_chain_kernel_boundary.md).
+- **Phase 35 — The amoebius image recipe** → [phase_35](phase_35_image_recipe_generation.md).
+- **Phase 36 — The closed transaction vocabulary** → [phase_36](phase_36_transaction_vocabulary.md).
+- **Phase 37 — Bounded UI-program schema** → [phase_37](phase_37_ui_program_schema.md).
+- **Phase 38 — UI authorization kernel** → [phase_38](phase_38_ui_authorization_kernel.md).
+- **Phase 39 — UI effect binding** → [phase_39](phase_39_ui_effect_binding.md).
+- **Phase 40 — UI plan compiler** → [phase_40](phase_40_ui_plan_compiler.md).
+- **Phase 41 — Offline language and paired plans** → [phase_41](phase_41_offline_language_plan.md).
+- **Phase 42 — Haskell browser-interpreter semantics and projection** → [phase_42](phase_42_ui_browser_interpreter.md).
+- **Phase 43 — Haskell UI-server boundary** → [phase_43](phase_43_ui_server_boundary.md).
+- **Phase 44 — Hardware-free Haskell UI composition** → [phase_44](phase_44_ui_local_composition.md).
+- **Phase 45 — Haskell offline-state semantics and runtime projection** → [phase_45](phase_45_encrypted_browser_runtime.md).
+- **Phase 46 — Haskell-generated browser contracts and bundle** → [phase_46](phase_46_ui_contract_generation.md).
+- **Phase 47 — Foreign-source generator closure, checking tools, and mutants** → [phase_47](phase_47_tool_and_mutant_generation.md).
 
 *Test-as-workflow (substrate `none`, Register 1):*
-- **Phase 49 — The test-workflow algebra** → [phase_49](phase_49_test_workflow_algebra.md).
-- **Phase 50 — No-hardware DSL promotion barrier and self-referential gate suite** → [phase_50](phase_50_self_referential_gates.md).
+- **Phase 48 — The test-workflow algebra** → [phase_48](phase_48_test_workflow_algebra.md).
+- **Phase 49 — No-hardware DSL promotion barrier and self-referential gate suite** → [phase_49](phase_49_self_referential_gates.md).
 
 *Pre-binary and host — the first machine (Registers 2–3):*
-- **Phase 51 — Bounded `pb` bootstrap and Haskell handoff** → [phase_51](phase_51_host_assert_cli.md).
-- **Phase 52 — The host-ensure kernel** → [phase_52](phase_52_host_ensure_kernel.md).
-- **Phase 53 — Linux: sudoless Docker and the native image** → [phase_53](phase_53_linux_engine_bringup.md).
-- **Phase 54 — Apple: Homebrew, Colima, and the native image** → [phase_54](phase_54_apple_engine_bringup.md).
-- **Phase 55 — Windows: WSL2 and the lifted Linux engine** → [phase_55](phase_55_windows_engine_bringup.md).
-- **Phase 56 — Haskell substrate coordinator and single kind cluster** → [phase_56](phase_56_bootstrap_coordinator_kind.md).
-- **Phase 57 — The base image, the jit-build resolver, and the in-cluster registry** → [phase_57](phase_57_base_image_registry.md).
-- **Phase 58 — The complementary-architecture base image** → [phase_58](phase_58_complementary_arch_child.md).
+- **Phase 50 — Bounded `pb` bootstrap and Haskell handoff** → [phase_50](phase_50_host_assert_cli.md).
+- **Phase 51 — The host-ensure kernel** → [phase_51](phase_51_host_ensure_kernel.md).
+- **Phase 52 — Linux: sudoless Docker and the native image** → [phase_52](phase_52_linux_engine_bringup.md).
+- **Phase 53 — Apple: Homebrew, Colima, and the native image** → [phase_53](phase_53_apple_engine_bringup.md).
+- **Phase 54 — Windows: WSL2 and the lifted Linux engine** → [phase_54](phase_54_windows_engine_bringup.md).
+- **Phase 55 — Haskell substrate coordinator and single kind cluster** → [phase_55](phase_55_bootstrap_coordinator_kind.md).
+- **Phase 56 — The base image, the jit-build resolver, and the in-cluster registry** → [phase_56](phase_56_base_image_registry.md).
+- **Phase 57 — The complementary-architecture base image** → [phase_57](phase_57_complementary_arch_child.md).
 
 *The live platform (Register 3):*
-- **Phase 59 — Typed renderer + object reconciler** → [phase_59](phase_59_object_reconciler.md).
-- **Phase 60 — amoebius-capacity scheduler + bootstrap cutover** → [phase_60](phase_60_capacity_scheduler.md).
-- **Phase 61 — No-provisioner retained storage + lossless rebind** → [phase_61](phase_61_retained_storage.md).
-- **Phase 62 — Root Vault + PKI + built-in Haskell Vault client** → [phase_62](phase_62_vault_pki.md).
-- **Phase 63 — Platform backbone (MetalLB + MinIO + Pulsar HA)** → [phase_63](phase_63_platform_backbone.md).
-- **Phase 64 — Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG)** → [phase_64](phase_64_platform_services_2.md).
-- **Phase 65 — Keycloak-owned ingress** → [phase_65](phase_65_keycloak_ingress.md).
-- **Phase 66 — Live DSL deploy via the replicas=1 control-plane daemon** → [phase_66](phase_66_live_dsl_deploy.md).
-- **Phase 67 — Tenant/provider provisioning** → [phase_67](phase_67_app_tenancy.md).
-- **Phase 68 — Native Pulsar client (CBOR)** → [phase_68](phase_68_pulsar_client.md).
-- **Phase 69 — Live subject/tenant isolation** → [phase_69](phase_69_user_tenant_isolation_live.md).
-- **Phase 70 — Content store + workflow runtime (Pulsar-Failover single-writer)** → [phase_70](phase_70_content_store_workflow.md).
-- **Phase 71 — Owner-scoped UI projection runtime** → [phase_71](phase_71_ui_projection_runtime.md).
-- **Phase 72 — Release lifecycle** → [phase_72](phase_72_release_lifecycle.md).
-- **Phase 73 — Atomic immutable UI-program release** → [phase_73](phase_73_ui_program_release.md).
-- **Phase 74 — WireGuard network fabric** → [phase_74](phase_74_network_fabric_wireguard.md).
-- **Phase 75 — Multi-cluster spawn + geo-replication** → [phase_75](phase_75_multicluster_spawn_georepl.md).
-- **Phase 76 — Gateway-migration drills + model-correspondence** → [phase_76](phase_76_gateway_migration_drills.md).
-- **Phase 77 — Haskell-derived provider Pulumi program and enveloped checkpoint** → [phase_77](phase_77_provider_deploy_checkpoint.md).
-- **Phase 78 — Hostless provider child + convergence + Lease handoff** → [phase_78](phase_78_provider_child_bringup.md).
-- **Phase 79 — Per-PV EBS decoupling + create-vs-delete credential** → [phase_79](phase_79_provider_ebs_credential.md).
-- **Phase 80 — Dynamic node provisioning by signal + leak-free provider gate** → [phase_80](phase_80_provider_dynamic_nodes.md).
-- **Phase 81 — Determinism kernel + jit-build CacheBudget cache** → [phase_81](phase_81_determinism_jitcache.md).
-- **Phase 82 — Single-tenant low-code UI live path** → [phase_82](phase_82_ui_single_tenant_live.md).
-- **Phase 83 — Multi-tenant low-code UI isolation** → [phase_83](phase_83_ui_multi_tenant_live.md).
-- **Phase 84 — UI rollout, projection catch-up, and reconnect** → [phase_84](phase_84_ui_rollout_reconnect.md).
-- **Phase 85 — Initial online UI multi-zone high availability** → [phase_85](phase_85_ui_ha_multizone.md).
-- **Phase 86 — Offline replay and durable receipts** → [phase_86](phase_86_offline_replay_receipts.md).
-- **Phase 87 — Offline blobs and partition isolation** → [phase_87](phase_87_offline_blobs_isolation.md).
-- **Phase 88 — Offline release and schema evolution** → [phase_88](phase_88_offline_release_evolution.md).
-- **Phase 89 — Offline multi-zone continuity** → [phase_89](phase_89_offline_multizone_continuity.md).
-- **Phase 90 — Apple-Metal host compute daemon** → [phase_90](phase_90_apple_metal_host_daemon.md).
-- **Phase 91 — The live test topology and elevated harness** → [phase_91](phase_91_test_topology_live.md).
+- **Phase 58 — Typed renderer + object reconciler** → [phase_58](phase_58_object_reconciler.md).
+- **Phase 59 — amoebius-capacity scheduler + bootstrap cutover** → [phase_59](phase_59_capacity_scheduler.md).
+- **Phase 60 — No-provisioner retained storage + lossless rebind** → [phase_60](phase_60_retained_storage.md).
+- **Phase 61 — Root Vault + PKI + built-in Haskell Vault client** → [phase_61](phase_61_vault_pki.md).
+- **Phase 62 — Platform backbone (MetalLB + MinIO + Pulsar HA)** → [phase_62](phase_62_platform_backbone.md).
+- **Phase 63 — Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG)** → [phase_63](phase_63_platform_services_2.md).
+- **Phase 64 — Keycloak-owned ingress** → [phase_64](phase_64_keycloak_ingress.md).
+- **Phase 65 — Live DSL deploy via the replicas=1 control-plane daemon** → [phase_65](phase_65_live_dsl_deploy.md).
+- **Phase 66 — Tenant/provider provisioning** → [phase_66](phase_66_app_tenancy.md).
+- **Phase 67 — Native Pulsar client (CBOR)** → [phase_67](phase_67_pulsar_client.md).
+- **Phase 68 — Live subject/tenant isolation** → [phase_68](phase_68_user_tenant_isolation_live.md).
+- **Phase 69 — Content store + workflow runtime (Pulsar-Failover single-writer)** → [phase_69](phase_69_content_store_workflow.md).
+- **Phase 70 — Owner-scoped UI projection runtime** → [phase_70](phase_70_ui_projection_runtime.md).
+- **Phase 71 — Release lifecycle** → [phase_71](phase_71_release_lifecycle.md).
+- **Phase 72 — Atomic immutable UI-program release** → [phase_72](phase_72_ui_program_release.md).
+- **Phase 73 — WireGuard network fabric** → [phase_73](phase_73_network_fabric_wireguard.md).
+- **Phase 74 — Multi-cluster spawn + geo-replication** → [phase_74](phase_74_multicluster_spawn_georepl.md).
+- **Phase 75 — Gateway-migration drills + model-correspondence** → [phase_75](phase_75_gateway_migration_drills.md).
+- **Phase 76 — Haskell-derived provider Pulumi program and enveloped checkpoint** → [phase_76](phase_76_provider_deploy_checkpoint.md).
+- **Phase 77 — Hostless provider child + convergence + Lease handoff** → [phase_77](phase_77_provider_child_bringup.md).
+- **Phase 78 — Per-PV EBS decoupling + create-vs-delete credential** → [phase_78](phase_78_provider_ebs_credential.md).
+- **Phase 79 — Dynamic node provisioning by signal + leak-free provider gate** → [phase_79](phase_79_provider_dynamic_nodes.md).
+- **Phase 80 — Determinism kernel + jit-build CacheBudget cache** → [phase_80](phase_80_determinism_jitcache.md).
+- **Phase 81 — Single-tenant low-code UI live path** → [phase_81](phase_81_ui_single_tenant_live.md).
+- **Phase 82 — Multi-tenant low-code UI isolation** → [phase_82](phase_82_ui_multi_tenant_live.md).
+- **Phase 83 — UI rollout, projection catch-up, and reconnect** → [phase_83](phase_83_ui_rollout_reconnect.md).
+- **Phase 84 — Initial online UI multi-zone high availability** → [phase_84](phase_84_ui_ha_multizone.md).
+- **Phase 85 — Offline replay and durable receipts** → [phase_85](phase_85_offline_replay_receipts.md).
+- **Phase 86 — Offline blobs and partition isolation** → [phase_86](phase_86_offline_blobs_isolation.md).
+- **Phase 87 — Offline release and schema evolution** → [phase_87](phase_87_offline_release_evolution.md).
+- **Phase 88 — Offline multi-zone continuity** → [phase_88](phase_88_offline_multizone_continuity.md).
+- **Phase 89 — Apple-Metal host compute daemon** → [phase_89](phase_89_apple_metal_host_daemon.md).
+- **Phase 90 — The live test topology and elevated harness** → [phase_90](phase_90_test_topology_live.md).
 
 *Domain instances — the seeds re-derived as conforming extensions (Register 3):*
-- **Phase 92 — The infernix inference core, re-derived** → [phase_92](phase_92_infernix_rederivation.md).
-- **Phase 93 — The infernix workflow and artifact contracts, re-derived** → [phase_93](phase_93_infernix_ui_rederivation.md).
-- **Phase 94 — The jitML numerical core, re-derived** → [phase_94](phase_94_jitml_rederivation.md).
-- **Phase 95 — The jitML training and checkpoint contracts, re-derived** → [phase_95](phase_95_jitml_ui_rederivation.md).
-- **Phase 96 — The multi-tenant web application re-derived** → [phase_96](phase_96_webapp_rederivation.md).
+- **Phase 91 — The infernix inference core, re-derived** → [phase_91](phase_91_infernix_rederivation.md).
+- **Phase 92 — The infernix workflow and artifact contracts, re-derived** → [phase_92](phase_92_infernix_ui_rederivation.md).
+- **Phase 93 — The jitML numerical core, re-derived** → [phase_93](phase_93_jitml_rederivation.md).
+- **Phase 94 — The jitML training and checkpoint contracts, re-derived** → [phase_94](phase_94_jitml_ui_rederivation.md).
+- **Phase 95 — The multi-tenant web application re-derived** → [phase_95](phase_95_webapp_rederivation.md).
 
 ---
 
@@ -367,7 +366,7 @@ fidelity remain explicitly unverified
   [system_components.md](system_components.md) remains target-only.
 - **Every prior seal is invalidated.** Earlier gates used repository-resident enumeration and ledgers, wrote run
   evidence beneath `DEVELOPMENT_PLAN/`, or depended on tracked resolver output and host-specific paths.
-- **Status posture:** Phase 0 is Active — NOT VALIDATED; Phases 1–96 are Blocked — NOT VALIDATED. The
+- **Status posture:** Phase 0 is Active — NOT VALIDATED; Phases 1–95 are Blocked — NOT VALIDATED. The
   authoritative per-phase projection lives only in [README.md](README.md); this summary cannot promote it.
 - **Artifact posture:** only Haskell behavioral source and the bounded Python `pb/**` bootstrap may be
   version-controlled. The

@@ -1,4 +1,4 @@
-# Authored surface expectation for the Phase-48 tool and mutant generation gate.
+# Authored surface expectation for the Phase-47 tool and mutant generation gate.
 # surface<TAB>owner<TAB>ids (comma-separated)
 
 closed-tool-source-inventory	checks	tool-source-inventory-exact

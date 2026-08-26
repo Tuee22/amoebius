@@ -34,7 +34,7 @@ RESULTS = ROOT / ".build/dsl/chain-boundary/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/chain-boundary/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/chain-boundary"
 TEMP_ROOT = ROOT / ".build/tmp/chain-boundary"
-CONTRACT = "DEVELOPMENT_PLAN/phase_35_chain_kernel_boundary.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md"
 GATE_COMMAND = "python3 tools/chain_boundary_gate.py"
 EXPECTATIONS = "test/oracle/chain_boundary_surfaces.tsv"
 
@@ -113,12 +113,12 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         {"case": "multi", "fixture": "sql", "shape": "Distributed", "nodes": "3"},
     ]
     if cases != expected_cases:
-        raise GateFailure(f"Phase-35 consumed case oracle drifted: {cases}")
+        raise GateFailure(f"Phase-34 consumed case oracle drifted: {cases}")
     expected_counts = {"minimal": 7, "multi": 12}
     for case, count in expected_counts.items():
         rows = [row for row in plan_rows if row["case"] == case]
         if len(rows) != count or [int(row["position"]) for row in rows] != list(range(1, count + 1)):
-            raise GateFailure(f"Phase-35 semantic plan positions drifted for {case}")
+            raise GateFailure(f"Phase-34 semantic plan positions drifted for {case}")
     if (
         len(plan_rows) != 19
         or {row["case"] for row in plan_rows} != set(expected_counts)
@@ -126,7 +126,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         or {row["frame"] for row in plan_rows}
         != {"ImmediateFrame", "BootstrapSchedulerFrame", "AfterBootstrapAddonCutoverFrame", "AfterManagedCapacityReadyFrame"}
     ):
-        raise GateFailure("Phase-35 semantic plan oracle is incomplete or malformed")
+        raise GateFailure("Phase-34 semantic plan oracle is incomplete or malformed")
     expected_calculus = {
         "calculus-kinds": "artifact,budget,lift,workflow,evidence",
         "component-names": "semantic-plan-rows,boundary-transcripts,ast-negatives,kernel-properties,mutant-evidence",
@@ -134,7 +134,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         "resource-vector": "5,38,0,0",
     }
     if calculus != expected_calculus:
-        raise GateFailure(f"Phase-35 calculus projection drifted: {calculus}")
+        raise GateFailure(f"Phase-34 calculus projection drifted: {calculus}")
     retired = [
         *sorted((ROOT / "test/fixture/chain_boundary/cfg").glob("*.cfg.json")),
         *sorted((ROOT / "test/fixture/chain_boundary/plan").glob("*")),
@@ -146,9 +146,9 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     if len(ast_rows) != 6 or reasons != {"UnsanctionedImport", "RawIO", "ForeignCall", "UnsafeOperation", "TemplateHaskell", "OrphanInstance"}:
         raise GateFailure("Gate-3 oracle must enumerate all six violation reasons exactly once")
     if len(mutants) != 7 or len({row["mutant"] for row in mutants}) != 7:
-        raise GateFailure("Phase-35 mutant manifest must contain seven unique mutants")
+        raise GateFailure("Phase-34 mutant manifest must contain seven unique mutants")
     if len(locus) != 20 or len({row["entry"] for row in locus}) != 20:
-        raise GateFailure("Phase-35 validation-locus ledger must contain twenty unique rows")
+        raise GateFailure("Phase-34 validation-locus ledger must contain twenty unique rows")
     for path in [CASES_ORACLE, PLAN_ORACLE, CALCULUS_ORACLE, BOUNDARY_INPUT]:
         if not path.is_file() or not path.read_bytes():
             raise GateFailure(f"empty oracle fixture: {path.relative_to(ROOT)}")
@@ -203,14 +203,14 @@ def verify_source_boundaries() -> None:
             primitive_hits.append(path)
     # The declared subprocess sites. This is a whole-tree invariant, so the list has to
     # name every module in `src/` that legitimately reaches the primitive — not only the
-    # ones Phase 16 itself wrote.
+    # ones Phase 15 itself wrote.
     #
-    # Phase 30 tightened the original boundary behind the opaque AbsExe tool ensure;
-    # Exec.Tool remains the Phase-16 compatibility facade and only Host.Ensure reaches the
-    # primitive on that path. Amended 2026-08-12 for the three Phase-31 image modules: an
+    # Phase 29 tightened the original boundary behind the opaque AbsExe tool ensure;
+    # Exec.Tool remains the Phase-15 compatibility facade and only Host.Ensure reaches the
+    # primitive on that path. Amended 2026-08-12 for the three Phase-30 image modules: an
     # image build, its runtime, and its publish step invoke a builder by construction, and
-    # a whole-tree list that omitted them would report a Phase-31 design decision as a
-    # Phase-16 defect. The check stays exact — any site not named here still fails —
+    # a whole-tree list that omitted them would report a Phase-30 design decision as a
+    # Phase-15 defect. The check stays exact — any site not named here still fails —
     # which is the property this phase actually claims
     # (development_plan_standards.md section M clause 1, amendment).
     expected = sorted(
@@ -316,7 +316,7 @@ def run_green_suites(cabal: Path) -> tuple[str, str]:
     combined = chain.stdout + isolated + boundary.stdout + astcheck.stdout
     for token in tokens:
         if token not in combined:
-            raise GateFailure(f"Phase-35 acceptance token is absent: {token}")
+            raise GateFailure(f"Phase-34 acceptance token is absent: {token}")
     return combined, observer
 
 
@@ -622,7 +622,7 @@ def main() -> int:
             if name != "platform"
         },
         dependencies={"chain-spec": "cabal test chain-spec", "boundary-spec": "cabal test boundary-spec", "astcheck-spec": "cabal test astcheck-spec"},
-        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-35 mutants", "status": "unrun"}],
+        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-34 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

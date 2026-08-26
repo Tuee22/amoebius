@@ -36,7 +36,7 @@ SPEC = ROOT / "test/spec/workflow/SelfReferentialGatesSpec.hs"
 RUNNER = ROOT / "tools/run_phase_gate.py"
 LEGAL = ROOT / "test/negative/self_referential_gates/legal_gate.hs"
 ILLEGAL = ROOT / "test/negative/self_referential_gates/leaked_gate.hs"
-CONTRACT = "DEVELOPMENT_PLAN/phase_50_self_referential_gates.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_49_self_referential_gates.md"
 GATE_COMMAND = "python3 tools/run_phase_gate.py 49"
 MUTANT_CAPABILITY = "self_referential_gates"
 SUITE = "test:self-referential-gates-spec"
@@ -199,7 +199,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], list[dict[str, str]], list[d
         if row["# phase"] == "149"
     ]
     if len(custody) != 10 or any(not (ROOT / row["path"]).is_file() for row in custody):
-        raise GateFailure("inventory-two-way-join: Phase-50 custody must contain ten inputs")
+        raise GateFailure("inventory-two-way-join: Phase-49 custody must contain ten inputs")
 
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 3 or {row["flag"] for row in mutants} != set(FLAGS):
@@ -408,7 +408,7 @@ def main() -> int:
 
         print("\noracle side — phase declarations, verdicts, calculus, custody, and mutants\n")
         inventory, locus, mutants = verify_oracles()
-        print("  ok    inventory-two-way-join 96 contracts at the Phase-50 boundary")
+        print("  ok    inventory-two-way-join 96 contracts at the Phase-49 boundary")
         print("  ok    93 runnable declarations; 3 explicitly descriptive contracts")
         print("  ok    103 validation loci; 10 custody inputs; 3 independent mutants")
         results["oracle"] = True
@@ -480,7 +480,7 @@ def main() -> int:
         "pass and red verdicts are evidence": ("verdicts", EXPECTED_RESULTS["verdicts"]),
         "teardown is a type obligation": ("compile-pairs", EXPECTED_RESULTS["compile-pairs"]),
         "three independent seeded defects": ("mutants", EXPECTED_RESULTS["mutants"]),
-        "phase-50 integrity checks": None,
+        "phase-49 integrity checks": None,
         "exact recorded outcomes": None,
     }
     layers = {
@@ -508,7 +508,7 @@ def main() -> int:
         mutants=[
             {"name": row["mutant"], "status": "red" if red == len(mutants) else "unrun"}
             for row in mutants
-        ] or [{"name": "Phase-50 mutants", "status": "unrun"}],
+        ] or [{"name": "Phase-49 mutants", "status": "unrun"}],
         observations=observations,
         extra_status=surface_decisions(expected_rows, results, rows),
     )

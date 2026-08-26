@@ -1309,13 +1309,13 @@ policyOwnerFindings owners documents = concatMap checkOwner owners
 
 canonicalGovernedPathCount :: Int
 #ifdef VALIDATION_DOCUMENT_INVENTORY_BASELINE_MUTANT
-canonicalGovernedPathCount = 196
+canonicalGovernedPathCount = 194
 #else
-canonicalGovernedPathCount = 197
+canonicalGovernedPathCount = 195
 #endif
 
 canonicalGovernedPathDigest :: Text
-canonicalGovernedPathDigest = "6488261ff12df3bf270901b018d4004aa9eef145352d356d274664ba9fc1326d"
+canonicalGovernedPathDigest = "51c38807d39526404f678c6a89ccaf6210ff91d7b17d4cde7989f1bc2a9e55f2"
 
 hex :: ByteString.ByteString -> Text
 hex = Text.pack . concatMap byteHex . ByteString.unpack

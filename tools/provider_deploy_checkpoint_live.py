@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the Phase-45 boundaries available without valid AWS authority."""
+"""Exercise the Phase-44 boundaries available without valid AWS authority."""
 
 from __future__ import annotations
 

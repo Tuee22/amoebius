@@ -1,4 +1,4 @@
-# Authored Phase-24 surface expectation.
+# Authored Phase-23 surface expectation.
 # surface<TAB>owner<TAB>ids (comma-separated)
 
 identity-attestation	metrics	identity-envelope,independent-signature

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-49 determinism and JIT-cache gate."""
+"""Run and seal the Phase-48 determinism and JIT-cache gate."""
 
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_48"
 LIVE = EVIDENCE / "determinism-jitcache-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_49_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_49_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_48_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_48_ledger.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
@@ -112,7 +112,7 @@ def phase0_domain() -> dict[str, str]:
     for row in rows:
         path = ROOT / row.split("\t")[2]
         require(path.is_file() and path.stat().st_size > 0, f"phase0-custody-missing:{path}")
-    return {"name": "phase0-custody", "command": "read Phase-49 manifest rows", "output": "23 oracles; 19 mutants", "result": "PASS"}
+    return {"name": "phase0-custody", "command": "read Phase-48 manifest rows", "output": "23 oracles; 19 mutants", "result": "PASS"}
 
 
 def oracle_domain() -> dict[str, str]:
@@ -145,7 +145,7 @@ def oracle_domain() -> dict[str, str]:
     }
     for path, tag in expected_negatives.items():
         require(load_dhall(path)["expectedTag"] == tag, f"negative:{tag}")
-    resource_mutants = sorted((ROOT / "test/mutant/phase_49_cache").glob("*.dhall")) + sorted((ROOT / "test/mutant/phase_49_determinism").glob("*.dhall"))
+    resource_mutants = sorted((ROOT / "test/mutant/phase_48_cache").glob("*.dhall")) + sorted((ROOT / "test/mutant/phase_48_determinism").glob("*.dhall"))
     require(len(resource_mutants) == 12 and all(load_dhall(str(path.relative_to(ROOT))).get("expectedTag") for path in resource_mutants), "resource-mutant-oracles")
     return {"name": "independent-oracles", "command": "Dhall/JSON/TSV/source oracle validation", "output": "identity, seeds, fingerprint, engine, capacity, negatives valid", "result": "PASS"}
 
@@ -195,7 +195,7 @@ def evidence_domain(*, fresh: bool) -> None:
     require(cache["ownerManifest"]["strategy"] == "Recreate" and cache["ownerManifest"]["imagePullPolicy"] == "Never" and cache["ownerManifest"]["writableHostPaths"] == 0 and cache["ownerManifest"]["ephemeralRequest"] == "224Mi" and cache["ownerManifest"]["emptyDirSizeLimit"] == "192Mi", "owner-manifest")
     require(cache["provisionedShape"] == {"cacheBudgetUnits": 160, "emptyDirSizeLimitUnits": 192, "ephemeralRequestUnits": 224, "inequalitiesHold": True, "writableAndLogHeadroomUnits": 32}, "provision-shape")
     require(cache["pinAwarePrune"] == {"afterBytes": 105, "beforeBytes": 121, "incomingPresent": True, "measuredPeakBytes": 121, "pinnedPresent": True, "unpinnedPresent": False} and cache["publicRegistryEvents"] == 0, "prune-egress")
-    require(live["deferred"] == {"crossNodeReuse": "UNVERIFIED", "crossSubstrateBitEquality": "UNVERIFIED", "tier2Model": "UNVERIFIED until Phase 50", "tier3CudaKernel": "UNVERIFIED until Phase 52"}, "deferred")
+    require(live["deferred"] == {"crossNodeReuse": "UNVERIFIED", "crossSubstrateBitEquality": "UNVERIFIED", "tier2Model": "UNVERIFIED until Phase 49", "tier3CudaKernel": "UNVERIFIED until Phase 51"}, "deferred")
     require(live["universalLinuxCpu"] == {"availableOnEveryHardwareSubstrate": True, "pristineLinuxHost": {"linux": "Incus", "linux-cuda": "Incus", "apple": "Lima", "windows": "WSL2"}}, "universal-linux-cpu-and-pristine-routing")
     require(live["cleanup"] == {"minioBucketAbsent": True, "namespaceAbsent": True, "registryAddedKeysAbsent": True, "remainingRegistryAddedKeys": []}, "cleanup")
     require(not re.search(r"(?i)(secretkey|root_token|privateKey|unseal_key|MINIO_ROOT|phase30-test-secret)", raw), "secret-in-evidence")
@@ -206,7 +206,7 @@ def no_live_residue() -> dict[str, str]:
     require(namespace.returncode != 0, "determinism-jitcache-namespace-residue")
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE, check=False, timeout=60).stdout.splitlines()
     require(clusters == ["amoebius-bootstrap-coordinator"], f"unexpected-kind-clusters:{clusters}")
-    return {"name": "external-cleanup-readback", "command": "namespace and kind inventories", "output": "no Phase-49 namespace; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
+    return {"name": "external-cleanup-readback", "command": "namespace and kind inventories", "output": "no Phase-48 namespace; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:
@@ -236,7 +236,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.extend(foreclosure_domain())
         rows.append(invoke("determinism-jitcache-contract", contract_args()))
         if args.reuse_fresh_live:
-            rows.append({"name": "determinism-jitcache-live", "command": "sealed just-produced Phase-49 live receipt", "output": "fresh retained-Kubernetes/MinIO/registry evidence", "result": "PASS"})
+            rows.append({"name": "determinism-jitcache-live", "command": "sealed just-produced Phase-48 live receipt", "output": "fresh retained-Kubernetes/MinIO/registry evidence", "result": "PASS"})
         else:
             rows.append(invoke("determinism-jitcache-live", (sys.executable, "tools/determinism_jitcache_live.py"), timeout=2400))
         evidence_domain(fresh=args.reuse_fresh_live)

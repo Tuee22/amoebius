@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the scoped Phase-52 host-CUDA/checkpoint live slice."""
+"""Run the scoped Phase-51 host-CUDA/checkpoint live slice."""
 
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the portable Phase-54 host boundary without claiming Apple physics."""
+"""Exercise the portable Phase-53 host boundary without claiming Apple physics."""
 
 from __future__ import annotations
 

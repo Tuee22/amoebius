@@ -34,7 +34,7 @@ LOCUS = ROOT / "test/oracle/inference_accelerator/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/inference-accelerator/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/inference-accelerator/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/inference-accelerator"
-CONTRACT = "DEVELOPMENT_PLAN/phase_33_inference_accelerator_provision.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md"
 GATE_COMMAND = "python3 tools/inference_accelerator_gate.py"
 EXPECTATIONS = "test/oracle/inference_accelerator_surfaces.tsv"
 
@@ -101,13 +101,13 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     locus = read_tsv(LOCUS)
     if len(cases) != 9 or len({row["case"] for row in cases}) != 9:
-        raise GateFailure("Phase-33 provision oracle must enumerate nine unique negatives")
+        raise GateFailure("Phase-32 provision oracle must enumerate nine unique negatives")
     if len(offerings) != 4 or {row["offering"] for row in offerings} != {"apple", "linux-cpu", "linux-cuda", "windows"}:
-        raise GateFailure("Phase-33 offering quotient oracle is incomplete")
+        raise GateFailure("Phase-32 offering quotient oracle is incomplete")
     if len(families) != 12 or len({(row["family"], row["lane"]) for row in families}) != 12:
-        raise GateFailure("Phase-33 family/lane relation must contain all twelve cells")
+        raise GateFailure("Phase-32 family/lane relation must contain all twelve cells")
     if coexistence != [{"epoch": "all-classes", "device": "cuda-a", "bytes": "15"}]:
-        raise GateFailure("Phase-33 hand-authored coexistence aggregation drifted")
+        raise GateFailure("Phase-32 hand-authored coexistence aggregation drifted")
     expected_calculus = [
         {"metric": "calculus-kinds", "value": "artifact,budget,lift,workflow,evidence"},
         {"metric": "component-names", "value": "inference-positives,availability-cells,boundary-negatives,accelerator-property,mutant-evidence"},
@@ -115,9 +115,9 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         {"metric": "resource-vector", "value": "5,34,0,0"},
     ]
     if calculus_projection != expected_calculus:
-        raise GateFailure("Phase-33 five-calculus projection oracle drifted")
+        raise GateFailure("Phase-32 five-calculus projection oracle drifted")
     if len(mutants) != 5 or len({row["mutant"] for row in mutants}) != 5:
-        raise GateFailure("Phase-33 mutant manifest must contain five unique mutants")
+        raise GateFailure("Phase-32 mutant manifest must contain five unique mutants")
     expected_locus = {
         "legal_inference_singlenode",
         "legal_inference_distributed",
@@ -126,7 +126,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         *(row["mutant"] for row in mutants),
     }
     if len(locus) != len(expected_locus) or {row["entry"] for row in locus} != expected_locus:
-        raise GateFailure("Phase-33 validation-locus ledger has incomplete or duplicate coverage")
+        raise GateFailure("Phase-32 validation-locus ledger has incomplete or duplicate coverage")
     for fixture in (
         "dhall/examples/legal_inference_singlenode.dhall",
         "dhall/examples/legal_inference_distributed.dhall",
@@ -134,7 +134,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     ):
         checked = run([str(dhall), "type", "--file", fixture, "--quiet"], require_success=False)
         if checked.returncode != 0:
-            raise GateFailure(f"Phase-33 positive is not Dhall-well-typed: {fixture}\n{checked.stdout}")
+            raise GateFailure(f"Phase-32 positive is not Dhall-well-typed: {fixture}\n{checked.stdout}")
     url = run([str(dhall), "type", "--file", "dhall/examples/illegal_engine_by_url.dhall", "--quiet"], require_success=False)
     if url.returncode == 0 or "Url" not in url.stdout:
         raise GateFailure("engine-by-URL fixture missed its Gate-1 Url locus")
@@ -144,7 +144,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         for stem in (row["case"], row["legal_twin"]):
             checked = run([str(dhall), "type", "--file", f"dhall/examples/{stem}.dhall", "--quiet"], require_success=False)
             if checked.returncode != 0:
-                raise GateFailure(f"Phase-33 semantic fixture is not Dhall-well-typed: {stem}\n{checked.stdout}")
+                raise GateFailure(f"Phase-32 semantic fixture is not Dhall-well-typed: {stem}\n{checked.stdout}")
     for row in mutants:
         descriptor = ROOT / f"test/mutant/inference_accelerator/{row['mutant']}/mutant.txt"
         if not descriptor.is_file() or not descriptor.read_text(encoding="utf-8").strip():
@@ -183,7 +183,7 @@ def run_green_suite(cabal: Path) -> str:
     calculus = "engine-accelerator-calculus: PASS (5 kinds, 34 projected units)"
     invariants = "engine-accelerator-invariants: PASS (1 opaque accelerator, 17 locus rows)"
     if token not in result.stdout or calculus not in result.stdout or invariants not in result.stdout or "each >=9%" not in result.stdout:
-        raise GateFailure(f"Phase-33 acceptance, calculus, invariant, or property token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-32 acceptance, calculus, invariant, or property token is absent:\n{result.stdout}")
     return result.stdout
 
 
@@ -425,7 +425,7 @@ def main() -> int:
         },
         dependencies={"battery": "cabal test capability-spec"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-33 mutants", "status": "unrun"}],
+        or [{"name": "phase-32 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

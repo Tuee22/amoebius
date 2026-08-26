@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-36 native Pulsar client gate."""
+"""Run and seal the Phase-35 native Pulsar client gate."""
 
 from __future__ import annotations
 
@@ -18,8 +18,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_35"
 LIVE = EVIDENCE / "pulsar-client-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_36_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_36_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_35_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_35_ledger.json"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 UNVERIFIED = {
     "content-store-workflow-workflow-content-store",
@@ -144,7 +144,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         disabled = tuple(f"-f-{flag}" for _, flag, _ in MUTANTS)
         rows = [invoke("source-build", (CABAL, "build", "amoebius-pulsar", *disabled, "-j1"))]
         if args.reuse_fresh_live:
-            rows.append({"name": "native-live", "command": "sealed just-produced Phase-36 live receipt", "output": "fresh final live evidence", "result": "PASS"})
+            rows.append({"name": "native-live", "command": "sealed just-produced Phase-35 live receipt", "output": "fresh final live evidence", "result": "PASS"})
         else:
             rows.append(invoke("native-live", (CABAL, "test", "pulsar-client-live", *disabled, "--test-show-details=direct", "-j1"), timeout=3600))
         evidence_domain(fresh=args.reuse_fresh_live)

@@ -37,7 +37,7 @@ import toolchain
 ROOT = Path(__file__).resolve().parents[1]
 MUTANT_FIXTURES = ROOT / "test/mutant/bootstrap_coordinator"
 RESULTS = ROOT / ".build/dsl/bootstrap-coordinator/phase-results.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_56_bootstrap_coordinator_kind.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md"
 GATE_COMMAND = "python3 tools/bootstrap_coordinator_gate.py --execute"
 EXPECTATIONS = ROOT / "test/oracle/bootstrap_coordinator_surfaces.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/bootstrap-coordinator"

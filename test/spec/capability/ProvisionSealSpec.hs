@@ -17,6 +17,6 @@ main = do
           if caught
             then do
               putStrLn ("provision-seal-mutant: RED " <> Text.unpack mutant)
-              fail ("Phase-32 mutant rejected: " <> Text.unpack mutant)
+              fail ("Phase-31 mutant rejected: " <> Text.unpack mutant)
             else putStrLn ("provision-seal-mutant: SURVIVED " <> Text.unpack mutant)
     _ -> runProvisionSealGate

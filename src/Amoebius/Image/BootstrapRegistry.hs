@@ -3,7 +3,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- | The resource-complete, snapshot-bound Phase-26 registry cycle-break.
+-- | The resource-complete, snapshot-bound Phase-25 registry cycle-break.
 -- Constructors for provisioned values and actions remain private; the only
 -- effects are selected-image import plus serialization/application of the
 -- fixed six-object bootstrap domain.

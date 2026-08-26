@@ -1,4 +1,4 @@
-# Pinned native-AArch64 builder for the generated Phase-26 monocontainer.
+# Pinned native-AArch64 builder for the generated Phase-25 monocontainer.
 # The final image Dockerfile remains generated from BakeCatalog.dhall; this
 # file produces its real arm64 BuildProduct input under binfmt/QEMU when the
 # host is not arm64.

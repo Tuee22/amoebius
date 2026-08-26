@@ -94,8 +94,8 @@ def validate_live(live: Path) -> dict[str, Any]:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
-    # The corpus pod pulls the Phase-31 published digest from the in-cluster registry.
-    parser.add_argument("--image", required=True, help="the Phase-31 published digest reference")
+    # The corpus pod pulls the Phase-30 published digest from the in-cluster registry.
+    parser.add_argument("--image", required=True, help="the Phase-30 published digest reference")
     arguments = parser.parse_args(argv)
     evidence = arguments.evidence
     evidence.mkdir(parents=True, exist_ok=True)

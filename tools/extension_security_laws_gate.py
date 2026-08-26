@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 24: bounded S1-S6 security-law evidence over a pure scoped kernel."""
+"""Phase 23: bounded S1-S6 security-law evidence over a pure scoped kernel."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ RESULTS = ROOT / ".build/dsl/extension-security-laws/phase-results.tsv"
 ENVELOPE = ROOT / ".build/dsl/extension-security-laws/envelope.tsv"
 NAMESPACES = ROOT / ".build/dsl/extension-security-laws/namespaces.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/extension-security-laws"
-CONTRACT = "DEVELOPMENT_PLAN/phase_24_extension_security_laws.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_23_extension_security_laws.md"
 GATE_COMMAND = "python3 tools/extension_security_laws_gate.py"
 EXPECTATIONS = "test/oracle/extension_security_laws_surfaces.tsv"
 OPERATIONS = ROOT / "test/oracle/extension_security/operation_matrix.tsv"

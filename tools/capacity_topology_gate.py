@@ -4,7 +4,7 @@
 The fold, compiler, compatibility, and mutant oracles carry authored shapes, the suite
 reaches its acceptance token with QuickCheck coverage in both directions, and all
 nineteen seeded mutants redden at their own loci. The three Dhall-typecheck loci remain
-deferred to Phase 26, so this phase imports no later schema or decoder.
+deferred to Phase 25, so this phase imports no later schema or decoder.
 
 What changed is the shell: evidence goes to the run bundle instead of the plan tree, the
 ledger is derived into that bundle instead of compared against a committed copy, the
@@ -125,7 +125,7 @@ def verify_registry_coverage(
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# Register-1 only; runtime correspondence UNVERIFIED\n", "entry\tsubcase\tlocus\tstatus\n"]
     for row in owned_rows:
-        status = "deferred-to-Phase-26" if row["validation_locus"] == "dhall-typecheck" else "discharged"
+        status = "deferred-to-Phase-25" if row["validation_locus"] == "dhall-typecheck" else "discharged"
         lines.append(f"{row['entry']}\t{row['subcase']}\t{row['validation_locus']}\t{status}\n")
     GENERATED_LEDGER.write_text("".join(lines), encoding="utf-8")
     return len(current), len(owned) - len(current)
@@ -206,7 +206,7 @@ def write_results(
         "compatibility-matrix": "9/9-equivalent",
         "quickcheck-properties": "4/4-green-checkCoverage-30-percent-both-directions",
         "mutants": f"{len(mutants)}/{len(mutants)}-red",
-        "registry-subcases": f"{discharged}/11-Phase-9-owned-discharged-{deferred}-deferred-to-Phase-26",
+        "registry-subcases": f"{discharged}/11-Phase-9-owned-discharged-{deferred}-deferred-to-Phase-25",
         "base-fold-totality": "compile-exhaustive-and-sampled-no-crash",
         "acceptance-token": "spec-composition-proven-base-capacity-topology",
         "storage-geometry": "UNVERIFIED",
@@ -246,7 +246,7 @@ EXPECTED_RESULTS = {
     "compatibility-matrix": "9/9-equivalent",
     "quickcheck-properties": "4/4-green-checkCoverage-30-percent-both-directions",
     "mutants": "19/19-red",
-    "registry-subcases": "8/11-Phase-9-owned-discharged-3-deferred-to-Phase-26",
+    "registry-subcases": "8/11-Phase-9-owned-discharged-3-deferred-to-Phase-25",
     "base-fold-totality": "compile-exhaustive-and-sampled-no-crash",
     "acceptance-token": "spec-composition-proven-base-capacity-topology",
     "storage-geometry": "UNVERIFIED",

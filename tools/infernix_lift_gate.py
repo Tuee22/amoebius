@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the scoped Phase-50 infernix artifact-lift gate."""
+"""Run and seal the scoped Phase-49 infernix artifact-lift gate."""
 
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_49"
 LIVE = EVIDENCE / "infernix-artifact-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_50_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_50_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_49_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_49_ledger.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
@@ -111,7 +111,7 @@ def phase0_domain() -> dict[str, str]:
     for row in rows:
         path = ROOT / row.split("\t")[2]
         require(path.is_file() and path.stat().st_size > 0, f"phase0-missing:{path}")
-    return {"name": "phase0-custody", "command": "read Phase-50 manifest rows", "output": "8 oracles; 4 mutants", "result": "PASS"}
+    return {"name": "phase0-custody", "command": "read Phase-49 manifest rows", "output": "8 oracles; 4 mutants", "result": "PASS"}
 
 
 def decode_cbor_text(path: Path) -> str:
@@ -211,7 +211,7 @@ def no_live_residue() -> dict[str, str]:
     namespace = subprocess.run((KUBECTL, "--kubeconfig", str(Path.home() / ".amoebius/phase24/kubeconfig"), "get", "namespace", "infernix-lift-system"), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, timeout=60)
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE, check=False, timeout=60).stdout.splitlines()
     require(namespace.returncode != 0 and clusters == ["amoebius-bootstrap-coordinator"], f"external-residue:{namespace.stdout}:{clusters}")
-    return {"name": "external-cleanup-readback", "command": "namespace and kind inventories", "output": "no Phase-50 namespace; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
+    return {"name": "external-cleanup-readback", "command": "namespace and kind inventories", "output": "no Phase-49 namespace; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:
@@ -242,7 +242,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.extend(foreclosure_domain())
         rows.append(invoke("infernix-core-artifact-lift-contract", contract_args()))
         if args.reuse_fresh_live:
-            rows.append({"name": "infernix-artifact-live", "command": "sealed just-produced Phase-50 live receipt", "output": "fresh retained Kubernetes/MinIO/Pulsar/Vault/cache evidence", "result": "PASS"})
+            rows.append({"name": "infernix-artifact-live", "command": "sealed just-produced Phase-49 live receipt", "output": "fresh retained Kubernetes/MinIO/Pulsar/Vault/cache evidence", "result": "PASS"})
         else:
             rows.append(invoke("infernix-artifact-live", (sys.executable, "tools/infernix_lift_live.py"), timeout=2400))
         evidence_domain(fresh=args.reuse_fresh_live)

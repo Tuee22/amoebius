@@ -14,7 +14,7 @@ This document owns the pre-hardware spine and its promotion barrier. Register de
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_12_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_13_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_14_symbolic_checker.md, DEVELOPMENT_PLAN/phase_17_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_18_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_28_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_34_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_35_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_50_self_referential_gates.md, DEVELOPMENT_PLAN/phase_59_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/workflow_calculus_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_49_self_referential_gates.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/workflow_calculus_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -31,11 +31,6 @@ This document owns the pre-hardware spine and its promotion barrier. Register de
 - [Related Documents](#related-documents)
 
 ---
-
-The spine admits one kind of real external read and write: the fixed-size records of the operator-owned
-host claim ledger ([hostclaim_spec.md](./hostclaim_spec.md)). That is filesystem work against a fixed
-per-user path, not a host, image, registry, cluster, accelerator, or cloud, and it establishes nothing
-about hardware. Deriving a claim's domains or charges from a probed device is outside the spine.
 
 ## 1. Why this doctrine exists
 
@@ -136,7 +131,7 @@ whose named oracle row turns red while unrelated controls stay green.
 
 ## 5. The pre-hardware promotion barrier
 
-[Phase 50](../../DEVELOPMENT_PLAN/phase_50_self_referential_gates.md) owns the integrated no-hardware barrier.
+[Phase 49](../../DEVELOPMENT_PLAN/phase_49_self_referential_gates.md) owns the integrated no-hardware barrier.
 Its candidate is admissible only when one qualified Haskell harness run demonstrates all nine stages from an
 empty generated tree and joins the complete earlier DSL/capability surface in both directions.
 
@@ -147,14 +142,14 @@ The barrier additionally requires:
 - separately reviewed Haskell oracles for every stage and recorded reviewer provenance;
 - a subject-change witness and intended red locus for every required mutant;
 - explicit `UNVERIFIED` live/runtime residue;
-- zero active legacy findings owned by Phases 0–50; and
+- zero active legacy findings owned by Phases 0–49; and
 - an external human approval bound to the source, contract, harness, and raw observations.
 
 The self-referential workflow representation is itself a subject of this barrier, not its authority. It must
 agree with the independently reviewed runner under clean and sabotaged cases, and neither representation may
 promote status.
 
-Phase 51 and all later work remain blocked until the human approval exists. A successful container build,
+Phase 50 and all later work remain blocked until the human approval exists. A successful container build,
 registry push/pull, host setup, accelerator calculation, kind cluster, or live deployment cannot substitute
 for or backfill this barrier.
 

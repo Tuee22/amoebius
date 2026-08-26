@@ -33,7 +33,7 @@ verifyCustody = do
   assertEqual "Phase-0 custody" 11 (length phaseRows)
   forM_ phaseRows $ \row -> case splitTabs row of
     (_ : _ : path : _) -> doesFileExist path >>= flip assert ("missing " <> path)
-    _ -> die "malformed Phase-56 custody row"
+    _ -> die "malformed Phase-55 custody row"
 
 ownerRequest :: RequestContext
 ownerRequest = RequestContext Own "https://ui.example" "https://ui.example" "csrf-1" "csrf-1" Nothing False

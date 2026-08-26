@@ -17,6 +17,6 @@ main = do
           if caught
             then do
               putStrLn ("execution-accelerator-mutant: RED " <> Text.unpack mutant)
-              fail ("Phase-30 mutant rejected: " <> Text.unpack mutant)
+              fail ("Phase-29 mutant rejected: " <> Text.unpack mutant)
             else putStrLn ("execution-accelerator-mutant: SURVIVED " <> Text.unpack mutant)
     _ -> runExecutionAcceleratorGate

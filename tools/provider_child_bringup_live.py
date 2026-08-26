@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise Phase-46 child-side Kubernetes boundaries without claiming EKS."""
+"""Exercise Phase-45 child-side Kubernetes boundaries without claiming EKS."""
 
 from __future__ import annotations
 
@@ -299,12 +299,12 @@ def execute() -> dict[str, Any]:
         "providerMaterialization": {
             "eksChild": "UNVERIFIED", "managedNode": "UNVERIFIED", "cloudLoadBalancer": "UNVERIFIED",
             "fullStandardServiceReachability": "UNVERIFIED", "fullStandardServiceHa": "UNVERIFIED",
-            "wildIngressOnlyViaKeycloakOnProvider": "UNVERIFIED", "reason": "Phase 45 AWS authority invalid",
+            "wildIngressOnlyViaKeycloakOnProvider": "UNVERIFIED", "reason": "Phase 44 AWS authority invalid",
         },
         "deferred": {
             "osBoundaryNoHelmObserver": "UNVERIFIED", "osBoundaryNoPublicPullNetworkObserver": "UNVERIFIED",
             "osBoundarySecondPassCloudAudit": "UNVERIFIED", "actualManagedEksHostForeclosureReadback": "UNVERIFIED",
-            "leakFreeProviderTagSweep": "UNVERIFIED until Phase 48",
+            "leakFreeProviderTagSweep": "UNVERIFIED until Phase 47",
         },
         "universalLinuxCpu": {
             "availableOnEveryHardwareSubstrate": True,

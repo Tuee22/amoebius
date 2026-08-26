@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Independent, deliberately tiny Phase-38 canonical-CBOR oracle.
+"""Independent, deliberately tiny Phase-37 canonical-CBOR oracle.
 
 This encoder is fixture custody, not the Haskell implementation.  It supports
-only the closed Phase-38 manifest vector and emits definite-length CBOR.
+only the closed Phase-37 manifest vector and emits definite-length CBOR.
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
--- Phase 40 representative topology. The live gate renders these typed values
+-- Phase 39 representative topology. The live gate renders these typed values
 -- through the existing SSA engine; this oracle names the closed domain.
 { app = "release-lifecycle-trivial"
 , environments = [ "Dev", "Staging", "Prod" ]

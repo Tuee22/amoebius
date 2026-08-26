@@ -62,7 +62,7 @@ main = do
     let plan = deriveGatePlan version declaration [declaration]
         actual = fmap projectionRow (gatePlanCases plan)
         unresolved = [ObservedCase (gateCaseId entry) (CaseFailed "not-observed-at-dhall-typecheck") | entry <- gatePlanCases plan]
-    assertEqual "authored Phase-25 projection" (sort expected) (sort actual)
+    assertEqual "authored Phase-24 projection" (sort expected) (sort actual)
     assertEqual "nineteen generated obligations" 19 (length actual)
     case runGeneratedGate plan (generatedFiles plan) unresolved of
       Left (CasesFailed failures) -> assertEqual "all obligations remain unresolved" 19 (length failures)

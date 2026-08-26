@@ -4,4 +4,4 @@ oracle	test/oracle/formal/gateway/invariant_mutants.tsv	hand-authored-before-Gat
 oracle	test/oracle/formal/gateway/cutoff_cases.tsv	independent-envelope-corpus
 mutant	test/oracle/formal/gateway/cutoff_mutants.tsv	eight-clause-delete-catalog
 oracle	test/oracle/formal/gateway/renderer_semantics.tsv	hand-authored semantic projection of emitted TLA/CFG
-oracle	test/oracle/formal/CalculusComposition.expected.tsv	Phase-11 composition semantic projection shared with Phase 12
+oracle	test/oracle/formal/CalculusComposition.expected.tsv	Phase-10 composition semantic projection shared with Phase 11

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Effect helper for the in-cluster Haskell Phase-34 control-plane daemon.
+"""Effect helper for the in-cluster Haskell Phase-33 control-plane daemon.
 
 All authority comes from the projected ServiceAccount token or from unlock
 material supplied on stdin.  No password, root token, or MinIO credential is

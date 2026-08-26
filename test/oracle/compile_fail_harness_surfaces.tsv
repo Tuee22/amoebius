@@ -1,4 +1,4 @@
-# Authored Phase-16 surface expectation.
+# Authored Phase-15 surface expectation.
 # surface<TAB>owner<TAB>ids (comma-separated)
 fixture-manifest	metrics	pair-count,claim-count
 owner-inventory	metrics	owner-count

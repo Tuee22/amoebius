@@ -203,7 +203,7 @@ def execute() -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--image", required=True, help="the Phase-31 published digest reference")
+    parser.add_argument("--image", required=True, help="the Phase-30 published digest reference")
     arguments = parser.parse_args()
     globals()["IMAGE"] = arguments.image
     try:

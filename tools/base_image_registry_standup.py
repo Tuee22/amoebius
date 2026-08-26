@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Enact and externally verify the fixed six-object Phase-31.2 registry domain."""
+"""Enact and externally verify the fixed six-object Phase-30.2 registry domain."""
 
 from __future__ import annotations
 
@@ -112,7 +112,7 @@ def proxy_source(
 ) -> str:
     source = (ROOT / "tools/base_image_registry_proxy_runtime.py").read_text(encoding="utf-8")
     source = source.removeprefix(
-        '"""Template executed inside the Phase-31 registry mutation-proxy container."""\n\n'
+        '"""Template executed inside the Phase-30 registry mutation-proxy container."""\n\n'
     )
     return (
         source.replace("__CAPABILITY__", repr(capability))

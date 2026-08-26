@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-42 test-surface join.
+# Authored expectation for the Phase-41 test-surface join.
 #
 # owner is the registry enumerated by the gate at run time:
 #   items     validation-locus entries plus the five central mutant-registry ids
@@ -6,7 +6,7 @@
 #   checks    source, oracle, suite, and mutation checks implemented by the gate
 #
 # Every enumerated id is claimed exactly once. The two runtime rows intentionally have no
-# evidence beyond an UNVERIFIED metric: Phase 42 compiles the language and paired plans; it
+# evidence beyond an UNVERIFIED metric: Phase 41 compiles the language and paired plans; it
 # does not claim a browser persistence interpreter or a live replay authority.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)

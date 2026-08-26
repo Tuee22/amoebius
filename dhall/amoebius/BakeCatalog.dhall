@@ -1,4 +1,4 @@
--- Typed Phase-26 source.  Every third-party binary enters on the highest rung of
+-- Typed Phase-25 source.  Every third-party binary enters on the highest rung of
 -- the `image_build_doctrine.md` section 7 acquisition ladder that applies to it,
 -- and there is no RunShell arm.
 let Platform = < Amd64 | Arm64 >

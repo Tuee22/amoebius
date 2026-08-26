@@ -1,8 +1,8 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
--- | Composition boundary for the Phase-9 placement, Phase-29 storage
--- witnesses, and Phase-30 execution/runtime/accelerator/provider-root proofs.
+-- | Composition boundary for the Phase-9 placement, Phase-28 storage
+-- witnesses, and Phase-29 execution/runtime/accelerator/provider-root proofs.
 -- The component folds remain the only way to obtain each retained witness.
 module Amoebius.Capacity.Composed
   ( ComposedPlacementInput (..)

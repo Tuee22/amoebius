@@ -176,77 +176,77 @@ flag resource-normalization-mutant
   manual: True
 
 flag base-image-registry-bootstrap-domain-expansion-mutant
-  description: Build the committed Phase-26.2 bootstrap-domain-expansion mutant
+  description: Build the committed Phase-25.2 bootstrap-domain-expansion mutant
   default: False
   manual: True
 
 flag base-image-registry-handoff-without-equality-mutant
-  description: Build the committed Phase-26.2 handoff-without-equality mutant
+  description: Build the committed Phase-25.2 handoff-without-equality mutant
   default: False
   manual: True
 
 flag base-image-registry-record-before-push-mutant
-  description: Build the committed Phase-26.3 record-before-push mutant
+  description: Build the committed Phase-25.3 record-before-push mutant
   default: False
   manual: True
 
 flag base-image-registry-noop-egress-policy-mutant
-  description: Build the committed Phase-26.4 unenforced kindnet policy mutant
+  description: Build the committed Phase-25.4 unenforced kindnet policy mutant
   default: False
   manual: True
 
 flag object-reconciler-wait-for-ready-pure-mutant
-  description: Build the committed Phase-27 dropped readiness observation mutant
+  description: Build the committed Phase-26 dropped readiness observation mutant
   default: False
   manual: True
 
 flag object-reconciler-generation-after-diff-mutant
-  description: Build the committed Phase-27 generation stamped after diff mutant
+  description: Build the committed Phase-26 generation stamped after diff mutant
   default: False
   manual: True
 
 flag object-reconciler-label-only-delete-mutant
-  description: Build the committed Phase-27 label-only delete authority mutant
+  description: Build the committed Phase-26 label-only delete authority mutant
   default: False
   manual: True
 
 flag object-reconciler-healthy-overbound-child-mutant
-  description: Build the committed Phase-27 healthy CR over-bound child mutant
+  description: Build the committed Phase-26 healthy CR over-bound child mutant
   default: False
   manual: True
 
 flag capacity-scheduler-collapsed-readiness-mutant
-  description: Build the committed Phase-28 collapsed scheduler-readiness mutant
+  description: Build the committed Phase-27 collapsed scheduler-readiness mutant
   default: False
   manual: True
 
 flag capacity-scheduler-stage-drop-mutant
-  description: Build the committed Phase-28 generic-SSA-before-cutover mutant
+  description: Build the committed Phase-27 generic-SSA-before-cutover mutant
   default: False
   manual: True
 
 flag capacity-scheduler-default-scheduler-bypass-mutant
-  description: Build the committed Phase-28 managed-node default-scheduler bypass mutant
+  description: Build the committed Phase-27 managed-node default-scheduler bypass mutant
   default: False
   manual: True
 
 flag capacity-scheduler-bind-before-reservation-cas-mutant
-  description: Build the committed Phase-28 Binding-before-reservation-CAS mutant
+  description: Build the committed Phase-27 Binding-before-reservation-CAS mutant
   default: False
   manual: True
 
 flag capacity-scheduler-numeric-add-mutant
-  description: Build the committed Phase-28 numeric-add instead of whole-ledger-refold mutant
+  description: Build the committed Phase-27 numeric-add instead of whole-ledger-refold mutant
   default: False
   manual: True
 
 flag capacity-scheduler-same-uid-double-debit-mutant
-  description: Build the committed Phase-28 same-UID double-debit mutant
+  description: Build the committed Phase-27 same-UID double-debit mutant
   default: False
   manual: True
 
 flag capacity-scheduler-bound-deleted-restart-mutant
-  description: Build the committed Phase-28 Bound-record-deleted-on-restart mutant
+  description: Build the committed Phase-27 Bound-record-deleted-on-restart mutant
   default: False
   manual: True
 
@@ -361,162 +361,162 @@ flag vault-pki-first-missing-mutant
   manual: True
 
 flag platform-backbone-registry-fs-driver-mutant
-  description: Build the Phase-31 registry filesystem-driver mutant
+  description: Build the Phase-30 registry filesystem-driver mutant
   default: False
   manual: True
 
 flag platform-backbone-offload-time-only-mutant
-  description: Build the Phase-31 time-only Pulsar offload mutant
+  description: Build the Phase-30 time-only Pulsar offload mutant
   default: False
   manual: True
 
 flag platform-backbone-logical-as-physical-mutant
-  description: Build the Phase-31 logical-as-physical MinIO storage mutant
+  description: Build the Phase-30 logical-as-physical MinIO storage mutant
   default: False
   manual: True
 
 flag platform-backbone-drop-fault-scenario-mutant
-  description: Build the Phase-31 dropped MinIO healing-scenario mutant
+  description: Build the Phase-30 dropped MinIO healing-scenario mutant
   default: False
   manual: True
 
 flag platform-backbone-sum-ordinals-mutant
-  description: Build the Phase-31 unequal-ordinal sum mutant
+  description: Build the Phase-30 unequal-ordinal sum mutant
   default: False
   manual: True
 
 flag platform-backbone-content-immediate-gc-mutant
-  description: Build the Phase-31 immediate failed-write GC mutant
+  description: Build the Phase-30 immediate failed-write GC mutant
   default: False
   manual: True
 
 flag platform-services-2-patroni-async-default-mutant
-  description: Build the Phase-32 non-strict Patroni configuration mutant
+  description: Build the Phase-31 non-strict Patroni configuration mutant
   default: False
   manual: True
 
 flag platform-services-2-dag-drop-edge-mutant
-  description: Build the Phase-32 Percona-to-Postgres edge deletion mutant
+  description: Build the Phase-31 Percona-to-Postgres edge deletion mutant
   default: False
   manual: True
 
 flag platform-services-2-dag-inject-cycle-mutant
-  description: Build the Phase-32 readiness cycle mutant
+  description: Build the Phase-31 readiness cycle mutant
   default: False
   manual: True
 
 flag platform-services-2-redis-pvc-mutant
-  description: Build the Phase-32 Redis persistence mutant
+  description: Build the Phase-31 Redis persistence mutant
   default: False
   manual: True
 
 flag platform-services-2-redis-unbounded-buffer-mutant
-  description: Build the Phase-32 unbounded Redis output buffer mutant
+  description: Build the Phase-31 unbounded Redis output buffer mutant
   default: False
   manual: True
 
 flag platform-services-2-redis-public-image-mutant
-  description: Build the Phase-32 public Redis image mutant
+  description: Build the Phase-31 public Redis image mutant
   default: False
   manual: True
 
 flag platform-services-2-redis-receipt-authority-mutant
-  description: Build the Phase-32 Redis durable receipt authority mutant
+  description: Build the Phase-31 Redis durable receipt authority mutant
   default: False
   manual: True
 
 flag platform-services-2-fixed-prometheus-mutant
-  description: Build the Phase-32 fixed Prometheus storage mutant
+  description: Build the Phase-31 fixed Prometheus storage mutant
   default: False
   manual: True
 
 flag keycloak-ingress-drop-oidc-mutant
-  description: Build the Phase-33 missing OIDC guard mutant
+  description: Build the Phase-32 missing OIDC guard mutant
   default: False
   manual: True
 
 flag keycloak-ingress-netpol-swap-mutant
-  description: Build the Phase-33 dropped/undeclared NetworkPolicy edge mutant
+  description: Build the Phase-32 dropped/undeclared NetworkPolicy edge mutant
   default: False
   manual: True
 
 flag keycloak-ingress-delete-noop-mutant
-  description: Build the Phase-33 cluster-delete no-op witness mutant
+  description: Build the Phase-32 cluster-delete no-op witness mutant
   default: False
   manual: True
 
 flag keycloak-ingress-drop-origin-mutant
-  description: Build the Phase-33 missing WebSocket Origin check mutant
+  description: Build the Phase-32 missing WebSocket Origin check mutant
   default: False
   manual: True
 
 flag keycloak-ingress-nonce-replay-mutant
-  description: Build the Phase-33 reusable WebSocket nonce mutant
+  description: Build the Phase-32 reusable WebSocket nonce mutant
   default: False
   manual: True
 
 flag keycloak-ingress-direct-backend-mutant
-  description: Build the Phase-33 directly published WebSocket backend mutant
+  description: Build the Phase-32 directly published WebSocket backend mutant
   default: False
   manual: True
 
 flag live-dsl-deploy-enact-noop-mutant
-  description: Build the Phase-34 dropped reconcile enactment mutant
+  description: Build the Phase-33 dropped reconcile enactment mutant
   default: False
   manual: True
 
 flag live-dsl-deploy-effect-swap-mutant
-  description: Build the Phase-34 harness-attributed effect swap mutant
+  description: Build the Phase-33 harness-attributed effect swap mutant
   default: False
   manual: True
 
 flag live-dsl-deploy-persist-password-mutant
-  description: Build the Phase-34 operator-password persistence mutant
+  description: Build the Phase-33 operator-password persistence mutant
   default: False
   manual: True
 
 flag live-dsl-deploy-reach-any-mutant
-  description: Build the Phase-34 seal-critical reach guard weakening mutant
+  description: Build the Phase-33 seal-critical reach guard weakening mutant
   default: False
   manual: True
 
 flag live-dsl-deploy-admit-unproven-secret-mutant
-  description: Build the Phase-34 unproven SecretRef admission mutant
+  description: Build the Phase-33 unproven SecretRef admission mutant
   default: False
   manual: True
 
 flag app-tenancy-drop-provider-arm-mutant
-  description: Build the Phase-35 dropped Pulsar provider-arm mutant
+  description: Build the Phase-34 dropped Pulsar provider-arm mutant
   default: False
   manual: True
 
 flag app-tenancy-collapse-tenant-key-mutant
-  description: Build the Phase-35 unqualified tenant-key mutant
+  description: Build the Phase-34 unqualified tenant-key mutant
   default: False
   manual: True
 
 flag user-tenant-isolation-drop-user-predicate-mutant
-  description: Build the Phase-37 dropped subject/owner predicate mutant
+  description: Build the Phase-36 dropped subject/owner predicate mutant
   default: False
   manual: True
 
 flag user-tenant-isolation-accept-body-tenant-mutant
-  description: Build the Phase-37 caller-body tenant authority mutant
+  description: Build the Phase-36 caller-body tenant authority mutant
   default: False
   manual: True
 
 flag ui-projection-runtime-drop-owner-key-mutant
-  description: Build the Phase-39 compaction key without its owner coordinate
+  description: Build the Phase-38 compaction key without its owner coordinate
   default: False
   manual: True
 
 flag ui-projection-runtime-drop-owner-subscription-mutant
-  description: Build the Phase-39 subscription identity without its owner coordinate
+  description: Build the Phase-38 subscription identity without its owner coordinate
   default: False
   manual: True
 
 flag ui-projection-runtime-drop-receipt-command-id-mutant
-  description: Build the Phase-39 receipt key without its command coordinate
+  description: Build the Phase-38 receipt key without its command coordinate
   default: False
   manual: True
 
@@ -761,17 +761,17 @@ flag release-lifecycle-drop-verification-wal-mutant
   manual: True
 
 flag provider-deploy-checkpoint-static-key-mutant
-  description: Build the committed Phase-45 pod-local checkpoint-key mutant
+  description: Build the committed Phase-44 pod-local checkpoint-key mutant
   default: False
   manual: True
 
 flag provider-deploy-checkpoint-leak-path-mutant
-  description: Build the committed Phase-45 child-PATH leak mutant
+  description: Build the committed Phase-44 child-PATH leak mutant
   default: False
   manual: True
 
 flag provider-deploy-checkpoint-drop-parallel-executor-mutant
-  description: Build the committed Phase-45 dropped parallel executor mutant
+  description: Build the committed Phase-44 dropped parallel executor mutant
   default: False
   manual: True
 
@@ -1234,7 +1234,7 @@ flag validation-policy-owner-map-mutant
   manual: True
 
 flag validation-policy-pb-transport-mutant
-  description: Widen the compiled policy to admit pb as validation transport before Phase 51
+  description: Widen the compiled policy to admit pb as validation transport before Phase 50
   default: False
   manual: True
 
@@ -1908,7 +1908,7 @@ flag validation-policy-serializer-status-phases-01-95-drop-mutant
   default: False
   manual: True
 
-flag validation-policy-serializer-status-phase-0-drop-mutant
+flag validation-policy-serializer-status-phase-00-drop-mutant
   description: Select the isolated VALIDATION_POLICY_SERIALIZER_STATUS_PHASE_00_DROP_MUTANT PolicyContract changed-production subject
   default: False
   manual: True
@@ -2814,7 +2814,7 @@ flag validation-phase-semantic-swap-mutant
   manual: True
 
 flag validation-phase-semantic-stage-mutant
-  description: Move Phase 52 across the hardware-free execution-stage boundary
+  description: Move Phase 51 across the hardware-free execution-stage boundary
   default: False
   manual: True
 
@@ -2824,12 +2824,12 @@ flag validation-phase-semantic-resource-mutant
   manual: True
 
 flag validation-phase-semantic-provider-mutant
-  description: Replace the Phase-57 registry:2 projection with an alternate registry reference
+  description: Replace the Phase-56 registry:2 projection with an alternate registry reference
   default: False
   manual: True
 
 flag validation-phase-semantic-predecessor-mutant
-  description: Skip Phase 52 in the compiled Phase-53 immediate-predecessor edge
+  description: Skip Phase 51 in the compiled Phase-52 immediate-predecessor edge
   default: False
   manual: True
 
@@ -2854,22 +2854,22 @@ flag validation-phase-semantic-slot-omission-mutant
   manual: True
 
 flag validation-phase-semantic-phase49-source-guard-mutant
-  description: Remove the all-owners-at-or-before-49-zero requirement from the Phase-50 source barrier
+  description: Remove the all-owners-at-or-before-49-zero requirement from the Phase-49 source barrier
   default: False
   manual: True
 
 flag validation-phase-semantic-phase50-handoff-guard-mutant
-  description: Remove the direct-Haskell-supervisor-with-pb-child requirement from the Phase-51 handoff boundary
+  description: Remove the direct-Haskell-supervisor-with-pb-child requirement from the Phase-50 handoff boundary
   default: False
   manual: True
 
 flag validation-phase-semantic-phase51-fake-guard-mutant
-  description: Remove the hardware-free-execution requirement from the Phase-52 fake boundary
+  description: Remove the hardware-free-execution requirement from the Phase-51 fake boundary
   default: False
   manual: True
 
 flag validation-phase-semantic-phase52-hardware-guard-mutant
-  description: Remove the first-hardware-validation requirement from the Phase-53 hardware boundary
+  description: Remove the first-hardware-validation requirement from the Phase-52 hardware boundary
   default: False
   manual: True
 
@@ -2889,12 +2889,12 @@ flag validation-phase-semantic-resource-diagnostic-removal-mutant
   manual: True
 
 flag validation-phase-semantic-hardware-metadata-swap-mutant
-  description: Swap the Phase-52 and Phase-53 substrate lane and register metadata across the first-hardware boundary
+  description: Swap the Phase-51 and Phase-52 substrate lane and register metadata across the first-hardware boundary
   default: False
   manual: True
 
 flag validation-phase-semantic-unexpected-critical-guard-mutant
-  description: Add a Phase-50 source-barrier guard to Phase 49 while preserving the required guarded phases
+  description: Add a Phase-49 source-barrier guard to Phase 48 while preserving the required guarded phases
   default: False
   manual: True
 
@@ -15197,107 +15197,107 @@ flag validation-pb-grammar-path-limit-widen-mutant
   manual: True
 
 flag validation-pb-grammar-authenticated-interpreter-residue-drop-mutant
-  description: Drop only the authenticated Python interpreter Phase-51 residue
+  description: Drop only the authenticated Python interpreter Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-isolation-flags-order-residue-drop-mutant
-  description: Drop only the Python isolation flag ordering Phase-51 residue
+  description: Drop only the Python isolation flag ordering Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-absolute-directory-subject-residue-drop-mutant
-  description: Drop only the absolute Python directory subject Phase-51 residue
+  description: Drop only the absolute Python directory subject Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-stdlib-startup-residue-drop-mutant
-  description: Drop only the standard-library startup Phase-51 residue
+  description: Drop only the standard-library startup Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-stdlib-transitive-residue-drop-mutant
-  description: Drop only the native and transitive standard-library semantics Phase-51 residue
+  description: Drop only the native and transitive standard-library semantics Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-ambient-interpreter-env-residue-drop-mutant
-  description: Drop only the ambient interpreter environment Phase-51 residue
+  description: Drop only the ambient interpreter environment Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-network-proxy-env-residue-drop-mutant
-  description: Drop only the network proxy environment Phase-51 residue
+  description: Drop only the network proxy environment Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-child-tool-search-path-residue-drop-mutant
-  description: Drop only the child-tool default search path Phase-51 residue
+  description: Drop only the child-tool default search path Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-network-transport-certificate-residue-drop-mutant
-  description: Drop only the network transport and certificate Phase-51 residue
+  description: Drop only the network transport and certificate Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-symlink-toctou-residue-drop-mutant
-  description: Drop only the symlink and TOCTOU Phase-51 residue
+  description: Drop only the symlink and TOCTOU Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-atomic-artifact-publication-residue-drop-mutant
-  description: Drop only the atomic artifact publication Phase-51 residue
+  description: Drop only the atomic artifact publication Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-executable-mode-observation-residue-drop-mutant
-  description: Drop only the executable-mode observation Phase-51 residue
+  description: Drop only the executable-mode observation Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-ghcup-tool-runtime-residue-drop-mutant
-  description: Drop only the ghcup-managed tool runtime Phase-51 residue
+  description: Drop only the ghcup-managed tool runtime Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-cabal-list-bin-path-residue-drop-mutant
-  description: Drop only the cabal list-bin path observation Phase-51 residue
+  description: Drop only the cabal list-bin path observation Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-source-binary-path-identity-residue-drop-mutant
-  description: Drop only the source and binary path identity Phase-51 residue
+  description: Drop only the source and binary path identity Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-windows-ghcup-runtime-residue-drop-mutant
-  description: Drop only the Windows ghcup runtime Phase-51 residue
+  description: Drop only the Windows ghcup runtime Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-fake-adapter-observation-residue-drop-mutant
-  description: Drop only the fake-adapter observation Phase-51 residue
+  description: Drop only the fake-adapter observation Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-concrete-adapter-effect-residue-drop-mutant
-  description: Drop only the concrete-adapter effect observation Phase-51 residue
+  description: Drop only the concrete-adapter effect observation Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-unchanged-argument-tail-residue-drop-mutant
-  description: Drop only the unchanged argument-tail Phase-51 residue
+  description: Drop only the unchanged argument-tail Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-exec-replacement-residue-drop-mutant
-  description: Drop only the exec replacement Phase-51 residue
+  description: Drop only the exec replacement Phase-50 residue
   default: False
   manual: True
 
 flag validation-pb-grammar-handoff-exit-propagation-residue-drop-mutant
-  description: Drop only the handoff exit-propagation Phase-51 residue
+  description: Drop only the handoff exit-propagation Phase-50 residue
   default: False
   manual: True
 
@@ -23198,7 +23198,7 @@ library validation-kernel
     cpp-options: -DVALIDATION_POLICY_SERIALIZER_STATUS_HISTORICAL_EVIDENCE_DROP_MUTANT
   if flag(validation-policy-serializer-status-phases-01-95-drop-mutant)
     cpp-options: -DVALIDATION_POLICY_SERIALIZER_STATUS_PHASES_01_95_DROP_MUTANT
-  if flag(validation-policy-serializer-status-phase-0-drop-mutant)
+  if flag(validation-policy-serializer-status-phase-00-drop-mutant)
     cpp-options: -DVALIDATION_POLICY_SERIALIZER_STATUS_PHASE_00_DROP_MUTANT
   if flag(validation-policy-serializer-status-sprints-drop-mutant)
     cpp-options: -DVALIDATION_POLICY_SERIALIZER_STATUS_SPRINTS_DROP_MUTANT
@@ -32012,7 +32012,7 @@ library jitml
       Amoebius.JitML.CudaArtifactLift
   -- `JitML.Codegen.RuntimeOperationsCuda` was on this library's surface but exists in
   -- neither this repository nor the jitml package the sibling checkout resolves to, so it
-  -- cannot be re-exported. The dangling reference is recorded against Phase 66 in
+  -- cannot be re-exported. The dangling reference is recorded against Phase 65 in
   -- DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md.
   hs-source-dirs:
       src
@@ -32346,7 +32346,7 @@ executable amoebius
   -- Everything under Amoebius.Entry.* is an entry-point-only seam of this one binary, and
   -- nothing else is: each is reached only through app/amoebius/Main.hs's subcommand table and
   -- belongs to the executable, not to the shared decision core. Keeping the serve-ui seam in
-  -- lib:dsl-core made every phase that links the core depend on the Phase-23 UI-server
+  -- lib:dsl-core made every phase that links the core depend on the Phase-22 UI-server
   -- boundary, which is the forward dependency development_plan_standards.md section E forbids.
   --
   -- The namespace exists because a module named `...Main` that defines no `main` is a trap:

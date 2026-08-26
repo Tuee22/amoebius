@@ -87,7 +87,7 @@ applyIdentityMutants = resourceMembershipDrift . pathDrift
 #ifdef VALIDATION_PHASE_IDENTITY_PATH_DRIFT_MUTANT
   pathDrift identityRow
     | phaseIdentityOrdinal identityRow == 43 =
-        identityRow {phaseIdentityPath = "DEVELOPMENT_PLAN/phase_44_resource-path-drift.md"}
+        identityRow {phaseIdentityPath = "DEVELOPMENT_PLAN/phase_43_resource-path-drift.md"}
     | otherwise = identityRow
 #else
   pathDrift = id

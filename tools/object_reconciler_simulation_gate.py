@@ -132,7 +132,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "completion persistence before cleanup", "exact authenticated delete",
                 "fresh observation and readiness before continuation",
             ],
-            "assumed": ["modeled apiserver fidelity; discharged separately by Sprint 68.4 Register-3 live evidence"],
+            "assumed": ["modeled apiserver fidelity; discharged separately by Sprint 67.4 Register-3 live evidence"],
             "result": "PASS",
         }
         receipt = {**stable, "receiptFingerprint": fingerprint(stable)}

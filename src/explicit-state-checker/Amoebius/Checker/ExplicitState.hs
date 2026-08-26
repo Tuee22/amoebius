@@ -3,9 +3,9 @@
 -- | Amoebius-owned bounded explicit-state checking over the formal 'Model'.
 --
 -- This implementation deliberately does not import 'Amoebius.Formal.Explore'.  Both
--- algorithms consume the Phase-12 interpreter semantics, while frontier management,
+-- algorithms consume the Phase-11 interpreter semantics, while frontier management,
 -- bound handling, violation selection, trace construction, and verdict formation are
--- independently implemented here and checked for parity by Phase 13.
+-- independently implemented here and checked for parity by Phase 12.
 module Amoebius.Checker.ExplicitState
   ( SearchBound
   , mkSearchBound

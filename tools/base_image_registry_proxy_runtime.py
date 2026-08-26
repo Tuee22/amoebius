@@ -1,4 +1,4 @@
-"""Template executed inside the Phase-31 registry mutation-proxy container."""
+"""Template executed inside the Phase-30 registry mutation-proxy container."""
 
 import base64
 import hashlib

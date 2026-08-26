@@ -1,4 +1,4 @@
-# Authored surface expectation for the Phase-46 encrypted browser runtime gate.
+# Authored surface expectation for the Phase-45 encrypted browser runtime gate.
 # surface<TAB>owner<TAB>ids (comma-separated)
 
 production-offline-module-graph	checks	production-offline-module-graph

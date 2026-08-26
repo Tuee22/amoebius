@@ -63,7 +63,7 @@ and other entry-specific residues remain with their delivery owners. Status and 
 
 ### 3.91 An unauthenticated route whose scope comes from the request
 
-**Delivery-owner:** `Phase-44`
+**Delivery-owner:** `Phase-43`
 
 **Case-family:** `security`
 
@@ -106,7 +106,7 @@ must turn the matrix red before any response body is produced.
 
 ### 3.92 A scope filter whose absent value means every scope
 
-**Delivery-owner:** `Phase-37`
+**Delivery-owner:** `Phase-36`
 
 **Case-family:** `security`
 
@@ -147,7 +147,7 @@ filters on.
 
 ### 3.93 A locally reconstructed session bearing the type of an attested one
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-41`
 
 **Case-family:** `security`
 
@@ -229,7 +229,7 @@ retagging rule. Live authentication and persisted-value re-entry remain `UNVERIF
 
 ### 3.95 A replay key that does not name its scope
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-41`
 
 **Case-family:** `security`
 
@@ -262,7 +262,7 @@ accept a caller-supplied key, and share one idempotency table across scopes with
 
 ### 3.96 A scope column that admits null
 
-**Delivery-owner:** `Phase-67`
+**Delivery-owner:** `Phase-66`
 
 **Case-family:** `security`
 
@@ -302,7 +302,7 @@ application role.
 
 ### 3.97 A scope key whose rendering is not injective
 
-**Delivery-owner:** `Phase-37`
+**Delivery-owner:** `Phase-36`
 
 **Case-family:** `security`
 

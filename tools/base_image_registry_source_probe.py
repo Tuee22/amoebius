@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Execute every pinned Phase-31 binary in its source or assembled image."""
+"""Execute every pinned Phase-30 binary in its source or assembled image."""
 
 from __future__ import annotations
 

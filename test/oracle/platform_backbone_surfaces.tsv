@@ -1,4 +1,4 @@
-# Authored Phase-35 platform-backbone surface expectation.
+# Authored Phase-34 platform-backbone surface expectation.
 all-three-sprints-sealed	metrics	sprint-receipts
 vault-readiness-precedes-backbone	metrics	vault-readiness
 stable-external-load-balancer	metrics	load-balancer

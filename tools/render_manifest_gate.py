@@ -29,7 +29,7 @@ LOCUS = ROOT / "test/oracle/render_manifest/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/render-manifest/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/render-manifest/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/render-manifest"
-CONTRACT = "DEVELOPMENT_PLAN/phase_34_render_manifest_oracles.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md"
 GATE_COMMAND = "python3 tools/render_manifest_gate.py"
 EXPECTATIONS = "test/oracle/render_manifest_surfaces.tsv"
 
@@ -82,11 +82,11 @@ def verify_oracles() -> list[dict[str, str]]:
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     locus = read_tsv(LOCUS)
     if len(corpus) != 18 or len({row["deployment"] for row in corpus}) != 18:
-        raise GateFailure("Phase-34 semantic oracle must enumerate eighteen unique deployments")
+        raise GateFailure("Phase-33 semantic oracle must enumerate eighteen unique deployments")
     if {row["deployment"].rsplit("_", 1)[-1] for row in corpus} != {"singlenode", "distributed"}:
-        raise GateFailure("Phase-34 semantic oracle must cover both shapes")
+        raise GateFailure("Phase-33 semantic oracle must cover both shapes")
     if sum(int(row["objects"]) for row in corpus) != 164:
-        raise GateFailure("Phase-34 semantic oracle must enumerate exactly 164 rendered objects")
+        raise GateFailure("Phase-33 semantic oracle must enumerate exactly 164 rendered objects")
     for row in corpus:
         identities = row["identities"].split(",")
         if len(identities) != int(row["objects"]) or identities != sorted(set(identities)):
@@ -104,9 +104,9 @@ def verify_oracles() -> list[dict[str, str]]:
         {"metric": "resource-vector", "value": "5,198,0,0"},
     ]
     if calculus_projection != expected_calculus:
-        raise GateFailure("Phase-34 five-calculus projection oracle drifted")
+        raise GateFailure("Phase-33 five-calculus projection oracle drifted")
     if len(mutants) != 12 or len({row["mutant"] for row in mutants}) != 12:
-        raise GateFailure("Phase-34 mutant manifest must contain twelve unique mutants")
+        raise GateFailure("Phase-33 mutant manifest must contain twelve unique mutants")
     expected_locus = {
         *(row["deployment"] for row in corpus),
         "unsafe_workload",
@@ -115,9 +115,9 @@ def verify_oracles() -> list[dict[str, str]]:
         *(row["mutant"] for row in mutants),
     }
     if len(locus) != len(expected_locus) or {row["entry"] for row in locus} != expected_locus:
-        raise GateFailure("Phase-34 validation-locus ledger has incomplete or duplicate coverage")
+        raise GateFailure("Phase-33 validation-locus ledger has incomplete or duplicate coverage")
     if len(locus) != 33:
-        raise GateFailure("Phase-34 validation-locus ledger must contain exactly 33 rows")
+        raise GateFailure("Phase-33 validation-locus ledger must contain exactly 33 rows")
     for row in mutants:
         descriptor = ROOT / f"test/mutant/render_manifest/{row['mutant']}/mutant.txt"
         if not descriptor.is_file() or not descriptor.read_text(encoding="utf-8").strip():
@@ -161,7 +161,7 @@ def run_green_suite(cabal: Path) -> str:
     invariants = "render-manifest-invariants: PASS (18 source domains, 164 identity/namespace/API/reconcile projections, 164 Aeson round-trips, 33 locus rows)"
     calculus = "render-manifest-calculus: PASS (5 kinds, 198 projected units)"
     if token not in result.stdout or invariants not in result.stdout or calculus not in result.stdout or "each >=4%" not in result.stdout:
-        raise GateFailure(f"Phase-34 acceptance, invariant, calculus, or property token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-33 acceptance, invariant, calculus, or property token is absent:\n{result.stdout}")
     return result.stdout
 
 
@@ -418,7 +418,7 @@ def main() -> int:
         },
         dependencies={"battery": "cabal test render-golden"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-34 mutants", "status": "unrun"}],
+        or [{"name": "phase-33 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

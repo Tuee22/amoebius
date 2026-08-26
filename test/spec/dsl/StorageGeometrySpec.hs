@@ -17,6 +17,6 @@ main = do
           if caught
             then do
               putStrLn ("storage-geometry-mutant: RED " <> Text.unpack mutant)
-              fail ("Phase-29 mutant rejected: " <> Text.unpack mutant)
+              fail ("Phase-28 mutant rejected: " <> Text.unpack mutant)
             else putStrLn ("storage-geometry-mutant: SURVIVED " <> Text.unpack mutant)
     _ -> runStorageGeometryGate

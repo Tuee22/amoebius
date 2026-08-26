@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 35: enact and independently read back six tenant-provider arms."""
+"""Phase 34: enact and independently read back six tenant-provider arms."""
 
 from __future__ import annotations
 
@@ -566,7 +566,7 @@ def target_inventory(app: str, tenants: list[str], challenge: str, root_token: s
 
 
 def cleanup_stale(root_token: str) -> None:
-    """Recover only Phase-35-prefixed residue from an interrupted prior gate."""
+    """Recover only Phase-34-prefixed residue from an interrupted prior gate."""
     for namespace in [item["metadata"]["name"] for item in json.loads(kubectl("get", "namespaces", "-o", "json").stdout)["items"] if item["metadata"]["name"].startswith("p34app")]:
         kubectl("delete", "namespace", namespace, "--wait=true", "--timeout=120s", check=False)
     with port_forward("edge-system", "service/keycloak", KEYCLOAK_PORT, 8080):
@@ -713,7 +713,7 @@ def run_live(root_token: str) -> dict[str, Any]:
                 {"name": "unsealed-enactor-input", "result": "no-constructor"},
             ],
             "cleanup": {"inventoriesEqual": True, "preflightSha256": digest(preflight), "postflightSha256": digest(postflight), "residue": []},
-            "applicationDataPath": "UNVERIFIED (Phase 37)",
+            "applicationDataPath": "UNVERIFIED (Phase 36)",
         }
     finally:
         if not cleaned and enactor:

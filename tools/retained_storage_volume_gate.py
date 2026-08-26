@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seal Sprint 33.2's retained-volume ceiling and explicit rebind."""
+"""Seal Sprint 32.2's retained-volume ceiling and explicit rebind."""
 
 from __future__ import annotations
 
@@ -79,7 +79,7 @@ def fingerprint(value: dict[str, Any]) -> str:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
-    parser.add_argument("--image", required=True, help="the Phase-31 digest reference imported into this run's node")
+    parser.add_argument("--image", required=True, help="the Phase-30 digest reference imported into this run's node")
     arguments = parser.parse_args(argv)
     evidence = arguments.evidence
     evidence.mkdir(parents=True, exist_ok=True)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the locally dischargeable Phase-47 gate domains."""
+"""Run and seal the locally dischargeable Phase-46 gate domains."""
 
 from __future__ import annotations
 
@@ -21,8 +21,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_46"
 LIVE = EVIDENCE / "provider-ebs-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_47_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_47_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_46_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_46_ledger.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
@@ -116,7 +116,7 @@ def phase0_domain() -> dict[str, str]:
     for row in rows:
         path = ROOT / row.split("\t")[2]
         require(path.is_file() and path.stat().st_size > 0, f"phase0-custody-missing:{path}")
-    return {"name": "phase0-custody", "command": "read Phase-47 manifest rows", "output": "6 oracles; 5 mutants", "result": "PASS"}
+    return {"name": "phase0-custody", "command": "read Phase-46 manifest rows", "output": "6 oracles; 5 mutants", "result": "PASS"}
 
 
 def load_dhall(path: str) -> Any:
@@ -202,7 +202,7 @@ def no_live_residue() -> dict[str, str]:
     require(not pvs, f"provider-ebs-credential-pv-residue:{pvs}")
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE, check=False, timeout=60).stdout.splitlines()
     require(clusters == ["amoebius-bootstrap-coordinator"], f"unexpected-kind-clusters:{clusters}")
-    return {"name": "external-cleanup-readback", "command": "namespace, PV, and kind inventories", "output": "no Phase-47 objects; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
+    return {"name": "external-cleanup-readback", "command": "namespace, PV, and kind inventories", "output": "no Phase-46 objects; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:
@@ -232,7 +232,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(oracle_domain())
         rows.append(invoke("pure-contract", contract_args()))
         if args.reuse_fresh_live:
-            rows.append({"name": "scoped-retained-storage-checkpoint", "command": "sealed just-produced Phase-47 live receipt", "output": "fresh scoped evidence; AWS EBS/IAM UNVERIFIED", "result": "PASS"})
+            rows.append({"name": "scoped-retained-storage-checkpoint", "command": "sealed just-produced Phase-46 live receipt", "output": "fresh scoped evidence; AWS EBS/IAM UNVERIFIED", "result": "PASS"})
         else:
             rows.append(invoke("scoped-retained-storage-checkpoint", (sys.executable, "tools/provider_ebs_credential_live.py"), timeout=2400))
         evidence_domain(fresh=args.reuse_fresh_live)

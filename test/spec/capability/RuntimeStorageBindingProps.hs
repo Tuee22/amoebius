@@ -60,7 +60,7 @@ runRuntimeStorageBindingProps fixture = do
     quickCheckWithResult
       stdArgs {chatty = False, maxSuccess = 400}
       (runtimeBoundary fixture requiredBytes)
-  unless (isSuccess result) (fail ("Phase-32 runtime-storage property failed: " <> show result))
+  unless (isSuccess result) (fail ("Phase-31 runtime-storage property failed: " <> show result))
   putStrLn "provision-runtime-storage-properties: TESTED exact backing vs one-byte-short (accept/reject >=40%)"
   pure 1
 

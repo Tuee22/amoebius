@@ -18,6 +18,6 @@ main = do
           if caught
             then do
               putStrLn ("render-manifest-mutant: RED " <> Text.unpack mutant)
-              fail ("Phase-34 mutant rejected at its semantic-property locus: " <> Text.unpack mutant)
+              fail ("Phase-33 mutant rejected at its semantic-property locus: " <> Text.unpack mutant)
             else putStrLn ("render-manifest-mutant: SURVIVED " <> Text.unpack mutant)
     _ -> runRenderGoldenGate

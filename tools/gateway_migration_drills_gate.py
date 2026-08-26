@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-44 gateway-migration correspondence gate."""
+"""Run and seal the Phase-43 gateway-migration correspondence gate."""
 
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_43"
 LIVE = EVIDENCE / "gateway-migration-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_44_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_44_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_43_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_43_ledger.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
@@ -120,7 +120,7 @@ def oracle_domain() -> dict[str, str]:
         *sorted((ROOT / "test/fixture/phase43").glob("*.json")),
     ):
         json.loads(path.read_text(encoding="utf-8"))
-    return {"name": "independent-oracles", "command": "dhall-to-json and parse Phase-44 JSON pins", "output": "numeric budget, journal, traces, invariants, demand, observer valid", "result": "PASS"}
+    return {"name": "independent-oracles", "command": "dhall-to-json and parse Phase-43 JSON pins", "output": "numeric budget, journal, traces, invariants, demand, observer valid", "result": "PASS"}
 
 
 def evidence_domain(*, fresh: bool) -> None:
@@ -221,7 +221,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(oracle_domain())
         rows.append(invoke("register-2.5-simulation", sim_args()))
         if args.reuse_fresh_live:
-            rows.append({"name": "gateway-migration-live", "command": "sealed just-produced Phase-44 live receipt", "output": "fresh final live evidence", "result": "PASS"})
+            rows.append({"name": "gateway-migration-live", "command": "sealed just-produced Phase-43 live receipt", "output": "fresh final live evidence", "result": "PASS"})
         else:
             rows.append(invoke("gateway-migration-live", (sys.executable, "tools/gateway_migration_drills_live.py"), timeout=3600))
         evidence_domain(fresh=args.reuse_fresh_live)

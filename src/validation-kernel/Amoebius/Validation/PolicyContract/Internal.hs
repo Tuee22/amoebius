@@ -1462,7 +1462,7 @@ renderPolicyContract contract =
           , "legacy.archive-rule=" <> renderArchiveRegisterRule (archiveRegisterRule register)
           , "legacy.history=" <> renderRegisterHistory (registerHistory register)
           , "legacy.predicate-authority=" <> renderRegisterPredicateAuthority (registerPredicateAuthority register)
-          , "status.phase-0=" <> renderResetPhaseStatus (phaseZeroResetStatus statusReset)
+          , "status.phase-00=" <> renderResetPhaseStatus (phaseZeroResetStatus statusReset)
           , "status.phases-01-95=" <> renderResetPhaseStatus (laterPhaseResetStatus statusReset)
           , "status.sprints=" <> renderSprintResetRule (sprintResetRule statusReset)
           , "status.historical-evidence=" <> renderHistoricalEvidenceRule (historicalEvidenceRule statusReset)
@@ -2167,19 +2167,19 @@ renderPhase50MigrationRule value
 
 renderDslBarrierSourceClosure :: DslBarrierSourceClosure -> Text
 renderDslBarrierSourceClosure value
-  | value == AllLtdSrcQueriesZeroBeforePhase49 = "all-ltd-src-queries-zero-before-phase-50"
+  | value == AllLtdSrcQueriesZeroBeforePhase49 = "all-ltd-src-queries-zero-before-phase-49"
   | otherwise = "mutation-only-dsl-barrier-source-closure"
 
 renderPrehardwareRule :: PrehardwareRule -> Text
 renderPrehardwareRule value
-  | value == NoHardwareThroughPhase51 = "no-hardware-through-phase-52"
+  | value == NoHardwareThroughPhase51 = "no-hardware-through-phase-51"
   | otherwise = "mutation-only-prehardware-rule"
 
 renderPbTransportRule :: PbTransportRule -> Text
 renderPbTransportRule rule
   | rule == DirectHaskellThrough49ObservedPbAt50ApprovalBoundAfter50 =
-      "direct-haskell-through-49;observed-pb-at-50;phase-51-approval-bound-pb-after-50"
-  | otherwise = "mutation-only-pb-admitted-before-phase-51"
+      "direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
+  | otherwise = "mutation-only-pb-admitted-before-phase-50"
 
 renderPromotionAuthority :: PromotionAuthority -> Text
 renderPromotionAuthority value

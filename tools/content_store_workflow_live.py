@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase-38 live MinIO/Pulsar/Kubernetes observer and mutation gateway."""
+"""Phase-37 live MinIO/Pulsar/Kubernetes observer and mutation gateway."""
 
 from __future__ import annotations
 
@@ -712,7 +712,7 @@ def finish(path: Path, result_path: Path) -> None:
             "pristineLinux": {"linux": "Incus", "linux-cuda": "Incus", "apple": "Lima", "windows": "WSL2"},
         },
         "unverified": [
-            "cross-cluster content replication", "deriveExperimentHash and SplitMix seed kernel (Phase 49)",
+            "cross-cluster content replication", "deriveExperimentHash and SplitMix seed kernel (Phase 48)",
             "Pulsar broker/BookKeeper/ZooKeeper consensus internals",
         ],
     }

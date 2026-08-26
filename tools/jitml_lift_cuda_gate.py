@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the scoped Phase-52 jitML CUDA artifact-lift gate."""
+"""Run and seal the scoped Phase-51 jitML CUDA artifact-lift gate."""
 
 from __future__ import annotations
 
@@ -24,8 +24,8 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "DEVELOPMENT_PLAN/evidence/phase_51"
 LIVE = EVIDENCE_DIR / "jitml-cuda-live.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
-ENUMERATION = ROOT / "test/enumeration/phase_52_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_52_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_51_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_51_ledger.json"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
 DHALL = "/home/matthewnowak/.local/bin/dhall"
@@ -119,7 +119,7 @@ def phase0_domain() -> dict[str, str]:
     require("src/Amoebius/JitML/CudaArtifactLift.hs" in patches and all(locus in patches for locus in
             ("CpuTarget", "capacityForAdmission", "PointerCasSucceeded", "workIdentity")),
             "phase0-mutant-loci")
-    return {"name": "phase0-custody", "command": "read Phase-52 manifest rows",
+    return {"name": "phase0-custody", "command": "read Phase-51 manifest rows",
             "output": "5 oracles; 4 mutants", "result": "PASS"}
 
 
@@ -214,7 +214,7 @@ def external_cleanup() -> dict[str, str]:
                              text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, timeout=30)
     require(process.returncode != 0, "jitml-lift-cuda-live-process-still-running")
     return {"name": "external-cleanup-readback", "command": "kind/Kubernetes/MinIO/process inventories",
-            "output": "no Phase-52 bucket/namespace/process; retained kind only", "result": "PASS"}
+            "output": "no Phase-51 bucket/namespace/process; retained kind only", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:
@@ -254,7 +254,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(invoke("production-dhall-package", (DHALL, "type", "--file", "dhall/jitml/package.dhall", "--quiet")))
         rows.append(invoke("jitml-cuda-artifact-lift-contract", contract_args()))
         if args.reuse_fresh_live:
-            rows.append({"name": "jitml-cuda-live", "command": "sealed just-produced Phase-52 live receipt",
+            rows.append({"name": "jitml-cuda-live", "command": "sealed just-produced Phase-51 live receipt",
                          "output": "fresh host-CUDA/MinIO evidence", "result": "PASS"})
         else:
             rows.append(invoke("jitml-cuda-live", (sys.executable, "tools/jitml_lift_cuda_live.py"), timeout=2400))

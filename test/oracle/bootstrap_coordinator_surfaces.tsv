@@ -1,7 +1,7 @@
-# Authored expectation for the Phase-30 test-surface join.
+# Authored expectation for the Phase-29 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
-# independently authored expectation. Phase 30 had no committed enumeration at all, so this
+# independently authored expectation. Phase 29 had no committed enumeration at all, so this
 # file is the first authored opinion its gate is checked against.
 #
 # owner is the registry the ids are enumerated from at run time:

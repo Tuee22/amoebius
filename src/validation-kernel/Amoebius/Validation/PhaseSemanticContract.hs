@@ -282,7 +282,7 @@ registryIntegrityFindings =
         "phase metadata rows must remain in exact shared-identity order"
     , integrityFinding
         (all stageMatchesOrdinal canonicalPhaseRegistry)
-        "execution stages must preserve the Phase-50/51/51/52 ordering boundary"
+        "execution stages must preserve the Phase-49/50/51/52 ordering boundary"
     , integrityFinding
         (all predecessorMatchesOrdinal canonicalPhaseRegistry)
         "every phase must bind genesis or its exact immediate numeric predecessor"
@@ -294,10 +294,10 @@ registryIntegrityFindings =
         "every semantic phase row must contain exactly the LegacyIds whose typed owner is that row ordinal"
     , integrityFinding
         criticalGuardsAreExact
-        "the complete Phase-50/51/51/52/56 critical-guard relation must remain exact and exclusive"
+        "the complete Phase-49/50/51/52/56 critical-guard relation must remain exact and exclusive"
     , integrityFinding
         criticalBoundaryTuplesAreExact
-        "the Phase-50/51/51/52 stage/substrate/lane/register/predecessor/resource/guard tuples must remain exact"
+        "the Phase-49/50/51/52 stage/substrate/lane/register/predecessor/resource/guard tuples must remain exact"
     ]
  where
   allSlots = concatMap (Map.elems . semanticGateSlots) canonicalPhaseRegistry

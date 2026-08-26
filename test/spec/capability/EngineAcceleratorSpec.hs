@@ -17,6 +17,6 @@ main = do
           if caught
             then do
               putStrLn ("inference-accelerator-mutant: RED " <> Text.unpack mutant)
-              fail ("Phase-33 mutant rejected: " <> Text.unpack mutant)
+              fail ("Phase-32 mutant rejected: " <> Text.unpack mutant)
             else putStrLn ("inference-accelerator-mutant: SURVIVED " <> Text.unpack mutant)
     _ -> runEngineAcceleratorGate

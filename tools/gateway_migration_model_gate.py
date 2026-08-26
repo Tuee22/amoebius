@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-18 gate — the gateway-migration model, both branches.
+"""The Phase-17 gate — the gateway-migration model, both branches.
 
 The capability claim is unchanged: the concrete `GatewayMigration` model renders through
 `emitTLA`, the in-process explorer and TLC agree on its 53 distinct reachable states and
@@ -37,7 +37,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 EMITTED = ROOT / ".build" / "tla" / "gateway-migration-model-spec"
 RESULTS = EMITTED / "phase-results.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_18_gateway_migration_model.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md"
 GATE_COMMAND = "python3 tools/gateway_migration_model_gate.py"
 EXPECTATIONS = "test/oracle/gateway_migration_model_surfaces.tsv"
 
@@ -51,7 +51,7 @@ CHECKS = {
 
 SIDES = ("toolchain", "suite", "oracle", "artifact")
 
-# The authored oracle, read off the Phase-18 contract's Gate paragraph.
+# The authored oracle, read off the Phase-17 contract's Gate paragraph.
 EXPECTED_RESULTS = {
     "gateway-distinct-state-count": "53",
     "explorer-tlc-fingerprints": "equal",

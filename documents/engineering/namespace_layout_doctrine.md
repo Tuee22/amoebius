@@ -20,7 +20,7 @@ half of the partition is derived directly from it.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_34_render_manifest_oracles.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -100,9 +100,9 @@ derived — not a layout an installer hand-maintains:
 
 Three properties make the set a *derivation*, not a convention:
 
-Phase 34's NOT-VALIDATED contract requires every provision-sealed render-source identity to be emitted once
+Phase 33's NOT-VALIDATED contract requires every provision-sealed render-source identity to be emitted once
 in deterministic order, with missing, duplicate, and cross-owned identities rejected. Existing source and
-test material are observed footprints only; live namespace admission remains Phase-59/runtime residue.
+test material are observed footprints only; live namespace admission remains Phase-58/runtime residue.
 
 - **One namespace per capability, never a shared one.** The Identity edge (Keycloak) and the L7 edge
   (Envoy/Gateway) are distinct capabilities and therefore distinct namespaces (`amoebius-keycloak`,

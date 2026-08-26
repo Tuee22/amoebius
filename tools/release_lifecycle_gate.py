@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-40 immutable release-lifecycle gate."""
+"""Run and seal the Phase-39 immutable release-lifecycle gate."""
 
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_39"
 LIVE = EVIDENCE / "release-lifecycle-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_40_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_40_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_39_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_39_ledger.json"
 ORACLE_MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
@@ -113,7 +113,7 @@ def compile_boundary() -> dict[str, str]:
     require("Data constructor not in scope: Qa" in negative.stdout, f"fourth-environment-wrong-reason:{negative.stdout}")
     return {
         "name": "closed-environment-compile-boundary",
-        "command": "cabal exec -- ghc -fno-code test/{accept,reject}/phase_40_environment",
+        "command": "cabal exec -- ghc -fno-code test/{accept,reject}/phase_39_environment",
         "output": "Prod compiles; Qa rejected at constructor site", "result": "PASS",
     }
 
@@ -245,7 +245,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(compile_boundary())
         if args.reuse_fresh_live:
             rows.append({
-                "name": "release-lifecycle-live", "command": "sealed just-produced Phase-40 live receipt",
+                "name": "release-lifecycle-live", "command": "sealed just-produced Phase-39 live receipt",
                 "output": "fresh final live evidence", "result": "PASS",
             })
         else:

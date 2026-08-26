@@ -1,4 +1,4 @@
--- Phase-26 independent oracle.  This file deliberately imports neither
+-- Phase-25 independent oracle.  This file deliberately imports neither
 -- BakeCatalog.dhall nor generated image metadata.
 --
 -- `acquisition` and `integrity` replace the pre-amendment `sourceImage` and
@@ -230,7 +230,7 @@ in    [ { catalogName = "distribution"
       , -- No `nvcc` row, and that is the answer rather than an omission: the
         -- accelerator toolchain is what made the pre-amendment base a CUDA devel
         -- image, and a linux-cpu gate cannot bake it under the one-substrate
-        -- discipline.  It belongs to the linux-cuda lane at Phase 52.
+        -- discipline.  It belongs to the linux-cuda lane at Phase 51.
         { catalogName = "g++"
         , canonicalService = "jit-build toolchain"
         , binary = "/usr/bin/g++"

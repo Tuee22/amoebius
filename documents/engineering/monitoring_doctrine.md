@@ -19,7 +19,7 @@ not own the capacity types that cost passes through, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_64_platform_services_2.md, DEVELOPMENT_PLAN/phase_68_pulsar_client.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -41,7 +41,7 @@ not own the capacity types that cost passes through, owned by
 ---
 
 **Pure cost-model target — NOT VALIDATED.** The
-[Phase 30 gate](../../DEVELOPMENT_PLAN/phase_30_execution_accelerator_folds.md) must execute the finite
+[Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must execute the finite
 `MonitoringWorkBudget` evaluation, query/proxy compute, and TSDB temporary-plus-resident storage derivation in
 Register 1. It must pair a direct one-axis volume-over-budget case with its exact-fit twin. Prometheus behavior
 and rendered/live correspondence remain unverified; no current fold ledger is asserted here.
@@ -565,9 +565,9 @@ not a flat "type-foreclosed":
 
 ---
 
-### Permanently invalidated Phase-64 observability history
+### Permanently invalidated Phase-63 observability history
 
-A pre-reset Phase-64 report described a descriptor-derived Prometheus provision with finite evaluation,
+A pre-reset Phase-63 report described a descriptor-derived Prometheus provision with finite evaluation,
 retention, query concurrency, series, sample, range, timeout, and retained-storage operands. It also reported
 bounded proxy responses, a NetworkPolicy denial, active platform targets, loaded derived rules, bounded TSDB
 high-water, and completed Grafana migrations. This history is diagnostic only and permanently invalidated; it
@@ -579,17 +579,17 @@ does not establish a current `linux-cpu` result or satisfy any future SLO.
 
 Phase order, status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). The monitoring obligation types — including
-the `UnitMonitor` of [§2.4](#24-per-execution-unit-obligation--boundexecutionunitmonitor) — are assigned to **Phase 26**,
-their decoder and non-vacuity refinements in **Phase 27**, and the
-`validateTopology` fold in **Phase 68**; the execution-set monitoring fold rides the whole-deployment seal in
-**Phase 32**; rendered monitoring shapes and baked binaries (including the alert receiver) are assigned to
+the `UnitMonitor` of [§2.4](#24-per-execution-unit-obligation--boundexecutionunitmonitor) — are assigned to **Phase 25**,
+their decoder and non-vacuity refinements in **Phase 26**, and the
+`validateTopology` fold in **Phase 67**; the execution-set monitoring fold rides the whole-deployment seal in
+**Phase 31**; rendered monitoring shapes and baked binaries (including the alert receiver) are assigned to
 **Phases 33 and 56**;
-the bounded Prometheus/Grafana projection and derived rules/panels are assigned to **Phase 64**, while the receiver,
+the bounded Prometheus/Grafana projection and derived rules/panels are assigned to **Phase 63**, while the receiver,
 the `AccessScope`-behind-Keycloak obligation, and any optional local Thanos companion remain owned by their
 respective later delivery surfaces; the `workflow-health` TableView
-projection in **Phase 66** and the orchestrator/worker SLO-status event in **Phase 70**; the extension surfaces in **Phase 92**
-(infernix) and **Phase 94** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
-**Phase 75**; and the decode-rejection tests in **Phase 49**. This doc never maintains a competing status
+projection in **Phase 65** and the orchestrator/worker SLO-status event in **Phase 69**; the extension surfaces in **Phase 91**
+(infernix) and **Phase 93** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
+**Phase 74**; and the decode-rejection tests in **Phase 48**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status, per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 

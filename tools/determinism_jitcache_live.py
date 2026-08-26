@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise Phase-49 same-substrate recompute and node-cache boundaries."""
+"""Exercise Phase-48 same-substrate recompute and node-cache boundaries."""
 
 from __future__ import annotations
 
@@ -401,7 +401,7 @@ def execute() -> dict[str, Any]:
         "register": 3, "substrate": "linux-cpu", "substrateFingerprint": substrate,
         "determinism": determinism, "cache": cache,
         "provisionRejections": ["CachePeakExceedsBudget", "ResidentSizeConflict", "DeletionNotObserved", "OwnerEphemeralUnderReserved", "FirstMissConcurrencyInvalid"],
-        "deferred": {"tier2Model": "UNVERIFIED until Phase 50", "tier3CudaKernel": "UNVERIFIED until Phase 52", "crossSubstrateBitEquality": "UNVERIFIED", "crossNodeReuse": "UNVERIFIED"},
+        "deferred": {"tier2Model": "UNVERIFIED until Phase 49", "tier3CudaKernel": "UNVERIFIED until Phase 51", "crossSubstrateBitEquality": "UNVERIFIED", "crossNodeReuse": "UNVERIFIED"},
         "universalLinuxCpu": {"availableOnEveryHardwareSubstrate": True, "pristineLinuxHost": {"linux": "Incus", "linux-cuda": "Incus", "apple": "Lima", "windows": "WSL2"}},
         "cleanup": cleanup,
     }

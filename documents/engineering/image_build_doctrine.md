@@ -20,7 +20,7 @@ nor the runtime asset cache that is the deliberate exception, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_36_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_53_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_57_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_63_platform_backbone.md, DEVELOPMENT_PLAN/phase_64_platform_services_2.md, DEVELOPMENT_PLAN/phase_77_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_78_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_81_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: AGENTS.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -233,7 +233,7 @@ reference names bytes some machine actually ran. On a mixed-architecture cluster
 from the registry to the manifest that names the image, which is a deployment concern owned by
 [service_capability_doctrine.md](./service_capability_doctrine.md).
 
-[Phase 36](../../DEVELOPMENT_PLAN/phase_36_image_recipe_generation.md) owns the future Register-1 boundary for
+[Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md) owns the future Register-1 boundary for
 this rule and is **NOT VALIDATED**. Its Haskell contract must cover all CPU/CUDA × amd64/arm64 cases and refuse
 observed/requested architecture mismatches before emission. Even a future pure result cannot establish an
 engine build, published image, or runtime correspondence.
@@ -294,7 +294,7 @@ time. So amoebius treats each architecture's image as one indivisible artifact:
 architecture is completely served by one published tag, and a mixed cluster is served by two independently
 published ones. Neither case has a partial state, because there is no artifact spanning both.
 
-> **Target boundary — NOT VALIDATED.** Phase 57 must demonstrate a proxy-induced partial-blob fault leaves
+> **Target boundary — NOT VALIDATED.** Phase 56 must demonstrate a proxy-induced partial-blob fault leaves
 > the immutable architecture-qualified tag absent, charges retained residue, publishes only after the exact
 > native child is complete, and performs zero mutating requests on a converged rerun. Pre-reset observations
 > used a Python verdict path and an emulated non-native child; they are invalid as current evidence and cannot
@@ -450,7 +450,7 @@ build, on-host MSL compilation, not the container image.)
   in which host worker nodes exist precisely for substrate-specific hardware
   ([substrate_doctrine.md](./substrate_doctrine.md)).
 - **Why in-pod is the eventual target, not the v1 default.** An in-pod builder removes the host build
-  dependency for cloud-managed substrates that have no operator host (the Phase 77 stateless in-cluster
+  dependency for cloud-managed substrates that have no operator host (the Phase 76 stateless in-cluster
   daemon). The cost is a builder pod that needs privileged build access and its own multi-arch story —
   deferred, not adopted by default.
 - **The build location does not change the output contract.** Wherever it runs, the builder emits the [§3](#3-multi-architecture-images--one-natively-built-child-per-architecture)
@@ -591,10 +591,10 @@ it needs to build an engine from source on a cache miss. The accelerator compile
 arrives with the lane's parent image rather than as a bake step, and a CPU-only lane must not carry a
 compiler it can never run. The **Apple-Metal bridge is not among the baked inputs**: it is a macOS Mach-O
 **host-resident** dylib source-built headless *on the Apple host* with `/usr/bin/clang` in the
-apple-substrate phase (Phase 90 —
+apple-substrate phase (Phase 89 —
 [apple_metal_headless_builds.md §1](./apple_metal_headless_builds.md#1-the-commitment-headless-on-host-no-vm),
 [§3.1](./apple_metal_headless_builds.md#31-fixed-host-metal-bridge)) and **cannot run in a Linux container or a Linux VM**, so it is **never baked into the multi-arch `linux/amd64`+`arm64` base image** — the base
-image bakes only the Linux resolver toolchain, and the Metal bridge is a Phase-90 on-host build. The engine
+image bakes only the Linux resolver toolchain, and the Metal bridge is a Phase-89 on-host build. The engine
 *payloads* themselves (`llama.cpp`, `whisper.cpp`, the ONNX runtime, Audiveris, the adapters) are **named catalog identities** the shared `jit-build` resolver **downloads-or-builds on first miss into the `CacheBudget`-bounded content-addressed cache** — none is baked into the image, and none is authored by URL.
 Because infernix and jitML link as extension libraries (bullet above), the *library* is present the moment
 the pod is; the *engine payload* it drives is cache-resident after the first resolve. This explicitly
@@ -703,10 +703,10 @@ which forces a concrete divergence from prodbox's mechanics:
   recorded resolution is a resolution *this run* performed. It also stops the rendered recipe changing every
   time an upstream base is republished, which is a diff nobody reads and everybody approves.
 
-  [Phase 36](../../DEVELOPMENT_PLAN/phase_36_image_recipe_generation.md) must eventually supply independently
+  [Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md) must eventually supply independently
   reviewed Register-1 evidence for this pure boundary: the Haskell catalog has no authored digest field,
   `BaseChannel` excludes digest syntax, and the lazy renderer emits one base argument and one matching
-  `FROM` while distinct run-local resolutions leave the recipe bytes unchanged. Phase 36 is **NOT VALIDATED**;
+  `FROM` while distinct run-local resolutions leave the recipe bytes unchanged. Phase 35 is **NOT VALIDATED**;
   registry resolution and use of an observed digest in a live build are later claims.
 - **No `DOCKER_CONFIG` environment variable — use `docker --config <dir>`.** prodbox isolated registry-push
   auth from public-pull auth with an **ephemeral `DOCKER_CONFIG`** (`local_registry_pipeline.md` §6.1).
@@ -732,10 +732,10 @@ The registry cannot pull the image that must exist before the registry can start
 **A pinned preload plus one typed action dissolves this cycle.** The selected provider is the fixed
 Distribution `registry:2` image, resolved to its reviewed digest and loaded into the node's CRI before any
 Registry object exists. Its binary is not copied into `amoebius-base`; there is no self-pull and no alternate
-registry mirror. Phase 57 still
+registry mirror. Phase 56 still
 precedes the full scheduler/reconciler deployment and therefore cannot pretend a standalone service is a
 whole `ProvisionedSpec`. It constructs an explicit resource-complete `ProvisionedBootstrapRegistry`, validates
-it against a fresh Phase-56 snapshot, and mints a single-use `BootstrapRegistryAction` that side-loads the
+it against a fresh Phase-55 snapshot, and mints a single-use `BootstrapRegistryAction` that side-loads the
 image and initializes only the exact registry/proxy object domain. The action uses the same package-private
 source serializer as `renderAll`; it exposes no public per-service renderer. Enactment CAS-consumes its
 snapshot-indexed token and returns a receipt on both applied and ambiguous outcomes; an ambiguous response
@@ -749,7 +749,7 @@ move to MinIO's S3 driver after MinIO is serving
 is a separate ordinary migration, not this bootstrap cycle. This doc records the build-side consequence:
 
 - **The base image and fixed `registry:2` bootstrap image are preloaded before registry object initialization.** In the target
-  sequence, Phase 56 first establishes an empty cluster after the Phase-50 barrier. The only upstream contact
+  sequence, Phase 55 first establishes an empty cluster after the Phase-49 barrier. The only upstream contact
   is the base-image *build* (apt/binary/source downloads on the
   builder, [§2](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)); the separately pinned
   Distribution image is the only Registry bootstrap image. Once both are admitted and preloaded, the
@@ -774,17 +774,17 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 
 ## 10. Honesty and planning ownership
 
-> **Validation reset.** Phase 57 is NOT VALIDATED. Its former seal depended on a Python-owned verdict path,
+> **Validation reset.** Phase 56 is NOT VALIDATED. Its former seal depended on a Python-owned verdict path,
 > committed generated expectations, and an emulated non-native child; none is admissible under the current
 > Haskell-only source boundary, natural-architecture rule, or spoof-resistant gate contract. Historical run
 > descriptions are diagnostic only and cannot establish acquisition, native execution, publication
-> atomicity, private-pull enforcement, mutation sensitivity, or promotion. The rewritten Phase-57 contract
-> must establish those claims independently after the hardware-free Phase-50 DSL barrier and human promotion.
+> atomicity, private-pull enforcement, mutation sensitivity, or promotion. The rewritten Phase-56 contract
+> must establish those claims independently after the hardware-free Phase-49 DSL barrier and human promotion.
 
 The target `linux-cpu` image and Distribution `registry:2` lane is required on every hardware substrate; that
 availability is not currently validated.
 
-All Phase-57 and later image, registry, provider-node preload, static-driver, resolver, private-pull, and
+All Phase-56 and later image, registry, provider-node preload, static-driver, resolver, private-pull, and
 public-egress claims remain target contracts or `UNVERIFIED` residue until their numerically ordered Haskell
 gates are qualified, independently reviewed, and human-promoted. This doctrine retains no scoped run as a
 substitute and no result that can be reactivated by a later status change.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-31 bake, registry, publication, and private-pull gate.
+"""Run and seal the Phase-30 bake, registry, publication, and private-pull gate.
 
 The capability claim is unchanged: the multi-arch base image bakes every third-party service
 binary plus the jit-build resolver and its toolchain, the single-binary `distribution`
@@ -47,7 +47,7 @@ RUNG_ORACLE = ROOT / "test/fixture/base_image_registry/acquisition_rungs.tsv"
 BUILDER_CHANNELS = ROOT / "test/fixture/base_image_registry/builder_channels.json"
 RESULTS = ROOT / ".build/dsl/base-image-registry/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/base_image_registry_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_57_base_image_registry.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_56_base_image_registry.md"
 GATE_COMMAND = "python3 tools/base_image_registry_gate.py --execute"
 
 RUNGS = ("AptPackage", "OfficialArtifact", "BuildProduct", "CopyOci")
@@ -599,8 +599,8 @@ def create_cluster(kind: str, kubectl: str, kubeconfig: Path) -> None:
         ),
         timeout=3600,
     )
-    # Phase 31 is independently runnable, so its disposable fixture must
-    # reproduce the finite node-container envelope Phase 30 establishes.  A
+    # Phase 30 is independently runnable, so its disposable fixture must
+    # reproduce the finite node-container envelope Phase 29 establishes.  A
     # default kind node reports zero for both limits (meaning unlimited), which
     # cannot witness the finite-limit admission this phase seals.
     run(
@@ -918,7 +918,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={"builder": "docker buildx / moby buildkit", "cluster": "kind (phase 30)"},
+        dependencies={"builder": "docker buildx / moby buildkit", "cluster": "kind (phase 29)"},
         mutants=[{"name": name, "status": outcomes.get(name, "absent")} for name in sorted(EXPECTED_MUTANTS)],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()

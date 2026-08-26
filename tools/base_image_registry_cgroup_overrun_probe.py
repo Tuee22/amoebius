@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deliberately cross the Phase-31 builder CPU and memory cgroup ceilings."""
+"""Deliberately cross the Phase-30 builder CPU and memory cgroup ceilings."""
 
 from __future__ import annotations
 

@@ -56,7 +56,7 @@ activationFrame activation = case activation of
   AfterBootstrapAddonCutover -> AfterBootstrapAddonCutoverFrame
   AfterManagedCapacityReady -> AfterManagedCapacityReadyFrame
 
--- Phase 15 declares and fake-exercises this seam. Phase 34 owns live invocation.
+-- Phase 14 declares and fake-exercises this seam. Phase 33 owns live invocation.
 runChainFromFrame :: Frame -> cfg -> [Step cfg] -> IO ()
 runChainFromFrame start cfg steps =
   forM_ (filter ((>= start) . stepFrame) steps) $ \step -> stepRun step cfg

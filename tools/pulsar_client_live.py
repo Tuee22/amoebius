@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 36 external Pulsar administrator and evidence observer."""
+"""Phase 35 external Pulsar administrator and evidence observer."""
 
 from __future__ import annotations
 
@@ -272,7 +272,7 @@ def finish(state_path: Path, result_path: Path) -> None:
             },
         },
         "unverified": [
-            "Phase-38 workflow runtime and content store",
+            "Phase-37 workflow runtime and content store",
             "cross-cluster Pulsar correspondence",
             "broker BookKeeper and ZooKeeper consensus internals",
         ],

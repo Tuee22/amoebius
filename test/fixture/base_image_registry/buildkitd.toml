@@ -1,4 +1,4 @@
-# Independent OS-boundary policy for the bounded Phase-26 builder.  The
+# Independent OS-boundary policy for the bounded Phase-25 builder.  The
 # docker-container driver supplies the CPU and memory cgroup ceilings; this
 # worker policy independently caps simultaneous stage execution.
 debug = false

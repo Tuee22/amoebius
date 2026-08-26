@@ -76,7 +76,7 @@ runPhaseSemanticContractOracle =
             (semanticMutationFindings [titleMutationFinding])
             titleMutationResult
         , expectExactJoinResult
-            "one immediate-predecessor mutation is refused at the exact Phase-53 link locus"
+            "one immediate-predecessor mutation is refused at the exact Phase-52 link locus"
             expectedJoinObservations
             (semanticMutationFindings [predecessorMutationFinding])
             predecessorMutationResult
@@ -86,7 +86,7 @@ runPhaseSemanticContractOracle =
             (semanticMutationFindings [predecessorTrailingFinding])
             predecessorTrailingResult
         , expectExactJoinResult
-            "one future-command mutation is refused at the exact Phase-51 command locus"
+            "one future-command mutation is refused at the exact Phase-50 command locus"
             expectedJoinObservations
             (semanticMutationFindings [futureCommandMutationFinding])
             futureCommandMutationResult
@@ -226,7 +226,7 @@ runPhaseSemanticContractOracle =
             indentedResourceBlockerFindings
             listAlternatingHtmlResourceResult
         , expectExactJoinResult
-            "one structurally valid tracker-target mutation is refused at the exact Phase-85 join"
+            "one structurally valid tracker-target mutation is refused at the exact Phase-84 join"
             expectedJoinObservations
             (semanticMutationFindings [trackerTargetMutationFinding])
             trackerTargetMutationResult
@@ -405,92 +405,92 @@ oraclePhases =
   , phase 7 "evidence_calculus" "The evidence calculus" "none" "none" "1"
   , phase 8 "scope_index" "Scoped identity kernel" "none" "none" "1"
   , phase 9 "resource_index" "Capacity core fold + topology relation" "none" "none" "1"
-  , phase 11 "calculus_composition" "Composition across the five calculi" "none" "none" "1"
-  , phase 12 "formal_model_kernel" "Formal-model EDSL (`Model`/`interpret`/`emitTLA`)" "none" "none" "1"
-  , phase 13 "explicit_state_checker" "The amoebius explicit-state checker" "none" "none" "1"
-  , phase 14 "symbolic_checker" "The amoebius symbolic checker" "none" "none" "1"
-  , phase 15 "refinement_checker" "The amoebius refinement checker" "none" "none" "1"
-  , phase 16 "compile_fail_harness" "The compile-fail fixture harness" "none" "none" "1"
-  , phase 17 "deterministic_sim_substrate" "Deterministic-simulation substrate" "none" "none" "2"
-  , phase 18 "gateway_migration_model" "Gateway-migration model (both branches)" "none" "none" "1"
-  , phase 19 "dsl_formal_model" "DSL formal model" "none" "none" "1"
-  , phase 20 "reconcile_core_simulation" "Reconcile decision core under deterministic simulation" "none" "none" "2"
-  , phase 21 "extension_declaration" "The extension declaration" "none" "none" "1"
-  , phase 22 "extension_laws_per_extension" "The per-extension laws L1-L5" "none" "none" "1"
-  , phase 23 "extension_laws_compositional" "The compositional laws C1-C7" "none" "none" "1"
-  , phase 24 "extension_security_laws" "The security laws S1-S6" "none" "none" "1"
-  , phase 25 "conformance_gate_generator" "The generated conformance gate" "none" "none" "1"
-  , phase 26 "dhall_schema_generation" "Haskell-derived Dhall projection and smart-constructor prelude" "none" "none" "1"
-  , phase 27 "gadt_decode_ir" "Haskell protocol declarations, GADT-indexed IR, and total decoder" "none" "none" "1"
-  , phase 28 "illegal_state_covering" "Illegal-state corpus + validation-locus ledger" "none" "none" "1"
-  , phase 29 "storage_geometry_folds" "Logical→physical storage geometry folds" "none" "none" "1"
-  , phase 30 "execution_accelerator_folds" "Execution-epoch + scheduler + accelerator + provider-root folds" "none" "none" "1"
-  , phase 31 "capability_bind" "Capability union + representational bind" "none" "none" "1"
-  , phase 32 "provision_seal" "Whole-deployment provision seal + expansion" "none" "none" "1"
-  , phase 33 "inference_accelerator_provision" "InferenceEngine capability + accelerator provision" "none" "none" "1"
-  , phase 34 "render_manifest_oracles" "Pure `renderAll` + rendered-artifact oracles" "none" "none" "1"
-  , phase 35 "chain_kernel_boundary" "chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker" "none" "none" "2"
-  , phase 36 "image_recipe_generation" "The amoebius image recipe" "none" "none" "1"
-  , phase 37 "transaction_vocabulary" "The closed transaction vocabulary" "none" "none" "1"
-  , phase 38 "ui_program_schema" "Bounded UI-program schema" "none" "none" "1"
-  , phase 39 "ui_authorization_kernel" "UI authorization kernel" "none" "none" "1"
-  , phase 40 "ui_effect_binding" "UI effect binding" "none" "none" "1"
-  , phase 41 "ui_plan_compiler" "UI plan compiler" "none" "none" "1"
-  , phase 42 "offline_language_plan" "Offline language and paired plans" "none" "none" "1"
-  , phase 43 "ui_browser_interpreter" "Haskell browser-interpreter semantics and projection" "none" "none" "1"
-  , phase 44 "ui_server_boundary" "Haskell UI-server boundary" "none" "none" "2"
-  , phase 45 "ui_local_composition" "Hardware-free Haskell UI composition" "none" "none" "2"
-  , phase 46 "encrypted_browser_runtime" "Haskell offline-state semantics and runtime projection" "none" "none" "1"
-  , phase 47 "ui_contract_generation" "Haskell-generated browser contracts and bundle" "none" "none" "1"
-  , phase 48 "tool_and_mutant_generation" "Foreign-source generator closure, checking tools, and mutants" "none" "none" "1"
-  , phase 49 "test_workflow_algebra" "The test-workflow algebra" "none" "none" "1"
-  , phase 50 "self_referential_gates" "No-hardware DSL promotion barrier + self-referential gate suite" "none" "none" "2"
-  , phase 51 "host_assert_cli" "Validate the bounded `pb` → Haskell handoff" "none" "none" "2"
-  , phase 52 "host_ensure_kernel" "The host-ensure kernel" "none" "none" "2"
-  , phase 53 "linux_engine_bringup" "Linux: sudoless Docker and the native image" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 54 "apple_engine_bringup" "Apple: Homebrew, Colima, and the native image" "apple" "linux-cpu/arm64" "3"
-  , phase 55 "windows_engine_bringup" "Windows: WSL2 and the lifted Linux engine" "windows" "linux-cpu/amd64" "3"
-  , phase 56 "bootstrap_coordinator_kind" "Haskell substrate coordinator + single kind cluster" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 57 "base_image_registry" "The base image, the jit-build resolver, and the in-cluster registry" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 58 "complementary_arch_child" "The complementary-architecture base image" "apple" "linux-cpu/arm64" "3"
-  , phase 59 "object_reconciler" "Typed renderer + object reconciler" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 60 "capacity_scheduler" "amoebius-capacity scheduler + bootstrap cutover" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 61 "retained_storage" "No-provisioner retained storage + lossless rebind" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 62 "vault_pki" "Root Vault + PKI + built-in Haskell Vault client" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 63 "platform_backbone" "Platform backbone (MetalLB + MinIO + Pulsar HA)" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 64 "platform_services_2" "Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG)" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 65 "keycloak_ingress" "Keycloak-owned ingress" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 66 "live_dsl_deploy" "Live DSL deploy via the replicas=1 control-plane daemon" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 67 "app_tenancy" "Tenant/provider provisioning" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 68 "pulsar_client" "Native Pulsar client (CBOR)" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 69 "user_tenant_isolation_live" "Live subject/tenant isolation" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 70 "content_store_workflow" "Content store + workflow runtime (Pulsar-Failover single-writer)" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 71 "ui_projection_runtime" "Owner-scoped UI projection runtime" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 72 "release_lifecycle" "Release lifecycle" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 73 "ui_program_release" "Atomic immutable UI-program release" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 74 "network_fabric_wireguard" "WireGuard network fabric" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 75 "multicluster_spawn_georepl" "Multi-cluster spawn + geo-replication" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 76 "gateway_migration_drills" "Gateway-migration drills + model-correspondence" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 77 "provider_deploy_checkpoint" "Haskell-derived provider Pulumi program and enveloped checkpoint" "linux-cpu" "provider" "3"
-  , phase 78 "provider_child_bringup" "Hostless provider child + convergence + Lease handoff" "linux-cpu" "provider" "3"
-  , phase 79 "provider_ebs_credential" "Per-PV EBS decoupling + create-vs-delete credential" "linux-cpu" "provider" "3"
-  , phase 80 "provider_dynamic_nodes" "Dynamic node provisioning by signal + leak-free provider gate" "linux-cpu" "provider" "3"
-  , phase 81 "determinism_jitcache" "Determinism kernel + jit-build CacheBudget cache" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 82 "ui_single_tenant_live" "Single-tenant low-code UI live path" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 83 "ui_multi_tenant_live" "Multi-tenant low-code UI isolation" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 84 "ui_rollout_reconnect" "UI rollout, projection catch-up, and reconnect" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 85 "ui_ha_multizone" "Initial online UI multi-zone high availability" "linux-cpu" "provider" "3"
-  , phase 86 "offline_replay_receipts" "Offline replay and durable receipts" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 87 "offline_blobs_isolation" "Offline blobs and partition isolation" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 88 "offline_release_evolution" "Offline release and schema evolution" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 89 "offline_multizone_continuity" "Offline multi-zone continuity" "linux-cpu" "provider" "3"
-  , phase 90 "apple_metal_host_daemon" "Apple-Metal host compute daemon" "apple" "metal" "3"
-  , phase 91 "test_topology_live" "The live test topology and elevated harness" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 92 "infernix_rederivation" "The infernix inference core, re-derived" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 93 "infernix_ui_rederivation" "The infernix workflow and artifact contracts, re-derived" "linux-cpu" "linux-cpu/amd64" "3"
-  , phase 94 "jitml_rederivation" "The jitML numerical core, re-derived" "linux-cuda" "cuda" "3"
-  , phase 95 "jitml_ui_rederivation" "The jitML training and checkpoint contracts, re-derived" "linux-cuda" "cuda" "3"
-  , phase 96 "webapp_rederivation" "The multi-tenant web application re-derived" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 10 "calculus_composition" "Composition across the five calculi" "none" "none" "1"
+  , phase 11 "formal_model_kernel" "Formal-model EDSL (`Model`/`interpret`/`emitTLA`)" "none" "none" "1"
+  , phase 12 "explicit_state_checker" "The amoebius explicit-state checker" "none" "none" "1"
+  , phase 13 "symbolic_checker" "The amoebius symbolic checker" "none" "none" "1"
+  , phase 14 "refinement_checker" "The amoebius refinement checker" "none" "none" "1"
+  , phase 15 "compile_fail_harness" "The compile-fail fixture harness" "none" "none" "1"
+  , phase 16 "deterministic_sim_substrate" "Deterministic-simulation substrate" "none" "none" "2"
+  , phase 17 "gateway_migration_model" "Gateway-migration model (both branches)" "none" "none" "1"
+  , phase 18 "dsl_formal_model" "DSL formal model" "none" "none" "1"
+  , phase 19 "reconcile_core_simulation" "Reconcile decision core under deterministic simulation" "none" "none" "2"
+  , phase 20 "extension_declaration" "The extension declaration" "none" "none" "1"
+  , phase 21 "extension_laws_per_extension" "The per-extension laws L1-L5" "none" "none" "1"
+  , phase 22 "extension_laws_compositional" "The compositional laws C1-C7" "none" "none" "1"
+  , phase 23 "extension_security_laws" "The security laws S1-S6" "none" "none" "1"
+  , phase 24 "conformance_gate_generator" "The generated conformance gate" "none" "none" "1"
+  , phase 25 "dhall_schema_generation" "Haskell-derived Dhall projection and smart-constructor prelude" "none" "none" "1"
+  , phase 26 "gadt_decode_ir" "Haskell protocol declarations, GADT-indexed IR, and total decoder" "none" "none" "1"
+  , phase 27 "illegal_state_covering" "Illegal-state corpus + validation-locus ledger" "none" "none" "1"
+  , phase 28 "storage_geometry_folds" "Logical→physical storage geometry folds" "none" "none" "1"
+  , phase 29 "execution_accelerator_folds" "Execution-epoch + scheduler + accelerator + provider-root folds" "none" "none" "1"
+  , phase 30 "capability_bind" "Capability union + representational bind" "none" "none" "1"
+  , phase 31 "provision_seal" "Whole-deployment provision seal + expansion" "none" "none" "1"
+  , phase 32 "inference_accelerator_provision" "InferenceEngine capability + accelerator provision" "none" "none" "1"
+  , phase 33 "render_manifest_oracles" "Pure `renderAll` + rendered-artifact oracles" "none" "none" "1"
+  , phase 34 "chain_kernel_boundary" "chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker" "none" "none" "2"
+  , phase 35 "image_recipe_generation" "The amoebius image recipe" "none" "none" "1"
+  , phase 36 "transaction_vocabulary" "The closed transaction vocabulary" "none" "none" "1"
+  , phase 37 "ui_program_schema" "Bounded UI-program schema" "none" "none" "1"
+  , phase 38 "ui_authorization_kernel" "UI authorization kernel" "none" "none" "1"
+  , phase 39 "ui_effect_binding" "UI effect binding" "none" "none" "1"
+  , phase 40 "ui_plan_compiler" "UI plan compiler" "none" "none" "1"
+  , phase 41 "offline_language_plan" "Offline language and paired plans" "none" "none" "1"
+  , phase 42 "ui_browser_interpreter" "Haskell browser-interpreter semantics and projection" "none" "none" "1"
+  , phase 43 "ui_server_boundary" "Haskell UI-server boundary" "none" "none" "2"
+  , phase 44 "ui_local_composition" "Hardware-free Haskell UI composition" "none" "none" "2"
+  , phase 45 "encrypted_browser_runtime" "Haskell offline-state semantics and runtime projection" "none" "none" "1"
+  , phase 46 "ui_contract_generation" "Haskell-generated browser contracts and bundle" "none" "none" "1"
+  , phase 47 "tool_and_mutant_generation" "Foreign-source generator closure, checking tools, and mutants" "none" "none" "1"
+  , phase 48 "test_workflow_algebra" "The test-workflow algebra" "none" "none" "1"
+  , phase 49 "self_referential_gates" "No-hardware DSL promotion barrier + self-referential gate suite" "none" "none" "2"
+  , phase 50 "host_assert_cli" "Validate the bounded `pb` → Haskell handoff" "none" "none" "2"
+  , phase 51 "host_ensure_kernel" "The host-ensure kernel" "none" "none" "2"
+  , phase 52 "linux_engine_bringup" "Linux: sudoless Docker and the native image" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 53 "apple_engine_bringup" "Apple: Homebrew, Colima, and the native image" "apple" "linux-cpu/arm64" "3"
+  , phase 54 "windows_engine_bringup" "Windows: WSL2 and the lifted Linux engine" "windows" "linux-cpu/amd64" "3"
+  , phase 55 "bootstrap_coordinator_kind" "Haskell substrate coordinator + single kind cluster" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 56 "base_image_registry" "The base image, the jit-build resolver, and the in-cluster registry" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 57 "complementary_arch_child" "The complementary-architecture base image" "apple" "linux-cpu/arm64" "3"
+  , phase 58 "object_reconciler" "Typed renderer + object reconciler" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 59 "capacity_scheduler" "amoebius-capacity scheduler + bootstrap cutover" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 60 "retained_storage" "No-provisioner retained storage + lossless rebind" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 61 "vault_pki" "Root Vault + PKI + built-in Haskell Vault client" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 62 "platform_backbone" "Platform backbone (MetalLB + MinIO + Pulsar HA)" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 63 "platform_services_2" "Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG)" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 64 "keycloak_ingress" "Keycloak-owned ingress" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 65 "live_dsl_deploy" "Live DSL deploy via the replicas=1 control-plane daemon" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 66 "app_tenancy" "Tenant/provider provisioning" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 67 "pulsar_client" "Native Pulsar client (CBOR)" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 68 "user_tenant_isolation_live" "Live subject/tenant isolation" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 69 "content_store_workflow" "Content store + workflow runtime (Pulsar-Failover single-writer)" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 70 "ui_projection_runtime" "Owner-scoped UI projection runtime" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 71 "release_lifecycle" "Release lifecycle" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 72 "ui_program_release" "Atomic immutable UI-program release" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 73 "network_fabric_wireguard" "WireGuard network fabric" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 74 "multicluster_spawn_georepl" "Multi-cluster spawn + geo-replication" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 75 "gateway_migration_drills" "Gateway-migration drills + model-correspondence" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 76 "provider_deploy_checkpoint" "Haskell-derived provider Pulumi program and enveloped checkpoint" "linux-cpu" "provider" "3"
+  , phase 77 "provider_child_bringup" "Hostless provider child + convergence + Lease handoff" "linux-cpu" "provider" "3"
+  , phase 78 "provider_ebs_credential" "Per-PV EBS decoupling + create-vs-delete credential" "linux-cpu" "provider" "3"
+  , phase 79 "provider_dynamic_nodes" "Dynamic node provisioning by signal + leak-free provider gate" "linux-cpu" "provider" "3"
+  , phase 80 "determinism_jitcache" "Determinism kernel + jit-build CacheBudget cache" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 81 "ui_single_tenant_live" "Single-tenant low-code UI live path" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 82 "ui_multi_tenant_live" "Multi-tenant low-code UI isolation" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 83 "ui_rollout_reconnect" "UI rollout, projection catch-up, and reconnect" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 84 "ui_ha_multizone" "Initial online UI multi-zone high availability" "linux-cpu" "provider" "3"
+  , phase 85 "offline_replay_receipts" "Offline replay and durable receipts" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 86 "offline_blobs_isolation" "Offline blobs and partition isolation" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 87 "offline_release_evolution" "Offline release and schema evolution" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 88 "offline_multizone_continuity" "Offline multi-zone continuity" "linux-cpu" "provider" "3"
+  , phase 89 "apple_metal_host_daemon" "Apple-Metal host compute daemon" "apple" "metal" "3"
+  , phase 90 "test_topology_live" "The live test topology and elevated harness" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 91 "infernix_rederivation" "The infernix inference core, re-derived" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 92 "infernix_ui_rederivation" "The infernix workflow and artifact contracts, re-derived" "linux-cpu" "linux-cpu/amd64" "3"
+  , phase 93 "jitml_rederivation" "The jitML numerical core, re-derived" "linux-cuda" "cuda" "3"
+  , phase 94 "jitml_ui_rederivation" "The jitML training and checkpoint contracts, re-derived" "linux-cuda" "cuda" "3"
+  , phase 95 "webapp_rederivation" "The multi-tenant web application re-derived" "linux-cpu" "linux-cpu/amd64" "3"
   ]
 
 invalidOraclePhase :: OraclePhase
@@ -1042,32 +1042,32 @@ titleMutationResult =
   phaseSemanticJoinDiagnostic
     ( replaceInPath
         (oraclePath phase52)
-        ("# Phase 53: " <> oracleTitle phase52)
-        "# Phase 53: Linux: sudoless Docker and the native image altered"
+        ("# Phase 52: " <> oracleTitle phase52)
+        "# Phase 52: Linux: sudoless Docker and the native image altered"
         canonicalCorpus
     )
 predecessorMutationResult =
   phaseSemanticJoinDiagnostic
     ( replaceInPath
         (oraclePath phase52)
-        "[Phase 52](phase_52_host_ensure_kernel.md)"
-        "[Phase 51](phase_51_host_assert_cli.md)"
+        "[Phase 51](phase_51_host_ensure_kernel.md)"
+        "[Phase 50](phase_50_host_assert_cli.md)"
         canonicalCorpus
     )
 predecessorTrailingResult =
   phaseSemanticJoinDiagnostic
     ( replaceInPath
         (oraclePath phase52)
-        "[Phase 52](phase_52_host_ensure_kernel.md)"
-        "[Phase 52](phase_52_host_ensure_kernel.md) trailing"
+        "[Phase 51](phase_51_host_ensure_kernel.md)"
+        "[Phase 51](phase_51_host_ensure_kernel.md) trailing"
         canonicalCorpus
     )
 futureCommandMutationResult =
   phaseSemanticJoinDiagnostic
     ( replaceInPath
         (oraclePath phase50)
-        "`pb validate phase 51`"
         "`pb validate phase 50`"
+        "`pb validate phase 49`"
         canonicalCorpus
     )
 resetStatusMutationResult =
@@ -1290,8 +1290,8 @@ trackerTargetMutationResult =
   phaseSemanticJoinDiagnostic
     ( replaceInPath
         trackerPath
-        "phase_85_ui_ha_multizone.md"
-        "phase_85_ui_ha_multizone.md-altered"
+        "phase_84_ui_ha_multizone.md"
+        "phase_84_ui_ha_multizone.md-altered"
         canonicalCorpus
     )
 indentedTrackerRowResult =
@@ -1593,16 +1593,16 @@ predecessorMutationFinding =
   semanticMismatch
     52
     "predecessor-link"
-    ("Phase 52|DEVELOPMENT_PLAN/phase_52_host_ensure_kernel.md" :: Text)
-    ("Phase 51|DEVELOPMENT_PLAN/phase_51_host_assert_cli.md" :: Text)
+    ("Phase 51|DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md" :: Text)
+    ("Phase 50|DEVELOPMENT_PLAN/phase_50_host_assert_cli.md" :: Text)
 predecessorTrailingFinding =
   semanticMismatch
     52
     "predecessor-link"
-    ("Phase 52|DEVELOPMENT_PLAN/phase_52_host_ensure_kernel.md" :: Text)
+    ("Phase 51|DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md" :: Text)
     ("MALFORMED" :: Text)
 futureCommandMutationFinding =
-  semanticMismatch 50 "future-command" ("pb validate phase 51" :: Text) ("pb validate phase 50" :: Text)
+  semanticMismatch 50 "future-command" ("pb validate phase 50" :: Text) ("pb validate phase 49" :: Text)
 resetStatusMutationFinding = semanticMismatch 0 "reset-status" activeStatus blockedStatus
 tabIndentedStatusFinding :: ExpectedFinding
 tabIndentedStatusFinding =
@@ -1700,7 +1700,7 @@ indentedResourceBlockerFindings =
 
 malformedPhasePath, unknownPhasePath :: FilePath
 malformedPhasePath = "DEVELOPMENT_PLAN/phaseX.md"
-unknownPhasePath = "DEVELOPMENT_PLAN/phase_53_wrong.md"
+unknownPhasePath = "DEVELOPMENT_PLAN/phase_52_wrong.md"
 
 malformedPathResult, unknownPathResult, duplicatePathResult :: CheckResult
 malformedPathResult = phaseSemanticJoinDiagnostic (canonicalCorpus <> [(malformedPhasePath, "")])

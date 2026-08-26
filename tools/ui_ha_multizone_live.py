@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise Phase 59's bounded host-process failover slice."""
+"""Exercise Phase 58's bounded host-process failover slice."""
 
 import hashlib
 import json

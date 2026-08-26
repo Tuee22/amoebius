@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the Phase-41 atomic UI-program release against the retained live stack."""
+"""Run the Phase-40 atomic UI-program release against the retained live stack."""
 
 from __future__ import annotations
 

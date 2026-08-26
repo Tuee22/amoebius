@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise Phase 64 migration crash/resume and rollback in real Chrome."""
+"""Exercise Phase 63 migration crash/resume and rollback in real Chrome."""
 
 import hashlib
 import json

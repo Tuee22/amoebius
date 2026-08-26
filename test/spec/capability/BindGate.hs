@@ -155,8 +155,8 @@ runBindGate :: IO ()
 runBindGate = do
   oracle <- loadArmOracle
   semantics <- loadShapeSemanticOracle
-  assert (length oracle == 9) "Phase-31 arm oracle must contain exactly nine rows"
-  assert (length semantics == 9) "Phase-31 semantic shape oracle must contain exactly nine rows"
+  assert (length oracle == 9) "Phase-30 arm oracle must contain exactly nine rows"
+  assert (length semantics == 9) "Phase-30 semantic shape oracle must contain exactly nine rows"
   assert (fmap fixtureArm capabilityFixtures == oracleArms) "fixture list no longer covers the independently pinned arm order"
   assert (Set.fromList (fmap fixtureSlug capabilityFixtures) == Set.fromList (fmap oracleSlug oracle)) "fixture/oracle slug coverage drifted"
   assert (fmap semanticSlug semantics == fmap oracleSlug oracle) "semantic shape oracle no longer follows the pinned arm order"
@@ -174,7 +174,7 @@ runBindGate = do
   propertyCount <- runBindProps
   let mutantCount = length capabilityMutants
       executionInventoryCount = length services
-  assert (mutantCount == 4) "Phase-31 mutant set must contain four entries"
+  assert (mutantCount == 4) "Phase-30 mutant set must contain four entries"
   checkCapabilityBindCalculusProjection (length oracle) (length services) (gate1Count + gate2Count) propertyCount mutantCount
   putStrLn
     ( "capability-bind-invariants: PASS ("
@@ -262,14 +262,14 @@ checkSemanticShape semantics shape service = do
 checkGate1 :: IO Int
 checkGate1 = do
   rows <- rowsOf "test/oracle/capability_bind/dhall_typecheck_cases.tsv"
-  assert (length rows == 3) "Phase-31 Gate-1 oracle must contain three negatives"
+  assert (length rows == 3) "Phase-30 Gate-1 oracle must contain three negatives"
   forM_ rows $ \row -> case row of
     [_caseName, negative, legal, required] -> do
       checkDhallGreen (Text.unpack legal)
       (exitCode, stdoutText, stderrText) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack negative, "--quiet"]) ""
       let observed = Text.pack (stdoutText <> stderrText)
       assert (exitCode /= ExitSuccess && required `Text.isInfixOf` observed) (Text.unpack negative <> " missed exact Gate-1 locus " <> Text.unpack required)
-    _ -> fail "malformed Phase-31 Gate-1 oracle row"
+    _ -> fail "malformed Phase-30 Gate-1 oracle row"
   pure (length rows)
 
 checkGate2 :: IO Int
@@ -292,12 +292,12 @@ checkGate2 = do
   assertRight extensionPositive "legal infernix/jitML extension graph rejected"
 
   oracle <- rowsOf "test/oracle/capability_bind/gadt_decode_cases.tsv"
-  assert (length oracle == 4) "Phase-31 Gate-2 oracle must contain four negatives"
+  assert (length oracle == 4) "Phase-30 Gate-2 oracle must contain four negatives"
   assert
     ( Set.fromList [expected | [_name, expected, _negative, _legal] <- oracle]
         == Set.fromList ["UnbuiltProviderArm", "UnboundCapability", "CyclicExtension", "ShadowingExtension"]
     )
-    "Phase-31 Gate-2 specific-tag oracle drifted"
+    "Phase-30 Gate-2 specific-tag oracle drifted"
   pure (length oracle)
 
 checkDeployment :: [BoundServiceSpec] -> IO Int
@@ -403,8 +403,8 @@ checkLedgerCoverage = do
           , "illegal_shadowing_extension"
           ]
       expected = positives <> negatives <> Set.fromList capabilityMutants
-  assert (observed == expected) "Phase-31 validation-locus ledger does not cover every positive, negative, and mutant"
-  assert (length rows == 29) "Phase-31 validation-locus ledger must contain exactly 29 rows"
+  assert (observed == expected) "Phase-30 validation-locus ledger does not cover every positive, negative, and mutant"
+  assert (length rows == 29) "Phase-30 validation-locus ledger must contain exactly 29 rows"
   pure (length rows)
 
 decodeProviderFixture :: FilePath -> IO (Either DecodeError ())
@@ -463,7 +463,7 @@ loadArmOracle = do
  where
   parse row = case row of
     [slug, arm, resource] -> pure (ArmOracleRow slug arm resource)
-    _ -> fail "malformed Phase-31 arm oracle row"
+    _ -> fail "malformed Phase-30 arm oracle row"
 
 loadShapeSemanticOracle :: IO [ShapeSemanticRow]
 loadShapeSemanticOracle = do
@@ -491,7 +491,7 @@ loadShapeSemanticOracle = do
           , semanticDistributedExecutions = distributedExecutions
           , semanticIntentCount = intentCount
           }
-    _ -> fail "malformed Phase-31 semantic shape oracle row"
+    _ -> fail "malformed Phase-30 semantic shape oracle row"
 
   parseBool field value = case value of
     "true" -> pure True

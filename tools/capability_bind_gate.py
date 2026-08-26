@@ -34,7 +34,7 @@ LOCUS = ROOT / "test/oracle/capability_bind/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/capability-bind/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/capability-bind/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/capability-bind"
-CONTRACT = "DEVELOPMENT_PLAN/phase_31_capability_bind.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_30_capability_bind.md"
 GATE_COMMAND = "python3 tools/capability_bind_gate.py"
 EXPECTATIONS = "test/oracle/capability_bind_surfaces.tsv"
 
@@ -122,11 +122,11 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         "InferenceEngine",
     }
     if len(arms) != 9 or {row["arm"] for row in arms} != required_arms:
-        raise GateFailure("Phase-31 arm oracle must enumerate the exact closed nine-arm union")
+        raise GateFailure("Phase-30 arm oracle must enumerate the exact closed nine-arm union")
     if len({row["slug"] for row in arms}) != 9 or len({row["resource"] for row in arms}) != 9:
-        raise GateFailure("Phase-31 arm oracle slugs and resource names must be unique")
+        raise GateFailure("Phase-30 arm oracle slugs and resource names must be unique")
     if len(shape_semantics) != 9 or [row["slug"] for row in shape_semantics] != [row["slug"] for row in arms]:
-        raise GateFailure("Phase-31 semantic shape oracle must cover the pinned arm order exactly")
+        raise GateFailure("Phase-30 semantic shape oracle must cover the pinned arm order exactly")
     expected_calculus = {
         "calculus-kinds": "artifact,budget,lift,workflow,evidence",
         "component-names": "capability-arms,bound-service-shapes,boundary-negatives,bind-property,mutant-evidence",
@@ -134,14 +134,14 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         "resource-vector": "5,39,0,0",
     }
     if {row["metric"]: row["value"] for row in calculus_projection} != expected_calculus:
-        raise GateFailure("Phase-31 independently authored five-calculus projection drifted")
+        raise GateFailure("Phase-30 independently authored five-calculus projection drifted")
     if len(dhall_typecheck) != 3 or {row["case"] for row in dhall_typecheck} != {"product-in-app", "engine-by-url", "shape-in-app"}:
-        raise GateFailure("Phase-31 Gate-1 oracle must contain the three required negatives")
+        raise GateFailure("Phase-30 Gate-1 oracle must contain the three required negatives")
     expected_gadt_decode = {"UnbuiltProviderArm", "UnboundCapability", "CyclicExtension", "ShadowingExtension"}
     if len(gadt_decode) != 4 or {row["expected"] for row in gadt_decode} != expected_gadt_decode:
-        raise GateFailure("Phase-31 Gate-2 oracle must preserve all four specific error tags")
+        raise GateFailure("Phase-30 Gate-2 oracle must preserve all four specific error tags")
     if len(mutants) != 4 or len({row["mutant"] for row in mutants}) != 4:
-        raise GateFailure("Phase-31 mutant manifest must contain four unique mutants")
+        raise GateFailure("Phase-30 mutant manifest must contain four unique mutants")
     positive_names = {
         f"legal_{row['slug']}_{shape}"
         for row in arms
@@ -158,7 +158,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         *(row["mutant"] for row in mutants),
     }
     if {row["entry"] for row in locus} != expected_locus or len(locus) != len(expected_locus):
-        raise GateFailure("Phase-31 validation-locus ledger has incomplete or duplicate coverage")
+        raise GateFailure("Phase-30 validation-locus ledger has incomplete or duplicate coverage")
     for row in arms:
         for shape in ("singlenode", "distributed"):
             fixture = ROOT / f"dhall/examples/legal_{row['slug']}_{shape}.dhall"
@@ -216,14 +216,14 @@ def run_green_suite(cabal: Path) -> str:
     )
     token = "capability-bind-spec: PASS (9 arms, 18 semantic shapes, 3 Gate-1, 4 Gate-2, 4 mutants, 1 covered property)"
     if token not in result.stdout:
-        raise GateFailure(f"Phase-31 acceptance token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-30 acceptance token is absent:\n{result.stdout}")
     if "capability-bind-calculus: PASS (5 kinds, 39 projected units)" not in result.stdout:
-        raise GateFailure("Phase-31 five-calculus projection token is absent")
+        raise GateFailure("Phase-30 five-calculus projection token is absent")
     invariant_token = "capability-bind-invariants: PASS (18 execution inventories, 3 unresolved references, 2 registry shapes, 2 extension-totality cases, 29 locus rows)"
     if invariant_token not in result.stdout:
-        raise GateFailure("Phase-31 structural invariant token is absent")
+        raise GateFailure("Phase-30 structural invariant token is absent")
     if "each of nine constructors >=8%" not in result.stdout:
-        raise GateFailure("Phase-31 property coverage token is absent")
+        raise GateFailure("Phase-30 property coverage token is absent")
     return result.stdout
 
 
@@ -461,7 +461,7 @@ def main() -> int:
         },
         dependencies={"battery": "cabal test capability-bind-spec"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-31 mutants", "status": "unrun"}],
+        or [{"name": "phase-30 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

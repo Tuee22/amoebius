@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the Phase-44 planned/failover migration drill over real child clusters."""
+"""Run the Phase-43 planned/failover migration drill over real child clusters."""
 
 from __future__ import annotations
 

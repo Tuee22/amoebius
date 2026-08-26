@@ -36,7 +36,7 @@ SOURCE = ROOT / "src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs"
 SPEC = ROOT / "test/spec/workflow/TestWorkflowAlgebraSpec.hs"
 LEGAL = ROOT / "test/negative/test_workflow_algebra/legal_teardown.hs"
 ILLEGAL = ROOT / "test/negative/test_workflow_algebra/missing_teardown.hs"
-CONTRACT = "DEVELOPMENT_PLAN/phase_49_test_workflow_algebra.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md"
 GATE_COMMAND = "python3 tools/test_topology_dsl_gate.py"
 MUTANT_CAPABILITY = "test_topology_dsl"
 
@@ -217,7 +217,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], list[dict[str, str]], list[d
         if row["# phase"] == "56"
     ]
     if len(custody) != 23 or any(not (ROOT / row["path"]).is_file() for row in custody):
-        raise GateFailure("semantic-oracles-complete: Phase-0 custody must contain 23 Phase-49 inputs")
+        raise GateFailure("semantic-oracles-complete: Phase-0 custody must contain 23 Phase-48 inputs")
 
     mutants = build_mutants()
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
@@ -553,7 +553,7 @@ def main() -> int:
         mutants=[
             {"name": row["mutant"], "status": "red" if reddened == len(mutants) else "unrun"}
             for row in mutants
-        ] or [{"name": "Phase-49 mutants", "status": "unrun"}],
+        ] or [{"name": "Phase-48 mutants", "status": "unrun"}],
         observations=observations,
         extra_status=surface_decisions(expected_rows, rows, classes, results),
     )

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-32 typed-action object-reconciler gate.
+"""Run and seal the Phase-31 typed-action object-reconciler gate.
 
-The capability claim is unchanged: the Phase-15 deployment-global render is validated and
+The capability claim is unchanged: the Phase-14 deployment-global render is validated and
 indexed, enacted on the live single-node `kind` cluster through stage-eligible typed actions
 alone, observed to convergence, and re-run byte-stable as a no-op — with the Register-2.5
 schedule battery driving the same real action modules under `IOSim`.
@@ -40,12 +40,12 @@ EXPECTED_ACTIONS = ROOT / "test/fixture/live/reconcile-corpus/expected-actions.j
 NEVER_READY = ROOT / "test/fixture/live/reconcile-corpus-never-ready"
 RESULTS = ROOT / ".build/dsl/object-reconciler/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/object_reconciler_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_59_object_reconciler.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_58_object_reconciler.md"
 GATE_COMMAND = "python3 tools/object_reconciler_gate.py --execute"
 
 # The committed mutant domain, each mapped to the sprint whose evidence decides it. The
-# live delete mutant is decided twice — Sprint 32.3 owns the staged-deletion claim and
-# Sprint 32.4 re-runs it inside the convergence battery — and one red observation of it is
+# live delete mutant is decided twice — Sprint 31.3 owns the staged-deletion claim and
+# Sprint 31.4 re-runs it inside the convergence battery — and one red observation of it is
 # what either sprint's evidence has to show.
 EXPECTED_MUTANTS = {
     "delete-from-owner-label-alone": "26.3",
@@ -320,7 +320,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if arguments.execute:
             handoff = project_cluster_fixture.verified_image_handoff()
             print(
-                "\npredecessor side — verified Phase-31 attestation, ledger, and OCI handoff\n"
+                "\npredecessor side — verified Phase-30 attestation, ledger, and OCI handoff\n"
             )
             print(f"  ok    attestation {handoff.attestation}")
             print(f"  ok    index       {handoff.index_digest}")
@@ -357,7 +357,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print("\nlive side — five sprints on this run's private linux-cpu kind cluster\n")
             execute_sprints(evidence, image, fixture.environment)
         elif evidence is None:
-            raise GateFailure("phase-32 needs --execute or an --evidence bundle from a completed live run")
+            raise GateFailure("phase-31 needs --execute or an --evidence bundle from a completed live run")
         else:
             print(f"\nlive side — reusing the completed live run at {evidence}\n")
         if not (evidence / "sprint-26.5-receipt.json").is_file():
@@ -430,7 +430,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         },
         dependencies={
             "cluster": "private marker-owned kind fixture",
-            "registry": "fresh in-cluster distribution from verified Phase-31 handoff",
+            "registry": "fresh in-cluster distribution from verified Phase-30 handoff",
             **(
                 {
                     "phase25Attestation": handoff.attestation,

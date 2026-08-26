@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-27 gate — the GADT-indexed IR and its total decoder (Gate 2).
+"""The Phase-26 gate — the GADT-indexed IR and its total decoder (Gate 2).
 
 The capability claim is unchanged: `gadt-decode-spec` decodes every positive fixture to its
 authored tree, each tagged negative fails at its own distinct `DecodeError`, three
@@ -57,7 +57,7 @@ GENERATED = ROOT / ".build" / "dsl" / "gadt-decode"
 RESULTS = GENERATED / "phase-results.tsv"
 OBSERVER_TAG = "gadt_decode_ir"
 BUILD_ROOT = ROOT / ".build" / "dist-newstyle" / "gadt-decoder-gadt_decode"
-CONTRACT = "DEVELOPMENT_PLAN/phase_27_gadt_decode_ir.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md"
 GATE_COMMAND = "python3 tools/gadt_decode_ir_gate.py"
 EXPECTATIONS = "test/oracle/gadt_decode_ir_surfaces.tsv"
 
@@ -208,7 +208,7 @@ def toolchain_side() -> tuple[bool, dict[str, Any]]:
 def suite_side(
     resolved: dict[str, Any], observer: argv_observer.ArgvObserver, run_dir: Path
 ) -> tuple[bool, dict[str, Any]]:
-    """Run the Phase-27-only suite through the boundary argv observer and measure it."""
+    """Run the Phase-26-only suite through the boundary argv observer and measure it."""
     print("\nsuite side — gadt-decode-spec through the boundary argv observer\n")
     GENERATED.mkdir(parents=True, exist_ok=True)
     if BUILD_ROOT.exists():

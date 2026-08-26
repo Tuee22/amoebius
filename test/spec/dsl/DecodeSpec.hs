@@ -80,7 +80,7 @@ data NegativeCase = NegativeCase
   , negativeTwin :: FilePath
   }
 
--- The suite invokes ghc and dhall by absolute path on purpose: the Phase-27 argv observer
+-- The suite invokes ghc and dhall by absolute path on purpose: the Phase-26 argv observer
 -- asserts that no tool is reached through an ambient PATH lookup. Which absolute path is a
 -- run-local resolution, not a fact about the repository, so the resolver supplies it and
 -- the suite fails closed rather than falling back to one developer's home directory.
@@ -284,8 +284,8 @@ printGate2Oracle = do
 checkPhase27CompileFail :: IO Int
 checkPhase27CompileFail = do
   (exitCode, stdout, stderr) <- readCreateProcessWithExitCode (proc "sh" ["tools/compile_fail.sh"]) ""
-  assert (exitCode == ExitSuccess) ("Phase-28 compile-fail harness failed:\n" <> stdout <> stderr)
-  assert ("compile-fail: PASS (5 legal/illegal one-token pairs)" `contains` stdout) "Phase-28 compile-fail token missing"
+  assert (exitCode == ExitSuccess) ("Phase-27 compile-fail harness failed:\n" <> stdout <> stderr)
+  assert ("compile-fail: PASS (5 legal/illegal one-token pairs)" `contains` stdout) "Phase-27 compile-fail token missing"
   pure 5
 
 checkPhase9CompileFail :: IO Int

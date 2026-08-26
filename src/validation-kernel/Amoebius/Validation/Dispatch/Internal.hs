@@ -677,7 +677,7 @@ validatePhase gitPath root phase
 checkPhaseZeroSnapshot :: SourceSnapshot -> CheckResult
 checkPhaseZeroSnapshot snapshot =
   mergeChecks
-    "phase-0"
+    "phase-00"
     [ checkPhaseZeroSnapshotCore snapshot
     , syntheticSnapshotRefusal
     ]
@@ -695,7 +695,7 @@ checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence =
   case snapshotDocuments snapshot of
     Left decodeFindings ->
       mergeChecks
-        "phase-0"
+        "phase-00"
         ( acquiredSourceChecks
             <> [ legacyCheckAcquired (Policy.phaseDomainLower policyOrdering) acquired compilerEvidence debtEvidence
                , Policy.checkPolicyContract Policy.canonicalPolicyContract
@@ -706,7 +706,7 @@ checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence =
         )
     Right documents ->
       mergeChecks
-        "phase-0"
+        "phase-00"
         ( acquiredSourceChecks
             <> [ legacyCheckAcquired (Policy.phaseDomainLower policyOrdering) acquired compilerEvidence debtEvidence
                , Policy.checkPolicyContract Policy.canonicalPolicyContract
@@ -728,7 +728,7 @@ checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence =
 checkPhaseZeroSnapshotCore :: SourceSnapshot -> CheckResult
 checkPhaseZeroSnapshotCore snapshot =
   mergeChecks
-    "phase-0"
+    "phase-00"
     ( map (rawPhaseZeroComponentCheck snapshot closure decodedDocuments) rawPhaseZeroComponentUniverse
         <> [phaseZeroReadinessBlockers]
     )
@@ -903,7 +903,7 @@ syntheticSnapshotFindings =
 phaseZeroReadinessBlockers :: CheckResult
 phaseZeroReadinessBlockers =
   CheckResult
-    { checkName = "phase-0-readiness"
+    { checkName = "phase-00-readiness"
     , checkObservations =
         [ observation "readiness.harness-qualification" "report consistency checker present; execution not implemented"
         , observation "readiness.policy-contract" "typed contract is integrated; changed-subject qualification and human prose-correspondence review are absent"
@@ -928,7 +928,7 @@ phaseZeroReadinessBlockers =
         , finding
             "PB-GRAMMAR-UNQUALIFIED"
             "Amoebius.Validation.PbBootstrapGrammar"
-            "the versioned static AST/import/resolved-call/control-flow/potential-effect analyzer is integrated, but no acquired one-file tracked snapshot, applied changed-subject qualification, or independent review binds it; Phase 51 alone owns external runtime handoff observation"
+            "the versioned static AST/import/resolved-call/control-flow/potential-effect analyzer is integrated, but no acquired one-file tracked snapshot, applied changed-subject qualification, or independent review binds it; Phase 50 alone owns external runtime handoff observation"
         , finding
             "PHASE-CONTRACT-SEMANTICS-UNREVIEWED"
             "Amoebius.Validation.PhaseContract"
@@ -939,11 +939,11 @@ phaseZeroReadinessBlockers =
             "the closed legacy inventory dispatches every ID and the LTD-SRC-000 and LTD-SRC-008 source analyzers are integrated but unqualified; the LTD-VAL-001 through LTD-VAL-004 owner analyzers and their independently authored reintroduction executions remain unavailable"
         , finding
             "INDEPENDENT-REVIEW-MISSING"
-            "phase-0-oracles"
+            "phase-00-oracles"
             "component diagnostics have no independent human reviewer or custody receipt"
         , finding
             "CLEANROOM-OBSERVER-MISSING"
-            "phase-0-cleanroom"
+            "phase-00-cleanroom"
             "fresh-run input closure and external residue have no implemented independent observer"
         , finding
             "EVIDENCE-INTEGRATION-MISSING"

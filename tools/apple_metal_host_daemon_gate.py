@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the scoped Phase-54 Apple host-daemon gate."""
+"""Run and seal the scoped Phase-53 Apple host-daemon gate."""
 
 from __future__ import annotations
 
@@ -17,8 +17,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_53"
 LIVE = EVIDENCE / "apple-host-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_54_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_54_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_53_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_53_ledger.json"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
 DHALL = "/home/matthewnowak/.local/bin/dhall"
@@ -95,7 +95,7 @@ def phase0() -> dict[str, str]:
             and sum("\tmutant\t" in row for row in rows) == 7, "phase0-cardinality")
     for row in rows:
         require((ROOT / row.split("\t")[2]).is_file(), f"phase0-missing:{row}")
-    return {"name": "phase0-custody", "command": "read Phase-54 manifest", "output": "13 oracles; 7 mutants", "result": "PASS"}
+    return {"name": "phase0-custody", "command": "read Phase-53 manifest", "output": "13 oracles; 7 mutants", "result": "PASS"}
 
 
 def dhall_domain() -> list[dict[str, str]]:

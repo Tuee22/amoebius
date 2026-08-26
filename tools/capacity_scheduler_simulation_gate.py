@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seal Sprint 32.5 deterministic scheduler convergence under faults."""
+"""Seal Sprint 31.5 deterministic scheduler convergence under faults."""
 
 from __future__ import annotations
 
@@ -110,7 +110,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "exact-lease-holder", "distinct-readiness-stages", "no-general-action-before-managed",
                 "one-debit-per-uid", "no-binding-before-cas", "bound-retained-on-restart", "fresh-snapshot-after-watch-gap",
             ],
-            "mutantsRed": len(MUTANTS), "modeledApiserverFidelity": "ASSUMED; bounded by Sprint 32.4 Register-3 live observations",
+            "mutantsRed": len(MUTANTS), "modeledApiserverFidelity": "ASSUMED; bounded by Sprint 31.4 Register-3 live observations",
             "result": "PASS",
         }
         (evidence / "sprint-27.5-simulation.json").write_text(json.dumps(simulation, indent=2, sort_keys=True) + "\n", encoding="utf-8")

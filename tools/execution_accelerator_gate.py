@@ -30,7 +30,7 @@ MUTANTS = ROOT / "test/mutant/registry.tsv"
 RESULTS = ROOT / ".build/dsl/execution-accelerator/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/execution-accelerator/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/execution-accelerator"
-CONTRACT = "DEVELOPMENT_PLAN/phase_30_execution_accelerator_folds.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md"
 GATE_COMMAND = "python3 tools/execution_accelerator_gate.py"
 EXPECTATIONS = "test/oracle/execution_accelerator_surfaces.tsv"
 
@@ -103,9 +103,9 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
     dhall_typecheck = read_tsv(DHALL_TYPECHECK)
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(rows) != 37 or len({row["variant"] for row in rows}) != 37:
-        raise GateFailure("Phase-30 fold oracle must contain 37 unique variants")
+        raise GateFailure("Phase-29 fold oracle must contain 37 unique variants")
     if len({row["twin"] for row in rows}) != 37:
-        raise GateFailure("every Phase-30 variant must name a distinct legal twin")
+        raise GateFailure("every Phase-29 variant must name a distinct legal twin")
     required_families = {
         "illegal_hard_ceiling_overcommit",
         "illegal_node_local_storage_over_backing",
@@ -127,11 +127,11 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
         "illegal_shared_accelerator_double_owner",
     }
     if {row["family"] for row in rows} != required_families:
-        raise GateFailure("Phase-30 oracle must preserve the exact eighteen negative families")
+        raise GateFailure("Phase-29 oracle must preserve the exact eighteen negative families")
     if len(dhall_typecheck) != 1 or {row["entry"] for row in dhall_typecheck} != {"3.28"}:
-        raise GateFailure("Phase-30 Gate-1 oracle must contain the accelerator-owner barrier")
+        raise GateFailure("Phase-29 Gate-1 oracle must contain the accelerator-owner barrier")
     if len(mutants) != 45 or len({row["mutant"] for row in mutants}) != 45:
-        raise GateFailure("Phase-30 mutant manifest must contain 45 unique mutants")
+        raise GateFailure("Phase-29 mutant manifest must contain 45 unique mutants")
     run([sys.executable, str(ROOT / "tools/locus_registry_lint.py")])
     for row in dhall_typecheck:
         legal = run([str(dhall), "type", "--file", row["legal"], "--quiet"], require_success=False)
@@ -146,18 +146,18 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
 
 def verify_registry_coverage(rows: list[dict[str, str]], dhall_typecheck: list[dict[str, str]]) -> None:
     registry = read_tsv(ROOT / "dhall/examples/locus_registry.tsv")
-    owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-30"}
+    owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-29"}
     evidence_entries = {
         *(row["catalog"].split(":", 1)[0] for row in rows),
         *(row["entry"] for row in dhall_typecheck),
     }
     covered = {(entry, subcase) for entry, subcase in owned if entry in evidence_entries}
     if len(owned) != 2 or covered != owned:
-        raise GateFailure(f"Phase-30 registry coverage drifted: covered={sorted(covered)}, owned={sorted(owned)}")
+        raise GateFailure(f"Phase-29 registry coverage drifted: covered={sorted(covered)}, owned={sorted(owned)}")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# Register-1 only; runtime correspondence UNVERIFIED\n", "entry\tsubcase\tlocus\tstatus\n"]
     for row in registry:
-        if row["owner_phase"] == "Phase-30":
+        if row["owner_phase"] == "Phase-29":
             lines.append(f"{row['entry']}\t{row['subcase']}\t{row['validation_locus']}\tdischarged\n")
     GENERATED_LEDGER.write_text("".join(lines), encoding="utf-8")
 
@@ -202,11 +202,11 @@ def run_green_suite(cabal: Path) -> str:
     )
     token = "execution-accelerator-spec: PASS (18 named negatives, 37 variants, 37 twins, 2 positives, 1 Gate-1, 7 properties)"
     if token not in result.stdout:
-        raise GateFailure(f"Phase-30 acceptance token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-29 acceptance token is absent:\n{result.stdout}")
     if "execution-accelerator-calculus: PASS (5 kinds, 128 projected units)" not in result.stdout:
-        raise GateFailure("Phase-30 five-calculus projection token is absent")
+        raise GateFailure("Phase-29 five-calculus projection token is absent")
     if ">=30% accept/reject coverage" not in result.stdout:
-        raise GateFailure("Phase-30 property coverage token is absent")
+        raise GateFailure("Phase-29 property coverage token is absent")
     return result.stdout
 
 
@@ -240,7 +240,7 @@ def write_results(rows: list[dict[str, str]], mutants: list[dict[str, str]]) -> 
         "dhall-typecheck-accelerator-owner": "1/1-exact-red-with-green-twin",
         "quickcheck-properties": "7/7-green-checkCoverage-30-percent-on-decision-folds",
         "mutants": f"{len(mutants)}/{len(mutants)}-red",
-        "registry-subcases": "2/2-Phase-30-owned-discharged",
+        "registry-subcases": "2/2-Phase-29-owned-discharged",
         "phase29-fold-totality": "compile-exhaustive-and-sampled-no-crash",
         "acceptance-token": "spec-composition-proven-full-resource-vector",
         "calculus-kinds": "5/5-artifact-budget-lift-workflow-evidence",
@@ -281,7 +281,7 @@ EXPECTED_RESULTS = {
     "dhall-typecheck-accelerator-owner": "1/1-exact-red-with-green-twin",
     "quickcheck-properties": "7/7-green-checkCoverage-30-percent-on-decision-folds",
     "mutants": "45/45-red",
-    "registry-subcases": "2/2-Phase-30-owned-discharged",
+    "registry-subcases": "2/2-Phase-29-owned-discharged",
     "phase29-fold-totality": "compile-exhaustive-and-sampled-no-crash",
     "acceptance-token": "spec-composition-proven-full-resource-vector",
     "calculus-kinds": "5/5-artifact-budget-lift-workflow-evidence",
@@ -402,7 +402,7 @@ def main() -> int:
         },
         dependencies={"battery": "cabal test execution-accelerator-spec"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-30 mutants", "status": "unrun"}],
+        or [{"name": "phase-29 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

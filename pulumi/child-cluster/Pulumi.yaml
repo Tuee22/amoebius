@@ -1,6 +1,6 @@
 name: amoebius-child-cluster
 runtime: yaml
-description: Phase-43 child-cluster stack identity and encrypted-checkpoint owner
+description: Phase-42 child-cluster stack identity and encrypted-checkpoint owner
 config:
   childId:
     type: string

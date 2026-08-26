@@ -119,7 +119,7 @@ def materialize_kind_config(output_root: Path) -> Path:
 
 
 def bootstrap_vault_predecessor() -> dict[str, Any]:
-    """Materialize Phase 34's real readiness floor inside this run's private fixture."""
+    """Materialize Phase 33's real readiness floor inside this run's private fixture."""
     vault.KIND = KIND
     vault.KUBECTL = KUBECTL
     vault.CABAL = CABAL

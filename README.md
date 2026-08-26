@@ -63,12 +63,12 @@ Haskell inventory. Phase 0 owns the binding explained as `LTD-SRC-008` and must 
 single `pb/__main__.py` inventory whose closed supported authored syntax/import/resolved-direct-call/control-flow/effect
 graph statically fits the toolchain-establish/build/opaque-argv-exec role. Interpreter startup,
 standard-library/native/transitive behavior, concrete adapter effects, unchanged argv, process replacement,
-and exit propagation remain Phase-51 runtime observations. Every source-migration binding, including that one, must be
-zero before the Phase-50 hardware-free promotion barrier may emit a candidate. Phase 50 builds and invokes the
-Haskell barrier directly; it does not use `pb` as transport. Phase 51 alone validates the runtime behavior of
+and exit propagation remain Phase-50 runtime observations. Every source-migration binding, including that one, must be
+zero before the Phase-49 hardware-free promotion barrier may emit a candidate. Phase 49 builds and invokes the
+Haskell barrier directly; it does not use `pb` as transport. Phase 50 alone validates the runtime behavior of
 the already source-bounded handoff and owns no source-migration binding: the exact source-built Haskell
-supervisor starts directly and invokes `pb` as its observed child subject. Phase 52 onward retains the same
-closed grammar. Phase 52 remains a hardware-free Haskell host-ensure gate against fake boundaries; Phase 53 is
+supervisor starts directly and invokes `pb` as its observed child subject. Phase 51 onward retains the same
+closed grammar. Phase 51 remains a hardware-free Haskell host-ensure gate against fake boundaries; Phase 52 is
 the first hardware-bearing validation phase. That target discipline
 generalises jitML's just-in-time discipline from machine learning to everything amoebius touches, and it is
 owned by the [JIT artifact doctrine](./documents/engineering/jit_artifact_doctrine.md) and the

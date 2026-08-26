@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import hashlib,json,os,shlex,subprocess,sys
 from pathlib import Path
-R=Path(__file__).resolve().parents[1];E=R/"DEVELOPMENT_PLAN/evidence/phase_56";N=R/"test/enumeration/phase_57_surfaces.txt";L=R/"test/golden/phase_57_ledger.json";C="/home/matthewnowak/.ghcup/bin/cabal";G="/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc";F=("ui-multi-tenant-live-accept-unlisted-choice-mutant","ui-multi-tenant-live-drop-tenant-key-mutant","ui-multi-tenant-live-drop-user-key-mutant","ui-multi-tenant-live-drop-scope-epoch-mutant");U={"keycloak-real-sessions","real-browser-tenant-switch","provider-zero-delta-observers","kubernetes-audit","foreign-pod-cni-probe","redis-realtime-scope-change"}
+R=Path(__file__).resolve().parents[1];E=R/"DEVELOPMENT_PLAN/evidence/phase_56";N=R/"test/enumeration/phase_56_surfaces.txt";L=R/"test/golden/phase_56_ledger.json";C="/home/matthewnowak/.ghcup/bin/cabal";G="/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc";F=("ui-multi-tenant-live-accept-unlisted-choice-mutant","ui-multi-tenant-live-drop-tenant-key-mutant","ui-multi-tenant-live-drop-user-key-mutant","ui-multi-tenant-live-drop-scope-epoch-mutant");U={"keycloak-real-sessions","real-browser-tenant-switch","provider-zero-delta-observers","kubernetes-audit","foreign-pod-cni-probe","redis-realtime-scope-change"}
 def fp(v):return "sha256:"+hashlib.sha256(json.dumps(v,sort_keys=True,separators=(",",":" )).encode()).hexdigest()
 def cfg(x=None):return tuple(("-f" if a==x else "-f-")+a for a in F)
 def cmd(x=None):return (C,"test","ui-live:ui-multi-tenant-live","-w",G,*cfg(x),"--test-show-details=direct","-j1","-v0")

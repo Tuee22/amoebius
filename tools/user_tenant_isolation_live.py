@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 37 live authority-to-provider isolation harness and external observer."""
+"""Phase 36 live authority-to-provider isolation harness and external observer."""
 
 from __future__ import annotations
 
@@ -438,7 +438,7 @@ def finish(state_path: Path, result_path: Path) -> dict[str, Any]:
         "cleanup": {"providers": cleanup, "inventoriesEqual": True, "residue": []},
         "provision": {"exactFit": True, "oneShortTerms": 10, "livePodResourcesNormalized": True, "apiObjects": 8},
         "universalLinuxCpu": {"allHardwareSubstrates": True, "pristineLinux": {"linux": "Incus", "linux-cuda": "Incus", "apple": "Lima", "windows": "WSL2"}},
-        "unverified": ["browser tenant switching (Phase 57)", "cross-cluster isolation", "provider audit-log completeness beyond normalized observers"],
+        "unverified": ["browser tenant switching (Phase 56)", "cross-cluster isolation", "provider audit-log completeness beyond normalized observers"],
     }
     evidence = {**stable, "evidenceDigest": digest(stable)}
     EVIDENCE.parent.mkdir(parents=True, exist_ok=True)

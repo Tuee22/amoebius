@@ -10,7 +10,7 @@ module PbBootstrapGrammarOracle
 
 -- The subject exposes one function and only an always-refusing CheckResult.
 -- This oracle owns its wire bytes, digest, observations, resource limits,
--- problem texts, and Phase-51 residue declarations.  It never imports a
+-- problem texts, and Phase-50 residue declarations.  It never imports a
 -- production parser, model, proof, projection, canonical literal, or success
 -- branch, and it never executes pb.
 
@@ -63,7 +63,7 @@ runPbBootstrapGrammarOracle =
 -- the same omission could disappear from both the subject and its reported
 -- coverage.  Several independent changed subjects are assigned to the same
 -- complete canonical result because that one exact result retains every
--- observation and Phase-51 residue row; the selector identity remains unique.
+-- observation and Phase-50 residue row; the selector identity remains unique.
 pbBootstrapGrammarSelectorIntents :: [(String, String, String)]
 pbBootstrapGrammarSelectorIntents =
   [ ("VALIDATION_PB_GRAMMAR_ABSOLUTE_DIRECTORY_SUBJECT_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
@@ -924,7 +924,7 @@ phase50Findings =
   [ Finding
       "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
       (Text.unpack residue)
-      "static source grammar cannot establish this runtime property; Phase 51 must observe the pb child from the source-bound Haskell supervisor"
+      "static source grammar cannot establish this runtime property; Phase 50 must observe the pb child from the source-bound Haskell supervisor"
   | residue <- residueNames
   ]
 
@@ -933,7 +933,7 @@ diagnosticOnlyFinding =
   Finding
     "PB-GRAMMAR-DIAGNOSTIC-ONLY"
     diagnosticSubject
-    "caller-supplied pb bytes are diagnostic input and cannot establish source custody or Phase-51 runtime truth"
+    "caller-supplied pb bytes are diagnostic input and cannot establish source custody or Phase-50 runtime truth"
 
 preflightFinding :: Text -> Text -> Finding
 preflightFinding code detail = Finding code diagnosticSubject detail

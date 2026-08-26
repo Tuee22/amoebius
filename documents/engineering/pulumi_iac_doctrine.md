@@ -14,7 +14,7 @@ unable to remove durable backing. It does not own the capacity checks that admit
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_65_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_68_pulsar_client.md, DEVELOPMENT_PLAN/phase_75_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_77_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_79_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_80_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -52,7 +52,7 @@ mean building or adopting an engine that otherwise does not exist. The work Pulu
 materially harder to replace than the work Helm did; the two removals are *not* symmetric.
 
 **The v1 decision: keep Pulumi.** It brings mature multi-cloud CRUD/diff/destroy and provider coverage, and
-its encrypted-MinIO-backend + Vault-Transit envelope shape ([§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)) began as sibling prodbox evidence; the target scoped amoebius Phase-75/77 obligations are specified in [§10](#10-planning-ownership).
+its encrypted-MinIO-backend + Vault-Transit envelope shape ([§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)) began as sibling prodbox evidence; the target scoped amoebius Phase-74/76 obligations are specified in [§10](#10-planning-ownership).
 Reimplementing that surface is a far larger and riskier undertaking than the Helm removal was, for no
 present gain.
 
@@ -246,7 +246,7 @@ flowchart TD
 
 > **Honesty.** This backend shape originated as evidence from the sibling prodbox project (`Prodbox.Pulumi.EncryptedBackend`:
 > a scratch backend hydrated from an opaque Model-B MinIO object, with a Transit/KV Vault gate on every
-> apply/destroy). Phase 75 owns child-checkpoint-custody validation, and Phase 77 owns the exact six-object
+> apply/destroy). Phase 74 owns child-checkpoint-custody validation, and Phase 76 owns the exact six-object
 > peak, direct Transit decrypt, opaque MinIO readback, and sealed-Vault pre-PUT refusal. None is a current
 > result, and these criteria do not cover an AWS provider checkpoint, direct-S3 denial, or the engine-pod
 > filesystem observer; those remain UNVERIFIED. Read broader statements here as design intent
@@ -654,26 +654,26 @@ To keep SSoT boundaries crisp:
 This document is normative Pulumi-IaC doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
-only (the plan is authoritative): root Vault/PKI is assigned to **Phase 62**; public-edge ZeroSSL/route53
-integration is assigned to **Phase 65**; gateway-migration route53 repointing is assigned to **Phase 76**;
+only (the plan is authoritative): root Vault/PKI is assigned to **Phase 61**; public-edge ZeroSSL/route53
+integration is assigned to **Phase 64**; gateway-migration route53 repointing is assigned to **Phase 75**;
 amoebic spawning via SSH-key Pulumi with the MinIO backend + Vault-envelope encryption is assigned to
-**Phase 75**; provider-managed clusters (EKS) and dynamic node provisioning are assigned to **Phase 77**; the
+**Phase 74**; provider-managed clusters (EKS) and dynamic node provisioning are assigned to **Phase 76**; the
 elevated live-harness storage-deletion safety that makes the
 [§6](#6-the-ebs-create-vs-delete-credential-model) create-vs-delete model leak-free is assigned to
-**Phase 91**. Phase 49 owns only the substrate-free test-workflow and teardown algebra; it may not exercise a
+**Phase 90**. Phase 48 owns only the substrate-free test-workflow and teardown algebra; it may not exercise a
 provider, elevated harness, or storage deletion. Per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius
 result: the model generalizes behaviour proven in prodbox into amoebius design intent, and the
 [§6](#6-the-ebs-create-vs-delete-credential-model) EBS credential model is an explicit *resolution of an open
 question*, not a tested capability.
 
-**Phase-65 target seam — NOT VALIDATED.** A bounded in-cluster ACME recording Job must receive only the Vault
+**Phase-64 target seam — NOT VALIDATED.** A bounded in-cluster ACME recording Job must receive only the Vault
 `SecretRef` path in argv, read EAB bytes from the Vault-derived Secret volume, record no values, and find no
 EAB literal in Dhall. The certificate chain must be issued by retained internal Vault PKI as the explicitly
 allowed staging stand-in. This would not evidence live ZeroSSL issuance,
 Route53 ownership, or Pulumi execution; those provider effects retain their later owners.
 
-**Phase-75 target boundary — NOT VALIDATED.** Phase 75 must realize the first in-cluster Pulumi owner in
+**Phase-74 target boundary — NOT VALIDATED.** Phase 74 must realize the first in-cluster Pulumi owner in
 `Amoebius.Pulumi.Engine`, the encrypted-checkpoint contract in `Amoebius.Pulumi.Backend.EncryptedMinio`, and a
 Haskell-declared command-provider program whose required external form is rendered lazily beneath
 `.build/pulumi/**`. Nothing beneath `pulumi/**` is target tracked source. Two resource-bounded Jobs
@@ -681,14 +681,14 @@ must run Pulumi inside a parent `kind` cluster, create two
 child clusters concurrently, export checkpoint state, observe an unchanged second pass, and destroy both
 stacks. The target observer must read Vault Transit envelope ciphertext and the checkpoint object from retained
 MinIO; the gate must refuse direct checkpoint admission and one-byte-short storage. Provider-managed programs remain
-Phase 76.
+Phase 75.
 
-**Phase-76 target boundary — NOT VALIDATED.** Phase 76 must realize the provider-neutral DNS decision and hub handoff in
+**Phase-75 target boundary — NOT VALIDATED.** Phase 75 must realize the provider-neutral DNS decision and hub handoff in
 `Amoebius.Multicluster.DnsRepoint` and `GatewayMigration`. The live drill must query a dedicated authoritative
 DNS server from outside the migration runtime and move a raw-kernel `wg0` role. Route53 API/Pulumi mutation
 remains UNVERIFIED and cannot be certified by a local DNS result.
 
-**Phase-77 target boundary — NOT VALIDATED.** Phase 77 must build the provider plan and receipt boundary in `Amoebius.Pulumi.Provider.Eks`, extend
+**Phase-76 target boundary — NOT VALIDATED.** Phase 76 must build the provider plan and receipt boundary in `Amoebius.Pulumi.Provider.Eks`, extend
 `Amoebius.Pulumi.Engine` with exact bounded executor provisioning and the control-plane daemon/absolute-path/empty-child-
 environment contract, and implements the exact checkpoint fold in
 `Amoebius.Pulumi.Backend.EncryptedMinio`. The scoped Register-3 challenge must observe two concurrent
@@ -698,7 +698,7 @@ exact cleanup. Provider-account observation, actual
 control-plane daemon `pulumi up`, EKS, the managed node group, CloudTrail, AWS-plugin `execve`, pod-filesystem inspection,
 and direct-S3 denial remain UNVERIFIED.
 
-**Phase-79 target boundary — NOT VALIDATED.** Phase 79 must implement the pure durable-EBS program in
+**Phase-78 target boundary — NOT VALIDATED.** Phase 78 must implement the pure durable-EBS program in
 `Amoebius.Pulumi.Ebs` and the closed operational/CSI/elevated-test action matrix in
 `Amoebius.Pulumi.Credential`. Its gate must validate integral-GiB allocation, byte/count
 quota refusal, deterministic promised slots, receipt-only materialization, distinct durable checkpoint keys,
@@ -707,7 +707,7 @@ real Vault Transit and MinIO for separate ephemeral/durable checkpoint namespace
 occurred, so create/delete authorization, volume retention, receipt-bound EBS state, and provider migration
 remain UNVERIFIED. The development-plan tracker owns the portable CPU/clean-guest routing rule.
 
-**Phase-80 target boundary — NOT VALIDATED.** Phase 80 must implement `Amoebius.Pulumi.NodeGroup` as receipt-only provider-node materialization and
+**Phase-79 target boundary — NOT VALIDATED.** Phase 79 must implement `Amoebius.Pulumi.NodeGroup` as receipt-only provider-node materialization and
 `Amoebius.Pulumi.Teardown` as fail-closed per-class teardown plus broadened run-owned enumeration. The pure
 contract requires the managed-capacity taint, complete supply/layout/device and fresh scheduler authority,
 rejects foreign-pod admission, retains durable resources, and discovers owned resources through run tag, VPC,

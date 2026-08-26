@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-39 owner-scoped UI projection gate."""
+"""Run and seal the Phase-38 owner-scoped UI projection gate."""
 
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_38"
 LIVE = EVIDENCE / "ui-projection-runtime-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_39_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_39_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_38_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_38_ledger.json"
 ORACLE_MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 UNVERIFIED = {
@@ -237,7 +237,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(phase0_domain())
         if args.reuse_fresh_live:
             rows.append({
-                "name": "projection-live", "command": "sealed just-produced Phase-39 live receipt",
+                "name": "projection-live", "command": "sealed just-produced Phase-38 live receipt",
                 "output": "fresh final live evidence", "result": "PASS",
             })
         else:

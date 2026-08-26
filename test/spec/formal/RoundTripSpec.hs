@@ -124,7 +124,7 @@ main = do
   rendererSemanticCaught <- checkRendererSemanticMutants rendererFacts
   checkNeverCommitted root
 
-  putStrLn "formal-model-spec: Phase-11 calculus-composition projection"
+  putStrLn "formal-model-spec: Phase-10 calculus-composition projection"
   compositionProjection <- checkCalculusCompositionBridge root
 
   putStrLn "formal-model-spec: TLC round-trip and liveness sensitivity"
@@ -494,9 +494,9 @@ readMetricOracle path = do
 withReferenceComposition
   :: (forall scope. Composition scope -> IO result)
   -> IO (Either String result)
-withReferenceComposition continuation = case trustedTenant "phase-12-tenant" of
+withReferenceComposition continuation = case trustedTenant "phase-11-tenant" of
   Left problem -> pure (Left (show problem))
-  Right tenant -> case trustedSubject tenant "phase-12-subject" of
+  Right tenant -> case trustedSubject tenant "phase-11-subject" of
     Left problem -> pure (Left (show problem))
     Right subject -> case activeMembership tenant subject of
       Left problem -> pure (Left (show problem))

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the complete Phase-32 platform-services acceptance gate."""
+"""Run and seal the complete Phase-31 platform-services acceptance gate."""
 
 from __future__ import annotations
 
@@ -18,8 +18,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_31"
 LIVE_EVIDENCE = EVIDENCE / "services-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_32_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_32_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_31_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_31_ledger.json"
 EXPECTED_DIGEST = ROOT / "test/fixture/platform_services_2/expected-base-digest.txt"
 POSTGRES_SHARE_DIGEST = ROOT / "test/fixture/platform_services_2/postgres-share-package.sha256"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"

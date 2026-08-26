@@ -84,7 +84,7 @@ runRenderBakeDockerfile arguments = case arguments of
     Text.putStr rendered.dockerfileText
   _ -> die "render-bake-dockerfile requires exactly one catalog path"
 
--- | Live Phase-26.1 entry point.  The fixed positional surface is deliberate:
+-- | Live Phase-25.1 entry point.  The fixed positional surface is deliberate:
 -- every observed capacity and every process path is explicit, the admitted
 -- action fixes the two-platform OCI export, and the subprocess receives no
 -- ambient environment.

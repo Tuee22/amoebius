@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-16 gate — structured, source-bound GHC compile-fail twins."""
+"""The Phase-15 gate — structured, source-bound GHC compile-fail twins."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "test/oracle/compile_fail_harness/fixtures.tsv"
 SOURCE = ROOT / "tools/compile_fail_harness.py"
 RESULTS = ROOT / ".build/checkers/compile-fail/results.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_16_compile_fail_harness.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md"
 GATE_COMMAND = "python3 tools/compile_fail_harness_gate.py"
 EXPECTATIONS = "test/oracle/compile_fail_harness_surfaces.tsv"
 MUTANT_CAPABILITY = "compile_fail_harness"

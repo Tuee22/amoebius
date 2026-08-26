@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capture the host-local, independently persisted slice of Phase 58."""
+"""Capture the host-local, independently persisted slice of Phase 57."""
 
 import hashlib
 import json

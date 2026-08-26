@@ -1,7 +1,7 @@
 # Authored expectation for the object-reconciler test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
-# independently authored expectation. Phase 68 had no authored expectation at all — the
+# independently authored expectation. Phase 67 had no authored expectation at all — the
 # retired gate read a surface list out of a committed enumeration file and compared a
 # committed ledger against a derived one, so the list described whatever the gate last
 # emitted. This file is the first authored opinion its gate is checked against.

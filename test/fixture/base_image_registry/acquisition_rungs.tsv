@@ -1,4 +1,4 @@
-# The authored acquisition-rung expectation for the Phase-26 bake catalog.
+# The authored acquisition-rung expectation for the Phase-25 bake catalog.
 #
 # `image_build_doctrine.md` §7 orders the ladder: an `apt` package where an official one
 # exists, otherwise an official multi-arch artifact verified against the publisher's own

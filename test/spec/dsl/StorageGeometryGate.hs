@@ -60,7 +60,7 @@ data OracleRow = OracleRow
 runStorageGeometryGate :: IO ()
 runStorageGeometryGate = do
   rows <- loadOracle "test/oracle/storage_geometry/storage_cases.tsv"
-  assert (length rows == 30) "Phase-29 storage oracle must contain 30 variant rows"
+  assert (length rows == 30) "Phase-28 storage oracle must contain 30 variant rows"
   let fixturesByVariant = Map.fromList [(storageFixtureVariant fixture, fixture) | fixture <- storageFixtures]
   assert (Map.keysSet fixturesByVariant == Set.fromList (fmap oracleVariant rows)) "storage fixture/oracle variant sets diverged"
   forM_ rows $ \row -> case Map.lookup (oracleVariant row) fixturesByVariant of
@@ -76,7 +76,7 @@ runStorageGeometryGate = do
   forM_ storagePositiveRows $ \(name, result) -> do
     decoded <- decodeCluster ("dhall/examples/" <> Text.unpack name <> ".dhall")
     case decoded of
-      Left problem -> fail (Text.unpack name <> " failed Gate 2 before Phase-29 geometry: " <> show problem)
+      Left problem -> fail (Text.unpack name <> " failed Gate 2 before Phase-28 geometry: " <> show problem)
       Right _ -> pure ()
     assert (result == Right ()) (Text.unpack name <> " storage rows rejected: " <> show result)
   gate1Count <- checkGate1
@@ -114,10 +114,10 @@ checkGate1 :: IO Int
 checkGate1 = do
   contents <- Text.readFile "test/oracle/storage_geometry/dhall_typecheck_cases.tsv"
   case Text.lines contents of
-    [] -> fail "Phase-29 Gate-1 oracle is empty"
+    [] -> fail "Phase-28 Gate-1 oracle is empty"
     header : rows -> do
-      assert (header == "entry\tnegative\tlegal\trequired") "Phase-29 Gate-1 oracle header drifted"
-      assert (length rows == 2) "Phase-29 Gate-1 oracle must contain two rows"
+      assert (header == "entry\tnegative\tlegal\trequired") "Phase-28 Gate-1 oracle header drifted"
+      assert (length rows == 2) "Phase-28 Gate-1 oracle must contain two rows"
       forM_ rows $ \row -> case Text.splitOn "\t" row of
         [_, negative, legal, required] -> do
           dhall <- resolvedDhall
@@ -126,7 +126,7 @@ checkGate1 = do
           (negativeExit, negativeOut, negativeError) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack negative, "--quiet"]) ""
           let observed = Text.pack (negativeOut <> negativeError)
           assert (negativeExit /= ExitSuccess && required `Text.isInfixOf` observed) (Text.unpack negative <> " missed exact Gate-1 locus")
-        _ -> fail ("malformed Phase-29 Gate-1 row: " <> Text.unpack row)
+        _ -> fail ("malformed Phase-28 Gate-1 row: " <> Text.unpack row)
       pure (length rows)
 
 countStorageMutants :: IO Int
@@ -136,7 +136,7 @@ countStorageMutants = do
         capability : _ -> capability == "storage_geometry"
         [] -> False
       count = length (filter isStorage (Text.lines contents))
-  assert (count == 31) "Phase-29 mutant registry must contain 31 rows"
+  assert (count == 31) "Phase-28 mutant registry must contain 31 rows"
   pure count
 
 checkStorageCalculusProjection :: Int -> Int -> Int -> Int -> IO ()

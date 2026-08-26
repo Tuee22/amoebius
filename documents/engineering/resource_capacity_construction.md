@@ -297,7 +297,7 @@ observed old/terminating instance must turn the independent epoch oracle red.
   model, finite concurrency, failure window, maximum failures, and GC horizon to include simultaneous upload
   workspace and retained partial uploads as a model-derived object-extent multiset. The same private
   `ProvisionedRegistryStorageDemand` retains the digest map, structured `objectStorePeak`, and scalar
-  `derivedPeak`: the scalar sizes only the interim bounded filesystem volume, while Phase 63 feeds the
+  `derivedPeak`: the scalar sizes only the interim bounded filesystem volume, while Phase 62 feeds the
   structured resident objects and transient extents through MinIO's per-object stripe/parity/metadata
   geometry. Equal-byte peaks with different object counts therefore need not have equal physical demand.
   Its private admission witness configures the only mutating registry path: a local proxy authenticates the

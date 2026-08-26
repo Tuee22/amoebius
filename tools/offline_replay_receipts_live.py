@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run Phase 62 through two local UI endpoints and a durable SQLite observer."""
+"""Run Phase 61 through two local UI endpoints and a durable SQLite observer."""
 
 import hashlib
 import http.client

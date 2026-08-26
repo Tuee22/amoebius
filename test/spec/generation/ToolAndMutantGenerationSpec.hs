@@ -149,7 +149,7 @@ verifyCustody root = do
     (_phase : _kind : path : _) -> do
       present <- doesFileExist (root </> path)
       assert present ("missing " <> path)
-    _ -> die "bad Phase-31 custody row"
+    _ -> die "bad Phase-30 custody row"
 
 loadTable :: FilePath -> IO [[String]]
 loadTable path = do

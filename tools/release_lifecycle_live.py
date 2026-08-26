@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the Phase-40 release lifecycle on the standing linux-cpu stack."""
+"""Exercise the Phase-39 release lifecycle on the standing linux-cpu stack."""
 
 from __future__ import annotations
 

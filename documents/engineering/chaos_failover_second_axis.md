@@ -14,7 +14,7 @@ argument in [chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_49_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_70_content_store_workflow.md, DEVELOPMENT_PLAN/phase_75_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_76_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -37,7 +37,7 @@ argument in [chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-
 > that describes the subsystem, **the analysis can stop here** — Appendix A is the worked example. Read on only if
 > the subsystem's data is geo-replicated across more than one cluster with *asynchronous* replication between them.
 
-For amoebius this gate is not a rare edge case — it is **Phase 75**. The moment a parent spawns a child and
+For amoebius this gate is not a rare edge case — it is **Phase 74**. The moment a parent spawns a child and
 the two geo-replicate, the forest crosses this line, and the [§3](./chaos_failover_doctrine.md#3-the-defect-class--one-shape-two-disguises) defect returns in a new and more dangerous
 form. Recall the fourth blindness ([§5](./chaos_failover_doctrine.md#5-three-layers-and-the-blindness-that-binds-them)): **every move is blind to the cluster boundary unless the boundary is modeled in.** Extract's convergent fold is pure *because its input converges* — and is blind to the fact
 that convergence *stops at the boundary*. Model, written against a single cluster in logical time, sees no

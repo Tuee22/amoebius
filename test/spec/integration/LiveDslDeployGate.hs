@@ -155,7 +155,7 @@ checkNegativeOracle = do
       assertBool "positive pair named" ("dhall/examples/" `Text.isPrefixOf` positive)
       assertBool "gate named" (gate == "Gate-1" || gate == "Gate-2")
       assertBool "specific tag nonempty" (not (Text.null tag))
-    _ -> die "malformed Phase-34 negative oracle"
+    _ -> die "malformed Phase-33 negative oracle"
 
 controlPlaneManifest :: ControlPlaneDaemonManifest
 controlPlaneManifest = ControlPlaneDaemonManifest

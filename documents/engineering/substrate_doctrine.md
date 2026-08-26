@@ -19,7 +19,7 @@ does not own the cluster engine that runs on it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_51_host_assert_cli.md, DEVELOPMENT_PLAN/phase_52_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_53_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_57_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_68_pulsar_client.md, DEVELOPMENT_PLAN/phase_77_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_81_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_86_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_87_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_88_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_90_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/host_resource_research.md, documents/engineering/hostclaim_spec.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -41,7 +41,7 @@ does not own the cluster engine that runs on it, owned by
 ---
 
 **Target inventory read-side boundary — NOT VALIDATED.** The eventual
-[Phase-30 gate](../../DEVELOPMENT_PLAN/phase_30_execution_accelerator_folds.md) must validate closed kubelet
+[Phase-29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must validate closed kubelet
 filesystem layouts, OCI/runtime metadata routing, provider-root template identities, accelerator
 family/profile ownership, peer-graph requirements, and raw/reserved/allocatable VRAM arithmetic in Register 1.
 Former reseals and external-run references are permanently invalid evidence. Detection, materialization,
@@ -209,12 +209,6 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 
 ---
 
-The same three reads also name the ledger domains this host offers. The mapping from an observed host to a
-set of opaque domain identifiers is a projection of that classification, and it is deliberately not this
-catalog: [hostclaim_spec.md §8](./hostclaim_spec.md#8-extension) requires a domain family to be addable
-with no revision and no agreement, while adding a substrate here costs a real change. Tying the two
-together would make hardware that no participant supports yet impossible to account for.
-
 ## 3. The no-environment / no-`PATH` lazy tool-ensure contract
 
 **The Haskell host-invocation layer takes no configuration from ambient environment variables and never resolves an external tool against the host's `PATH`.** This is one of the project's locked invariants, and it
@@ -371,7 +365,7 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > that is type-enforced now; package-manager-canonical *discovery* is the part still to land. Do not read
 > the current discovery seam as the finished contract.
 >
-> **Observed implementation.** [Phase 52](../../DEVELOPMENT_PLAN/phase_52_host_ensure_kernel.md) has a
+> **Observed implementation.** [Phase 51](../../DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md) has a
 > footprint covering the parts that are amoebius's, whose status is recorded in the
 > [tracker](../../DEVELOPMENT_PLAN/README.md) and nowhere here: an install step is a typed `Performer` plus an argument vector in which a
 > version is a requirement reference rather than a literal, so a pin has one home; `HostTool` carries the
@@ -381,11 +375,11 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > it probed with. Discovery is still `findExecutable`-shaped, and remains UNVERIFIED against the
 > package-manager-canonical target.
 
-**Phase-68 code generation.** The retired `amoebius-pulsar/Setup.hs` resolved `protoc` and
+**Phase-67 code generation.** The retired `amoebius-pulsar/Setup.hs` resolved `protoc` and
 `proto-lens-protoc` by absolute path and gave `proto-lens-setup` a closed search domain — never the ambient
 host `PATH`, so no unrelated executable could shadow code generation. It went with the package split, because
 [§2.1](./repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package) admits no ground for a
-package that exists only to carry a `Setup.hs`. Phase 68 re-establishes the same invariant against
+package that exists only to carry a `Setup.hs`. Phase 67 re-establishes the same invariant against
 `.build/proto/**`; the generated modules stay build artifacts either way.
 
 ---
@@ -504,7 +498,7 @@ a host worker*.
 > **Honesty.** Lima, WSL2, and Incus are implemented VM providers in the `hostbootstrap` seed. The headless,
 > on-host Apple build/run shape is **proven in the sibling jitML project** (its implemented fixed-Metal-bridge
 > path) and the sibling `infernix` library **removed** its own legacy Tart path in favour of it — that is
-> sibling evidence for physical Metal. Phase 90 owns the future Lima/brew plan, private disk/capacity fold,
+> sibling evidence for physical Metal. Phase 89 owns the future Lima/brew plan, private disk/capacity fold,
 > and headless bridge/build/lifecycle contracts, but is **NOT VALIDATED**. A Linux `x86_64` scoped gate cannot
 > establish live Apple/Lima/brew or Metal behavior. Under [§1.1](#11-the-natural-architecture-rule) it cannot close them
 > later either: an `apple` claim is provable only on Apple Silicon, whose natural architecture is `arm64`.
@@ -620,20 +614,20 @@ provenance unanswerable.
 **Observed implementation.** The tracked `pb/**` footprint is migration debt under `LTD-SRC-008`; file
 presence and lexical inspection do not establish the role above. Phase 0 must close that row with an exact,
 non-empty, deny-by-default Haskell-owned AST/import/resolved-call/control-flow/potential-effect graph before
-Phase 50 can emit a candidate. That is static source admission only. Phase 50 invokes the source-bound Haskell
-binary directly and cannot use `pb` as evidence. [Phase 51](../../DEVELOPMENT_PLAN/phase_51_host_assert_cli.md)
+Phase 49 can emit a candidate. That is static source admission only. Phase 49 invokes the source-bound Haskell
+binary directly and cannot use `pb` as evidence. [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md)
 alone validates runtime adapter effects, executable identity, unchanged argv, exec replacement, and exit
 propagation for the already-bounded handoff. The tracker records both phases as **NOT VALIDATED**.
 
-Phase 66 owns the Haskell command-mode administrative client —
+Phase 65 owns the Haskell command-mode administrative client —
 node-local Vault init/unseal plus desired-spec update and KV CRUD against the control-plane daemon. Both phases
 are **NOT VALIDATED**. This does not change the universal baseline: every hardware substrate can always run
 `linux-cpu` at its own natural architecture ([§1.1](#11-the-natural-architecture-rule)), and a pristine Linux
 host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The Phase-77 provider-parent target follows the same rule: its eventual contract must resolve the provider
+The Phase-76 provider-parent target follows the same rule: its eventual contract must resolve the provider
 engine and plugin by absolute path, independently observe an empty child environment, and reject `PATH`,
-`PULUMI_*`, and `AWS_*` authority. Phase 77 is **NOT VALIDATED**; former invalid-identity traces cannot
+`PULUMI_*`, and `AWS_*` authority. Phase 76 is **NOT VALIDATED**; former invalid-identity traces cannot
 establish provider execution. This does not alter the
 universal route: every hardware substrate can always run the linux-cpu parent at its own natural
 architecture, with pristine Linux supplied by Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
@@ -733,13 +727,13 @@ every inbound link already names.
 
 This document is normative substrate doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): substrate detection
-and the `bootstrap` contract land in **Phase 56** (`linux-cpu`); host compute daemons, the Lima/WSL2
-providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 90** (`apple`; physical Apple
+and the `bootstrap` contract land in **Phase 55** (`linux-cpu`); host compute daemons, the Lima/WSL2
+providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 89** (`apple`; physical Apple
 surfaces remain UNVERIFIED after its scoped Linux-host gate); the in-cluster CUDA path is exercised in
-**Phase 94** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
+**Phase 93** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
 and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
-Phase 81 must eventually validate deterministic recomputation and Tier-1 executable-engine cache reuse on its
+Phase 80 must eventually validate deterministic recomputation and Tier-1 executable-engine cache reuse on its
 declared `linux-cpu` platform; it is currently **NOT VALIDATED**. Its bounded target cannot establish
 cross-substrate bit equality, cross-node reuse, production llama.cpp inference, or CUDA/Metal cache behavior.
 Those exclusions do not narrow the target platform model: every hardware substrate can run `linux-cpu` at its

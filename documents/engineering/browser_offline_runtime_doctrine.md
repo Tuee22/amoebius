@@ -14,7 +14,7 @@ replay. It does not own the online runtime it pairs with, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_42_offline_language_plan.md, DEVELOPMENT_PLAN/phase_46_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_86_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_87_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_88_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_89_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
@@ -135,7 +135,7 @@ data OfflineQueueContract = OfflineQueueContract
 }
 ```
 
-The Phase-42 mirror names the nine required terms `maxCount`, `maxBytes`, `maxAgeSeconds`,
+The Phase-41 mirror names the nine required terms `maxCount`, `maxBytes`, `maxAgeSeconds`,
 `localValidation`, `idempotency`, `conflict`, `ordering`, `dependency`, and
 `authoritativeValidation`. Its exact refusal corpus covers every absent term and every operation that must stay
 online-only; no browser persistence or live authority behavior follows from that result.

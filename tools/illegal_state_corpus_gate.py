@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-28 gate — the illegal-state corpus and its validation-locus ledger.
+"""The Phase-27 gate — the illegal-state corpus and its validation-locus ledger.
 
 The capability claim is unchanged: every catalog entry reconciles to an owner and family,
 the Gate-1 and Gate-2 negative corpora each fail at their own locus with a green twin that
@@ -9,7 +9,7 @@ exhausted, six registry mutants and four implementation mutants each turn the ba
 at their intended locus, and the reached Phase-8/9 rows join through explicit predecessor
 evidence rather than disappearing at an obsolete owner threshold.
 
-As in Phase 27, the results table used to restate the gate's intentions as string literals.
+As in Phase 26, the results table used to restate the gate's intentions as string literals.
 Every row that the run can observe is now measured: the catalog and registry counts come
 from the registry reader, the corpus counts and locus-ledger tallies from the suite's own
 acceptance token, the decision-mutant row from the set of properties that actually went
@@ -45,7 +45,7 @@ RESULTS = GENERATED / "phase-results.tsv"
 LOCUS_LEDGER = GENERATED / "validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build" / "dist-newstyle" / "illegal-state-corpus"
 BUILD_TMP = ROOT / ".build" / "tmp" / "illegal-state-corpus"
-CONTRACT = "DEVELOPMENT_PLAN/phase_28_illegal_state_covering.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md"
 GATE_COMMAND = "python3 tools/illegal_state_corpus_gate.py"
 EXPECTATIONS = "test/oracle/illegal_state_corpus_surfaces.tsv"
 
@@ -220,7 +220,7 @@ def registry_mutants() -> int:
             before = snapshot(root)
             mutator(root)
             if snapshot(root) == before:
-                # `owner_drift` named `Phase-33`, which the ordering re-baseline renumbered
+                # `owner_drift` named `Phase-32`, which the ordering re-baseline renumbered
                 # away, so it edited nothing and was counted as an applied mutant that the
                 # check happened to survive. A mutator that changes no byte is a defect in
                 # the instrument, and it says so rather than reporting a survivor.
@@ -370,7 +370,7 @@ def suite_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str,
         return False, {}
     match = ACCEPTANCE.search(result.stdout)
     if match is None:
-        print("  FAIL  the Phase-28 acceptance token is absent, so its counts cannot be measured")
+        print("  FAIL  the Phase-27 acceptance token is absent, so its counts cannot be measured")
         return False, {}
     dhall_typecheck, gadt_decode, positives, discharged, deferred = (int(v) for v in match.groups())
     calculus = CALCULUS_ACCEPTANCE.search(result.stdout)

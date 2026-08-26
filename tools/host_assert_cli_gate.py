@@ -46,7 +46,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 
 GATE_COMMAND = "python3 tools/host_assert_cli_gate.py"
-CONTRACT = "DEVELOPMENT_PLAN/phase_51_host_assert_cli.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_50_host_assert_cli.md"
 EXPECTATIONS = "test/oracle/host_assert_cli_surfaces.tsv"
 
 DISTRIBUTION = ROOT / "pb"

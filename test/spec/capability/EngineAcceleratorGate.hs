@@ -169,14 +169,14 @@ checkNegativeCorpus = do
   oracle <- rowsOf "test/oracle/inference_accelerator/provision_cases.tsv"
   let expectedDomain = Set.fromList [name | [name, _tag, _twin, _layer] <- oracle]
       observedDomain = Set.insert "illegal_engine_by_url" (Set.fromList (fmap engineNegativeName engineNegatives))
-  assert (length oracle == 9 && observedDomain == expectedDomain) "Phase-33 negative oracle must cover exactly nine cases"
+  assert (length oracle == 9 && observedDomain == expectedDomain) "Phase-32 negative oracle must cover exactly nine cases"
   checkGate1Url
   forM_ engineNegatives $ \negative -> do
     case [row | row@[name, _tag, _twin, _layer] <- oracle, name == engineNegativeName negative] of
       [[_name, expected, twin, "provision-seal"]] -> do
-        assert (expected == engineNegativeExpected negative) "Phase-33 expected tag drifted"
-        assert (twin == engineNegativeTwin negative) "Phase-33 legal twin drifted"
-      _ -> fail "missing or duplicate Phase-33 provision oracle row"
+        assert (expected == engineNegativeExpected negative) "Phase-32 expected tag drifted"
+        assert (twin == engineNegativeTwin negative) "Phase-32 legal twin drifted"
+      _ -> fail "missing or duplicate Phase-32 provision oracle row"
     case engineNegativeOutcome negative of
       Left problem -> assert (engineProvisionErrorTag problem == engineNegativeExpected negative) ("wrong engine provision tag: " <> show problem)
       Right _ -> fail ("illegal engine case accepted: " <> Text.unpack (engineNegativeName negative))
@@ -214,8 +214,8 @@ checkValidationLocus = do
               <> fmap engineNegativeName engineNegatives
               <> engineAcceleratorMutants
           )
-  assert (length rows == Set.size expected && observed == expected) "Phase-33 validation-locus coverage drifted"
-  assert (length rows == 17) "Phase-33 validation-locus ledger must contain exactly 17 rows"
+  assert (length rows == Set.size expected && observed == expected) "Phase-32 validation-locus coverage drifted"
+  assert (length rows == 17) "Phase-32 validation-locus ledger must contain exactly 17 rows"
   pure (length rows)
 
 checkEngineAcceleratorCalculusProjection :: Int -> Int -> Int -> Int -> Int -> IO ()

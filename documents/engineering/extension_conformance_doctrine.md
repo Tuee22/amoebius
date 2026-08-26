@@ -16,7 +16,7 @@ are stated over are owned by their own doctrines.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_calculus_composition.md, DEVELOPMENT_PLAN/phase_21_extension_declaration.md, DEVELOPMENT_PLAN/phase_25_conformance_gate_generator.md, DEVELOPMENT_PLAN/phase_31_capability_bind.md, DEVELOPMENT_PLAN/phase_33_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_52_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_53_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_58_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_90_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/host_resource_research.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_20_extension_declaration.md, DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -97,13 +97,13 @@ core needs, and an extension that has left one empty is not a partial extension 
 The surface is deliberately small. A domain author's freedom is in the *logic*, which the core never inspects;
 the obligations are about the seams where that logic meets everything else.
 
-**Target declaration boundary — NOT VALIDATED.** `lib:extension-declaration` must store five Phase-11
+**Target declaration boundary — NOT VALIDATED.** `lib:extension-declaration` must store five Phase-10
 `Component scope` values behind a private constructor. Its checked introduction rule must require them in
 calculus order, with one shared generative request-scope index; its resource observation must be the exact
 natural-number composition fold. Five readers must derive the per-calculus singleton sets. The declaration
 identity must hash a versioned, length-framed projection
 of the name, calculus tags, component names, resource coordinates, and explicit canonical payload fields.
-`Show` output is diagnostic only and does not participate. Phase 21 must test that boundary over two declarations
+`Show` output is diagnostic only and does not participate. Phase 20 must test that boundary over two declarations
 and ten authored component rows, with a separately implemented digest oracle and compiler barriers for a
 missing component and mixed scopes. This is finite Register-1 evidence. It does not establish L1–L5, prevent
 an implementation from using an undeclared side channel, or make either fixture a conforming extension.
@@ -173,9 +173,9 @@ seams the extension declares. The suite is generated to `.build/` and is never t
 `ExtensionDeclaration scope` and a same-request peer list. The L cases follow the declaration vocabulary, C
 cases cross every named peer with C1–C7, compile cases follow evidence claims, and S1–S6 name the security
 boundary. It must emit five canonical suite manifests plus a generated coverage grid beneath `.build/**`; their
-joint length-framed SHA-256 digest is independent of traversal order. The bounded Phase-25 corpus must have one
+joint length-framed SHA-256 digest is independent of traversal order. The bounded Phase-24 corpus must have one
 Infernix declaration and one JitML peer: nineteen executable case identities and 24 coverage cells. P1–P6 are
-explicitly `not-applicable` because the Phase-21 declaration cannot name a transaction axis before Phase 37;
+explicitly `not-applicable` because the Phase-20 declaration cannot name a transaction axis before Phase 36;
 the transaction suite is empty rather than silently credited.
 
 These files are executable obligations only in the sense that a runner must return exactly one result for
@@ -221,7 +221,7 @@ verdict construction, verdict omission, and cross-request verdict use.
 
 That is content binding and a single API introduction path, not authenticated execution. Any in-process
 caller can supply an observation bundle to the pure runner; no signature, process isolation, or external gate
-service proves where those results came from. The Phase-25 contract records this as UNVERIFIED rather than promoting the
+service proves where those results came from. The Phase-24 contract records this as UNVERIFIED rather than promoting the
 modeled passing seal to the unforgeability claim above. SHA-256 collision absence is likewise ASSUMED.
 
 ---
@@ -266,11 +266,6 @@ neither declared — a file path, a clock, a global — are outside it. That is 
 restatement of what L1 and C4 demand, and it is why an undeclared side channel is an illegal state rather than
 a bad practice.
 
-
-Ledger participation is subject to exactly that rule. amoebius reaches the host claim ledger
-([hostclaim_spec.md](./hostclaim_spec.md)) through the declared resource index or it does not reach it at
-all. Reading that root incidentally, from any other locus, is an undeclared channel between two components
-and is therefore an illegal state rather than an untidy one.
 ---
 
 ## 8. A hardware substrate is an extension too
@@ -308,12 +303,12 @@ Stated plainly, because a conformance verdict is exactly the kind of artifact th
 - **It does not prove the law set is sufficient.** The laws are a human choice, exactly as the catalogue's
   taxonomy is, and a hazard along a dimension no law names passes every gate
   ([`documentation_standards.md` §16](../documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list)).
-- **The target boundary is pure and bounded.** [Phase 11](../../DEVELOPMENT_PLAN/phase_11_calculus_composition.md)
+- **The target boundary is pure and bounded.** [Phase 10](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md)
   owns the base same-request calculus composition; [Phase
-  20](../../DEVELOPMENT_PLAN/phase_21_extension_declaration.md) owns the complete declaration; [Phases
-  21–23](../../DEVELOPMENT_PLAN/phase_22_extension_laws_per_extension.md) own bounded L, C, and S evaluators;
-  and Phase 25 owns the derived plan, suite bytes, modeled passing verdict, and guarded pure link set
-  described above. P instances await Phase 37's transaction vocabulary. None of these authenticates a result
+  20](../../DEVELOPMENT_PLAN/phase_20_extension_declaration.md) owns the complete declaration; [Phases
+  21–23](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) own bounded L, C, and S evaluators;
+  and Phase 24 owns the derived plan, suite bytes, modeled passing verdict, and guarded pure link set
+  described above. P instances await Phase 36's transaction vocabulary. None of these authenticates a result
   observer, proves C1, closes S/P composition, or establishes runtime correspondence. Status lives only in the
   [tracker](../../DEVELOPMENT_PLAN/README.md).
 

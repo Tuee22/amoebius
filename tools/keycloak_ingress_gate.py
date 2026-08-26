@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the complete Phase-33 Keycloak-owned ingress acceptance gate."""
+"""Run and seal the complete Phase-32 Keycloak-owned ingress acceptance gate."""
 
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_32"
 LIVE_EVIDENCE = EVIDENCE / "keycloak-ingress-live.json"
 REBIND_EVIDENCE = EVIDENCE / "rebind-regression.json"
-ENUMERATION = ROOT / "test/enumeration/phase_33_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_33_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_32_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_32_ledger.json"
 EXPECTED_DIGEST = ROOT / "test/fixture/keycloak_ingress/expected-base-digest.txt"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 UNVERIFIED = {"control-plane-owned-reconcile", "app-tenancy"}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-43 recursive-spawn and sibling-replication gate."""
+"""Run and seal the Phase-42 recursive-spawn and sibling-replication gate."""
 
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_42"
 LIVE = EVIDENCE / "multicluster-live.json"
-ENUMERATION = ROOT / "test/enumeration/phase_43_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_43_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_42_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_42_ledger.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
@@ -181,7 +181,7 @@ def evidence_domain(*, fresh: bool) -> None:
     require(live.get("deferred") == {
         "physicallyIndependentPulsarBrokerPerChild": "UNVERIFIED",
         "childLocalVaultProcessPerMode": "UNVERIFIED",
-        "providerManagedChildren": "UNVERIFIED until Phase 45",
+        "providerManagedChildren": "UNVERIFIED until Phase 44",
         "rke2Children": "UNVERIFIED",
     }, "deferred-honesty")
     require(live.get("universalLinuxCpu") == {
@@ -196,7 +196,7 @@ def no_live_residue() -> dict[str, str]:
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE, check=False, timeout=60).stdout.splitlines()
     require(not any(name in clusters for name in ("amoebius-p42-parent", "amoebius-p42-a", "amoebius-p42-b")), "kind-cluster-residue")
     require(not Path("/var/tmp/amoebius-multicluster-spawn-georepl-live").exists(), "temporary-root-residue")
-    return {"name": "external-cleanup-readback", "command": "kind and exact temporary-root inventories", "output": "no Phase-43 clusters, stacks, or temporary root", "result": "PASS"}
+    return {"name": "external-cleanup-readback", "command": "kind and exact temporary-root inventories", "output": "no Phase-42 clusters, stacks, or temporary root", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:
@@ -230,7 +230,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(compile_corpus())
         rows.append(oracle_domain())
         if args.reuse_fresh_live:
-            rows.append({"name": "multicluster-live", "command": "sealed just-produced Phase-43 live receipt", "output": "fresh final live evidence", "result": "PASS"})
+            rows.append({"name": "multicluster-live", "command": "sealed just-produced Phase-42 live receipt", "output": "fresh final live evidence", "result": "PASS"})
         else:
             rows.append(invoke("multicluster-live", (sys.executable, "tools/multicluster_spawn_georepl_live.py"), timeout=5400))
         evidence_domain(fresh=args.reuse_fresh_live)

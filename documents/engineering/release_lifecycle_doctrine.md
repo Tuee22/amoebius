@@ -16,7 +16,7 @@ nor the reconciler that applies a generation, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_72_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_ui_program_release.md, DEVELOPMENT_PLAN/phase_84_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_88_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -96,7 +96,7 @@ delegates their storage, reconciliation, evidence, and provider mechanisms as fo
 | The control-plane daemon that runs the promote/rollout half | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon) |
 | The bounded UI language, plan envelope, browser/server ABI, and compatibility witness | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 
-> **Target instance — NOT VALIDATED.** Phase 72 must bind all four delivery values through independently
+> **Target instance — NOT VALIDATED.** Phase 71 must bind all four delivery values through independently
 > reviewed Haskell oracles and the exact live boundary its contract names. Every former run/result statement
 > is permanently invalidated and omitted; Gateway-API canary shifting, Pulsar consumer-group cutover, and
 > cross-cluster/geo promotion remain `UNVERIFIED` until their owning numeric phases are human-promoted.
@@ -141,7 +141,7 @@ data AppliedGeneration = AppliedGeneration
   retaining the same release identity. The generic client/server image may remain byte-identical while a program changes,
   but that change still mints a distinct `Release`. The authoritative field set and digest coverage are owned
   by [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts).
-- **The paired-plan rule is observed live.** [Phase 73](../../DEVELOPMENT_PLAN/phase_73_ui_program_release.md)
+- **The paired-plan rule is observed live.** [Phase 72](../../DEVELOPMENT_PLAN/phase_72_ui_program_release.md)
   publishes two distinct content-addressed UI releases and observes the environment pointer history advancing
   only A-pair then B-pair. No pointer effect names a missing or mixed half, and the unchanged generic runtime
   image demonstrates that program release data does not require an OCI rebuild.
@@ -276,7 +276,7 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   move, [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact))
   yields no witness for that layer — so a `Release` short of an environment's required strength has **no**
   `advance` value to hand the CAS.
-- **A Tier-1-only in-process ledger cannot advance the gate to prod.** The front-loaded pre-cluster (Phases 9–14)
+- **A Tier-1-only in-process ledger cannot advance the gate to prod.** The front-loaded pre-cluster (Phases 9–13)
   formal-validation track emits its evidence ledger from a purely **in-process** run — Dhall typecheck +
   decoder + QuickCheck + TLA+/TLC, **no live substrate** — a **Tier-1 (design-time) artifact** that
   establishes only that the spec composes and the protocol is sound in the abstract, with the Runtime/chaos
@@ -293,8 +293,8 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   [illegal_state_catalog.md §3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) (an unverified environment promotion), owned by this doctrine, technique "a handle exists only once its evidence
   edge does."
 - **Generalizes the already-planned `Multicluster/PromotionGate.hs`.** amoebius already scopes a
-  `PromotionGate` for the multicluster spawn path; Phase 72 **generalizes** that single-purpose gate into
-  the now-built uniform per-environment promotion precondition. Cross-cluster use remains Phase 75 work.
+  `PromotionGate` for the multicluster spawn path; Phase 71 **generalizes** that single-purpose gate into
+  the now-built uniform per-environment promotion precondition. Cross-cluster use remains Phase 74 work.
 
 > **Layer.** Promote-unverified→prod is **type-foreclosed** (uninhabitable — no `advance` term). The *strength
 > mapping* itself (which layer prod requires) is a policy value the gate enforces at construction time.
@@ -303,7 +303,7 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
 
 infernix gates a servable artifact behind a `.ready` sentinel written **last** (`model_bootstrap.py`,
 `model_cache.py`) — the "no handle without its completion edge" pattern the `PromotionGate` mirrors at the
-promotion layer. This remains sibling evidence for the *idiom*. Phase 72 must independently validate
+promotion layer. This remains sibling evidence for the *idiom*. Phase 71 must independently validate
 amoebius's live wiring and is currently **NOT VALIDATED**.
 
 ---
@@ -343,7 +343,7 @@ data ProvisionedRolloutWork       -- private constructors only
   overlap—before a DDL statement. The migrate phase uses only the private `ProvisionedSchemaMigration`,
   migrates and **verifies** the copy, and only a later phase retires the old — with the
   retire step inheriting the durable-data-deletion prohibition. This is the delivery home of the schema-migration
-  half of **Phase 72** (release lifecycle); the remaining manifest-change-correctness hardening stays in
+  half of **Phase 71** (release lifecycle); the remaining manifest-change-correctness hardening stays in
   [DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md). The schema-migration engine is a
   `RolloutPhase`, and the manifest-change-correctness half hardens the typed diff of
   [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed).
@@ -385,7 +385,7 @@ data ProvisionedRolloutWork       -- private constructors only
 > so a `RolloutPhase` applies **rendered objects**, never a `helm install`. The pattern is borrowed; the Helm
 > is dropped.
 
-> **Layer / honesty — target only, NOT VALIDATED.** Phase 72 must validate the typed three-phase plan and its
+> **Layer / honesty — target only, NOT VALIDATED.** Phase 71 must validate the typed three-phase plan and its
 > live SSA/readiness wiring for base apply, PostgreSQL schema migration, and finalize. Its eventual runtime
 > observation is not a proof. Gateway-API canary weights, Pulsar subscription cutover, and cross-cluster
 > rollout remain outside that bounded target.
@@ -397,7 +397,7 @@ jitML's `src/JitML/Cluster/Helm.hs` defines exactly this shape — a three-arm `
 `helmPhasedRolloutPlan` that applies them in readiness-gated phase order — the **`RolloutPhase` pattern, demonstrated in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
 rollout in two around the Postgres schema grant (`livePreGrantSubprocessesForPort → postgresSchemaGrantIO →
 livePostGrantSubprocessesForPort`), which is **the schema-migration-as-a-phase shape, LIVE in a sibling** and
-the concrete evidence behind the Phase-72 rollout shape. By contrast, hostbootstrap's only delivery gate
+the concrete evidence behind the Phase-71 rollout shape. By contrast, hostbootstrap's only delivery gate
 is the build-time `check-code`, with no rollout-phase or promotion concept at all. All sibling evidence, not
 amoebius results.
 
@@ -428,9 +428,9 @@ elsewhere:
 completion status, and validation gates are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the environment/promotion values compose with the SSA reconciler landing in
-**Phase 59**; pure test-workflow/evidence algebra is assigned to **Phase 49**, while live test-topology
-execution and its evidence observations are assigned to **Phase 91** after the Phase-50 barrier; the DB-schema-migration
-`RolloutPhase` lands in **Phase 72**, while the remaining manifest-change-correctness hardening and the generic
+**Phase 58**; pure test-workflow/evidence algebra is assigned to **Phase 48**, while live test-topology
+execution and its evidence observations are assigned to **Phase 90** after the Phase-49 barrier; the DB-schema-migration
+`RolloutPhase` lands in **Phase 71**, while the remaining manifest-change-correctness hardening and the generic
 third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md). This doc states the target shape and links back for status.
 
 ---
@@ -453,21 +453,21 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 - [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) pins a coherent UI program and client/server ABI into each release
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — reconciler tiers (a) cloud-IaC and (b) the tag-discovery host reconciler, distinct from tier (c)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the remaining manifest-change-correctness hardening after Phase 72 homes the schema-migration rollout
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the remaining manifest-change-correctness hardening after Phase 71 homes the schema-migration rollout
 - [Documentation Standards](../documentation_standards.md)
 
-> **Honesty — target only, NOT VALIDATED.** Phase 72 must become the independently validated amoebius instance
+> **Honesty — target only, NOT VALIDATED.** Phase 71 must become the independently validated amoebius instance
 > for the immutable `Release` ledger, closed `Environment` pointer, `PromotionGate`, and
 > base→schema-migration→finalize `RolloutPlan`. No former `linux-cpu` run is current evidence. Sibling systems
 > remain historical context; Gateway-API canary shifting, Pulsar consumer cutover, and cross-cluster/geo
 > promotion remain outside the bounded target.
 
-> **Phase-84 target — NOT VALIDATED.** The immutable A→B→A state machine must gate forward and rollback
+> **Phase-83 target — NOT VALIDATED.** The immutable A→B→A state machine must gate forward and rollback
 > decisions on the corresponding projector watermark. Its future contract must cover stale plans, scoped
 > cursors, registration drain, changed-production-subject mutants, and a fresh independent observer. No live
 > Gateway API/Envoy, Keycloak, Pulsar, browser, Kubernetes, CNI, or provider observation is current.
 
-> **Phase-88 target — NOT VALIDATED.** Promotion must eventually require a finite path for every admitted
-> offline record kind. A live-browser contract may only run after the Phase-50 barrier and must independently
+> **Phase-87 target — NOT VALIDATED.** Promotion must eventually require a finite path for every admitted
+> offline record kind. A live-browser contract may only run after the Phase-49 barrier and must independently
 > observe stage, termination, atomic resume, reload, rollback, and incompatible-version refusal. Gateway,
 > Pulsar, provider, Keycloak, Kubernetes, and CNI observations are separate claims.

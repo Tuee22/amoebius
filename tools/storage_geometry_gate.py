@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-29 logical-to-physical storage geometry gate."""
+"""Run and seal the Phase-28 logical-to-physical storage geometry gate."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ MUTANTS = ROOT / "test/mutant/registry.tsv"
 RESULTS = ROOT / ".build/dsl/storage-geometry/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/storage-geometry/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/storage-geometry"
-CONTRACT = "DEVELOPMENT_PLAN/phase_29_storage_geometry_folds.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md"
 GATE_COMMAND = "python3 tools/storage_geometry_gate.py"
 EXPECTATIONS = "test/oracle/storage_geometry_surfaces.tsv"
 
@@ -103,7 +103,7 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
     if {row["family"] for row in storage} != required_families:
         raise GateFailure("storage oracle must preserve the exact five named negative families")
     if len(dhall_typecheck) != 2 or {row["entry"] for row in dhall_typecheck} != {"3.32"}:
-        raise GateFailure("Phase-29 Gate-1 oracle must cover both 3.32 barriers")
+        raise GateFailure("Phase-28 Gate-1 oracle must cover both 3.32 barriers")
     if len(mutants) != 31 or len({row["mutant"] for row in mutants}) != 31:
         raise GateFailure("mutant manifest must contain 31 unique mutants")
     run([sys.executable, str(ROOT / "tools/locus_registry_lint.py")])
@@ -120,18 +120,18 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
 
 def verify_registry_coverage(storage: list[dict[str, str]], dhall_typecheck: list[dict[str, str]]) -> None:
     registry = read_tsv(ROOT / "dhall/examples/locus_registry.tsv")
-    owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-29"}
+    owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-28"}
     evidence_entries = {
         *(row["catalog"].split(":", 1)[0] for row in storage),
         *(row["entry"] for row in dhall_typecheck),
     }
     covered = {(entry, subcase) for entry, subcase in owned if entry in evidence_entries}
     if len(owned) != 5 or covered != owned:
-        raise GateFailure(f"Phase-29 registry coverage drifted: covered={sorted(covered)}, owned={sorted(owned)}")
+        raise GateFailure(f"Phase-28 registry coverage drifted: covered={sorted(covered)}, owned={sorted(owned)}")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# Register-1 only; runtime correspondence UNVERIFIED\n", "entry\tsubcase\tlocus\tstatus\n"]
     for row in registry:
-        if row["owner_phase"] == "Phase-29":
+        if row["owner_phase"] == "Phase-28":
             lines.append(f"{row['entry']}\t{row['subcase']}\t{row['validation_locus']}\tdischarged\n")
     GENERATED_LEDGER.write_text("".join(lines), encoding="utf-8")
 
@@ -169,7 +169,7 @@ def run_green_suite(cabal: Path) -> str:
     )
     token = "storage-geometry-spec: PASS (5 named negatives, 30 variants, 30 twins, 2 positives, 2 Gate-1, 6 properties)"
     if token not in result.stdout:
-        raise GateFailure(f"Phase-29 acceptance token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-28 acceptance token is absent:\n{result.stdout}")
     if ">=30% accept/reject coverage" not in result.stdout:
         raise GateFailure("QuickCheck coverage token is absent")
     if "storage-geometry-calculus: PASS (5 kinds, 99 projected units)" not in result.stdout:
@@ -207,7 +207,7 @@ def write_results(storage: list[dict[str, str]], mutants: list[dict[str, str]]) 
         "dhall-typecheck-training-cases": "2/2-exact-red-with-green-twins",
         "quickcheck-properties": "6/6-green-checkCoverage-30-percent-both-directions",
         "mutants": f"{len(mutants)}/{len(mutants)}-red",
-        "registry-subcases": "5/5-Phase-29-owned-discharged",
+        "registry-subcases": "5/5-Phase-28-owned-discharged",
         "storage-fold-totality": "compile-exhaustive-and-sampled-no-crash",
         "acceptance-token": "spec-composition-proven-storage-geometry",
         "calculus-kinds": "5/5-artifact-budget-lift-workflow-evidence",
@@ -240,7 +240,7 @@ CHECKS = {
 
 SIDES = ("toolchain", "oracle", "suite", "mutant", "results")
 
-EXPECTED_RESULTS = {'named-negatives': '5/5-specific-tag-red', 'variant-rows': '30/30-specific-tag-red', 'legal-twins': '30/30-green', 'positive-specs': '2/2-decode-and-storage-rows-fit', 'dhall-typecheck-training-cases': '2/2-exact-red-with-green-twins', 'quickcheck-properties': '6/6-green-checkCoverage-30-percent-both-directions', 'mutants': '31/31-red', 'registry-subcases': '5/5-Phase-29-owned-discharged', 'storage-fold-totality': 'compile-exhaustive-and-sampled-no-crash', 'acceptance-token': 'spec-composition-proven-storage-geometry', 'calculus-kinds': '5/5-artifact-budget-lift-workflow-evidence', 'calculus-components': 'storage-negatives,storage-twins,positive-specs,envelope-properties,mutant-evidence', 'calculus-projection-counts': '30,30,2,6,31', 'calculus-resource-vector': '5,99,0,0', 'live-storage-mutation': 'UNVERIFIED', 'execution-accelerator-provider-root-composition': 'UNVERIFIED', 'runtime': 'UNVERIFIED'}
+EXPECTED_RESULTS = {'named-negatives': '5/5-specific-tag-red', 'variant-rows': '30/30-specific-tag-red', 'legal-twins': '30/30-green', 'positive-specs': '2/2-decode-and-storage-rows-fit', 'dhall-typecheck-training-cases': '2/2-exact-red-with-green-twins', 'quickcheck-properties': '6/6-green-checkCoverage-30-percent-both-directions', 'mutants': '31/31-red', 'registry-subcases': '5/5-Phase-28-owned-discharged', 'storage-fold-totality': 'compile-exhaustive-and-sampled-no-crash', 'acceptance-token': 'spec-composition-proven-storage-geometry', 'calculus-kinds': '5/5-artifact-budget-lift-workflow-evidence', 'calculus-components': 'storage-negatives,storage-twins,positive-specs,envelope-properties,mutant-evidence', 'calculus-projection-counts': '30,30,2,6,31', 'calculus-resource-vector': '5,99,0,0', 'live-storage-mutation': 'UNVERIFIED', 'execution-accelerator-provider-root-composition': 'UNVERIFIED', 'runtime': 'UNVERIFIED'}
 
 # Every storage-case surface is decided by the same recorded observation: the run read all
 # 30 variant rows and each one reddened at its specific tag beside a green twin. Pointing
@@ -350,7 +350,7 @@ def main() -> int:
         },
         dependencies={"battery": "cabal test storage-geometry-spec"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-29 mutants", "status": "unrun"}],
+        or [{"name": "phase-28 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

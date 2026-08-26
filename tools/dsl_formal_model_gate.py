@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 19: bounded DSL formal models and actual implementation projections."""
+"""Phase 18: bounded DSL formal models and actual implementation projections."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 EMITTED = ROOT / ".build" / "tla" / "dsl-formal-model-spec"
 RESULTS = EMITTED / "phase-results.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_19_dsl_formal_model.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md"
 GATE_COMMAND = "python3 tools/dsl_formal_model_gate.py"
 EXPECTATIONS = "test/oracle/dsl_formal_model_surfaces.tsv"
 

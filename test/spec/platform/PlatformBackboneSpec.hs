@@ -64,7 +64,7 @@ verifyRegistry provision = do
   assertEqual "registry digest map complete" 3 (Map.size (registryReplacementObjects provision))
   assertEqual "failed verification preserves source" (RegistryFilesystem "/var/lib/registry") (cutoverRegistry False provision)
   assertEqual "verified migration cuts over" (registryTargetBackend provision) (cutoverRegistry True provision)
-  assertEqual "Phase-26 peak preserved" 49152 (registryOriginalPeak provision)
+  assertEqual "Phase-25 peak preserved" 49152 (registryOriginalPeak provision)
 
 verifyPulsar :: ProvisionedPulsarBackbone -> IO ()
 verifyPulsar provision = do

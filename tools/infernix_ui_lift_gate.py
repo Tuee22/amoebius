@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run and seal the scoped Phase-51 infernix UI-lift gate."""
+"""Run and seal the scoped Phase-50 infernix UI-lift gate."""
 
 from __future__ import annotations
 
@@ -27,8 +27,8 @@ EVIDENCE_DIR = ROOT / "DEVELOPMENT_PLAN/evidence/phase_50"
 LIVE = EVIDENCE_DIR / "infernix-ui-live.json"
 INFERNIX_LIFT_RECEIPT = ROOT / "DEVELOPMENT_PLAN/evidence/phase_49/phase-receipt.json"
 MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
-ENUMERATION = ROOT / "test/enumeration/phase_51_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_51_ledger.json"
+ENUMERATION = ROOT / "test/enumeration/phase_50_surfaces.txt"
+LEDGER = ROOT / "test/golden/phase_50_ledger.json"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
 DHALL = "/home/matthewnowak/.local/bin/dhall"
@@ -112,7 +112,7 @@ def phase0_domain() -> dict[str, str]:
     patches = "\n".join((ROOT / row.split("\t")[2]).read_text(encoding="utf-8") for row in rows if "\tmutant\t" in row)
     require("src/Amoebius/Infernix/UiAdapter.hs" in patches and all(marker in patches for marker in
             ("authorizationTenant", "terminalCommandId")), "phase0-mutant-loci")
-    return {"name": "phase0-custody", "command": "read Phase-51 manifest rows", "output": "6 oracles; 2 mutants", "result": "PASS"}
+    return {"name": "phase0-custody", "command": "read Phase-50 manifest rows", "output": "6 oracles; 2 mutants", "result": "PASS"}
 
 
 def oracle_domain() -> dict[str, str]:
@@ -197,7 +197,7 @@ def external_cleanup() -> dict[str, str]:
     with phase34.port_forward("platform-system", "service/minio", phase37.MINIO_PORT, 9000):
         status, payload, _ = phase37.s3_request("GET", "")
         require(status == 200 and b"<Name>p50-" not in payload, "infernix-ui-lift-minio-residue")
-    return {"name": "external-cleanup-readback", "command": "Kubernetes/Keycloak/MinIO/Pulsar/kind inventories", "output": "no Phase-51 residue; retained kind only", "result": "PASS"}
+    return {"name": "external-cleanup-readback", "command": "Kubernetes/Keycloak/MinIO/Pulsar/kind inventories", "output": "no Phase-50 residue; retained kind only", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:
@@ -229,7 +229,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rows.append(invoke("production-dhall-ui", (DHALL, "type", "--file", "dhall/ui/infernix.dhall", "--quiet")))
         rows.append(invoke("infernix-ui-lift-contract", contract_args()))
         if args.reuse_fresh_live:
-            rows.append({"name": "infernix-ui-live", "command": "sealed just-produced Phase-51 live receipt", "output": "fresh browser/Keycloak/Pulsar/MinIO/Kubernetes evidence", "result": "PASS"})
+            rows.append({"name": "infernix-ui-live", "command": "sealed just-produced Phase-50 live receipt", "output": "fresh browser/Keycloak/Pulsar/MinIO/Kubernetes evidence", "result": "PASS"})
         else:
             rows.append(invoke("infernix-ui-live", (sys.executable, "tools/infernix_ui_lift_live.py"), timeout=2400))
         evidence_domain(fresh=args.reuse_fresh_live)

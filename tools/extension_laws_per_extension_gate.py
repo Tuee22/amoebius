@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 22: mechanical L1-L5 predicates over one extension declaration."""
+"""Phase 21: mechanical L1-L5 predicates over one extension declaration."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / ".build/dsl/extension-laws/phase-results.tsv"
 COMPILE_RESULTS = ROOT / ".build/checkers/extension-laws/compile-fail.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/extension-laws"
-CONTRACT = "DEVELOPMENT_PLAN/phase_22_extension_laws_per_extension.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md"
 GATE_COMMAND = "python3 tools/extension_laws_per_extension_gate.py"
 EXPECTATIONS = "test/oracle/extension_laws_per_extension_surfaces.tsv"
 VERDICTS = ROOT / "test/oracle/extension_laws/law_verdicts.tsv"
@@ -38,7 +38,7 @@ CHECKS = {
     "totality-scan": "the pure law fixture has no partial token or wildcard dispatch arm",
     "ambient-scan": "the pure law fixture has no known ambient observation primitive",
     "verdict-oracle-independent": "seven authored subjects decide all 35 L1-L5 verdicts",
-    "compile-harness-reused": "Phase 16 pins claim-without-fixture to its exact GHC reason",
+    "compile-harness-reused": "Phase 15 pins claim-without-fixture to its exact GHC reason",
     "results-untracked": "generated observations remain beneath .build/**",
     "toolchain-satisfies-requirements": "resolved Cabal and GHC satisfy authored ranges",
     "recorded-results-match-oracle": "all twelve exact metrics match the contract",
@@ -204,7 +204,7 @@ def suite_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str,
 
 
 def compile_fail_side(resolved: dict[str, Any], run_dir: Path) -> bool:
-    print("\ncompile-fail side — L5 reuses the Phase-16 pinned fixture harness\n")
+    print("\ncompile-fail side — L5 reuses the Phase-15 pinned fixture harness\n")
     COMPILE_RESULTS.parent.mkdir(parents=True, exist_ok=True)
     result = run(
         [

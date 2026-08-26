@@ -30,7 +30,7 @@ the family: the closure argument does not carry them across a seam. The algebra 
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_37_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_61_retained_storage.md, DEVELOPMENT_PLAN/phase_64_platform_services_2.md, documents/README.md, documents/engineering/README.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/platform_services_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, documents/README.md, documents/engineering/README.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/platform_services_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -51,7 +51,7 @@ the family: the closure argument does not carry them across a seam. The algebra 
 
 This document is a **family slice**. It owns the six transaction laws and the role split of [§2](#2-postgres-has-two-roles-and-only-one-of-them-is-amoebiuss). It does not own
 the provisioning of a Postgres instance, its backup and recovery, its capacity accounting, or the tenant model
-the scope index expresses; each is named where it is used. [Phase 37](../../DEVELOPMENT_PLAN/phase_37_transaction_vocabulary.md)
+the scope index expresses; each is named where it is used. [Phase 36](../../DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md)
 delivers the bounded pure instance: three row declarations, five scope-indexed transactions, two additive
 generation transitions, four compiler barriers, and three paired semantic mutants. That Register-1 result
 does not install SQL or exercise a database role; live catalog, policy, and executor fidelity remain

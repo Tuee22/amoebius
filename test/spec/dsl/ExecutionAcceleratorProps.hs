@@ -97,7 +97,7 @@ runExecutionAcceleratorProps = do
     , runProperty "prop_composedIndependentValidator" propComposedIndependentValidator
     ]
   let failed = [name | (name, result) <- results, not (isSuccess result)]
-  unless (null failed) (fail ("Phase-30 properties failed: " <> show failed))
+  unless (null failed) (fail ("Phase-29 properties failed: " <> show failed))
   putStrLn "execution-accelerator-properties: TESTED sampled (7) with >=30% accept/reject coverage on each decision fold"
   pure (length results)
 

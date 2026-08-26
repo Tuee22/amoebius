@@ -2,7 +2,7 @@
 
 -- | Mechanical observations and predicates for the seven compositional laws.
 --
--- A 'CompositeDeclaration' is a separate value from Phase 21's exactly-five-component
+-- A 'CompositeDeclaration' is a separate value from Phase 20's exactly-five-component
 -- 'ExtensionDeclaration'.  It retains the declarations at one request-scope index,
 -- normalizes their order, unions their L-law vocabularies, and folds their real resource
 -- vectors.  The finite gate supplies behavior and address observations; this module does
@@ -81,7 +81,7 @@ compositionLawTag law = case law of
   C7 -> "C7"
 
 -- | A normalized multiset of complete declarations at one request-scope index.  The
--- constructor remains private, preserving the Phase-21 introduction rule for every
+-- constructor remains private, preserving the Phase-20 introduction rule for every
 -- member.  Repeated declarations are retained because budget additivity is over linked
 -- inputs, not a name-keyed overwrite.
 newtype CompositeDeclaration scope = CompositeDeclaration [ExtensionDeclaration scope]

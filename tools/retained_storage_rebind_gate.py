@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seal Sprint 33.3's real cluster delete/recreate retained-byte proof."""
+"""Seal Sprint 32.3's real cluster delete/recreate retained-byte proof."""
 
 from __future__ import annotations
 
@@ -71,8 +71,8 @@ def fingerprint(value: dict[str, Any]) -> str:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
-    parser.add_argument("--artifact", type=Path, required=True, help="the verified Phase-31 OCI export")
-    parser.add_argument("--image-digest", required=True, help="the verified Phase-31 image-index digest")
+    parser.add_argument("--artifact", type=Path, required=True, help="the verified Phase-30 OCI export")
+    parser.add_argument("--image-digest", required=True, help="the verified Phase-30 image-index digest")
     parser.add_argument("--prepared-cluster", action="store_true", help="consume the clean cluster prepared by the phase gate")
     arguments = parser.parse_args(argv)
     evidence = arguments.evidence
