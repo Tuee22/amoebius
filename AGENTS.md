@@ -25,6 +25,27 @@ LLMs must not run `git add`, `git commit`, or `git push`.
 
 Staging, committing, and pushing changes are reserved solely for the human user.
 
+## Development Compiler Serialization
+
+LLMs must serialize all development work that can invoke a compiler or linker. This includes Cabal builds,
+tests, and runs; direct GHC invocations; compile-negative checks; component and mutation matrices; and every
+generated harness row that performs any of those operations.
+
+- Start at most one compiler- or linker-bearing command at a time and wait for it to finish before starting
+  another. Do not overlap compile-only work with full-link work.
+- Pass `--jobs=1` or `-j1` to every Cabal command that can build. Do not pass GHC an unbounded `-j` or a
+  parallelism value greater than one.
+- Execute compiler-bearing matrix and harness rows one at a time. Do not use `xargs -P` above one, GNU
+  `parallel`, background jobs, concurrent subprocess pools, parallel tool calls, or subagents to run compiler-
+  or linker-bearing work.
+- A generated development harness must encode serial execution as a fixed invariant and must not expose an
+  environment variable, argument, detected CPU count, or other override that can raise compiler or linker
+  concurrency.
+
+Only the human user may run compiler- or linker-bearing development work with concurrency above one. An LLM
+must not infer permission to raise concurrency from available memory, CPU count, elapsed time, prior success,
+or the absence of other observed compiler processes.
+
 ## Tracked Source Boundary
 
 There must be **no version-controlled behavioral source code that is not Haskell (`.hs`)**, except for the
