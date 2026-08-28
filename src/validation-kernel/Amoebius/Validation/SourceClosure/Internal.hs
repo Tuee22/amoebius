@@ -54,9 +54,22 @@ module Amoebius.Validation.SourceClosure.Internal
 
 import Amoebius.Validation.PbBootstrapGrammar qualified as Pb
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
+import Amoebius.Validation.SourceSnapshot.Internal
+  ( AcquiredSourceSnapshot
+  , GitObjectFormat (..)
+  , IndexEntry (..)
+  , IndexMode (..)
+  , SourceSnapshot (..)
+  , TrackedEntry (..)
+  , acquiredSourceSnapshot
+  )
+#if defined(VALIDATION_SOURCE_CLOSURE_INTERNAL_TEST_ACQUIRE)
+import Amoebius.Validation.SourceSnapshot.Internal qualified as SourceSnapshot
+#endif
 import Amoebius.Validation.Types
   ( CheckResult (..)
   , Finding (..)
+  , Observation
   , finding
   , observation
   )
@@ -81,6 +94,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as TextEncoding
 import qualified Data.Text.Encoding.Error as TextError
+import Data.Word (Word8)
 import System.Exit (ExitCode (..))
 import System.FilePath
   ( dropTrailingPathSeparator
@@ -234,28 +248,39 @@ rawSourceClosureDiagnostic
   -> CheckResult
 rawSourceClosureDiagnostic claimedIdentity tuples =
   CheckResult
-    { checkName = "source-closure-diagnostic"
+    { checkName = rawSourceClosureCheckName
     , checkObservations =
-        [ observation "source-closure.input-commitment.kind" inputCommitmentKind
-        , observation "source-closure.input-commitment.sha256" inputCommitmentDigest
-        , observation "source-closure.input.claimed-snapshot" (rawSafeClaimedIdentity claimedIdentity)
-        , observation "source-closure.input.entry-count" (rawAnalysisEntryCount analysis)
-        , observation "source-closure.input.aggregate-blob-bytes" (rawAnalysisAggregateBytes analysis)
-        , observation "source-closure.derived.snapshot" (rawAnalysisComputedSnapshot analysis)
-        , observation "source-closure.derived.classification-sha256" (rawAnalysisClassificationDigest analysis)
-        , observation "source-closure.derived.haskell-count" (classCount 0)
-        , observation "source-closure.derived.documentation-count" (classCount 1)
-        , observation "source-closure.derived.project-count" (classCount 2)
-        , observation "source-closure.derived.pb-debt-count" (classCount 3)
-        , observation "source-closure.derived.legacy-count" (classCount 4)
-        , observation "source-closure.derived.unregistered-count" (classCount 5)
-        , observation "source-closure.preflight.problem-count" (rawAnalysisProblemCount analysis)
-        , observation "source-closure.diagnostic-status" "refused"
-        ]
-    , checkFindings = boundedFindings
+        rawSourceObservationOrder
+          [ item
+          | Just item <-
+              [ rawSourceObservation 1 "source-closure.input-commitment.kind" inputCommitmentKind
+              , rawSourceObservation 2 "source-closure.input-commitment.sha256" inputCommitmentDigest
+              , rawSourceObservation 3 "source-closure.input.claimed-snapshot" (rawSafeClaimedIdentity claimedIdentity)
+              , rawSourceObservation 4 "source-closure.input.entry-count" (rawAnalysisEntryCount analysis)
+              , rawSourceObservation 5 "source-closure.input.aggregate-blob-bytes" (rawAnalysisAggregateBytes analysis)
+              , rawSourceObservation 6 "source-closure.derived.snapshot" (rawAnalysisComputedSnapshot analysis)
+              , rawSourceObservation 7 "source-closure.derived.classification-sha256" (rawAnalysisClassificationDigest analysis)
+              , rawSourceObservation 8 "source-closure.derived.haskell-count" (classCount 0)
+              , rawSourceObservation 9 "source-closure.derived.documentation-count" (classCount 1)
+              , rawSourceObservation 10 "source-closure.derived.project-count" (classCount 2)
+              , rawSourceObservation 11 "source-closure.derived.pb-debt-count" (classCount 3)
+              , rawSourceObservation 12 "source-closure.derived.legacy-count" (classCount 4)
+              , rawSourceObservation 13 "source-closure.derived.unregistered-count" (classCount 5)
+              , rawSourceObservation 14 "source-closure.preflight.problem-count" (rawAnalysisProblemCount analysis)
+              , rawSourceObservation 15 "source-closure.diagnostic-status" "refused"
+              ]
+          ]
+    , checkFindings = rawSourceFindingOrder boundedFindings
     }
  where
-  rawEntries = [RawSourceEntry path mode objectIdentity bytes | (path, mode, objectIdentity, bytes) <- tuples]
+  rawEntries =
+    [ RawSourceEntry
+        (rawTuplePath path)
+        (rawTupleMode mode)
+        (rawTupleObject objectIdentity)
+        (rawTupleBytes bytes)
+    | (path, mode, objectIdentity, bytes) <- tuples
+    ]
   analysis = analyzeRawSourceInventory claimedIdentity rawEntries
   inputCommitment = rawAnalysisInputCommitment analysis
   inputCommitmentKind = rawInputCommitmentKind inputCommitment
@@ -274,12 +299,346 @@ rawSourceClosureDiagnostic claimedIdentity tuples =
     PrefixExceeded observed
       | rawResultFindingLimitExceeded observed ->
           mandatoryRawSourceFindings inputCommitment
-            <> [ finding
+            <> [ rawMappedFinding
+                  27
                   "SOURCE-CLOSURE-RESULT-FINDING-LIMIT"
                   "<raw-source-closure>"
                   (rawLimitDetail maximumRawResultFindings observed <> rawCommitmentDetail inputCommitment)
                ]
     PrefixExceeded _ -> take maximumRawResultFindings candidateFindings
+
+rawSourceObservation :: Int -> Text -> Text -> Maybe Observation
+rawSourceObservation ordinal key value
+#if defined(VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_KIND_OBSERVATION_DROP_MUTANT)
+  | ordinal == 1 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_KIND_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 1 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_KIND_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 1 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_SHA256_OBSERVATION_DROP_MUTANT)
+  | ordinal == 2 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_SHA256_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 2 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_SHA256_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 2 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_CLAIMED_SNAPSHOT_OBSERVATION_DROP_MUTANT)
+  | ordinal == 3 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_CLAIMED_SNAPSHOT_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 3 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_CLAIMED_SNAPSHOT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 3 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_ENTRY_COUNT_OBSERVATION_DROP_MUTANT)
+  | ordinal == 4 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_ENTRY_COUNT_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 4 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_ENTRY_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 4 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_AGGREGATE_BLOB_BYTES_OBSERVATION_DROP_MUTANT)
+  | ordinal == 5 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_AGGREGATE_BLOB_BYTES_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 5 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_INPUT_AGGREGATE_BLOB_BYTES_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 5 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_SNAPSHOT_OBSERVATION_DROP_MUTANT)
+  | ordinal == 6 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_SNAPSHOT_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 6 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_SNAPSHOT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 6 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_CLASSIFICATION_SHA256_OBSERVATION_DROP_MUTANT)
+  | ordinal == 7 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_CLASSIFICATION_SHA256_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 7 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_CLASSIFICATION_SHA256_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 7 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_HASKELL_COUNT_OBSERVATION_DROP_MUTANT)
+  | ordinal == 8 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_HASKELL_COUNT_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 8 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_HASKELL_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 8 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_DOCUMENTATION_COUNT_OBSERVATION_DROP_MUTANT)
+  | ordinal == 9 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_DOCUMENTATION_COUNT_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 9 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_DOCUMENTATION_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 9 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_PROJECT_COUNT_OBSERVATION_DROP_MUTANT)
+  | ordinal == 10 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_PROJECT_COUNT_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 10 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_PROJECT_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 10 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_PB_DEBT_COUNT_OBSERVATION_DROP_MUTANT)
+  | ordinal == 11 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_PB_DEBT_COUNT_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 11 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_PB_DEBT_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 11 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_LEGACY_COUNT_OBSERVATION_DROP_MUTANT)
+  | ordinal == 12 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_LEGACY_COUNT_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 12 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_LEGACY_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 12 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_UNREGISTERED_COUNT_OBSERVATION_DROP_MUTANT)
+  | ordinal == 13 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_UNREGISTERED_COUNT_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 13 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_DERIVED_UNREGISTERED_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 13 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_PREFLIGHT_PROBLEM_COUNT_OBSERVATION_DROP_MUTANT)
+  | ordinal == 14 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_PREFLIGHT_PROBLEM_COUNT_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 14 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_PREFLIGHT_PROBLEM_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 14 = Just (observation key (value <> "-mutant"))
+#elif defined(VALIDATION_SOURCE_CLOSURE_DIAGNOSTIC_STATUS_OBSERVATION_DROP_MUTANT)
+  | ordinal == 15 = Nothing
+#elif defined(VALIDATION_SOURCE_CLOSURE_DIAGNOSTIC_STATUS_OBSERVATION_KEY_MAPPING_MUTANT)
+  | ordinal == 15 = Just (observation (key <> ".mutant") value)
+#elif defined(VALIDATION_SOURCE_CLOSURE_DIAGNOSTIC_STATUS_OBSERVATION_VALUE_MAPPING_MUTANT)
+  | ordinal == 15 = Just (observation key (value <> "-mutant"))
+#endif
+  | otherwise = ordinal `seq` Just (observation key value)
+
+
+rawMappedFinding :: Int -> Text -> FilePath -> Text -> Finding
+rawMappedFinding locus code subject detail =
+  finding
+    (rawMappedFindingCode locus code)
+    (rawMappedFindingSubject locus subject)
+    (rawMappedFindingDetail locus detail)
+
+rawMappedFindingCode :: Int -> Text -> Text
+rawMappedFindingCode locus value
+#if defined(VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_BYTE_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 1 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 2 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_BYTE_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 3 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_DEPTH_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 4 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_SEGMENT_BYTE_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 5 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MODE_BYTE_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 6 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_BYTE_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 7 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_BLOB_BYTE_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 8 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_AGGREGATE_BLOB_BYTE_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 9 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_SEMANTIC_LINE_BYTE_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 10 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_GRAMMAR_CODE_MAPPING_MUTANT)
+  | locus == 11 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_MISMATCH_CODE_MAPPING_MUTANT)
+  | locus == 12 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_INVENTORY_EMPTY_CODE_MAPPING_MUTANT)
+  | locus == 13 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_GRAMMAR_CODE_MAPPING_MUTANT)
+  | locus == 14 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MODE_GRAMMAR_CODE_MAPPING_MUTANT)
+  | locus == 15 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_GRAMMAR_CODE_MAPPING_MUTANT)
+  | locus == 16 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_MISMATCH_CODE_MAPPING_MUTANT)
+  | locus == 17 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_FORMAT_MIXED_CODE_MAPPING_MUTANT)
+  | locus == 18 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_DUPLICATE_PATH_CODE_MAPPING_MUTANT)
+  | locus == 19 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_ORDER_CODE_MAPPING_MUTANT)
+  | locus == 20 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_CASE_COLLISION_CODE_MAPPING_MUTANT)
+  | locus == 21 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_PREFIX_CONFLICT_CODE_MAPPING_MUTANT)
+  | locus == 22 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PROBLEM_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 23 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_CODE_MAPPING_MUTANT)
+  | locus == 24 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_CODE_MAPPING_MUTANT)
+  | locus == 25 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_CODE_MAPPING_MUTANT)
+  | locus == 26 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_RESULT_FINDING_LIMIT_CODE_MAPPING_MUTANT)
+  | locus == 27 = value <> "-MUTANT"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_UNREGISTERED_CODE_MAPPING_MUTANT)
+  | locus == 28 = value <> "-MUTANT"
+#endif
+  | otherwise = locus `seq` value
+
+rawMappedFindingSubject :: Int -> FilePath -> FilePath
+rawMappedFindingSubject locus value
+#if defined(VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 1 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 2 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 3 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_DEPTH_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 4 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_SEGMENT_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 5 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MODE_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 6 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 7 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_BLOB_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 8 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_AGGREGATE_BLOB_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 9 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_SEMANTIC_LINE_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 10 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_GRAMMAR_SUBJECT_MAPPING_MUTANT)
+  | locus == 11 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_MISMATCH_SUBJECT_MAPPING_MUTANT)
+  | locus == 12 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_INVENTORY_EMPTY_SUBJECT_MAPPING_MUTANT)
+  | locus == 13 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_GRAMMAR_SUBJECT_MAPPING_MUTANT)
+  | locus == 14 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MODE_GRAMMAR_SUBJECT_MAPPING_MUTANT)
+  | locus == 15 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_GRAMMAR_SUBJECT_MAPPING_MUTANT)
+  | locus == 16 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_MISMATCH_SUBJECT_MAPPING_MUTANT)
+  | locus == 17 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_FORMAT_MIXED_SUBJECT_MAPPING_MUTANT)
+  | locus == 18 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_DUPLICATE_PATH_SUBJECT_MAPPING_MUTANT)
+  | locus == 19 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_ORDER_SUBJECT_MAPPING_MUTANT)
+  | locus == 20 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_CASE_COLLISION_SUBJECT_MAPPING_MUTANT)
+  | locus == 21 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_PREFIX_CONFLICT_SUBJECT_MAPPING_MUTANT)
+  | locus == 22 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PROBLEM_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 23 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_SUBJECT_MAPPING_MUTANT)
+  | locus == 24 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_SUBJECT_MAPPING_MUTANT)
+  | locus == 25 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_SUBJECT_MAPPING_MUTANT)
+  | locus == 26 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_RESULT_FINDING_LIMIT_SUBJECT_MAPPING_MUTANT)
+  | locus == 27 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_UNREGISTERED_SUBJECT_MAPPING_MUTANT)
+  | locus == 28 = value <> "-mutant"
+#endif
+  | otherwise = locus `seq` value
+
+rawMappedFindingDetail :: Int -> Text -> Text
+rawMappedFindingDetail locus value
+#if defined(VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_BYTE_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 1 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 2 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_BYTE_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 3 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_DEPTH_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 4 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_SEGMENT_BYTE_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 5 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MODE_BYTE_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 6 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_BYTE_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 7 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_BLOB_BYTE_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 8 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_AGGREGATE_BLOB_BYTE_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 9 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_SEMANTIC_LINE_BYTE_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 10 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_GRAMMAR_DETAIL_MAPPING_MUTANT)
+  | locus == 11 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_MISMATCH_DETAIL_MAPPING_MUTANT)
+  | locus == 12 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_INVENTORY_EMPTY_DETAIL_MAPPING_MUTANT)
+  | locus == 13 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PATH_GRAMMAR_DETAIL_MAPPING_MUTANT)
+  | locus == 14 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MODE_GRAMMAR_DETAIL_MAPPING_MUTANT)
+  | locus == 15 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_GRAMMAR_DETAIL_MAPPING_MUTANT)
+  | locus == 16 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_MISMATCH_DETAIL_MAPPING_MUTANT)
+  | locus == 17 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_FORMAT_MIXED_DETAIL_MAPPING_MUTANT)
+  | locus == 18 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_DUPLICATE_PATH_DETAIL_MAPPING_MUTANT)
+  | locus == 19 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_ORDER_DETAIL_MAPPING_MUTANT)
+  | locus == 20 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_CASE_COLLISION_DETAIL_MAPPING_MUTANT)
+  | locus == 21 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_PREFIX_CONFLICT_DETAIL_MAPPING_MUTANT)
+  | locus == 22 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_PROBLEM_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 23 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_DETAIL_MAPPING_MUTANT)
+  | locus == 24 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_DETAIL_MAPPING_MUTANT)
+  | locus == 25 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_DETAIL_MAPPING_MUTANT)
+  | locus == 26 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_RESULT_FINDING_LIMIT_DETAIL_MAPPING_MUTANT)
+  | locus == 27 = value <> "; mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_UNREGISTERED_DETAIL_MAPPING_MUTANT)
+  | locus == 28 = value <> "; mutant"
+#endif
+  | otherwise = locus `seq` value
+
+rawSourceClosureCheckName :: Text
+#if defined(VALIDATION_SOURCE_CLOSURE_RESULT_CHECK_NAME_MUTANT)
+rawSourceClosureCheckName = "source-closure-diagnostic-mutant"
+#else
+rawSourceClosureCheckName = "source-closure-diagnostic"
+#endif
+
+rawSourceObservationOrder :: [Observation] -> [Observation]
+#if defined(VALIDATION_SOURCE_CLOSURE_RESULT_OBSERVATION_ORDER_MUTANT)
+rawSourceObservationOrder = reverse
+#else
+rawSourceObservationOrder = id
+#endif
+
+rawSourceFindingOrder :: [Finding] -> [Finding]
+#if defined(VALIDATION_SOURCE_CLOSURE_RESULT_FINDING_ORDER_MUTANT)
+rawSourceFindingOrder = reverse
+#else
+rawSourceFindingOrder = id
+#endif
+
+rawTuplePath :: FilePath -> FilePath
+#if defined(VALIDATION_SOURCE_CLOSURE_TUPLE_PATH_ROUTE_MUTANT)
+rawTuplePath _ = "src/Mutant.hs"
+#else
+rawTuplePath = id
+#endif
+
+rawTupleMode, rawTupleObject :: Text -> Text
+#if defined(VALIDATION_SOURCE_CLOSURE_TUPLE_MODE_ROUTE_MUTANT)
+rawTupleMode _ = "100755"
+#else
+rawTupleMode = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_TUPLE_OBJECT_ROUTE_MUTANT)
+rawTupleObject = Text.map (const '0')
+#else
+rawTupleObject = id
+#endif
+
+rawTupleBytes :: ByteString -> ByteString
+#if defined(VALIDATION_SOURCE_CLOSURE_TUPLE_BYTES_ROUTE_MUTANT)
+rawTupleBytes = ByteString.drop 1
+#else
+rawTupleBytes = id
+#endif
 
 mandatoryRawSourceFindings :: RawInputCommitment -> [Finding]
 mandatoryRawSourceFindings inputCommitment =
@@ -289,7 +648,8 @@ mandatoryRawSourceFindings inputCommitment =
 #if defined(VALIDATION_SOURCE_CLOSURE_DIAGNOSTIC_BYPASS_MUTANT)
     []
 #else
-    [ finding
+    [ rawMappedFinding
+        24
         "SOURCE-CLOSURE-DIAGNOSTIC-ONLY"
         "<raw-source-closure>"
         ("caller-supplied source inventory is diagnostic input and cannot mint source-closure evidence" <> rawCommitmentDetail inputCommitment)
@@ -299,7 +659,8 @@ mandatoryRawSourceFindings inputCommitment =
 #if defined(VALIDATION_SOURCE_CLOSURE_CUSTODY_BYPASS_MUTANT)
     []
 #else
-    [ finding
+    [ rawMappedFinding
+        25
         "SOURCE-CLOSURE-AUTHENTICATED-CUSTODY-UNAVAILABLE"
         "<raw-source-closure>"
         ("no authenticated network-independent source-custody authority is attached" <> rawCommitmentDetail inputCommitment)
@@ -309,7 +670,8 @@ mandatoryRawSourceFindings inputCommitment =
 #if defined(VALIDATION_SOURCE_CLOSURE_DISCOVERY_BYPASS_MUTANT)
     []
 #else
-    [ finding
+    [ rawMappedFinding
+        26
         "SOURCE-CLOSURE-ATOMIC-COMPLETE-DISCOVERY-UNAVAILABLE"
         "<raw-source-closure>"
         ("caller tuples cannot prove atomic tracked, ignored, untracked, special-file, and replacement-race discovery" <> rawCommitmentDetail inputCommitment)
@@ -342,21 +704,83 @@ analyzeRawSourceEntries claimedIdentity entries =
     PrefixExceeded _ -> analyzeRawSourceEntries claimedIdentity (take maximumRawEntries entries)
     PrefixWithin boundedEntries -> analyzeBoundedRawSourceEntries claimedIdentity boundedEntries
 
+rawResourceStage :: [RawSourceProblem] -> [RawSourceProblem]
+#if defined(VALIDATION_SOURCE_CLOSURE_RESOURCE_STAGE_DROP_MUTANT)
+rawResourceStage _ = []
+#elif defined(VALIDATION_SOURCE_CLOSURE_RESOURCE_PROBLEM_ORDER_MUTANT)
+rawResourceStage = reverse
+#else
+rawResourceStage = id
+#endif
+
+rawAggregateStage, rawInventoryStage, rawFormatStage, rawIdentityStage :: [RawSourceProblem] -> [RawSourceProblem]
+#if defined(VALIDATION_SOURCE_CLOSURE_AGGREGATE_STAGE_DROP_MUTANT)
+rawAggregateStage _ = []
+#else
+rawAggregateStage = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_INVENTORY_STAGE_DROP_MUTANT)
+rawInventoryStage _ = []
+#else
+rawInventoryStage = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_FORMAT_STAGE_DROP_MUTANT)
+rawFormatStage _ = []
+#else
+rawFormatStage = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_IDENTITY_STAGE_DROP_MUTANT)
+rawIdentityStage _ = []
+#else
+rawIdentityStage = id
+#endif
+
+rawGrammarProblemOrder, rawEntryGrammarProblemOrder, rawAllProblemOrder :: [RawSourceProblem] -> [RawSourceProblem]
+#if defined(VALIDATION_SOURCE_CLOSURE_GRAMMAR_STAGE_DROP_MUTANT)
+rawGrammarProblemOrder _ = []
+#elif defined(VALIDATION_SOURCE_CLOSURE_GRAMMAR_PROBLEM_ORDER_MUTANT)
+rawGrammarProblemOrder = reverse
+#else
+rawGrammarProblemOrder = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_ENTRY_GRAMMAR_PROBLEM_ORDER_MUTANT)
+rawEntryGrammarProblemOrder = reverse
+#else
+rawEntryGrammarProblemOrder = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_ALL_PROBLEM_ORDER_MUTANT)
+rawAllProblemOrder = reverse
+#else
+rawAllProblemOrder = id
+#endif
+
+rawTrackedStage :: Maybe [TrackedEntry] -> Maybe [TrackedEntry]
+#if defined(VALIDATION_SOURCE_CLOSURE_TRACKED_STAGE_DROP_MUTANT)
+rawTrackedStage _ = Nothing
+#else
+rawTrackedStage = id
+#endif
+
 analyzeBoundedRawSourceEntries :: Text -> [RawSourceEntry] -> RawSourceAnalysis
 analyzeBoundedRawSourceEntries claimedIdentity entries =
   let entryCountText = Text.pack (show (length entries))
-      resourceProblems = concat (zipWith rawEntryResourceProblems [1 ..] entries)
+      resourceProblems = rawResourceStage (concat (zipWith rawEntryResourceProblems [1 ..] entries))
       aggregateResult = boundedRawAggregateBytes entries
-      aggregateProblems = case aggregateResult of
-        Left observed -> [RawAggregateBlobByteLimitExceeded maximumRawAggregateBlobBytes observed]
-        Right _ -> []
+      aggregateProblems =
+        rawAggregateStage
+          (case aggregateResult of
+            Left observed -> [RawAggregateBlobByteLimitExceeded maximumRawAggregateBlobBytes observed]
+            Right _ -> []
+          )
       grammarProblems =
         if null resourceProblems && null aggregateProblems
-          then rawIdentityGrammarProblems claimedIdentity <> concat (zipWith rawEntryGrammarProblems [1 ..] entries)
+          then
+            rawGrammarProblemOrder
+              (rawIdentityGrammarProblems claimedIdentity <> concat (zipWith rawEntryGrammarProblems [1 ..] entries))
           else []
       inventoryProblems =
         if null resourceProblems && null aggregateProblems && null grammarProblems
-          then rawInventoryProblems entries
+          then rawInventoryStage (rawInventoryProblems entries)
           else []
       inputCommitment =
         if null resourceProblems
@@ -376,27 +800,30 @@ analyzeBoundedRawSourceEntries claimedIdentity entries =
           then rawObjectFormat entries
           else Left []
       formatProblems = case objectFormatResult of
-        Left problems -> problems
+        Left problems -> rawFormatStage problems
         Right _ -> []
       trackedResult =
         if null formatProblems
-          then traverse rawTrackedEntry entries
+          then rawTrackedStage (traverse rawTrackedEntry entries)
           else Nothing
       computedSnapshot = case (objectFormatResult, trackedResult) of
         (Right objectFormat, Just trackedEntries) -> computeSourceSnapshotIdentity objectFormat trackedEntries
         _ -> "unavailable"
       identityProblems =
-        [ RawSnapshotIdentityMismatch computedSnapshot claimedIdentity
-        | computedSnapshot /= "unavailable"
-        , rawSnapshotIdentityMismatch claimedIdentity computedSnapshot
-        ]
+        rawIdentityStage
+          [ RawSnapshotIdentityMismatch computedSnapshot claimedIdentity
+          | computedSnapshot /= "unavailable"
+          , rawSnapshotIdentityMismatch claimedIdentity computedSnapshot
+          ]
       allProblems =
-        resourceProblems
-          <> aggregateProblems
-          <> grammarProblems
-          <> inventoryProblems
-          <> formatProblems
-          <> identityProblems
+        rawAllProblemOrder
+          ( resourceProblems
+              <> aggregateProblems
+              <> grammarProblems
+              <> inventoryProblems
+              <> formatProblems
+              <> identityProblems
+          )
       (retainedProblems, problemCountText) = boundedRawProblems allProblems
       aggregateText = either (const "unavailable") (Text.pack . show) aggregateResult
    in case (retainedProblems, objectFormatResult, trackedResult) of
@@ -514,10 +941,12 @@ rawIdentityGrammarProblems value =
 
 rawEntryGrammarProblems :: Int -> RawSourceEntry -> [RawSourceProblem]
 rawEntryGrammarProblems ordinal entry =
-  rawPortablePathProblems ordinal path
-    <> [RawModeMalformed ordinal mode | not (rawModeValid mode)]
-    <> objectShapeProblems
-    <> objectContentProblems
+  rawEntryGrammarProblemOrder
+    ( rawPortablePathProblems ordinal path
+        <> [RawModeMalformed ordinal mode | not (rawModeValid mode)]
+        <> objectShapeProblems
+        <> objectContentProblems
+    )
  where
   path = rawEntryPath entry
   mode = rawEntryMode entry
@@ -562,8 +991,16 @@ rawInventoryProblems entries =
 rawObjectFormat :: [RawSourceEntry] -> Either [RawSourceProblem] GitObjectFormat
 rawObjectFormat entries =
   case Set.toAscList (Set.fromList (map (Text.length . rawEntryObjectIdentity) entries)) of
+#if defined(VALIDATION_SOURCE_CLOSURE_OBJECT_FORMAT_SHA1_ROUTE_MUTANT)
+    [40] -> Right GitObjectSha256
+#else
     [40] -> Right GitObjectSha1
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_OBJECT_FORMAT_SHA256_ROUTE_MUTANT)
+    [64] -> Right GitObjectSha1
+#else
     [64] -> Right GitObjectSha256
+#endif
     widths
       | rawMixedObjectIdentityFormatsRejected -> Left [RawMixedObjectIdentityFormats widths]
       | otherwise -> Right GitObjectSha1
@@ -575,25 +1012,59 @@ rawTrackedEntry entry = do
     TrackedEntry
       { trackedIndex =
           IndexEntry
-            { indexPath = rawEntryPath entry
+            { indexPath = rawTrackedPath (rawEntryPath entry)
             , indexMode = mode
-            , indexObjectId = rawEntryObjectIdentity entry
+            , indexObjectId = rawTrackedObject (rawEntryObjectIdentity entry)
             }
-      , trackedBytes = rawEntryBytes entry
+      , trackedBytes = rawTrackedBytes (rawEntryBytes entry)
       }
 
 rawIndexMode :: Text -> Maybe IndexMode
+#if defined(VALIDATION_SOURCE_CLOSURE_INDEX_MODE_REGULAR_ROUTE_MUTANT)
+rawIndexMode "100644" = Just ExecutableFile
+#else
 rawIndexMode "100644" = Just RegularFile
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_INDEX_MODE_EXECUTABLE_ROUTE_MUTANT)
+rawIndexMode "100755" = Just RegularFile
+#else
 rawIndexMode "100755" = Just ExecutableFile
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_INDEX_MODE_SYMLINK_ROUTE_MUTANT)
+rawIndexMode "120000" = Just RegularFile
+#else
 rawIndexMode "120000" = Just SymbolicLink
+#endif
 rawIndexMode _ = Nothing
+
+rawTrackedPath :: FilePath -> FilePath
+#if defined(VALIDATION_SOURCE_CLOSURE_TRACKED_PATH_ROUTE_MUTANT)
+rawTrackedPath _ = "src/Mutant.hs"
+#else
+rawTrackedPath = id
+#endif
+
+rawTrackedObject :: Text -> Text
+#if defined(VALIDATION_SOURCE_CLOSURE_TRACKED_OBJECT_ROUTE_MUTANT)
+rawTrackedObject = Text.map (const '0')
+#else
+rawTrackedObject = id
+#endif
+
+rawTrackedBytes :: ByteString -> ByteString
+#if defined(VALIDATION_SOURCE_CLOSURE_TRACKED_BYTES_ROUTE_MUTANT)
+rawTrackedBytes = ByteString.drop 1
+#else
+rawTrackedBytes = id
+#endif
 
 rawClosureFindings :: RawInputCommitment -> SourceClosure -> [Finding]
 rawClosureFindings inputCommitment closure =
   localPathFindings <> boundPbFindings
  where
   localPathFindings =
-    [ finding
+    [ rawMappedFinding
+        28
         "SRC-UNREGISTERED"
         (indexPath (trackedIndex (classifiedEntry item)))
         (Text.intercalate "; " (classificationReasons item) <> rawCommitmentDetail inputCommitment)
@@ -602,11 +1073,13 @@ rawClosureFindings inputCommitment closure =
     ]
   boundPbFindings =
     [ problem
-        { findingDetail = findingDetail problem <> rawCommitmentDetail inputCommitment
+        { findingDetail =
+            findingDetail problem
+              <> rawPbFindingCommitment (rawCommitmentDetail inputCommitment)
         }
-    | (ordinal, problem) <- zip [1 ..] (checkFindings (closurePbBootstrapDiagnostic closure))
+    | (ordinal, problem) <- zip [1 ..] (rawPbFindingOrder (checkFindings (closurePbBootstrapDiagnostic closure)))
     , rawPbDiagnosticFindingRetained problem
-    , rawPbFirstRuntimeFindingRetained ordinal problem
+    , rawPbRuntimeFindingRetained ordinal problem
     ]
 
 rawPbDiagnosticFindingRetained :: Finding -> Bool
@@ -616,57 +1089,291 @@ rawPbDiagnosticFindingRetained problem = findingCode problem /= "PB-GRAMMAR-DIAG
 rawPbDiagnosticFindingRetained _ = True
 #endif
 
-rawPbFirstRuntimeFindingRetained :: Int -> Finding -> Bool
+rawPbRuntimeFindingRetained :: Int -> Finding -> Bool
 #if defined(VALIDATION_SOURCE_CLOSURE_PB_FIRST_RUNTIME_RETENTION_DROP_MUTANT)
-rawPbFirstRuntimeFindingRetained ordinal problem =
+rawPbRuntimeFindingRetained ordinal problem =
   ordinal /= 2 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_02_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 3 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_03_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 4 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_04_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 5 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_05_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 6 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_06_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 7 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_07_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 8 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_08_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 9 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_09_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 10 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_10_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 11 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_11_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 12 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_12_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 13 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_13_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 14 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_14_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 15 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_15_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 16 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_16_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 17 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_17_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 18 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_18_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 19 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_19_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 20 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_20_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 21 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_21_RETENTION_DROP_MUTANT)
+rawPbRuntimeFindingRetained ordinal problem =
+  ordinal /= 22 || findingCode problem /= "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
 #else
-rawPbFirstRuntimeFindingRetained _ _ = True
+rawPbRuntimeFindingRetained _ _ = True
+#endif
+
+rawPbFindingOrder :: [Finding] -> [Finding]
+#if defined(VALIDATION_SOURCE_CLOSURE_PB_FINDING_ORDER_MUTANT)
+rawPbFindingOrder = reverse
+#else
+rawPbFindingOrder = id
+#endif
+
+rawPbFindingCommitment :: Text -> Text
+#if defined(VALIDATION_SOURCE_CLOSURE_PB_FINDING_COMMITMENT_DROP_MUTANT)
+rawPbFindingCommitment _ = ""
+#else
+rawPbFindingCommitment = id
 #endif
 
 rawClassCounts :: SourceClosure -> [Text]
-rawClassCounts closure = map (Text.pack . show) [haskellCount, documentCount, projectCount, pbCount, legacyCount, unregisteredCount]
+rawClassCounts closure =
+  rawClassCountOrder (map (Text.pack . show) [haskellCount, documentCount, projectCount, pbCount, legacyCount, unregisteredCount])
  where
   classes = map classifiedAs (closurePaths closure)
   count predicate = length (filter predicate classes)
-  haskellCount = count (== HaskellSource)
-  documentCount = count (== DocumentationInput)
-  projectCount = count (== ProjectDeclaration)
-  pbCount = count (== RegisteredLegacy SourcePb)
-  legacyCount = count isRegistered
-  unregisteredCount = count (== UnregisteredBehavioralSource)
+  haskellCount = count rawHaskellClass
+  documentCount = count rawDocumentationClass
+  projectCount = count rawProjectClass
+  pbCount = count rawPbClass
+  legacyCount = count rawLegacyClass
+  unregisteredCount = count rawUnregisteredClass
+
+rawHaskellClass, rawDocumentationClass, rawProjectClass, rawPbClass, rawLegacyClass, rawUnregisteredClass :: SourceClass -> Bool
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_HASKELL_PREDICATE_MUTANT)
+rawHaskellClass _ = False
+#else
+rawHaskellClass = (== HaskellSource)
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_DOCUMENTATION_PREDICATE_MUTANT)
+rawDocumentationClass _ = False
+#else
+rawDocumentationClass = (== DocumentationInput)
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_PROJECT_PREDICATE_MUTANT)
+rawProjectClass _ = False
+#else
+rawProjectClass = (== ProjectDeclaration)
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_PB_PREDICATE_MUTANT)
+rawPbClass _ = False
+#else
+rawPbClass = (== RegisteredLegacy SourcePb)
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_LEGACY_PREDICATE_MUTANT)
+rawLegacyClass _ = False
+#else
+rawLegacyClass = isRegistered
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_UNREGISTERED_PREDICATE_MUTANT)
+rawUnregisteredClass _ = False
+#else
+rawUnregisteredClass = (== UnregisteredBehavioralSource)
+#endif
+
+rawClassCountOrder :: [Text] -> [Text]
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_ORDER_MUTANT)
+rawClassCountOrder = reverse
+#else
+rawClassCountOrder = id
+#endif
 
 rawClassificationDigest :: SourceClosure -> Text
 rawClassificationDigest closure = hex (SHA256.finalize finalContext)
  where
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_DOMAIN_DROP_MUTANT)
+  initialContext = SHA256.init
+#else
   initialContext = SHA256.update SHA256.init "amoebius-source-closure-classification-v1\0"
-  finalContext = foldl' updateClassifiedPath initialContext (closurePaths closure)
+#endif
+  finalContext = foldl' updateClassifiedPath initialContext (rawClassificationItems (closurePaths closure))
   updateClassifiedPath context item =
     foldl'
       updateLengthPrefixedText
       context
-      [ Text.pack (indexPath indexed)
-      , renderIndexMode (indexMode indexed)
-      , indexObjectId indexed
-      , renderSourceClass (classifiedAs item)
-      , Text.intercalate "," (map renderSourceFacet (classificationFacets item))
-      , Text.intercalate "; " (classificationReasons item)
+      [ rawClassificationPath (Text.pack (indexPath indexed))
+      , rawClassificationMode (renderIndexMode (indexMode indexed))
+      , rawClassificationObject (indexObjectId indexed)
+      , rawClassificationClass (renderSourceClass (classifiedAs item))
+      , rawClassificationFacets (Text.intercalate "," (map renderSourceFacet (classificationFacets item)))
+      , rawClassificationReasons (Text.intercalate "; " (classificationReasons item))
       ]
    where
     indexed = trackedIndex (classifiedEntry item)
 
+rawClassificationItems :: [ClassifiedPath] -> [ClassifiedPath]
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_ITEM_ORDER_MUTANT)
+rawClassificationItems = reverse
+#else
+rawClassificationItems = id
+#endif
+
+rawClassificationPath, rawClassificationMode, rawClassificationObject :: Text -> Text
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_PATH_DROP_MUTANT)
+rawClassificationPath _ = ""
+#else
+rawClassificationPath = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_MODE_DROP_MUTANT)
+rawClassificationMode _ = ""
+#else
+rawClassificationMode = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_OBJECT_DROP_MUTANT)
+rawClassificationObject _ = ""
+#else
+rawClassificationObject = id
+#endif
+
+rawClassificationClass, rawClassificationFacets, rawClassificationReasons :: Text -> Text
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_CLASS_DROP_MUTANT)
+rawClassificationClass _ = ""
+#else
+rawClassificationClass = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_FACETS_DROP_MUTANT)
+rawClassificationFacets _ = ""
+#else
+rawClassificationFacets = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_REASONS_DROP_MUTANT)
+rawClassificationReasons _ = ""
+#else
+rawClassificationReasons = id
+#endif
+
+rawInputEntryOrder :: [RawSourceEntry] -> [RawSourceEntry]
+#if defined(VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_ENTRY_ORDER_MUTANT)
+rawInputEntryOrder = reverse
+#else
+rawInputEntryOrder = id
+#endif
+
+rawInputClaimedContribution :: SHA256.Ctx -> Text -> SHA256.Ctx
+#if defined(VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_CLAIMED_DROP_MUTANT)
+rawInputClaimedContribution context _ = context
+#else
+rawInputClaimedContribution = updateLengthPrefixedText
+#endif
+
+rawInputPathContribution, rawInputModeContribution, rawInputObjectContribution :: SHA256.Ctx -> Text -> SHA256.Ctx
+#if defined(VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_PATH_DROP_MUTANT)
+rawInputPathContribution context _ = context
+#else
+rawInputPathContribution = updateLengthPrefixedText
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_MODE_DROP_MUTANT)
+rawInputModeContribution context _ = context
+#else
+rawInputModeContribution = updateLengthPrefixedText
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_OBJECT_DROP_MUTANT)
+rawInputObjectContribution context _ = context
+#else
+rawInputObjectContribution = updateLengthPrefixedText
+#endif
+
+rawInputBytesContribution :: SHA256.Ctx -> ByteString -> SHA256.Ctx
+#if defined(VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_BYTES_DROP_MUTANT)
+rawInputBytesContribution context _ = context
+#else
+rawInputBytesContribution = updateLengthPrefixedBytes
+#endif
+
+rawBoundedClaimedContribution, rawBoundedEntryStateContribution :: SHA256.Ctx -> Text -> SHA256.Ctx
+#if defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_DIGEST_CLAIMED_DROP_MUTANT)
+rawBoundedClaimedContribution context _ = context
+#else
+rawBoundedClaimedContribution = updateLengthPrefixedText
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_DIGEST_ENTRY_STATE_DROP_MUTANT)
+rawBoundedEntryStateContribution context _ = context
+#else
+rawBoundedEntryStateContribution = updateLengthPrefixedText
+#endif
+
+rawLengthPrefixContribution :: SHA256.Ctx -> ByteString -> SHA256.Ctx
+#if defined(VALIDATION_SOURCE_CLOSURE_LENGTH_PREFIX_LENGTH_DROP_MUTANT)
+rawLengthPrefixContribution context _ = context
+#else
+rawLengthPrefixContribution = SHA256.update
+#endif
+
+rawLengthSeparatorContribution :: SHA256.Ctx -> SHA256.Ctx
+#if defined(VALIDATION_SOURCE_CLOSURE_LENGTH_PREFIX_SEPARATOR_DROP_MUTANT)
+rawLengthSeparatorContribution = id
+#else
+rawLengthSeparatorContribution context = SHA256.update context ":"
+#endif
+
+rawLengthPrefixedValue :: SHA256.Ctx -> ByteString -> SHA256.Ctx
+#if defined(VALIDATION_SOURCE_CLOSURE_LENGTH_PREFIX_VALUE_DROP_MUTANT)
+rawLengthPrefixedValue context _ = context
+#else
+rawLengthPrefixedValue = SHA256.update
+#endif
+
 rawSourceInputDigest :: Text -> [RawSourceEntry] -> Text
 rawSourceInputDigest claimedIdentity entries = hex (SHA256.finalize finalContext)
  where
+#if defined(VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_DOMAIN_DROP_MUTANT)
+  initialContext = SHA256.init
+#else
   initialContext = SHA256.update SHA256.init "amoebius-source-closure-input-v1\0"
-  claimedContext = updateLengthPrefixedText initialContext claimedIdentity
-  finalContext = foldl' updateRawEntry claimedContext entries
+#endif
+  claimedContext = rawInputClaimedContribution initialContext claimedIdentity
+  finalContext = foldl' updateRawEntry claimedContext (rawInputEntryOrder entries)
   updateRawEntry context entry =
-    updateLengthPrefixedBytes blobContext (rawEntryBytes entry)
+    rawInputBytesContribution blobContext (rawEntryBytes entry)
    where
-    pathContext = updateLengthPrefixedText context (Text.pack (rawEntryPath entry))
-    modeContext = updateLengthPrefixedText pathContext (rawEntryMode entry)
-    blobContext = updateLengthPrefixedText modeContext (rawEntryObjectIdentity entry)
+    pathContext = rawInputPathContribution context (Text.pack (rawEntryPath entry))
+    modeContext = rawInputModeContribution pathContext (rawEntryMode entry)
+    blobContext = rawInputObjectContribution modeContext (rawEntryObjectIdentity entry)
 
 -- | Commit only the bounded state which was safe to observe before a resource
 -- refusal.  This is intentionally not the complete-input domain: an
@@ -681,27 +1388,79 @@ rawBoundedRefusalCommitment claimedIdentity entries problems =
     "bounded-preflight-refusal"
     (hex (SHA256.finalize problemContext))
  where
+#if defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_DIGEST_DOMAIN_DROP_MUTANT)
+  initialContext = SHA256.init
+#else
   initialContext = SHA256.update SHA256.init "amoebius-source-closure-bounded-refusal-v1\0"
+#endif
   claimedPrefix = Text.take (maximumRawSnapshotIdentityBytes + 1) claimedIdentity
-  claimedContext = updateLengthPrefixedText initialContext claimedPrefix
+  claimedContext = rawBoundedClaimedContribution initialContext claimedPrefix
   entryState = case boundedPrefix maximumRawEntries entries of
     PrefixWithin values -> "within:" <> Text.pack (show (length values))
     PrefixExceeded observed -> "exceeded-at-least:" <> Text.pack (show observed)
-  entryContext = updateLengthPrefixedText claimedContext entryState
-  problemContext = foldl' updateLengthPrefixedText entryContext (map rawProblemCommitmentTag problems)
+  entryContext = rawBoundedEntryStateContribution claimedContext entryState
+  problemContext =
+    foldl'
+      updateLengthPrefixedText
+      entryContext
+      (map rawProblemCommitmentTag (rawBoundedProblemOrder problems))
+
+rawBoundedProblemOrder :: [RawSourceProblem] -> [RawSourceProblem]
+#if defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_ORDER_MUTANT)
+rawBoundedProblemOrder = reverse
+#else
+rawBoundedProblemOrder = id
+#endif
+
+rawBoundedProblemTag :: Int -> Text -> Text
+rawBoundedProblemTag ordinal value
+#if defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_01_MAPPING_MUTANT)
+  | ordinal == 1 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_02_MAPPING_MUTANT)
+  | ordinal == 2 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_03_MAPPING_MUTANT)
+  | ordinal == 3 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_04_MAPPING_MUTANT)
+  | ordinal == 4 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_05_MAPPING_MUTANT)
+  | ordinal == 5 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_06_MAPPING_MUTANT)
+  | ordinal == 6 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_07_MAPPING_MUTANT)
+  | ordinal == 7 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_08_MAPPING_MUTANT)
+  | ordinal == 8 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_09_MAPPING_MUTANT)
+  | ordinal == 9 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_10_MAPPING_MUTANT)
+  | ordinal == 10 = value <> "-mutant"
+#endif
+  | otherwise = ordinal `seq` value
+
+rawCommitmentDetailKind, rawCommitmentDetailDigest :: Text -> Text
+#if defined(VALIDATION_SOURCE_CLOSURE_COMMITMENT_DETAIL_KIND_DROP_MUTANT)
+rawCommitmentDetailKind _ = ""
+#else
+rawCommitmentDetailKind = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_COMMITMENT_DETAIL_DIGEST_DROP_MUTANT)
+rawCommitmentDetailDigest _ = ""
+#else
+rawCommitmentDetailDigest = id
+#endif
 
 rawProblemCommitmentTag :: RawSourceProblem -> Text
 rawProblemCommitmentTag problem = case problem of
-  RawSnapshotIdentityByteLimitExceeded maximumValue observed -> numeric "identity-bytes" [maximumValue, observed]
-  RawEntryLimitExceeded maximumValue observed -> numeric "entries" [maximumValue, observed]
-  RawPathByteLimitExceeded ordinal maximumValue observed -> numeric "path-bytes" [ordinal, maximumValue, observed]
-  RawPathDepthLimitExceeded ordinal maximumValue observed -> numeric "path-depth" [ordinal, maximumValue, observed]
-  RawPathSegmentByteLimitExceeded ordinal maximumValue observed -> numeric "path-segment-bytes" [ordinal, maximumValue, observed]
-  RawModeByteLimitExceeded ordinal maximumValue observed -> numeric "mode-bytes" [ordinal, maximumValue, observed]
-  RawObjectIdentityByteLimitExceeded ordinal maximumValue observed -> numeric "object-id-bytes" [ordinal, maximumValue, observed]
-  RawBlobByteLimitExceeded ordinal maximumValue observed -> numeric "blob-bytes" [ordinal, maximumValue, observed]
-  RawAggregateBlobByteLimitExceeded maximumValue observed -> numeric "aggregate-blob-bytes" [maximumValue, observed]
-  RawSemanticLineByteLimitExceeded ordinal maximumValue observed -> numeric "semantic-line-bytes" [ordinal, maximumValue, observed]
+  RawSnapshotIdentityByteLimitExceeded maximumValue observed -> rawBoundedProblemTag 1 (numeric "identity-bytes" [maximumValue, observed])
+  RawEntryLimitExceeded maximumValue observed -> rawBoundedProblemTag 2 (numeric "entries" [maximumValue, observed])
+  RawPathByteLimitExceeded ordinal maximumValue observed -> rawBoundedProblemTag 3 (numeric "path-bytes" [ordinal, maximumValue, observed])
+  RawPathDepthLimitExceeded ordinal maximumValue observed -> rawBoundedProblemTag 4 (numeric "path-depth" [ordinal, maximumValue, observed])
+  RawPathSegmentByteLimitExceeded ordinal maximumValue observed -> rawBoundedProblemTag 5 (numeric "path-segment-bytes" [ordinal, maximumValue, observed])
+  RawModeByteLimitExceeded ordinal maximumValue observed -> rawBoundedProblemTag 6 (numeric "mode-bytes" [ordinal, maximumValue, observed])
+  RawObjectIdentityByteLimitExceeded ordinal maximumValue observed -> rawBoundedProblemTag 7 (numeric "object-id-bytes" [ordinal, maximumValue, observed])
+  RawBlobByteLimitExceeded ordinal maximumValue observed -> rawBoundedProblemTag 8 (numeric "blob-bytes" [ordinal, maximumValue, observed])
+  RawAggregateBlobByteLimitExceeded maximumValue observed -> rawBoundedProblemTag 9 (numeric "aggregate-blob-bytes" [maximumValue, observed])
+  RawSemanticLineByteLimitExceeded ordinal maximumValue observed -> rawBoundedProblemTag 10 (numeric "semantic-line-bytes" [ordinal, maximumValue, observed])
   RawSnapshotIdentityMalformed _ -> "snapshot-identity-unrepresentable"
   RawPathMalformed ordinal _ detail -> "path-unrepresentable:" <> Text.pack (show ordinal) <> ":" <> detail
   _ -> "bounded-non-resource-preflight"
@@ -712,11 +1471,11 @@ updateLengthPrefixedText :: SHA256.Ctx -> Text -> SHA256.Ctx
 updateLengthPrefixedText context = updateLengthPrefixedBytes context . TextEncoding.encodeUtf8
 
 updateLengthPrefixedBytes :: SHA256.Ctx -> ByteString -> SHA256.Ctx
-updateLengthPrefixedBytes context bytes = SHA256.update separatorContext bytes
+updateLengthPrefixedBytes context bytes = rawLengthPrefixedValue separatorContext bytes
  where
   lengthBytes = ByteString8.pack (show (ByteString.length bytes))
-  lengthContext = SHA256.update context lengthBytes
-  separatorContext = SHA256.update lengthContext ":"
+  lengthContext = rawLengthPrefixContribution context lengthBytes
+  separatorContext = rawLengthSeparatorContribution lengthContext
 
 rawPortablePathProblems :: Int -> FilePath -> [RawSourceProblem]
 rawPortablePathProblems ordinal path
@@ -1205,10 +1964,10 @@ utf8TextBytesUpTo limit = Text.foldl' step 0
 
 utf8CharacterBytes :: Char -> Int
 utf8CharacterBytes character
-  | code <= 0x7f = 1
-  | code <= 0x7ff = 2
-  | code <= 0xffff = 3
-  | otherwise = 4
+  | code <= 0x7f = rawUtf8Width 1 1
+  | code <= 0x7ff = rawUtf8Width 2 2
+  | code <= 0xffff = rawUtf8Width 3 3
+  | otherwise = rawUtf8Width 4 4
  where
   code = ord character
 
@@ -1218,62 +1977,119 @@ utf8CharacterBytes character
 boundedSignificantLineInspection :: Int -> ByteString -> Either Int Int
 boundedSignificantLineInspection limit bytes = go 0 False (ByteString.take (limit + 1) bytes)
  where
-  blobWithinLimit = ByteString.length bytes <= limit
+  blobWithinLimit = rawSemanticBlobWithinLimit (ByteString.length bytes <= limit)
   go consumed significant remaining = case ByteString.uncons remaining of
     Nothing
       | blobWithinLimit -> Right consumed
       | otherwise -> Left (limit + 1)
     Just (byte, rest)
-      | consumed == limit -> Left (limit + 1)
-      | byte == 10 || byte == 13 ->
+      | consumed == limit -> rawSemanticLimitResult limit
+      | rawSemanticLf byte || rawSemanticCr byte ->
           if significant
             then Right (consumed + 1)
             else go (consumed + 1) False rest
-      | byte == 9 || byte == 32 -> go (consumed + 1) significant rest
-      | otherwise -> go (consumed + 1) True rest
+      | rawSemanticTab byte || rawSemanticSpace byte -> go (consumed + 1) significant rest
+      | otherwise -> go (consumed + 1) (rawSemanticSignificant significant) rest
+
+rawUtf8Width :: Int -> Int -> Int
+rawUtf8Width ordinal width
+#if defined(VALIDATION_SOURCE_CLOSURE_UTF8_ASCII_WIDTH_MUTANT)
+  | ordinal == 1 = 2
+#elif defined(VALIDATION_SOURCE_CLOSURE_UTF8_TWO_BYTE_WIDTH_MUTANT)
+  | ordinal == 2 = 1
+#elif defined(VALIDATION_SOURCE_CLOSURE_UTF8_THREE_BYTE_WIDTH_MUTANT)
+  | ordinal == 3 = 1
+#elif defined(VALIDATION_SOURCE_CLOSURE_UTF8_FOUR_BYTE_WIDTH_MUTANT)
+  | ordinal == 4 = 1
+#endif
+  | otherwise = ordinal `seq` width
+
+rawSemanticBlobWithinLimit :: Bool -> Bool
+#if defined(VALIDATION_SOURCE_CLOSURE_SEMANTIC_BLOB_WITHIN_LIMIT_MUTANT)
+rawSemanticBlobWithinLimit _ = False
+#else
+rawSemanticBlobWithinLimit = id
+#endif
+
+rawSemanticLimitResult :: Int -> Either Int Int
+#if defined(VALIDATION_SOURCE_CLOSURE_SEMANTIC_LIMIT_RESULT_MUTANT)
+rawSemanticLimitResult = Right
+#else
+rawSemanticLimitResult limit = Left (limit + 1)
+#endif
+
+rawSemanticLf, rawSemanticCr, rawSemanticTab, rawSemanticSpace :: Word8 -> Bool
+#if defined(VALIDATION_SOURCE_CLOSURE_SEMANTIC_LF_BYPASS_MUTANT)
+rawSemanticLf _ = False
+#else
+rawSemanticLf = (== 10)
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_SEMANTIC_CR_BYPASS_MUTANT)
+rawSemanticCr _ = False
+#else
+rawSemanticCr = (== 13)
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_SEMANTIC_TAB_BYPASS_MUTANT)
+rawSemanticTab _ = False
+#else
+rawSemanticTab = (== 9)
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_SEMANTIC_SPACE_BYPASS_MUTANT)
+rawSemanticSpace _ = False
+#else
+rawSemanticSpace = (== 32)
+#endif
+
+rawSemanticSignificant :: Bool -> Bool
+#if defined(VALIDATION_SOURCE_CLOSURE_SEMANTIC_SIGNIFICANT_BYPASS_MUTANT)
+rawSemanticSignificant = id
+#else
+rawSemanticSignificant _ = True
+#endif
 
 rawSourceProblemFinding :: RawInputCommitment -> RawSourceProblem -> Finding
 rawSourceProblemFinding inputCommitment problem = case problem of
   RawSnapshotIdentityByteLimitExceeded maximumBytes observed ->
-    resource "SOURCE-CLOSURE-IDENTITY-BYTE-LIMIT" "<claimed-snapshot>" maximumBytes observed
+    resource 1 "SOURCE-CLOSURE-IDENTITY-BYTE-LIMIT" "<claimed-snapshot>" maximumBytes observed
   RawEntryLimitExceeded maximumEntries observed ->
-    resource "SOURCE-CLOSURE-ENTRY-LIMIT" "<raw-source-closure>" maximumEntries observed
+    resource 2 "SOURCE-CLOSURE-ENTRY-LIMIT" "<raw-source-closure>" maximumEntries observed
   RawPathByteLimitExceeded ordinal maximumBytes observed ->
-    resource "SOURCE-CLOSURE-PATH-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
+    resource 3 "SOURCE-CLOSURE-PATH-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
   RawPathDepthLimitExceeded ordinal maximumDepth observed ->
-    resource "SOURCE-CLOSURE-PATH-DEPTH-LIMIT" (rawOrdinalSubject ordinal) maximumDepth observed
+    resource 4 "SOURCE-CLOSURE-PATH-DEPTH-LIMIT" (rawOrdinalSubject ordinal) maximumDepth observed
   RawPathSegmentByteLimitExceeded ordinal maximumBytes observed ->
-    resource "SOURCE-CLOSURE-PATH-SEGMENT-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
+    resource 5 "SOURCE-CLOSURE-PATH-SEGMENT-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
   RawModeByteLimitExceeded ordinal maximumBytes observed ->
-    resource "SOURCE-CLOSURE-MODE-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
+    resource 6 "SOURCE-CLOSURE-MODE-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
   RawObjectIdentityByteLimitExceeded ordinal maximumBytes observed ->
-    resource "SOURCE-CLOSURE-OBJECT-ID-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
+    resource 7 "SOURCE-CLOSURE-OBJECT-ID-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
   RawBlobByteLimitExceeded ordinal maximumBytes observed ->
-    resource "SOURCE-CLOSURE-BLOB-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
+    resource 8 "SOURCE-CLOSURE-BLOB-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
   RawAggregateBlobByteLimitExceeded maximumBytes observed ->
-    resource "SOURCE-CLOSURE-AGGREGATE-BLOB-BYTE-LIMIT" "<raw-source-closure>" maximumBytes observed
+    resource 9 "SOURCE-CLOSURE-AGGREGATE-BLOB-BYTE-LIMIT" "<raw-source-closure>" maximumBytes observed
   RawSemanticLineByteLimitExceeded ordinal maximumBytes observed ->
-    resource "SOURCE-CLOSURE-SEMANTIC-LINE-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
+    resource 10 "SOURCE-CLOSURE-SEMANTIC-LINE-BYTE-LIMIT" (rawOrdinalSubject ordinal) maximumBytes observed
   RawSnapshotIdentityMalformed observed ->
-    malformed "SOURCE-CLOSURE-IDENTITY-GRAMMAR" "<claimed-snapshot>" ("expected exactly 64 lowercase ASCII hexadecimal characters; observed=" <> observed)
+    malformed 11 "SOURCE-CLOSURE-IDENTITY-GRAMMAR" "<claimed-snapshot>" ("expected exactly 64 lowercase ASCII hexadecimal characters; observed=" <> observed)
   RawSnapshotIdentityMismatch expected observed ->
-    malformed "SOURCE-CLOSURE-IDENTITY-MISMATCH" "<claimed-snapshot>" ("expected=" <> expected <> "; observed=" <> observed)
+    malformed 12 "SOURCE-CLOSURE-IDENTITY-MISMATCH" "<claimed-snapshot>" ("expected=" <> expected <> "; observed=" <> observed)
   RawEmptyInventory ->
-    malformed "SOURCE-CLOSURE-INVENTORY-EMPTY" "<raw-source-closure>" "raw inventory must contain at least one tracked entry"
+    malformed 13 "SOURCE-CLOSURE-INVENTORY-EMPTY" "<raw-source-closure>" "raw inventory must contain at least one tracked entry"
   RawPathMalformed ordinal path detail ->
-    malformed "SOURCE-CLOSURE-PATH-GRAMMAR" (rawSafePathSubject ordinal path) detail
+    malformed 14 "SOURCE-CLOSURE-PATH-GRAMMAR" (rawSafePathSubject ordinal path) detail
   RawModeMalformed ordinal observed ->
-    malformed "SOURCE-CLOSURE-MODE-GRAMMAR" (rawOrdinalSubject ordinal) ("observed=" <> observed)
+    malformed 15 "SOURCE-CLOSURE-MODE-GRAMMAR" (rawOrdinalSubject ordinal) ("observed=" <> observed)
   RawObjectIdentityMalformed ordinal observed ->
-    malformed "SOURCE-CLOSURE-OBJECT-ID-GRAMMAR" (rawOrdinalSubject ordinal) ("observed=" <> observed)
+    malformed 16 "SOURCE-CLOSURE-OBJECT-ID-GRAMMAR" (rawOrdinalSubject ordinal) ("observed=" <> observed)
   RawObjectIdentityMismatch ordinal expected actual ->
-    malformed "SOURCE-CLOSURE-OBJECT-ID-MISMATCH" (rawOrdinalSubject ordinal) ("expected=" <> expected <> "; recomputed=" <> actual)
+    malformed 17 "SOURCE-CLOSURE-OBJECT-ID-MISMATCH" (rawOrdinalSubject ordinal) ("expected=" <> expected <> "; recomputed=" <> actual)
   RawMixedObjectIdentityFormats widths ->
-    malformed "SOURCE-CLOSURE-OBJECT-FORMAT-MIXED" "<raw-source-closure>" (Text.pack (show widths))
+    malformed 18 "SOURCE-CLOSURE-OBJECT-FORMAT-MIXED" "<raw-source-closure>" (Text.pack (show widths))
   RawDuplicatePath path ->
-    malformed "SOURCE-CLOSURE-DUPLICATE-PATH" path "path occurs more than once"
+    malformed 19 "SOURCE-CLOSURE-DUPLICATE-PATH" path "path occurs more than once"
   RawEntryOrderInvalid paths ->
     malformed
+      20
       "SOURCE-CLOSURE-ENTRY-ORDER"
       "<raw-source-closure>"
       ( "observed-count="
@@ -1282,15 +2098,15 @@ rawSourceProblemFinding inputCommitment problem = case problem of
           <> Text.pack (show (take 2 paths))
       )
   RawPortableCaseCollision left right ->
-    malformed "SOURCE-CLOSURE-PORTABLE-CASE-COLLISION" left ("collides with " <> Text.pack right)
+    malformed 21 "SOURCE-CLOSURE-PORTABLE-CASE-COLLISION" left ("collides with " <> Text.pack right)
   RawPortablePrefixConflict left right ->
-    malformed "SOURCE-CLOSURE-PORTABLE-PREFIX-CONFLICT" left ("conflicts with " <> Text.pack right)
+    malformed 22 "SOURCE-CLOSURE-PORTABLE-PREFIX-CONFLICT" left ("conflicts with " <> Text.pack right)
   RawProblemLimitExceeded maximumProblems observed ->
-    resource "SOURCE-CLOSURE-PROBLEM-LIMIT" "<raw-source-closure>" maximumProblems observed
+    resource 23 "SOURCE-CLOSURE-PROBLEM-LIMIT" "<raw-source-closure>" maximumProblems observed
  where
-  resource code subject maximumValue observed =
-    finding code subject (rawLimitDetail maximumValue observed <> rawCommitmentDetail inputCommitment)
-  malformed code subject detail = finding code subject (detail <> rawCommitmentDetail inputCommitment)
+  resource locus code subject maximumValue observed =
+    rawMappedFinding locus code subject (rawLimitDetail maximumValue observed <> rawCommitmentDetail inputCommitment)
+  malformed locus code subject detail = rawMappedFinding locus code subject (detail <> rawCommitmentDetail inputCommitment)
 
 rawLimitDetail :: Int -> Int -> Text
 rawLimitDetail maximumValue observed =
@@ -1299,9 +2115,9 @@ rawLimitDetail maximumValue observed =
 rawCommitmentDetail :: RawInputCommitment -> Text
 rawCommitmentDetail inputCommitment =
   "; source-closure.input-commitment-kind="
-    <> rawInputCommitmentKind inputCommitment
+    <> rawCommitmentDetailKind (rawInputCommitmentKind inputCommitment)
     <> "; source-closure.input-commitment-sha256="
-    <> rawInputCommitmentSha256 inputCommitment
+    <> rawCommitmentDetailDigest (rawInputCommitmentSha256 inputCommitment)
 
 rawOrdinalSubject :: Int -> FilePath
 rawOrdinalSubject ordinal = "<entry-" <> show ordinal <> ">"
@@ -1423,17 +2239,6 @@ rawEntryOrderInvalid observed expected = observed /= expected
 newtype GitExecutable = GitExecutable FilePath
   deriving (Eq, Ord, Show)
 
-data IndexMode
-  = RegularFile
-  | ExecutableFile
-  | SymbolicLink
-  deriving (Eq, Ord, Show)
-
-data GitObjectFormat
-  = GitObjectSha1
-  | GitObjectSha256
-  deriving (Eq, Ord, Show)
-
 -- | The two independent, NUL-delimited index-visibility observations used
 -- during acquisition.  They are distinct because @git ls-files -v@ exposes
 -- assume-unchanged through a lower-case tag, while @git ls-files -t@ exposes
@@ -1450,48 +2255,12 @@ data WorktreeEntryKind
   | WorktreeOther
   deriving (Eq, Ord, Show)
 
-data IndexEntry = IndexEntry
-  { indexPath :: FilePath
-  , indexMode :: IndexMode
-  , indexObjectId :: Text
-  }
-  deriving (Eq, Ord, Show)
-
-data TrackedEntry = TrackedEntry
-  { trackedIndex :: IndexEntry
-  , trackedBytes :: ByteString
-  }
-  deriving (Eq, Ord, Show)
-
--- | The identity is a domain-separated SHA-256 digest of the independently
--- observed Git storage format and a canonical manifest containing mode, Git
--- object id, an independent SHA-256 commitment to the exact blob bytes, and
--- path for every stage-zero entry. Classification never consults mutable
--- worktree bytes.
-data SourceSnapshot = SourceSnapshot
-  { snapshotRoot :: FilePath
-  , snapshotIdentity :: Text
-  , snapshotEntries :: [TrackedEntry]
-  }
-  deriving (Eq, Show)
-
--- | Reserved candidate authority.  The constructor is deliberately private:
--- a caller may construct a 'SourceSnapshot' for pure diagnostics, but cannot
--- turn it into candidate evidence.  No caller-selected Git path constructs
--- this wrapper in the ordinary build; authenticated clean-room custody remains
--- explicit residue.
-data AcquiredSourceSnapshot = AcquiredSourceSnapshot SourceSnapshot
-  deriving (Eq, Show)
-
-acquiredSourceSnapshot :: AcquiredSourceSnapshot -> SourceSnapshot
-acquiredSourceSnapshot (AcquiredSourceSnapshot snapshot) = snapshot
-
 #if defined(VALIDATION_SOURCE_CLOSURE_INTERNAL_TEST_ACQUIRE)
 -- This constructor exists only when the Cabal-owned direct-source internal
 -- Graph oracle compiles the exact home-module tree.  It is absent from the
 -- packaged validation-kernel library and cannot cross either public facade.
 sourceClosureInternalTestAcquire :: SourceSnapshot -> AcquiredSourceSnapshot
-sourceClosureInternalTestAcquire = AcquiredSourceSnapshot
+sourceClosureInternalTestAcquire = SourceSnapshot.AcquiredSourceSnapshot
 #endif
 
 data WorktreeEntryObservation = WorktreeEntryObservation
@@ -2753,10 +3522,14 @@ computeSourceSnapshotIdentity :: GitObjectFormat -> [TrackedEntry] -> Text
 computeSourceSnapshotIdentity objectFormat entries =
   hex (SHA256.finalize finalContext)
  where
-  ordered = sortOn (indexPath . trackedIndex) entries
+  ordered = rawSnapshotMemberOrder (sortOn (indexPath . trackedIndex) entries)
+#if defined(VALIDATION_SOURCE_CLOSURE_SNAPSHOT_DIGEST_DOMAIN_DROP_MUTANT)
+  domainContext = SHA256.init
+#else
   domainContext = SHA256.update SHA256.init "amoebius-source-snapshot-v2\0"
+#endif
   formatContext = updateSnapshotFormat domainContext objectFormat
-  formatSeparatorContext = SHA256.update formatContext "\0"
+  formatSeparatorContext = rawSnapshotFormatSeparator formatContext
   finalContext = foldl' updateSnapshotMember formatSeparatorContext ordered
 
 updateSnapshotFormat :: SHA256.Ctx -> GitObjectFormat -> SHA256.Ctx
@@ -2767,16 +3540,50 @@ updateSnapshotFormat context = SHA256.update context . TextEncoding.encodeUtf8 .
 #endif
 
 updateSnapshotMember :: SHA256.Ctx -> TrackedEntry -> SHA256.Ctx
-updateSnapshotMember initialContext trackedEntry = SHA256.update pathContext "\0"
+updateSnapshotMember initialContext trackedEntry = rawSnapshotPathSeparator pathContext
  where
   indexEntry = trackedIndex trackedEntry
   modeContext = SHA256.update initialContext (TextEncoding.encodeUtf8 (snapshotModeCommitment indexEntry))
-  modeSeparatorContext = SHA256.update modeContext "\0"
+  modeSeparatorContext = rawSnapshotModeSeparator modeContext
   objectContext = SHA256.update modeSeparatorContext (TextEncoding.encodeUtf8 (snapshotObjectCommitment indexEntry))
-  objectSeparatorContext = SHA256.update objectContext "\0"
+  objectSeparatorContext = rawSnapshotObjectSeparator objectContext
   blobContext = SHA256.update objectSeparatorContext (TextEncoding.encodeUtf8 (snapshotBlobByteCommitment trackedEntry))
-  blobSeparatorContext = SHA256.update blobContext "\0"
+  blobSeparatorContext = rawSnapshotBlobSeparator blobContext
   pathContext = SHA256.update blobSeparatorContext (TextEncoding.encodeUtf8 (snapshotPathCommitment indexEntry))
+
+rawSnapshotMemberOrder :: [TrackedEntry] -> [TrackedEntry]
+#if defined(VALIDATION_SOURCE_CLOSURE_SNAPSHOT_MEMBER_ORDER_MUTANT)
+rawSnapshotMemberOrder = reverse
+#else
+rawSnapshotMemberOrder = id
+#endif
+
+rawSnapshotFormatSeparator, rawSnapshotModeSeparator, rawSnapshotObjectSeparator, rawSnapshotBlobSeparator, rawSnapshotPathSeparator :: SHA256.Ctx -> SHA256.Ctx
+#if defined(VALIDATION_SOURCE_CLOSURE_SNAPSHOT_FORMAT_SEPARATOR_DROP_MUTANT)
+rawSnapshotFormatSeparator = id
+#else
+rawSnapshotFormatSeparator context = SHA256.update context "\0"
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_SNAPSHOT_MODE_SEPARATOR_DROP_MUTANT)
+rawSnapshotModeSeparator = id
+#else
+rawSnapshotModeSeparator context = SHA256.update context "\0"
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_SNAPSHOT_OBJECT_SEPARATOR_DROP_MUTANT)
+rawSnapshotObjectSeparator = id
+#else
+rawSnapshotObjectSeparator context = SHA256.update context "\0"
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_SNAPSHOT_BLOB_SEPARATOR_DROP_MUTANT)
+rawSnapshotBlobSeparator = id
+#else
+rawSnapshotBlobSeparator context = SHA256.update context "\0"
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_SNAPSHOT_PATH_SEPARATOR_DROP_MUTANT)
+rawSnapshotPathSeparator = id
+#else
+rawSnapshotPathSeparator context = SHA256.update context "\0"
+#endif
 
 snapshotModeCommitment :: IndexEntry -> Text
 #if defined(VALIDATION_SOURCE_CLOSURE_SNAPSHOT_MODE_COMMITMENT_MUTANT)
@@ -3051,15 +3858,38 @@ classifySnapshot snapshot =
 
 toPbTrackedFile :: TrackedEntry -> (FilePath, Text, ByteString)
 toPbTrackedFile entry =
-  ( indexPath indexed
-  , case indexMode indexed of
-      RegularFile -> "100644"
-      ExecutableFile -> "100755"
-      SymbolicLink -> "120000"
-  , trackedBytes entry
+  ( rawPbPath (indexPath indexed)
+  , rawPbMode
+      (case indexMode indexed of
+        RegularFile -> "100644"
+        ExecutableFile -> "100755"
+        SymbolicLink -> "120000"
+      )
+  , rawPbBytes (trackedBytes entry)
   )
  where
   indexed = trackedIndex entry
+
+rawPbPath :: FilePath -> FilePath
+#if defined(VALIDATION_SOURCE_CLOSURE_PB_INPUT_PATH_ROUTE_MUTANT)
+rawPbPath _ = "pb/mutant.py"
+#else
+rawPbPath = id
+#endif
+
+rawPbMode :: Text -> Text
+#if defined(VALIDATION_SOURCE_CLOSURE_PB_INPUT_MODE_ROUTE_MUTANT)
+rawPbMode _ = "100755"
+#else
+rawPbMode = id
+#endif
+
+rawPbBytes :: ByteString -> ByteString
+#if defined(VALIDATION_SOURCE_CLOSURE_PB_INPUT_BYTES_ROUTE_MUTANT)
+rawPbBytes = ByteString.drop 1
+#else
+rawPbBytes = id
+#endif
 
 -- | Pure, total classification of one supplied tracked entry.  Root migrations
 -- and format migrations are intentionally ordered so an entry cannot be charged
@@ -3079,9 +3909,9 @@ classifyEntry entry =
     facets = entryFacets entry
     structuralReasons = disallowedStructure initial facets
     signatureReasons = disallowedSignature initial path bytes facets
-    reasons = primaryReasons initial path bytes <> structuralReasons <> signatureReasons
+    reasons = rawReasonAssembly (primaryReasons initial path bytes) structuralReasons signatureReasons
     finalClass
-      | isRegistered initial = initial
+      | rawFinalClassRetainsInitial initial = initial
       | null structuralReasons && null signatureReasons = initial
       | otherwise = UnregisteredBehavioralSource
 
@@ -3284,9 +4114,405 @@ admittedDocumentationPath path =
 -- independent documentation-corpus manifest are both updated. Bytes still
 -- require structural checking, compiler-resolved consumer closure, and human
 -- semantic custody; this path list never claims that prose is non-behavioural.
+rawGovernedDocumentationPath :: Int -> FilePath -> FilePath
+rawGovernedDocumentationPath ordinal path
+#if defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_001_RETENTION_MUTANT)
+  | ordinal == 1 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_002_RETENTION_MUTANT)
+  | ordinal == 2 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_003_RETENTION_MUTANT)
+  | ordinal == 3 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_004_RETENTION_MUTANT)
+  | ordinal == 4 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_005_RETENTION_MUTANT)
+  | ordinal == 5 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_006_RETENTION_MUTANT)
+  | ordinal == 6 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_007_RETENTION_MUTANT)
+  | ordinal == 7 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_008_RETENTION_MUTANT)
+  | ordinal == 8 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_009_RETENTION_MUTANT)
+  | ordinal == 9 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_010_RETENTION_MUTANT)
+  | ordinal == 10 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_011_RETENTION_MUTANT)
+  | ordinal == 11 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_012_RETENTION_MUTANT)
+  | ordinal == 12 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_013_RETENTION_MUTANT)
+  | ordinal == 13 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_014_RETENTION_MUTANT)
+  | ordinal == 14 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_015_RETENTION_MUTANT)
+  | ordinal == 15 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_016_RETENTION_MUTANT)
+  | ordinal == 16 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_017_RETENTION_MUTANT)
+  | ordinal == 17 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_018_RETENTION_MUTANT)
+  | ordinal == 18 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_019_RETENTION_MUTANT)
+  | ordinal == 19 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_020_RETENTION_MUTANT)
+  | ordinal == 20 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_021_RETENTION_MUTANT)
+  | ordinal == 21 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_022_RETENTION_MUTANT)
+  | ordinal == 22 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_023_RETENTION_MUTANT)
+  | ordinal == 23 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_024_RETENTION_MUTANT)
+  | ordinal == 24 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_025_RETENTION_MUTANT)
+  | ordinal == 25 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_026_RETENTION_MUTANT)
+  | ordinal == 26 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_027_RETENTION_MUTANT)
+  | ordinal == 27 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_028_RETENTION_MUTANT)
+  | ordinal == 28 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_029_RETENTION_MUTANT)
+  | ordinal == 29 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_030_RETENTION_MUTANT)
+  | ordinal == 30 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_031_RETENTION_MUTANT)
+  | ordinal == 31 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_032_RETENTION_MUTANT)
+  | ordinal == 32 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_033_RETENTION_MUTANT)
+  | ordinal == 33 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_034_RETENTION_MUTANT)
+  | ordinal == 34 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_035_RETENTION_MUTANT)
+  | ordinal == 35 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_036_RETENTION_MUTANT)
+  | ordinal == 36 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_037_RETENTION_MUTANT)
+  | ordinal == 37 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_038_RETENTION_MUTANT)
+  | ordinal == 38 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_039_RETENTION_MUTANT)
+  | ordinal == 39 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_040_RETENTION_MUTANT)
+  | ordinal == 40 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_041_RETENTION_MUTANT)
+  | ordinal == 41 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_042_RETENTION_MUTANT)
+  | ordinal == 42 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_043_RETENTION_MUTANT)
+  | ordinal == 43 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_044_RETENTION_MUTANT)
+  | ordinal == 44 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_045_RETENTION_MUTANT)
+  | ordinal == 45 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_046_RETENTION_MUTANT)
+  | ordinal == 46 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_047_RETENTION_MUTANT)
+  | ordinal == 47 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_048_RETENTION_MUTANT)
+  | ordinal == 48 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_049_RETENTION_MUTANT)
+  | ordinal == 49 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_050_RETENTION_MUTANT)
+  | ordinal == 50 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_051_RETENTION_MUTANT)
+  | ordinal == 51 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_052_RETENTION_MUTANT)
+  | ordinal == 52 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_053_RETENTION_MUTANT)
+  | ordinal == 53 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_054_RETENTION_MUTANT)
+  | ordinal == 54 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_055_RETENTION_MUTANT)
+  | ordinal == 55 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_056_RETENTION_MUTANT)
+  | ordinal == 56 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_057_RETENTION_MUTANT)
+  | ordinal == 57 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_058_RETENTION_MUTANT)
+  | ordinal == 58 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_059_RETENTION_MUTANT)
+  | ordinal == 59 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_060_RETENTION_MUTANT)
+  | ordinal == 60 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_061_RETENTION_MUTANT)
+  | ordinal == 61 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_062_RETENTION_MUTANT)
+  | ordinal == 62 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_063_RETENTION_MUTANT)
+  | ordinal == 63 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_064_RETENTION_MUTANT)
+  | ordinal == 64 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_065_RETENTION_MUTANT)
+  | ordinal == 65 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_066_RETENTION_MUTANT)
+  | ordinal == 66 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_067_RETENTION_MUTANT)
+  | ordinal == 67 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_068_RETENTION_MUTANT)
+  | ordinal == 68 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_069_RETENTION_MUTANT)
+  | ordinal == 69 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_070_RETENTION_MUTANT)
+  | ordinal == 70 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_071_RETENTION_MUTANT)
+  | ordinal == 71 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_072_RETENTION_MUTANT)
+  | ordinal == 72 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_073_RETENTION_MUTANT)
+  | ordinal == 73 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_074_RETENTION_MUTANT)
+  | ordinal == 74 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_075_RETENTION_MUTANT)
+  | ordinal == 75 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_076_RETENTION_MUTANT)
+  | ordinal == 76 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_077_RETENTION_MUTANT)
+  | ordinal == 77 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_078_RETENTION_MUTANT)
+  | ordinal == 78 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_079_RETENTION_MUTANT)
+  | ordinal == 79 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_080_RETENTION_MUTANT)
+  | ordinal == 80 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_081_RETENTION_MUTANT)
+  | ordinal == 81 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_082_RETENTION_MUTANT)
+  | ordinal == 82 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_083_RETENTION_MUTANT)
+  | ordinal == 83 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_084_RETENTION_MUTANT)
+  | ordinal == 84 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_085_RETENTION_MUTANT)
+  | ordinal == 85 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_086_RETENTION_MUTANT)
+  | ordinal == 86 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_087_RETENTION_MUTANT)
+  | ordinal == 87 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_088_RETENTION_MUTANT)
+  | ordinal == 88 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_089_RETENTION_MUTANT)
+  | ordinal == 89 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_090_RETENTION_MUTANT)
+  | ordinal == 90 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_091_RETENTION_MUTANT)
+  | ordinal == 91 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_092_RETENTION_MUTANT)
+  | ordinal == 92 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_093_RETENTION_MUTANT)
+  | ordinal == 93 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_094_RETENTION_MUTANT)
+  | ordinal == 94 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_095_RETENTION_MUTANT)
+  | ordinal == 95 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_096_RETENTION_MUTANT)
+  | ordinal == 96 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_097_RETENTION_MUTANT)
+  | ordinal == 97 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_098_RETENTION_MUTANT)
+  | ordinal == 98 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_099_RETENTION_MUTANT)
+  | ordinal == 99 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_100_RETENTION_MUTANT)
+  | ordinal == 100 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_101_RETENTION_MUTANT)
+  | ordinal == 101 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_102_RETENTION_MUTANT)
+  | ordinal == 102 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_103_RETENTION_MUTANT)
+  | ordinal == 103 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_104_RETENTION_MUTANT)
+  | ordinal == 104 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_105_RETENTION_MUTANT)
+  | ordinal == 105 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_106_RETENTION_MUTANT)
+  | ordinal == 106 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_107_RETENTION_MUTANT)
+  | ordinal == 107 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_108_RETENTION_MUTANT)
+  | ordinal == 108 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_109_RETENTION_MUTANT)
+  | ordinal == 109 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_110_RETENTION_MUTANT)
+  | ordinal == 110 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_111_RETENTION_MUTANT)
+  | ordinal == 111 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_112_RETENTION_MUTANT)
+  | ordinal == 112 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_113_RETENTION_MUTANT)
+  | ordinal == 113 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_114_RETENTION_MUTANT)
+  | ordinal == 114 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_115_RETENTION_MUTANT)
+  | ordinal == 115 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_116_RETENTION_MUTANT)
+  | ordinal == 116 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_117_RETENTION_MUTANT)
+  | ordinal == 117 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_118_RETENTION_MUTANT)
+  | ordinal == 118 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_119_RETENTION_MUTANT)
+  | ordinal == 119 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_120_RETENTION_MUTANT)
+  | ordinal == 120 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_121_RETENTION_MUTANT)
+  | ordinal == 121 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_122_RETENTION_MUTANT)
+  | ordinal == 122 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_123_RETENTION_MUTANT)
+  | ordinal == 123 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_124_RETENTION_MUTANT)
+  | ordinal == 124 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_125_RETENTION_MUTANT)
+  | ordinal == 125 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_126_RETENTION_MUTANT)
+  | ordinal == 126 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_127_RETENTION_MUTANT)
+  | ordinal == 127 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_128_RETENTION_MUTANT)
+  | ordinal == 128 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_129_RETENTION_MUTANT)
+  | ordinal == 129 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_130_RETENTION_MUTANT)
+  | ordinal == 130 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_131_RETENTION_MUTANT)
+  | ordinal == 131 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_132_RETENTION_MUTANT)
+  | ordinal == 132 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_133_RETENTION_MUTANT)
+  | ordinal == 133 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_134_RETENTION_MUTANT)
+  | ordinal == 134 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_135_RETENTION_MUTANT)
+  | ordinal == 135 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_136_RETENTION_MUTANT)
+  | ordinal == 136 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_137_RETENTION_MUTANT)
+  | ordinal == 137 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_138_RETENTION_MUTANT)
+  | ordinal == 138 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_139_RETENTION_MUTANT)
+  | ordinal == 139 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_140_RETENTION_MUTANT)
+  | ordinal == 140 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_141_RETENTION_MUTANT)
+  | ordinal == 141 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_142_RETENTION_MUTANT)
+  | ordinal == 142 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_143_RETENTION_MUTANT)
+  | ordinal == 143 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_144_RETENTION_MUTANT)
+  | ordinal == 144 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_145_RETENTION_MUTANT)
+  | ordinal == 145 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_146_RETENTION_MUTANT)
+  | ordinal == 146 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_147_RETENTION_MUTANT)
+  | ordinal == 147 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_148_RETENTION_MUTANT)
+  | ordinal == 148 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_149_RETENTION_MUTANT)
+  | ordinal == 149 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_150_RETENTION_MUTANT)
+  | ordinal == 150 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_151_RETENTION_MUTANT)
+  | ordinal == 151 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_152_RETENTION_MUTANT)
+  | ordinal == 152 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_153_RETENTION_MUTANT)
+  | ordinal == 153 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_154_RETENTION_MUTANT)
+  | ordinal == 154 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_155_RETENTION_MUTANT)
+  | ordinal == 155 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_156_RETENTION_MUTANT)
+  | ordinal == 156 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_157_RETENTION_MUTANT)
+  | ordinal == 157 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_158_RETENTION_MUTANT)
+  | ordinal == 158 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_159_RETENTION_MUTANT)
+  | ordinal == 159 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_160_RETENTION_MUTANT)
+  | ordinal == 160 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_161_RETENTION_MUTANT)
+  | ordinal == 161 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_162_RETENTION_MUTANT)
+  | ordinal == 162 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_163_RETENTION_MUTANT)
+  | ordinal == 163 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_164_RETENTION_MUTANT)
+  | ordinal == 164 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_165_RETENTION_MUTANT)
+  | ordinal == 165 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_166_RETENTION_MUTANT)
+  | ordinal == 166 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_167_RETENTION_MUTANT)
+  | ordinal == 167 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_168_RETENTION_MUTANT)
+  | ordinal == 168 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_169_RETENTION_MUTANT)
+  | ordinal == 169 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_170_RETENTION_MUTANT)
+  | ordinal == 170 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_171_RETENTION_MUTANT)
+  | ordinal == 171 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_172_RETENTION_MUTANT)
+  | ordinal == 172 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_173_RETENTION_MUTANT)
+  | ordinal == 173 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_174_RETENTION_MUTANT)
+  | ordinal == 174 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_175_RETENTION_MUTANT)
+  | ordinal == 175 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_176_RETENTION_MUTANT)
+  | ordinal == 176 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_177_RETENTION_MUTANT)
+  | ordinal == 177 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_178_RETENTION_MUTANT)
+  | ordinal == 178 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_179_RETENTION_MUTANT)
+  | ordinal == 179 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_180_RETENTION_MUTANT)
+  | ordinal == 180 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_181_RETENTION_MUTANT)
+  | ordinal == 181 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_182_RETENTION_MUTANT)
+  | ordinal == 182 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_183_RETENTION_MUTANT)
+  | ordinal == 183 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_184_RETENTION_MUTANT)
+  | ordinal == 184 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_185_RETENTION_MUTANT)
+  | ordinal == 185 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_186_RETENTION_MUTANT)
+  | ordinal == 186 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_187_RETENTION_MUTANT)
+  | ordinal == 187 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_188_RETENTION_MUTANT)
+  | ordinal == 188 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_189_RETENTION_MUTANT)
+  | ordinal == 189 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_190_RETENTION_MUTANT)
+  | ordinal == 190 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_191_RETENTION_MUTANT)
+  | ordinal == 191 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_192_RETENTION_MUTANT)
+  | ordinal == 192 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_193_RETENTION_MUTANT)
+  | ordinal == 193 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_194_RETENTION_MUTANT)
+  | ordinal == 194 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_195_RETENTION_MUTANT)
+  | ordinal == 195 = "documents/renamed_program.md"
+#endif
+  | otherwise = ordinal `seq` path
+
 canonicalGovernedDocumentationPaths :: Set FilePath
 canonicalGovernedDocumentationPaths =
   Set.fromList
+    ( zipWith rawGovernedDocumentationPath [1 ..]
     [ "AGENTS.md"
     , "CLAUDE.md"
     , "DEVELOPMENT_PLAN/README.md"
@@ -3483,32 +4709,165 @@ canonicalGovernedDocumentationPaths =
     , "documents/illegal_state/illegal_state_topology.md"
     , "documents/reading_order.md"
     ]
+    )
 #if defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_INVENTORY_WIDEN_MUTANT)
     `Set.union` Set.singleton "documents/renamed_program.md"
 #endif
 
+rawEntryFacetOrder :: [SourceFacet] -> [SourceFacet]
+#if defined(VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_ORDER_MUTANT)
+rawEntryFacetOrder = reverse
+#else
+rawEntryFacetOrder = id
+#endif
+
+rawRegularModeFacets, rawExecutableModeFacets, rawBinaryFacets :: [SourceFacet]
+#if defined(VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_REGULAR_MODE_ROUTE_MUTANT)
+rawRegularModeFacets = [ExecutableModeFacet]
+#else
+rawRegularModeFacets = []
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_EXECUTABLE_DROP_MUTANT)
+rawExecutableModeFacets = []
+#else
+rawExecutableModeFacets = [ExecutableModeFacet]
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_BINARY_DROP_MUTANT)
+rawBinaryFacets = []
+#else
+rawBinaryFacets = [BinaryContentFacet]
+#endif
+
+rawSymbolicLinkFacets :: Text -> [SourceFacet]
+#if defined(VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_SYMLINK_DROP_MUTANT)
+rawSymbolicLinkFacets _ = []
+#else
+rawSymbolicLinkFacets value = [SymbolicLinkFacet value]
+#endif
+
+rawShebangFacets :: Text -> [SourceFacet]
+#if defined(VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_SHEBANG_DROP_MUTANT)
+rawShebangFacets _ = []
+#else
+rawShebangFacets value = [ShebangFacet value]
+#endif
+
+rawForeignSignatureFacets :: Text -> [SourceFacet]
+#if defined(VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_FOREIGN_DROP_MUTANT)
+rawForeignSignatureFacets _ = []
+#else
+rawForeignSignatureFacets value = [ForeignSourceSignatureFacet value]
+#endif
+
+rawReasonAssembly :: [Text] -> [Text] -> [Text] -> [Text]
+rawReasonAssembly primary structural signature =
+  rawReasonOrder
+    (rawPrimaryReasons primary)
+    (rawStructuralReasons structural)
+    (rawSignatureReasons signature)
+
+rawReasonOrder :: [Text] -> [Text] -> [Text] -> [Text]
+#if defined(VALIDATION_SOURCE_CLOSURE_REASON_ORDER_MUTANT)
+rawReasonOrder primary structural signature = signature <> structural <> primary
+#else
+rawReasonOrder primary structural signature = primary <> structural <> signature
+#endif
+
+rawPrimaryReasons, rawStructuralReasons, rawSignatureReasons :: [Text] -> [Text]
+#if defined(VALIDATION_SOURCE_CLOSURE_REASON_PRIMARY_DROP_MUTANT)
+rawPrimaryReasons _ = []
+#else
+rawPrimaryReasons = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_REASON_STRUCTURAL_DROP_MUTANT)
+rawStructuralReasons _ = []
+#else
+rawStructuralReasons = id
+#endif
+#if defined(VALIDATION_SOURCE_CLOSURE_REASON_SIGNATURE_DROP_MUTANT)
+rawSignatureReasons _ = []
+#else
+rawSignatureReasons = id
+#endif
+
+rawFinalClassRetainsInitial :: SourceClass -> Bool
+#if defined(VALIDATION_SOURCE_CLOSURE_FINAL_CLASS_GUARD_WIDEN_MUTANT)
+rawFinalClassRetainsInitial _ = True
+#else
+rawFinalClassRetainsInitial = isRegistered
+#endif
+
+rawStructuralReason :: Int -> Text -> Text
+rawStructuralReason ordinal value
+#if defined(VALIDATION_SOURCE_CLOSURE_STRUCTURAL_REASON_01_MAPPING_MUTANT)
+  | ordinal == 1 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_STRUCTURAL_REASON_02_MAPPING_MUTANT)
+  | ordinal == 2 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_STRUCTURAL_REASON_03_MAPPING_MUTANT)
+  | ordinal == 3 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_STRUCTURAL_REASON_04_MAPPING_MUTANT)
+  | ordinal == 4 = value <> "-mutant"
+#endif
+  | otherwise = ordinal `seq` value
+
+rawSignatureReason :: Int -> Text -> Text
+rawSignatureReason ordinal value
+#if defined(VALIDATION_SOURCE_CLOSURE_SIGNATURE_REASON_01_MAPPING_MUTANT)
+  | ordinal == 1 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_SIGNATURE_REASON_02_MAPPING_MUTANT)
+  | ordinal == 2 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_SIGNATURE_REASON_03_MAPPING_MUTANT)
+  | ordinal == 3 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_SIGNATURE_REASON_04_MAPPING_MUTANT)
+  | ordinal == 4 = value <> "-mutant"
+#endif
+  | otherwise = ordinal `seq` value
+
+rawPrimaryReason :: Int -> Text -> Text
+rawPrimaryReason ordinal value
+#if defined(VALIDATION_SOURCE_CLOSURE_PRIMARY_REASON_01_MAPPING_MUTANT)
+  | ordinal == 1 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_PRIMARY_REASON_02_MAPPING_MUTANT)
+  | ordinal == 2 = value <> "-mutant"
+#endif
+  | otherwise = ordinal `seq` value
+
+rawTextualNulCheck :: ByteString -> Bool
+#if defined(VALIDATION_SOURCE_CLOSURE_TEXTUAL_NUL_CHECK_BYPASS_MUTANT)
+rawTextualNulCheck _ = True
+#else
+rawTextualNulCheck = not . ByteString.elem 0
+#endif
+
+rawTextualUtf8Check :: ByteString -> Bool
+#if defined(VALIDATION_SOURCE_CLOSURE_TEXTUAL_UTF8_CHECK_BYPASS_MUTANT)
+rawTextualUtf8Check _ = True
+#else
+rawTextualUtf8Check = either (const False) (const True) . TextEncoding.decodeUtf8'
+#endif
+
 entryFacets :: TrackedEntry -> [SourceFacet]
-entryFacets entry = modeFacets <> shebangFacets <> contentFacets
+entryFacets entry = rawEntryFacetOrder (modeFacets <> shebangFacets <> contentFacets)
   where
     bytes = trackedBytes entry
     modeFacets = case indexMode (trackedIndex entry) of
-      RegularFile -> []
-      ExecutableFile -> [ExecutableModeFacet]
-      SymbolicLink -> [SymbolicLinkFacet (decodeLenient bytes)]
-    shebangFacets = maybe [] (pure . ShebangFacet) (shebang bytes)
+      RegularFile -> rawRegularModeFacets
+      ExecutableFile -> rawExecutableModeFacets
+      SymbolicLink -> rawSymbolicLinkFacets (decodeLenient bytes)
+    shebangFacets = maybe [] rawShebangFacets (shebang bytes)
     contentFacets
-      | ByteString.elem 0 bytes = [BinaryContentFacet]
-      | otherwise = maybe [] (pure . ForeignSourceSignatureFacet) (foreignSourceSignature bytes)
+      | ByteString.elem 0 bytes = rawBinaryFacets
+      | otherwise = maybe [] rawForeignSignatureFacets (foreignSourceSignature bytes)
 
 disallowedStructure :: SourceClass -> [SourceFacet] -> [Text]
 disallowedStructure sourceClass facets
   | isRegistered sourceClass = []
   | otherwise =
       concat
-        [ ["tracked executable mode is not an authored-source role" | retainedExecutableFacetRefusal facets]
-        , ["tracked symbolic links are not admitted source" | retainedSymlinkFacetRefusal facets]
-        , ["tracked binary bytes are not admitted source" | retainedBinaryFacetRefusal facets]
-        , ["a shebang may not disguise an authored source role" | retainedShebangFacetRefusal facets]
+        [ [rawStructuralReason 1 "tracked executable mode is not an authored-source role" | retainedExecutableFacetRefusal facets]
+        , [rawStructuralReason 2 "tracked symbolic links are not admitted source" | retainedSymlinkFacetRefusal facets]
+        , [rawStructuralReason 3 "tracked binary bytes are not admitted source" | retainedBinaryFacetRefusal facets]
+        , [rawStructuralReason 4 "a shebang may not disguise an authored source role" | retainedShebangFacetRefusal facets]
         ]
 
 retainedExecutableFacetRefusal :: [SourceFacet] -> Bool
@@ -3542,13 +4901,13 @@ retainedShebangFacetRefusal = any isShebangFacet
 disallowedSignature :: SourceClass -> FilePath -> ByteString -> [SourceFacet] -> [Text]
 disallowedSignature sourceClass _path bytes facets
   | isRegistered sourceClass = []
-  | sourceClass == UnregisteredBehavioralSource = ["path has no admitted authored-source class"]
-  | retainedInvalidUtf8Refusal bytes = ["authored text is not valid UTF-8"]
+  | sourceClass == UnregisteredBehavioralSource = [rawSignatureReason 1 "path has no admitted authored-source class"]
+  | retainedInvalidUtf8Refusal bytes = [rawSignatureReason 2 "authored text is not valid UTF-8"]
   | sourceClass == HaskellSource && retainedHaskellForeignSignatureRefusal facets =
-      [".hs bytes begin with a foreign-language source signature"]
+      [rawSignatureReason 3 ".hs bytes begin with a foreign-language source signature"]
   | sourceClass `elem` [DocumentationInput, ProjectDeclaration]
       && retainedNoncodeForeignSignatureRefusal facets =
-      ["an admitted non-code input begins with a behavioral-source signature"]
+      [rawSignatureReason 4 "an admitted non-code input begins with a behavioral-source signature"]
   | otherwise = []
 
 retainedInvalidUtf8Refusal :: ByteString -> Bool
@@ -3574,8 +4933,8 @@ retainedNoncodeForeignSignatureRefusal = any isForeignSignatureFacet
 
 primaryReasons :: SourceClass -> FilePath -> ByteString -> [Text]
 primaryReasons (RegisteredLegacy SourcePb) _path _bytes =
-  ["pb authorization requires the complete exact snapshot-level grammar"]
-primaryReasons UnregisteredBehavioralSource _ _ = ["no closed-grammar class matched"]
+  [rawPrimaryReason 1 "pb authorization requires the complete exact snapshot-level grammar"]
+primaryReasons UnregisteredBehavioralSource _ _ = [rawPrimaryReason 2 "no closed-grammar class matched"]
 primaryReasons _ _ _ = []
 
 sourceClosureCheck :: SourceClosure -> CheckResult
@@ -3706,39 +5065,107 @@ sourceDebtPathCount identifier closure =
     , classifiedAs item == RegisteredLegacy identifier
     ]
 
+rawRenderedDebt :: Int -> Text -> Text
+rawRenderedDebt ordinal value
+#if defined(VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_01_MAPPING_MUTANT)
+  | ordinal == 1 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_02_MAPPING_MUTANT)
+  | ordinal == 2 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_03_MAPPING_MUTANT)
+  | ordinal == 3 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_04_MAPPING_MUTANT)
+  | ordinal == 4 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_05_MAPPING_MUTANT)
+  | ordinal == 5 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_06_MAPPING_MUTANT)
+  | ordinal == 6 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_07_MAPPING_MUTANT)
+  | ordinal == 7 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_08_MAPPING_MUTANT)
+  | ordinal == 8 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_09_MAPPING_MUTANT)
+  | ordinal == 9 = value <> "-mutant"
+#endif
+  | otherwise = ordinal `seq` value
+
+rawRenderedClass :: Int -> Text -> Text
+rawRenderedClass ordinal value
+#if defined(VALIDATION_SOURCE_CLOSURE_RENDER_CLASS_01_MAPPING_MUTANT)
+  | ordinal == 1 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_CLASS_02_MAPPING_MUTANT)
+  | ordinal == 2 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_CLASS_03_MAPPING_MUTANT)
+  | ordinal == 3 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_CLASS_04_MAPPING_MUTANT)
+  | ordinal == 4 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_CLASS_05_MAPPING_MUTANT)
+  | ordinal == 5 = value <> "-mutant"
+#endif
+  | otherwise = ordinal `seq` value
+
+rawRenderedMode :: Int -> Text -> Text
+rawRenderedMode ordinal value
+#if defined(VALIDATION_SOURCE_CLOSURE_RENDER_MODE_01_MAPPING_MUTANT)
+  | ordinal == 1 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_MODE_02_MAPPING_MUTANT)
+  | ordinal == 2 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_MODE_03_MAPPING_MUTANT)
+  | ordinal == 3 = value <> "-mutant"
+#endif
+  | otherwise = ordinal `seq` value
+
+rawRenderedFacet :: Int -> Text -> Text
+rawRenderedFacet ordinal value
+#if defined(VALIDATION_SOURCE_CLOSURE_RENDER_FACET_01_MAPPING_MUTANT)
+  | ordinal == 1 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_FACET_02_MAPPING_MUTANT)
+  | ordinal == 2 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_FACET_03_MAPPING_MUTANT)
+  | ordinal == 3 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_FACET_04_MAPPING_MUTANT)
+  | ordinal == 4 = value <> "-mutant"
+#elif defined(VALIDATION_SOURCE_CLOSURE_RENDER_FACET_05_MAPPING_MUTANT)
+  | ordinal == 5 = value <> "-mutant"
+#endif
+  | otherwise = ordinal `seq` value
+
 renderSourceDebtId :: SourceDebtId -> Text
-renderSourceDebtId SourceTools = "LTD-SRC-001"
-renderSourceDebtId SourceDhall = "LTD-SRC-002"
-renderSourceDebtId SourceProto = "LTD-SRC-003"
-renderSourceDebtId SourceUi = "LTD-SRC-004"
-renderSourceDebtId SourcePulumi = "LTD-SRC-005"
-renderSourceDebtId SourceTest = "LTD-SRC-006"
-renderSourceDebtId SourceProbe = "LTD-SRC-007"
-renderSourceDebtId SourcePb = "LTD-SRC-008"
-renderSourceDebtId SourceVendor = "LTD-SRC-009"
+renderSourceDebtId identifier = case identifier of
+  SourceTools -> rawRenderedDebt 1 "LTD-SRC-001"
+  SourceDhall -> rawRenderedDebt 2 "LTD-SRC-002"
+  SourceProto -> rawRenderedDebt 3 "LTD-SRC-003"
+  SourceUi -> rawRenderedDebt 4 "LTD-SRC-004"
+  SourcePulumi -> rawRenderedDebt 5 "LTD-SRC-005"
+  SourceTest -> rawRenderedDebt 6 "LTD-SRC-006"
+  SourceProbe -> rawRenderedDebt 7 "LTD-SRC-007"
+  SourcePb -> rawRenderedDebt 8 "LTD-SRC-008"
+  SourceVendor -> rawRenderedDebt 9 "LTD-SRC-009"
 
 renderSourceClass :: SourceClass -> Text
-renderSourceClass HaskellSource = "haskell"
-renderSourceClass DocumentationInput = "documentation"
-renderSourceClass ProjectDeclaration = "project-declaration"
-renderSourceClass (RegisteredLegacy identifier) = "registered:" <> renderSourceDebtId identifier
-renderSourceClass UnregisteredBehavioralSource = "unregistered"
+renderSourceClass sourceClass = case sourceClass of
+  HaskellSource -> rawRenderedClass 1 "haskell"
+  DocumentationInput -> rawRenderedClass 2 "documentation"
+  ProjectDeclaration -> rawRenderedClass 3 "project-declaration"
+  RegisteredLegacy identifier -> rawRenderedClass 4 ("registered:" <> renderSourceDebtId identifier)
+  UnregisteredBehavioralSource -> rawRenderedClass 5 "unregistered"
 
 renderIndexMode :: IndexMode -> Text
-renderIndexMode RegularFile = "100644"
-renderIndexMode ExecutableFile = "100755"
-renderIndexMode SymbolicLink = "120000"
+renderIndexMode mode = case mode of
+  RegularFile -> rawRenderedMode 1 "100644"
+  ExecutableFile -> rawRenderedMode 2 "100755"
+  SymbolicLink -> rawRenderedMode 3 "120000"
 
 renderGitObjectFormat :: GitObjectFormat -> Text
 renderGitObjectFormat GitObjectSha1 = "sha1"
 renderGitObjectFormat GitObjectSha256 = "sha256"
 
 renderSourceFacet :: SourceFacet -> Text
-renderSourceFacet ExecutableModeFacet = "executable"
-renderSourceFacet (ShebangFacet value) = "shebang=" <> value
-renderSourceFacet (SymbolicLinkFacet value) = "symlink=" <> value
-renderSourceFacet BinaryContentFacet = "binary"
-renderSourceFacet (ForeignSourceSignatureFacet value) = "foreign-signature=" <> value
+renderSourceFacet facet = case facet of
+  ExecutableModeFacet -> rawRenderedFacet 1 "executable"
+  ShebangFacet value -> rawRenderedFacet 2 ("shebang=" <> value)
+  SymbolicLinkFacet value -> rawRenderedFacet 3 ("symlink=" <> value)
+  BinaryContentFacet -> rawRenderedFacet 4 "binary"
+  ForeignSourceSignatureFacet value -> rawRenderedFacet 5 ("foreign-signature=" <> value)
 
 renderSnapshotProblem :: SnapshotProblem -> Text
 renderSnapshotProblem problem = case problem of
@@ -4014,8 +5441,18 @@ hex :: ByteString -> Text
 hex = Text.pack . concatMap byteHex . ByteString.unpack
  where
   byteHex value =
-    [ intToDigit (fromIntegral value `div` 16)
-    , intToDigit (fromIntegral value `mod` 16)
+    [ intToDigit
+#if defined(VALIDATION_SOURCE_CLOSURE_HEX_HIGH_NIBBLE_MUTANT)
+        0
+#else
+        (fromIntegral value `div` 16)
+#endif
+    , intToDigit
+#if defined(VALIDATION_SOURCE_CLOSURE_HEX_LOW_NIBBLE_MUTANT)
+        0
+#else
+        (fromIntegral value `mod` 16)
+#endif
     ]
 
 shebang :: ByteString -> Maybe Text
@@ -4105,7 +5542,7 @@ firstMatch value (candidate : rest)
   | otherwise = firstMatch value rest
 
 textual :: ByteString -> Bool
-textual bytes = not (ByteString.elem 0 bytes) && either (const False) (const True) (TextEncoding.decodeUtf8' bytes)
+textual bytes = rawTextualNulCheck bytes && rawTextualUtf8Check bytes
 
 decodeLenient :: ByteString -> Text
 decodeLenient = TextEncoding.decodeUtf8With TextError.lenientDecode

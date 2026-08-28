@@ -584,20 +584,34 @@ inventoryResourceProblems :: [value] -> [Finding]
 inventoryResourceProblems values =
   [ resourceFinding "inventory-entries" maximumInventoryEntries observed
   | let observed = boundedLength (maximumInventoryEntries + 1) values
-  , observed > maximumInventoryEntries
+  , inventoryCardinalityExceeded observed
   ]
+
+inventoryCardinalityExceeded :: Int -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_INVENTORY_CARDINALITY_PREDICATE_BYPASS_MUTANT)
+inventoryCardinalityExceeded _ = False
+#else
+inventoryCardinalityExceeded observed = observed > maximumInventoryEntries
+#endif
 
 effectResourceProblems :: [value] -> [Finding]
 effectResourceProblems values =
   [ resourceFinding "resolved-effects" maximumEffects observed
   | let observed = boundedLength (maximumEffects + 1) values
-  , observed > maximumEffects
+  , effectCardinalityExceeded observed
   ]
+
+effectCardinalityExceeded :: Int -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_EFFECT_CARDINALITY_PREDICATE_BYPASS_MUTANT)
+effectCardinalityExceeded _ = False
+#else
+effectCardinalityExceeded observed = observed > maximumEffects
+#endif
 
 rawEntryPreflight :: (FilePath, Text, Text, Text) -> [Finding]
 rawEntryPreflight (path, classTag, mode, objectId) =
   orderedRawEntryPreflightProblems
-    ( if null resourceAndPathProblems
+    ( if entryPreflightSemanticsAdmitted resourceAndPathProblems
         then
           classTagProblems path classTag
             <> modeTagProblems path mode
@@ -611,10 +625,17 @@ rawEntryPreflight (path, classTag, mode, objectId) =
       <> fieldProblems "mode-tag" mode
       <> fieldProblems "object-id" objectId
 
+entryPreflightSemanticsAdmitted :: [Finding] -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_ENTRY_PREFLIGHT_ROUTE_BYPASS_MUTANT)
+entryPreflightSemanticsAdmitted _ = False
+#else
+entryPreflightSemanticsAdmitted = null
+#endif
+
 rawEffectPreflight :: (FilePath, Text, Text, Text, Text, Text) -> [Finding]
 rawEffectPreflight (modulePath, moduleName, bindingName, targetTag, targetValue, useTag) =
   orderedRawEffectPreflightProblems
-    ( if null resourceAndPathProblems
+    ( if effectPreflightSemanticsAdmitted resourceAndPathProblems
         then
           effectIdentityProblems modulePath moduleName bindingName
             <> targetTagProblems modulePath targetTag targetValue
@@ -629,6 +650,13 @@ rawEffectPreflight (modulePath, moduleName, bindingName, targetTag, targetValue,
       <> fieldProblems "effect-target-tag" targetTag
       <> fieldProblems "effect-target-value" targetValue
       <> fieldProblems "effect-use-tag" useTag
+
+effectPreflightSemanticsAdmitted :: [Finding] -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_EFFECT_PREFLIGHT_ROUTE_BYPASS_MUTANT)
+effectPreflightSemanticsAdmitted _ = False
+#else
+effectPreflightSemanticsAdmitted = null
+#endif
 
 orderedRawEntryPreflightProblems, orderedRawEffectPreflightProblems :: [Finding] -> [Finding]
 #if defined(VALIDATION_SOURCE_CONSUMER_ENTRY_PREFLIGHT_PROBLEM_ORDER_MUTANT)
@@ -705,19 +733,19 @@ pathProblems field path =
  where
   observedLength = boundedStringUtf8Bytes (maximumPathBytes + 1) path
   resourceProblems =
-    [resourceFinding (field <> "-bytes") maximumPathBytes observedLength | observedLength > maximumPathBytes]
+    [resourceFinding (field <> "-bytes") maximumPathBytes observedLength | pathByteLimitExceeded observedLength]
   shapeProblems
-    | not (null resourceProblems) = []
+    | not (pathShapeSemanticsAdmitted resourceProblems) = []
     | otherwise =
         let segments = Text.splitOn "/" (Text.pack path)
             depth = boundedLength (maximumPathDepth + 1) segments
             overSegments =
               [ segment
               | segment <- segments
-              , boundedTextUtf8Bytes (maximumSegmentBytes + 1) segment > maximumSegmentBytes
+              , pathSegmentLimitExceeded segment
               ]
          in orderedPathShapeProblems
-              ( [resourceFinding (field <> "-depth") maximumPathDepth depth | depth > maximumPathDepth]
+              ( [resourceFinding (field <> "-depth") maximumPathDepth depth | pathDepthLimitExceeded depth]
                   <> [ resourceFinding
                         (field <> "-segment-bytes")
                         maximumSegmentBytes
@@ -734,6 +762,35 @@ pathProblems field path =
                      ]
               )
 
+pathByteLimitExceeded :: Int -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_PATH_BYTE_PREDICATE_BYPASS_MUTANT)
+pathByteLimitExceeded _ = False
+#else
+pathByteLimitExceeded observed = observed > maximumPathBytes
+#endif
+
+pathShapeSemanticsAdmitted :: [Finding] -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_PATH_SHAPE_ROUTE_BYPASS_MUTANT)
+pathShapeSemanticsAdmitted _ = False
+#else
+pathShapeSemanticsAdmitted = null
+#endif
+
+pathDepthLimitExceeded :: Int -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_PATH_DEPTH_PREDICATE_BYPASS_MUTANT)
+pathDepthLimitExceeded _ = False
+#else
+pathDepthLimitExceeded observed = observed > maximumPathDepth
+#endif
+
+pathSegmentLimitExceeded :: Text -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_PATH_SEGMENT_PREDICATE_BYPASS_MUTANT)
+pathSegmentLimitExceeded _ = False
+#else
+pathSegmentLimitExceeded segment =
+  boundedTextUtf8Bytes (maximumSegmentBytes + 1) segment > maximumSegmentBytes
+#endif
+
 orderedPathShapeProblems :: [Finding] -> [Finding]
 #if defined(VALIDATION_SOURCE_CONSUMER_PATH_SHAPE_PROBLEM_ORDER_MUTANT)
 orderedPathShapeProblems = reverse
@@ -745,8 +802,15 @@ fieldProblems :: Text -> Text -> [Finding]
 fieldProblems field value =
   [ resourceFinding (field <> "-bytes") maximumFieldBytes observed
   | let observed = boundedTextUtf8Bytes (maximumFieldBytes + 1) value
-  , observed > maximumFieldBytes
+  , fieldLimitExceeded observed
   ]
+
+fieldLimitExceeded :: Int -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_FIELD_PREDICATE_BYPASS_MUTANT)
+fieldLimitExceeded _ = False
+#else
+fieldLimitExceeded observed = observed > maximumFieldBytes
+#endif
 
 classTagProblems :: FilePath -> Text -> [Finding]
 classTagProblems path classTag =
@@ -1718,21 +1782,42 @@ orderProblems entries =
 strictlyIncreasing :: Ord value => [value] -> Bool
 strictlyIncreasing [] = True
 strictlyIncreasing [_] = True
-strictlyIncreasing (first : second : rest) = first < second && strictlyIncreasing (second : rest)
+strictlyIncreasing (first : second : rest) = strictlyOrderedPair first second && strictlyIncreasing (second : rest)
+
+strictlyOrderedPair :: Ord value => value -> value -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_INVENTORY_ORDER_COMPARATOR_MUTANT)
+strictlyOrderedPair first second = first <= second
+#else
+strictlyOrderedPair first second = first < second
+#endif
 
 bindingCountProblems :: [RawEntry] -> [Finding]
 bindingCountProblems entries =
   [ resourceFinding "content-bindings" maximumBindings count
   | let count = boundedLength (maximumBindings + 1) [() | entry <- entries, bindingCountTag (rawEntryClassTag entry)]
-  , count > maximumBindings
+  , bindingCountLimitExceeded count
   ]
+
+bindingCountLimitExceeded :: Int -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_BINDING_COUNT_PREDICATE_BYPASS_MUTANT)
+bindingCountLimitExceeded _ = False
+#else
+bindingCountLimitExceeded count = count > maximumBindings
+#endif
 
 haskellCountProblems :: [RawEntry] -> [Finding]
 haskellCountProblems entries =
   [ resourceFinding "haskell-subjects" maximumHaskellSubjects count
   | let count = boundedLength (maximumHaskellSubjects + 1) [() | entry <- entries, haskellCountTag (rawEntryClassTag entry)]
-  , count > maximumHaskellSubjects
+  , haskellCountLimitExceeded count
   ]
+
+haskellCountLimitExceeded :: Int -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_HASKELL_COUNT_PREDICATE_BYPASS_MUTANT)
+haskellCountLimitExceeded _ = False
+#else
+haskellCountLimitExceeded count = count > maximumHaskellSubjects
+#endif
 
 emptyInventoryProblems :: [RawEntry] -> [Finding]
 #if defined(VALIDATION_SOURCE_CONSUMER_EMPTY_INVENTORY_BYPASS_MUTANT)
@@ -2220,7 +2305,7 @@ preflightEffectCount = boundedLength 65
 
 completeSnapshotValue :: Text -> Text
 #if defined(VALIDATION_SOURCE_CONSUMER_COMPLETE_SNAPSHOT_VALUE_MAPPING_MUTANT)
-completeSnapshotValue value = value <> "<"
+completeSnapshotValue value = value <> "[snapshot-value-mapping-mutant]"
 #else
 completeSnapshotValue value = value
 #endif

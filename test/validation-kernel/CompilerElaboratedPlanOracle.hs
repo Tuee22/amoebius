@@ -2,7 +2,13 @@
 {-# LANGUAGE PackageImports #-}
 
 module CompilerElaboratedPlanOracle
-  ( runCompilerElaboratedPlanOracle
+  ( compilerElaboratedPlanAffectedExactCaseLabels
+  , compilerElaboratedPlanExactCaseLabels
+  , compilerElaboratedPlanSelectorNames
+  , runCompilerElaboratedPlanOracle
+  , runCompilerElaboratedPlanSelectorImpactOracle
+  , runCompilerElaboratedPlanSelectorIsolationOracle
+  , runCompilerElaboratedPlanSelectorOracle
   ) where
 
 import Amoebius.Validation.CompilerElaboratedPlan
@@ -14,6 +20,7 @@ import "crypton" Crypto.Hash (Digest, SHA256, hash)
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Char8 qualified as ByteString8
+import Data.List (isPrefixOf)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Text.Read (readMaybe)
@@ -699,11 +706,1485 @@ selectorIntentRegistry =
   , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_MANDATORY_PREFIX_DROP_MUTANT" "the exact observed-result ceiling retains fifteen mandatory refusals and 113 exact source-path rows"
   , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_RESULT_PROBLEM_LIMIT_BYPASS_MUTANT" "the first observed variable row beyond the result ceiling retains every mandatory refusal before one exact limit row"
   ]
+    <> newSelectorIntents
+    <> auditSelectorIntents
+    <> routingAuditSelectorIntents
 
 -- These are the independently declared executable exact-case labels referenced
--- by the closed selector registry.  The registry checks require each label to
--- occur here exactly once; shared selector targets therefore cannot create a
--- false duplicate case declaration.
+signatureExactCaseLabels :: [String]
+signatureExactCaseLabels =
+  [ "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , "the aggregate component alternative has one exact ordered digest-bound public refusal"
+  , "an install plan without a local component refuses empty discovery"
+  , "a duplicate unit id is refused at the exact identity"
+  , "the same source-root/component pair cannot be represented by two units"
+  , "a missing compiler identity field is explicit"
+  , "an unknown top-level identity field changes the closed schema"
+  , "duplicate root keys are rejected before object normalization"
+  , "three equal root keys retain both duplicate occurrences"
+  , "duplicate flag keys are rejected at their exact nested scope"
+  , "duplicate unit keys are rejected at their exact array-object scope"
+  , "duplicate nested repository keys are rejected before nested object normalization"
+  , "escaped-equivalent root keys are duplicate decoded identities"
+  , "duplicate nested component keys retain an unambiguous quoted scope"
+  , "trailing garbage cannot be hidden behind an earlier duplicate"
+  , "an empty configured component map refuses discovery"
+  , "component names follow the closed Cabal-plan grammar"
+  , "compiler identities require the closed ghc numeric-version grammar"
+  , "flag names cannot be empty or detach configuration subject identity"
+  , "local source roots require the bounded absolute path grammar"
+  , "aggregate units reject a top-level ordinary dependency instead of ignoring it"
+  , "aggregate units reject a top-level executable dependency instead of ignoring it"
+  , "configured units cannot present both direct and aggregate component shapes"
+  , "aggregate nested dependencies reject duplicate edges at the component locus"
+  , "aggregate nested dependencies reject unknown unit identities"
+  , "aggregate nested self dependencies retain both edge and cycle defects"
+  , "a duplicate ordinary dependency remains an exact edge-locus defect"
+  , "a duplicate executable dependency remains distinct from an ordinary edge defect"
+  , "an unknown executable dependency retains its executable-edge locus"
+  , "a self dependency is both the exact edge defect and a unit cycle"
+  , "a two-unit dependency cycle is refused as one closed identity set"
+  , "a malformed remote source hash is one exact identity defect"
+  , "a malformed repository Cabal hash is one exact identity defect"
+  , "a missing remote source hash is explicit"
+  , "a missing repository Cabal hash is explicit"
+  , "repository-tar accepts only the frozen secure-repo subtype"
+  , "source-repo accepts only the frozen Git subtype"
+  , "local sources reject an unexpected claimed source hash"
+  , "source repositories reject an unexpected Cabal hash"
+  , "a mutable source-repository tag is not accepted as an immutable source identity"
+  , "an inplace configured unit without its build-info path is refused"
+  , "a local configured unit without its dist directory is refused"
+  , "a global library rejects an impossible local build-info path"
+  , "a library rejects an unexpected binary path"
+  , "an executable requires its retained binary path"
+  , "a dependency swap to an absent unit id cannot remain a closed graph"
+  , "changing a local source declaration to a remote package type cannot retain local style"
+  , "an unknown local compiler input is unsupported schema"
+  , "an unterminated generic array retains the token-scan invalid mapping"
+  , "an unterminated generic object retains the token-scan invalid mapping"
+  , "an invalid root token retains the token-scan invalid mapping"
+  , "a record closing token is counted at the exact global token boundary"
+  , "all JSON value kinds retain their exact type names"
+  , "an empty required text field is not accepted as a value"
+  , "a configured unit requires its package-source object"
+  , "a configured package-source field retains its object type"
+  , "an empty optional path is refused before field-combination analysis"
+  , "a mistyped optional path is refused before field-combination analysis"
+  , "a pre-existing unit requires its dependency array"
+  , "a dependency field retains its array type"
+  , "an empty dependency identity retains its exact element locus"
+  , "a dependency element retains its text type"
+  , "a dependency identity is checked by the shared constrained-text grammar"
+  , "uppercase ASCII remains an admitted portable-identity alternative"
+  , "a test component independently requires its binary path"
+  , "a benchmark component independently requires its binary path"
+  , "multiple unknown fields retain deterministic lexical order"
+  , "pre-existing unit dependencies remain projected into invariant checks"
+  , "the Cabal schema version is an exact closed alternative"
+  , "the Cabal library schema version is an independently exact closed alternative"
+  , "the compiler identifier prefix is exact"
+  , "the compiler numeric version rejects an empty segment independently"
+  , "the compiler numeric version rejects a non-decimal symbol independently"
+  , "a portable identity rejects a leading punctuation boundary independently"
+  , "a portable identity rejects a trailing punctuation boundary independently"
+  , "a portable identity rejects an independently forbidden character"
+  , "a platform token rejects a leading punctuation boundary independently"
+  , "a platform token rejects a trailing punctuation boundary independently"
+  , "a platform token rejects an independently forbidden character"
+  , "a package name rejects an empty hyphen-delimited segment"
+  , "a package name rejects an independently forbidden segment character"
+  , "a package version rejects an empty decimal segment"
+  , "a package version rejects an independently non-decimal symbol"
+  , "a flag name rejects a leading punctuation boundary independently"
+  , "a flag name rejects a trailing punctuation boundary independently"
+  , "a flag name rejects an independently forbidden character"
+  , "a component builtin is drawn from the exact closed set"
+  , "a qualified component prefix is drawn from the exact closed set"
+  , "a qualified component suffix rejects a leading punctuation boundary"
+  , "a qualified component suffix rejects a trailing punctuation boundary"
+  , "a qualified component suffix rejects an independently forbidden character"
+  , "the admitted component alternative remains exact: lib"
+  , "the admitted component alternative remains exact: setup"
+  , "the admitted component alternative remains exact: lib:core"
+  , "the admitted component alternative remains exact: exe:tool"
+  , "the admitted component alternative remains exact: test:spec"
+  , "the admitted component alternative remains exact: bench:perf"
+  , "an unsupported install-unit discriminator is exact"
+  , "an unsupported package-source discriminator is exact"
+  , "an unsupported configured style is exact"
+  , "a configured unit must state one component shape"
+  , "a local source cannot claim the global build style"
+  , "a global unit independently forbids a dist-directory path"
+  , "a local source independently forbids a claimed Cabal hash"
+  , "a source repository independently requires its source hash"
+  , "source scheme"
+  , "source payload"
+  , "source lower visible-character bound"
+  , "source upper ASCII-character bound"
+  , "source backslash"
+  , "path absolute marker"
+  , "path lower visible-character bound"
+  , "path upper ASCII-character bound"
+  , "path backslash"
+  , "path colon"
+  , "path empty trailing segment"
+  , "path parent segment"
+  , "path dot-segment position"
+  , "the path root alternative is admitted before the independent probe refusal"
+  , "the final dot-segment alternative is admitted before the independent probe refusal"
+  , "a SHA-256 identity rejects width 63 exactly"
+  , "a SHA-256 identity rejects a non-lower-hex symbol exactly"
+  , "a Git SHA-1 identity rejects width 39 exactly"
+  , "a Git SHA-256 identity rejects width 63 independently"
+  , "a Git object identity rejects a non-lower-hex symbol exactly"
+  , "the Git SHA-256 width alternative reaches semantic plan analysis"
+  , "the exact input-byte ceiling reaches the exact decoded root refusal"
+  , "one byte beyond the input ceiling is refused before tokenization"
+  , "the exact nesting ceiling reaches the exact decoded root refusal"
+  , "one container beyond the nesting ceiling is refused exactly"
+  , "the exact decoded-text ceiling reaches the exact decoded root refusal"
+  , "one decoded character beyond the text ceiling is refused exactly"
+  , "the exact generic-array ceiling reaches the exact decoded root refusal"
+  , "one element beyond the collection ceiling is refused exactly"
+  , "the exact generic-object-member ceiling reaches the semantic problem cap"
+  , "one generic object member beyond the ceiling is refused before decoding"
+  , "the exact JSON key-text ceiling retains every closed-schema refusal"
+  , "one code point beyond the JSON key-text ceiling is refused before decoding"
+  , "exactly one million structural tokens reach the decoded root refusal"
+  , "the first token beyond the token ceiling is refused exactly"
+  , "the exact duplicate-problem ceiling retains every duplicate finding"
+  , "one duplicate problem beyond the problem ceiling is refused exactly"
+  , "the exact semantic-problem ceiling retains every exact entry locus"
+  , "one semantic problem beyond the ceiling refuses before further traversal"
+  , "the exact observed-result ceiling retains fifteen mandatory refusals and 113 exact source-path rows"
+  , "the first observed variable row beyond the result ceiling retains every mandatory refusal before one exact limit row"
+  , "the exact unit ceiling reaches the independently smaller problem ceiling"
+  , "one install unit beyond the unit ceiling is refused before unit traversal"
+  , "the exact component ceiling retains every exact member locus"
+  , "one component beyond the component ceiling is refused before member traversal"
+  , "the aggregate component ceiling counts direct components across unit boundaries before rendering"
+  , "the exact dependency ceiling reaches the independently smaller problem ceiling"
+  , "one dependency beyond the dependency ceiling is refused before edge traversal"
+  , "the aggregate dependency ceiling counts root executable edges before traversal"
+  , "the aggregate dependency ceiling counts nested ordinary edges before traversal"
+  , "the aggregate dependency ceiling counts nested executable edges before traversal"
+  , "the exact flag ceiling retains every exact flag-value locus"
+  , "one flag beyond the flag ceiling is refused before flag traversal"
+  , "the exact source-object member ceiling reaches closed-schema parsing"
+  , "one source-object member beyond the ceiling is refused before source traversal"
+  , "the exact semantic-scalar byte ceiling reaches the flag value-type refusal"
+  , "one semantic-scalar byte beyond the ceiling is refused at the exact flag key"
+  , "the exact source-locator byte ceiling reaches the independent repository-type refusal"
+  , "one source-locator byte beyond the ceiling is refused at the locator locus"
+  , "the exact path byte ceiling reaches the independent unknown-field refusal"
+  , "one path byte beyond the ceiling is refused at the path locus"
+  , "the exact path-segment ceiling reaches the independent unknown-field refusal"
+  , "one path segment beyond the ceiling is refused at the path locus"
+  , "the exact path-member byte ceiling reaches the independent unknown-field refusal"
+  , "one path-member byte beyond the ceiling is refused at the path locus"
+  ]
+
+supplementalExactCaseLabels :: [String]
+supplementalExactCaseLabels =
+  [ "the local build-info and dist-directory paths remain exact diagnostic values"
+  , "minimal closed-schema plan was rejected"
+  , "the complete accepted semantic snapshot is independently literal and input-bound"
+  , "the parser freezes both Cabal plan schema versions"
+  , "compiler identity is read from the immutable plan bytes"
+  , "platform retains the exact architecture and operating-system pair"
+  , "missing local source ownership is precise typed residue, not an empty-path claim"
+  , "the complete public diagnostic wire is exact, ordered, digest-bound, and permanently refusing"
+  , "multiple flags retain deterministic lexical order"
+  , "the local component and its exact dependency unit ids are retained"
+  , "Cabal 3.16 plan JSON supplies no component source paths"
+  , "pre-existing, remote, and local units remain distinct"
+  , "every exact unit id is retained"
+  , "package provenance and Cabal build style remain separate"
+  , "direct component shape remains explicit instead of collapsing into an aggregate"
+  , "selected local flags remain exact typed values"
+  , "the remote repository location is bound separately from a local source root"
+  , "the local package root is retained without normalization or invention"
+  , "portable identity retains the colon character alternative"
+  , "portable identity retains the dot character alternative"
+  , "portable identity retains the plus character alternative"
+  , "portable identity retains the hyphen character alternative"
+  , "portable identity retains the underscore character alternative"
+  , "platform tokens retain the hyphen character alternative"
+  , "platform tokens retain the underscore character alternative"
+  , "the admitted component alternative remains exact: lib:core.name"
+  , "the admitted component alternative remains exact: lib:core-name"
+  , "the admitted component alternative remains exact: lib:core_name"
+  , "the admitted flag alternative remains exact: variant-name"
+  , "the admitted flag alternative remains exact: variant_name"
+  , "SHA-256 lower-hex alphabetic alternative remains admitted"
+  , "SHA-256 lower-hex digit alternative remains admitted"
+  , "source-repository global projection retains kind, repository type, location, and tag"
+  , "source-repository inplace style remains distinct"
+  , "multiple local roots retain deterministic subject order"
+  ]
+
+allExecutableExactCaseLabels :: [String]
+allExecutableExactCaseLabels = signatureExactCaseLabels <> supplementalExactCaseLabels
+
+
+newSelectorIntents :: [SelectorIntent]
+newSelectorIntents =
+  [ SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_AESON_DECODE_FAILURE_MAPPING_MUTANT" "trailing garbage cannot be hidden behind an earlier duplicate"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_DIGIT_ALTERNATIVE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_LOWERCASE_ALTERNATIVE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_UPPERCASE_ALTERNATIVE_DROP_MUTANT" "uppercase ASCII remains an admitted portable-identity alternative"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_BENCHMARK_CLASSIFICATION_DROP_MUTANT" "a benchmark component independently requires its binary path"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_EXECUTABLE_CLASSIFICATION_DROP_MUTANT" "a duplicate executable dependency remains distinct from an ordinary edge defect"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_LIBRARY_CLASSIFICATION_WIDEN_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_TEST_CLASSIFICATION_DROP_MUTANT" "a test component independently requires its binary path"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BOOLEAN_MAP_VALUE_TYPE_ROUTE_MUTANT" "one semantic-scalar byte beyond the ceiling is refused at the exact flag key"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BOUNDED_PROBLEM_ORDER_MUTANT" "aggregate nested self dependencies retain both edge and cycle defects"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CHECK_NAME_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCIES_PROJECTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT" "aggregate nested dependencies reject duplicate edges at the component locus"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCIES_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT" "a duplicate executable dependency remains distinct from an ordinary edge defect"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_NAME_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_ORDER_MUTANT" "the exact observed-result ceiling retains fifteen mandatory refusals and 113 exact source-path rows"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SOURCE_PATHS_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIT_ID_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_ARRAY_VALUE_GATE_BYPASS_MUTANT" "a dependency identity is checked by the shared constrained-text grammar"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_PATH_VALUE_GATE_BYPASS_MUTANT" "local source roots require the bounded absolute path grammar"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_TEXT_VALUE_GATE_BYPASS_MUTANT" "compiler identities require the closed ghc numeric-version grammar"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_ELEMENT_TYPE_ROUTE_MUTANT" "a dependency element retains its text type"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_EMPTY_TEXT_ROUTE_MUTANT" "an empty dependency identity retains its exact element locus"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_MISSING_ROUTE_MUTANT" "a pre-existing unit requires its dependency array"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_TYPE_ROUTE_MUTANT" "a dependency field retains its array type"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_CYCLE_PROBLEM_CONTRIBUTION_DROP_MUTANT" "aggregate nested self dependencies retain both edge and cycle defects"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT" "aggregate nested dependencies reject duplicate edges at the component locus"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_GROUPING_BYPASS_MUTANT" "a duplicate unit id is refused at the exact identity"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_LOCAL_COMPONENT_PROBLEM_CONTRIBUTION_DROP_MUTANT" "the same source-root/component pair cannot be represented by two units"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_UNIT_PROBLEM_CONTRIBUTION_DROP_MUTANT" "a duplicate unit id is refused at the exact identity"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_EMPTY_COMPONENT_MAP_GUARD_BYPASS_MUTANT" "an empty configured component map refuses discovery"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_CODE_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_DETAIL_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_ORDER_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_SUBJECT_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_ORDER_MUTANT" "multiple flags retain deterministic lexical order"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_LOCAL_DISCOVERY_GUARD_BYPASS_MUTANT" "an install plan without a local component refuses empty discovery"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_GROUPED_VALUE_RENDER_DROP_MUTANT" "the same source-root/component pair cannot be represented by two units"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_KEY_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_VALUE_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_KEY_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_VALUE_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_NON_OBJECT_MAPPING_MUTANT" "the exact semantic-problem ceiling retains every exact entry locus"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_OBJECT_ROUTE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_DEPTH_ROUTE_MUTANT" "one container beyond the nesting ceiling is refused exactly"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_END_TOKEN_COUNT_DROP_MUTANT" "a record closing token is counted at the exact global token boundary"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ERROR_ROUTE_MUTANT" "an unterminated generic array retains the token-scan invalid mapping"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ITEM_TOKEN_COUNT_DROP_MUTANT" "a record closing token is counted at the exact global token boundary"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_TYPE_MAPPING_MUTANT" "all JSON value kinds retain their exact type names"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_BOOLEAN_TYPE_MAPPING_MUTANT" "all JSON value kinds retain their exact type names"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_APPEND_DROP_MUTANT" "duplicate flag keys are rejected at their exact nested scope"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_RENDER_MUTANT" "duplicate flag keys are rejected at their exact nested scope"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_SCOPE_MAPPING_MUTANT" "flag names cannot be empty or detach configuration subject identity"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_APPEND_DROP_MUTANT" "duplicate flag keys are rejected at their exact nested scope"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_RENDER_MUTANT" "duplicate flag keys are rejected at their exact nested scope"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INVALID_FAILURE_MAPPING_MUTANT" "an unterminated generic array retains the token-scan invalid mapping"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_LITERAL_TOKEN_ROUTE_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NULL_TYPE_MAPPING_MUTANT" "all JSON value kinds retain their exact type names"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TOKEN_ROUTE_MUTANT" "all JSON value kinds retain their exact type names"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TYPE_MAPPING_MUTANT" "all JSON value kinds retain their exact type names"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_OBJECT_TYPE_MAPPING_MUTANT" "all JSON value kinds retain their exact type names"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_DEPTH_ROUTE_MUTANT" "one container beyond the nesting ceiling is refused exactly"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_END_TOKEN_COUNT_DROP_MUTANT" "a record closing token is counted at the exact global token boundary"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_ERROR_ROUTE_MUTANT" "an unterminated generic object retains the token-scan invalid mapping"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_PAIR_TOKEN_COUNT_DROP_MUTANT" "a record closing token is counted at the exact global token boundary"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LABEL_MAPPING_MUTANT" "a record closing token is counted at the exact global token boundary"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LIMIT_MAPPING_MUTANT" "a record closing token is counted at the exact global token boundary"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_OBSERVED_MAPPING_MUTANT" "a record closing token is counted at the exact global token boundary"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_STRING_TYPE_MAPPING_MUTANT" "all JSON value kinds retain their exact type names"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TEXT_TOKEN_ROUTE_MUTANT" "one decoded character beyond the text ceiling is refused exactly"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TOKEN_ERROR_ROUTE_MUTANT" "an invalid root token retains the token-scan invalid mapping"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_DISCOVERY_PROBLEM_CONTRIBUTION_DROP_MUTANT" "an install plan without a local component refuses empty discovery"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_DIGEST_PROJECTION_MUTANT" "an install plan without a local component refuses empty discovery"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_NON_OBJECT_MAPPING_MUTANT" "the exact component ceiling retains every exact member locus"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_OBJECT_ROUTE_DROP_MUTANT" "the aggregate component alternative has one exact ordered digest-bound public refusal"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_UNIT_ORDER_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_EMPTY_ROUTE_MUTANT" "an empty optional path is refused before field-combination analysis"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_MISSING_ROUTE_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_TYPE_ROUTE_MUTANT" "a mistyped optional path is refused before field-combination analysis"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_PROBLEMS_PROJECTION_DROP_MUTANT" "a missing compiler identity field is explicit"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_VALUE_PROJECTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_PROBLEM_CONTRIBUTION_DROP_MUTANT" "an empty configured component map refuses discovery"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_VALUE_CONTRIBUTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_DIGEST_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_INPUT_BYTES_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_PROBLEM_ORDER_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_SNAPSHOT_PROJECTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_MISSING_ROUTE_MUTANT" "a configured unit requires its package-source object"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_TYPE_ROUTE_MUTANT" "a configured package-source field retains its object type"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_EMPTY_ROUTE_MUTANT" "an empty required text field is not accepted as a value"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_MISSING_ROUTE_MUTANT" "a missing compiler identity field is explicit"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_TYPE_ROUTE_MUTANT" "all JSON value kinds retain their exact type names"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_MISSING_ROUTE_MUTANT" "the exact JSON key-text ceiling retains every closed-schema refusal"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_TYPE_ROUTE_MUTANT" "all JSON value kinds retain their exact type names"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_NON_OBJECT_MAPPING_MUTANT" "the exact input-byte ceiling reaches the exact decoded root refusal"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBJECT_ROUTE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_KEY_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_VALUE_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HEX_ALPHA_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HIGH_NIBBLE_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_LOW_NIBBLE_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_KEY_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_VALUE_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SUBJECT_OBSERVATION_CONTRIBUTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BINARY_PATH_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_INFO_PATH_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_STYLE_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_CABAL_SHA256_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENTS_PROJECTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENT_SHAPE_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCIES_PROJECTION_DROP_MUTANT" "pre-existing unit dependencies remain projected into invariant checks"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT" "pre-existing unit dependencies remain projected into invariant checks"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DIST_DIRECTORY_PATH_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_FLAGS_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ID_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_KEY_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_ORDER_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_VALUE_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORDER_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORIGIN_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_NAME_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_VERSION_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_REPOSITORY_TYPE_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_KIND_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_LOCATION_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_ROOT_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_SHA256_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_TAG_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_DETECTION_BYPASS_MUTANT" "an unknown top-level identity field changes the closed schema"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_ORDER_MUTANT" "multiple unknown fields retain deterministic lexical order"
+  ]
+
+
+newSelectorImpactSignatures :: [(String, String)]
+newSelectorImpactSignatures =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_AESON_DECODE_FAILURE_MAPPING_MUTANT", "00000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_DIGIT_ALTERNATIVE_DROP_MUTANT", "11111110000000011111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111111111111111111100000000000000001111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_LOWERCASE_ALTERNATIVE_DROP_MUTANT", "11111110000000011111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111111111111111111100000000000000001111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_UPPERCASE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_BENCHMARK_CLASSIFICATION_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_EXECUTABLE_CLASSIFICATION_DROP_MUTANT", "00000000000000000000000000011000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_LIBRARY_CLASSIFICATION_WIDEN_MUTANT", "10111000000000000000000000100111111001111111011100000000110000000000000000000001111000000000000001010111100000000000001111111100000000000000000000000001000000000000101010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_TEST_CLASSIFICATION_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BOOLEAN_MAP_VALUE_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111110000000000000000000000000000000000000000000000000000000000010001100000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BOUNDED_PROBLEM_ORDER_MUTANT", "00000000000000000000000001000100000000000000000000001000000000000011000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CHECK_NAME_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCIES_PROJECTION_DROP_MUTANT", "11000000000000000000000111100110000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000111100100000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCIES_PROJECTION_MUTANT", "11111000000000000000000111111110000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000000011000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_NAME_PROJECTION_MUTANT", "11001000000000000000000111111100000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_ORDER_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SOURCE_PATHS_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIT_ID_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_ARRAY_VALUE_GATE_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_PATH_VALUE_GATE_BYPASS_MUTANT", "00000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000111111110000000000000000000000000000000000000000000000010101")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_TEXT_VALUE_GATE_BYPASS_MUTANT", "00000000000000000100000000000000000000000000000000000000000000000000001111111111111000000000000000000000011111000000000000000000000000000000000000000000000000000001000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_ELEMENT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_EMPTY_TEXT_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_MISSING_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_CYCLE_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000001000110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000111111100000000000000010000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_GROUPING_BYPASS_MUTANT", "00010000000000000000000100110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_LOCAL_COMPONENT_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_UNIT_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_EMPTY_COMPONENT_MAP_GUARD_BYPASS_MUTANT", "00000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_CODE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_DETAIL_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_ORDER_MUTANT", "11000000000000000000000001000100000000000000000000001000110000000011000000000000000000000000000000000000011111000000000000000000000000001000001011001000000010000101010101")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_SUBJECT_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_ORDER_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_LOCAL_DISCOVERY_GUARD_BYPASS_MUTANT", "00100000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GROUPED_VALUE_RENDER_DROP_MUTANT", "00001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_KEY_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_VALUE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_KEY_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_VALUE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_NON_OBJECT_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_OBJECT_ROUTE_DROP_MUTANT", "11111000000000011011111111111111111111111111111100000011111111111101000000000001111111111111111111111111111111111111111111111100000000000000000011001001000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_DEPTH_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_END_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ERROR_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ITEM_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_BOOLEAN_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001001010101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_APPEND_DROP_MUTANT", "00000000011101000011110000000000000111101111100100000011111111111100000000000001111111000001111110000011011111111111111100000000000000000000001000001000000010101111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_RENDER_MUTANT", "00000000011101000011110000000000000111101111100100000011111111111100000000000001111111000001111110000011011111111111111100000000000000000000001000001000000010101111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_SCOPE_MAPPING_MUTANT", "00000000000000000011000000000000000110000000000000000000000000000000000000000000000111000001111110000000011111111111110000000000000000000000000000001000000010101111010101")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_APPEND_DROP_MUTANT", "00000000011101000011110000000000000111101111100100000011111111111100000000000001111111000001111110000011011111111111111100000000000000000000001000001000000010101111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_RENDER_MUTANT", "00000000011101000011110000000000000111101111100100000011111111111100000000000001111111000001111110000011011111111111111100000000000000000000001000001000000010101111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INVALID_FAILURE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000011100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_LITERAL_TOKEN_ROUTE_MUTANT", "11011111110010101111001000100110000001000001010100011001010101010010111111111111111111111111111111110001000000000000001100000010100011111011111100111101100011111100111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NULL_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000001111110000000000000000000000000000000000000000000000000000000000010001100000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TOKEN_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_OBJECT_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_DEPTH_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_END_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_ERROR_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_PAIR_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LABEL_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000010101010101010000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LIMIT_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000010101010101010000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_OBSERVED_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000010101010101010000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_STRING_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TEXT_TOKEN_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TOKEN_ERROR_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_DISCOVERY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00100000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_DIGEST_PROJECTION_MUTANT", "00111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111100111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_NON_OBJECT_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_OBJECT_ROUTE_DROP_MUTANT", "01000000000000000000110111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_UNIT_ORDER_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_EMPTY_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_MISSING_ROUTE_MUTANT", "11111000000000011011111111100111111111111110111100000011110000001100000000000001111111111111110001111111111111111111111111111100000000000000000011001001000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_PROBLEMS_PROJECTION_DROP_MUTANT", "00000100000000011111111000000001111111111111101100001111111111111100001111111111111111111111111111111111111111111111111111111000000000001000001100111000000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_VALUE_PROJECTION_DROP_MUTANT", "11111000000000011011111111111111111111111111111100000011111111111101110000000001111111111111111111111111111111111111111111111100000000000000001111101111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000011011111000000001111111111111101100000011111111111100000000000001111111111111111111111111111111111111111111111000000000000000001100101000000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_VALUE_CONTRIBUTION_DROP_MUTANT", "11011000000000000000000111111110000000000000010000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000011000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_DIGEST_PROJECTION_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_INPUT_BYTES_PROJECTION_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_PROBLEM_ORDER_MUTANT", "11000000000000000000000001000100000000000000000000001000110000000011000000000000000000000000000000000000011111000000000000000000000000001000001011001000000010000101010101")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_SNAPSHOT_PROJECTION_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_MISSING_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_EMPTY_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_MISSING_ROUTE_MUTANT", "00000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_MISSING_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_NON_OBJECT_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010101010000010000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBJECT_ROUTE_DROP_MUTANT", "11111110000000011111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111111111111111111100000000101000001111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_KEY_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_VALUE_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HEX_ALPHA_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HIGH_NIBBLE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_LOW_NIBBLE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_KEY_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_VALUE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SUBJECT_OBSERVATION_CONTRIBUTION_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BINARY_PATH_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_INFO_PATH_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_STYLE_PROJECTION_MUTANT", "11011000000000000000000111111110000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_CABAL_SHA256_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENTS_PROJECTION_DROP_MUTANT", "11011000000000000000000111111110000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENT_SHAPE_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCIES_PROJECTION_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DIST_DIRECTORY_PATH_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_FLAGS_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ID_PROJECTION_MUTANT", "11111000000000000000000111111110000000000000010000000000000000000001000000000000000000000000000000000000000000000000000000000100000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_KEY_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_ORDER_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_VALUE_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORDER_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORIGIN_PROJECTION_MUTANT", "11001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_NAME_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_VERSION_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_REPOSITORY_TYPE_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_KIND_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_LOCATION_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_ROOT_PROJECTION_MUTANT", "11001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_SHA256_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_TAG_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_DETECTION_BYPASS_MUTANT", "00000010000000000000000000000000000000000000000100000000000000010010000000000000000000000000000000000000000000000000001100000000000000101000000000000000000000100000111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_ORDER_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  ]
+
+
+newSelectorSupplementalImpactSignatures :: [(String, String)]
+newSelectorSupplementalImpactSignatures =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_AESON_DECODE_FAILURE_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_DIGIT_ALTERNATIVE_DROP_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_LOWERCASE_ALTERNATIVE_DROP_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_UPPERCASE_ALTERNATIVE_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_BENCHMARK_CLASSIFICATION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_EXECUTABLE_CLASSIFICATION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_LIBRARY_CLASSIFICATION_WIDEN_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_TEST_CLASSIFICATION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BOOLEAN_MAP_VALUE_TYPE_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BOUNDED_PROBLEM_ORDER_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CHECK_NAME_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCIES_PROJECTION_DROP_MUTANT", "001110100000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCIES_PROJECTION_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_NAME_PROJECTION_MUTANT", "001110100000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_ORDER_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SOURCE_PATHS_PROJECTION_MUTANT", "001110010000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIT_ID_PROJECTION_MUTANT", "001110100000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_ARRAY_VALUE_GATE_BYPASS_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_PATH_VALUE_GATE_BYPASS_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_TEXT_VALUE_GATE_BYPASS_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_ELEMENT_TYPE_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_EMPTY_TEXT_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_MISSING_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_TYPE_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_CYCLE_PROBLEM_CONTRIBUTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_GROUPING_BYPASS_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_LOCAL_COMPONENT_PROBLEM_CONTRIBUTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_UNIT_PROBLEM_CONTRIBUTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_EMPTY_COMPONENT_MAP_GUARD_BYPASS_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_CODE_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_DETAIL_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_ORDER_MUTANT", "000110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_SUBJECT_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_ORDER_MUTANT", "000001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_LOCAL_DISCOVERY_GUARD_BYPASS_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GROUPED_VALUE_RENDER_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_KEY_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_VALUE_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_KEY_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_VALUE_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_NON_OBJECT_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_OBJECT_ROUTE_DROP_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_DEPTH_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_END_TOKEN_COUNT_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ERROR_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ITEM_TOKEN_COUNT_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_TYPE_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_BOOLEAN_TYPE_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_APPEND_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_RENDER_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_SCOPE_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_APPEND_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_RENDER_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INVALID_FAILURE_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_LITERAL_TOKEN_ROUTE_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NULL_TYPE_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TOKEN_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TYPE_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_OBJECT_TYPE_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_DEPTH_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_END_TOKEN_COUNT_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_ERROR_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_PAIR_TOKEN_COUNT_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LABEL_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LIMIT_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_OBSERVED_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_STRING_TYPE_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TEXT_TOKEN_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TOKEN_ERROR_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_DISCOVERY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_DIGEST_PROJECTION_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_NON_OBJECT_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_OBJECT_ROUTE_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_UNIT_ORDER_MUTANT", "001010001111000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_EMPTY_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_MISSING_ROUTE_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_TYPE_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_PROBLEMS_PROJECTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_VALUE_PROJECTION_DROP_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_PROBLEM_CONTRIBUTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_VALUE_CONTRIBUTION_DROP_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_DIGEST_PROJECTION_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_INPUT_BYTES_PROJECTION_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_PROBLEM_ORDER_MUTANT", "000110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_SNAPSHOT_PROJECTION_DROP_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_MISSING_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_TYPE_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_EMPTY_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_MISSING_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_TYPE_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_MISSING_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_TYPE_ROUTE_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_NON_OBJECT_MAPPING_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBJECT_ROUTE_DROP_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_KEY_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_VALUE_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HEX_ALPHA_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HIGH_NIBBLE_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_LOW_NIBBLE_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_KEY_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_VALUE_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SUBJECT_OBSERVATION_CONTRIBUTION_DROP_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BINARY_PATH_PROJECTION_MUTANT", "101110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_INFO_PATH_PROJECTION_MUTANT", "101110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_STYLE_PROJECTION_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_CABAL_SHA256_PROJECTION_MUTANT", "001110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENTS_PROJECTION_DROP_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENT_SHAPE_PROJECTION_MUTANT", "001110000001000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCIES_PROJECTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DIST_DIRECTORY_PATH_PROJECTION_MUTANT", "101110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_FLAGS_PROJECTION_MUTANT", "001111000000100")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ID_PROJECTION_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_KEY_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_ORDER_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_VALUE_MAPPING_MUTANT", "010001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORDER_MUTANT", "001110001111000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORIGIN_PROJECTION_MUTANT", "101111111000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_NAME_PROJECTION_MUTANT", "001110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_VERSION_PROJECTION_MUTANT", "001110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_REPOSITORY_TYPE_PROJECTION_MUTANT", "001110000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_KIND_PROJECTION_MUTANT", "001110000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_LOCATION_PROJECTION_MUTANT", "001110000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_ROOT_PROJECTION_MUTANT", "001110000000011")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_SHA256_PROJECTION_MUTANT", "001110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_TAG_PROJECTION_MUTANT", "001110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_DETECTION_BYPASS_MUTANT", "000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_ORDER_MUTANT", "000000000000000")
+  ]
+
+legacySelectorImpactSignatures :: [(String, String)]
+legacySelectorImpactSignatures =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_PUBLIC_REFUSAL_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_KEY_BYPASS_MUTANT", "00000001111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000110000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTE_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TOKEN_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_PROBLEM_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_DEPTH_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_STRING_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_KEY_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_OBJECT_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000110000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000111100000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_MEMBER_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SEMANTIC_PROBLEM_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000100100001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SEMANTIC_BYTE_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_BYTE_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_BYTE_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_SEGMENT_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_SEGMENT_BYTE_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DIRECT_COMPONENT_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_MAP_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_DEPENDS_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000110000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_EXECUTABLE_DEPENDS_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_DEPENDS_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_EXECUTABLE_DEPENDS_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_TYPE_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_SCHEMA_VERSION_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_LIBRARY_SCHEMA_VERSION_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ACCEPTED_FIELD_BINDING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_AGGREGATE_DEPENDS_GUARD_BYPASS_MUTANT", "00000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_AGGREGATE_EXECUTABLE_DEPENDS_GUARD_BYPASS_MUTANT", "00000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_BUILD_INFO_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_DIST_DIRECTORY_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_BUILD_INFO_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000000000010000000000000110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_DIST_DIRECTORY_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_PATH_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000000000000100000000000000000001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NON_BINARY_PATH_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SHAPE_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SHAPE_AMBIGUITY_BYPASS_MUTANT", "00000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_TYPE_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_BYPASS_MUTANT", "00000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000011111000000000000000000000000000000000000000000000000000011000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_TYPE_BYPASS_MUTANT", "00000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_ORIGIN_MISMATCH_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REMOTE_ORIGIN_MISMATCH_BYPASS_MUTANT", "00000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURED_STYLE_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CYCLE_GUARD_BYPASS_MUTANT", "00000000000000000000000001000110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_DEPENDENCY_GUARD_BYPASS_MUTANT", "00000000000000000000000100110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SELF_DEPENDENCY_GUARD_BYPASS_MUTANT", "00000000000000000000000001000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_DEPENDENCY_GUARD_BYPASS_MUTANT", "00000000000000000000000010001000000000000000010000000000000000000001000000000000000000000001111110000000000000000000000000000000000000000000000000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_PATH_RESIDUE_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_AUTHENTICATION_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ARTIFACT_GENERATION_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_EXPECTED_COMPILER_IDENTITY_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_EXPECTED_PLATFORM_IDENTITY_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_KEY_OBSERVATION_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_BRANCH_CLOSURE_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CPP_BRANCH_CLOSURE_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SEMANTICS_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_BYTES_IDENTITY_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_PATH_IDENTITY_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_LEXICAL_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_FILESYSTEM_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SNAPSHOT_BINDING_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DIAGNOSTIC_RESIDUE_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_CABAL_HASH_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_HASH_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_SOURCE_HASH_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_CABAL_HASH_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_CABAL_HASH_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_HASH_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_WIDTH_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GIT_SHA1_WIDTH_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GIT_SHA256_WIDTH_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GIT_OBJECT_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SHAPE_COLLAPSE_MUTANT", "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_BUILTIN_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_PREFIX_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LEADING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_TRAILING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPILER_PREFIX_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_LEADING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_TRAILING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000100000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_LEADING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_TRAILING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_NAME_SEGMENT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_NAME_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_VERSION_SEGMENT_BYPASS_MUTANT", "00000000000000000100000000000000000000000000000000000000000000000000000100000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_VERSION_DIGIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000010000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_LEADING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_TRAILING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_SCHEME_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_PAYLOAD_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOWER_BOUND_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_UPPER_BOUND_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_BACKSLASH_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_ABSOLUTE_BYPASS_MUTANT", "00000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_LOWER_BOUND_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_UPPER_BOUND_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_BACKSLASH_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_COLON_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_EMPTY_SEGMENT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_PARENT_SEGMENT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_DOT_POSITION_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_MANDATORY_PREFIX_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_RESULT_PROBLEM_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000")
+  ]
+
+legacySelectorSupplementalImpactSignatures :: [(String, String)]
+legacySelectorSupplementalImpactSignatures =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_PUBLIC_REFUSAL_BYPASS_MUTANT", "01000000100000000000000000000000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_KEY_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTE_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TOKEN_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_PROBLEM_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_DEPTH_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_STRING_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_KEY_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_OBJECT_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_MEMBER_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SEMANTIC_PROBLEM_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SEMANTIC_BYTE_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_BYTE_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_BYTE_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_SEGMENT_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_SEGMENT_BYTE_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DIRECT_COMPONENT_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_MAP_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_DEPENDS_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_EXECUTABLE_DEPENDS_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_DEPENDS_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_EXECUTABLE_DEPENDS_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_TYPE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_SCHEMA_VERSION_BYPASS_MUTANT", "00000000000000000000000110000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_LIBRARY_SCHEMA_VERSION_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ACCEPTED_FIELD_BINDING_MUTANT", "10100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_AGGREGATE_DEPENDS_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_AGGREGATE_EXECUTABLE_DEPENDS_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_BUILD_INFO_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_DIST_DIRECTORY_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_BUILD_INFO_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_DIST_DIRECTORY_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_PATH_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NON_BINARY_PATH_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SHAPE_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SHAPE_AMBIGUITY_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_TYPE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_TYPE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_ORIGIN_MISMATCH_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REMOTE_ORIGIN_MISMATCH_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURED_STYLE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CYCLE_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_DEPENDENCY_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SELF_DEPENDENCY_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_DEPENDENCY_GUARD_BYPASS_MUTANT", "00000000000000000000000001110000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_PATH_RESIDUE_DROP_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_AUTHENTICATION_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ARTIFACT_GENERATION_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_EXPECTED_COMPILER_IDENTITY_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_EXPECTED_PLATFORM_IDENTITY_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_KEY_OBSERVATION_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_BRANCH_CLOSURE_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CPP_BRANCH_CLOSURE_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SEMANTICS_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_BYTES_IDENTITY_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_PATH_IDENTITY_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_LEXICAL_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000001")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_FILESYSTEM_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000001")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SNAPSHOT_BINDING_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DIAGNOSTIC_RESIDUE_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_CABAL_HASH_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_HASH_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_SOURCE_HASH_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_CABAL_HASH_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_CABAL_HASH_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_HASH_PRESENCE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_WIDTH_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000011000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GIT_SHA1_WIDTH_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GIT_SHA256_WIDTH_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GIT_OBJECT_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SHAPE_COLLAPSE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_BUILTIN_BYPASS_MUTANT", "00000000000000000000000000001100000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_PREFIX_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LEADING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_TRAILING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPILER_PREFIX_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_LEADING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_TRAILING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_LEADING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_TRAILING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_NAME_SEGMENT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_NAME_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_VERSION_SEGMENT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_VERSION_DIGIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_LEADING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_TRAILING_BOUNDARY_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_CHARACTER_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_SCHEME_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_PAYLOAD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOWER_BOUND_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_UPPER_BOUND_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_BACKSLASH_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_ABSOLUTE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_LOWER_BOUND_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_UPPER_BOUND_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_BACKSLASH_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_COLON_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_EMPTY_SEGMENT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_PARENT_SEGMENT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PATH_DOT_POSITION_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_MANDATORY_PREFIX_DROP_MUTANT", "00000011000000000000000000000000011")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_RESULT_PROBLEM_LIMIT_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  ]
+
+
+updatedNewSelectorImpactSignatures :: [(String, String)]
+updatedNewSelectorImpactSignatures =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_AESON_DECODE_FAILURE_MAPPING_MUTANT", "00000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_DIGIT_ALTERNATIVE_DROP_MUTANT", "11111110000000011111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111111111111111111100000000000000001111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_LOWERCASE_ALTERNATIVE_DROP_MUTANT", "11111110000000011111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111111111111111111100000000000000001111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_UPPERCASE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_BENCHMARK_CLASSIFICATION_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_EXECUTABLE_CLASSIFICATION_DROP_MUTANT", "00000000000000000000000000011000000000000000100000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_LIBRARY_CLASSIFICATION_WIDEN_MUTANT", "10111000000000000000000000100111111001111111011100000000110000000000000000000001111000000001010001010111100000000000001111111100000000000000000000000001000000000000101010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_TEST_CLASSIFICATION_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BOOLEAN_MAP_VALUE_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010001100000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BOUNDED_PROBLEM_ORDER_MUTANT", "00000000000000000000000001000100000000000000000000001000000000000011000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CHECK_NAME_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCIES_PROJECTION_DROP_MUTANT", "11000000000000000000000111100110000000000000010000000000000000000000000000000000000000000001111110000000000000000000000000000000000000000000000000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000111100100000000000000010000000000000000000000000000000000000000000001111110000000000000000000000000000000000000000000000000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCIES_PROJECTION_MUTANT", "11111000000000000000000111111110000000000000010000000000000000000000000000000000000000000001111110000000000000000000000000000100000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000000011000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_NAME_PROJECTION_MUTANT", "11001000000000000000000111111100000000000000010000000000000000000000000000000000000000000001111110000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_ORDER_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SOURCE_PATHS_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIT_ID_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_ARRAY_VALUE_GATE_BYPASS_MUTANT", "00000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_PATH_VALUE_GATE_BYPASS_MUTANT", "00000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000111111110000000000000000000000000000000000000000000000010101")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_TEXT_VALUE_GATE_BYPASS_MUTANT", "00000000000000000100000000000000000000000000000000000000000000000000001111111111111000000000000000000000011111000000000000000000000000000000000000000000000000000001000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_ELEMENT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_EMPTY_TEXT_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_MISSING_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_CYCLE_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000001000110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000111111100000000000000010000000000000000000001000000000000000000000001111110000000000000000000000000000000000000000000000000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_GROUPING_BYPASS_MUTANT", "00010000000000000000000100110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_LOCAL_COMPONENT_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_UNIT_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_EMPTY_COMPONENT_MAP_GUARD_BYPASS_MUTANT", "00000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_CODE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_DETAIL_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_ORDER_MUTANT", "11000000000000000000000001000100000000000000000000001000110000000011000000000000000000000000000000000000011111000000000000000000000000001000001011001000000010000101010101")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_SUBJECT_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_ORDER_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_LOCAL_DISCOVERY_GUARD_BYPASS_MUTANT", "00100000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GROUPED_VALUE_RENDER_DROP_MUTANT", "00001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_KEY_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_VALUE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_KEY_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_VALUE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_NON_OBJECT_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_OBJECT_ROUTE_DROP_MUTANT", "11111000000000011011111111111111111111111111111100000011111111111101000000000001111111111111111111111111111111111111111111111100000000000000000011001001000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_DEPTH_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_END_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ERROR_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ITEM_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_BOOLEAN_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001001010101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_APPEND_DROP_MUTANT", "00000000011101000011110000000000000111101111100100000011111111111100000000000001111111000000000000000011011111111111111100000000000000000000001000001000000010101111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_RENDER_MUTANT", "00000000011101000011110000000000000111101111100100000011111111111100000000000001111111000000000000000011011111111111111100000000000000000000001000001000000010101111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_SCOPE_MAPPING_MUTANT", "00000000000000000011000000000000000110000000000000000000000000000000000000000000000111000000000000000000011111111111110000000000000000000000000000001000000010101111010101")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_APPEND_DROP_MUTANT", "00000000011101000011110000000000000111101111100100000011111111111100000000000001111111000000000000000011011111111111111100000000000000000000001000001000000010101111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_RENDER_MUTANT", "00000000011101000011110000000000000111101111100100000011111111111100000000000001111111000000000000000011011111111111111100000000000000000000001000001000000010101111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INVALID_FAILURE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000011100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_LITERAL_TOKEN_ROUTE_MUTANT", "11011111110010101111001000100110000001000001010100011001010101010010111111111111111111111110000001110001000000000000001100000010100011111011111100111101100011111100111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NULL_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010001100000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TOKEN_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_OBJECT_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_DEPTH_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_END_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_ERROR_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_PAIR_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LABEL_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000010101010101010000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LIMIT_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000010101010101010000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_OBSERVED_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000010101010101010000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_STRING_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TEXT_TOKEN_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TOKEN_ERROR_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_DISCOVERY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00100000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_DIGEST_PROJECTION_MUTANT", "00111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111100111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_NON_OBJECT_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_OBJECT_ROUTE_DROP_MUTANT", "01000000000000000000110111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_UNIT_ORDER_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_EMPTY_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_MISSING_ROUTE_MUTANT", "11111000000000011011111111100111111111111110111100000011110000001100000000000001111111111111110001111111111111111111111111111100000000000000000011001001000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_PROBLEMS_PROJECTION_DROP_MUTANT", "00000100000000011111111000000001111111111111101100001111111111111100001111111111111111111110000001111111111111111111111111111000000000001000001100111000000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_VALUE_PROJECTION_DROP_MUTANT", "11111000000000011011111111111111111111111111111100000011111111111101110000000001111111111111111111111111111111111111111111111100000000000000001111101111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000011011111000000001111111111111101100000011111111111100000000000001111111111110000001111111111111111111111111111000000000000000001100101000000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_VALUE_CONTRIBUTION_DROP_MUTANT", "11011000000000000000000111111110000000000000010000000000000000000001000000000000000000000001111110000000000000000000000000000000000000000000000011000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_DIGEST_PROJECTION_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_INPUT_BYTES_PROJECTION_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_PROBLEM_ORDER_MUTANT", "11000000000000000000000001000100000000000000000000001000110000000011000000000000000000000000000000000000011111000000000000000000000000001000001011001000000010000101010101")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_SNAPSHOT_PROJECTION_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_MISSING_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_EMPTY_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_MISSING_ROUTE_MUTANT", "00000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_MISSING_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_NON_OBJECT_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010101010000010000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBJECT_ROUTE_DROP_MUTANT", "11111110000000011111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111111111111111111100000000101000001111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_KEY_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_VALUE_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HEX_ALPHA_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HIGH_NIBBLE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_LOW_NIBBLE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_KEY_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_VALUE_MAPPING_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SUBJECT_OBSERVATION_CONTRIBUTION_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BINARY_PATH_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_INFO_PATH_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_STYLE_PROJECTION_MUTANT", "11011000000000000000000111111110000000000000010000000000000000000000000000000000000000000001111110000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_CABAL_SHA256_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENTS_PROJECTION_DROP_MUTANT", "11011000000000000000000111111110000000000000010000000000000000000000000000000000000000000001111110000000000000000000000000000000000000000000000011000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENT_SHAPE_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCIES_PROJECTION_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DIST_DIRECTORY_PATH_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_FLAGS_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ID_PROJECTION_MUTANT", "11111000000000000000000111111110000000000000010000000000000000000001000000000000000000000001111110000000000000000000000000000100000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_KEY_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_ORDER_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_VALUE_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORDER_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORIGIN_PROJECTION_MUTANT", "11001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_NAME_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_VERSION_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_REPOSITORY_TYPE_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_KIND_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_LOCATION_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_ROOT_PROJECTION_MUTANT", "11001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_SHA256_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_TAG_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_DETECTION_BYPASS_MUTANT", "00000010000000000000000000000000000000000000000100000000000000010010000000000000000000000000000000000000000000000000001100000000000000101000000000000000000000100000111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_ORDER_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  ]
+
+
+updatedNewSelectorSupplementalImpactSignatures :: [(String, String)]
+updatedNewSelectorSupplementalImpactSignatures =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_AESON_DECODE_FAILURE_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_DIGIT_ALTERNATIVE_DROP_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_LOWERCASE_ALTERNATIVE_DROP_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_UPPERCASE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_BENCHMARK_CLASSIFICATION_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_EXECUTABLE_CLASSIFICATION_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_LIBRARY_CLASSIFICATION_WIDEN_MUTANT", "01000000100000000000000001110011111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_TEST_CLASSIFICATION_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BOOLEAN_MAP_VALUE_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BOUNDED_PROBLEM_ORDER_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CHECK_NAME_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCIES_PROJECTION_DROP_MUTANT", "00100011010000000000000001110000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000001110000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCIES_PROJECTION_MUTANT", "01000000100000000000000001110000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_NAME_PROJECTION_MUTANT", "00100011010000000000000001110000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_ORDER_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SOURCE_PATHS_PROJECTION_MUTANT", "00100011001000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIT_ID_PROJECTION_MUTANT", "00100011010000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_ARRAY_VALUE_GATE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_PATH_VALUE_GATE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_TEXT_VALUE_GATE_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_ELEMENT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_EMPTY_TEXT_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_MISSING_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_CYCLE_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000001110000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_GROUPING_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_LOCAL_COMPONENT_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_UNIT_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_EMPTY_COMPONENT_MAP_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_CODE_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_DETAIL_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_ORDER_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_SUBJECT_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_ORDER_MUTANT", "00000000100000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_LOCAL_DISCOVERY_GUARD_BYPASS_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_GROUPED_VALUE_RENDER_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_KEY_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_VALUE_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_KEY_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_VALUE_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_NON_OBJECT_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_OBJECT_ROUTE_DROP_MUTANT", "01000000100000000011111001111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_DEPTH_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_END_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ERROR_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ITEM_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_BOOLEAN_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_APPEND_DROP_MUTANT", "00000000000000000011111000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_RENDER_MUTANT", "00000000000000000011111000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_SCOPE_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_APPEND_DROP_MUTANT", "00000000000000000011111000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_RENDER_MUTANT", "00000000000000000011111000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INVALID_FAILURE_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_LITERAL_TOKEN_ROUTE_MUTANT", "01000000100000000011111110001100111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NULL_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TOKEN_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_OBJECT_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_DEPTH_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_END_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_ERROR_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_PAIR_TOKEN_COUNT_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LABEL_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LIMIT_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_OBSERVED_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_STRING_TYPE_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TEXT_TOKEN_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TOKEN_ERROR_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_DISCOVERY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_DIGEST_PROJECTION_MUTANT", "00000000000000000011111111111111000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_NON_OBJECT_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_OBJECT_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_UNIT_ORDER_MUTANT", "00100001000111100000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_EMPTY_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_MISSING_ROUTE_MUTANT", "01000000100000000000000001111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_PROBLEMS_PROJECTION_DROP_MUTANT", "00000000000000000011111000001111000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_VALUE_PROJECTION_DROP_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000011111000001111000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_VALUE_CONTRIBUTION_DROP_MUTANT", "01000000100000000000000001110000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_DIGEST_PROJECTION_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_INPUT_BYTES_PROJECTION_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_PROBLEM_ORDER_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_SNAPSHOT_PROJECTION_DROP_MUTANT", "01000000100000000000000000000000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_MISSING_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_EMPTY_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_MISSING_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_MISSING_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_TYPE_ROUTE_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_NON_OBJECT_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBJECT_ROUTE_DROP_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_KEY_MAPPING_MUTANT", "01000000100000000000000000000000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_VALUE_MAPPING_MUTANT", "01000000100000000000000000000000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HEX_ALPHA_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HIGH_NIBBLE_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_LOW_NIBBLE_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_KEY_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_VALUE_MAPPING_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SUBJECT_OBSERVATION_CONTRIBUTION_DROP_MUTANT", "01000000100000000000000000000000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BINARY_PATH_PROJECTION_MUTANT", "10100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_INFO_PATH_PROJECTION_MUTANT", "10100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_STYLE_PROJECTION_MUTANT", "01000000100000000000000001110000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_CABAL_SHA256_PROJECTION_MUTANT", "00100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENTS_PROJECTION_DROP_MUTANT", "01000000100000000000000001110000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENT_SHAPE_PROJECTION_MUTANT", "00100011000000100000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCIES_PROJECTION_DROP_MUTANT", "00000000000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DIST_DIRECTORY_PATH_PROJECTION_MUTANT", "10100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_FLAGS_PROJECTION_MUTANT", "00100011100000010000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ID_PROJECTION_MUTANT", "01000000100000000000000001110000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_KEY_MAPPING_MUTANT", "01000000100000000000000000000000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_ORDER_MUTANT", "01000000100000000000000000000000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_VALUE_MAPPING_MUTANT", "01000000100000000000000000000000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORDER_MUTANT", "00100011000111100000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORIGIN_PROJECTION_MUTANT", "10100011111100011100000000000000001")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_NAME_PROJECTION_MUTANT", "00100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_VERSION_PROJECTION_MUTANT", "00100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_REPOSITORY_TYPE_PROJECTION_MUTANT", "00100011000000001000000000000000100")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_KIND_PROJECTION_MUTANT", "00100011000000001000000000000000100")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_LOCATION_PROJECTION_MUTANT", "00100011000000001000000000000000100")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_ROOT_PROJECTION_MUTANT", "00100011000000001100000000000000001")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_SHA256_PROJECTION_MUTANT", "00100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_TAG_PROJECTION_MUTANT", "00100011000000000000000000000000100")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_DETECTION_BYPASS_MUTANT", "00000000000000000011111000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_ORDER_MUTANT", "00000000000000000000000000000000000")
+  ]
+
+
+auditSelectorIntents :: [SelectorIntent]
+auditSelectorIntents =
+  [ SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_AGGREGATE_COMPONENT_SHAPE_MAPPING_MUTANT" "the aggregate component alternative has one exact ordered digest-bound public refusal"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_LIBRARY_SCHEMA_FIELD_ROUTE_DROP_MUTANT" "the Cabal schema version is an exact closed alternative"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_SCHEMA_FIELD_ROUTE_DROP_MUTANT" "the Cabal library schema version is an independently exact closed alternative"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_BENCHMARK_PREFIX_ALTERNATIVE_DROP_MUTANT" "the admitted component alternative remains exact: bench:perf"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DOT_ALTERNATIVE_DROP_MUTANT" "the admitted component alternative remains exact: lib:core.name"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_PREFIX_ALTERNATIVE_DROP_MUTANT" "the admitted component alternative remains exact: exe:tool"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_HYPHEN_ALTERNATIVE_DROP_MUTANT" "the admitted component alternative remains exact: lib:core-name"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIB_BUILTIN_ALTERNATIVE_DROP_MUTANT" "the admitted component alternative remains exact: lib"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIB_PREFIX_ALTERNATIVE_DROP_MUTANT" "the admitted component alternative remains exact: lib:core"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_MAP_ROUTE_DROP_MUTANT" "the aggregate component alternative has one exact ordered digest-bound public refusal"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SETUP_BUILTIN_ALTERNATIVE_DROP_MUTANT" "the admitted component alternative remains exact: setup"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_TEST_PREFIX_ALTERNATIVE_DROP_MUTANT" "the admitted component alternative remains exact: test:spec"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNDERSCORE_ALTERNATIVE_DROP_MUTANT" "the admitted component alternative remains exact: lib:core_name"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DIRECT_COMPONENT_ROUTE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DIRECT_COMPONENT_SHAPE_MAPPING_MUTANT" "direct component shape remains explicit instead of collapsing into an aggregate"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_HYPHEN_ALTERNATIVE_DROP_MUTANT" "the admitted flag alternative remains exact: variant-name"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_UNDERSCORE_ALTERNATIVE_DROP_MUTANT" "the admitted flag alternative remains exact: variant_name"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_CONFIGURED_ROUTE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_PRE_EXISTING_ROUTE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_PACKAGE_SOURCE_ROUTE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_IDENTITY_ROUTE_DROP_MUTANT" "local sources reject an unexpected claimed source hash"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_KIND_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_LOCAL_STYLE_ROUTE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_LOWER_HEX_ALPHA_ALTERNATIVE_DROP_MUTANT" "SHA-256 lower-hex alphabetic alternative remains admitted"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_LOWER_HEX_DIGIT_ALTERNATIVE_DROP_MUTANT" "SHA-256 lower-hex digit alternative remains admitted"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_HYPHEN_ALTERNATIVE_DROP_MUTANT" "platform tokens retain the hyphen character alternative"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_UNDERSCORE_ALTERNATIVE_DROP_MUTANT" "platform tokens retain the underscore character alternative"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_COLON_ALTERNATIVE_DROP_MUTANT" "portable identity retains the colon character alternative"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_DOT_ALTERNATIVE_DROP_MUTANT" "portable identity retains the dot character alternative"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_HYPHEN_ALTERNATIVE_DROP_MUTANT" "portable identity retains the hyphen character alternative"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_PLUS_ALTERNATIVE_DROP_MUTANT" "portable identity retains the plus character alternative"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_UNDERSCORE_ALTERNATIVE_DROP_MUTANT" "portable identity retains the underscore character alternative"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PRE_EXISTING_SOURCE_KIND_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_GLOBAL_STYLE_ROUTE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_INPLACE_STYLE_ROUTE_DROP_MUTANT" "an inplace configured unit without its build-info path is refused"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_PACKAGE_SOURCE_ROUTE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_SOURCE_IDENTITY_ROUTE_DROP_MUTANT" "a malformed remote source hash is one exact identity defect"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_SOURCE_KIND_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_ABSENT_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_REPOSITORY_TAR_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_SOURCE_REPOSITORY_MAPPING_MUTANT" "source-repository global projection retains kind, repository type, location, and tag"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_ABSENT_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_REPOSITORY_TAR_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_SOURCE_REPOSITORY_MAPPING_MUTANT" "source-repository global projection retains kind, repository type, location, and tag"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_GLOBAL_STYLE_ROUTE_DROP_MUTANT" "source repositories reject an unexpected Cabal hash"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_IDENTITY_ROUTE_DROP_MUTANT" "source repositories reject an unexpected Cabal hash"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_INPLACE_STYLE_ROUTE_DROP_MUTANT" "source-repository inplace style remains distinct"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_PACKAGE_SOURCE_ROUTE_DROP_MUTANT" "source-repo accepts only the frozen Git subtype"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_SOURCE_KIND_MAPPING_MUTANT" "source-repository global projection retains kind, repository type, location, and tag"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_ROOT_ABSENT_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_ROOT_LOCAL_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_TAG_ABSENT_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_TAG_SOURCE_REPOSITORY_MAPPING_MUTANT" "source-repository global projection retains kind, repository type, location, and tag"
+  ]
+
+routingAuditSelectorIntents :: [SelectorIntent]
+routingAuditSelectorIntents =
+  [ SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_PRE_EXISTING_ORIGIN_EXCLUSION_BYPASS_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_REMOTE_ORIGIN_ALTERNATIVE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_SUBJECT_ORDER_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_SUBJECT_PROJECTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT" "source-repository inplace style remains distinct"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT" "source-repository inplace style remains distinct"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_GLOBAL_STYLE_EXCLUSION_BYPASS_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_INPLACE_STYLE_ALTERNATIVE_DROP_MUTANT" "source-repository inplace style remains distinct"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_LOCAL_STYLE_ALTERNATIVE_DROP_MUTANT" "the exact observed-result ceiling retains fifteen mandatory refusals and 113 exact source-path rows"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_SUBJECT_ORDER_MUTANT" "the exact observed-result ceiling retains fifteen mandatory refusals and 113 exact source-path rows"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_SUBJECT_PROJECTION_DROP_MUTANT" "the exact observed-result ceiling retains fifteen mandatory refusals and 113 exact source-path rows"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_GLOBAL_STYLE_ALTERNATIVE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_INPLACE_STYLE_ALTERNATIVE_DROP_MUTANT" "source-repository inplace style remains distinct"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_LOCAL_STYLE_ALTERNATIVE_DROP_MUTANT" "the exact observed-result ceiling retains fifteen mandatory refusals and 113 exact source-path rows"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_PRE_EXISTING_STYLE_EXCLUSION_BYPASS_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_SUBJECT_ORDER_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_SUBJECT_PROJECTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SUBJECT_ORDER_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SUBJECT_PROJECTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_SUBJECT_ORDER_MUTANT" "multiple local roots retain deterministic subject order"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_SUBJECT_PROJECTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_INPUT_BYTES_PROJECTION_MUTANT" "an install plan without a local component refuses empty discovery"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_PROBLEMS_PROJECTION_MUTANT" "multiple unknown fields retain deterministic lexical order"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_ARCHITECTURE_PROJECTION_MUTANT" "the complete accepted semantic snapshot is independently literal and input-bound"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_CABAL_LIBRARY_VERSION_PROJECTION_MUTANT" "the complete accepted semantic snapshot is independently literal and input-bound"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_CABAL_VERSION_PROJECTION_MUTANT" "the complete accepted semantic snapshot is independently literal and input-bound"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_COMPILER_ABI_PROJECTION_MUTANT" "the complete accepted semantic snapshot is independently literal and input-bound"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_COMPILER_ID_PROJECTION_MUTANT" "the complete accepted semantic snapshot is independently literal and input-bound"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_DIGEST_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_INPUT_BYTES_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_OPERATING_SYSTEM_PROJECTION_MUTANT" "the complete accepted semantic snapshot is independently literal and input-bound"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_PROBLEMS_PROJECTION_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_PRE_EXISTING_ORIGIN_EXCLUSION_BYPASS_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_REMOTE_ORIGIN_ALTERNATIVE_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_SUBJECT_ORDER_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_SUBJECT_PROJECTION_DROP_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_INPUT_ROUTE_MUTANT" "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT" "source-repository inplace style remains distinct"
+  , SelectorIntent "VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT" "source-repository inplace style remains distinct"
+  ]
+
+
+auditSelectorImpactSignatures :: [(String, String)]
+auditSelectorImpactSignatures =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_AGGREGATE_COMPONENT_SHAPE_MAPPING_MUTANT", "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_LIBRARY_SCHEMA_FIELD_ROUTE_DROP_MUTANT", "11111110000000011111111111111111111111111111111100000111111111111111101111111111111111111111111111111111111111111111111111111100000000000000001111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_SCHEMA_FIELD_ROUTE_DROP_MUTANT", "11111110000000011111111111111111111111111111111100000011111111111111011111111111111111111111111111111111111111111111111111111100000000000000001111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_BENCHMARK_PREFIX_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DOT_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_PREFIX_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000011000000000000000100000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_HYPHEN_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIB_BUILTIN_ALTERNATIVE_DROP_MUTANT", "11111000000000000000110111000001111000111010011100000000110000000000000000000001111000000001000001010111100000000000001111111100000000000000000000000000000000000000101010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIB_PREFIX_ALTERNATIVE_DROP_MUTANT", "10011000000000000000000000100110000001000101011100000000000000000000000000000000000000000001010000000000000000000000000000000000000000000000000011000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_MAP_ROUTE_DROP_MUTANT", "01000000000000010000110111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011001000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SETUP_BUILTIN_ALTERNATIVE_DROP_MUTANT", "00000000000000000000110111000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_TEST_PREFIX_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNDERSCORE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DIRECT_COMPONENT_ROUTE_DROP_MUTANT", "10111000000000001000000000111111111001111111111100000000110000001100000000000001111000111111111111010111100000000000001111111100000000000000000000000001000000000000101010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DIRECT_COMPONENT_SHAPE_MAPPING_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_HYPHEN_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_UNDERSCORE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_CONFIGURED_ROUTE_DROP_MUTANT", "11111000000000011011111111111111111111111111111100000011110000001100000000000001111111111111111111111111111111111111111111111100000000000000000011001001000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_PRE_EXISTING_ROUTE_DROP_MUTANT", "11111000000000011011111111111111111111111111111100000011111111111101000000000001111111111111111110111111111111111111111111111100000000000000000011001001000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_PACKAGE_SOURCE_ROUTE_DROP_MUTANT", "11011000000000001011111111111110000001000101110100000000000000001100000000000001111111111111111111011101000000111111111100000000000000000000000011001001000010101100111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_IDENTITY_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_KIND_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_LOCAL_STYLE_ROUTE_DROP_MUTANT", "11011000000000001000111111111110000001000101110100000000000000001100000000000001111000111111111111001001000000000000001100000000000000000000000011001001000000000000101010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOWER_HEX_ALPHA_ALTERNATIVE_DROP_MUTANT", "10111000000000000000000000000001111000111010011100000000110000000000000000000000000000000000000000000010100000000000000011111100000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOWER_HEX_DIGIT_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_HYPHEN_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_UNDERSCORE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_COLON_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_DOT_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_HYPHEN_ALTERNATIVE_DROP_MUTANT", "11111000000000011011111111111111111111111111111100000011111111111101000000000001111111111111111111111111111111111111111111111100000000000000000011001001000010111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_PLUS_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_UNDERSCORE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PRE_EXISTING_SOURCE_KIND_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_GLOBAL_STYLE_ROUTE_DROP_MUTANT", "10111000000000010000000000000001111000000010011100000000110000000000000000000000000000000000000000000010000000000000000011000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_INPLACE_STYLE_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_PACKAGE_SOURCE_ROUTE_DROP_MUTANT", "10111000000000010000000000000001111100001010011100000000110000000000000000000000000000000000000000000010011111000000000011000000000000000000000000000000000000000011000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_SOURCE_IDENTITY_ROUTE_DROP_MUTANT", "00000000000000000000000000000001111000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_SOURCE_KIND_MAPPING_MUTANT", "10000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_ABSENT_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_REPOSITORY_TAR_MAPPING_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_SOURCE_REPOSITORY_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_ABSENT_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_REPOSITORY_TAR_MAPPING_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_SOURCE_REPOSITORY_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_GLOBAL_STYLE_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000000110000000000000000000000000000000000000000000000000000000000000000100000000000000000111100000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_IDENTITY_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000000110000000000000000000000000000000000000000000000000000000000000000100000000000000000111000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_INPLACE_STYLE_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_PACKAGE_SOURCE_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000010110000000000000000000000000000000000000000000000000000000000000000100000000000000000111100000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_SOURCE_KIND_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_ROOT_ABSENT_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_ROOT_LOCAL_MAPPING_MUTANT", "11001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_TAG_ABSENT_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_TAG_SOURCE_REPOSITORY_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  ]
+
+
+auditSelectorSupplementalImpactSignatures :: [(String, String)]
+auditSelectorSupplementalImpactSignatures =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_AGGREGATE_COMPONENT_SHAPE_MAPPING_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_LIBRARY_SCHEMA_FIELD_ROUTE_DROP_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_SCHEMA_FIELD_ROUTE_DROP_MUTANT", "01000000100000000011111001111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_BENCHMARK_PREFIX_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DOT_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000001000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_PREFIX_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_HYPHEN_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000100000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIB_BUILTIN_ALTERNATIVE_DROP_MUTANT", "01000000100000000000000000000011110")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIB_PREFIX_ALTERNATIVE_DROP_MUTANT", "01000000000000000000000001110000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_MAP_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SETUP_BUILTIN_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_TEST_PREFIX_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNDERSCORE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000010000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DIRECT_COMPONENT_ROUTE_DROP_MUTANT", "01000000100000000000000001111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DIRECT_COMPONENT_SHAPE_MAPPING_MUTANT", "00100011000000100000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_HYPHEN_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000001000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_UNDERSCORE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000100000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_CONFIGURED_ROUTE_DROP_MUTANT", "01000000100000000000000001111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_PRE_EXISTING_ROUTE_DROP_MUTANT", "01000000100000000011111001111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_PACKAGE_SOURCE_ROUTE_DROP_MUTANT", "01000000100000000000000001111100111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_IDENTITY_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_KIND_MAPPING_MUTANT", "00100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_LOCAL_STYLE_ROUTE_DROP_MUTANT", "01000000100000000000000001111100111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOWER_HEX_ALPHA_ALTERNATIVE_DROP_MUTANT", "01000000000000000000000000000010110")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOWER_HEX_DIGIT_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000001000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_HYPHEN_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000100000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_UNDERSCORE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000010000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_COLON_ALTERNATIVE_DROP_MUTANT", "00000000000000000010000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_DOT_ALTERNATIVE_DROP_MUTANT", "00000000000000000001000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_HYPHEN_ALTERNATIVE_DROP_MUTANT", "01000000100000000000010001111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_PLUS_ALTERNATIVE_DROP_MUTANT", "00000000000000000000100000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_UNDERSCORE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000001000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PRE_EXISTING_SOURCE_KIND_MAPPING_MUTANT", "00100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_GLOBAL_STYLE_ROUTE_DROP_MUTANT", "01000000000000000000000000000011000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_INPLACE_STYLE_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_PACKAGE_SOURCE_ROUTE_DROP_MUTANT", "01000000000000000000000000000011000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_SOURCE_IDENTITY_ROUTE_DROP_MUTANT", "00000000000000000000000000000011000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_SOURCE_KIND_MAPPING_MUTANT", "00100011000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_ABSENT_MAPPING_MUTANT", "00100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_REPOSITORY_TAR_MAPPING_MUTANT", "00100011000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_SOURCE_REPOSITORY_MAPPING_MUTANT", "00000000000000000000000000000000100")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_ABSENT_MAPPING_MUTANT", "00100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_REPOSITORY_TAR_MAPPING_MUTANT", "00100011000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_SOURCE_REPOSITORY_MAPPING_MUTANT", "00000000000000000000000000000000100")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_GLOBAL_STYLE_ROUTE_DROP_MUTANT", "00000000000000000000000000000000100")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_IDENTITY_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_INPLACE_STYLE_ROUTE_DROP_MUTANT", "00000000000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_PACKAGE_SOURCE_ROUTE_DROP_MUTANT", "00000000000000000000000000000000110")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_SOURCE_KIND_MAPPING_MUTANT", "00000000000000000000000000000000100")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_ROOT_ABSENT_MAPPING_MUTANT", "00100011000000001000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_ROOT_LOCAL_MAPPING_MUTANT", "00100011000000000100000000000000001")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_TAG_ABSENT_MAPPING_MUTANT", "00100011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_TAG_SOURCE_REPOSITORY_MAPPING_MUTANT", "00000000000000000000000000000000100")
+  ]
+
+
+routingAuditSelectorImpactSignatures :: [(String, String)]
+routingAuditSelectorImpactSignatures =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_PRE_EXISTING_ORIGIN_EXCLUSION_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_REMOTE_ORIGIN_ALTERNATIVE_DROP_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_SUBJECT_ORDER_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_SUBJECT_PROJECTION_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_GLOBAL_STYLE_EXCLUSION_BYPASS_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_INPLACE_STYLE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_LOCAL_STYLE_ALTERNATIVE_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_SUBJECT_ORDER_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_SUBJECT_PROJECTION_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_GLOBAL_STYLE_ALTERNATIVE_DROP_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_INPLACE_STYLE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_LOCAL_STYLE_ALTERNATIVE_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_PRE_EXISTING_STYLE_EXCLUSION_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_SUBJECT_ORDER_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_SUBJECT_PROJECTION_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SUBJECT_ORDER_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SUBJECT_PROJECTION_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_SUBJECT_PROJECTION_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_INPUT_BYTES_PROJECTION_MUTANT", "00111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111100111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_PROBLEMS_PROJECTION_MUTANT", "00000000000000000000000001000100000000000000000000001000110000000011000000000000000000000000000000000000011111000000000000000000000000001000001000001000000010000101010101")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_ARCHITECTURE_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_CABAL_LIBRARY_VERSION_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_CABAL_VERSION_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_COMPILER_ABI_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_COMPILER_ID_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_DIGEST_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_INPUT_BYTES_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_OPERATING_SYSTEM_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_PROBLEMS_PROJECTION_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_PRE_EXISTING_ORIGIN_EXCLUSION_BYPASS_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_REMOTE_ORIGIN_ALTERNATIVE_DROP_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_SUBJECT_ORDER_MUTANT", "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_SUBJECT_PROJECTION_DROP_MUTANT", "11000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_INPUT_ROUTE_MUTANT", "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111111111111111111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_SUBJECT_ORDER_MUTANT", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+  ]
+
+routingAuditSelectorSupplementalImpactSignatures :: [(String, String)]
+routingAuditSelectorSupplementalImpactSignatures =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_PRE_EXISTING_ORIGIN_EXCLUSION_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_REMOTE_ORIGIN_ALTERNATIVE_DROP_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_SUBJECT_ORDER_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_SUBJECT_PROJECTION_DROP_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT", "00000000000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT", "00000000000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_GLOBAL_STYLE_EXCLUSION_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_INPLACE_STYLE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_LOCAL_STYLE_ALTERNATIVE_DROP_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_SUBJECT_ORDER_MUTANT", "00000000000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_SUBJECT_PROJECTION_DROP_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_GLOBAL_STYLE_ALTERNATIVE_DROP_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_INPLACE_STYLE_ALTERNATIVE_DROP_MUTANT", "00000000000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_LOCAL_STYLE_ALTERNATIVE_DROP_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_PRE_EXISTING_STYLE_EXCLUSION_BYPASS_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_SUBJECT_ORDER_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_SUBJECT_PROJECTION_DROP_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SUBJECT_ORDER_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SUBJECT_PROJECTION_DROP_MUTANT", "00000011000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT", "00000011000000000000000000000000001")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_SUBJECT_PROJECTION_DROP_MUTANT", "00000011000000000000000000000000001")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_INPUT_BYTES_PROJECTION_MUTANT", "00000000000000000011111111111111000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_PROBLEMS_PROJECTION_MUTANT", "00000000000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_ARCHITECTURE_PROJECTION_MUTANT", "00100101000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_CABAL_LIBRARY_VERSION_PROJECTION_MUTANT", "00110001000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_CABAL_VERSION_PROJECTION_MUTANT", "00110001000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_COMPILER_ABI_PROJECTION_MUTANT", "00101001000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_COMPILER_ID_PROJECTION_MUTANT", "00101001000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_DIGEST_PROJECTION_MUTANT", "01000000100000000000000000000000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_INPUT_BYTES_PROJECTION_MUTANT", "01000000100000000000000000000000111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_OPERATING_SYSTEM_PROJECTION_MUTANT", "00100101000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_PROBLEMS_PROJECTION_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_PRE_EXISTING_ORIGIN_EXCLUSION_BYPASS_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_REMOTE_ORIGIN_ALTERNATIVE_DROP_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_SUBJECT_ORDER_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_SUBJECT_PROJECTION_DROP_MUTANT", "00000011000000000000000000000000000")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_INPUT_ROUTE_MUTANT", "01000000100000000011111111111111111")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT", "00000000000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT", "00000000000000000000000000000000010")
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_SUBJECT_ORDER_MUTANT", "00000000000000000000000000000000001")
+  ]
+
+legacyAuditImpactRegistry :: [(String, [String])]
+legacyAuditImpactRegistry =
+  [ ("VALIDATION_COMPILER_ELABORATED_PLAN_PUBLIC_REFUSAL_BYPASS_MUTANT", ["source-repository global projection retains kind, repository type, location, and tag","source-repository inplace style remains distinct"])
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_SCHEMA_VERSION_BYPASS_MUTANT", ["platform tokens retain the hyphen character alternative","platform tokens retain the underscore character alternative"])
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_DEPENDENCY_GUARD_BYPASS_MUTANT"
+    , [ "the admitted component alternative remains exact: lib"
+      , "the admitted component alternative remains exact: setup"
+      , "the admitted component alternative remains exact: lib:core"
+      , "the admitted component alternative remains exact: exe:tool"
+      , "the admitted component alternative remains exact: test:spec"
+      , "the admitted component alternative remains exact: bench:perf"
+      , "the admitted component alternative remains exact: lib:core.name"
+      , "the admitted component alternative remains exact: lib:core-name"
+      , "the admitted component alternative remains exact: lib:core_name"
+      ]
+    )
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_CHARACTER_BYPASS_MUTANT", ["SHA-256 lower-hex alphabetic alternative remains admitted","SHA-256 lower-hex digit alternative remains admitted"])
+  , ("VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_BUILTIN_BYPASS_MUTANT", ["the admitted flag alternative remains exact: variant-name","the admitted flag alternative remains exact: variant_name"])
+  ]
+
+
+-- These two literal inventories retain the original primary exact-case
+-- declarations and independently name every later executable case.
 selectorExactCaseLabels :: [String]
 selectorExactCaseLabels =
   [ "the same-library public positive client observes the one exact always-refusing CheckResult"
@@ -803,12 +2284,211 @@ selectorExactCaseLabels =
   , "path dot-segment position"
   ]
 
+selectorAdditionalExactCaseLabels :: [String]
+selectorAdditionalExactCaseLabels =
+  [ "three equal root keys retain both duplicate occurrences"
+  , "duplicate unit keys are rejected at their exact array-object scope"
+  , "duplicate nested repository keys are rejected before nested object normalization"
+  , "escaped-equivalent root keys are duplicate decoded identities"
+  , "duplicate nested component keys retain an unambiguous quoted scope"
+  , "component names follow the closed Cabal-plan grammar"
+  , "aggregate nested dependencies reject unknown unit identities"
+  , "an unknown executable dependency retains its executable-edge locus"
+  , "a malformed repository Cabal hash is one exact identity defect"
+  , "a mutable source-repository tag is not accepted as an immutable source identity"
+  , "an unknown local compiler input is unsupported schema"
+  , "the compiler numeric version rejects an empty segment independently"
+  , "the compiler numeric version rejects a non-decimal symbol independently"
+  , "the path root alternative is admitted before the independent probe refusal"
+  , "the final dot-segment alternative is admitted before the independent probe refusal"
+  , "the Git SHA-256 width alternative reaches semantic plan analysis"
+  , "the exact nesting ceiling reaches the exact decoded root refusal"
+  , "the exact decoded-text ceiling reaches the exact decoded root refusal"
+  , "the exact generic-array ceiling reaches the exact decoded root refusal"
+  , "the exact generic-object-member ceiling reaches the semantic problem cap"
+  , "exactly one million structural tokens reach the decoded root refusal"
+  , "the exact duplicate-problem ceiling retains every duplicate finding"
+  , "the exact unit ceiling reaches the independently smaller problem ceiling"
+  , "the exact dependency ceiling reaches the independently smaller problem ceiling"
+  , "the exact flag ceiling retains every exact flag-value locus"
+  , "the exact source-object member ceiling reaches closed-schema parsing"
+  , "the exact semantic-scalar byte ceiling reaches the flag value-type refusal"
+  , "the exact source-locator byte ceiling reaches the independent repository-type refusal"
+  , "the exact path byte ceiling reaches the independent unknown-field refusal"
+  , "the exact path-segment ceiling reaches the independent unknown-field refusal"
+  , "the exact path-member byte ceiling reaches the independent unknown-field refusal"
+  , "minimal closed-schema plan was rejected"
+  , "the complete accepted semantic snapshot is independently literal and input-bound"
+  , "the parser freezes both Cabal plan schema versions"
+  , "compiler identity is read from the immutable plan bytes"
+  , "platform retains the exact architecture and operating-system pair"
+  , "missing local source ownership is precise typed residue, not an empty-path claim"
+  , "the complete public diagnostic wire is exact, ordered, digest-bound, and permanently refusing"
+  , "the local component and its exact dependency unit ids are retained"
+  , "Cabal 3.16 plan JSON supplies no component source paths"
+  , "pre-existing, remote, and local units remain distinct"
+  , "every exact unit id is retained"
+  , "package provenance and Cabal build style remain separate"
+  , "selected local flags remain exact typed values"
+  , "the remote repository location is bound separately from a local source root"
+  , "the local package root is retained without normalization or invention"
+  , "multiple local roots retain deterministic subject order"
+  ]
+
+selectorImpactRegistry :: [(String, [String])]
+selectorImpactRegistry =
+  [ ( "VALIDATION_COMPILER_ELABORATED_PLAN_PUBLIC_REFUSAL_BYPASS_MUTANT"
+    , [ "minimal closed-schema plan was rejected"
+      , "the aggregate component alternative has one exact ordered digest-bound public refusal"
+      , "the exact observed-result ceiling retains fifteen mandatory refusals and 113 exact source-path rows"
+      , "the first observed variable row beyond the result ceiling retains every mandatory refusal before one exact limit row"
+      , "multiple flags retain deterministic lexical order"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TOKEN_LIMIT_BYPASS_MUTANT"
+    , ["a record closing token is counted at the exact global token boundary"]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_BUILD_INFO_GUARD_BYPASS_MUTANT"
+    , [ "an empty optional path is refused before field-combination analysis"
+      , "a mistyped optional path is refused before field-combination analysis"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_PATH_PRESENCE_BYPASS_MUTANT"
+    , [ "a test component independently requires its binary path"
+      , "a benchmark component independently requires its binary path"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_CHARACTER_BYPASS_MUTANT"
+    , ["a dependency identity is checked by the shared constrained-text grammar"]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_KEY_BYPASS_MUTANT"
+    , [ "three equal root keys retain both duplicate occurrences"
+      , "duplicate flag keys are rejected at their exact nested scope"
+      , "duplicate unit keys are rejected at their exact array-object scope"
+      , "duplicate nested repository keys are rejected before nested object normalization"
+      , "escaped-equivalent root keys are duplicate decoded identities"
+      , "duplicate nested component keys retain an unambiguous quoted scope"
+      , "the exact duplicate-problem ceiling retains every duplicate finding"
+      , "one duplicate problem beyond the problem ceiling is refused exactly"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIMIT_BYPASS_MUTANT"
+    , ["the aggregate component ceiling counts direct components across unit boundaries before rendering"]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_LIMIT_BYPASS_MUTANT"
+    , [ "the aggregate dependency ceiling counts root executable edges before traversal"
+      , "the aggregate dependency ceiling counts nested ordinary edges before traversal"
+      , "the aggregate dependency ceiling counts nested executable edges before traversal"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_SEMANTIC_PROBLEM_LIMIT_BYPASS_MUTANT"
+    , [ "the exact generic-object-member ceiling reaches the semantic problem cap"
+      , "the exact unit ceiling reaches the independently smaller problem ceiling"
+      , "the exact dependency ceiling reaches the independently smaller problem ceiling"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_DEPENDS_COUNT_DROP_MUTANT"
+    , ["the aggregate dependency ceiling counts root executable edges before traversal"]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_ACCEPTED_FIELD_BINDING_MUTANT"
+    , [ "the same-library public positive client observes the one exact always-refusing CheckResult"
+      , "the complete accepted semantic snapshot is independently literal and input-bound"
+      , "missing local source ownership is precise typed residue, not an empty-path claim"
+      , "the complete public diagnostic wire is exact, ordered, digest-bound, and permanently refusing"
+      , "the aggregate component alternative has one exact ordered digest-bound public refusal"
+      , "the exact observed-result ceiling retains fifteen mandatory refusals and 113 exact source-path rows"
+      , "the first observed variable row beyond the result ceiling retains every mandatory refusal before one exact limit row"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_BYPASS_MUTANT"
+    , [ "source scheme"
+      , "source payload"
+      , "source lower visible-character bound"
+      , "source upper ASCII-character bound"
+      , "source backslash"
+      , "the exact source-locator byte ceiling reaches the independent repository-type refusal"
+      , "one source-locator byte beyond the ceiling is refused at the locator locus"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_CYCLE_GUARD_BYPASS_MUTANT"
+    , [ "aggregate nested self dependencies retain both edge and cycle defects"
+      , "a self dependency is both the exact edge defect and a unit cycle"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_DEPENDENCY_GUARD_BYPASS_MUTANT"
+    , [ "aggregate nested dependencies reject duplicate edges at the component locus"
+      , "a duplicate executable dependency remains distinct from an ordinary edge defect"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_SELF_DEPENDENCY_GUARD_BYPASS_MUTANT"
+    , ["aggregate nested self dependencies retain both edge and cycle defects"]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_DEPENDENCY_GUARD_BYPASS_MUTANT"
+    , [ "aggregate nested dependencies reject unknown unit identities"
+      , "an unknown executable dependency retains its executable-edge locus"
+      , "the exact dependency ceiling reaches the independently smaller problem ceiling"
+      , "pre-existing unit dependencies remain projected into invariant checks"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SHAPE_COLLAPSE_MUTANT"
+    , [ "the exact observed-result ceiling retains fifteen mandatory refusals and 113 exact source-path rows"
+      , "the first observed variable row beyond the result ceiling retains every mandatory refusal before one exact limit row"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_VERSION_SEGMENT_BYPASS_MUTANT"
+    , [ "compiler identities require the closed ghc numeric-version grammar"
+      , "the compiler numeric version rejects an empty segment independently"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_VERSION_DIGIT_BYPASS_MUTANT"
+    , ["the compiler numeric version rejects a non-decimal symbol independently"]
+    )
+  , ( "VALIDATION_COMPILER_ELABORATED_PLAN_PATH_ABSOLUTE_BYPASS_MUTANT"
+    , ["local source roots require the bounded absolute path grammar"]
+    )
+  ]
+    <> [ (selector, observedPermanentImpactLabels)
+       | selector <- observedPermanentImpactSelectors
+       ]
+    <> legacyAuditImpactRegistry
+
+observedPermanentImpactSelectors :: [String]
+observedPermanentImpactSelectors =
+  [ "VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_PATH_RESIDUE_DROP_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_AUTHENTICATION_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_ARTIFACT_GENERATION_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_EXPECTED_COMPILER_IDENTITY_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_EXPECTED_PLATFORM_IDENTITY_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_KEY_OBSERVATION_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_BRANCH_CLOSURE_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_CPP_BRANCH_CLOSURE_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SEMANTICS_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_BYTES_IDENTITY_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_PATH_IDENTITY_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_LEXICAL_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_FILESYSTEM_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_SNAPSHOT_BINDING_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_DIAGNOSTIC_RESIDUE_BYPASS_MUTANT"
+  , "VALIDATION_COMPILER_ELABORATED_PLAN_MANDATORY_PREFIX_DROP_MUTANT"
+  ]
+
+observedPermanentImpactLabels :: [String]
+observedPermanentImpactLabels =
+  [ "the same-library public positive client observes the one exact always-refusing CheckResult"
+  , "missing local source ownership is precise typed residue, not an empty-path claim"
+  , "the complete public diagnostic wire is exact, ordered, digest-bound, and permanently refusing"
+  , "the aggregate component alternative has one exact ordered digest-bound public refusal"
+  , "the first observed variable row beyond the result ceiling retains every mandatory refusal before one exact limit row"
+  , "source-repository inplace style remains distinct"
+  ]
+
 selectorIntentRegistryProblems :: [String]
 selectorIntentRegistryProblems =
   concat
     [ expectEqual
-        "the oracle owns exactly 114 CompilerElaboratedPlan selector intents"
-        114
+        "the oracle owns exactly 342 CompilerElaboratedPlan selector intents"
+        342
         (length selectorIntentRegistry)
     , expectEqual
         "the oracle selector-intent inventory contains no duplicate selector"
@@ -818,19 +2498,209 @@ selectorIntentRegistryProblems =
         "the independently declared selector exact-case list contains no duplicate label"
         []
         (duplicateStrings selectorExactCaseLabels)
+    , expectEqual
+        "the oracle owns exactly 205 executable CompilerElaboratedPlan cases"
+        205
+        (length allExecutableExactCaseLabels)
+    , expectEqual
+        "the executable CompilerElaboratedPlan case inventory contains no duplicate label"
+        []
+        (duplicateStrings allExecutableExactCaseLabels)
+    , expectEqual
+        "the legacy group owns exactly 114 literal selector impact signatures"
+        114
+        (length legacySelectorImpactSignatures)
+    , expectEqual
+        "the legacy impact signatures have the exact first 114 selector identities"
+        [selector | SelectorIntent selector _ <- take 114 selectorIntentRegistry]
+        legacySignatureSelectors
+    , expectEqual
+        "the legacy selector impact signatures contain no duplicate selector"
+        []
+        (duplicateStrings legacySignatureSelectors)
+    , expectEqual
+        "the legacy group owns exactly 114 literal supplemental impact signatures"
+        114
+        (length legacySelectorSupplementalImpactSignatures)
+    , expectEqual
+        "the legacy supplemental impact signatures have the same selector inventory"
+        legacySignatureSelectors
+        (map fst legacySelectorSupplementalImpactSignatures)
+    , expectEqual
+        "the expansion owns exactly 131 literal selector impact signatures"
+        131
+        (length updatedNewSelectorImpactSignatures)
+    , expectEqual
+        "the expansion selector impact signatures contain no duplicate selector"
+        []
+        (duplicateStrings signatureSelectors)
+    , expectEqual
+        "the expansion owns exactly 131 updated literal supplemental impact signatures"
+        131
+        (length updatedNewSelectorSupplementalImpactSignatures)
+    , expectEqual
+        "the supplemental impact signatures have the same selector inventory"
+        signatureSelectors
+        (map fst updatedNewSelectorSupplementalImpactSignatures)
+    , expectEqual
+        "the post-matrix audit owns exactly 53 literal selector impact signatures"
+        53
+        (length auditSelectorImpactSignatures)
+    , expectEqual
+        "the post-matrix audit selector impact signatures contain no duplicate selector"
+        []
+        (duplicateStrings auditSignatureSelectors)
+    , expectEqual
+        "the post-matrix audit owns exactly 53 literal supplemental impact signatures"
+        53
+        (length auditSelectorSupplementalImpactSignatures)
+    , expectEqual
+        "the post-matrix audit supplemental signatures have the same selector inventory"
+        auditSignatureSelectors
+        (map fst auditSelectorSupplementalImpactSignatures)
+    , expectEqual
+        "the routing audit owns exactly 44 literal selector impact signatures"
+        44
+        (length routingAuditSelectorImpactSignatures)
+    , expectEqual
+        "the routing audit selector impact signatures contain no duplicate selector"
+        []
+        (duplicateStrings routingAuditSignatureSelectors)
+    , expectEqual
+        "the routing audit owns exactly 44 literal supplemental impact signatures"
+        44
+        (length routingAuditSelectorSupplementalImpactSignatures)
+    , expectEqual
+        "the routing audit supplemental signatures have the same selector inventory"
+        routingAuditSignatureSelectors
+        (map fst routingAuditSelectorSupplementalImpactSignatures)
+    , expectEqual
+        "the superseded 131-row main signature checkpoint remains a closed historical diagnostic"
+        131
+        (length newSelectorImpactSignatures)
+    , expectEqual
+        "the superseded 131-row supplemental signature checkpoint remains a closed historical diagnostic"
+        131
+        (length newSelectorSupplementalImpactSignatures)
     , [ "selector intent " <> selector <> " must reference exactly one independently declared exact case, but label " <> show target <> " occurs " <> show count <> " times"
       | SelectorIntent selector target <- selectorIntentRegistry
-      , let count = occurrenceCount target selectorExactCaseLabels
+      , let count = occurrenceCount target allExecutableExactCaseLabels
       , count /= 1
       ]
     , [ "independently declared selector exact case is not referenced by any selector intent: " <> show target
       | target <- selectorExactCaseLabels
       , target `notElem` targetNames
       ]
+    , [ "impact registry selector must occur exactly once in the primary selector registry: " <> selector
+      | (selector, _) <- selectorImpactRegistry
+      , occurrenceCount selector selectorNames /= 1
+      ]
+    , [ "selector impact registry contains a duplicate exact-case label: selector=" <> selector <> "; exact-case=" <> target
+      | (selector, targets) <- selectorImpactRegistry
+      , target <- duplicateStrings targets
+      ]
+    , [ "selector impact repeats its primary exact case: selector=" <> selector <> "; exact-case=" <> target
+      | (selector, targets) <- selectorImpactRegistry
+      , target <- targets
+      , target `elem` [primary | SelectorIntent candidate primary <- selectorIntentRegistry, candidate == selector]
+      ]
+    , [ "selector impact references an undeclared executable exact case: selector=" <> selector <> "; exact-case=" <> target
+      | (selector, targets) <- selectorImpactRegistry
+      , target <- targets
+      , occurrenceCount target allExecutableExactCaseLabels /= 1
+      ]
+    , [ "additional executable exact case is not referenced by a declared selector impact: " <> show target
+      | target <- selectorAdditionalExactCaseLabels
+      , target `notElem` allDeclaredSelectorImpactTargets
+      ]
+    , [ "declared legacy exact case is absent from the complete executable case inventory: " <> show target
+      | target <- allDeclaredExactCaseLabels
+      , occurrenceCount target allExecutableExactCaseLabels /= 1
+      ]
+    , [ "expansion selector impact signature must occur exactly once in the primary selector registry: " <> selector
+      | selector <- signatureSelectors
+      , occurrenceCount selector selectorNames /= 1
+      ]
+    , [ "expansion selector is missing its one literal impact signature: " <> selector
+      | SelectorIntent selector _ <- newSelectorIntents
+      , occurrenceCount selector signatureSelectors /= 1
+      ]
+    , [ "post-matrix audit selector is missing its one literal impact signature: " <> selector
+      | SelectorIntent selector _ <- auditSelectorIntents
+      , occurrenceCount selector auditSignatureSelectors /= 1
+      ]
+    , [ "routing audit selector is missing its one literal impact signature: " <> selector
+      | SelectorIntent selector _ <- routingAuditSelectorIntents
+      , occurrenceCount selector routingAuditSignatureSelectors /= 1
+      ]
+    , [ "legacy selector impact signature must contain exactly 170 binary digits: selector=" <> selector <> "; length=" <> show (length signature)
+      | (selector, signature) <- legacySelectorImpactSignatures
+      , length signature /= length signatureExactCaseLabels
+          || any (`notElem` ['0', '1']) signature
+      ]
+    , [ "legacy supplemental selector impact signature must match the exact supplemental case inventory: selector=" <> selector <> "; length=" <> show (length signature)
+      | (selector, signature) <- legacySelectorSupplementalImpactSignatures
+      , length signature /= length supplementalExactCaseLabels
+          || any (`notElem` ['0', '1']) signature
+      ]
+    , [ "selector impact signature must contain exactly 170 binary digits: selector=" <> selector <> "; length=" <> show (length signature)
+      | (selector, signature) <- updatedNewSelectorImpactSignatures
+      , length signature /= length signatureExactCaseLabels
+          || any (`notElem` ['0', '1']) signature
+      ]
+    , [ "supplemental selector impact signature must match the exact supplemental case inventory: selector=" <> selector <> "; length=" <> show (length signature)
+      | (selector, signature) <- updatedNewSelectorSupplementalImpactSignatures
+      , length signature /= length supplementalExactCaseLabels
+          || any (`notElem` ['0', '1']) signature
+      ]
+    , [ "post-matrix audit selector impact signature must contain exactly 170 binary digits: selector=" <> selector <> "; length=" <> show (length signature)
+      | (selector, signature) <- auditSelectorImpactSignatures
+      , length signature /= length signatureExactCaseLabels
+          || any (`notElem` ['0', '1']) signature
+      ]
+    , [ "post-matrix audit supplemental selector impact signature must match the exact supplemental case inventory: selector=" <> selector <> "; length=" <> show (length signature)
+      | (selector, signature) <- auditSelectorSupplementalImpactSignatures
+      , length signature /= length supplementalExactCaseLabels
+          || any (`notElem` ['0', '1']) signature
+      ]
+    , [ "routing audit selector impact signature must contain exactly 170 binary digits: selector=" <> selector <> "; length=" <> show (length signature)
+      | (selector, signature) <- routingAuditSelectorImpactSignatures
+      , length signature /= length signatureExactCaseLabels
+          || any (`notElem` ['0', '1']) signature
+      ]
+    , [ "routing audit supplemental selector impact signature must match the exact supplemental case inventory: selector=" <> selector <> "; length=" <> show (length signature)
+      | (selector, signature) <- routingAuditSelectorSupplementalImpactSignatures
+      , length signature /= length supplementalExactCaseLabels
+          || any (`notElem` ['0', '1']) signature
+      ]
+    , [ "selector impact signature omits its primary exact case: selector=" <> selector <> "; exact-case=" <> target
+      | SelectorIntent selector target <- newSelectorIntents
+      , target `notElem` decodedSelectorImpactTargets selector
+      ]
+    , [ "post-matrix audit selector impact signature omits its primary exact case: selector=" <> selector <> "; exact-case=" <> target
+      | SelectorIntent selector target <- auditSelectorIntents
+      , target `notElem` decodedSelectorImpactTargets selector
+      ]
+    , [ "routing audit selector impact signature omits its primary exact case: selector=" <> selector <> "; exact-case=" <> target
+      | SelectorIntent selector target <- routingAuditSelectorIntents
+      , target `notElem` decodedSelectorImpactTargets selector
+      ]
+    , [ "legacy selector impact signature omits its primary exact case: selector=" <> selector <> "; exact-case=" <> target
+      | SelectorIntent selector target <- take 114 selectorIntentRegistry
+      , target `notElem` decodedSelectorImpactTargets selector
+      ]
     ]
  where
   selectorNames = [selector | SelectorIntent selector _ <- selectorIntentRegistry]
   targetNames = [target | SelectorIntent _ target <- selectorIntentRegistry]
+  allDeclaredExactCaseLabels = selectorExactCaseLabels <> selectorAdditionalExactCaseLabels
+  allDeclaredSelectorImpactTargets =
+    concatMap snd selectorImpactRegistry
+      <> concatMap decodedSelectorImpactTargets (legacySignatureSelectors <> signatureSelectors <> auditSignatureSelectors <> routingAuditSignatureSelectors)
+  legacySignatureSelectors = map fst legacySelectorImpactSignatures
+  signatureSelectors = map fst updatedNewSelectorImpactSignatures
+  auditSignatureSelectors = map fst auditSelectorImpactSignatures
+  routingAuditSignatureSelectors = map fst routingAuditSelectorImpactSignatures
 
 duplicateStrings :: [String] -> [String]
 duplicateStrings = go []
@@ -847,13 +2717,145 @@ runCompilerElaboratedPlanOracle :: IO ()
 runCompilerElaboratedPlanOracle =
   finishDiagnostics
     "CompilerElaboratedPlanOracle"
-    ( selectorIntentRegistryProblems
-        <> publicBoundaryProblems
-        <> positiveProblems
-        <> aggregateShapeFullProblems
-        <> negativeProblems
-        <> grammarPredicateProblems
-        <> resourceLimitProblems
+    (selectorIntentRegistryProblems <> compilerElaboratedPlanExactProblems)
+
+compilerElaboratedPlanSelectorNames :: [String]
+compilerElaboratedPlanSelectorNames =
+  [selector | SelectorIntent selector _ <- selectorIntentRegistry]
+
+compilerElaboratedPlanExactCaseLabels :: [String]
+compilerElaboratedPlanExactCaseLabels = allExecutableExactCaseLabels
+
+compilerElaboratedPlanAffectedExactCaseLabels :: [String]
+compilerElaboratedPlanAffectedExactCaseLabels =
+  [ label
+  | label <- allExecutableExactCaseLabels
+  , not (null (problemsForTarget label))
+  ]
+
+-- A selector run observes the complete oracle so every unassigned exact case
+-- remains an executed same-harness control.  A changed subject is admissible
+-- only when all emitted differences carry its independently literal target
+-- label; the matrix driver separately requires that target to turn red.
+runCompilerElaboratedPlanSelectorOracle :: String -> IO ()
+runCompilerElaboratedPlanSelectorOracle selector =
+  case selectorTargets selector of
+    [target] -> do
+      let affectedTargets = selectorAffectedTargets selector
+          assignedProblems = problemsForTargets affectedTargets
+          unaffectedProblems = problemsOutsideTargets affectedTargets
+      unless (null selectorIntentRegistryProblems) $
+        failDiagnostic "registry-control" selectorIntentRegistryProblems
+      unless (null unaffectedProblems) $
+        failDiagnostic "wrong-locus" (summarizeProblemLabels unaffectedProblems)
+      unless (null assignedProblems) $
+        failDiagnostic ("assigned-locus:" <> target) (summarizeProblemLabels assignedProblems)
+    targets ->
+      failDiagnostic
+        "unresolvable-selector"
+        ["selector=" <> selector, "targets=" <> show targets]
+
+-- This inverse check is run only against the changed subject.  It proves that
+-- the declared exact case itself turned red rather than accepting an exit from
+-- an unrelated assertion or from the compiler.
+runCompilerElaboratedPlanSelectorImpactOracle :: String -> IO ()
+runCompilerElaboratedPlanSelectorImpactOracle selector =
+  case selectorTargets selector of
+    [_] -> do
+      unless (null selectorIntentRegistryProblems) $
+        failDiagnostic "registry-control" selectorIntentRegistryProblems
+      let missingImpacts =
+            [ "declared impacted exact case remained green: selector="
+                <> selector
+                <> "; exact-case="
+                <> affectedTarget
+            | affectedTarget <- selectorAffectedTargets selector
+            , null (problemsForTarget affectedTarget)
+            ]
+      unless (null missingImpacts) (failDiagnostic "declared-impact" missingImpacts)
+    targets ->
+      failDiagnostic
+        "unresolvable-selector"
+        ["selector=" <> selector, "targets=" <> show targets]
+
+runCompilerElaboratedPlanSelectorIsolationOracle :: String -> IO ()
+runCompilerElaboratedPlanSelectorIsolationOracle selector =
+  case selectorTargets selector of
+    [_] -> do
+      let problems =
+            selectorIntentRegistryProblems
+              <> problemsOutsideTargets (selectorAffectedTargets selector)
+      unless (null problems) (failDiagnostic "unaffected-control" (summarizeProblemLabels problems))
+    targets ->
+      failDiagnostic
+        "unresolvable-selector"
+        ["selector=" <> selector, "targets=" <> show targets]
+
+selectorTargets :: String -> [String]
+selectorTargets selector =
+  [target | SelectorIntent candidate target <- selectorIntentRegistry, candidate == selector]
+
+selectorAffectedTargets :: String -> [String]
+selectorAffectedTargets selector = case decodedSelectorImpactTargets selector of
+  [] ->
+    selectorTargets selector
+      <> concat [targets | (candidate, targets) <- selectorImpactRegistry, candidate == selector]
+  targets -> targets
+
+decodedSelectorImpactTargets :: String -> [String]
+decodedSelectorImpactTargets selector =
+  concat
+    [ [label | (label, bit) <- zip signatureExactCaseLabels signature, bit == '1']
+    | (candidate, signature) <- legacySelectorImpactSignatures <> updatedNewSelectorImpactSignatures <> auditSelectorImpactSignatures <> routingAuditSelectorImpactSignatures
+    , candidate == selector
+    ]
+    <> concat
+      [ [label | (label, bit) <- zip supplementalExactCaseLabels signature, bit == '1']
+      | (candidate, signature) <- legacySelectorSupplementalImpactSignatures <> updatedNewSelectorSupplementalImpactSignatures <> auditSelectorSupplementalImpactSignatures <> routingAuditSelectorSupplementalImpactSignatures
+      , candidate == selector
+      ]
+
+problemsForTarget :: String -> [String]
+problemsForTarget target =
+  filter ((target <> ":") `isPrefixOf`) compilerElaboratedPlanExactProblems
+
+problemsForTargets :: [String] -> [String]
+problemsForTargets targets =
+  filter
+    (\problem -> any (\target -> (target <> ":") `isPrefixOf` problem) targets)
+    compilerElaboratedPlanExactProblems
+
+problemsOutsideTargets :: [String] -> [String]
+problemsOutsideTargets targets =
+  filter
+    (\problem -> all (\target -> not ((target <> ":") `isPrefixOf` problem)) targets)
+    compilerElaboratedPlanExactProblems
+
+compilerElaboratedPlanExactProblems :: [String]
+compilerElaboratedPlanExactProblems =
+  publicBoundaryProblems
+    <> positiveProblems
+    <> aggregateShapeFullProblems
+    <> negativeProblems
+    <> expansionCoverageProblems
+    <> grammarPredicateProblems
+    <> resourceLimitProblems
+
+summarizeProblemLabels :: [String] -> [String]
+summarizeProblemLabels = go [] . map (takeWhile (/= ':'))
+ where
+  go _ [] = []
+  go seen (label : remaining)
+    | label `elem` seen = go seen remaining
+    | otherwise = label : go (label : seen) remaining
+
+failDiagnostic :: String -> [String] -> IO ()
+failDiagnostic label problems =
+  fail
+    ( unlines
+        ( ("CompilerElaboratedPlanOracle " <> label <> ":")
+            : map ("  " <>) problems
+        )
     )
 
 publicBoundaryProblems :: [String]
@@ -1441,6 +3443,157 @@ negativeProblems =
         unknownLocalFieldPlanBytes
     ]
 
+expansionCoverageProblems :: [String]
+expansionCoverageProblems =
+  concat
+    [ expectExactLeftProblems
+        "an unterminated generic array retains the token-scan invalid mapping"
+        [PlanJsonInvalid "token-scan-invalid"]
+        "["
+    , expectExactLeftProblems
+        "an unterminated generic object retains the token-scan invalid mapping"
+        [PlanJsonInvalid "token-scan-invalid"]
+        "{"
+    , expectExactLeftProblems
+        "an invalid root token retains the token-scan invalid mapping"
+        [PlanJsonInvalid "token-scan-invalid"]
+        "?"
+    , expectExactLeftProblems
+        "a record closing token is counted at the exact global token boundary"
+        [PlanResourceLimitExceeded "json-tokens" 1000000 1000001]
+        jsonRecordEndTokenOneOverBytes
+    , expectExactLeftProblems
+        "all JSON value kinds retain their exact type names"
+        [ PlanJsonFieldTypeMismatch "plan" "cabal-version" "object"
+        , PlanJsonFieldTypeMismatch "plan" "cabal-lib-version" "array"
+        , PlanJsonFieldTypeMismatch "plan" "compiler-id" "number"
+        , PlanJsonFieldTypeMismatch "plan" "compiler-abi" "boolean"
+        , PlanJsonFieldTypeMismatch "plan" "os" "null"
+        , PlanJsonFieldTypeMismatch "plan" "install-plan" "string"
+        ]
+        allJsonValueKindsPlanBytes
+    , expectExactLeftProblems
+        "an empty required text field is not accepted as a value"
+        [PlanJsonTextEmpty "plan" "cabal-version"]
+        emptyRequiredTextPlanBytes
+    , expectExactLeftProblems
+        "a configured unit requires its package-source object"
+        [PlanJsonFieldMissing unitOneScope "pkg-src"]
+        missingRequiredObjectPlanBytes
+    , expectExactLeftProblems
+        "a configured package-source field retains its object type"
+        [PlanJsonFieldTypeMismatch unitOneScope "pkg-src" "boolean"]
+        mistypedRequiredObjectPlanBytes
+    , expectExactLeftProblems
+        "an empty optional path is refused before field-combination analysis"
+        [ PlanJsonTextEmpty unitOneScope "build-info"
+        , PlanJsonFieldUnexpected unitOneScope "build-info"
+        ]
+        emptyOptionalTextPlanBytes
+    , expectExactLeftProblems
+        "a mistyped optional path is refused before field-combination analysis"
+        [ PlanJsonFieldTypeMismatch unitOneScope "build-info" "boolean"
+        , PlanJsonFieldUnexpected unitOneScope "build-info"
+        ]
+        mistypedOptionalTextPlanBytes
+    , expectExactLeftProblems
+        "a pre-existing unit requires its dependency array"
+        [PlanJsonFieldMissing unitZeroScope "depends"]
+        missingDependencyArrayPlanBytes
+    , expectExactLeftProblems
+        "a dependency field retains its array type"
+        [PlanJsonFieldTypeMismatch unitZeroScope "depends" "boolean"]
+        mistypedDependencyArrayPlanBytes
+    , expectExactLeftProblems
+        "an empty dependency identity retains its exact element locus"
+        [PlanJsonTextEmpty unitZeroScope "depends[0]"]
+        emptyDependencyElementPlanBytes
+    , expectExactLeftProblems
+        "a dependency element retains its text type"
+        [PlanJsonFieldTypeMismatch unitZeroScope "depends[0]" "boolean"]
+        mistypedDependencyElementPlanBytes
+    , expectExactLeftProblems
+        "a dependency identity is checked by the shared constrained-text grammar"
+        [PlanJsonTextMalformed unitZeroScope "depends[0]" "bad@identity"]
+        malformedDependencyIdentityPlanBytes
+    , expectExactLeftProblems
+        "uppercase ASCII remains an admitted portable-identity alternative"
+        [PlanJsonFieldUnknown unitZeroScope "probe"]
+        uppercasePortableIdentityPlanBytes
+    , expectExactLeftProblems
+        "portable identity retains the colon character alternative"
+        [PlanJsonFieldUnknown unitZeroScope "probe"]
+        (portableIdentityAlternativePlanBytes "base:id")
+    , expectExactLeftProblems
+        "portable identity retains the dot character alternative"
+        [PlanJsonFieldUnknown unitZeroScope "probe"]
+        (portableIdentityAlternativePlanBytes "base.id")
+    , expectExactLeftProblems
+        "portable identity retains the plus character alternative"
+        [PlanJsonFieldUnknown unitZeroScope "probe"]
+        (portableIdentityAlternativePlanBytes "base+id")
+    , expectExactLeftProblems
+        "portable identity retains the hyphen character alternative"
+        [PlanJsonFieldUnknown unitZeroScope "probe"]
+        (portableIdentityAlternativePlanBytes "base-id")
+    , expectExactLeftProblems
+        "portable identity retains the underscore character alternative"
+        [PlanJsonFieldUnknown unitZeroScope "probe"]
+        (portableIdentityAlternativePlanBytes "base_id")
+    , exactRootProblem
+        "platform tokens retain the hyphen character alternative"
+        (UnsupportedPlanSchemaVersion "cabal-version" "3.16.1.0" "3.16.1.1")
+        (rootGrammarPlan "3.16.1.1" "3.16.1.0" "ghc-9.12.4" "6f4d" "darwin-kernel" "aarch64")
+    , exactRootProblem
+        "platform tokens retain the underscore character alternative"
+        (UnsupportedPlanSchemaVersion "cabal-version" "3.16.1.0" "3.16.1.1")
+        (rootGrammarPlan "3.16.1.1" "3.16.1.0" "ghc-9.12.4" "6f4d" "darwin_kernel" "aarch64")
+    , componentAlternativeControlProblems "lib:core.name"
+    , componentAlternativeControlProblems "lib:core-name"
+    , componentAlternativeControlProblems "lib:core_name"
+    , flagAlternativeControlProblems "variant-name"
+    , flagAlternativeControlProblems "variant_name"
+    , lowerHexAlternativeControlProblems
+        "SHA-256 lower-hex alphabetic alternative remains admitted"
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    , lowerHexAlternativeControlProblems
+        "SHA-256 lower-hex digit alternative remains admitted"
+        "1111111111111111111111111111111111111111111111111111111111111111"
+    , sourceRepositoryProjectionProblems
+    , localSourceRootOrderProblems
+    , expectExactLeftProblems
+        "a test component independently requires its binary path"
+        [PlanJsonFieldMissing unitOneScope "bin-file"]
+        testComponentWithoutBinaryPlanBytes
+    , expectExactLeftProblems
+        "a benchmark component independently requires its binary path"
+        [PlanJsonFieldMissing unitOneScope "bin-file"]
+        benchmarkComponentWithoutBinaryPlanBytes
+    , exactFlagOrderProblems
+    , expectExactLeftProblems
+        "multiple unknown fields retain deterministic lexical order"
+        [ PlanJsonFieldUnknown "plan" "alpha-unknown"
+        , PlanJsonFieldUnknown "plan" "zeta-unknown"
+        ]
+        multipleUnknownFieldsPlanBytes
+    , expectExactLeftProblems
+        "pre-existing unit dependencies remain projected into invariant checks"
+        [ UnknownComponentDependencyUnit "base-id" "<unit>.depends" "missing-id"
+        , LocalComponentDiscoveryEmpty
+        ]
+        preExistingUnknownDependencyPlanBytes
+    ]
+
+exactFlagOrderProblems :: [String]
+exactFlagOrderProblems =
+  case inspectCompilerElaboratedPlanDiagnostic twoFlagPlanBytes of
+    Left problems -> ["multiple flags retain deterministic lexical order: plan was rejected with " <> show problems]
+    Right plan ->
+      expectEqual
+        "multiple flags retain deterministic lexical order"
+        [[("alpha", True), ("zeta", False)]]
+        (map diagnosticElaboratedUnitFlags (localUnits plan))
+
 grammarPredicateProblems :: [String]
 grammarPredicateProblems =
   concat
@@ -1774,13 +3927,17 @@ componentAlternativeControlProblems :: ByteString -> [String]
 componentAlternativeControlProblems componentName =
   expectExactLeftProblems
     ("the admitted component alternative remains exact: " <> ByteString8.unpack componentName)
-    [PlanJsonFieldTypeMismatch flagsScope "probe" "null"]
+    [ UnknownComponentDependencyUnit
+        "component-control-id"
+        (Text.pack (ByteString8.unpack componentName) <> ".depends")
+        "missing-id"
+    ]
     ( renderPlan
         identityFields
         [ preExistingUnit
-        , "{\"type\":\"configured\",\"id\":\"component-control-id\",\"pkg-name\":\"local-package\",\"pkg-version\":\"0.1.0.0\",\"flags\":{\"probe\":null},\"style\":\"local\",\"pkg-src\":{\"type\":\"local\",\"path\":\"/immutable/repository/.\"},\"component-name\":\""
+        , "{\"type\":\"configured\",\"id\":\"component-control-id\",\"pkg-name\":\"local-package\",\"pkg-version\":\"0.1.0.0\",\"flags\":{},\"style\":\"local\",\"pkg-src\":{\"type\":\"local\",\"path\":\"/immutable/repository/.\"},\"component-name\":\""
             <> componentName
-            <> "\",\"depends\":[\"base-id\"],\"exe-depends\":[],\"build-info\":\"/immutable/build/component-control-id/build-info.json\",\"dist-dir\":\"/immutable/build/component-control-id\""
+            <> "\",\"depends\":[\"missing-id\"],\"exe-depends\":[],\"build-info\":\"/immutable/build/component-control-id/build-info.json\",\"dist-dir\":\"/immutable/build/component-control-id\""
             <> if any (`ByteString8.isPrefixOf` componentName) ["exe:", "test:", "bench:"]
               then ",\"bin-file\":\"/immutable/build/component-control-id/binary\"}"
               else "}"
@@ -2114,10 +4271,10 @@ inputByteOneOverBytes =
   "null" <> ByteString8.replicate 8388605 ' '
 
 jsonDepthBoundaryBytes :: ByteString
-jsonDepthBoundaryBytes = nestedJsonArrays 64
+jsonDepthBoundaryBytes = nestedJsonContainers 64
 
 jsonDepthOneOverBytes :: ByteString
-jsonDepthOneOverBytes = nestedJsonArrays 65
+jsonDepthOneOverBytes = nestedJsonContainers 65
 
 jsonTextBoundaryBytes :: ByteString
 jsonTextBoundaryBytes =
@@ -2167,7 +4324,7 @@ jsonTokenBoundaryBytes =
   "["
     <> ByteString8.intercalate
       ","
-      (jsonArrayOf 22 "null" : replicate 52629 eightElementJsonArray)
+      (jsonArrayOf 22 "null" : eightElementJsonObject : replicate 52628 eightElementJsonArray)
     <> "]"
 
 jsonTokenOneOverBytes :: ByteString
@@ -2175,11 +4332,18 @@ jsonTokenOneOverBytes =
   "["
     <> ByteString8.intercalate
       ","
-      (jsonArrayOf 23 "null" : replicate 52629 eightElementJsonArray)
+      (jsonArrayOf 23 "null" : eightElementJsonObject : replicate 52628 eightElementJsonArray)
     <> "]"
 
 eightElementJsonArray :: ByteString
 eightElementJsonArray = jsonArrayOf 8 "null"
+
+eightElementJsonObject :: ByteString
+eightElementJsonObject = uniqueJsonObjectOf 8
+
+jsonRecordEndTokenOneOverBytes :: ByteString
+jsonRecordEndTokenOneOverBytes =
+  ByteString.take (ByteString.length jsonTokenOneOverBytes - 1) jsonTokenOneOverBytes
 
 jsonProblemBoundaryBytes :: ByteString
 jsonProblemBoundaryBytes =
@@ -2559,9 +4723,13 @@ decimal3 value =
   let rendered = ByteString8.pack (show value)
    in ByteString8.replicate (3 - ByteString8.length rendered) '0' <> rendered
 
-nestedJsonArrays :: Int -> ByteString
-nestedJsonArrays count =
-  ByteString8.replicate count '[' <> "null" <> ByteString8.replicate count ']'
+nestedJsonContainers :: Int -> ByteString
+nestedJsonContainers count =
+  foldr wrap "null" (take count (cycle [True, False]))
+ where
+  wrap isArray value
+    | isArray = "[" <> value <> "]"
+    | otherwise = "{\"nested\":" <> value <> "}"
 
 jsonArrayOf :: Int -> ByteString -> ByteString
 jsonArrayOf count value =
@@ -2976,6 +5144,306 @@ unknownLocalFieldPlanBytes =
     , remoteUnit "remote-id"
     , localUnit "local-id" "/immutable/repository/." "lib:core" ["base-id"] "\"compiler-input\":true"
     ]
+
+allJsonValueKindsPlanBytes :: ByteString
+allJsonValueKindsPlanBytes =
+  "{\"cabal-version\":{},\"cabal-lib-version\":[],\"compiler-id\":0,\"compiler-abi\":false,\"os\":null,\"arch\":\"aarch64\",\"install-plan\":\"not-an-array\"}"
+
+emptyRequiredTextPlanBytes :: ByteString
+emptyRequiredTextPlanBytes =
+  renderPlan
+    ("\"cabal-version\":\"\"" : drop 1 identityFields)
+    [preExistingUnit]
+
+missingRequiredObjectPlanBytes :: ByteString
+missingRequiredObjectPlanBytes =
+  renderPlan identityFields [preExistingUnit, configuredUnitWithPackageSource ""]
+
+mistypedRequiredObjectPlanBytes :: ByteString
+mistypedRequiredObjectPlanBytes =
+  renderPlan identityFields [preExistingUnit, configuredUnitWithPackageSource "\"pkg-src\":false"]
+
+configuredUnitWithPackageSource :: ByteString -> ByteString
+configuredUnitWithPackageSource packageSourceField =
+  ByteString8.concat
+    [ "{\"type\":\"configured\",\"id\":\"local-id\",\"pkg-name\":\"local-package\",\"pkg-version\":\"0.1.0.0\",\"flags\":{},\"style\":\"local\""
+    , if ByteString8.null packageSourceField then "" else "," <> packageSourceField
+    , ",\"component-name\":\"lib\",\"depends\":[\"base-id\"],\"exe-depends\":[],\"build-info\":\"/immutable/build/local-id/build-info.json\",\"dist-dir\":\"/immutable/build/local-id\"}"
+    ]
+
+emptyOptionalTextPlanBytes :: ByteString
+emptyOptionalTextPlanBytes =
+  renderPlan
+    identityFields
+    [ preExistingUnit
+    , repositoryTarUnit "remote-id" "secure-repo" (Just validCabalHashBytes) (Just validSourceHashBytes) "\"build-info\":\"\""
+    ]
+
+mistypedOptionalTextPlanBytes :: ByteString
+mistypedOptionalTextPlanBytes =
+  renderPlan
+    identityFields
+    [ preExistingUnit
+    , repositoryTarUnit "remote-id" "secure-repo" (Just validCabalHashBytes) (Just validSourceHashBytes) "\"build-info\":false"
+    ]
+
+missingDependencyArrayPlanBytes :: ByteString
+missingDependencyArrayPlanBytes =
+  renderPlan identityFields ["{\"type\":\"pre-existing\",\"id\":\"base-id\",\"pkg-name\":\"base\",\"pkg-version\":\"4.21.2.0\"}"]
+
+mistypedDependencyArrayPlanBytes :: ByteString
+mistypedDependencyArrayPlanBytes =
+  renderPlan identityFields [preExistingUnitWithDependencies "false"]
+
+emptyDependencyElementPlanBytes :: ByteString
+emptyDependencyElementPlanBytes =
+  renderPlan identityFields [preExistingUnitWithDependencies "[\"\"]"]
+
+mistypedDependencyElementPlanBytes :: ByteString
+mistypedDependencyElementPlanBytes =
+  renderPlan identityFields [preExistingUnitWithDependencies "[false]"]
+
+malformedDependencyIdentityPlanBytes :: ByteString
+malformedDependencyIdentityPlanBytes =
+  renderPlan identityFields [preExistingUnitWithDependencies "[\"bad@identity\"]"]
+
+preExistingUnknownDependencyPlanBytes :: ByteString
+preExistingUnknownDependencyPlanBytes =
+  renderPlan identityFields [preExistingUnitWithDependencies "[\"missing-id\"]"]
+
+preExistingUnitWithDependencies :: ByteString -> ByteString
+preExistingUnitWithDependencies dependencies =
+  "{\"type\":\"pre-existing\",\"id\":\"base-id\",\"pkg-name\":\"base\",\"pkg-version\":\"4.21.2.0\",\"depends\":"
+    <> dependencies
+    <> "}"
+
+uppercasePortableIdentityPlanBytes :: ByteString
+uppercasePortableIdentityPlanBytes =
+  renderPlan
+    identityFields
+    ["{\"type\":\"pre-existing\",\"id\":\"BASE-ID\",\"pkg-name\":\"base\",\"pkg-version\":\"4.21.2.0\",\"depends\":[],\"probe\":true}"]
+
+portableIdentityAlternativePlanBytes :: ByteString -> ByteString
+portableIdentityAlternativePlanBytes identity =
+  renderPlan
+    identityFields
+    [ "{\"type\":\"pre-existing\",\"id\":\""
+        <> identity
+        <> "\",\"pkg-name\":\"base\",\"pkg-version\":\"4.21.2.0\",\"depends\":[],\"probe\":true}"
+    ]
+
+flagAlternativeControlProblems :: ByteString -> [String]
+flagAlternativeControlProblems flagName =
+  expectExactLeftProblems
+    ("the admitted flag alternative remains exact: " <> ByteString8.unpack flagName)
+    [ConfiguredComponentNameMalformed "flag-control-id" "foreign"]
+    ( renderPlan
+        identityFields
+        [ preExistingUnit
+        , "{\"type\":\"configured\",\"id\":\"flag-control-id\",\"pkg-name\":\"local-package\",\"pkg-version\":\"0.1.0.0\",\"flags\":{\""
+            <> flagName
+            <> "\":false},\"style\":\"local\",\"pkg-src\":{\"type\":\"local\",\"path\":\"/immutable/repository/.\"},\"component-name\":\"foreign\",\"depends\":[\"base-id\"],\"exe-depends\":[],\"build-info\":\"/immutable/build/flag-control-id/build-info.json\",\"dist-dir\":\"/immutable/build/flag-control-id\"}"
+        ]
+    )
+
+lowerHexAlternativeControlProblems :: String -> ByteString -> [String]
+lowerHexAlternativeControlProblems label sourceHash =
+  expectExactLeftProblems
+    label
+    [ RepositoryCabalHashMalformed
+        "hash-alternative-id"
+        "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg"
+    ]
+    ( renderPlan
+        identityFields
+        [ preExistingUnit
+        , repositoryTarUnit
+            "hash-alternative-id"
+            "secure-repo"
+            (Just "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg")
+            (Just sourceHash)
+            ""
+        ]
+    )
+
+sourceRepositoryProjectionProblems :: [String]
+sourceRepositoryProjectionProblems =
+  sourceRepositoryGlobalProjectionProblems <> sourceRepositoryInplaceProjectionProblems
+
+localSourceRootOrderProblems :: [String]
+localSourceRootOrderProblems =
+  case inspectCompilerElaboratedPlanDiagnostic localSourceRootOrderPlanBytes of
+    Left problems ->
+      [ "multiple local roots retain deterministic subject order: plan was rejected with "
+          <> show problems
+      ]
+    Right plan ->
+      concat
+        [ expectEqual
+            "multiple local roots retain deterministic subject order"
+            [[("local-a-id", "/immutable/repository/a"), ("local-z-id", "/immutable/repository/z")]]
+            [subject | LocalSourceRootIdentityLimitedToLexical subject <- diagnosticProblems plan]
+        , expectEqual
+            "multiple local roots retain deterministic subject order"
+            [[("local-a-id", "/immutable/repository/a"), ("local-z-id", "/immutable/repository/z")]]
+            [subject | LocalSourceRootFilesystemIdentityUnavailable subject <- diagnosticProblems plan]
+        ]
+
+localSourceRootOrderPlanBytes :: ByteString
+localSourceRootOrderPlanBytes =
+  renderPlan
+    identityFields
+    [ preExistingUnit
+    , localUnit "local-z-id" "/immutable/repository/z" "lib:z" ["base-id"] ""
+    , localUnit "local-a-id" "/immutable/repository/a" "lib:a" ["base-id"] ""
+    ]
+
+sourceRepositoryGlobalProjectionProblems :: [String]
+sourceRepositoryGlobalProjectionProblems =
+  case inspectCompilerElaboratedPlanDiagnostic sourceRepositoryGlobalPlanBytes of
+    Left problems ->
+      [ "source-repository global projection retains kind, repository type, location, and tag: plan was rejected with "
+          <> show problems
+      ]
+    Right plan ->
+      expectEqual
+        "source-repository global projection retains kind, repository type, location, and tag"
+        [ ( "source-repo"
+          , Just "git"
+          , Just "https://example.invalid/source.git"
+          , Just "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          )
+        ]
+        [ ( diagnosticElaboratedUnitPackageSourceKind unit
+          , diagnosticElaboratedUnitRepositoryType unit
+          , diagnosticElaboratedUnitPackageSourceLocation unit
+          , diagnosticElaboratedUnitPackageSourceTag unit
+          )
+        | unit <- diagnosticUnits plan
+        , diagnosticElaboratedUnitId unit == "source-repo-global-id"
+        ]
+
+sourceRepositoryInplaceProjectionProblems :: [String]
+sourceRepositoryInplaceProjectionProblems =
+  case inspectCompilerElaboratedPlanDiagnostic sourceRepositoryInplacePlanBytes of
+    Left problems ->
+      [ "source-repository inplace style remains distinct: plan was rejected with "
+          <> show problems
+      ]
+    Right plan ->
+      concat
+        [ expectEqual
+            "source-repository inplace style remains distinct"
+            [InplaceBuildStyle]
+            [ diagnosticElaboratedUnitBuildStyle unit
+            | unit <- diagnosticUnits plan
+            , diagnosticElaboratedUnitId unit == "source-repo-inplace-id"
+            ]
+        , expectEqual
+            "source-repository inplace style remains distinct"
+            [ [ ("source-repo-inplace-id", "lib")
+              , ("source-repo-inplace-local-control", "lib:control")
+              ]
+            ]
+            [ subject
+            | IndependentComponentUniverseUnavailable subject <- diagnosticProblems plan
+            ]
+        , expectEqual
+            "source-repository inplace style remains distinct"
+            [ [ ( "source-repo-inplace-id"
+                , InplaceBuildStyle
+                , Just DirectElaboratedComponentShape
+                , []
+                , ["lib"]
+                )
+              , ( "source-repo-inplace-local-control"
+                , LocalBuildStyle
+                , Just DirectElaboratedComponentShape
+                , [("variant", False)]
+                , ["lib:control"]
+                )
+              ]
+            ]
+            [ subject
+            | ConfigurationBranchClosureUnavailable subject <- diagnosticProblems plan
+            ]
+        , expectEqual
+            "source-repository inplace style remains distinct"
+            [ [ ("dependent-pre-existing-id", "<unit>.depends", "base-id")
+              , ("source-repo-inplace-id", "lib.depends", "base-id")
+              , ("source-repo-inplace-id", "lib.exe-depends", "base-id")
+              , ("source-repo-inplace-local-control", "lib:control.depends", "base-id")
+              ]
+            ]
+            [ subject
+            | IndependentDependencySemanticsUnavailable subject <- diagnosticProblems plan
+            ]
+        ]
+
+sourceRepositoryGlobalPlanBytes :: ByteString
+sourceRepositoryGlobalPlanBytes =
+  renderPlan
+    identityFields
+    [ preExistingUnit
+    , localUnit "source-repo-local-control" "/immutable/repository/source-repo-control" "lib:control" ["base-id"] ""
+    , projectionSourceRepositoryUnit "source-repo-global-id" "global" ""
+    ]
+
+sourceRepositoryInplacePlanBytes :: ByteString
+sourceRepositoryInplacePlanBytes =
+  renderPlan
+    identityFields
+    [ preExistingUnit
+    , dependentPreExistingUnit
+    , localUnit "source-repo-inplace-local-control" "/immutable/repository/source-repo-inplace-control" "lib:control" ["base-id"] ""
+    , projectionSourceRepositoryInplaceUnit
+    ]
+
+dependentPreExistingUnit :: ByteString
+dependentPreExistingUnit =
+  "{\"type\":\"pre-existing\",\"id\":\"dependent-pre-existing-id\",\"pkg-name\":\"dependent-pre-existing\",\"pkg-version\":\"1.0.0\",\"depends\":[\"base-id\"]}"
+
+projectionSourceRepositoryInplaceUnit :: ByteString
+projectionSourceRepositoryInplaceUnit =
+  "{\"type\":\"configured\",\"id\":\"source-repo-inplace-id\",\"pkg-name\":\"source-repo-package\",\"pkg-version\":\"1.0.0\",\"flags\":{},\"style\":\"inplace\",\"pkg-src\":{\"type\":\"source-repo\",\"source-repo\":{\"type\":\"git\",\"location\":\"https://example.invalid/source.git\",\"tag\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}},\"component-name\":\"lib\",\"depends\":[\"base-id\"],\"exe-depends\":[\"base-id\"],\"pkg-src-sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"build-info\":\"/immutable/build/source-repo-inplace-id/build-info.json\",\"dist-dir\":\"/immutable/build/source-repo-inplace-id\"}"
+
+projectionSourceRepositoryUnit :: ByteString -> ByteString -> ByteString -> ByteString
+projectionSourceRepositoryUnit unitId style pathFields =
+  "{\"type\":\"configured\",\"id\":\""
+    <> unitId
+    <> "\",\"pkg-name\":\"source-repo-package\",\"pkg-version\":\"1.0.0\",\"flags\":{},\"style\":\""
+    <> style
+    <> "\",\"pkg-src\":{\"type\":\"source-repo\",\"source-repo\":{\"type\":\"git\",\"location\":\"https://example.invalid/source.git\",\"tag\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}},\"component-name\":\"lib\",\"depends\":[\"base-id\"],\"exe-depends\":[],\"pkg-src-sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\""
+    <> pathFields
+    <> "}"
+
+testComponentWithoutBinaryPlanBytes :: ByteString
+testComponentWithoutBinaryPlanBytes =
+  renderPlan identityFields [preExistingUnit, binaryComponentWithoutBinary "test:spec"]
+
+benchmarkComponentWithoutBinaryPlanBytes :: ByteString
+benchmarkComponentWithoutBinaryPlanBytes =
+  renderPlan identityFields [preExistingUnit, binaryComponentWithoutBinary "bench:perf"]
+
+binaryComponentWithoutBinary :: ByteString -> ByteString
+binaryComponentWithoutBinary component =
+  "{\"type\":\"configured\",\"id\":\"binary-id\",\"pkg-name\":\"local-package\",\"pkg-version\":\"0.1.0.0\",\"flags\":{},\"style\":\"local\",\"pkg-src\":{\"type\":\"local\",\"path\":\"/immutable/repository/.\"},\"component-name\":\""
+    <> component
+    <> "\",\"depends\":[\"base-id\"],\"exe-depends\":[],\"build-info\":\"/immutable/build/binary-id/build-info.json\",\"dist-dir\":\"/immutable/build/binary-id\"}"
+
+twoFlagPlanBytes :: ByteString
+twoFlagPlanBytes =
+  renderPlan identityFields [preExistingUnit, twoFlagLocalUnit]
+
+twoFlagLocalUnit :: ByteString
+twoFlagLocalUnit =
+  "{\"type\":\"configured\",\"id\":\"local-id\",\"pkg-name\":\"local-package\",\"pkg-version\":\"0.1.0.0\",\"flags\":{\"zeta\":false,\"alpha\":true},\"style\":\"local\",\"pkg-src\":{\"type\":\"local\",\"path\":\"/immutable/repository/.\"},\"component-name\":\"lib\",\"depends\":[\"base-id\"],\"exe-depends\":[],\"build-info\":\"/immutable/build/local-id/build-info.json\",\"dist-dir\":\"/immutable/build/local-id\"}"
+
+multipleUnknownFieldsPlanBytes :: ByteString
+multipleUnknownFieldsPlanBytes =
+  renderPlan
+    (identityFields <> ["\"zeta-unknown\":null", "\"alpha-unknown\":null"])
+    [preExistingUnit]
 
 identityFields :: [ByteString]
 identityFields =

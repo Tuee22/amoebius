@@ -22,6 +22,7 @@ module Amoebius.Validation.SourceConsumerGraph.Internal
   , consumerGraphResidue
   , consumerGraphSnapshotIdentity
   , contentModeProblemDiagnostic
+  , legalNameRefusedDiagnostic
   , makeCompilerGraphResidueDiagnostic
   , makeSourceConsumerGraphDiagnostic
   , problemFindingDiagnostic
@@ -443,8 +444,22 @@ boundedPrefix limit = go 0 []
   go count reversed remaining = case remaining of
     [] -> PrefixWithin (reverse reversed)
     value : rest
-      | count == limit -> PrefixExceeded (limit + 1)
+      | prefixLimitReached limit count -> PrefixExceeded (prefixExceededObservation limit)
       | otherwise -> go (count + 1) (value : reversed) rest
+
+prefixLimitReached :: Int -> Int -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_INTERNAL_BOUNDED_PREFIX_TRANSITION_MUTANT)
+prefixLimitReached limit count = count > limit
+#else
+prefixLimitReached limit count = count == limit
+#endif
+
+prefixExceededObservation :: Int -> Int
+#if defined(VALIDATION_SOURCE_CONSUMER_INTERNAL_BOUNDED_PREFIX_OBSERVED_MAPPING_MUTANT)
+prefixExceededObservation limit = limit + 2
+#else
+prefixExceededObservation limit = limit + 1
+#endif
 
 -- These are deliberately ordinary functions rather than exported record
 -- fields.  The abstract graph can be observed but not problem-erased through
@@ -874,7 +889,16 @@ isCompilerResidueProblem _ = False
 
 isAdmittedContent :: ClassifiedPath -> Bool
 isAdmittedContent item =
-  admittedDocumentationClass item || admittedProjectClass item
+  admittedContentRoute
+    (admittedDocumentationClass item)
+    (admittedProjectClass item)
+
+admittedContentRoute :: Bool -> Bool -> Bool
+#if defined(VALIDATION_SOURCE_CONSUMER_INTERNAL_ADMITTED_CONTENT_ROUTE_BYPASS_MUTANT)
+admittedContentRoute documentation project = documentation `seq` project `seq` False
+#else
+admittedContentRoute documentation project = documentation || project
+#endif
 
 admittedDocumentationClass, admittedProjectClass :: ClassifiedPath -> Bool
 #if defined(VALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_CLASS_ALTERNATIVE_DROP_MUTANT)
@@ -906,7 +930,7 @@ haskellSubject item =
 
 bindAdmittedContent :: ClassifiedPath -> Either ConsumerGraphProblem ContentBinding
 bindAdmittedContent item =
-  case roleForAdmittedPath sourceClass path of
+  case admittedContentRole sourceClass path of
     Nothing -> Left (makeUnboundProblem path sourceClass)
     Just role
       | not (regularContentMode mode) -> Left (makeContentModeProblem path mode)
@@ -919,12 +943,19 @@ bindAdmittedContent item =
   path = indexPath entry
   mode = indexMode entry
 
+admittedContentRole :: SourceClass -> FilePath -> Maybe ContentRole
+#if defined(VALIDATION_SOURCE_CONSUMER_INTERNAL_BIND_ADMITTED_ROLE_ROUTE_BYPASS_MUTANT)
+admittedContentRole sourceClass path = roleForAdmittedPath sourceClass path `seq` Nothing
+#else
+admittedContentRole = roleForAdmittedPath
+#endif
+
 -- | Closed role grammar.  It is exported so an independently stated oracle can
 -- exercise the deny-by-default boundary without having to forge a
 -- ClassifiedPath value.
 roleForAdmittedPath :: SourceClass -> FilePath -> Maybe ContentRole
 roleForAdmittedPath DocumentationInput path
-  | legalNameRefused path = Nothing
+  | legalNameRefusedDiagnostic path = Nothing
   | documentationSuffixAdmitted path = Just GovernanceDocumentation
   | otherwise = Nothing
 roleForAdmittedPath ProjectDeclaration path
@@ -963,11 +994,13 @@ documentationSuffixAdmitted _ = True
 documentationSuffixAdmitted path = takeExtension path == ".md"
 #endif
 
-legalNameRefused :: FilePath -> Bool
+-- | Package-hidden diagnostic projection of the exact legal-name deny
+-- predicate used by 'roleForAdmittedPath'.
+legalNameRefusedDiagnostic :: FilePath -> Bool
 #if defined(VALIDATION_SOURCE_CONSUMER_INTERNAL_LEGAL_NAME_REFUSAL_BYPASS_MUTANT)
-legalNameRefused path = ambiguousLegalName path `seq` False
+legalNameRefusedDiagnostic path = ambiguousLegalName path `seq` False
 #else
-legalNameRefused = ambiguousLegalName
+legalNameRefusedDiagnostic = ambiguousLegalName
 #endif
 
 amoebiusCabalRolePath, probeCabalRolePath, cabalProjectRolePath :: FilePath -> Bool

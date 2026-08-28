@@ -2,6 +2,13 @@
 
 module SourceDebtBaselineOracle
   ( runSourceDebtBaselineOracle
+  , runSourceDebtBaselineExactCaseOracle
+  , runSourceDebtBaselineSelectorImpactOracle
+  , runSourceDebtBaselineSelectorIsolationOracle
+  , runSourceDebtBaselineSelectorControlOracle
+  , runSourceDebtBaselineSelectorOracle
+  , sourceDebtBaselineExactCaseLabels
+  , sourceDebtBaselineSelectorNames
   ) where
 
 -- This oracle intentionally uses only the permanently refusing raw diagnostic
@@ -24,25 +31,157 @@ runSourceDebtBaselineOracle =
   finishDiagnostics
     "SourceDebtBaselineOracle"
     ( mutationIntentProblems
+        <> mutationImpactProblems
         <> fixtureIntegrityProblems
-        <> expectExact "empty diagnostic result" emptyExpected (diagnose [])
-        <> expectExact "invalid raw mode refuses exactly" invalidModeExpected (diagnose [invalidModeEntry])
-        <> expectExact "all-family exact result and result-bound maxima" centralExpected (diagnose centralEntries)
-        <> expectExact "pb debt is an exact semantic refusal" pbExpected (diagnose [pbEntry])
-        <> expectExact "preallocation maximum is admitted exactly" preallocationMaximumExpected (diagnose preallocationMaximumEntries)
-        <> expectExact "preallocation maximum-plus-one refuses before hashing" preallocationExceededExpected (diagnose preallocationExceededEntries)
-        <> expectExact "traversal maximum is admitted exactly" traversalMaximumExpected (diagnose traversalMaximumEntries)
-        <> expectExact "traversal maximum-plus-one refuses before observation" traversalExceededExpected (diagnose traversalExceededEntries)
-        <> expectExact "UTF-8 path maximum is admitted exactly" pathMaximumExpected (diagnose [pathMaximumEntry])
-        <> expectExact "UTF-8 path maximum-plus-one refuses before hashing" pathExceededExpected (diagnose [pathExceededEntry])
-        <> expectExact "object-id maximum is admitted exactly" objectIdMaximumExpected (diagnose [objectIdMaximumEntry])
-        <> expectExact "object-id maximum-plus-one refuses before hashing" objectIdExceededExpected (diagnose [objectIdExceededEntry])
-        <> expectExact "blob maximum is admitted exactly" blobMaximumExpected (diagnose [blobMaximumEntry])
-        <> expectExact "blob maximum-plus-one refuses before hashing" blobExceededExpected (diagnose [blobExceededEntry])
-        <> expectExact "aggregate blob maximum is admitted exactly" aggregateBlobMaximumExpected (diagnose aggregateBlobMaximumEntries)
-        <> expectExact "aggregate blob maximum-plus-one refuses before hashing" aggregateBlobExceededExpected (diagnose aggregateBlobExceededEntries)
-        <> expectExact "problem and observation first-excess bounds refuse exactly" resultBoundsExceededExpected (diagnose (centralEntries <> [pbEntry]))
+        <> concatMap snd exactCaseProblems
     )
+
+runSourceDebtBaselineExactCaseOracle :: String -> IO ()
+runSourceDebtBaselineExactCaseOracle label =
+  finishDiagnostics
+    "SourceDebtBaselineOracle exact case"
+    ( mutationIntentProblems
+        <> mutationImpactProblems
+        <> fixtureIntegrityProblems
+        <> case [problems | (candidate, problems) <- exactCaseProblems, candidate == label] of
+          [problems] -> problems
+          matches ->
+            [ "exact case is not exactly resolvable: label="
+                <> label
+                <> "; exact-case-count="
+                <> show (length matches)
+            ]
+    )
+
+sourceDebtBaselineSelectorNames :: [String]
+sourceDebtBaselineSelectorNames = map fst mutationIntent
+
+sourceDebtBaselineExactCaseLabels :: [String]
+sourceDebtBaselineExactCaseLabels = exactCaseLabels
+
+runSourceDebtBaselineSelectorOracle :: String -> IO ()
+runSourceDebtBaselineSelectorOracle selector =
+  finishDiagnostics
+    "SourceDebtBaselineOracle selector"
+    ( mutationIntentProblems
+        <> mutationImpactProblems
+        <> fixtureIntegrityProblems
+        <> case [target | (candidate, target) <- mutationIntent, candidate == selector] of
+          [target] -> case [problems | (label, problems) <- exactCaseProblems, label == target] of
+            [problems] -> problems
+            matches ->
+              [ "selector target is not exactly resolvable: selector="
+                  <> selector
+                  <> "; target="
+                  <> target
+                  <> "; exact-case-count="
+                  <> show (length matches)
+              ]
+          targets ->
+            [ "selector intent is not exactly resolvable: selector="
+                <> selector
+                <> "; target-count="
+                <> show (length targets)
+            ]
+    )
+
+runSourceDebtBaselineSelectorControlOracle :: String -> IO ()
+runSourceDebtBaselineSelectorControlOracle selector =
+  finishDiagnostics
+    "SourceDebtBaselineOracle selector control"
+    ( mutationIntentProblems
+        <> mutationImpactProblems
+        <> fixtureIntegrityProblems
+        <> [ "selector control identity is not exactly resolvable: selector="
+               <> selector
+               <> "; intent-count="
+               <> show (length [() | (candidate, _) <- mutationIntent, candidate == selector])
+           | length [() | (candidate, _) <- mutationIntent, candidate == selector] /= 1
+           ]
+    )
+
+runSourceDebtBaselineSelectorImpactOracle :: String -> IO ()
+runSourceDebtBaselineSelectorImpactOracle selector =
+  finishDiagnostics
+    "SourceDebtBaselineOracle selector impact"
+    ( mutationIntentProblems
+        <> mutationImpactProblems
+        <> case [labels | (candidate, labels) <- mutationImpact, candidate == selector] of
+          [expectedLabels] ->
+            [ "registered impacted case stayed green: selector="
+                <> selector
+                <> "; label="
+                <> label
+            | label <- expectedLabels
+            , label `notElem` observedImpactedLabels
+            ]
+          matches ->
+            [ "selector impact signature is not exactly resolvable: selector="
+                <> selector
+                <> "; signature-count="
+                <> show (length matches)
+            ]
+    )
+
+runSourceDebtBaselineSelectorIsolationOracle :: String -> IO ()
+runSourceDebtBaselineSelectorIsolationOracle selector =
+  finishDiagnostics
+    "SourceDebtBaselineOracle selector isolation"
+    ( mutationIntentProblems
+        <> mutationImpactProblems
+        <> case [labels | (candidate, labels) <- mutationImpact, candidate == selector] of
+          [expectedLabels] ->
+            [ "registered unaffected case reddened: selector="
+                <> selector
+                <> "; label="
+                <> label
+            | label <- observedImpactedLabels
+            , label `notElem` expectedLabels
+            ]
+          matches ->
+            [ "selector isolation signature is not exactly resolvable: selector="
+                <> selector
+                <> "; signature-count="
+                <> show (length matches)
+            ]
+    )
+
+observedImpactedLabels :: [String]
+observedImpactedLabels =
+  [ label
+  | (label, problems) <- exactCaseProblems
+  , not (null problems)
+  ]
+
+exactCaseProblems :: [(String, [String])]
+exactCaseProblems =
+  [ ("empty diagnostic result", expectExact "empty diagnostic result" emptyExpected (diagnose []))
+  , ("invalid raw mode refuses exactly", expectExact "invalid raw mode refuses exactly" invalidModeExpected (diagnose [invalidModeEntry]))
+  , ("executable raw mode maps exactly", expectExact "executable raw mode maps exactly" executableModeExpected (diagnose [executableModeEntry]))
+  , ("symbolic-link raw mode maps exactly", expectExact "symbolic-link raw mode maps exactly" symbolicLinkModeExpected (diagnose [symbolicLinkModeEntry]))
+  , ("all-family exact result and result-bound maxima", expectExact "all-family exact result and result-bound maxima" centralExpected (diagnose centralEntries))
+  , ("pb debt is an exact semantic refusal", expectExact "pb debt is an exact semantic refusal" pbExpected (diagnose [pbEntry]))
+  , ("preallocation maximum is admitted exactly", expectExact "preallocation maximum is admitted exactly" preallocationMaximumExpected (diagnose preallocationMaximumEntries))
+  , ("preallocation maximum-plus-one refuses before hashing", expectExact "preallocation maximum-plus-one refuses before hashing" preallocationExceededExpected (diagnose preallocationExceededEntries))
+  , ("traversal maximum is admitted exactly", expectExact "traversal maximum is admitted exactly" traversalMaximumExpected (diagnose traversalMaximumEntries))
+  , ("traversal maximum-plus-one refuses before observation", expectExact "traversal maximum-plus-one refuses before observation" traversalExceededExpected (diagnose traversalExceededEntries))
+  , ("UTF-8 path maximum is admitted exactly", expectExact "UTF-8 path maximum is admitted exactly" pathMaximumExpected (diagnose [pathMaximumEntry]))
+  , ("UTF-8 path maximum-plus-one refuses before hashing", expectExact "UTF-8 path maximum-plus-one refuses before hashing" pathExceededExpected (diagnose [pathExceededEntry]))
+  , ("ASCII path maximum-plus-one refuses before hashing", expectExact "ASCII path maximum-plus-one refuses before hashing" pathExceededExpected (diagnose [asciiPathExceededEntry]))
+  , ("three-byte path maximum-plus-one refuses before hashing", expectExact "three-byte path maximum-plus-one refuses before hashing" pathExceededExpected (diagnose [threeBytePathExceededEntry]))
+  , ("four-byte path maximum-plus-one refuses before hashing", expectExact "four-byte path maximum-plus-one refuses before hashing" pathExceededExpected (diagnose [fourBytePathExceededEntry]))
+  , ("object-id maximum is admitted exactly", expectExact "object-id maximum is admitted exactly" objectIdMaximumExpected (diagnose [objectIdMaximumEntry]))
+  , ("object-id maximum-plus-one refuses before hashing", expectExact "object-id maximum-plus-one refuses before hashing" objectIdExceededExpected (diagnose [objectIdExceededEntry]))
+  , ("blob maximum is admitted exactly", expectExact "blob maximum is admitted exactly" blobMaximumExpected (diagnose [blobMaximumEntry]))
+  , ("blob maximum-plus-one refuses before hashing", expectExact "blob maximum-plus-one refuses before hashing" blobExceededExpected (diagnose [blobExceededEntry]))
+  , ("aggregate blob maximum is admitted exactly", expectExact "aggregate blob maximum is admitted exactly" aggregateBlobMaximumExpected (diagnose aggregateBlobMaximumEntries))
+  , ("aggregate blob maximum-plus-one refuses before hashing", expectExact "aggregate blob maximum-plus-one refuses before hashing" aggregateBlobExceededExpected (diagnose aggregateBlobExceededEntries))
+  , ("path preflight wins before a later object excess", expectExact "path preflight wins before a later object excess" pathExceededExpected (diagnose pathBeforeObjectEntries))
+  , ("object preflight wins before a later blob excess", expectExact "object preflight wins before a later blob excess" objectIdExceededExpected (diagnose objectBeforeBlobEntries))
+  , ("blob preflight wins before a later path excess", expectExact "blob preflight wins before a later path excess" blobExceededExpected (diagnose blobBeforePathEntries))
+  , ("aggregate preflight wins before a later path excess", expectExact "aggregate preflight wins before a later path excess" aggregateBlobExceededExpected (diagnose aggregateBeforePathEntries))
+  , ("problem and observation first-excess bounds refuse exactly", expectExact "problem and observation first-excess bounds refuse exactly" resultBoundsExceededExpected (diagnose (centralEntries <> [pbEntry])))
+  ]
 
 -- The intent registry is independent of production CPP and Cabal. Static
 -- repository diagnostics reconcile these names two ways; this oracle only
@@ -104,6 +243,139 @@ mutationIntent =
   , ("VALIDATION_SOURCE_DEBT_PROBLEM_LIMIT_WIDEN_MUTANT", resultBoundCase)
   , ("VALIDATION_SOURCE_DEBT_RAW_MODE_BYPASS_MUTANT", "invalid raw mode refuses exactly")
   , ("VALIDATION_SOURCE_DEBT_TRAVERSAL_LIMIT_WIDEN_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_COUNT_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_AGGREGATE_RESOURCE_ROUTING_MUTANT", "aggregate blob maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_COUNT_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_FINGERPRINT_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PATH_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_BLOB_RESOURCE_ROUTING_MUTANT", "blob maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_BOUNDED_OBSERVATION_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_BOUNDED_PREFIX_LENGTH_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_BOUNDED_PREFIX_PREDICATE_MUTANT", "traversal maximum is admitted exactly")
+  , ("VALIDATION_SOURCE_DEBT_BOUNDED_PROBLEM_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_COMPARISON_FAMILY_ORDER_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_COUNT_ACTUAL_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_COUNT_EXPECTED_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_DECLARED_FAMILY_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_EXPECTED_FAMILY_COUNT_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_ACTUAL_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_BLOB_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_DOMAIN_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_EXPECTED_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_IDENTITY_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_MEMBER_ORDER_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_MODE_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_OBJECT_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_PATH_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_FINDING_CODE_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_FINDING_DETAIL_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_FINDING_SUBJECT_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_MAXIMUM_KEY_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_MAXIMUM_VALUE_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_OBSERVATION_ORDER_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_OBSERVED_KEY_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_OBSERVED_VALUE_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_RESULT_FINDINGS_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_RESULT_NAME_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_RESULT_OBSERVATIONS_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_MEMBER_ORDER_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_OBJECT_ID_RESOURCE_ROUTING_MUTANT", "object-id maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_OBSERVATION_COUNT_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_OBSERVATION_FINGERPRINT_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_OBSERVATION_PATH_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_ORDER_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_OBSERVED_MAP_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_PATH_ACTUAL_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_DOMAIN_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_IDENTITY_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_MEMBER_ORDER_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_PATH_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_PATH_EXPECTED_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_PATH_RESOURCE_ROUTING_MUTANT", "UTF-8 path maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_PB_OBSERVATION_PROJECTION_MUTANT", "pb debt is an exact semantic refusal")
+  , ("VALIDATION_SOURCE_DEBT_PREPARED_ENTRY_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_PREPARED_FAMILY_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RAW_AGGREGATE_RESOURCE_TRANSITION_MUTANT", "aggregate preflight wins before a later path excess")
+  , ("VALIDATION_SOURCE_DEBT_RAW_BLOB_RESOURCE_PROJECTION_MUTANT", "blob preflight wins before a later path excess")
+  , ("VALIDATION_SOURCE_DEBT_RAW_ENTRY_BLOB_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RAW_ENTRY_MODE_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RAW_ENTRY_OBJECT_ID_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RAW_ENTRY_PATH_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_EXECUTABLE_MAPPING_MUTANT", "executable raw mode maps exactly")
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_REGULAR_MAPPING_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_SYMLINK_MAPPING_MUTANT", "symbolic-link raw mode maps exactly")
+  , ("VALIDATION_SOURCE_DEBT_RAW_OBJECT_ID_RESOURCE_PROJECTION_MUTANT", "object preflight wins before a later blob excess")
+  , ("VALIDATION_SOURCE_DEBT_RAW_PATH_RESOURCE_PROJECTION_MUTANT", "path preflight wins before a later object excess")
+  , ("VALIDATION_SOURCE_DEBT_REGISTERED_PATH_CLASSIFICATION_MUTANT", "preallocation maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_RENDER_COUNT_KEY_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RENDER_COUNT_VALUE_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RENDER_FINGERPRINT_KEY_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RENDER_FINGERPRINT_VALUE_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RENDER_OBSERVATION_ORDER_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RENDER_PATH_KEY_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RENDER_PATH_VALUE_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RESOURCE_RESULT_FINDINGS_MUTANT", "UTF-8 path maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_RESOURCE_RESULT_NAME_MUTANT", "UTF-8 path maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_RESOURCE_RESULT_OBSERVATIONS_MUTANT", "UTF-8 path maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_RESULT_FINDING_COMPOSITION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RESULT_FINDING_ORDER_MUTANT", resultBoundCase)
+  , ("VALIDATION_SOURCE_DEBT_RESULT_NAME_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RESULT_OBSERVATION_PROJECTION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_RAW_AGGREGATE_RESOURCE_PREDICATE_MUTANT", "aggregate preflight wins before a later path excess")
+  , ("VALIDATION_SOURCE_DEBT_RAW_BLOB_RESOURCE_PREDICATE_MUTANT", "blob preflight wins before a later path excess")
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_CODE_MUTANT", "invalid raw mode refuses exactly")
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_COMPOSITION_MUTANT", "invalid raw mode refuses exactly")
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_DETAIL_MUTANT", "invalid raw mode refuses exactly")
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_SUBJECT_MUTANT", "invalid raw mode refuses exactly")
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_RESULT_NAME_MUTANT", "invalid raw mode refuses exactly")
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_RESULT_OBSERVATIONS_MUTANT", "invalid raw mode refuses exactly")
+  , ("VALIDATION_SOURCE_DEBT_RAW_OBJECT_ID_RESOURCE_PREDICATE_MUTANT", "object preflight wins before a later blob excess")
+  , ("VALIDATION_SOURCE_DEBT_RAW_PATH_RESOURCE_PREDICATE_MUTANT", "path preflight wins before a later object excess")
+  , ("VALIDATION_SOURCE_DEBT_UTF8_ASCII_WIDTH_MUTANT", "ASCII path maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_UTF8_FOUR_BYTE_WIDTH_MUTANT", "four-byte path maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_UTF8_THREE_BYTE_WIDTH_MUTANT", "three-byte path maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_UTF8_TWO_BYTE_WIDTH_MUTANT", "UTF-8 path maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_ANALYSIS_PREALLOCATION_RESULT_ROUTE_MUTANT", "preallocation maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_ANALYSIS_RESULT_PROJECTION_MUTANT", "empty diagnostic result")
+  , ("VALIDATION_SOURCE_DEBT_BYTESTRING_LENGTH_PROJECTION_MUTANT", "blob maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_COUNT_PROBLEM_COMPOSITION_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_DIAGNOSTIC_FINDING_CODE_MUTANT", "empty diagnostic result")
+  , ("VALIDATION_SOURCE_DEBT_DIAGNOSTIC_FINDING_DETAIL_MUTANT", "empty diagnostic result")
+  , ("VALIDATION_SOURCE_DEBT_DIAGNOSTIC_FINDING_SUBJECT_MUTANT", "empty diagnostic result")
+  , ("VALIDATION_SOURCE_DEBT_DIAGNOSTIC_RESULT_COMPOSITION_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_BLOB_SEPARATOR_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_IDENTIFIER_SEPARATOR_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_MODE_SEPARATOR_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_OBJECT_SEPARATOR_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_PATH_SEPARATOR_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_PROBLEM_COMPOSITION_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_HEX_HIGH_NIBBLE_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_HEX_LOW_NIBBLE_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_PROBLEM_COMPOSITION_MUTANT", "empty diagnostic result")
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_IDENTIFIER_SEPARATOR_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_MEMBER_SEPARATOR_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_PATH_LENGTH_EARLY_PREDICATE_MUTANT", "UTF-8 path maximum is admitted exactly")
+  , ("VALIDATION_SOURCE_DEBT_PATH_LENGTH_TRANSITION_MUTANT", "UTF-8 path maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_PATH_PROBLEM_COMPOSITION_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_PB_PROBLEM_COMPOSITION_MUTANT", "pb debt is an exact semantic refusal")
+  , ("VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_ORDER_MUTANT", "executable raw mode maps exactly")
+  , ("VALIDATION_SOURCE_DEBT_RAW_RESOURCE_RESULT_ROUTE_MUTANT", "UTF-8 path maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_RAW_TRAVERSAL_RESULT_ROUTE_MUTANT", "traversal maximum-plus-one refuses before observation")
+  , ("VALIDATION_SOURCE_DEBT_RENDER_MODE_EXECUTABLE_MUTANT", "executable raw mode maps exactly")
+  , ("VALIDATION_SOURCE_DEBT_RENDER_MODE_REGULAR_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_RENDER_MODE_SYMLINK_MUTANT", "symbolic-link raw mode maps exactly")
+  , ("VALIDATION_SOURCE_DEBT_TEXT_LENGTH_EARLY_PREDICATE_MUTANT", "object-id maximum is admitted exactly")
+  , ("VALIDATION_SOURCE_DEBT_TEXT_LENGTH_TRANSITION_MUTANT", "object-id maximum-plus-one refuses before hashing")
+  , ("VALIDATION_SOURCE_DEBT_UPDATE_TEXT_ENCODING_MUTANT", "all-family exact result and result-bound maxima")
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_TOOLS_OMISSION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_DHALL_OMISSION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_PROTO_OMISSION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_UI_OMISSION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_PULUMI_OMISSION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_TEST_OMISSION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_PROBE_OMISSION_MUTANT", centralCase)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_VENDOR_OMISSION_MUTANT", centralCase)
   ]
  where
   centralCase = "all-family exact result and result-bound maxima"
@@ -111,34 +383,243 @@ mutationIntent =
 
 mutationIntentProblems :: [String]
 mutationIntentProblems =
-  ["expected 55 mutation-intent rows, observed " <> show (length mutationIntent)
-  | length mutationIntent /= 55]
+  ["expected 188 mutation-intent rows, observed " <> show (length mutationIntent)
+  | length mutationIntent /= 188]
     <> ["duplicate mutation-intent selector " <> selector
        | selector : _ : _ <- group (sort (map fst mutationIntent))]
     <> ["mutation-intent target must name exactly one case: " <> selector <> " -> " <> target
        | (selector, target) <- mutationIntent
        , length (filter (== target) exactCaseLabels) /= 1]
 
-exactCaseLabels :: [String]
-exactCaseLabels =
-  [ "empty diagnostic result"
-  , "invalid raw mode refuses exactly"
-  , "all-family exact result and result-bound maxima"
-  , "pb debt is an exact semantic refusal"
-  , "preallocation maximum is admitted exactly"
-  , "preallocation maximum-plus-one refuses before hashing"
-  , "traversal maximum is admitted exactly"
-  , "traversal maximum-plus-one refuses before observation"
-  , "UTF-8 path maximum is admitted exactly"
-  , "UTF-8 path maximum-plus-one refuses before hashing"
-  , "object-id maximum is admitted exactly"
-  , "object-id maximum-plus-one refuses before hashing"
-  , "blob maximum is admitted exactly"
-  , "blob maximum-plus-one refuses before hashing"
-  , "aggregate blob maximum is admitted exactly"
-  , "aggregate blob maximum-plus-one refuses before hashing"
-  , "problem and observation first-excess bounds refuse exactly"
+mutationImpact :: [(String, [String])]
+mutationImpact =
+  [ ("VALIDATION_SOURCE_DEBT_AGGREGATE_BLOB_LIMIT_WIDEN_MUTANT", ["aggregate blob maximum-plus-one refuses before hashing", "aggregate preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_BYTE_COMMITMENT_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_DHALL_COUNT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_DHALL_FINGERPRINT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_DHALL_OMISSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_DHALL_PATH_INVENTORY_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_FAMILY_SET_INVERSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_FINGERPRINT_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PATH_INVENTORY_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PROBE_COUNT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PROBE_FINGERPRINT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PROBE_OMISSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PROBE_PATH_INVENTORY_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PROTO_COUNT_MUTANT", ["all-family exact result and result-bound maxima", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PROTO_FINGERPRINT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PROTO_OMISSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PROTO_PATH_INVENTORY_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PULUMI_COUNT_MUTANT", ["all-family exact result and result-bound maxima", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PULUMI_FINGERPRINT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PULUMI_OMISSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PULUMI_PATH_INVENTORY_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_TEST_COUNT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_TEST_FINGERPRINT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_TEST_OMISSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_TEST_PATH_INVENTORY_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_TOOLS_OMISSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_UI_COUNT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_UI_FINGERPRINT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_UI_OMISSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_UI_PATH_INVENTORY_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_VENDOR_COUNT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_VENDOR_FINGERPRINT_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_VENDOR_PATH_INVENTORY_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_BLOB_LIMIT_WIDEN_MUTANT", ["blob maximum-plus-one refuses before hashing", "blob preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_COUNT_COMPARISON_BYPASS_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_COUNT_OBSERVER_FABRICATION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_DIAGNOSTIC_BYPASS_MUTANT", ["empty diagnostic result", "invalid raw mode refuses exactly", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "preallocation maximum-plus-one refuses before hashing", "traversal maximum is admitted exactly", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum is admitted exactly", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum is admitted exactly", "object-id maximum-plus-one refuses before hashing", "blob maximum is admitted exactly", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum is admitted exactly", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_COMPARISON_BYPASS_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_OBSERVER_FABRICATION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_MISSING_OBSERVATION_ZERO_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_OBJECT_ID_LIMIT_WIDEN_MUTANT", ["object-id maximum-plus-one refuses before hashing", "object preflight wins before a later blob excess"])
+  , ("VALIDATION_SOURCE_DEBT_OBSERVATION_LIMIT_WIDEN_MUTANT", ["problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_SET_BYPASS_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_OBSERVER_FABRICATION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_OMISSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_INVENTORY_BYPASS_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_INVENTORY_COMPARISON_BYPASS_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_OBSERVER_FABRICATION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_UTF8_LIMIT_WIDEN_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "path preflight wins before a later object excess"])
+  , ("VALIDATION_SOURCE_DEBT_PB_ZERO_BYPASS_MUTANT", ["pb debt is an exact semantic refusal", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PREALLOCATION_LIMIT_WIDEN_MUTANT", ["preallocation maximum-plus-one refuses before hashing"])
+  , ("VALIDATION_SOURCE_DEBT_PROBLEM_LIMIT_WIDEN_MUTANT", ["problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_BYPASS_MUTANT", ["invalid raw mode refuses exactly"])
+  , ("VALIDATION_SOURCE_DEBT_TRAVERSAL_LIMIT_WIDEN_MUTANT", ["traversal maximum-plus-one refuses before observation"])
+  , ("VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_COUNT_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_AGGREGATE_RESOURCE_ROUTING_MUTANT", ["aggregate blob maximum-plus-one refuses before hashing", "aggregate preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_COUNT_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_FINGERPRINT_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_PATH_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BLOB_RESOURCE_ROUTING_MUTANT", ["blob maximum-plus-one refuses before hashing", "blob preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_BOUNDED_OBSERVATION_PROJECTION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BOUNDED_PREFIX_LENGTH_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BOUNDED_PREFIX_PREDICATE_MUTANT", ["all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BOUNDED_PROBLEM_PROJECTION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_COMPARISON_FAMILY_ORDER_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_COUNT_ACTUAL_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_COUNT_EXPECTED_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_DECLARED_FAMILY_PROJECTION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_EXPECTED_FAMILY_COUNT_PROJECTION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_ACTUAL_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_BLOB_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_DOMAIN_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_EXPECTED_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_IDENTITY_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_MEMBER_ORDER_MUTANT", ["all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_MODE_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_OBJECT_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_PATH_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_FINDING_CODE_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_FINDING_DETAIL_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_FINDING_SUBJECT_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_MAXIMUM_KEY_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_MAXIMUM_VALUE_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_OBSERVATION_ORDER_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_OBSERVED_KEY_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_OBSERVED_VALUE_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_RESULT_FINDINGS_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_RESULT_NAME_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation"])
+  , ("VALIDATION_SOURCE_DEBT_LIMIT_RESULT_OBSERVATIONS_MUTANT", ["preallocation maximum-plus-one refuses before hashing", "traversal maximum-plus-one refuses before observation"])
+  , ("VALIDATION_SOURCE_DEBT_MEMBER_ORDER_PROJECTION_MUTANT", ["all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_OBJECT_ID_RESOURCE_ROUTING_MUTANT", ["object-id maximum-plus-one refuses before hashing", "object preflight wins before a later blob excess"])
+  , ("VALIDATION_SOURCE_DEBT_OBSERVATION_COUNT_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_OBSERVATION_FINGERPRINT_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_OBSERVATION_PATH_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_ORDER_MUTANT", ["all-family exact result and result-bound maxima"])
+  , ("VALIDATION_SOURCE_DEBT_OBSERVED_MAP_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_ACTUAL_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_DOMAIN_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_IDENTITY_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_MEMBER_ORDER_MUTANT", ["all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_PATH_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_EXPECTED_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_RESOURCE_ROUTING_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "path preflight wins before a later object excess"])
+  , ("VALIDATION_SOURCE_DEBT_PB_OBSERVATION_PROJECTION_MUTANT", ["pb debt is an exact semantic refusal", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PREPARED_ENTRY_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PREPARED_FAMILY_PROJECTION_MUTANT", ["all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_AGGREGATE_RESOURCE_TRANSITION_MUTANT", ["aggregate preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_BLOB_RESOURCE_PROJECTION_MUTANT", ["blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_ENTRY_BLOB_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_ENTRY_MODE_PROJECTION_MUTANT", ["executable raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_ENTRY_OBJECT_ID_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_ENTRY_PATH_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "preallocation maximum-plus-one refuses before hashing", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_EXECUTABLE_MAPPING_MUTANT", ["executable raw mode maps exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_REGULAR_MAPPING_MUTANT", ["all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_SYMLINK_MAPPING_MUTANT", ["symbolic-link raw mode maps exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_OBJECT_ID_RESOURCE_PROJECTION_MUTANT", ["object preflight wins before a later blob excess"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_PATH_RESOURCE_PROJECTION_MUTANT", ["path preflight wins before a later object excess"])
+  , ("VALIDATION_SOURCE_DEBT_REGISTERED_PATH_CLASSIFICATION_MUTANT", ["preallocation maximum-plus-one refuses before hashing"])
+  , ("VALIDATION_SOURCE_DEBT_RENDER_COUNT_KEY_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RENDER_COUNT_VALUE_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RENDER_FINGERPRINT_KEY_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RENDER_FINGERPRINT_VALUE_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RENDER_OBSERVATION_ORDER_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RENDER_PATH_KEY_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RENDER_PATH_VALUE_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RESOURCE_RESULT_FINDINGS_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_RESOURCE_RESULT_NAME_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_RESOURCE_RESULT_OBSERVATIONS_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_RESULT_FINDING_COMPOSITION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RESULT_FINDING_ORDER_MUTANT", ["problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RESULT_NAME_PROJECTION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RESULT_OBSERVATION_PROJECTION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_AGGREGATE_RESOURCE_PREDICATE_MUTANT", ["aggregate preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_BLOB_RESOURCE_PREDICATE_MUTANT", ["blob preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_CODE_MUTANT", ["invalid raw mode refuses exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_COMPOSITION_MUTANT", ["invalid raw mode refuses exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_DETAIL_MUTANT", ["invalid raw mode refuses exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_SUBJECT_MUTANT", ["invalid raw mode refuses exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_RESULT_NAME_MUTANT", ["invalid raw mode refuses exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_MODE_RESULT_OBSERVATIONS_MUTANT", ["invalid raw mode refuses exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_OBJECT_ID_RESOURCE_PREDICATE_MUTANT", ["object preflight wins before a later blob excess"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_PATH_RESOURCE_PREDICATE_MUTANT", ["path preflight wins before a later object excess"])
+  , ("VALIDATION_SOURCE_DEBT_UTF8_ASCII_WIDTH_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess"])
+  , ("VALIDATION_SOURCE_DEBT_UTF8_FOUR_BYTE_WIDTH_MUTANT", ["four-byte path maximum-plus-one refuses before hashing"])
+  , ("VALIDATION_SOURCE_DEBT_UTF8_THREE_BYTE_WIDTH_MUTANT", ["three-byte path maximum-plus-one refuses before hashing"])
+  , ("VALIDATION_SOURCE_DEBT_UTF8_TWO_BYTE_WIDTH_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "path preflight wins before a later object excess"])
+  , ("VALIDATION_SOURCE_DEBT_ANALYSIS_PREALLOCATION_RESULT_ROUTE_MUTANT", ["preallocation maximum-plus-one refuses before hashing"])
+  , ("VALIDATION_SOURCE_DEBT_ANALYSIS_RESULT_PROJECTION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "preallocation maximum-plus-one refuses before hashing", "traversal maximum is admitted exactly", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum is admitted exactly", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum is admitted exactly", "object-id maximum-plus-one refuses before hashing", "blob maximum is admitted exactly", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum is admitted exactly", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BYTESTRING_LENGTH_PROJECTION_MUTANT", ["blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_COUNT_PROBLEM_COMPOSITION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_DIAGNOSTIC_FINDING_CODE_MUTANT", ["empty diagnostic result", "invalid raw mode refuses exactly", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "preallocation maximum-plus-one refuses before hashing", "traversal maximum is admitted exactly", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum is admitted exactly", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum is admitted exactly", "object-id maximum-plus-one refuses before hashing", "blob maximum is admitted exactly", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum is admitted exactly", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_DIAGNOSTIC_FINDING_DETAIL_MUTANT", ["empty diagnostic result", "invalid raw mode refuses exactly", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "preallocation maximum-plus-one refuses before hashing", "traversal maximum is admitted exactly", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum is admitted exactly", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum is admitted exactly", "object-id maximum-plus-one refuses before hashing", "blob maximum is admitted exactly", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum is admitted exactly", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_DIAGNOSTIC_FINDING_SUBJECT_MUTANT", ["empty diagnostic result", "invalid raw mode refuses exactly", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "preallocation maximum-plus-one refuses before hashing", "traversal maximum is admitted exactly", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum is admitted exactly", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum is admitted exactly", "object-id maximum-plus-one refuses before hashing", "blob maximum is admitted exactly", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum is admitted exactly", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_DIAGNOSTIC_RESULT_COMPOSITION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "preallocation maximum-plus-one refuses before hashing", "traversal maximum is admitted exactly", "traversal maximum-plus-one refuses before observation", "UTF-8 path maximum is admitted exactly", "UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum is admitted exactly", "object-id maximum-plus-one refuses before hashing", "blob maximum is admitted exactly", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum is admitted exactly", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_BLOB_SEPARATOR_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_IDENTIFIER_SEPARATOR_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_MODE_SEPARATOR_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_OBJECT_SEPARATOR_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_PATH_SEPARATOR_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_FINGERPRINT_PROBLEM_COMPOSITION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_HEX_HIGH_NIBBLE_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_HEX_LOW_NIBBLE_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_PROBLEM_COMPOSITION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_IDENTIFIER_SEPARATOR_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_DIGEST_MEMBER_SEPARATOR_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_LENGTH_EARLY_PREDICATE_MUTANT", ["UTF-8 path maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_LENGTH_TRANSITION_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "path preflight wins before a later object excess"])
+  , ("VALIDATION_SOURCE_DEBT_PATH_PROBLEM_COMPOSITION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PB_PROBLEM_COMPOSITION_MUTANT", ["pb debt is an exact semantic refusal", "problem and observation first-excess bounds refuse exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_ORDER_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_RESOURCE_RESULT_ROUTE_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess"])
+  , ("VALIDATION_SOURCE_DEBT_RAW_TRAVERSAL_RESULT_ROUTE_MUTANT", ["traversal maximum-plus-one refuses before observation"])
+  , ("VALIDATION_SOURCE_DEBT_RENDER_MODE_EXECUTABLE_MUTANT", ["executable raw mode maps exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RENDER_MODE_REGULAR_MUTANT", ["all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_RENDER_MODE_SYMLINK_MUTANT", ["symbolic-link raw mode maps exactly"])
+  , ("VALIDATION_SOURCE_DEBT_TEXT_LENGTH_EARLY_PREDICATE_MUTANT", ["object-id maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_TEXT_LENGTH_TRANSITION_MUTANT", ["object-id maximum-plus-one refuses before hashing", "object preflight wins before a later blob excess"])
+  , ("VALIDATION_SOURCE_DEBT_UPDATE_TEXT_ENCODING_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_TOOLS_OMISSION_MUTANT", laterIdOmissionImpact)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_DHALL_OMISSION_MUTANT", laterIdOmissionImpact)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_PROTO_OMISSION_MUTANT", laterIdOmissionImpact)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_UI_OMISSION_MUTANT", laterIdOmissionImpact)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_PULUMI_OMISSION_MUTANT", laterIdOmissionImpact)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_TEST_OMISSION_MUTANT", laterIdOmissionImpact)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_PROBE_OMISSION_MUTANT", laterIdOmissionImpact)
+  , ("VALIDATION_SOURCE_DEBT_LATER_ID_VENDOR_OMISSION_MUTANT", laterIdOmissionImpact)
   ]
+ where
+  laterIdOmissionImpact =
+    [ "empty diagnostic result"
+    , "executable raw mode maps exactly"
+    , "symbolic-link raw mode maps exactly"
+    , "all-family exact result and result-bound maxima"
+    , "pb debt is an exact semantic refusal"
+    , "preallocation maximum is admitted exactly"
+    , "traversal maximum is admitted exactly"
+    , "UTF-8 path maximum is admitted exactly"
+    , "object-id maximum is admitted exactly"
+    , "blob maximum is admitted exactly"
+    , "aggregate blob maximum is admitted exactly"
+    , "problem and observation first-excess bounds refuse exactly"
+    ]
+
+mutationImpactProblems :: [String]
+mutationImpactProblems =
+  ["expected 188 mutation-impact rows, observed " <> show (length mutationImpact)
+  | length mutationImpact /= 188]
+    <> ["duplicate mutation-impact selector " <> selector
+       | selector : _ : _ <- group (sort (map fst mutationImpact))]
+    <> ["mutation-impact selector is absent from intent registry: " <> selector
+       | (selector, _) <- mutationImpact
+       , selector `notElem` sourceDebtBaselineSelectorNames]
+    <> ["mutation-impact registry is missing intent selector: " <> selector
+       | selector <- sourceDebtBaselineSelectorNames
+       , selector `notElem` map fst mutationImpact]
+    <> ["mutation-impact signature is empty: " <> selector
+       | (selector, labels) <- mutationImpact
+       , null labels]
+    <> ["mutation-impact label is not an exact case: " <> selector <> " -> " <> label
+       | (selector, labels) <- mutationImpact
+       , label <- labels
+       , label `notElem` exactCaseLabels]
+
+exactCaseLabels :: [String]
+exactCaseLabels = map fst exactCaseProblems
 
 diagnose :: [LiteralTrackedEntry] -> CheckResult
 diagnose = sourceDebtBaselineCheck . map renderLiteralEntry
@@ -155,12 +636,16 @@ fixtureIntegrityProblems =
     , expectLiteral "central expected finding count" 25 (length (checkFindings centralExpected))
     , expectLiteral "UTF-8 path exact byte count" 1024 (utf8PathBytes pathMaximumValue)
     , expectLiteral "UTF-8 path first-excess byte count" 1025 (utf8PathBytes pathExceededValue)
+    , expectLiteral "ASCII path first-excess byte count" 1025 (utf8PathBytes asciiPathExceededValue)
+    , expectLiteral "three-byte path first-excess byte count" 1026 (utf8PathBytes threeBytePathExceededValue)
+    , expectLiteral "four-byte path first-excess byte count" 1029 (utf8PathBytes fourBytePathExceededValue)
     , expectLiteral "object-id exact UTF-8 byte count" 64 (utf8TextBytes objectIdMaximumValue)
     , expectLiteral "object-id first-excess UTF-8 byte count" 65 (utf8TextBytes objectIdExceededValue)
     , expectLiteral "blob exact byte count" 16777216 (ByteString.length blobMaximumPayload)
     , expectLiteral "blob first-excess byte count" 16777217 (ByteString.length blobExceededPayload)
     , expectLiteral "aggregate blob exact byte count" 33554432 (sum (map (ByteString.length . literalBytes) aggregateBlobMaximumEntries))
     , expectLiteral "aggregate blob first-excess byte count" 33554433 (sum (map (ByteString.length . literalBytes) aggregateBlobExceededEntries))
+    , expectLiteral "aggregate-precedence fixture first excess" 33554433 (sum (map (ByteString.length . literalBytes) (take 3 aggregateBeforePathEntries)))
     ]
 
 emptyExpected :: CheckResult
@@ -190,6 +675,20 @@ invalidModeExpected =
             "raw mode must be exactly one of 100644,100755,120000"
         ]
     }
+
+executableModeExpected :: CheckResult
+executableModeExpected =
+  toolsOnlyExpected
+    "1"
+    "503e1d9f87b930f6a5df332bc4d81c754ef90a4035b3de58828275a3ad000566"
+    toolsActualPathDigest
+
+symbolicLinkModeExpected :: CheckResult
+symbolicLinkModeExpected =
+  toolsOnlyExpected
+    "1"
+    "95de628c18cbcbd4b747da722160109b8e327dbdd9ba92a5d7b99a599fda8be1"
+    toolsActualPathDigest
 
 centralExpected :: CheckResult
 centralExpected =
@@ -496,6 +995,8 @@ textPath = Text.unpack
 
 data LiteralIndexMode
   = LiteralRegularFile
+  | LiteralExecutableFile
+  | LiteralSymbolicLink
   | LiteralInvalidMode Text
 
 data LiteralTrackedEntry = LiteralTrackedEntry
@@ -510,6 +1011,8 @@ renderLiteralEntry entry =
   ( literalPath entry
   , case literalMode entry of
       LiteralRegularFile -> "100644"
+      LiteralExecutableFile -> "100755"
+      LiteralSymbolicLink -> "120000"
       LiteralInvalidMode mode -> mode
   , literalObjectId entry
   , literalBytes entry
@@ -535,6 +1038,12 @@ invalidModeEntry =
     { literalMode = LiteralInvalidMode "100600"
     }
 
+executableModeEntry :: LiteralTrackedEntry
+executableModeEntry = toolsEntry {literalMode = LiteralExecutableFile}
+
+symbolicLinkModeEntry :: LiteralTrackedEntry
+symbolicLinkModeEntry = toolsEntry {literalMode = LiteralSymbolicLink}
+
 toolsEntry, dhallEntry, protoAEntry, protoBEntry, uiEntry :: LiteralTrackedEntry
 toolsEntry = literalEntry "tools/a.py" "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "tools literal\n"
 dhallEntry = literalEntry "dhall/a.dhall" "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" "dhall literal\n"
@@ -559,6 +1068,19 @@ pathExceededEntry =
 pathMaximumValue, pathExceededValue :: FilePath
 pathMaximumValue = "tools/a" <> replicate 507 '\233' <> ".py"
 pathExceededValue = "tools/" <> replicate 508 '\233' <> ".py"
+
+asciiPathExceededEntry, threeBytePathExceededEntry, fourBytePathExceededEntry :: LiteralTrackedEntry
+asciiPathExceededEntry =
+  literalEntry asciiPathExceededValue "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "path literal\n"
+threeBytePathExceededEntry =
+  literalEntry threeBytePathExceededValue "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "path literal\n"
+fourBytePathExceededEntry =
+  literalEntry fourBytePathExceededValue "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "path literal\n"
+
+asciiPathExceededValue, threeBytePathExceededValue, fourBytePathExceededValue :: FilePath
+asciiPathExceededValue = "tools/" <> replicate 1016 'a' <> ".py"
+threeBytePathExceededValue = "tools/" <> replicate 339 '\8364' <> ".py"
+fourBytePathExceededValue = "tools/" <> replicate 255 '\128512' <> ".py"
 
 objectIdMaximumEntry, objectIdExceededEntry :: LiteralTrackedEntry
 objectIdMaximumEntry =
@@ -588,6 +1110,23 @@ aggregateBlobMaximumEntries =
 aggregateBlobExceededEntries =
   aggregateBlobMaximumEntries
     <> [literalEntry "tools/aggregate-c.py" "cccccccccccccccccccccccccccccccccccccccc" "z"]
+
+pathBeforeObjectEntries :: [LiteralTrackedEntry]
+pathBeforeObjectEntries =
+  [pathExceededEntry, objectIdExceededEntry]
+
+objectBeforeBlobEntries :: [LiteralTrackedEntry]
+objectBeforeBlobEntries =
+  [objectIdExceededEntry, blobExceededEntry]
+
+blobBeforePathEntries :: [LiteralTrackedEntry]
+blobBeforePathEntries =
+  [blobExceededEntry, pathExceededEntry]
+
+aggregateBeforePathEntries :: [LiteralTrackedEntry]
+aggregateBeforePathEntries =
+  aggregateBlobMaximumEntries
+    <> [literalEntry "tools/aggregate-c.py" "cccccccccccccccccccccccccccccccccccccccc" "z", pathExceededEntry]
 
 literalEntry :: FilePath -> Text -> ByteString -> LiteralTrackedEntry
 literalEntry path objectId bytes =

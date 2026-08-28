@@ -187,21 +187,21 @@ The current audit makes no validation attribution.
 
 | Phase(s) | Current classification | Meaning |
 |---|---|---|
-| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and eighteen component oracles exist. The typed policy contract, closed 25-ID legacy lifecycle/analyzer dispatch, descriptor-pinned source observer, v2 byte-bound debt observer, one-file static `pb` grammar, compiler/consumer adapters, and typed phase/resource registries are present. Adversarial reviews rejected candidate integration and exposed remaining trust, completeness, and oracle-independence gaps. Source acquisition remains permanently diagnostic without authenticated atomic external authority; the compiler route establishes only four restricted-session facts and cannot reach the repository graph. The worktree has one `pb/__main__.py`; the unstaged Git index still has the condemned fifteen-path bootstrap footprint. The `LTD-SRC-000` and `LTD-SRC-008` analyzers are integrated but unqualified, while `LTD-VAL-001` through `LTD-VAL-004` owner analyzers are absent. Independent human review/key custody, clean-room observation, evidence integration, contract resolution, legacy closure, and human promotion remain absent. |
+| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and eighteen component oracles exist. The typed policy contract, closed 25-ID legacy lifecycle/analyzer dispatch, descriptor-pinned source observer, v2 byte-bound debt observer, one-file static `pb` grammar, compiler/consumer adapters, and typed phase/resource registries are present. Adversarial reviews rejected candidate integration and exposed remaining trust, completeness, and oracle-independence gaps. Source acquisition remains permanently diagnostic without authenticated atomic external authority; the compiler route establishes only four restricted-session facts and cannot reach the repository graph. The tracked tree now has exactly one `pb/__main__.py` blob at 4,770 bytes with SHA-256 `e210494d3ad4bcaad716daed5bb89cb5611107547e83eb018a6369e134cd5418`; static admission and qualification remain open. The `LTD-SRC-000` and `LTD-SRC-008` analyzers are integrated but unqualified, while `LTD-VAL-001` through `LTD-VAL-004` owner analyzers are absent. Independent human review/key custody, clean-room observation, evidence integration, contract resolution, legacy closure, and human promotion remain absent. |
 | 1–95 | **Observed footprint / Known partial — NOT VALIDATED** | Existing files and historical run material are migration input only; each phase is blocked behind numerical predecessor validation and human promotion. |
 
 The 2026-08-23 inspection reran `cabal build lib:validation-kernel test:validation-kernel-component` and the
 clean `cabal test validation-kernel-component` aggregate after connecting the source-debt, source-consumer,
 compiler-component, compiler-graph, and one-file `pb` grammar modules. All fourteen then-named component oracles
-executed and reported their diagnostic expectations met. The runner now contains eighteen oracles; its latest
-completed aggregate reached every oracle, with a stale Dispatch classifier and the intentionally stale
-Documentation manifest refusing. Subsequent semantic hardening invalidated that aggregate. Earlier policy and
+executed and reported their diagnostic expectations met. The runner now contains eighteen oracles; its
+2026-08-26 aggregate reached every oracle and all eighteen reported their bounded diagnostic expectations met
+after the documentation-header repair. Earlier policy and
 legacy changed-production runs are stale wherever their production/oracle subjects changed; the current
 clean-plus-twenty legacy matrix and the integrated source/compiler/bootstrap/semantic mutant matrix must be
 rerun before candidate preparation. Supporting
 focused mutant observations are compilation and component diagnostics only, never validation or independent
-reviewer custody. The current dirty worktree and unstaged source transition are ineligible for clean snapshot
-acquisition, and the dispatcher also carries explicit fail-closed findings for unexecuted qualification,
+reviewer custody. The current agent-authored dirty worktree is ineligible for clean snapshot acquisition, and
+the dispatcher also carries explicit fail-closed findings for unexecuted qualification,
 missing independent human review/key custody, missing external clean-room observation, and missing evidence
 integration. The evidence schema also lacks closed typed command, toolchain, substrate, run, and cleanup
 fields, and no reviewed binding connects Git object-format identity to its required SHA-256 provenance. In
@@ -213,6 +213,14 @@ validation, legacy, and documentation bindings remain explicit `UNRESOLVED` valu
 claims their semantics are complete. The compiled phase-semantic/resource registry and its independent oracle
 are under adversarial integration review; every remaining gap and missing reviewer-custody value keeps the
 Phase-0 gate refusing.
+
+The 2026-08-26 serialized diagnostic restored the two exact pinned source-repository inputs beneath ignored
+`.build/**`, built `lib:validation-kernel` and `test:validation-kernel-component` with one Cabal job, repaired
+six absent documentation-header finding projections, and reran the aggregate component suite. All eighteen
+named component oracles executed and reported their bounded diagnostic expectations met after the semantic
+oracle was aligned with the exact opaque-table rule and the mutable-worktree prose count was refrozen at 1,601.
+The restored inputs were fetched during development and remain unauthenticated candidate inputs; the green
+aggregate is neither qualification, clean-room evidence, independent custody, validation, nor promotion.
 
 Capability-by-capability target ownership remains in the linked phase contracts and the target-only
 [system_components.md](system_components.md). Current divergence identity, ownership, and closure are typed

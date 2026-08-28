@@ -294,29 +294,44 @@ checkCompilerElaboratedPlanDiagnostic bytes =
       diagnosticCheckResult digest inputBytes "malformed-refusal" problems [])
     ( \digest inputBytes problems cabalVersion cabalLibraryVersion compilerId compilerAbi
         operatingSystem architecture units ->
-        diagnosticCheckResult
+        observedDiagnosticCheckResult
           digest
           inputBytes
           "observed-refusal"
           problems
           ( observation
-              "compiler-elaborated-plan.root"
-              ( Text.pack
-                  ( show
-                      ( digest
-                      , ( cabalVersion
-                        , cabalLibraryVersion
-                        , compilerId
-                        , compilerAbi
-                        , operatingSystem
-                        , architecture
-                        )
-                      )
-                  )
-              )
-              : zipWith (unitObservation digest) [0 :: Int ..] units
+              rootObservationKey
+              (rootObservationValue digest cabalVersion cabalLibraryVersion compilerId compilerAbi operatingSystem architecture)
+              : projectUnitObservationOrder (zipWith (unitObservation digest) [0 :: Int ..] units)
           )
     )
+
+rootObservationKey :: Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_KEY_MAPPING_MUTANT)
+rootObservationKey = "compiler-elaborated-plan.mutated-root"
+#else
+rootObservationKey = "compiler-elaborated-plan.root"
+#endif
+
+rootObservationValue :: Maybe Text -> Text -> Text -> Text -> Text -> Text -> Text -> Text
+rootObservationValue digest cabalVersion cabalLibraryVersion compilerId compilerAbi operatingSystem architecture =
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBSERVATION_VALUE_MAPPING_MUTANT)
+  digest `seq` cabalVersion `seq` cabalLibraryVersion `seq` compilerId `seq` compilerAbi `seq` operatingSystem `seq` architecture `seq` "mutated-root"
+#else
+  Text.pack
+    ( show
+        ( digest
+        , (cabalVersion, cabalLibraryVersion, compilerId, compilerAbi, operatingSystem, architecture)
+        )
+    )
+#endif
+
+projectUnitObservationOrder :: [Observation] -> [Observation]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_ORDER_MUTANT)
+projectUnitObservationOrder = reverse
+#else
+projectUnitObservationOrder = id
+#endif
 
 diagnosticCheckResult
   :: Maybe Text
@@ -327,36 +342,149 @@ diagnosticCheckResult
   -> CheckResult
 diagnosticCheckResult digest inputBytes status problems subjectObservations =
   CheckResult
-    { checkName = "compiler-elaborated-plan-diagnostic-refusal"
+    { checkName = diagnosticCheckName
     , checkObservations =
         [ observation
-            "compiler-elaborated-plan.input-sha256"
-            (maybe "unavailable-over-input-limit" id digest)
+            diagnosticInputDigestObservationKey
+            (diagnosticInputDigestObservationValue digest)
         , observation
-            "compiler-elaborated-plan.input-bytes"
-            (Text.pack (show inputBytes))
-        , observation "compiler-elaborated-plan.status" status
+            diagnosticInputBytesObservationKey
+            (diagnosticInputBytesObservationValue inputBytes)
+        , observation diagnosticStatusObservationKey (diagnosticStatusObservationValue status)
         ]
-          <> subjectObservations
-#ifdef VALIDATION_COMPILER_ELABORATED_PLAN_PUBLIC_REFUSAL_BYPASS_MUTANT
-    , checkFindings = problemFinding (NonEmpty.head problems) `seq` []
-#else
-    , checkFindings = map problemFinding (NonEmpty.toList problems)
-#endif
+          <> projectSubjectObservationContribution subjectObservations
+    , checkFindings = projectFindingOrder (map problemFinding (NonEmpty.toList problems))
     }
+
+diagnosticCheckName :: Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CHECK_NAME_MAPPING_MUTANT)
+diagnosticCheckName = "compiler-elaborated-plan-mutated"
+#else
+diagnosticCheckName = "compiler-elaborated-plan-diagnostic-refusal"
+#endif
+
+diagnosticInputDigestObservationKey :: Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_KEY_MAPPING_MUTANT)
+diagnosticInputDigestObservationKey = "compiler-elaborated-plan.mutated-sha256"
+#else
+diagnosticInputDigestObservationKey = "compiler-elaborated-plan.input-sha256"
+#endif
+
+diagnosticInputDigestObservationValue :: Maybe Text -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_DIGEST_OBSERVATION_VALUE_MAPPING_MUTANT)
+diagnosticInputDigestObservationValue _ = "mutated-digest"
+#else
+diagnosticInputDigestObservationValue = maybe "unavailable-over-input-limit" id
+#endif
+
+diagnosticInputBytesObservationKey :: Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_KEY_MAPPING_MUTANT)
+diagnosticInputBytesObservationKey = "compiler-elaborated-plan.mutated-bytes"
+#else
+diagnosticInputBytesObservationKey = "compiler-elaborated-plan.input-bytes"
+#endif
+
+diagnosticInputBytesObservationValue :: Int -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_BYTES_OBSERVATION_VALUE_MAPPING_MUTANT)
+diagnosticInputBytesObservationValue _ = "0"
+#else
+diagnosticInputBytesObservationValue = Text.pack . show
+#endif
+
+diagnosticStatusObservationKey :: Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_KEY_MAPPING_MUTANT)
+diagnosticStatusObservationKey = "compiler-elaborated-plan.mutated-status"
+#else
+diagnosticStatusObservationKey = "compiler-elaborated-plan.status"
+#endif
+
+diagnosticStatusObservationValue :: Text -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_STATUS_OBSERVATION_VALUE_MAPPING_MUTANT)
+diagnosticStatusObservationValue _ = "mutated-status"
+#else
+diagnosticStatusObservationValue = id
+#endif
+
+projectSubjectObservationContribution :: [Observation] -> [Observation]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SUBJECT_OBSERVATION_CONTRIBUTION_DROP_MUTANT)
+projectSubjectObservationContribution _ = []
+#else
+projectSubjectObservationContribution = id
+#endif
+
+projectFindingOrder :: [Finding] -> [Finding]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_ORDER_MUTANT)
+projectFindingOrder = reverse
+#else
+projectFindingOrder = id
+#endif
+
+-- The public-refusal changed subject belongs specifically to the successfully
+-- decoded observation route.  Malformed-plan diagnostics are independent
+-- controls and must not be erased by the same selector.
+observedDiagnosticCheckResult
+  :: Maybe Text
+  -> Int
+  -> Text
+  -> NonEmpty CompilerElaboratedPlanProblem
+  -> [Observation]
+  -> CheckResult
+observedDiagnosticCheckResult digest inputBytes status problems subjectObservations =
+#ifdef VALIDATION_COMPILER_ELABORATED_PLAN_PUBLIC_REFUSAL_BYPASS_MUTANT
+  let result = diagnosticCheckResult digest inputBytes status problems subjectObservations
+   in problemFinding (NonEmpty.head problems) `seq` result {checkFindings = []}
+#else
+  diagnosticCheckResult digest inputBytes status problems subjectObservations
+#endif
 
 problemFinding :: CompilerElaboratedPlanProblem -> Finding
 problemFinding problem =
   finding
-    "COMPILER-ELABORATED-PLAN-DIAGNOSTIC-REFUSAL"
-    "compiler-elaborated-plan.json"
-    (Text.pack (show problem))
+    (problemFindingCode problem)
+    (problemFindingSubject problem)
+    (problemFindingDetail problem)
+
+problemFindingCode :: CompilerElaboratedPlanProblem -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_CODE_MAPPING_MUTANT)
+problemFindingCode problem = problem `seq` "MUTATED-CODE"
+#else
+problemFindingCode _ = "COMPILER-ELABORATED-PLAN-DIAGNOSTIC-REFUSAL"
+#endif
+
+problemFindingSubject :: CompilerElaboratedPlanProblem -> FilePath
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_SUBJECT_MAPPING_MUTANT)
+problemFindingSubject problem = problem `seq` "mutated.json"
+#else
+problemFindingSubject _ = "compiler-elaborated-plan.json"
+#endif
+
+problemFindingDetail :: CompilerElaboratedPlanProblem -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_FINDING_DETAIL_MAPPING_MUTANT)
+problemFindingDetail problem = problem `seq` "mutated-detail"
+#else
+problemFindingDetail = Text.pack . show
+#endif
 
 unitObservation :: Maybe Text -> Int -> DiagnosticElaboratedUnit -> Observation
 unitObservation digest index unit =
   observation
-    ("compiler-elaborated-plan.unit." <> Text.pack (show index))
-    (Text.pack (show (digest, index, diagnosticUnitObservationWire unit)))
+    (unitObservationKey index)
+    (unitObservationValue digest index unit)
+
+unitObservationKey :: Int -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_KEY_MAPPING_MUTANT)
+unitObservationKey index = index `seq` "compiler-elaborated-plan.unit.mutated"
+#else
+unitObservationKey index = "compiler-elaborated-plan.unit." <> Text.pack (show index)
+#endif
+
+unitObservationValue :: Maybe Text -> Int -> DiagnosticElaboratedUnit -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_OBSERVATION_VALUE_MAPPING_MUTANT)
+unitObservationValue digest index unit = digest `seq` index `seq` unit `seq` "mutated-unit"
+#else
+unitObservationValue digest index unit =
+  Text.pack (show (digest, index, diagnosticUnitObservationWire unit))
+#endif
 
 diagnosticUnitObservationWire
   :: DiagnosticElaboratedUnit
@@ -417,27 +545,50 @@ parseCompilerElaboratedPlanDiagnostic bytes =
       Right duplicateProblems ->
         case eitherDecodeStrict' bytes of
           Left _ ->
-            singleProblemRefusal inputDigest inputBytes (PlanJsonInvalid "aeson-decode-invalid")
+            singleProblemRefusal inputDigest inputBytes aesonDecodeFailureProblem
           Right decoded
             | not (null duplicateProblems) ->
                 hardRefusal inputDigest inputBytes duplicateProblems
             | otherwise -> case decoded of
-                Object root -> case parseRoot root of
-                  Left problems -> hardRefusal inputDigest inputBytes problems
-                  Right snapshot ->
-                    let (mandatoryProblems, variableProblems) =
-                          diagnosticPlanResidue inputSha256 inputBytes snapshot
-                     in observedRefusal
-                          inputDigest
-                          inputBytes
-                          mandatoryProblems
-                          variableProblems
-                          snapshot
-                _ -> singleProblemRefusal inputDigest inputBytes PlanRootNotObject
+                Object root -> case projectRootObjectRoute root of
+                  Nothing -> singleProblemRefusal inputDigest inputBytes PlanRootNotObject
+                  Just admittedRoot -> case parseRoot admittedRoot of
+                    Left problems -> hardRefusal inputDigest inputBytes problems
+                    Right snapshot ->
+                      let (mandatoryProblems, variableProblems) =
+                            diagnosticPlanResidue inputSha256 inputBytes snapshot
+                       in observedRefusal
+                            inputDigest
+                            inputBytes
+                            mandatoryProblems
+                            variableProblems
+                            snapshot
+                value -> singleProblemRefusal inputDigest inputBytes (rootNonObjectProblem value)
  where
   inputBytes = ByteString.length bytes
   inputSha256 = sha256Text bytes
   inputDigest = Just inputSha256
+
+aesonDecodeFailureProblem :: CompilerElaboratedPlanProblem
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_AESON_DECODE_FAILURE_MAPPING_MUTANT)
+aesonDecodeFailureProblem = PlanRootNotObject
+#else
+aesonDecodeFailureProblem = PlanJsonInvalid "aeson-decode-invalid"
+#endif
+
+projectRootObjectRoute :: Object -> Maybe Object
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_OBJECT_ROUTE_DROP_MUTANT)
+projectRootObjectRoute root = root `seq` Nothing
+#else
+projectRootObjectRoute = Just
+#endif
+
+rootNonObjectProblem :: Value -> CompilerElaboratedPlanProblem
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_ROOT_NON_OBJECT_MAPPING_MUTANT)
+rootNonObjectProblem value = value `seq` PlanJsonInvalid "mutated-root-type"
+#else
+rootNonObjectProblem _ = PlanRootNotObject
+#endif
 
 duplicateJsonKeyProblems
   :: ByteString
@@ -462,18 +613,42 @@ scanJsonTokens
 scanJsonTokens path depth budget tokens = do
   nextBudget <- consumeJsonToken budget
   case tokens of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_LITERAL_TOKEN_ROUTE_MUTANT)
+    TkLit _ continuation -> continuation `seq` Left (JsonScanInvalid "mutated-literal-route")
+#else
     TkLit _ continuation -> Right ([], continuation, nextBudget)
+#endif
     TkText value continuation -> do
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TEXT_TOKEN_ROUTE_MUTANT)
+      checkJsonStringLength (min 0 (Text.length value))
+#else
       checkJsonStringLength (Text.length value)
+#endif
       Right ([], continuation, nextBudget)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TOKEN_ROUTE_MUTANT)
+    TkNumber _ continuation -> continuation `seq` Left (JsonScanInvalid "mutated-number-route")
+#else
     TkNumber _ continuation -> Right ([], continuation, nextBudget)
+#endif
     TkArrayOpen values -> do
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_DEPTH_ROUTE_MUTANT)
+      let nextDepth = depth
+#else
       nextDepth <- enterJsonContainer depth
+#endif
       scanJsonArray path nextDepth 0 nextBudget values
     TkRecordOpen fields -> do
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_DEPTH_ROUTE_MUTANT)
+      let nextDepth = depth
+#else
       nextDepth <- enterJsonContainer depth
+#endif
       scanJsonRecord path nextDepth 0 Set.empty nextBudget fields
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_TOKEN_ERROR_ROUTE_MUTANT)
+    TkErr message -> Text.length (Text.pack message) `seq` Left (JsonScanResourceLimit "mutated-token-error" 0 1)
+#else
     TkErr message -> Left (JsonScanInvalid (Text.pack message))
+#endif
 
 scanJsonArray
   :: JsonPath
@@ -487,7 +662,11 @@ scanJsonArray
 scanJsonArray path depth index budget values = case values of
   TkItem tokens -> do
     checkJsonArraySize (index + 1)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ITEM_TOKEN_COUNT_DROP_MUTANT)
+    let itemBudget = budget
+#else
     itemBudget <- consumeJsonToken budget
+#endif
     (itemProblems, remaining, afterItem) <-
       scanJsonTokens
         (appendJsonIndex path index)
@@ -498,9 +677,17 @@ scanJsonArray path depth index budget values = case values of
       scanJsonArray path depth (index + 1) afterItem remaining
     pure (itemProblems <> remainingProblems, continuation, finalBudget)
   TkArrayEnd continuation -> do
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_END_TOKEN_COUNT_DROP_MUTANT)
+    let finalBudget = budget
+#else
     finalBudget <- consumeJsonToken budget
+#endif
     Right ([], continuation, finalBudget)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_ERROR_ROUTE_MUTANT)
+  TkArrayErr message -> Text.length (Text.pack message) `seq` Left (JsonScanResourceLimit "mutated-array-error" 0 1)
+#else
   TkArrayErr message -> Left (JsonScanInvalid (Text.pack message))
+#endif
 
 scanJsonRecord
   :: JsonPath
@@ -518,7 +705,11 @@ scanJsonRecord path depth fieldCount seen budget fields = case fields of
         duplicateObserved = duplicateJsonKeyObserved name seen
     checkJsonObjectSize (fieldCount + 1)
     checkJsonKeyLength (Text.length name)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_PAIR_TOKEN_COUNT_DROP_MUTANT)
+    let pairBudget = budget
+#else
     pairBudget <- consumeJsonToken budget
+#endif
     afterDuplicate <-
       if duplicateObserved
         then recordJsonProblem pairBudget
@@ -543,9 +734,17 @@ scanJsonRecord path depth fieldCount seen budget fields = case fields of
       , finalBudget
       )
   TkRecordEnd continuation -> do
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_END_TOKEN_COUNT_DROP_MUTANT)
+    let finalBudget = budget
+#else
     finalBudget <- consumeJsonToken budget
+#endif
     Right ([], continuation, finalBudget)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RECORD_ERROR_ROUTE_MUTANT)
+  TkRecordErr message -> Text.length (Text.pack message) `seq` Left (JsonScanResourceLimit "mutated-record-error" 0 1)
+#else
   TkRecordErr message -> Left (JsonScanInvalid (Text.pack message))
+#endif
 
 duplicateJsonKeyObserved :: Text -> Set Text -> Bool
 #ifdef VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_KEY_BYPASS_MUTANT
@@ -639,9 +838,37 @@ checkJsonObjectSize observed
 
 jsonScanFailureProblem :: JsonScanFailure -> CompilerElaboratedPlanProblem
 jsonScanFailureProblem failure = case failure of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INVALID_FAILURE_MAPPING_MUTANT)
+  JsonScanInvalid message -> message `seq` PlanRootNotObject
+#else
   JsonScanInvalid _ -> PlanJsonInvalid "token-scan-invalid"
+#endif
   JsonScanResourceLimit label limit observed ->
-    PlanResourceLimitExceeded label limit observed
+    PlanResourceLimitExceeded
+      (jsonResourceFailureLabel label)
+      (jsonResourceFailureLimit limit)
+      (jsonResourceFailureObserved observed)
+
+jsonResourceFailureLabel :: Text -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LABEL_MAPPING_MUTANT)
+jsonResourceFailureLabel _ = "mutated-resource"
+#else
+jsonResourceFailureLabel = id
+#endif
+
+jsonResourceFailureLimit :: Int -> Int
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_LIMIT_MAPPING_MUTANT)
+jsonResourceFailureLimit = const 0
+#else
+jsonResourceFailureLimit = id
+#endif
+
+jsonResourceFailureObserved :: Int -> Int
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_RESOURCE_FAILURE_OBSERVED_MAPPING_MUTANT)
+jsonResourceFailureObserved = const 0
+#else
+jsonResourceFailureObserved = id
+#endif
 
 limitExceeded :: Int -> Int -> Bool
 limitExceeded limit observed = observed > limit
@@ -780,23 +1007,43 @@ pathSegmentByteLimitExceeded observed = limitExceeded compilerElaboratedPlanMaxi
 #endif
 
 appendJsonField :: JsonPath -> Text -> JsonPath
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_APPEND_DROP_MUTANT)
+appendJsonField path name = name `seq` path
+#else
 appendJsonField (JsonPath segments) name =
   JsonPath (segments <> [JsonObjectField name])
+#endif
 
 appendJsonIndex :: JsonPath -> Int -> JsonPath
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_APPEND_DROP_MUTANT)
+appendJsonIndex path index = index `seq` path
+#else
 appendJsonIndex (JsonPath segments) index =
   JsonPath (segments <> [JsonArrayIndex index])
+#endif
 
 renderJsonPath :: JsonPath -> Text
 renderJsonPath (JsonPath segments) = "plan" <> foldMap renderSegment segments
  where
   renderSegment segment = case segment of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_PATH_RENDER_MUTANT)
+    JsonObjectField name -> name `seq` "[\"mutated\"]"
+#else
     JsonObjectField name -> "[" <> Text.pack (show (Text.unpack name)) <> "]"
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_INDEX_PATH_RENDER_MUTANT)
+    JsonArrayIndex index -> index `seq` "[999]"
+#else
     JsonArrayIndex index -> "[" <> Text.pack (show index) <> "]"
+#endif
 
 jsonFieldScope :: Text -> Text -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_FIELD_SCOPE_MAPPING_MUTANT)
+jsonFieldScope scope name = scope `seq` name `seq` "plan[\"mutated\"]"
+#else
 jsonFieldScope scope name =
   scope <> "[" <> Text.pack (show (Text.unpack name)) <> "]"
+#endif
 
 parseRoot
   :: Object
@@ -1003,7 +1250,7 @@ parseUnits cabalVersion cabalLibraryVersion compilerId compilerAbi operatingSyst
     (unitProblems, _)
       | not (null unitProblems) -> Left (boundedProblemList unitProblems)
     (_, decodedUnits) ->
-      let units = sortOn diagnosticElaboratedUnitId (map parsedUnitValue decodedUnits)
+      let units = projectUnitOrder (sortOn diagnosticElaboratedUnitId (map parsedUnitValue decodedUnits))
           invariantProblems = planInvariantProblems decodedUnits units
        in if null invariantProblems
             then
@@ -1021,11 +1268,46 @@ parseUnits cabalVersion cabalLibraryVersion compilerId compilerAbi operatingSyst
  where
   parsedUnits = zipWith parseInstallUnit [0 ..] encodedUnits
 
+projectUnitOrder :: [DiagnosticElaboratedUnit] -> [DiagnosticElaboratedUnit]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORDER_MUTANT)
+projectUnitOrder = reverse
+#else
+projectUnitOrder = id
+#endif
+
 parseInstallUnit :: Int -> Value -> Parsed ParsedUnit
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_OBJECT_ROUTE_DROP_MUTANT)
+parseInstallUnit index (Object object) =
+  parsedObject `seq` Parsed [PlanJsonFieldTypeMismatch (unitScope index) "<entry>" "mutated-object"] Nothing
+ where
+  parsedObject =
+    case parsedValue unitType of
+      Just "pre-existing" -> parsePreExistingUnit index object
+      Just "configured" -> parseConfiguredUnit index object
+      Just "foreign"
+        | unsupportedInstallUnitTypeAccepted -> parsePreExistingUnit index object
+      Just observed -> Parsed (baseProblems <> [UnsupportedInstallUnitType index observed]) Nothing
+      Nothing -> Parsed baseProblems Nothing
+  scope = unitScope index
+  unitType = requiredSemanticText scope object "type"
+  baseProblems = parsedProblems unitType
+#else
 parseInstallUnit index (Object object) =
   case parsedValue unitType of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_PRE_EXISTING_ROUTE_DROP_MUTANT)
+    Just "pre-existing" ->
+      parsePreExistingUnit index object `seq`
+        Parsed [UnsupportedInstallUnitType index "pre-existing"] Nothing
+#else
     Just "pre-existing" -> parsePreExistingUnit index object
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_CONFIGURED_ROUTE_DROP_MUTANT)
+    Just "configured" ->
+      parseConfiguredUnit index object `seq`
+        Parsed [UnsupportedInstallUnitType index "configured"] Nothing
+#else
     Just "configured" -> parseConfiguredUnit index object
+#endif
     Just "foreign"
       | unsupportedInstallUnitTypeAccepted -> parsePreExistingUnit index object
     Just observed -> Parsed (baseProblems <> [UnsupportedInstallUnitType index observed]) Nothing
@@ -1034,10 +1316,16 @@ parseInstallUnit index (Object object) =
   scope = unitScope index
   unitType = requiredSemanticText scope object "type"
   baseProblems = parsedProblems unitType
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_NON_OBJECT_MAPPING_MUTANT)
+parseInstallUnit index value =
+  value `seq` Parsed [PlanJsonFieldTypeMismatch (unitScope index) "<entry>" "mutated-non-object"] Nothing
+#else
 parseInstallUnit index _ =
   Parsed
     [PlanJsonFieldTypeMismatch (unitScope index) "<entry>" "object"]
     Nothing
+#endif
 
 unsupportedInstallUnitTypeAccepted :: Bool
 #ifdef VALIDATION_COMPILER_ELABORATED_PLAN_INSTALL_UNIT_TYPE_BYPASS_MUTANT
@@ -1048,8 +1336,16 @@ unsupportedInstallUnitTypeAccepted = False
 
 schemaVersionAccepted :: Text -> Text -> Text -> Bool
 schemaVersionAccepted field expected actual = case field of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_SCHEMA_FIELD_ROUTE_DROP_MUTANT)
+  "cabal-version" -> cabalSchemaVersionAccepted expected actual `seq` False
+#else
   "cabal-version" -> cabalSchemaVersionAccepted expected actual
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CABAL_LIBRARY_SCHEMA_FIELD_ROUTE_DROP_MUTANT)
+  "cabal-lib-version" -> cabalLibrarySchemaVersionAccepted expected actual `seq` False
+#else
   "cabal-lib-version" -> cabalLibrarySchemaVersionAccepted expected actual
+#endif
   _ -> False
 
 cabalSchemaVersionAccepted :: Text -> Text -> Bool
@@ -1345,7 +1641,17 @@ nonBinaryPathForbidden shape object =
 componentProducesBinary :: ConfiguredComponentShape -> Bool
 componentProducesBinary shape = case shape of
   DirectComponentShape name ->
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_EXECUTABLE_CLASSIFICATION_DROP_MUTANT)
+    any (`Text.isPrefixOf` name) ["test:", "bench:"]
+#elif defined(VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_TEST_CLASSIFICATION_DROP_MUTANT)
+    any (`Text.isPrefixOf` name) ["exe:", "bench:"]
+#elif defined(VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_BENCHMARK_CLASSIFICATION_DROP_MUTANT)
+    any (`Text.isPrefixOf` name) ["exe:", "test:"]
+#elif defined(VALIDATION_COMPILER_ELABORATED_PLAN_BINARY_LIBRARY_CLASSIFICATION_WIDEN_MUTANT)
+    any (`Text.isPrefixOf` name) ["lib", "exe:", "test:", "bench:"]
+#else
     any (`Text.isPrefixOf` name) ["exe:", "test:", "bench:"]
+#endif
   ComponentMapShape -> False
 
 configuredComponents
@@ -1357,8 +1663,20 @@ configuredComponents index unitId object =
   case (KeyMap.lookup "component-name" object, KeyMap.lookup "components" object) of
     (Nothing, Nothing) -> missingComponentShape index unitId object
     (Just _, Just _) -> ambiguousComponentShape index unitId object
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DIRECT_COMPONENT_ROUTE_DROP_MUTANT)
+    (Just _, Nothing) ->
+      parseDirectComponent index unitId object `seq`
+        Parsed [ConfiguredUnitComponentShapeMissing unitId] Nothing
+#else
     (Just _, Nothing) -> parseDirectComponent index unitId object
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_MAP_ROUTE_DROP_MUTANT)
+    (Nothing, Just (Object components)) ->
+      parseComponentMap index unitId components `seq`
+        Parsed [ConfiguredUnitComponentShapeMissing unitId] Nothing
+#else
     (Nothing, Just (Object components)) -> parseComponentMap index unitId components
+#endif
     (Nothing, Just _) ->
       Parsed
         [PlanJsonFieldTypeMismatch (unitScope index) "components" "object"]
@@ -1430,14 +1748,14 @@ parseComponentMap
   -> Object
   -> Parsed ([DiagnosticElaboratedComponent], [Text], ConfiguredComponentShape)
 parseComponentMap index unitId componentMap =
-  if KeyMap.null componentMap
+  if emptyComponentMapRejected componentMap
     then Parsed [ConfiguredUnitComponentDiscoveryEmpty unitId] Nothing
     else case partitionParsed parsedComponents of
       (problems, _)
         | not (null problems) -> Parsed problems Nothing
       (_, components) ->
-        let ordered = sortOn diagnosticElaboratedComponentName components
-            declaredNames = sort (map Key.toText (KeyMap.keys componentMap))
+        let ordered = projectComponentOrder (sortOn diagnosticElaboratedComponentName components)
+            declaredNames = projectDeclaredComponentNameOrder (sort (map Key.toText (KeyMap.keys componentMap)))
          in Parsed [] (Just (ordered, declaredNames, ComponentMapShape))
  where
   parsedComponents =
@@ -1445,7 +1763,29 @@ parseComponentMap index unitId componentMap =
     | (name, value) <- sortOn (Key.toText . fst) (KeyMap.toList componentMap)
     ]
 
+emptyComponentMapRejected :: Object -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_EMPTY_COMPONENT_MAP_GUARD_BYPASS_MUTANT)
+emptyComponentMapRejected componentMap = KeyMap.null componentMap `seq` False
+#else
+emptyComponentMapRejected = KeyMap.null
+#endif
+
+projectComponentOrder :: [DiagnosticElaboratedComponent] -> [DiagnosticElaboratedComponent]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_ORDER_MUTANT)
+projectComponentOrder = reverse
+#else
+projectComponentOrder = id
+#endif
+
+projectDeclaredComponentNameOrder :: [Text] -> [Text]
+projectDeclaredComponentNameOrder = id
+
 parseNestedComponent :: Int -> Text -> Text -> Value -> Parsed DiagnosticElaboratedComponent
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_OBJECT_ROUTE_DROP_MUTANT)
+parseNestedComponent index unitId name (Object object) =
+  unitId `seq` object `seq`
+    Parsed [PlanJsonFieldTypeMismatch (jsonFieldScope (unitScope index) "components") name "mutated-object"] Nothing
+#else
 parseNestedComponent index unitId name (Object object) =
   case (parsedValue dependencies, parsedValue executableDependencies) of
     (Just dependencyIds, Just executableDependencyIds)
@@ -1463,6 +1803,12 @@ parseNestedComponent index unitId name (Object object) =
     unknownFields scope allowed object
       <> concatMap parsedProblems [dependencies, executableDependencies]
       <> [ConfiguredComponentNameMalformed unitId name | not (componentNameText name)]
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_NESTED_COMPONENT_NON_OBJECT_MAPPING_MUTANT)
+parseNestedComponent index unitId name value =
+  unitId `seq` value `seq`
+    Parsed [PlanJsonFieldTypeMismatch (jsonFieldScope (unitScope index) "components") name "mutated-non-object"] Nothing
+#else
 parseNestedComponent index _ name _ =
   Parsed
     [ PlanJsonFieldTypeMismatch
@@ -1471,6 +1817,7 @@ parseNestedComponent index _ name _ =
         "object"
     ]
     Nothing
+#endif
 
 parsePackageSource :: Int -> Object -> Parsed PackageSource
 parsePackageSource index unitObject =
@@ -1487,9 +1834,27 @@ parsePackageSource index unitObject =
             Nothing
       | otherwise ->
           case parsedValue sourceType of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_PACKAGE_SOURCE_ROUTE_DROP_MUTANT)
+            Just "local" ->
+              parseLocalSource scope object `seq`
+                Parsed [UnsupportedPackageSourceType label "local"] Nothing
+#else
             Just "local" -> parseLocalSource scope object
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_PACKAGE_SOURCE_ROUTE_DROP_MUTANT)
+            Just "repo-tar" ->
+              parseRepositoryTarSource scope object `seq`
+                Parsed [UnsupportedPackageSourceType label "repo-tar"] Nothing
+#else
             Just "repo-tar" -> parseRepositoryTarSource scope object
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_PACKAGE_SOURCE_ROUTE_DROP_MUTANT)
+            Just "source-repo" ->
+              parseSourceRepositorySource scope object `seq`
+                Parsed [UnsupportedPackageSourceType label "source-repo"] Nothing
+#else
             Just "source-repo" -> parseSourceRepositorySource scope object
+#endif
             Just "foreign"
               | unsupportedPackageSourceTypeAccepted -> parseLocalSource scope object
             Just observed ->
@@ -1621,7 +1986,11 @@ configuredOrigin
   -> PackageSource
   -> Parsed (DiagnosticElaboratedUnitOrigin, DiagnosticElaboratedUnitBuildStyle)
 configuredOrigin unitId style source = case (style, source) of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_LOCAL_STYLE_ROUTE_DROP_MUTANT)
+  ("local", LocalPackageSource _) -> Parsed [UnsupportedConfiguredUnitStyle unitId "local"] Nothing
+#else
   ("local", LocalPackageSource _) -> Parsed [] (Just (LocalUnit, LocalBuildStyle))
+#endif
   (observed, LocalPackageSource _)
     | observed `elem` ["global", "inplace"] && localOriginMismatchAccepted ->
         Parsed
@@ -1634,11 +2003,27 @@ configuredOrigin unitId style source = case (style, source) of
     | observed `elem` ["global", "inplace"] ->
         Parsed [ConfiguredUnitOriginMismatch unitId observed "local"] Nothing
   (observed, RepositoryTarPackageSource _ _)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_GLOBAL_STYLE_ROUTE_DROP_MUTANT)
+    | observed == "global" -> Parsed [UnsupportedConfiguredUnitStyle unitId observed] Nothing
+#else
     | observed == "global" -> Parsed [] (Just (RemoteUnit, GlobalBuildStyle))
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_INPLACE_STYLE_ROUTE_DROP_MUTANT)
+    | observed == "inplace" -> Parsed [UnsupportedConfiguredUnitStyle unitId observed] Nothing
+#else
     | observed == "inplace" -> Parsed [] (Just (RemoteUnit, InplaceBuildStyle))
+#endif
   (observed, SourceRepositoryPackageSource _ _ _)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_GLOBAL_STYLE_ROUTE_DROP_MUTANT)
+    | observed == "global" -> Parsed [UnsupportedConfiguredUnitStyle unitId observed] Nothing
+#else
     | observed == "global" -> Parsed [] (Just (RemoteUnit, GlobalBuildStyle))
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_INPLACE_STYLE_ROUTE_DROP_MUTANT)
+    | observed == "inplace" -> Parsed [UnsupportedConfiguredUnitStyle unitId observed] Nothing
+#else
     | observed == "inplace" -> Parsed [] (Just (RemoteUnit, InplaceBuildStyle))
+#endif
   (observed, remoteSource)
     | observed == "local" && remoteOriginMismatchAccepted ->
         Parsed [] (Just (RemoteUnit, LocalBuildStyle))
@@ -1673,11 +2058,11 @@ unsupportedConfiguredStyleAccepted = False
 
 planInvariantProblems :: [ParsedUnit] -> [DiagnosticElaboratedUnit] -> [CompilerElaboratedPlanProblem]
 planInvariantProblems parsedUnits units =
-  duplicateUnitProblems
-    <> duplicateLocalComponentProblems
-    <> dependencyProblems
-    <> dependencyCycleProblems
-    <> localDiscoveryProblems
+  projectDuplicateUnitProblemContribution duplicateUnitProblems
+    <> projectDuplicateLocalComponentProblemContribution duplicateLocalComponentProblems
+    <> projectDependencyProblemContribution dependencyProblems
+    <> projectDependencyCycleProblemContribution dependencyCycleProblems
+    <> projectLocalDiscoveryProblemContribution localDiscoveryProblems
  where
   unitIds = map diagnosticElaboratedUnitId units
   duplicateUnitProblems = map DuplicateElaboratedUnitId (duplicates unitIds)
@@ -1721,27 +2106,98 @@ planInvariantProblems parsedUnits units =
     , null (diagnosticElaboratedUnitComponents unit)
     ]
   localDiscoveryProblems =
-    emptyUnitProblems
-      <> [LocalComponentDiscoveryEmpty | null declaredLocal]
+    projectEmptyUnitProblemContribution emptyUnitProblems
+      <> [LocalComponentDiscoveryEmpty | localComponentDiscoveryEmpty declaredLocal]
+
+projectDuplicateUnitProblemContribution :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_UNIT_PROBLEM_CONTRIBUTION_DROP_MUTANT)
+projectDuplicateUnitProblemContribution _ = []
+#else
+projectDuplicateUnitProblemContribution = id
+#endif
+
+projectDuplicateLocalComponentProblemContribution :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_LOCAL_COMPONENT_PROBLEM_CONTRIBUTION_DROP_MUTANT)
+projectDuplicateLocalComponentProblemContribution _ = []
+#else
+projectDuplicateLocalComponentProblemContribution = id
+#endif
+
+projectDependencyProblemContribution :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT)
+projectDependencyProblemContribution _ = []
+#else
+projectDependencyProblemContribution = id
+#endif
+
+projectDependencyCycleProblemContribution :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_CYCLE_PROBLEM_CONTRIBUTION_DROP_MUTANT)
+projectDependencyCycleProblemContribution _ = []
+#else
+projectDependencyCycleProblemContribution = id
+#endif
+
+projectLocalDiscoveryProblemContribution :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_DISCOVERY_PROBLEM_CONTRIBUTION_DROP_MUTANT)
+projectLocalDiscoveryProblemContribution _ = []
+#else
+projectLocalDiscoveryProblemContribution = id
+#endif
+
+projectEmptyUnitProblemContribution :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+projectEmptyUnitProblemContribution = id
+
+localComponentDiscoveryEmpty :: [(Text, Text)] -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_GLOBAL_LOCAL_DISCOVERY_GUARD_BYPASS_MUTANT)
+localComponentDiscoveryEmpty declared = null declared `seq` False
+#else
+localComponentDiscoveryEmpty = null
+#endif
 
 unitDependencyProblems :: Set Text -> DiagnosticElaboratedUnit -> [CompilerElaboratedPlanProblem]
 unitDependencyProblems knownUnitIds unit =
-  preExistingProblems <> concatMap componentProblems (diagnosticElaboratedUnitComponents unit)
+  projectUnitDependencyContribution preExistingProblems
+    <> concatMap componentProblems (diagnosticElaboratedUnitComponents unit)
  where
   unitId = diagnosticElaboratedUnitId unit
   preExistingProblems =
     dependencyListProblems knownUnitIds unitId "<unit>.depends" (diagnosticElaboratedUnitDependencyUnitIds unit)
   componentProblems component =
-    dependencyListProblems
-      knownUnitIds
-      unitId
-      (diagnosticElaboratedComponentName component <> ".depends")
-      (diagnosticElaboratedComponentDependencyUnitIds component)
-      <> dependencyListProblems
-        knownUnitIds
-        unitId
-        (diagnosticElaboratedComponentName component <> ".exe-depends")
-        (diagnosticElaboratedComponentExecutableDependencyUnitIds component)
+    projectComponentDependencyContribution
+      ( dependencyListProblems
+          knownUnitIds
+          unitId
+          (diagnosticElaboratedComponentName component <> ".depends")
+          (diagnosticElaboratedComponentDependencyUnitIds component)
+      )
+      <> projectComponentExecutableDependencyContribution
+        ( dependencyListProblems
+            knownUnitIds
+            unitId
+            (diagnosticElaboratedComponentName component <> ".exe-depends")
+            (diagnosticElaboratedComponentExecutableDependencyUnitIds component)
+        )
+
+projectUnitDependencyContribution :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT)
+projectUnitDependencyContribution _ = []
+#else
+projectUnitDependencyContribution = id
+#endif
+
+projectComponentDependencyContribution :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT)
+projectComponentDependencyContribution _ = []
+#else
+projectComponentDependencyContribution = id
+#endif
+
+projectComponentExecutableDependencyContribution :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_PROBLEM_CONTRIBUTION_DROP_MUTANT)
+projectComponentExecutableDependencyContribution _ = []
+#else
+projectComponentExecutableDependencyContribution = id
+#endif
 
 dependencyListProblems
   :: Set Text
@@ -1868,54 +2324,257 @@ diagnosticPlanResidue inputDigest inputBytes
   )
  where
   compiledComponents =
-    sort
-      [ (diagnosticElaboratedUnitId unit, diagnosticElaboratedComponentName component)
-      | unit <- units
-      , diagnosticElaboratedUnitBuildStyle unit `elem` [LocalBuildStyle, InplaceBuildStyle]
-      , component <- diagnosticElaboratedUnitComponents unit
-      ]
+    projectComponentUniverseSubject
+      ( projectComponentUniverseSubjectOrder
+          ( sort
+              [ (diagnosticElaboratedUnitId unit, diagnosticElaboratedComponentName component)
+              | unit <- units
+              , componentUniverseBuildStyleIncluded (diagnosticElaboratedUnitBuildStyle unit)
+              , component <- diagnosticElaboratedUnitComponents unit
+              ]
+          )
+      )
   configurationSubject =
-    sort
-      [ ( diagnosticElaboratedUnitId unit
-        , diagnosticElaboratedUnitBuildStyle unit
-        , diagnosticElaboratedUnitComponentShape unit
-        , diagnosticElaboratedUnitFlags unit
-        , sort (map diagnosticElaboratedComponentName (diagnosticElaboratedUnitComponents unit))
-        )
-      | unit <- units
-      , diagnosticElaboratedUnitBuildStyle unit /= PreExistingBuildStyle
-      ]
-  dependencySubject = sort (concatMap unitDependencySubject units)
+    projectConfigurationSubject
+      ( projectConfigurationSubjectOrder
+          ( sort
+              [ ( diagnosticElaboratedUnitId unit
+                , diagnosticElaboratedUnitBuildStyle unit
+                , diagnosticElaboratedUnitComponentShape unit
+                , diagnosticElaboratedUnitFlags unit
+                , sort (map diagnosticElaboratedComponentName (diagnosticElaboratedUnitComponents unit))
+                )
+              | unit <- units
+              , configurationBuildStyleIncluded (diagnosticElaboratedUnitBuildStyle unit)
+              ]
+          )
+      )
+  dependencySubject =
+    projectDependencySubject
+      (projectDependencySubjectOrder (sort (concatMap unitDependencySubject units)))
   packageSourceSubject =
-    sort
-      [ ( diagnosticElaboratedUnitId unit
-        , diagnosticElaboratedUnitPackageSourceKind unit
-        , diagnosticElaboratedUnitPackageSourceRoot unit
-        , diagnosticElaboratedUnitPackageSourceLocation unit
-        , diagnosticElaboratedUnitPackageSourceTag unit
-        , diagnosticElaboratedUnitPackageCabalSha256 unit
-        , diagnosticElaboratedUnitPackageSourceSha256 unit
-        )
-      | unit <- units
-      , diagnosticElaboratedUnitOrigin unit /= PreExistingUnit
-      ]
+    projectPackageSourceSubject
+      ( projectPackageSourceSubjectOrder
+          ( sort
+              [ ( diagnosticElaboratedUnitId unit
+                , diagnosticElaboratedUnitPackageSourceKind unit
+                , diagnosticElaboratedUnitPackageSourceRoot unit
+                , diagnosticElaboratedUnitPackageSourceLocation unit
+                , diagnosticElaboratedUnitPackageSourceTag unit
+                , diagnosticElaboratedUnitPackageCabalSha256 unit
+                , diagnosticElaboratedUnitPackageSourceSha256 unit
+                )
+              | unit <- units
+              , packageSourceOriginIncluded (diagnosticElaboratedUnitOrigin unit)
+              ]
+          )
+      )
   buildArtifactSubject =
-    sort
-      [ ( diagnosticElaboratedUnitId unit
-        , diagnosticElaboratedUnitBuildInfoPath unit
-        , diagnosticElaboratedUnitDistDirectoryPath unit
-        , diagnosticElaboratedUnitBinaryPath unit
-        )
-      | unit <- units
-      , diagnosticElaboratedUnitOrigin unit /= PreExistingUnit
-      ]
+    projectBuildArtifactSubject
+      ( projectBuildArtifactSubjectOrder
+          ( sort
+              [ ( diagnosticElaboratedUnitId unit
+                , diagnosticElaboratedUnitBuildInfoPath unit
+                , diagnosticElaboratedUnitDistDirectoryPath unit
+                , diagnosticElaboratedUnitBinaryPath unit
+                )
+              | unit <- units
+              , buildArtifactOriginIncluded (diagnosticElaboratedUnitOrigin unit)
+              ]
+          )
+      )
   localSourceRoots =
-    sort
-      [ (diagnosticElaboratedUnitId unit, root)
-      | unit <- units
-      , diagnosticElaboratedUnitOrigin unit == LocalUnit
-      , Just root <- [diagnosticElaboratedUnitPackageSourceRoot unit]
-      ]
+    projectLocalSourceRootSubject
+      ( projectLocalSourceRootSubjectOrder
+          ( sort
+              [ (diagnosticElaboratedUnitId unit, root)
+              | unit <- units
+              , localSourceRootOriginIncluded (diagnosticElaboratedUnitOrigin unit)
+              , Just root <- [diagnosticElaboratedUnitPackageSourceRoot unit]
+              ]
+          )
+      )
+
+componentUniverseBuildStyleIncluded :: DiagnosticElaboratedUnitBuildStyle -> Bool
+componentUniverseBuildStyleIncluded style = case style of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_LOCAL_STYLE_ALTERNATIVE_DROP_MUTANT)
+  LocalBuildStyle -> False
+#else
+  LocalBuildStyle -> True
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_INPLACE_STYLE_ALTERNATIVE_DROP_MUTANT)
+  InplaceBuildStyle -> False
+#else
+  InplaceBuildStyle -> True
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_GLOBAL_STYLE_EXCLUSION_BYPASS_MUTANT)
+  GlobalBuildStyle -> True
+#else
+  GlobalBuildStyle -> False
+#endif
+  PreExistingBuildStyle -> False
+
+configurationBuildStyleIncluded :: DiagnosticElaboratedUnitBuildStyle -> Bool
+configurationBuildStyleIncluded style = case style of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_LOCAL_STYLE_ALTERNATIVE_DROP_MUTANT)
+  LocalBuildStyle -> False
+#else
+  LocalBuildStyle -> True
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_GLOBAL_STYLE_ALTERNATIVE_DROP_MUTANT)
+  GlobalBuildStyle -> False
+#else
+  GlobalBuildStyle -> True
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_INPLACE_STYLE_ALTERNATIVE_DROP_MUTANT)
+  InplaceBuildStyle -> False
+#else
+  InplaceBuildStyle -> True
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_PRE_EXISTING_STYLE_EXCLUSION_BYPASS_MUTANT)
+  PreExistingBuildStyle -> True
+#else
+  PreExistingBuildStyle -> False
+#endif
+
+packageSourceOriginIncluded :: DiagnosticElaboratedUnitOrigin -> Bool
+packageSourceOriginIncluded origin = case origin of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT)
+  LocalUnit -> False
+#else
+  LocalUnit -> True
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_REMOTE_ORIGIN_ALTERNATIVE_DROP_MUTANT)
+  RemoteUnit -> False
+#else
+  RemoteUnit -> True
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_PRE_EXISTING_ORIGIN_EXCLUSION_BYPASS_MUTANT)
+  PreExistingUnit -> True
+#else
+  PreExistingUnit -> False
+#endif
+
+buildArtifactOriginIncluded :: DiagnosticElaboratedUnitOrigin -> Bool
+buildArtifactOriginIncluded origin = case origin of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT)
+  LocalUnit -> False
+#else
+  LocalUnit -> True
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_REMOTE_ORIGIN_ALTERNATIVE_DROP_MUTANT)
+  RemoteUnit -> False
+#else
+  RemoteUnit -> True
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_PRE_EXISTING_ORIGIN_EXCLUSION_BYPASS_MUTANT)
+  PreExistingUnit -> True
+#else
+  PreExistingUnit -> False
+#endif
+
+localSourceRootOriginIncluded :: DiagnosticElaboratedUnitOrigin -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_LOCAL_ORIGIN_ALTERNATIVE_DROP_MUTANT)
+localSourceRootOriginIncluded origin = origin `seq` False
+#else
+localSourceRootOriginIncluded origin = origin == LocalUnit
+#endif
+
+projectComponentUniverseSubject :: [(Text, Text)] -> [(Text, Text)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_SUBJECT_PROJECTION_DROP_MUTANT)
+projectComponentUniverseSubject subject = subject `seq` []
+#else
+projectComponentUniverseSubject = id
+#endif
+
+projectComponentUniverseSubjectOrder :: [(Text, Text)] -> [(Text, Text)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIVERSE_SUBJECT_ORDER_MUTANT)
+projectComponentUniverseSubjectOrder = reverse
+#else
+projectComponentUniverseSubjectOrder = id
+#endif
+
+projectConfigurationSubject
+  :: [(Text, DiagnosticElaboratedUnitBuildStyle, Maybe DiagnosticElaboratedComponentShape, [(Text, Bool)], [Text])]
+  -> [(Text, DiagnosticElaboratedUnitBuildStyle, Maybe DiagnosticElaboratedComponentShape, [(Text, Bool)], [Text])]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_SUBJECT_PROJECTION_DROP_MUTANT)
+projectConfigurationSubject subject = subject `seq` []
+#else
+projectConfigurationSubject = id
+#endif
+
+projectConfigurationSubjectOrder
+  :: [(Text, DiagnosticElaboratedUnitBuildStyle, Maybe DiagnosticElaboratedComponentShape, [(Text, Bool)], [Text])]
+  -> [(Text, DiagnosticElaboratedUnitBuildStyle, Maybe DiagnosticElaboratedComponentShape, [(Text, Bool)], [Text])]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CONFIGURATION_SUBJECT_ORDER_MUTANT)
+projectConfigurationSubjectOrder = reverse
+#else
+projectConfigurationSubjectOrder = id
+#endif
+
+projectDependencySubject :: [(Text, Text, Text)] -> [(Text, Text, Text)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SUBJECT_PROJECTION_DROP_MUTANT)
+projectDependencySubject subject = subject `seq` []
+#else
+projectDependencySubject = id
+#endif
+
+projectDependencySubjectOrder :: [(Text, Text, Text)] -> [(Text, Text, Text)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_SUBJECT_ORDER_MUTANT)
+projectDependencySubjectOrder = reverse
+#else
+projectDependencySubjectOrder = id
+#endif
+
+projectPackageSourceSubject
+  :: [(Text, Text, Maybe FilePath, Maybe Text, Maybe Text, Maybe Text, Maybe Text)]
+  -> [(Text, Text, Maybe FilePath, Maybe Text, Maybe Text, Maybe Text, Maybe Text)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_SUBJECT_PROJECTION_DROP_MUTANT)
+projectPackageSourceSubject subject = subject `seq` []
+#else
+projectPackageSourceSubject = id
+#endif
+
+projectPackageSourceSubjectOrder
+  :: [(Text, Text, Maybe FilePath, Maybe Text, Maybe Text, Maybe Text, Maybe Text)]
+  -> [(Text, Text, Maybe FilePath, Maybe Text, Maybe Text, Maybe Text, Maybe Text)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PACKAGE_SOURCE_SUBJECT_ORDER_MUTANT)
+projectPackageSourceSubjectOrder = reverse
+#else
+projectPackageSourceSubjectOrder = id
+#endif
+
+projectBuildArtifactSubject
+  :: [(Text, Maybe FilePath, Maybe FilePath, Maybe FilePath)]
+  -> [(Text, Maybe FilePath, Maybe FilePath, Maybe FilePath)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_SUBJECT_PROJECTION_DROP_MUTANT)
+projectBuildArtifactSubject subject = subject `seq` []
+#else
+projectBuildArtifactSubject = id
+#endif
+
+projectBuildArtifactSubjectOrder
+  :: [(Text, Maybe FilePath, Maybe FilePath, Maybe FilePath)]
+  -> [(Text, Maybe FilePath, Maybe FilePath, Maybe FilePath)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_BUILD_ARTIFACT_SUBJECT_ORDER_MUTANT)
+projectBuildArtifactSubjectOrder = reverse
+#else
+projectBuildArtifactSubjectOrder = id
+#endif
+
+projectLocalSourceRootSubject :: [(Text, FilePath)] -> [(Text, FilePath)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_SUBJECT_PROJECTION_DROP_MUTANT)
+projectLocalSourceRootSubject subject = subject `seq` []
+#else
+projectLocalSourceRootSubject = id
+#endif
+
+projectLocalSourceRootSubjectOrder :: [(Text, FilePath)] -> [(Text, FilePath)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_ROOT_SUBJECT_ORDER_MUTANT)
+projectLocalSourceRootSubjectOrder = reverse
+#else
+projectLocalSourceRootSubjectOrder = id
+#endif
 
 inputAuthenticationResidue :: Text -> Int -> [CompilerElaboratedPlanProblem]
 #ifdef VALIDATION_COMPILER_ELABORATED_PLAN_INPUT_AUTHENTICATION_RESIDUE_BYPASS_MUTANT
@@ -2052,22 +2711,67 @@ oracleQualificationResidue = [CompilerElaboratedPlanOracleQualificationUnavailab
 
 unitDependencySubject :: DiagnosticElaboratedUnit -> [(Text, Text, Text)]
 unitDependencySubject unit =
-  [ (unitId, "<unit>.depends", dependency)
-  | dependency <- diagnosticElaboratedUnitDependencyUnitIds unit
-  ]
+  projectUnitDependencySubjectRoute
+    [ (unitId, unitDependencySubjectLabel, dependency)
+    | dependency <- diagnosticElaboratedUnitDependencyUnitIds unit
+    ]
     <> concatMap componentSubject (diagnosticElaboratedUnitComponents unit)
  where
   unitId = diagnosticElaboratedUnitId unit
   componentSubject component =
-    [ (unitId, diagnosticElaboratedComponentName component <> ".depends", dependency)
-    | dependency <- diagnosticElaboratedComponentDependencyUnitIds component
-    ]
-      <> [ ( unitId
-           , diagnosticElaboratedComponentName component <> ".exe-depends"
-           , dependency
-           )
-         | dependency <- diagnosticElaboratedComponentExecutableDependencyUnitIds component
-         ]
+    projectComponentDependencySubjectRoute
+      [ (unitId, diagnosticElaboratedComponentName component <> componentDependencySubjectSuffix, dependency)
+      | dependency <- diagnosticElaboratedComponentDependencyUnitIds component
+      ]
+      <> projectComponentExecutableDependencySubjectRoute
+        [ ( unitId
+          , diagnosticElaboratedComponentName component <> componentExecutableDependencySubjectSuffix
+          , dependency
+          )
+        | dependency <- diagnosticElaboratedComponentExecutableDependencyUnitIds component
+        ]
+
+projectUnitDependencySubjectRoute :: [(Text, Text, Text)] -> [(Text, Text, Text)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT)
+projectUnitDependencySubjectRoute subject = subject `seq` []
+#else
+projectUnitDependencySubjectRoute = id
+#endif
+
+projectComponentDependencySubjectRoute :: [(Text, Text, Text)] -> [(Text, Text, Text)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT)
+projectComponentDependencySubjectRoute subject = subject `seq` []
+#else
+projectComponentDependencySubjectRoute = id
+#endif
+
+projectComponentExecutableDependencySubjectRoute :: [(Text, Text, Text)] -> [(Text, Text, Text)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_SUBJECT_ROUTE_DROP_MUTANT)
+projectComponentExecutableDependencySubjectRoute subject = subject `seq` []
+#else
+projectComponentExecutableDependencySubjectRoute = id
+#endif
+
+unitDependencySubjectLabel :: Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT)
+unitDependencySubjectLabel = "<unit>.mutated-depends"
+#else
+unitDependencySubjectLabel = "<unit>.depends"
+#endif
+
+componentDependencySubjectSuffix :: Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT)
+componentDependencySubjectSuffix = ".mutated-depends"
+#else
+componentDependencySubjectSuffix = ".depends"
+#endif
+
+componentExecutableDependencySubjectSuffix :: Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCY_SUBJECT_LABEL_MAPPING_MUTANT)
+componentExecutableDependencySubjectSuffix = ".mutated-exe-depends"
+#else
+componentExecutableDependencySubjectSuffix = ".exe-depends"
+#endif
 
 sourceIdentityProblemsForHashes
   :: Text
@@ -2079,29 +2783,69 @@ sourceIdentityProblemsForHashes
   -> Maybe Text
   -> [CompilerElaboratedPlanProblem]
 sourceIdentityProblemsForHashes scope unitId source cabalPresent sourcePresent cabalSha sourceSha = case source of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_IDENTITY_ROUTE_DROP_MUTANT)
   LocalPackageSource _ ->
-    [PlanJsonFieldUnexpected scope "pkg-cabal-sha256" | localCabalHashForbidden cabalPresent]
-      <> [PlanJsonFieldUnexpected scope "pkg-src-sha256" | localSourceHashForbidden sourcePresent]
+    localSourceIdentityProblems scope cabalPresent sourcePresent `seq` []
+#else
+  LocalPackageSource _ ->
+    localSourceIdentityProblems scope cabalPresent sourcePresent
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_SOURCE_IDENTITY_ROUTE_DROP_MUTANT)
   RepositoryTarPackageSource _ _ ->
-    [RemotePackageSourceHashMissing unitId | repositorySourceHashMissing sourcePresent]
-      <> [ RemotePackageSourceHashMalformed unitId observed
-         | Just observed <- [sourceSha]
-         , not (sha256DigestText observed)
-         ]
-      <> [RepositoryCabalHashMissing unitId | repositoryCabalHashMissing cabalPresent]
-      <> [ RepositoryCabalHashMalformed unitId observed
-         | Just observed <- [cabalSha]
-         , not (sha256DigestText observed)
-         ]
+    repositoryTarSourceIdentityProblems unitId cabalPresent sourcePresent cabalSha sourceSha `seq` []
+#else
+  RepositoryTarPackageSource _ _ ->
+    repositoryTarSourceIdentityProblems unitId cabalPresent sourcePresent cabalSha sourceSha
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_IDENTITY_ROUTE_DROP_MUTANT)
   SourceRepositoryPackageSource _ _ tag ->
-    [PlanJsonFieldUnexpected scope "pkg-cabal-sha256" | sourceRepositoryCabalHashForbidden cabalPresent]
-      <> [RemotePackageSourceHashMissing unitId | sourceRepositoryHashMissing sourcePresent]
-      <> [ RemotePackageSourceHashMalformed unitId observed
-         | Just observed <- [sourceSha]
-         , not (sha256DigestText observed)
-         ]
-      <> [SourceRepositoryTagMutable unitId tag | not (immutableGitObjectText tag)]
+    sourceRepositoryIdentityProblems scope unitId cabalPresent sourcePresent sourceSha tag `seq` []
+#else
+  SourceRepositoryPackageSource _ _ tag ->
+    sourceRepositoryIdentityProblems scope unitId cabalPresent sourcePresent sourceSha tag
+#endif
   PreExistingPackageSource -> []
+
+localSourceIdentityProblems :: Text -> Bool -> Bool -> [CompilerElaboratedPlanProblem]
+localSourceIdentityProblems scope cabalPresent sourcePresent =
+  [PlanJsonFieldUnexpected scope "pkg-cabal-sha256" | localCabalHashForbidden cabalPresent]
+    <> [PlanJsonFieldUnexpected scope "pkg-src-sha256" | localSourceHashForbidden sourcePresent]
+
+repositoryTarSourceIdentityProblems
+  :: Text
+  -> Bool
+  -> Bool
+  -> Maybe Text
+  -> Maybe Text
+  -> [CompilerElaboratedPlanProblem]
+repositoryTarSourceIdentityProblems unitId cabalPresent sourcePresent cabalSha sourceSha =
+  [RemotePackageSourceHashMissing unitId | repositorySourceHashMissing sourcePresent]
+    <> [ RemotePackageSourceHashMalformed unitId observed
+       | Just observed <- [sourceSha]
+       , not (sha256DigestText observed)
+       ]
+    <> [RepositoryCabalHashMissing unitId | repositoryCabalHashMissing cabalPresent]
+    <> [ RepositoryCabalHashMalformed unitId observed
+       | Just observed <- [cabalSha]
+       , not (sha256DigestText observed)
+       ]
+
+sourceRepositoryIdentityProblems
+  :: Text
+  -> Text
+  -> Bool
+  -> Bool
+  -> Maybe Text
+  -> Text
+  -> [CompilerElaboratedPlanProblem]
+sourceRepositoryIdentityProblems scope unitId cabalPresent sourcePresent sourceSha tag =
+  [PlanJsonFieldUnexpected scope "pkg-cabal-sha256" | sourceRepositoryCabalHashForbidden cabalPresent]
+    <> [RemotePackageSourceHashMissing unitId | sourceRepositoryHashMissing sourcePresent]
+    <> [ RemotePackageSourceHashMalformed unitId observed
+       | Just observed <- [sourceSha]
+       , not (sha256DigestText observed)
+       ]
+    <> [SourceRepositoryTagMutable unitId tag | not (immutableGitObjectText tag)]
 
 localCabalHashForbidden :: Bool -> Bool
 #ifdef VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_CABAL_HASH_GUARD_BYPASS_MUTANT
@@ -2193,24 +2937,61 @@ immutableGitCharactersAccepted value = Text.all lowerHexCharacter value
 
 lowerHexCharacter :: Char -> Bool
 lowerHexCharacter character =
-  (character >= '0' && character <= '9')
-    || (character >= 'a' && character <= 'f')
+  lowerHexDigitAccepted character || lowerHexAlphaAccepted character
+
+lowerHexDigitAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_LOWER_HEX_DIGIT_ALTERNATIVE_DROP_MUTANT)
+lowerHexDigitAccepted character = character `seq` False
+#else
+lowerHexDigitAccepted character = character >= '0' && character <= '9'
+#endif
+
+lowerHexAlphaAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_LOWER_HEX_ALPHA_ALTERNATIVE_DROP_MUTANT)
+lowerHexAlphaAccepted character = character `seq` False
+#else
+lowerHexAlphaAccepted character = character >= 'a' && character <= 'f'
+#endif
 
 requiredText :: Text -> Object -> Text -> Parsed Text
 requiredText scope object name = case KeyMap.lookup (Key.fromText name) object of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_MISSING_ROUTE_MUTANT)
+  Nothing -> Parsed [] (Just "mutated-missing")
+#else
   Nothing -> Parsed [PlanJsonFieldMissing scope name] Nothing
+#endif
   Just (String value)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_EMPTY_ROUTE_MUTANT)
+    | Text.null value -> Parsed [] (Just "mutated-empty")
+#else
     | Text.null value -> Parsed [PlanJsonTextEmpty scope name] Nothing
+#endif
     | otherwise -> Parsed [] (Just value)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_TEXT_TYPE_ROUTE_MUTANT)
+  Just value -> jsonType value `seq` Parsed [] (Just "mutated-type")
+#else
   Just value -> Parsed [PlanJsonFieldTypeMismatch scope name (jsonType value)] Nothing
+#endif
 
 optionalText :: Text -> Object -> Text -> Parsed Text
 optionalText scope object name = case KeyMap.lookup (Key.fromText name) object of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_MISSING_ROUTE_MUTANT)
+  Nothing -> Parsed [] (Just "mutated-missing")
+#else
   Nothing -> Parsed [] Nothing
+#endif
   Just (String value)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_EMPTY_ROUTE_MUTANT)
+    | Text.null value -> Parsed [] Nothing
+#else
     | Text.null value -> Parsed [PlanJsonTextEmpty scope name] Nothing
+#endif
     | otherwise -> Parsed [] (Just value)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OPTIONAL_TEXT_TYPE_ROUTE_MUTANT)
+  Just value -> jsonType value `seq` Parsed [] Nothing
+#else
   Just value -> Parsed [PlanJsonFieldTypeMismatch scope name (jsonType value)] Nothing
+#endif
 
 requiredSemanticText :: Text -> Object -> Text -> Parsed Text
 requiredSemanticText scope object name =
@@ -2253,11 +3034,18 @@ requiredConstrainedTextArray scope object name predicate =
                 (name <> "[" <> Text.pack (show index) <> "]")
                 value
             | (index, value) <- zip [0 :: Int ..] values
-            , not (semanticTextAccepted predicate value)
+            , constrainedArrayValueRejected predicate value
             ]
        in if null malformed
             then Parsed problems (Just values)
             else Parsed (problems <> malformed) Nothing
+
+constrainedArrayValueRejected :: (Text -> Bool) -> Text -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_ARRAY_VALUE_GATE_BYPASS_MUTANT)
+constrainedArrayValueRejected predicate value = predicate value `seq` False
+#else
+constrainedArrayValueRejected predicate value = not (semanticTextAccepted predicate value)
+#endif
 
 constrainParsedText
   :: Text
@@ -2267,9 +3055,16 @@ constrainParsedText
   -> Parsed Text
 constrainParsedText scope name predicate (Parsed problems parsed) = case parsed of
   Just value
-    | not (semanticTextAccepted predicate value) ->
+    | constrainedTextValueRejected predicate value ->
         Parsed (problems <> [PlanJsonTextMalformed scope name value]) Nothing
   _ -> Parsed problems parsed
+
+constrainedTextValueRejected :: (Text -> Bool) -> Text -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_TEXT_VALUE_GATE_BYPASS_MUTANT)
+constrainedTextValueRejected predicate value = predicate value `seq` False
+#else
+constrainedTextValueRejected predicate value = not (semanticTextAccepted predicate value)
+#endif
 
 requiredSafeFilePath :: Text -> Object -> Text -> Parsed FilePath
 requiredSafeFilePath scope object name =
@@ -2282,22 +3077,41 @@ optionalSafeFilePath scope object name =
 constrainParsedPath :: Text -> Text -> Parsed Text -> Parsed FilePath
 constrainParsedPath scope name (Parsed problems parsed) = case parsed of
   Just value
-    | not (pathTextAccepted value) ->
+    | constrainedPathValueRejected value ->
         Parsed
           (problems <> [PlanJsonPathUnsafe scope name (Text.unpack value)])
           Nothing
     | otherwise -> Parsed problems (Just (Text.unpack value))
   Nothing -> Parsed problems Nothing
 
+constrainedPathValueRejected :: Text -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_CONSTRAINED_PATH_VALUE_GATE_BYPASS_MUTANT)
+constrainedPathValueRejected value = pathTextAccepted value `seq` False
+#else
+constrainedPathValueRejected = not . pathTextAccepted
+#endif
+
 requiredObject :: Text -> Object -> Text -> Parsed Object
 requiredObject scope object name = case KeyMap.lookup (Key.fromText name) object of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_MISSING_ROUTE_MUTANT)
+  Nothing -> Parsed [] (Just KeyMap.empty)
+#else
   Nothing -> Parsed [PlanJsonFieldMissing scope name] Nothing
+#endif
   Just (Object value) -> Parsed [] (Just value)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_OBJECT_TYPE_ROUTE_MUTANT)
+  Just value -> jsonType value `seq` Parsed [] (Just KeyMap.empty)
+#else
   Just value -> Parsed [PlanJsonFieldTypeMismatch scope name (jsonType value)] Nothing
+#endif
 
 requiredUnitArray :: Text -> Object -> Text -> Parsed [Value]
 requiredUnitArray scope object name = case KeyMap.lookup (Key.fromText name) object of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_MISSING_ROUTE_MUTANT)
+  Nothing -> Parsed [] (Just [])
+#else
   Nothing -> Parsed [PlanJsonFieldMissing scope name] Nothing
+#endif
   Just (Array values)
     | unitLimitExceeded (Foldable.length values) ->
         Parsed
@@ -2308,13 +3122,25 @@ requiredUnitArray scope object name = case KeyMap.lookup (Key.fromText name) obj
           ]
           Nothing
     | otherwise -> Parsed [] (Just (toList values))
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REQUIRED_UNIT_ARRAY_TYPE_ROUTE_MUTANT)
+  Just value -> jsonType value `seq` Parsed [] (Just [])
+#else
   Just value -> Parsed [PlanJsonFieldTypeMismatch scope name (jsonType value)] Nothing
+#endif
 
 requiredDependencyTextArray :: Text -> Object -> Text -> Parsed [Text]
 requiredDependencyTextArray scope object name = case KeyMap.lookup (Key.fromText name) object of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_MISSING_ROUTE_MUTANT)
+  Nothing -> Parsed [] (Just [])
+#else
   Nothing -> Parsed [PlanJsonFieldMissing scope name] Nothing
+#endif
   Just (Array values) -> decodeTextValues (toList values)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_TYPE_ROUTE_MUTANT)
+  Just value -> jsonType value `seq` Parsed [] (Just [])
+#else
   Just value -> Parsed [PlanJsonFieldTypeMismatch scope name (jsonType value)] Nothing
+#endif
  where
   decodeTextValues values =
     let typed = map asText (zip [0 :: Int ..] values)
@@ -2324,8 +3150,15 @@ requiredDependencyTextArray scope object name = case KeyMap.lookup (Key.fromText
           then Parsed [] (Just texts)
           else Parsed typeProblems Nothing
   asText (position, String value)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_EMPTY_TEXT_ROUTE_MUTANT)
+    | Text.null value = position `seq` Right "mutated-empty"
+#else
     | Text.null value = Left (PlanJsonTextEmpty scope (name <> "[" <> Text.pack (show position) <> "]"))
+#endif
     | otherwise = Right value
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DEPENDENCY_ARRAY_ELEMENT_TYPE_ROUTE_MUTANT)
+  asText (position, value) = position `seq` jsonType value `seq` Right "mutated-type"
+#else
   asText (position, value) =
     Left
       ( PlanJsonFieldTypeMismatch
@@ -2333,6 +3166,7 @@ requiredDependencyTextArray scope object name = case KeyMap.lookup (Key.fromText
           (name <> "[" <> Text.pack (show position) <> "]")
           (jsonType value)
       )
+#endif
 
 requiredBooleanMap :: Text -> Object -> Text -> Parsed [(Text, Bool)]
 requiredBooleanMap scope object name = case requiredObject scope object name of
@@ -2341,7 +3175,7 @@ requiredBooleanMap scope object name = case requiredObject scope object name of
     let orderedEntries = sortOn (Key.toText . fst) (KeyMap.toList values)
         typed = map asBoolean orderedEntries
         typeProblems = [problem | Left problem <- typed]
-        flags = sort [value | Right value <- typed]
+        flags = projectFlagOrder (sort [value | Right value <- typed])
         nameProblems =
           [ PlanJsonTextMalformed (jsonFieldScope scope name) key key
           | key <- map (Key.toText . fst) orderedEntries
@@ -2352,6 +3186,9 @@ requiredBooleanMap scope object name = case requiredObject scope object name of
           else Parsed (problems <> typeProblems <> nameProblems) Nothing
  where
   asBoolean (key, Bool value) = Right (Key.toText key, value)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_BOOLEAN_MAP_VALUE_TYPE_ROUTE_MUTANT)
+  asBoolean (key, value) = jsonType value `seq` Right (Key.toText key, False)
+#else
   asBoolean (key, value) =
     Left
       ( PlanJsonFieldTypeMismatch
@@ -2359,22 +3196,69 @@ requiredBooleanMap scope object name = case requiredObject scope object name of
           (Key.toText key)
           (jsonType value)
       )
+#endif
+
+projectFlagOrder :: [(Text, Bool)] -> [(Text, Bool)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_ORDER_MUTANT)
+projectFlagOrder = reverse
+#else
+projectFlagOrder = id
+#endif
 
 unknownFields :: Text -> Set Text -> Object -> [CompilerElaboratedPlanProblem]
 unknownFields scope allowed object =
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_DETECTION_BYPASS_MUTANT)
   [ PlanJsonFieldUnknown scope observed
-  | observed <- sort (map Key.toText (KeyMap.keys object))
+  | observed <- projectUnknownFieldOrder (sort (map Key.toText (KeyMap.keys object)))
+  , Set.notMember observed allowed
+  , Text.null observed && not (Text.null observed)
+  ]
+#else
+  [ PlanJsonFieldUnknown scope observed
+  | observed <- projectUnknownFieldOrder (sort (map Key.toText (KeyMap.keys object)))
   , Set.notMember observed allowed
   ]
+#endif
+
+projectUnknownFieldOrder :: [Text] -> [Text]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNKNOWN_FIELD_ORDER_MUTANT)
+projectUnknownFieldOrder = reverse
+#else
+projectUnknownFieldOrder = id
+#endif
 
 jsonType :: Value -> Text
 jsonType value = case value of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_OBJECT_TYPE_MAPPING_MUTANT)
+  Object _ -> "mutated-object"
+#else
   Object _ -> "object"
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_ARRAY_TYPE_MAPPING_MUTANT)
+  Array _ -> "mutated-array"
+#else
   Array _ -> "array"
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_STRING_TYPE_MAPPING_MUTANT)
+  String _ -> "mutated-string"
+#else
   String _ -> "string"
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NUMBER_TYPE_MAPPING_MUTANT)
+  Number _ -> "mutated-number"
+#else
   Number _ -> "number"
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_BOOLEAN_TYPE_MAPPING_MUTANT)
+  Bool _ -> "mutated-boolean"
+#else
   Bool _ -> "boolean"
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_JSON_NULL_TYPE_MAPPING_MUTANT)
+  Null -> "mutated-null"
+#else
   Null -> "null"
+#endif
 
 unitScope :: Int -> Text
 unitScope index =
@@ -2385,14 +3269,38 @@ observedTextOr :: Text -> Parsed Text -> Text
 observedTextOr fallback parsed = maybe fallback id (parsedValue parsed)
 
 parsedProblems :: Parsed value -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_PROBLEMS_PROJECTION_DROP_MUTANT)
+parsedProblems (Parsed problems value) = value `seq` problems `seq` []
+#else
 parsedProblems (Parsed problems _) = problems
+#endif
 
 parsedValue :: Parsed value -> Maybe value
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PARSED_VALUE_PROJECTION_DROP_MUTANT)
+parsedValue (Parsed problems value) = problems `seq` value `seq` Nothing
+#else
 parsedValue (Parsed _ value) = value
+#endif
 
 partitionParsed :: [Parsed value] -> ([CompilerElaboratedPlanProblem], [value])
 partitionParsed values =
-  (concatMap parsedProblems values, catMaybes (map parsedValue values))
+  ( projectPartitionProblemContribution (concatMap parsedProblems values)
+  , projectPartitionValueContribution (catMaybes (map parsedValue values))
+  )
+
+projectPartitionProblemContribution :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_PROBLEM_CONTRIBUTION_DROP_MUTANT)
+projectPartitionProblemContribution _ = []
+#else
+projectPartitionProblemContribution = id
+#endif
+
+projectPartitionValueContribution :: [value] -> [value]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PARTITION_VALUE_CONTRIBUTION_DROP_MUTANT)
+projectPartitionValueContribution _ = []
+#else
+projectPartitionValueContribution = id
+#endif
 
 parsedUnitValue :: ParsedUnit -> DiagnosticElaboratedUnit
 parsedUnitValue (ParsedUnit unit _) = unit
@@ -2400,15 +3308,23 @@ parsedUnitValue (ParsedUnit unit _) = unit
 duplicates :: Ord value => [value] -> [value]
 duplicates = mapMaybe duplicateValue . group . sort
  where
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DUPLICATE_GROUPING_BYPASS_MUTANT)
+  duplicateValue values = values `seq` Nothing
+#else
   duplicateValue (value : _ : _) = Just value
   duplicateValue _ = Nothing
+#endif
 
 groupedValues :: (Ord key, Ord value) => [(key, value)] -> [(key, [value])]
 groupedValues values = mapMaybe renderGroup (groupByKey (sortOn fst values))
  where
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_GROUPED_VALUE_RENDER_DROP_MUTANT)
+  renderGroup groupValues = groupValues `seq` Nothing
+#else
   renderGroup ((key, value) : remaining) =
     Just (key, sort (value : map snd remaining))
   renderGroup [] = Nothing
+#endif
   groupByKey [] = []
   groupByKey (first : remaining) =
     let (same, rest) = span ((== fst first) . fst) remaining
@@ -2421,8 +3337,16 @@ diagnosticComponentShape
 diagnosticComponentShape _ = DirectElaboratedComponentShape
 #else
 diagnosticComponentShape shape = case shape of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_DIRECT_COMPONENT_SHAPE_MAPPING_MUTANT)
+  DirectComponentShape _ -> AggregateElaboratedComponentShape
+#else
   DirectComponentShape _ -> DirectElaboratedComponentShape
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_AGGREGATE_COMPONENT_SHAPE_MAPPING_MUTANT)
+  ComponentMapShape -> DirectElaboratedComponentShape
+#else
   ComponentMapShape -> AggregateElaboratedComponentShape
+#endif
 #endif
 
 componentNameText :: Text -> Bool
@@ -2437,9 +3361,27 @@ componentNameText value =
 
 componentBuiltinAccepted :: Text -> Bool
 #ifdef VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_BUILTIN_BYPASS_MUTANT
-componentBuiltinAccepted value = value `elem` ["lib", "setup", "foreign"]
+componentBuiltinAccepted value =
+  componentLibBuiltinAccepted value
+    || componentSetupBuiltinAccepted value
+    || value == "foreign"
 #else
-componentBuiltinAccepted value = value `elem` ["lib", "setup"]
+componentBuiltinAccepted value =
+  componentLibBuiltinAccepted value || componentSetupBuiltinAccepted value
+#endif
+
+componentLibBuiltinAccepted :: Text -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIB_BUILTIN_ALTERNATIVE_DROP_MUTANT)
+componentLibBuiltinAccepted value = value `seq` False
+#else
+componentLibBuiltinAccepted value = value == "lib"
+#endif
+
+componentSetupBuiltinAccepted :: Text -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SETUP_BUILTIN_ALTERNATIVE_DROP_MUTANT)
+componentSetupBuiltinAccepted value = value `seq` False
+#else
+componentSetupBuiltinAccepted value = value == "setup"
 #endif
 
 qualifiedComponentSuffix :: Text -> Maybe Text
@@ -2452,9 +3394,43 @@ qualifiedComponentSuffix value = firstPrefix componentPrefixes
 
 componentPrefixes :: [Text]
 #ifdef VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_PREFIX_BYPASS_MUTANT
-componentPrefixes = ["lib:", "exe:", "test:", "bench:", "foreign:"]
+componentPrefixes =
+  componentLibPrefix
+    <> componentExecutablePrefix
+    <> componentTestPrefix
+    <> componentBenchmarkPrefix
+    <> ["foreign:"]
 #else
-componentPrefixes = ["lib:", "exe:", "test:", "bench:"]
+componentPrefixes =
+  componentLibPrefix <> componentExecutablePrefix <> componentTestPrefix <> componentBenchmarkPrefix
+#endif
+
+componentLibPrefix :: [Text]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_LIB_PREFIX_ALTERNATIVE_DROP_MUTANT)
+componentLibPrefix = []
+#else
+componentLibPrefix = ["lib:"]
+#endif
+
+componentExecutablePrefix :: [Text]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_PREFIX_ALTERNATIVE_DROP_MUTANT)
+componentExecutablePrefix = []
+#else
+componentExecutablePrefix = ["exe:"]
+#endif
+
+componentTestPrefix :: [Text]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_TEST_PREFIX_ALTERNATIVE_DROP_MUTANT)
+componentTestPrefix = []
+#else
+componentTestPrefix = ["test:"]
+#endif
+
+componentBenchmarkPrefix :: [Text]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_BENCHMARK_PREFIX_ALTERNATIVE_DROP_MUTANT)
+componentBenchmarkPrefix = []
+#else
+componentBenchmarkPrefix = ["bench:"]
 #endif
 
 componentBoundaryAccepted :: Text -> Bool
@@ -2478,10 +3454,38 @@ componentTrailingBoundaryAccepted value = maybe False (asciiAlphaNumeric . snd) 
 componentCharacterAccepted :: Char -> Bool
 #ifdef VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_CHARACTER_BYPASS_MUTANT
 componentCharacterAccepted character =
-  asciiAlphaNumeric character || character `elem` ['.', '_', '-', '@']
+  asciiAlphaNumeric character
+    || componentDotAccepted character
+    || componentUnderscoreAccepted character
+    || componentHyphenAccepted character
+    || character == '@'
 #else
 componentCharacterAccepted character =
-  asciiAlphaNumeric character || character `elem` ['.', '_', '-']
+  asciiAlphaNumeric character
+    || componentDotAccepted character
+    || componentUnderscoreAccepted character
+    || componentHyphenAccepted character
+#endif
+
+componentDotAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DOT_ALTERNATIVE_DROP_MUTANT)
+componentDotAccepted character = character `seq` False
+#else
+componentDotAccepted character = character == '.'
+#endif
+
+componentUnderscoreAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNDERSCORE_ALTERNATIVE_DROP_MUTANT)
+componentUnderscoreAccepted character = character `seq` False
+#else
+componentUnderscoreAccepted character = character == '_'
+#endif
+
+componentHyphenAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_HYPHEN_ALTERNATIVE_DROP_MUTANT)
+componentHyphenAccepted character = character `seq` False
+#else
+componentHyphenAccepted character = character == '-'
 #endif
 
 semanticTextAccepted :: (Text -> Bool) -> Text -> Bool
@@ -2533,10 +3537,56 @@ portableIdentityTrailingBoundaryAccepted value =
 portableIdentityCharacterAccepted :: Char -> Bool
 #ifdef VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_CHARACTER_BYPASS_MUTANT
 portableIdentityCharacterAccepted character =
-  asciiAlphaNumeric character || character `elem` ['-', '_', '.', '+', ':', '@']
+  asciiAlphaNumeric character
+    || portableIdentityHyphenAccepted character
+    || portableIdentityUnderscoreAccepted character
+    || portableIdentityDotAccepted character
+    || portableIdentityPlusAccepted character
+    || portableIdentityColonAccepted character
+    || character == '@'
 #else
 portableIdentityCharacterAccepted character =
-  asciiAlphaNumeric character || character `elem` ['-', '_', '.', '+', ':']
+  asciiAlphaNumeric character
+    || portableIdentityHyphenAccepted character
+    || portableIdentityUnderscoreAccepted character
+    || portableIdentityDotAccepted character
+    || portableIdentityPlusAccepted character
+    || portableIdentityColonAccepted character
+#endif
+
+portableIdentityHyphenAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_HYPHEN_ALTERNATIVE_DROP_MUTANT)
+portableIdentityHyphenAccepted character = character `seq` False
+#else
+portableIdentityHyphenAccepted character = character == '-'
+#endif
+
+portableIdentityUnderscoreAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_UNDERSCORE_ALTERNATIVE_DROP_MUTANT)
+portableIdentityUnderscoreAccepted character = character `seq` False
+#else
+portableIdentityUnderscoreAccepted character = character == '_'
+#endif
+
+portableIdentityDotAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_DOT_ALTERNATIVE_DROP_MUTANT)
+portableIdentityDotAccepted character = character `seq` False
+#else
+portableIdentityDotAccepted character = character == '.'
+#endif
+
+portableIdentityPlusAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_PLUS_ALTERNATIVE_DROP_MUTANT)
+portableIdentityPlusAccepted character = character `seq` False
+#else
+portableIdentityPlusAccepted character = character == '+'
+#endif
+
+portableIdentityColonAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PORTABLE_IDENTITY_COLON_ALTERNATIVE_DROP_MUTANT)
+portableIdentityColonAccepted character = character `seq` False
+#else
+portableIdentityColonAccepted character = character == ':'
 #endif
 
 platformTokenText :: Text -> Bool
@@ -2565,9 +3615,30 @@ platformTrailingBoundaryAccepted value = maybe False (asciiAlphaNumeric . snd) (
 
 platformCharacterAccepted :: Char -> Bool
 #ifdef VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_CHARACTER_BYPASS_MUTANT
-platformCharacterAccepted character = asciiAlphaNumeric character || character `elem` ['-', '_', '.']
+platformCharacterAccepted character =
+  asciiAlphaNumeric character
+    || platformHyphenAccepted character
+    || platformUnderscoreAccepted character
+    || character == '.'
 #else
-platformCharacterAccepted character = asciiAlphaNumeric character || character `elem` ['-', '_']
+platformCharacterAccepted character =
+  asciiAlphaNumeric character
+    || platformHyphenAccepted character
+    || platformUnderscoreAccepted character
+#endif
+
+platformHyphenAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_HYPHEN_ALTERNATIVE_DROP_MUTANT)
+platformHyphenAccepted character = character `seq` False
+#else
+platformHyphenAccepted character = character == '-'
+#endif
+
+platformUnderscoreAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PLATFORM_UNDERSCORE_ALTERNATIVE_DROP_MUTANT)
+platformUnderscoreAccepted character = character `seq` False
+#else
+platformUnderscoreAccepted character = character == '_'
 #endif
 
 packageNameText :: Text -> Bool
@@ -2643,9 +3714,30 @@ flagTrailingBoundaryAccepted value = maybe False (asciiAlphaNumeric . snd) (Text
 
 flagCharacterAccepted :: Char -> Bool
 #ifdef VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_CHARACTER_BYPASS_MUTANT
-flagCharacterAccepted character = asciiAlphaNumeric character || character `elem` ['-', '_', '.']
+flagCharacterAccepted character =
+  asciiAlphaNumeric character
+    || flagHyphenAccepted character
+    || flagUnderscoreAccepted character
+    || character == '.'
 #else
-flagCharacterAccepted character = asciiAlphaNumeric character || character `elem` ['-', '_']
+flagCharacterAccepted character =
+  asciiAlphaNumeric character
+    || flagHyphenAccepted character
+    || flagUnderscoreAccepted character
+#endif
+
+flagHyphenAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_HYPHEN_ALTERNATIVE_DROP_MUTANT)
+flagHyphenAccepted character = character `seq` False
+#else
+flagHyphenAccepted character = character == '-'
+#endif
+
+flagUnderscoreAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_FLAG_UNDERSCORE_ALTERNATIVE_DROP_MUTANT)
+flagUnderscoreAccepted character = character `seq` False
+#else
+flagUnderscoreAccepted character = character == '_'
 #endif
 
 secureLocatorText :: Text -> Bool
@@ -2699,9 +3791,30 @@ boundedSemanticText value =
 
 asciiAlphaNumeric :: Char -> Bool
 asciiAlphaNumeric character =
-  (character >= 'a' && character <= 'z')
-    || (character >= 'A' && character <= 'Z')
-    || (character >= '0' && character <= '9')
+  asciiLowercaseAccepted character
+    || asciiUppercaseAccepted character
+    || asciiDigitAccepted character
+
+asciiLowercaseAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_LOWERCASE_ALTERNATIVE_DROP_MUTANT)
+asciiLowercaseAccepted character = character `seq` False
+#else
+asciiLowercaseAccepted character = character >= 'a' && character <= 'z'
+#endif
+
+asciiUppercaseAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_UPPERCASE_ALTERNATIVE_DROP_MUTANT)
+asciiUppercaseAccepted character = character `seq` False
+#else
+asciiUppercaseAccepted character = character >= 'A' && character <= 'Z'
+#endif
+
+asciiDigitAccepted :: Char -> Bool
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_ASCII_DIGIT_ALTERNATIVE_DROP_MUTANT)
+asciiDigitAccepted character = character `seq` False
+#else
+asciiDigitAccepted character = character >= '0' && character <= '9'
+#endif
 
 pathTextAccepted :: Text -> Bool
 pathTextAccepted value =
@@ -2787,10 +3900,26 @@ textByteLength = ByteString.length . TextEncoding.encodeUtf8
 
 packageSourceKind :: PackageSource -> Text
 packageSourceKind source = case source of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_PRE_EXISTING_SOURCE_KIND_MAPPING_MUTANT)
+  PreExistingPackageSource -> "mutated-pre-existing"
+#else
   PreExistingPackageSource -> "pre-existing"
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_LOCAL_SOURCE_KIND_MAPPING_MUTANT)
+  LocalPackageSource _ -> "mutated-local"
+#else
   LocalPackageSource _ -> "local"
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TAR_SOURCE_KIND_MAPPING_MUTANT)
+  RepositoryTarPackageSource _ _ -> "mutated-repo-tar"
+#else
   RepositoryTarPackageSource _ _ -> "repo-tar"
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_REPOSITORY_SOURCE_KIND_MAPPING_MUTANT)
+  SourceRepositoryPackageSource _ _ _ -> "mutated-source-repo"
+#else
   SourceRepositoryPackageSource _ _ _ -> "source-repo"
+#endif
 
 foldDiagnosticCompilerElaboratedPlanRefusal
   :: DiagnosticCompilerElaboratedPlanRefusal
@@ -2811,7 +3940,11 @@ foldDiagnosticCompilerElaboratedPlanRefusal
 foldDiagnosticCompilerElaboratedPlanRefusal
   (DiagnosticCompilerElaboratedPlanRefusal digest inputBytes problems Nothing)
   onMalformed
-  _ = onMalformed digest inputBytes problems
+  _ =
+    onMalformed
+      (projectMalformedFoldDigest digest)
+      (projectMalformedFoldInputBytes inputBytes)
+      (projectMalformedFoldProblems problems)
 foldDiagnosticCompilerElaboratedPlanRefusal
   ( DiagnosticCompilerElaboratedPlanRefusal
       digest
@@ -2832,16 +3965,111 @@ foldDiagnosticCompilerElaboratedPlanRefusal
   _
   onObserved =
     onObserved
-      digest
-      inputBytes
-      problems
-      cabalVersion
-      cabalLibraryVersion
-      compilerId
-      compilerAbi
-      operatingSystem
-      architecture
-      units
+      (projectObservedFoldDigest digest)
+      (projectObservedFoldInputBytes inputBytes)
+      (projectObservedFoldProblems problems)
+      (projectObservedFoldCabalVersion cabalVersion)
+      (projectObservedFoldCabalLibraryVersion cabalLibraryVersion)
+      (projectObservedFoldCompilerId compilerId)
+      (projectObservedFoldCompilerAbi compilerAbi)
+      (projectObservedFoldOperatingSystem operatingSystem)
+      (projectObservedFoldArchitecture architecture)
+      (projectObservedFoldUnits units)
+
+projectMalformedFoldDigest :: Maybe Text -> Maybe Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_DIGEST_PROJECTION_MUTANT)
+projectMalformedFoldDigest digest = digest `seq` Nothing
+#else
+projectMalformedFoldDigest = id
+#endif
+
+projectMalformedFoldInputBytes :: Int -> Int
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_INPUT_BYTES_PROJECTION_MUTANT)
+projectMalformedFoldInputBytes inputBytes = inputBytes `seq` (-1)
+#else
+projectMalformedFoldInputBytes = id
+#endif
+
+projectMalformedFoldProblems
+  :: NonEmpty CompilerElaboratedPlanProblem
+  -> NonEmpty CompilerElaboratedPlanProblem
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_MALFORMED_FOLD_PROBLEMS_PROJECTION_MUTANT)
+projectMalformedFoldProblems = NonEmpty.fromList . reverse . NonEmpty.toList
+#else
+projectMalformedFoldProblems = id
+#endif
+
+projectObservedFoldDigest :: Maybe Text -> Maybe Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_DIGEST_PROJECTION_MUTANT)
+projectObservedFoldDigest digest = digest `seq` Nothing
+#else
+projectObservedFoldDigest = id
+#endif
+
+projectObservedFoldInputBytes :: Int -> Int
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_INPUT_BYTES_PROJECTION_MUTANT)
+projectObservedFoldInputBytes inputBytes = inputBytes `seq` (-2)
+#else
+projectObservedFoldInputBytes = id
+#endif
+
+projectObservedFoldProblems
+  :: NonEmpty CompilerElaboratedPlanProblem
+  -> NonEmpty CompilerElaboratedPlanProblem
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_PROBLEMS_PROJECTION_MUTANT)
+projectObservedFoldProblems = NonEmpty.fromList . reverse . NonEmpty.toList
+#else
+projectObservedFoldProblems = id
+#endif
+
+projectObservedFoldCabalVersion :: Text -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_CABAL_VERSION_PROJECTION_MUTANT)
+projectObservedFoldCabalVersion value = value `seq` "mutated-fold-cabal-version"
+#else
+projectObservedFoldCabalVersion = id
+#endif
+
+projectObservedFoldCabalLibraryVersion :: Text -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_CABAL_LIBRARY_VERSION_PROJECTION_MUTANT)
+projectObservedFoldCabalLibraryVersion value = value `seq` "mutated-fold-cabal-library-version"
+#else
+projectObservedFoldCabalLibraryVersion = id
+#endif
+
+projectObservedFoldCompilerId :: Text -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_COMPILER_ID_PROJECTION_MUTANT)
+projectObservedFoldCompilerId value = value `seq` "mutated-fold-compiler-id"
+#else
+projectObservedFoldCompilerId = id
+#endif
+
+projectObservedFoldCompilerAbi :: Text -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_COMPILER_ABI_PROJECTION_MUTANT)
+projectObservedFoldCompilerAbi value = value `seq` "mutated-fold-compiler-abi"
+#else
+projectObservedFoldCompilerAbi = id
+#endif
+
+projectObservedFoldOperatingSystem :: Text -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_OPERATING_SYSTEM_PROJECTION_MUTANT)
+projectObservedFoldOperatingSystem value = value `seq` "mutated-fold-operating-system"
+#else
+projectObservedFoldOperatingSystem = id
+#endif
+
+projectObservedFoldArchitecture :: Text -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_ARCHITECTURE_PROJECTION_MUTANT)
+projectObservedFoldArchitecture value = value `seq` "mutated-fold-architecture"
+#else
+projectObservedFoldArchitecture = id
+#endif
+
+projectObservedFoldUnits :: [DiagnosticElaboratedUnit] -> [DiagnosticElaboratedUnit]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_OBSERVED_FOLD_UNIT_ORDER_MUTANT)
+projectObservedFoldUnits = reverse
+#else
+projectObservedFoldUnits = id
+#endif
 
 singleProblemRefusal
   :: Maybe Text
@@ -2849,7 +4077,11 @@ singleProblemRefusal
   -> CompilerElaboratedPlanProblem
   -> DiagnosticCompilerElaboratedPlanRefusal
 singleProblemRefusal digest inputBytes problem =
-  DiagnosticCompilerElaboratedPlanRefusal digest inputBytes (problem :| []) Nothing
+  DiagnosticCompilerElaboratedPlanRefusal
+    (projectRefusalDigest digest)
+    (projectRefusalInputBytes inputBytes)
+    (projectRefusalProblems (problem :| []))
+    (projectRefusalSnapshot Nothing)
 
 hardRefusal
   :: Maybe Text
@@ -2858,10 +4090,10 @@ hardRefusal
   -> DiagnosticCompilerElaboratedPlanRefusal
 hardRefusal digest inputBytes problems =
   DiagnosticCompilerElaboratedPlanRefusal
-    digest
-    inputBytes
-    (boundedProblemSet "hard-refusal" problems)
-    Nothing
+    (projectRefusalDigest digest)
+    (projectRefusalInputBytes inputBytes)
+    (projectRefusalProblems (boundedProblemSet "hard-refusal" problems))
+    (projectRefusalSnapshot Nothing)
 
 observedRefusal
   :: Maybe Text
@@ -2872,10 +4104,38 @@ observedRefusal
   -> DiagnosticCompilerElaboratedPlanRefusal
 observedRefusal digest inputBytes mandatoryProblems variableProblems snapshot =
   DiagnosticCompilerElaboratedPlanRefusal
-    digest
-    inputBytes
-    (boundedObservedProblemSet mandatoryProblems variableProblems)
-    (Just snapshot)
+    (projectRefusalDigest digest)
+    (projectRefusalInputBytes inputBytes)
+    (projectRefusalProblems (boundedObservedProblemSet mandatoryProblems variableProblems))
+    (projectRefusalSnapshot (Just snapshot))
+
+projectRefusalDigest :: Maybe Text -> Maybe Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_DIGEST_PROJECTION_MUTANT)
+projectRefusalDigest digest = digest `seq` Nothing
+#else
+projectRefusalDigest = id
+#endif
+
+projectRefusalInputBytes :: Int -> Int
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_INPUT_BYTES_PROJECTION_MUTANT)
+projectRefusalInputBytes = const 0
+#else
+projectRefusalInputBytes = id
+#endif
+
+projectRefusalProblems :: NonEmpty CompilerElaboratedPlanProblem -> NonEmpty CompilerElaboratedPlanProblem
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_PROBLEM_ORDER_MUTANT)
+projectRefusalProblems = NonEmpty.fromList . reverse . NonEmpty.toList
+#else
+projectRefusalProblems = id
+#endif
+
+projectRefusalSnapshot :: Maybe DiagnosticCompilerElaboratedPlanSnapshot -> Maybe DiagnosticCompilerElaboratedPlanSnapshot
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REFUSAL_SNAPSHOT_PROJECTION_DROP_MUTANT)
+projectRefusalSnapshot snapshot = snapshot `seq` Nothing
+#else
+projectRefusalSnapshot = id
+#endif
 
 boundedObservedProblemSet
   :: [CompilerElaboratedPlanProblem]
@@ -2929,7 +4189,7 @@ boundedProblemList
   -> [CompilerElaboratedPlanProblem]
 boundedProblemList problems =
   case splitAt semanticProblemLimit problems of
-    (bounded, []) -> bounded
+    (bounded, []) -> projectBoundedProblemOrder bounded
     (_, _ : _) ->
       [ PlanResourceLimitExceeded
           "problems"
@@ -2937,100 +4197,273 @@ boundedProblemList problems =
           (semanticProblemLimit + 1)
       ]
 
+projectBoundedProblemOrder :: [CompilerElaboratedPlanProblem] -> [CompilerElaboratedPlanProblem]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_BOUNDED_PROBLEM_ORDER_MUTANT)
+projectBoundedProblemOrder = reverse
+#else
+projectBoundedProblemOrder = id
+#endif
+
 sha256Text :: ByteString -> Text
-sha256Text = Text.pack . concatMap renderOctet . ByteString.unpack . SHA256.hash
+sha256Text bytes =
+  Text.pack
+    ( concatMap renderOctet
+        (ByteString.unpack (SHA256.hash (projectSha256Input bytes)))
+    )
  where
   renderOctet octet =
-    [ hexDigit (fromIntegral octet `div` 16)
-    , hexDigit (fromIntegral octet `mod` 16)
+    [ hexDigit (sha256HighNibble (fromIntegral octet))
+    , hexDigit (sha256LowNibble (fromIntegral octet))
     ]
+
+  sha256HighNibble :: Int -> Int
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HIGH_NIBBLE_MAPPING_MUTANT)
+  sha256HighNibble value = value `seq` 0
+#else
+  sha256HighNibble value = value `div` 16
+#endif
+
+  sha256LowNibble :: Int -> Int
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_LOW_NIBBLE_MAPPING_MUTANT)
+  sha256LowNibble value = value `seq` 0
+#else
+  sha256LowNibble value = value `mod` 16
+#endif
+
   hexDigit :: Int -> Char
   hexDigit value
     | value < 10 = toEnum (fromEnum '0' + value)
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_HEX_ALPHA_MAPPING_MUTANT)
+    | otherwise = toEnum (fromEnum 'f' - value + 10)
+#else
     | otherwise = toEnum (fromEnum 'a' + value - 10)
+#endif
+
+projectSha256Input :: ByteString -> ByteString
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SHA256_INPUT_ROUTE_MUTANT)
+projectSha256Input bytes = bytes `seq` ByteString.empty
+#else
+projectSha256Input = id
+#endif
 
 diagnosticElaboratedUnitOrigin :: DiagnosticElaboratedUnit -> DiagnosticElaboratedUnitOrigin
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ORIGIN_PROJECTION_MUTANT)
+diagnosticElaboratedUnitOrigin unit = unit `seq` RemoteUnit
+#else
 diagnosticElaboratedUnitOrigin (DiagnosticElaboratedUnit value _ _ _ _ _ _ _ _ _ _ _ _ _ _) = value
+#endif
 
 diagnosticElaboratedUnitBuildStyle :: DiagnosticElaboratedUnit -> DiagnosticElaboratedUnitBuildStyle
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_STYLE_PROJECTION_MUTANT)
+diagnosticElaboratedUnitBuildStyle unit = unit `seq` GlobalBuildStyle
+#else
 diagnosticElaboratedUnitBuildStyle (DiagnosticElaboratedUnit _ value _ _ _ _ _ _ _ _ _ _ _ _ _) = value
+#endif
 
 diagnosticElaboratedUnitId :: DiagnosticElaboratedUnit -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_ID_PROJECTION_MUTANT)
+diagnosticElaboratedUnitId unit = unit `seq` "mutated-unit-id"
+#else
 diagnosticElaboratedUnitId (DiagnosticElaboratedUnit _ _ value _ _ _ _ _ _ _ _ _ _ _ _) = value
+#endif
 
 diagnosticElaboratedUnitPackageName :: DiagnosticElaboratedUnit -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_NAME_PROJECTION_MUTANT)
+diagnosticElaboratedUnitPackageName unit = unit `seq` "mutated-package"
+#else
 diagnosticElaboratedUnitPackageName (DiagnosticElaboratedUnit _ _ _ value _ _ _ _ _ _ _ _ _ _ _) = value
+#endif
 
 diagnosticElaboratedUnitPackageVersion :: DiagnosticElaboratedUnit -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_PACKAGE_VERSION_PROJECTION_MUTANT)
+diagnosticElaboratedUnitPackageVersion unit = unit `seq` "0"
+#else
 diagnosticElaboratedUnitPackageVersion (DiagnosticElaboratedUnit _ _ _ _ value _ _ _ _ _ _ _ _ _ _) = value
+#endif
 
 diagnosticElaboratedUnitPackageSourceKind :: DiagnosticElaboratedUnit -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_KIND_PROJECTION_MUTANT)
+diagnosticElaboratedUnitPackageSourceKind unit = unit `seq` "mutated-source-kind"
+#else
 diagnosticElaboratedUnitPackageSourceKind (DiagnosticElaboratedUnit _ _ _ _ _ source _ _ _ _ _ _ _ _ _) = packageSourceKind source
+#endif
 
 diagnosticElaboratedUnitPackageSourceRoot :: DiagnosticElaboratedUnit -> Maybe FilePath
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_ROOT_PROJECTION_MUTANT)
+diagnosticElaboratedUnitPackageSourceRoot unit = unit `seq` Just "/mutated/root"
+#else
 diagnosticElaboratedUnitPackageSourceRoot (DiagnosticElaboratedUnit _ _ _ _ _ source _ _ _ _ _ _ _ _ _) = case source of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_ROOT_LOCAL_MAPPING_MUTANT)
+  LocalPackageSource root -> root `seq` Nothing
+#else
   LocalPackageSource root -> Just root
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_ROOT_ABSENT_MAPPING_MUTANT)
+  _ -> Just "/mutated/absent-root"
+#else
   _ -> Nothing
+#endif
+#endif
 
 diagnosticElaboratedUnitPackageSourceLocation :: DiagnosticElaboratedUnit -> Maybe Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_LOCATION_PROJECTION_MUTANT)
+diagnosticElaboratedUnitPackageSourceLocation unit = unit `seq` Just "https://mutated.invalid"
+#else
 diagnosticElaboratedUnitPackageSourceLocation (DiagnosticElaboratedUnit _ _ _ _ _ source _ _ _ _ _ _ _ _ _) = case source of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_REPOSITORY_TAR_MAPPING_MUTANT)
+  RepositoryTarPackageSource _ uri -> uri `seq` Just "https://mutated.invalid/repo-tar"
+#else
   RepositoryTarPackageSource _ uri -> Just uri
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_SOURCE_REPOSITORY_MAPPING_MUTANT)
+  SourceRepositoryPackageSource _ location _ -> location `seq` Just "https://mutated.invalid/source-repo"
+#else
   SourceRepositoryPackageSource _ location _ -> Just location
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_LOCATION_ABSENT_MAPPING_MUTANT)
+  _ -> Just "https://mutated.invalid/absent-location"
+#else
   _ -> Nothing
+#endif
+#endif
 
 diagnosticElaboratedUnitPackageSourceTag :: DiagnosticElaboratedUnit -> Maybe Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_TAG_PROJECTION_MUTANT)
+diagnosticElaboratedUnitPackageSourceTag unit = unit `seq` Just "mutated-tag"
+#else
 diagnosticElaboratedUnitPackageSourceTag (DiagnosticElaboratedUnit _ _ _ _ _ source _ _ _ _ _ _ _ _ _) = case source of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_TAG_SOURCE_REPOSITORY_MAPPING_MUTANT)
+  SourceRepositoryPackageSource _ _ tag -> tag `seq` Just "mutated-tag"
+#else
   SourceRepositoryPackageSource _ _ tag -> Just tag
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_SOURCE_TAG_ABSENT_MAPPING_MUTANT)
+  _ -> Just "mutated-absent-tag"
+#else
   _ -> Nothing
+#endif
+#endif
 
 diagnosticElaboratedUnitFlags :: DiagnosticElaboratedUnit -> [(Text, Bool)]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_FLAGS_PROJECTION_MUTANT)
+diagnosticElaboratedUnitFlags unit = unit `seq` [("mutated", True)]
+#else
 diagnosticElaboratedUnitFlags (DiagnosticElaboratedUnit _ _ _ _ _ _ flags _ _ _ _ _ _ _ _) = flags
+#endif
 
 diagnosticElaboratedUnitComponents :: DiagnosticElaboratedUnit -> [DiagnosticElaboratedComponent]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENTS_PROJECTION_DROP_MUTANT)
+diagnosticElaboratedUnitComponents unit = unit `seq` []
+#else
 diagnosticElaboratedUnitComponents (DiagnosticElaboratedUnit _ _ _ _ _ _ _ components _ _ _ _ _ _ _) = components
+#endif
 
 diagnosticElaboratedUnitComponentShape
   :: DiagnosticElaboratedUnit
   -> Maybe DiagnosticElaboratedComponentShape
 diagnosticElaboratedUnitComponentShape
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_COMPONENT_SHAPE_PROJECTION_MUTANT)
+  unit = unit `seq` Just AggregateElaboratedComponentShape
+#else
   (DiagnosticElaboratedUnit _ _ _ _ _ _ _ _ shape _ _ _ _ _ _) = shape
+#endif
 
 diagnosticElaboratedUnitDependencyUnitIds :: DiagnosticElaboratedUnit -> [Text]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DEPENDENCIES_PROJECTION_DROP_MUTANT)
+diagnosticElaboratedUnitDependencyUnitIds unit = unit `seq` []
+#else
 diagnosticElaboratedUnitDependencyUnitIds (DiagnosticElaboratedUnit _ _ _ _ _ _ _ _ _ dependencies _ _ _ _ _) = dependencies
+#endif
 
 diagnosticElaboratedUnitPackageCabalSha256 :: DiagnosticElaboratedUnit -> Maybe Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_CABAL_SHA256_PROJECTION_MUTANT)
+diagnosticElaboratedUnitPackageCabalSha256 unit = unit `seq` Just "mutated-cabal-sha256"
+#else
 diagnosticElaboratedUnitPackageCabalSha256 (DiagnosticElaboratedUnit _ _ _ _ _ _ _ _ _ _ value _ _ _ _) = value
+#endif
 
 diagnosticElaboratedUnitPackageSourceSha256 :: DiagnosticElaboratedUnit -> Maybe Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_SOURCE_SHA256_PROJECTION_MUTANT)
+diagnosticElaboratedUnitPackageSourceSha256 unit = unit `seq` Just "mutated-source-sha256"
+#else
 diagnosticElaboratedUnitPackageSourceSha256 (DiagnosticElaboratedUnit _ _ _ _ _ _ _ _ _ _ _ value _ _ _) = value
+#endif
 
 diagnosticElaboratedUnitBuildInfoPath :: DiagnosticElaboratedUnit -> Maybe FilePath
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BUILD_INFO_PATH_PROJECTION_MUTANT)
+diagnosticElaboratedUnitBuildInfoPath unit = unit `seq` Just "/mutated/build-info"
+#else
 diagnosticElaboratedUnitBuildInfoPath (DiagnosticElaboratedUnit _ _ _ _ _ _ _ _ _ _ _ _ value _ _) = value
+#endif
 
 diagnosticElaboratedUnitDistDirectoryPath :: DiagnosticElaboratedUnit -> Maybe FilePath
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_DIST_DIRECTORY_PATH_PROJECTION_MUTANT)
+diagnosticElaboratedUnitDistDirectoryPath unit = unit `seq` Just "/mutated/dist"
+#else
 diagnosticElaboratedUnitDistDirectoryPath (DiagnosticElaboratedUnit _ _ _ _ _ _ _ _ _ _ _ _ _ value _) = value
+#endif
 
 diagnosticElaboratedUnitBinaryPath :: DiagnosticElaboratedUnit -> Maybe FilePath
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_BINARY_PATH_PROJECTION_MUTANT)
+diagnosticElaboratedUnitBinaryPath unit = unit `seq` Just "/mutated/binary"
+#else
 diagnosticElaboratedUnitBinaryPath (DiagnosticElaboratedUnit _ _ _ _ _ _ _ _ _ _ _ _ _ _ value) = value
+#endif
 
 diagnosticElaboratedUnitRepositoryType :: DiagnosticElaboratedUnit -> Maybe Text
 diagnosticElaboratedUnitRepositoryType (DiagnosticElaboratedUnit _ _ _ _ _ source _ _ _ _ _ _ _ _ _) =
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_UNIT_REPOSITORY_TYPE_PROJECTION_MUTANT)
+  source `seq` Just "mutated-repository-type"
+#else
   case source of
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_REPOSITORY_TAR_MAPPING_MUTANT)
+    RepositoryTarPackageSource repositoryType _ -> repositoryType `seq` Just "mutated-repo-tar-type"
+#else
     RepositoryTarPackageSource repositoryType _ -> Just repositoryType
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_SOURCE_REPOSITORY_MAPPING_MUTANT)
+    SourceRepositoryPackageSource repositoryType _ _ -> repositoryType `seq` Just "mutated-source-repo-type"
+#else
     SourceRepositoryPackageSource repositoryType _ _ -> Just repositoryType
+#endif
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_REPOSITORY_TYPE_ABSENT_MAPPING_MUTANT)
+    _ -> Just "mutated-absent-repository-type"
+#else
     _ -> Nothing
+#endif
+#endif
 
 diagnosticElaboratedComponentUnitId :: DiagnosticElaboratedComponent -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_UNIT_ID_PROJECTION_MUTANT)
+diagnosticElaboratedComponentUnitId component = component `seq` "mutated-component-unit"
+#else
 diagnosticElaboratedComponentUnitId (DiagnosticElaboratedComponent value _ _ _ _) = value
+#endif
 
 diagnosticElaboratedComponentName :: DiagnosticElaboratedComponent -> Text
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_NAME_PROJECTION_MUTANT)
+diagnosticElaboratedComponentName component = component `seq` "mutated-component"
+#else
 diagnosticElaboratedComponentName (DiagnosticElaboratedComponent _ value _ _ _) = value
+#endif
 
 diagnosticElaboratedComponentDependencyUnitIds :: DiagnosticElaboratedComponent -> [Text]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_DEPENDENCIES_PROJECTION_DROP_MUTANT)
+diagnosticElaboratedComponentDependencyUnitIds component = component `seq` []
+#else
 diagnosticElaboratedComponentDependencyUnitIds (DiagnosticElaboratedComponent _ _ value _ _) = value
+#endif
 
 diagnosticElaboratedComponentExecutableDependencyUnitIds :: DiagnosticElaboratedComponent -> [Text]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_EXECUTABLE_DEPENDENCIES_PROJECTION_MUTANT)
+diagnosticElaboratedComponentExecutableDependencyUnitIds component = component `seq` ["mutated-executable-dependency"]
+#else
 diagnosticElaboratedComponentExecutableDependencyUnitIds (DiagnosticElaboratedComponent _ _ _ value _) = value
+#endif
 
 diagnosticElaboratedComponentSourcePaths :: DiagnosticElaboratedComponent -> Maybe [FilePath]
+#if defined(VALIDATION_COMPILER_ELABORATED_PLAN_COMPONENT_SOURCE_PATHS_PROJECTION_MUTANT)
+diagnosticElaboratedComponentSourcePaths component = component `seq` Just ["/mutated/source.hs"]
+#else
 diagnosticElaboratedComponentSourcePaths (DiagnosticElaboratedComponent _ _ _ _ value) = value
+#endif

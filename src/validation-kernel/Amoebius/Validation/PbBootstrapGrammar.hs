@@ -1995,77 +1995,368 @@ renderControlFlowFallthrough fallsThrough = if fallsThrough then "may-return" el
 
 renderArgvClaim :: ArgvProvenance -> Text
 renderArgvClaim (OpaqueUserArgvTail source parameter executable) =
-  Text.intercalate "|" ["argv", source, parameter, executable]
+  Text.intercalate
+    claimFieldSeparator
+    [ mapArgvClaimTag "argv"
+    , mapArgvSourceField source
+    , mapArgvParameterField parameter
+    , mapArgvExecutableField executable
+    ]
 
 renderBinaryClaim :: BinaryProvenance -> Text
 renderBinaryClaim proof =
   Text.intercalate
-    "|"
-    [ "binary"
-    , binaryBuildTarget proof
-    , binaryGhcupVersion proof
-    , binaryCompilerVersion proof
-    , binaryCabalVersion proof
-    , binaryLocator proof
-    , binaryHandoff proof
+    claimFieldSeparator
+    [ mapBinaryClaimTag "binary"
+    , mapBinaryTargetField (binaryBuildTarget proof)
+    , mapBinaryGhcupField (binaryGhcupVersion proof)
+    , mapBinaryCompilerField (binaryCompilerVersion proof)
+    , mapBinaryCabalField (binaryCabalVersion proof)
+    , mapBinaryLocatorField (binaryLocator proof)
+    , mapBinaryHandoffField (binaryHandoff proof)
     ]
 
 renderInjectionClaim :: InjectionSeamProof -> Text
 renderInjectionClaim proof =
   Text.intercalate
-    "|"
-    [ "injection"
-    , seamFunctionName proof
-    , seamAdapterParameter proof
-    , seamArgumentsParameter proof
-    , seamConcreteConstructionScope proof
-    , seamMainGuardExpression proof
+    claimFieldSeparator
+    [ mapInjectionClaimTag "injection"
+    , mapInjectionFunctionField (seamFunctionName proof)
+    , mapInjectionAdapterField (seamAdapterParameter proof)
+    , mapInjectionArgumentsField (seamArgumentsParameter proof)
+    , mapInjectionConstructionField (seamConcreteConstructionScope proof)
+    , mapInjectionGuardField (seamMainGuardExpression proof)
     ]
 
 renderPhase50InvocationClaim :: Phase50InvocationContract -> Text
 renderPhase50InvocationClaim
   (RequiredPhase50PythonDirectoryInvocation interpreter flags subject arguments) =
     Text.intercalate
-      "|"
-      [ "phase50-invocation"
-      , interpreter
-      , Text.intercalate "," flags
-      , subject
-      , arguments
+      claimFieldSeparator
+      [ mapPhase50ClaimTag "phase50-invocation"
+      , mapPhase50InterpreterField interpreter
+      , Text.intercalate phase50FlagSeparator (mapPhase50FlagsField flags)
+      , mapPhase50SubjectField subject
+      , mapPhase50ArgumentsField arguments
       ]
 
 renderEnsureClaim :: GhcupEnsureProof -> Text
 renderEnsureClaim proof =
   Text.intercalate
-    "|"
-    [ "ensure"
-    , truth (ensureMatchingExistingReturnsBeforeMutation proof)
-    , truth (ensureMismatchedExistingFailsClosed proof)
-    , truth (ensureAbsentArtifactVerifiedBeforeWrite proof)
+    claimFieldSeparator
+    [ mapEnsureClaimTag "ensure"
+    , truth (mapEnsureMatchingField (ensureMatchingExistingReturnsBeforeMutation proof))
+    , truth (mapEnsureMismatchedField (ensureMismatchedExistingFailsClosed proof))
+    , truth (mapEnsureAbsentField (ensureAbsentArtifactVerifiedBeforeWrite proof))
     ]
 
 renderEnvironmentClaim :: ClosedEnvironmentProof -> Text
 renderEnvironmentClaim proof =
   Text.intercalate
-    "|"
-    [ "environment"
-    , truth (environmentStartsEmpty proof)
-    , Text.intercalate "," (environmentExactKeys proof)
-    , Text.intercalate "," (environmentContainedPathKeys proof)
-    , truth (childEnvironmentMappingExact proof)
+    claimFieldSeparator
+    [ mapEnvironmentClaimTag "environment"
+    , truth (mapEnvironmentStartsEmptyField (environmentStartsEmpty proof))
+    , Text.intercalate "," (mapEnvironmentExactKeysField (environmentExactKeys proof))
+    , Text.intercalate "," (mapEnvironmentContainedKeysField (environmentContainedPathKeys proof))
+    , truth (mapEnvironmentChildMappingField (childEnvironmentMappingExact proof))
     ]
 
 renderExecutableClaim :: ToolchainExecutableProof -> Text
 renderExecutableClaim proof =
   Text.intercalate
-    "|"
-    [ "executables"
-    , toolchainRootProvenance proof
-    , ghcupExecutableProvenance proof
-    , ghcExecutableProvenance proof
-    , cabalExecutableProvenance proof
-    , childArgvZeroProvenance proof
+    claimFieldSeparator
+    [ mapExecutableClaimTag "executables"
+    , mapExecutableRootField (toolchainRootProvenance proof)
+    , mapExecutableGhcupField (ghcupExecutableProvenance proof)
+    , mapExecutableGhcField (ghcExecutableProvenance proof)
+    , mapExecutableCabalField (cabalExecutableProvenance proof)
+    , mapExecutableArgvZeroField (childArgvZeroProvenance proof)
     ]
+
+renderPlatformLimitationsClaim :: [PlatformLimitation] -> Text
+renderPlatformLimitationsClaim limitations =
+  Text.intercalate
+    claimFieldSeparator
+    [ mapPlatformLimitationsClaimTag "platform-limitations"
+    , Text.intercalate
+        platformLimitationSeparator
+        (map renderPlatformLimitation (orderPlatformLimitations limitations))
+    ]
+
+renderRuntimeBoundaryClaim :: RuntimeBoundary -> Text
+renderRuntimeBoundaryClaim boundary =
+  Text.intercalate
+    claimFieldSeparator
+    [ mapRuntimeBoundaryClaimTag "runtime-boundary"
+    , renderRuntimeBoundary boundary
+    ]
+
+claimFieldSeparator, phase50FlagSeparator, platformLimitationSeparator :: Text
+#if defined(VALIDATION_PB_GRAMMAR_CLAIM_FIELD_SEPARATOR_MUTANT)
+claimFieldSeparator = "~"
+#else
+claimFieldSeparator = "|"
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_PHASE50_FLAGS_SEPARATOR_MUTANT)
+phase50FlagSeparator = ";"
+#else
+phase50FlagSeparator = ","
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_PLATFORM_LIMITATION_SEPARATOR_MUTANT)
+platformLimitationSeparator = ";"
+#else
+platformLimitationSeparator = ","
+#endif
+
+mapArgvClaimTag, mapBinaryClaimTag, mapInjectionClaimTag, mapPhase50ClaimTag :: Text -> Text
+mapEnsureClaimTag, mapEnvironmentClaimTag, mapExecutableClaimTag :: Text -> Text
+mapPlatformLimitationsClaimTag, mapRuntimeBoundaryClaimTag :: Text -> Text
+#if defined(VALIDATION_PB_GRAMMAR_ARGV_CLAIM_TAG_MAPPING_MUTANT)
+mapArgvClaimTag value = value <> "-mutant"
+#else
+mapArgvClaimTag value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_BINARY_CLAIM_TAG_MAPPING_MUTANT)
+mapBinaryClaimTag value = value <> "-mutant"
+#else
+mapBinaryClaimTag value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_INJECTION_CLAIM_TAG_MAPPING_MUTANT)
+mapInjectionClaimTag value = value <> "-mutant"
+#else
+mapInjectionClaimTag value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_PHASE50_CLAIM_TAG_MAPPING_MUTANT)
+mapPhase50ClaimTag value = value <> "-mutant"
+#else
+mapPhase50ClaimTag value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_ENSURE_CLAIM_TAG_MAPPING_MUTANT)
+mapEnsureClaimTag value = value <> "-mutant"
+#else
+mapEnsureClaimTag value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_CLAIM_TAG_MAPPING_MUTANT)
+mapEnvironmentClaimTag value = value <> "-mutant"
+#else
+mapEnvironmentClaimTag value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_EXECUTABLE_CLAIM_TAG_MAPPING_MUTANT)
+mapExecutableClaimTag value = value <> "-mutant"
+#else
+mapExecutableClaimTag value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_PLATFORM_LIMITATIONS_CLAIM_TAG_MAPPING_MUTANT)
+mapPlatformLimitationsClaimTag value = value <> "-mutant"
+#else
+mapPlatformLimitationsClaimTag value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_RUNTIME_BOUNDARY_CLAIM_TAG_MAPPING_MUTANT)
+mapRuntimeBoundaryClaimTag value = value <> "-mutant"
+#else
+mapRuntimeBoundaryClaimTag value = value
+#endif
+
+mapArgvSourceField, mapArgvParameterField, mapArgvExecutableField :: Text -> Text
+#if defined(VALIDATION_PB_GRAMMAR_ARGV_SOURCE_FIELD_MAPPING_MUTANT)
+mapArgvSourceField value = value <> "-mutant"
+#else
+mapArgvSourceField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_ARGV_PARAMETER_FIELD_MAPPING_MUTANT)
+mapArgvParameterField value = value <> "-mutant"
+#else
+mapArgvParameterField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_ARGV_EXECUTABLE_FIELD_MAPPING_MUTANT)
+mapArgvExecutableField value = value <> "-mutant"
+#else
+mapArgvExecutableField value = value
+#endif
+
+mapBinaryTargetField, mapBinaryGhcupField, mapBinaryCompilerField :: Text -> Text
+mapBinaryCabalField, mapBinaryLocatorField, mapBinaryHandoffField :: Text -> Text
+#if defined(VALIDATION_PB_GRAMMAR_BINARY_TARGET_FIELD_MAPPING_MUTANT)
+mapBinaryTargetField value = value <> "-mutant"
+#else
+mapBinaryTargetField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_BINARY_GHCUP_FIELD_MAPPING_MUTANT)
+mapBinaryGhcupField value = value <> "-mutant"
+#else
+mapBinaryGhcupField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_BINARY_COMPILER_FIELD_MAPPING_MUTANT)
+mapBinaryCompilerField value = value <> "-mutant"
+#else
+mapBinaryCompilerField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_BINARY_CABAL_FIELD_MAPPING_MUTANT)
+mapBinaryCabalField value = value <> "-mutant"
+#else
+mapBinaryCabalField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_BINARY_LOCATOR_FIELD_MAPPING_MUTANT)
+mapBinaryLocatorField value = value <> "-mutant"
+#else
+mapBinaryLocatorField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_BINARY_HANDOFF_FIELD_MAPPING_MUTANT)
+mapBinaryHandoffField value = value <> "-mutant"
+#else
+mapBinaryHandoffField value = value
+#endif
+
+mapInjectionFunctionField, mapInjectionAdapterField, mapInjectionArgumentsField :: Text -> Text
+mapInjectionConstructionField, mapInjectionGuardField :: Text -> Text
+#if defined(VALIDATION_PB_GRAMMAR_INJECTION_FUNCTION_FIELD_MAPPING_MUTANT)
+mapInjectionFunctionField value = value <> "-mutant"
+#else
+mapInjectionFunctionField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_INJECTION_ADAPTER_FIELD_MAPPING_MUTANT)
+mapInjectionAdapterField value = value <> "-mutant"
+#else
+mapInjectionAdapterField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_INJECTION_ARGUMENTS_FIELD_MAPPING_MUTANT)
+mapInjectionArgumentsField value = value <> "-mutant"
+#else
+mapInjectionArgumentsField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_INJECTION_CONSTRUCTION_FIELD_MAPPING_MUTANT)
+mapInjectionConstructionField value = value <> "-mutant"
+#else
+mapInjectionConstructionField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_INJECTION_GUARD_FIELD_MAPPING_MUTANT)
+mapInjectionGuardField value = value <> "-mutant"
+#else
+mapInjectionGuardField value = value
+#endif
+
+mapPhase50InterpreterField, mapPhase50SubjectField, mapPhase50ArgumentsField :: Text -> Text
+#if defined(VALIDATION_PB_GRAMMAR_PHASE50_INTERPRETER_FIELD_MAPPING_MUTANT)
+mapPhase50InterpreterField value = value <> "-mutant"
+#else
+mapPhase50InterpreterField value = value
+#endif
+mapPhase50FlagsField :: [Text] -> [Text]
+#if defined(VALIDATION_PB_GRAMMAR_PHASE50_FLAGS_FIELD_MAPPING_MUTANT)
+mapPhase50FlagsField = reverse
+#else
+mapPhase50FlagsField = id
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_PHASE50_SUBJECT_FIELD_MAPPING_MUTANT)
+mapPhase50SubjectField value = value <> "-mutant"
+#else
+mapPhase50SubjectField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_PHASE50_ARGUMENTS_FIELD_MAPPING_MUTANT)
+mapPhase50ArgumentsField value = value <> "-mutant"
+#else
+mapPhase50ArgumentsField value = value
+#endif
+
+mapEnsureMatchingField, mapEnsureMismatchedField, mapEnsureAbsentField :: Bool -> Bool
+#if defined(VALIDATION_PB_GRAMMAR_ENSURE_MATCHING_FIELD_MAPPING_MUTANT)
+mapEnsureMatchingField = not
+#else
+mapEnsureMatchingField = id
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_ENSURE_MISMATCHED_FIELD_MAPPING_MUTANT)
+mapEnsureMismatchedField = not
+#else
+mapEnsureMismatchedField = id
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_ENSURE_ABSENT_FIELD_MAPPING_MUTANT)
+mapEnsureAbsentField = not
+#else
+mapEnsureAbsentField = id
+#endif
+
+mapEnvironmentStartsEmptyField, mapEnvironmentChildMappingField :: Bool -> Bool
+#if defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_STARTS_EMPTY_FIELD_MAPPING_MUTANT)
+mapEnvironmentStartsEmptyField = not
+#else
+mapEnvironmentStartsEmptyField = id
+#endif
+mapEnvironmentExactKeysField, mapEnvironmentContainedKeysField :: [Text] -> [Text]
+#if defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_EXACT_KEYS_FIELD_MAPPING_MUTANT)
+mapEnvironmentExactKeysField = reverse
+#else
+mapEnvironmentExactKeysField = id
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_CONTAINED_KEYS_FIELD_MAPPING_MUTANT)
+mapEnvironmentContainedKeysField = reverse
+#else
+mapEnvironmentContainedKeysField = id
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_CHILD_MAPPING_FIELD_MAPPING_MUTANT)
+mapEnvironmentChildMappingField = not
+#else
+mapEnvironmentChildMappingField = id
+#endif
+
+mapExecutableRootField, mapExecutableGhcupField, mapExecutableGhcField :: Text -> Text
+mapExecutableCabalField, mapExecutableArgvZeroField :: Text -> Text
+#if defined(VALIDATION_PB_GRAMMAR_EXECUTABLE_ROOT_FIELD_MAPPING_MUTANT)
+mapExecutableRootField value = value <> "-mutant"
+#else
+mapExecutableRootField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_EXECUTABLE_GHCUP_FIELD_MAPPING_MUTANT)
+mapExecutableGhcupField value = value <> "-mutant"
+#else
+mapExecutableGhcupField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_EXECUTABLE_GHC_FIELD_MAPPING_MUTANT)
+mapExecutableGhcField value = value <> "-mutant"
+#else
+mapExecutableGhcField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_EXECUTABLE_CABAL_FIELD_MAPPING_MUTANT)
+mapExecutableCabalField value = value <> "-mutant"
+#else
+mapExecutableCabalField value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_EXECUTABLE_ARGV_ZERO_FIELD_MAPPING_MUTANT)
+mapExecutableArgvZeroField value = value <> "-mutant"
+#else
+mapExecutableArgvZeroField value = value
+#endif
+
+orderPlatformLimitations :: [PlatformLimitation] -> [PlatformLimitation]
+#if defined(VALIDATION_PB_GRAMMAR_PLATFORM_LIMITATION_ORDER_MUTANT)
+orderPlatformLimitations = reverse
+#else
+orderPlatformLimitations = id
+#endif
+
+renderPlatformLimitation :: PlatformLimitation -> Text
+renderPlatformLimitation limitation = case limitation of
+  WindowsAmd64RuntimeFidelityDeferredToPhase50 -> mapWindowsPlatformLimitation "WindowsAmd64RuntimeFidelityDeferredToPhase50"
+  AllOtherPlatformsRefused -> mapOtherPlatformLimitation "AllOtherPlatformsRefused"
+
+mapWindowsPlatformLimitation, mapOtherPlatformLimitation :: Text -> Text
+#if defined(VALIDATION_PB_GRAMMAR_WINDOWS_PLATFORM_LIMITATION_MAPPING_MUTANT)
+mapWindowsPlatformLimitation value = value <> "-mutant"
+#else
+mapWindowsPlatformLimitation value = value
+#endif
+#if defined(VALIDATION_PB_GRAMMAR_OTHER_PLATFORM_LIMITATION_MAPPING_MUTANT)
+mapOtherPlatformLimitation value = value <> "-mutant"
+#else
+mapOtherPlatformLimitation value = value
+#endif
+
+renderRuntimeBoundary :: RuntimeBoundary -> Text
+renderRuntimeBoundary boundary = case boundary of
+#if defined(VALIDATION_PB_GRAMMAR_RUNTIME_BOUNDARY_MAPPING_MUTANT)
+  RuntimeTruthDeferredToPhase50 -> "RuntimeTruthDeferredToPhase50-mutant"
+#else
+  RuntimeTruthDeferredToPhase50 -> "RuntimeTruthDeferredToPhase50"
+#endif
 
 truth :: Bool -> Text
 truth True = "true"
@@ -2542,11 +2833,8 @@ analyzePbBootstrap inventory =
                         , renderEnsureClaim ensureProof
                         , renderEnvironmentClaim environmentProof
                         , renderExecutableClaim executableProof
-                        , "platform-limitations|"
-                            <> Text.intercalate
-                              ","
-                              (map (Text.pack . show) (derivePlatformLimitations adapters))
-                        , "runtime-boundary|" <> Text.pack (show RuntimeTruthDeferredToPhase50)
+                        , renderPlatformLimitationsClaim (derivePlatformLimitations adapters)
+                        , renderRuntimeBoundaryClaim RuntimeTruthDeferredToPhase50
                         ]
                     , proofRuntimeResidue = runtimeResidue
                     }
@@ -2567,48 +2855,20 @@ analyzePbBootstrap inventory =
   resolutionProblems = either pure (const []) resolvedResult
 #endif
   argvResult = astResult >>= proveArgvForBuild
-#if defined(VALIDATION_PB_GRAMMAR_ARGV_BYPASS_MUTANT)
-  argvProblems = []
-#else
-  argvProblems = either pure (const []) argvResult
-#endif
+  argvProblems = mutateArgvProblems (either pure (const []) argvResult)
   binaryResult = astResult >>= proveBinary
   binaryProblems = mutateBinaryProblems (either pure (const []) binaryResult)
   injectionResult = astResult >>= proveInjectionSeamForBuild
-#if defined(VALIDATION_PB_GRAMMAR_INJECTION_BYPASS_MUTANT)
-  injectionProblems = []
-#else
-  injectionProblems = either pure (const []) injectionResult
-#endif
+  injectionProblems = mutateInjectionProblems (either pure (const []) injectionResult)
   ensureResult = astResult >>= proveGhcupEnsure
-#if defined(VALIDATION_PB_GRAMMAR_ENSURE_BYPASS_MUTANT)
-  ensureProblems = []
-#else
-  ensureProblems = either pure (const []) ensureResult
-#endif
+  ensureProblems = mutateEnsureProblems (either pure (const []) ensureResult)
   environmentResult = astResult >>= proveClosedEnvironment
-#if defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_BYPASS_MUTANT)
-  environmentProblems = []
-#else
-  environmentProblems = either pure (const []) environmentResult
-#endif
+  environmentProblems = mutateEnvironmentProblems (either pure (const []) environmentResult)
   executableResult = astResult >>= proveToolchainExecutables
-#if defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_BYPASS_MUTANT)
-  executableProblems = []
-#else
-  executableProblems = either pure (const []) executableResult
-#endif
+  executableProblems = mutateExecutableProblems (either pure (const []) executableResult)
   platformResult = astResult >>= provePlatformArtifacts
-#if defined(VALIDATION_PB_GRAMMAR_PLATFORM_BYPASS_MUTANT)
-  platformProofProblems = []
-#else
-  platformProofProblems = either pure (const []) platformResult
-#endif
-#if defined(VALIDATION_PB_GRAMMAR_CONTROL_FLOW_BYPASS_MUTANT)
-  terminalProblems = either pure validateHandoffControlFlowForBuild astResult `seq` []
-#else
-  terminalProblems = either pure validateHandoffControlFlowForBuild astResult
-#endif
+  platformProofProblems = mutatePlatformProblems (either pure (const []) platformResult)
+  terminalProblems = mutateTerminalProblems (either pure validateHandoffControlFlowForBuild astResult)
   allProblems =
     boundProblemList
       (stableNub
@@ -2779,6 +3039,258 @@ lexLine path lineNumber initialColumn source = go initialColumn (Text.unpack sou
 
 -- Parser --------------------------------------------------------------------
 
+admitStatementImport :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_IMPORT_MUTANT)
+admitStatementImport = False
+#else
+admitStatementImport = True
+#endif
+
+admitStatementFromImport :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_FROM_IMPORT_MUTANT)
+admitStatementFromImport = False
+#else
+admitStatementFromImport = True
+#endif
+
+admitStatementClass :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_CLASS_MUTANT)
+admitStatementClass = False
+#else
+admitStatementClass = True
+#endif
+
+admitStatementFunction :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_FUNCTION_MUTANT)
+admitStatementFunction = False
+#else
+admitStatementFunction = True
+#endif
+
+admitStatementIf :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_IF_MUTANT)
+admitStatementIf = False
+#else
+admitStatementIf = True
+#endif
+
+admitStatementReturn :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_RETURN_MUTANT)
+admitStatementReturn = False
+#else
+admitStatementReturn = True
+#endif
+
+admitStatementRaise :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_RAISE_MUTANT)
+admitStatementRaise = False
+#else
+admitStatementRaise = True
+#endif
+
+admitStatementAssignment :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_ASSIGNMENT_MUTANT)
+admitStatementAssignment = False
+#else
+admitStatementAssignment = True
+#endif
+
+admitStatementExpression :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_EXPRESSION_MUTANT)
+admitStatementExpression = False
+#else
+admitStatementExpression = True
+#endif
+
+admitBinaryAnd :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_BINARY_AND_MUTANT)
+admitBinaryAnd = False
+#else
+admitBinaryAnd = True
+#endif
+
+admitBinaryEqual :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_BINARY_EQUAL_MUTANT)
+admitBinaryEqual = False
+#else
+admitBinaryEqual = True
+#endif
+
+admitBinaryNotEqual :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_BINARY_NOT_EQUAL_MUTANT)
+admitBinaryNotEqual = False
+#else
+admitBinaryNotEqual = True
+#endif
+
+admitBinaryAdd :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_BINARY_ADD_MUTANT)
+admitBinaryAdd = False
+#else
+admitBinaryAdd = True
+#endif
+
+admitBinaryPathJoin :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_BINARY_PATH_JOIN_MUTANT)
+admitBinaryPathJoin = False
+#else
+admitBinaryPathJoin = True
+#endif
+
+admitExpressionAttribute :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_ATTRIBUTE_MUTANT)
+admitExpressionAttribute = False
+#else
+admitExpressionAttribute = True
+#endif
+
+admitExpressionIndex :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_INDEX_MUTANT)
+admitExpressionIndex = False
+#else
+admitExpressionIndex = True
+#endif
+
+admitExpressionCall :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_CALL_MUTANT)
+admitExpressionCall = False
+#else
+admitExpressionCall = True
+#endif
+
+admitIndexLeadingSlice :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_INDEX_LEADING_SLICE_MUTANT)
+admitIndexLeadingSlice = False
+#else
+admitIndexLeadingSlice = True
+#endif
+
+admitIndexStartedSlice :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_INDEX_STARTED_SLICE_MUTANT)
+admitIndexStartedSlice = False
+#else
+admitIndexStartedSlice = True
+#endif
+
+admitIndexPlain :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_INDEX_PLAIN_MUTANT)
+admitIndexPlain = False
+#else
+admitIndexPlain = True
+#endif
+
+admitExpressionTrue :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_TRUE_MUTANT)
+admitExpressionTrue = False
+#else
+admitExpressionTrue = True
+#endif
+
+admitExpressionFalse :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_FALSE_MUTANT)
+admitExpressionFalse = False
+#else
+admitExpressionFalse = True
+#endif
+
+admitExpressionName :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_NAME_MUTANT)
+admitExpressionName = False
+#else
+admitExpressionName = True
+#endif
+
+admitExpressionString :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_STRING_MUTANT)
+admitExpressionString = False
+#else
+admitExpressionString = True
+#endif
+
+admitExpressionInteger :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_INTEGER_MUTANT)
+admitExpressionInteger = False
+#else
+admitExpressionInteger = True
+#endif
+
+admitExpressionDictionary :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_DICTIONARY_MUTANT)
+admitExpressionDictionary = False
+#else
+admitExpressionDictionary = True
+#endif
+
+admitExpressionParenthesized :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_PARENTHESIZED_MUTANT)
+admitExpressionParenthesized = False
+#else
+admitExpressionParenthesized = True
+#endif
+
+admitExpressionList :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_LIST_MUTANT)
+admitExpressionList = False
+#else
+admitExpressionList = True
+#endif
+
+admitParenthesizedEmptyTuple :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_PARENTHESIZED_EMPTY_TUPLE_MUTANT)
+admitParenthesizedEmptyTuple = False
+#else
+admitParenthesizedEmptyTuple = True
+#endif
+
+admitParenthesizedTuple :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_PARENTHESIZED_TUPLE_MUTANT)
+admitParenthesizedTuple = False
+#else
+admitParenthesizedTuple = True
+#endif
+
+admitParenthesizedGrouped :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_PARENTHESIZED_GROUPED_MUTANT)
+admitParenthesizedGrouped = False
+#else
+admitParenthesizedGrouped = True
+#endif
+
+admitListEmpty :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_LIST_EMPTY_MUTANT)
+admitListEmpty = False
+#else
+admitListEmpty = True
+#endif
+
+admitListNonempty :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_LIST_NONEMPTY_MUTANT)
+admitListNonempty = False
+#else
+admitListNonempty = True
+#endif
+
+admitArgumentKeyword :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_ARGUMENT_KEYWORD_MUTANT)
+admitArgumentKeyword = False
+#else
+admitArgumentKeyword = True
+#endif
+
+admitArgumentPositional :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_ARGUMENT_POSITIONAL_MUTANT)
+admitArgumentPositional = False
+#else
+admitArgumentPositional = True
+#endif
+
+admitDottedNameExtension :: Bool
+#if defined(VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_DOTTED_NAME_EXTENSION_MUTANT)
+admitDottedNameExtension = False
+#else
+admitDottedNameExtension = True
+#endif
+
 newtype Parser value = Parser
   { runParser :: [LocatedToken] -> Either PbProblem (value, [LocatedToken])
   }
@@ -2816,17 +3328,89 @@ mutateAstRefusal result =
   case result of
     Left PbInvalidUtf8 {} -> parseBootstrapAst canonicalBootstrapBytes
     _ -> result
-#elif defined(VALIDATION_PB_GRAMMAR_LINE_DISCIPLINE_BYPASS_MUTANT)
+#elif defined(VALIDATION_PB_GRAMMAR_LINE_BOM_REFUSAL_BYPASS_MUTANT)
   case result of
-    Left PbLineDiscipline {} -> parseBootstrapAst canonicalBootstrapBytes
+    Left (PbLineDiscipline _ "UTF-8 BOM is forbidden") -> parseBootstrapAst canonicalBootstrapBytes
     _ -> result
-#elif defined(VALIDATION_PB_GRAMMAR_LEXICAL_BYPASS_MUTANT)
+#elif defined(VALIDATION_PB_GRAMMAR_LINE_CR_REFUSAL_BYPASS_MUTANT)
   case result of
-    Left PbLexicalProblem {} -> parseBootstrapAst canonicalBootstrapBytes
+    Left (PbLineDiscipline _ "CR and CRLF are forbidden") -> parseBootstrapAst canonicalBootstrapBytes
     _ -> result
-#elif defined(VALIDATION_PB_GRAMMAR_PARSE_BYPASS_MUTANT)
+#elif defined(VALIDATION_PB_GRAMMAR_LINE_TAB_REFUSAL_BYPASS_MUTANT)
   case result of
-    Left PbParseProblem {} -> parseBootstrapAst canonicalBootstrapBytes
+    Left (PbLineDiscipline _ "tabs are forbidden") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_LINE_NUL_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbLineDiscipline _ "NUL is forbidden") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_LINE_FINAL_LF_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbLineDiscipline _ "exact final LF is required") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_LINE_TRAILING_BLANK_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbLineDiscipline _ "trailing blank lines are forbidden") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_LINE_BLANK_LINE_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbLineDiscipline _ "blank lines are outside the grammar") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_LEXICAL_INDENT_MULTIPLE_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbLexicalProblem _ _ _ "indentation must be a multiple of four spaces") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_LEXICAL_INDENT_INCREASE_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbLexicalProblem _ _ _ "indentation may increase by exactly four spaces") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_LEXICAL_UNSUPPORTED_CHARACTER_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbLexicalProblem _ _ _ detail) | "unsupported character " `Text.isPrefixOf` detail -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_LEXICAL_UNTERMINATED_STRING_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbLexicalProblem _ _ _ "unterminated string literal") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_LEXICAL_STRING_ESCAPE_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbLexicalProblem _ _ _ "string escapes are outside the grammar") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_LEXICAL_STRING_CONTROL_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbLexicalProblem _ _ _ "control character in string literal") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_PARSE_TOP_INDENT_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbParseProblem _ _ _ "unexpected top-level indentation") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_PARSE_UNSUPPORTED_STATEMENT_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbParseProblem _ _ _ detail) | "unsupported statement " `Text.isPrefixOf` detail -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_PARSE_INVALID_ASSIGNMENT_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbParseProblem _ _ _ "invalid assignment target") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_PARSE_NONE_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbParseProblem _ _ _ "None is outside the grammar") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_PARSE_EXPECTED_EXPRESSION_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbParseProblem _ _ _ "expected expression") -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_PARSE_EXPECTED_TOKEN_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbParseProblem _ _ _ detail) | "expected Tok" `Text.isPrefixOf` detail -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_PARSE_EXPECTED_KEYWORD_NAME_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbParseProblem _ _ _ detail) | "expected keyword/name " `Text.isPrefixOf` detail -> parseBootstrapAst canonicalBootstrapBytes
+    _ -> result
+#elif defined(VALIDATION_PB_GRAMMAR_PARSE_EXPECTED_NAME_REFUSAL_BYPASS_MUTANT)
+  case result of
+    Left (PbParseProblem _ _ _ "expected name") -> parseBootstrapAst canonicalBootstrapBytes
     _ -> result
 #else
   result
@@ -2847,13 +3431,13 @@ parseStatement :: Parser PyStmt
 parseStatement = do
   token <- peekLocated
   case locatedToken token of
-    TokName "import" -> parseImport
-    TokName "from" -> parseFromImport
-    TokName "class" -> parseClass
-    TokName "def" -> parseFunction
-    TokName "if" -> parseIf
-    TokName "return" -> parseReturn
-    TokName "raise" -> parseRaise
+    TokName "import" -> requireAlternative admitStatementImport token "statement-import" parseImport
+    TokName "from" -> requireAlternative admitStatementFromImport token "statement-from-import" parseFromImport
+    TokName "class" -> requireAlternative admitStatementClass token "statement-class" parseClass
+    TokName "def" -> requireAlternative admitStatementFunction token "statement-function" parseFunction
+    TokName "if" -> requireAlternative admitStatementIf token "statement-if" parseIf
+    TokName "return" -> requireAlternative admitStatementReturn token "statement-return" parseReturn
+    TokName "raise" -> requireAlternative admitStatementRaise token "statement-raise" parseRaise
     TokName keyword
       | keyword `elem` unsupportedStatementKeywords -> parserFail token ("unsupported statement " <> keyword)
     _ -> parseAssignmentOrExpression
@@ -2923,12 +3507,16 @@ parseAssignmentOrExpression = do
   token <- peekLocated
   case locatedToken token of
     TokAssign -> do
+      requireAlternative admitStatementAssignment token "statement-assignment" (pure ())
       consumeToken TokAssign
       unless (validAssignmentTarget left) (parserFail token "invalid assignment target")
       right <- parseExpression
       consumeToken TokNewline
       pure (PyAssign left right)
-    _ -> consumeToken TokNewline >> pure (PyExpression left)
+    _ -> do
+      requireAlternative admitStatementExpression token "statement-expression" (pure ())
+      consumeToken TokNewline
+      pure (PyExpression left)
 
 validAssignmentTarget :: PyExpr -> Bool
 validAssignmentTarget (PyName _) = True
@@ -2962,43 +3550,55 @@ parseExpression :: Parser PyExpr
 parseExpression = parseAndExpression
 
 parseAndExpression :: Parser PyExpr
-parseAndExpression = chainNamed "and" PyAnd parseComparison
+parseAndExpression = chainNamed admitBinaryAnd "binary-and" "and" PyAnd parseComparison
 
 parseComparison :: Parser PyExpr
 parseComparison = do
   left <- parseAddition
   token <- peekLocated
   case locatedToken token of
-    TokEqual -> consumeToken TokEqual >> PyBinary PyEqual left <$> parseAddition
-    TokNotEqual -> consumeToken TokNotEqual >> PyBinary PyNotEqual left <$> parseAddition
+    TokEqual -> do
+      requireAlternative admitBinaryEqual token "binary-equal" (pure ())
+      consumeToken TokEqual
+      PyBinary PyEqual left <$> parseAddition
+    TokNotEqual -> do
+      requireAlternative admitBinaryNotEqual token "binary-not-equal" (pure ())
+      consumeToken TokNotEqual
+      PyBinary PyNotEqual left <$> parseAddition
     _ -> pure left
 
 parseAddition :: Parser PyExpr
-parseAddition = chainToken TokPlus PyAdd parsePathJoin
+parseAddition = chainToken admitBinaryAdd "binary-add" TokPlus PyAdd parsePathJoin
 
 parsePathJoin :: Parser PyExpr
-parsePathJoin = chainToken TokSlash PyPathJoin parsePostfix
+parsePathJoin = chainToken admitBinaryPathJoin "binary-path-join" TokSlash PyPathJoin parsePostfix
 
-chainNamed :: Text -> PyBinaryOperator -> Parser PyExpr -> Parser PyExpr
-chainNamed name operator operand = do
+chainNamed :: Bool -> Text -> Text -> PyBinaryOperator -> Parser PyExpr -> Parser PyExpr
+chainNamed admitted alternativeName name operator operand = do
   initial <- operand
   go initial
  where
   go left = do
     token <- peekLocated
     case locatedToken token of
-      TokName found | found == name -> consumeName name >> operand >>= go . PyBinary operator left
+      TokName found | found == name -> do
+        requireAlternative admitted token alternativeName (pure ())
+        consumeName name
+        operand >>= go . PyBinary operator left
       _ -> pure left
 
-chainToken :: Token -> PyBinaryOperator -> Parser PyExpr -> Parser PyExpr
-chainToken separator operator operand = do
+chainToken :: Bool -> Text -> Token -> PyBinaryOperator -> Parser PyExpr -> Parser PyExpr
+chainToken admitted alternativeName separator operator operand = do
   initial <- operand
   go initial
  where
   go left = do
     token <- peekLocated
     if locatedToken token == separator
-      then consumeToken separator >> operand >>= go . PyBinary operator left
+      then do
+        requireAlternative admitted token alternativeName (pure ())
+        consumeToken separator
+        operand >>= go . PyBinary operator left
       else pure left
 
 parsePostfix :: Parser PyExpr
@@ -3008,15 +3608,18 @@ parsePostfix = parsePrimary >>= go
     token <- peekLocated
     case locatedToken token of
       TokDot -> do
+        requireAlternative admitExpressionAttribute token "expression-attribute" (pure ())
         consumeToken TokDot
         field <- takeName
         go (PyAttribute expression field)
       TokLBracket -> do
+        requireAlternative admitExpressionIndex token "expression-index" (pure ())
         consumeToken TokLBracket
         index <- parseIndexValue
         consumeToken TokRBracket
         go (PyIndex expression index)
       TokLParen -> do
+        requireAlternative admitExpressionCall token "expression-call" (pure ())
         consumeToken TokLParen
         arguments <- parseArguments
         consumeToken TokRParen
@@ -3028,6 +3631,7 @@ parseIndexValue = do
   token <- peekLocated
   case locatedToken token of
     TokColon -> do
+      requireAlternative admitIndexLeadingSlice token "index-leading-slice" (pure ())
       consumeToken TokColon
       end <- optionalBefore TokRBracket parseExpression
       pure (PySlice Nothing end)
@@ -3036,27 +3640,29 @@ parseIndexValue = do
       next <- peekLocated
       case locatedToken next of
         TokColon -> do
+          requireAlternative admitIndexStartedSlice next "index-started-slice" (pure ())
           consumeToken TokColon
           end <- optionalBefore TokRBracket parseExpression
           pure (PySlice (Just start) end)
-        _ -> pure start
+        _ -> requireAlternative admitIndexPlain next "index-plain" (pure start)
 
 parsePrimary :: Parser PyExpr
 parsePrimary = do
   token <- peekLocated
   case locatedToken token of
-    TokName "True" -> consumeAny >> pure (PyBoolean True)
-    TokName "False" -> consumeAny >> pure (PyBoolean False)
+    TokName "True" -> requireAlternative admitExpressionTrue token "expression-true" (consumeAny >> pure (PyBoolean True))
+    TokName "False" -> requireAlternative admitExpressionFalse token "expression-false" (consumeAny >> pure (PyBoolean False))
     TokName "None" -> parserFail token "None is outside the grammar"
-    TokName name -> consumeAny >> pure (PyName name)
-    TokString value -> consumeAny >> pure (PyString value)
-    TokInteger value -> consumeAny >> pure (PyInteger value)
+    TokName name -> requireAlternative admitExpressionName token "expression-name" (consumeAny >> pure (PyName name))
+    TokString value -> requireAlternative admitExpressionString token "expression-string" (consumeAny >> pure (PyString value))
+    TokInteger value -> requireAlternative admitExpressionInteger token "expression-integer" (consumeAny >> pure (PyInteger value))
     TokLBrace -> do
+      requireAlternative admitExpressionDictionary token "expression-dictionary" (pure ())
       consumeToken TokLBrace
       consumeToken TokRBrace
       pure PyEmptyDictionary
-    TokLParen -> parseParenthesized
-    TokLBracket -> parseList
+    TokLParen -> requireAlternative admitExpressionParenthesized token "expression-parenthesized" parseParenthesized
+    TokLBracket -> requireAlternative admitExpressionList token "expression-list" parseList
     _ -> parserFail token "expected expression"
 
 parseParenthesized :: Parser PyExpr
@@ -3064,22 +3670,29 @@ parseParenthesized = do
   consumeToken TokLParen
   token <- peekLocated
   case locatedToken token of
-    TokRParen -> consumeToken TokRParen >> pure (PyTuple [])
+    TokRParen -> requireAlternative admitParenthesizedEmptyTuple token "parenthesized-empty-tuple" (consumeToken TokRParen >> pure (PyTuple []))
     _ -> do
       first <- parseExpression
       next <- peekLocated
       case locatedToken next of
         TokComma -> do
+          requireAlternative admitParenthesizedTuple next "parenthesized-tuple" (pure ())
           consumeToken TokComma
           rest <- commaSeparatedExpressions TokRParen
           consumeToken TokRParen
           pure (PyTuple (first : rest))
-        _ -> consumeToken TokRParen >> pure first
+        _ -> requireAlternative admitParenthesizedGrouped next "parenthesized-grouped" (consumeToken TokRParen >> pure first)
 
 parseList :: Parser PyExpr
 parseList = do
   consumeToken TokLBracket
   values <- commaSeparatedExpressions TokRBracket
+  token <- peekLocated
+  requireAlternative
+    (if null values then admitListEmpty else admitListNonempty)
+    token
+    (if null values then "list-empty" else "list-nonempty")
+    (pure ())
   consumeToken TokRBracket
   pure (PyList values)
 
@@ -3101,10 +3714,15 @@ parseArguments = do
     tokens <- peekTokens 2
     case map locatedToken tokens of
       [TokName name, TokAssign] -> do
+        token <- peekLocated
+        requireAlternative admitArgumentKeyword token "argument-keyword" (pure ())
         consumeName name
         consumeToken TokAssign
         PyKeyword name <$> parseExpression
-      _ -> PyPositional <$> parseExpression
+      _ -> do
+        token <- peekLocated
+        requireAlternative admitArgumentPositional token "argument-positional" (pure ())
+        PyPositional <$> parseExpression
 
 commaSeparatedNames :: Token -> Parser [Text]
 commaSeparatedNames end = do
@@ -3149,8 +3767,17 @@ parseDottedName = do
   go reversed = do
     token <- peekLocated
     case locatedToken token of
-      TokDot -> consumeToken TokDot >> takeName >>= \name -> go (name : reversed)
+      TokDot -> do
+        requireAlternative admitDottedNameExtension token "dotted-name-extension" (pure ())
+        consumeToken TokDot
+        takeName >>= \name -> go (name : reversed)
       _ -> pure (reverse reversed)
+
+requireAlternative :: Bool -> LocatedToken -> Text -> Parser value -> Parser value
+requireAlternative admitted token name parser =
+  if admitted
+    then parser
+    else parserFail token ("closed grammar alternative disabled by changed subject: " <> name)
 
 peekLocated :: Parser LocatedToken
 peekLocated = Parser $ \case
@@ -3270,10 +3897,184 @@ mutateProgramProblems =
 
 mutateBinaryProblems :: [PbProblem] -> [PbProblem]
 mutateBinaryProblems =
-#if defined(VALIDATION_PB_GRAMMAR_PIN_BYPASS_MUTANT)
-  filter (\case PbPinProblem {} -> False; _ -> True)
-#elif defined(VALIDATION_PB_GRAMMAR_BINARY_BYPASS_MUTANT)
-  filter (\case PbBinaryProvenanceProblem {} -> False; _ -> True)
+#if defined(VALIDATION_PB_GRAMMAR_PIN_ASSIGNMENT_COUNT_REFUSAL_BYPASS_MUTANT)
+  filter (\case PbPinProblem detail -> not (" exact string assignment count is " `Text.isInfixOf` detail); _ -> True)
+#elif defined(VALIDATION_PB_GRAMMAR_PIN_GHCUP_VERSION_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPinProblem "GHCUP_VERSION must be 0.2.6.2")
+#elif defined(VALIDATION_PB_GRAMMAR_PIN_GHC_VERSION_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPinProblem "GHC_VERSION must be 9.12.4")
+#elif defined(VALIDATION_PB_GRAMMAR_PIN_CABAL_VERSION_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPinProblem "CABAL_VERSION must be 3.16.1.0")
+#elif defined(VALIDATION_PB_GRAMMAR_PIN_BUILD_TARGET_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPinProblem "BUILD_TARGET must be exe:amoebius")
+#elif defined(VALIDATION_PB_GRAMMAR_BINARY_BOOTSTRAP_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbBinaryProvenanceProblem "bootstrap function is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_BINARY_ASSIGNMENT_COUNT_REFUSAL_BYPASS_MUTANT)
+  filter (\case PbBinaryProvenanceProblem detail -> not (" assignment count is " `Text.isInfixOf` detail); _ -> True)
+#elif defined(VALIDATION_PB_GRAMMAR_BINARY_LOCATOR_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbBinaryProvenanceProblem "binary bytes do not come from contained cabal list-bin")
+#elif defined(VALIDATION_PB_GRAMMAR_BINARY_DECODE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbBinaryProvenanceProblem "binary locator is not exact UTF-8")
+#elif defined(VALIDATION_PB_GRAMMAR_BINARY_PATH_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbBinaryProvenanceProblem "binary path is not derived only from list-bin output")
+#elif defined(VALIDATION_PB_GRAMMAR_BINARY_ORDER_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbBinaryProvenanceProblem "one exact build must precede one exact list-bin")
+#else
+  id
+#endif
+
+mutateArgvProblems :: [PbProblem] -> [PbProblem]
+mutateArgvProblems =
+#if defined(VALIDATION_PB_GRAMMAR_ARGV_MAIN_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbArgvProvenanceProblem "main function is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_ARGV_BOOTSTRAP_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbArgvProvenanceProblem "bootstrap function is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_ARGV_MAIN_BODY_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbArgvProvenanceProblem "main must pass sys.argv[1:] unchanged to the injected bootstrap seam")
+#elif defined(VALIDATION_PB_GRAMMAR_ARGV_HANDOFF_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbArgvProvenanceProblem "bootstrap must hand off [binary] + arguments exactly")
+#elif defined(VALIDATION_PB_GRAMMAR_ARGV_SYS_ARGV_COUNT_REFUSAL_BYPASS_MUTANT)
+  filter (\case PbArgvProvenanceProblem detail -> not ("sys.argv occurrence count is " `Text.isPrefixOf` detail); _ -> True)
+#elif defined(VALIDATION_PB_GRAMMAR_ARGV_ARGUMENTS_COUNT_REFUSAL_BYPASS_MUTANT)
+  filter (\case PbArgvProvenanceProblem detail -> not ("bootstrap arguments occurrence count is " `Text.isPrefixOf` detail); _ -> True)
+#else
+  id
+#endif
+
+mutateInjectionProblems :: [PbProblem] -> [PbProblem]
+mutateInjectionProblems =
+#if defined(VALIDATION_PB_GRAMMAR_INJECTION_BOOTSTRAP_DEFINITION_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbInjectionSeamProblem "bootstrap function is absent or duplicated")
+#elif defined(VALIDATION_PB_GRAMMAR_INJECTION_MAIN_DEFINITION_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbInjectionSeamProblem "main function is absent or duplicated")
+#elif defined(VALIDATION_PB_GRAMMAR_INJECTION_BOOTSTRAP_SIGNATURE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbInjectionSeamProblem "bootstrap signature must be exactly (adapter, arguments)")
+#elif defined(VALIDATION_PB_GRAMMAR_INJECTION_MAIN_SIGNATURE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbInjectionSeamProblem "main signature must be empty")
+#elif defined(VALIDATION_PB_GRAMMAR_INJECTION_MAIN_BODY_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbInjectionSeamProblem "main alone must construct BootstrapAdapter and call bootstrap(adapter, sys.argv[1:])")
+#elif defined(VALIDATION_PB_GRAMMAR_INJECTION_CONSTRUCTION_SCOPE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbInjectionSeamProblem "the sole concrete adapter construction must occur in main")
+#elif defined(VALIDATION_PB_GRAMMAR_INJECTION_MAIN_GUARD_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbInjectionSeamProblem "module must end in exact if __name__ == \"__main__\": main() guard")
+#elif defined(VALIDATION_PB_GRAMMAR_INJECTION_MAIN_CALL_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbInjectionSeamProblem "main must be called exactly once by the module guard")
+#else
+  id
+#endif
+
+mutateEnsureProblems :: [PbProblem] -> [PbProblem]
+mutateEnsureProblems =
+#if defined(VALIDATION_PB_GRAMMAR_ENSURE_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbGhcupEnsureProblem "BootstrapAdapter.ensure_ghcup is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_ENSURE_BODY_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbGhcupEnsureProblem "ensure_ghcup must return a matching existing artifact, fail closed on mismatch, and verify absence acquisition before write")
+#else
+  id
+#endif
+
+mutateEnvironmentProblems :: [PbProblem] -> [PbProblem]
+mutateEnvironmentProblems =
+#if defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbClosedEnvironmentProblem "BootstrapAdapter.environment is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_RUN_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbClosedEnvironmentProblem "BootstrapAdapter.run is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_CAPTURE_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbClosedEnvironmentProblem "BootstrapAdapter.capture is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_BODY_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbClosedEnvironmentProblem "environment must start empty and expose only exact contained home/cache/temp/toolchain values")
+#elif defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_RUN_BODY_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbClosedEnvironmentProblem "run must invoke subprocess.run with the injected argv/environment, shell=False, and no ambient lookup")
+#elif defined(VALIDATION_PB_GRAMMAR_ENVIRONMENT_CAPTURE_BODY_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbClosedEnvironmentProblem "capture must invoke exact shell=False subprocess.run and return only stdout")
+#else
+  id
+#endif
+
+mutateExecutableProblems :: [PbProblem] -> [PbProblem]
+mutateExecutableProblems =
+#if defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_BOOTSTRAP_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "bootstrap function is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_REPOSITORY_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "BootstrapAdapter.repository_root is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_ASSIGNMENT_COUNT_REFUSAL_BYPASS_MUTANT)
+  filter (\case PbToolchainExecutableProblem detail -> not (" assignment count is " `Text.isInfixOf` detail); _ -> True)
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_ROOT_PROVENANCE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "repository root must come only from BootstrapAdapter.repository_root")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_REPOSITORY_SHAPE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "repository root must be the absolute source-relative Path(__file__).resolve().parents[1]")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_PLATFORM_PROVENANCE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "platform observation must come only through the injected adapter")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_ARTIFACT_PROVENANCE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "platform artifact must come from the pure selector fed by adapter.platform()")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_ROOT_PATH_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "toolchain root is not the closed adapter path below the absolute repository root")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_GHCUP_TARGET_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "ghcup target is not rooted in the contained toolchain with the adapter filename")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_GHCUP_RESULT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "ghcup executable must be the verified ensure result")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_ENVIRONMENT_PROVENANCE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "child environment must be derived only from the contained toolchain")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_EXECUTABLE_PATHS_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "GHC/Cabal executables are not exact contained versioned paths")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_BUILDDIR_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "Cabal build directory must be below the exact adapter toolchain root")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_STORE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "Cabal store must be below the exact adapter toolchain root")
+#elif defined(VALIDATION_PB_GRAMMAR_TOOLCHAIN_CHILD_CALLS_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbToolchainExecutableProblem "the four contained child calls, methods, and argv lists are not structurally exact or an additional child call is present")
+#else
+  id
+#endif
+
+mutatePlatformProblems :: [PbProblem] -> [PbProblem]
+mutatePlatformProblems =
+#if defined(VALIDATION_PB_GRAMMAR_PLATFORM_SELECTOR_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPlatformProofProblem "select_artifact is absent or duplicated")
+#elif defined(VALIDATION_PB_GRAMMAR_PLATFORM_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPlatformProofProblem "BootstrapAdapter.platform is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_PLATFORM_OBSERVATION_BODY_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPlatformProofProblem "concrete platform observation must return only platform.system() and platform.machine()")
+#elif defined(VALIDATION_PB_GRAMMAR_PLATFORM_TERMINAL_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPlatformProofProblem "pure platform selector must end in the exact unsupported-platform raise")
+#elif defined(VALIDATION_PB_GRAMMAR_PLATFORM_BRANCH_COUNT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPlatformProofProblem "pure platform selector must contain exactly four branches")
+#elif defined(VALIDATION_PB_GRAMMAR_PLATFORM_BRANCH_SHAPE_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPlatformProofProblem "platform branch is not an exact pure literal return")
+#elif defined(VALIDATION_PB_GRAMMAR_PLATFORM_CONDITION_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPlatformProofProblem "platform branch condition is not exact pure system/machine equality")
+#elif defined(VALIDATION_PB_GRAMMAR_PLATFORM_ARTIFACT_SET_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbPlatformProofProblem "platform adapter URL/SHA/system/machine/executable set is not exact")
+#else
+  id
+#endif
+
+mutateTerminalProblems :: [PbProblem] -> [PbProblem]
+mutateTerminalProblems =
+#if defined(VALIDATION_PB_GRAMMAR_CONTROL_BOOTSTRAP_END_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "bootstrap must end with exact adapter.handoff(binary, [binary] + arguments)")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_MAIN_END_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "main must end with exact bootstrap(adapter, sys.argv[1:])")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_HANDOFF_BODY_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "handoff must contain exactly one final os.execv request")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_BOOTSTRAP_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "bootstrap function is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_MAIN_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "main function is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_HANDOFF_ABSENT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "BootstrapAdapter.handoff is absent")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_HANDOFF_COUNT_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "bootstrap must contain exactly one handoff request and it must be the final reachable statement")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_BOOTSTRAP_TERMINATION_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "bootstrap may not return or raise before its final handoff request")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_HANDOFF_REACHABILITY_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "bootstrap handoff request is absent, duplicated, or unreachable")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_MODULE_TERMINATION_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "module body may not return or raise before the exact main guard")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_MODULE_SAFETY_REFUSAL_BYPASS_MUTANT)
+  filter (/= PbHandoffControlFlowProblem "module body before the exact main guard may contain only direct imports, literal constants, and the closed definitions")
+#elif defined(VALIDATION_PB_GRAMMAR_CONTROL_UNREACHABLE_NODE_REFUSAL_BYPASS_MUTANT)
+  filter (\case PbHandoffControlFlowProblem detail -> not ("control-flow graph contains unreachable nodes in " `Text.isPrefixOf` detail); _ -> True)
 #else
   id
 #endif

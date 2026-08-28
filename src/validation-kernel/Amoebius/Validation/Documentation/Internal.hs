@@ -2539,6 +2539,48 @@ checkHeader document =
       (requiredValueFinding path "Referenced by" metadataReferencedBy metadata)
       (generatedFinding path metadata)
 
+documentationHeaderTitleFinding :: FilePath -> Finding
+documentationHeaderTitleFinding path =
+  finding
+    "DOC-HEADER-TITLE"
+    path
+    "document must contain exactly one H1 title at its first non-blank line"
+
+documentationHeaderPurposeFinding :: FilePath -> Finding
+documentationHeaderPurposeFinding path =
+  finding
+    "DOC-HEADER-PURPOSE"
+    path
+    "Purpose must occur exactly once, within the first forty lines, with a non-empty value"
+
+documentationHeaderReadThisFinding :: FilePath -> Finding
+documentationHeaderReadThisFinding path =
+  finding
+    "DOC-HEADER-READ-THIS-IF"
+    path
+    "Read this if must occur exactly once, within the first forty lines, with a non-empty value"
+
+documentationHeaderDetailsFinding :: FilePath -> Finding
+documentationHeaderDetailsFinding path =
+  finding
+    "DOC-HEADER-DETAILS"
+    path
+    "link-graph metadata details/summary/closing tags must occur exactly once in the first forty lines"
+
+documentationHeaderOrderFinding :: FilePath -> Finding
+documentationHeaderOrderFinding path =
+  finding
+    "DOC-HEADER-ORDER"
+    path
+    "title, Purpose, Read-this-if, lead prose, and link-graph metadata must occur in that order"
+
+documentationHeaderMetadataBlockFinding :: FilePath -> Finding
+documentationHeaderMetadataBlockFinding path =
+  finding
+    "DOC-HEADER-METADATA-BLOCK"
+    path
+    "the four metadata fields must occur in canonical order between the metadata summary and closing tag"
+
 documentationHeaderFindingBlocks :: [Finding] -> [Finding] -> [Finding] -> [Finding] -> [Finding] -> [Finding]
 #ifdef VALIDATION_DOCUMENT_HEADER_BLOCK_ORDER_MUTANT
 documentationHeaderFindingBlocks title purpose readThis details fields =

@@ -771,6 +771,12 @@ compilerComponentPlanSelectorIntents =
   , ("VALIDATION_COMPILER_PLAN_RESULT_LIMIT_FINDING_CONTRIBUTION_DROP_MUTANT", "result-finding max+1 is replaced before rendering")
   , ("VALIDATION_COMPILER_PLAN_RESULT_LIMIT_FINDING_ORDER_MUTANT", "result-finding max+1 is replaced before rendering")
   , ("VALIDATION_COMPILER_PLAN_UTF8_THRESHOLD_WIDEN_MUTANT", "path-byte max+1 is refused")
+  , ("VALIDATION_COMPILER_PLAN_AGGREGATE_OVERFLOW_OBSERVED_PROJECTION_MUTANT", "aggregate-byte max+1 is refused before hashing")
+  , ("VALIDATION_COMPILER_PLAN_BOUNDED_PREFIX_EXCEEDED_COUNT_PROJECTION_MUTANT", "snapshot entry max+1 refuses before traversal")
+  , ("VALIDATION_COMPILER_PLAN_CANDIDATE_MEMBERSHIP_DROP_MUTANT", "supported raw input remains an exact refusing diagnostic")
+  , ("VALIDATION_COMPILER_PLAN_CONDITIONAL_NODE_INHERITED_MERGE_DROP_MUTANT", "true and false nested condition recursion is exact")
+  , ("VALIDATION_COMPILER_PLAN_EMPTY_CABAL_SCAN_STATE_SEED_MUTANT", "component max is admitted before parser refusal")
+  , ("VALIDATION_COMPILER_PLAN_UTF8_EXCEEDED_COUNT_PROJECTION_MUTANT", "path-byte max+1 is refused")
   ]
 
 -- A selector can legitimately alter more than its primary exact case when a
@@ -17344,6 +17350,90 @@ compilerComponentPlanSelectorDependentCaseLabels =
       , "two-byte UTF-8 width reaches the path-byte refusal"
       ]
     )
+  , ("VALIDATION_COMPILER_PLAN_AGGREGATE_OVERFLOW_OBSERVED_PROJECTION_MUTANT", [])
+  , ( "VALIDATION_COMPILER_PLAN_BOUNDED_PREFIX_EXCEEDED_COUNT_PROJECTION_MUTANT"
+    , [ "candidate expansion is bounded before assignment maps and sorting"
+      , "parsed view resource residue survives preflight undercount"
+      , "parsed combined module fields are bounded before sorting"
+      , "parsed source-directory resource residue survives scanner undercount"
+      , "parsed option resource residue survives scanner undercount"
+      , "parsed resource refusal cannot mint a partial assignment"
+      , "parsed dependency resource residue survives scanner undercount"
+      , "common-stanza expansion is bounded after warning-free parsing"
+      , "problem max remains bounded before rendering"
+      , "problem max+1 is replaced by one exact refusal"
+      , "result-finding max+1 is replaced before rendering"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_PLAN_CANDIDATE_MEMBERSHIP_DROP_MUTANT"
+    , [ "default source directory is projected exactly"
+      , "nested default source directory maps to the package root"
+      , "nested package root joins every component field exactly"
+      , "main-is projection is bound exactly"
+      , "named-library kind projection is exact"
+      , "test kind projection is exact"
+      , "library test interface contributes its declared module"
+      , "test BuildInfo other-modules contribute exactly once"
+      , "test code generators remain explicit residue"
+      , "benchmark kind projection is exact"
+      , "executable Haskell subject mode projection is exact"
+      , "symbolic-link Haskell subject mode projection is exact"
+      , "cabal.project is never confused with an elaborated plan"
+      , "non-Simple build type remains residue"
+      , "custom Setup is distinct from build-type residue"
+      , "package-level behavioral data is explicit"
+      , "a Cabal condition is complete ordered residue"
+      , "signature modules remain exact residue"
+      , "autogen modules remain exact residue"
+      , "two exact candidates are not sorted into acceptance"
+      , "two main-is candidates remain ambiguous"
+      , "one path cannot satisfy two declared module identities"
+      , "an unlisted Haskell subject is exact residue"
+      , "GHC option residue is exact"
+      , "CPP option residue is exact"
+      , "language drift is exact"
+      , "extension residue is exact"
+      , "other-extensions source contribution is exact"
+      , "legacy extensions remain bounded compiler configuration"
+      , "hazardous extension has both exact refusals"
+      , "dependency environment residue is exact"
+      , "unsupported BuildInfo field is exact"
+      , "legacy build tools remain explicit residue"
+      , "all warning-free BuildInfo alternatives are exact"
+      , "module reexports and their dependency environment are both exact"
+      , "conditional configurations cannot collapse"
+      , "true and false conditional nodes contribute independently"
+      , "multiple components remain exact residue"
+      , "all package-level behavioral field alternatives are exact"
+      , "all hazardous extension alternatives are exact"
+      , "candidate expansion is bounded before assignment maps and sorting"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_PLAN_CONDITIONAL_NODE_INHERITED_MERGE_DROP_MUTANT"
+    , [ "a Cabal condition is complete ordered residue"
+      , "conditional configurations cannot collapse"
+      , "true and false conditional nodes contribute independently"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_PLAN_EMPTY_CABAL_SCAN_STATE_SEED_MUTANT"
+    , [ "component max+1 is refused before parsing"
+      , "all component scan alternatives contribute independently"
+      , "configuration max is admitted before parser refusal"
+      , "configuration max+1 is refused before parsing"
+      , "uppercase, space, and tab scan normalization alternatives are independent"
+      , "aggregate Cabal scan contributions are independently bounded"
+      ]
+    )
+  , ( "VALIDATION_COMPILER_PLAN_UTF8_EXCEEDED_COUNT_PROJECTION_MUTANT"
+    , [ "snapshot identity max+1 is refused before inventory traversal"
+      , "two-byte UTF-8 width reaches the path-byte refusal"
+      , "three-byte UTF-8 width reaches the path-byte refusal"
+      , "four-byte UTF-8 width reaches the path-byte refusal"
+      , "mode-byte max+1 is refused"
+      , "object-identity byte max+1 is refused"
+      , "over-limit problem paths use one bounded fallback"
+      ]
+    )
   ]
 
 -- Literal continuation dependencies discovered by the frozen 640-row
@@ -19264,6 +19354,12 @@ compilerComponentPlanSelectorProductControls =
   , ("VALIDATION_COMPILER_PLAN_RESULT_LIMIT_FINDING_CONTRIBUTION_DROP_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_RESULT_LIMIT_FINDING_ORDER_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_UTF8_THRESHOLD_WIDEN_MUTANT", PublicCheckNameControl)
+  , ("VALIDATION_COMPILER_PLAN_AGGREGATE_OVERFLOW_OBSERVED_PROJECTION_MUTANT", PublicCheckNameControl)
+  , ("VALIDATION_COMPILER_PLAN_BOUNDED_PREFIX_EXCEEDED_COUNT_PROJECTION_MUTANT", PublicCheckNameControl)
+  , ("VALIDATION_COMPILER_PLAN_CANDIDATE_MEMBERSHIP_DROP_MUTANT", PublicCheckNameControl)
+  , ("VALIDATION_COMPILER_PLAN_CONDITIONAL_NODE_INHERITED_MERGE_DROP_MUTANT", PublicCheckNameControl)
+  , ("VALIDATION_COMPILER_PLAN_EMPTY_CABAL_SCAN_STATE_SEED_MUTANT", PublicCheckNameControl)
+  , ("VALIDATION_COMPILER_PLAN_UTF8_EXCEEDED_COUNT_PROJECTION_MUTANT", PublicCheckNameControl)
   ]
 
 runSelectorProductControl :: String -> ExactCase -> [String]
@@ -19305,8 +19401,8 @@ compilerComponentPlanSelectorNames = map fst compilerComponentPlanSelectorIntent
 
 registryIntegrityProblems :: [String]
 registryIntegrityProblems =
-  [ "selector intent cardinality changed: expected=653; observed=" <> show (length compilerComponentPlanSelectorIntents)
-  | length compilerComponentPlanSelectorIntents /= 653
+  [ "selector intent cardinality changed: expected=659; observed=" <> show (length compilerComponentPlanSelectorIntents)
+  | length compilerComponentPlanSelectorIntents /= 659
   ]
     <> ["duplicate selector intent: " <> selector | selector <- duplicateStrings compilerComponentPlanSelectorNames]
     <> ["duplicate exact-case label: " <> label | label <- duplicateStrings exactCaseLabels]
@@ -19326,9 +19422,9 @@ registryIntegrityProblems =
        | unassignedExactCaseLabels /= expectedUnassignedExactCaseLabels
        ]
     <> ["duplicate dependent-case selector: " <> selector | selector <- duplicateStrings dependentSelectors]
-    <> [ "dependent-case registry cardinality changed: expected=653; observed="
-           <> show (length compilerComponentPlanSelectorDependentCaseLabels)
-       | length compilerComponentPlanSelectorDependentCaseLabels /= 653
+    <> [ "dependent-case registry cardinality changed: expected=659; observed="
+          <> show (length compilerComponentPlanSelectorDependentCaseLabels)
+       | length compilerComponentPlanSelectorDependentCaseLabels /= 659
        ]
     <> [ "dependent-case selector registry is not two-way complete against primary intents"
        | Set.fromList dependentSelectors /= primarySelectorSet
@@ -19408,9 +19504,9 @@ registryIntegrityProblems =
        | continuationDependentObservedLabelCounts
            /= compilerComponentPlanContinuationDependentLabelCounts
        ]
-    <> [ "product-control registry cardinality changed: expected=653; observed="
-           <> show (length compilerComponentPlanSelectorProductControls)
-       | length compilerComponentPlanSelectorProductControls /= 653
+    <> [ "product-control registry cardinality changed: expected=659; observed="
+          <> show (length compilerComponentPlanSelectorProductControls)
+       | length compilerComponentPlanSelectorProductControls /= 659
        ]
     <> ["duplicate product-control selector: " <> selector | selector <- duplicateStrings productControlSelectors]
     <> [ "product-control selector registry is not two-way complete against primary intents"
@@ -19454,7 +19550,6 @@ expectedUnassignedExactCaseLabels =
   , "blob-byte max is admitted"
   , "Cabal-entry max is admitted before four exact parse refusals"
   , "Cabal-byte max is admitted before exact parse refusal"
-  , "component max is admitted before parser refusal"
   , "conditional max is admitted before parser refusal"
   , "module max admits its predicate while candidate preallocation refuses"
   , "source-directory max is admitted before parser refusal"

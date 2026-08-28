@@ -66,10 +66,11 @@ An **Observed footprint / Known partial** of the target Haskell validation kerne
 `src/validation-kernel/Amoebius/Validation/**`. It includes the typed cross-cutting policy contract, source
 closure, legacy-register, documentation, phase-contract, qualification-report, candidate-evidence,
 approval-verification, and dispatch modules. The
-component-oracle footprint is beneath `test/validation-kernel/**`. The mutable worktree now contains only
-`pb/__main__.py`; the old fifteen-path bootstrap/admin/test/check footprint remains in the Git index because
-agents may not stage changes. The one-file subject therefore is not yet an acquired tracked snapshot and
-`LTD-SRC-008` remains open. Token scanning cannot prove the absence of hidden Python behavior, so Phase 0 must
+component-oracle footprint is beneath `test/validation-kernel/**`. The tracked tree now contains exactly one
+`pb/__main__.py` blob at 4,770 bytes with SHA-256
+`e210494d3ad4bcaad716daed5bb89cb5611107547e83eb018a6369e134cd5418`. That exact inventory removes the
+superseded index/worktree mismatch but does not acquire or statically admit the source, so `LTD-SRC-008`
+remains open. Token scanning cannot prove the absence of hidden Python behavior, so Phase 0 must
 statically prove the exact minimal-platform-discrimination,
 contained-toolchain-establishment, source-bound-build, opaque-exec source graph before `pb` may remain as the
 sole non-Haskell source exception. That source-admission proof does not claim the handoff ran; Phase 50 alone
@@ -90,11 +91,9 @@ same-workstream component work that has not been independently qualified or exte
 
 A 2026-08-23 supporting `cabal build lib:validation-kernel test:validation-kernel-component` diagnostic and
 unmutated `cabal test validation-kernel-component` component diagnostic earlier completed with fourteen named
-component oracles. The runner now contains eighteen named component oracles. The latest completed aggregate
-reached all eighteen; sixteen met their component expectations, `DispatchOracle` exposed a stale observation
-classifier that has since been corrected, and `DocumentationOracle` refused the intentionally stale corpus
-manifest while documentation and phase semantics are still changing. That result has been invalidated by the
-subsequent semantic-contract hardening and must be rerun. In each earlier separate build
+component oracles. The runner now contains eighteen named component oracles. The 2026-08-26 aggregate reached
+all eighteen and every oracle reported its bounded diagnostic expectations met after the documentation-header
+repair. This is neither qualification nor candidate evidence. In each earlier separate build
 that widened the compiled Registry-provider universe, redirected the compiled owner map, or admitted `pb` as
 transport before Phase 50, the runner executed all nine named component oracles; only `PolicyContractOracle`
 failed. The other eight oracles stayed green. Those observations establish only
@@ -384,20 +383,26 @@ signatures. That surface is unusable to a real external client and caused `Legac
 become private, the public diagnostic must accept bounded raw primitives, and the exact binding/selector
 inventory must be two-way complete before Sprint 0.2 can rejoin the Phase-0 aggregate.
 
-The in-progress replacement now has a package-hidden implementation and a raw refusal-only public facade.
-Its current safe checkpoint contains 441 once-only source selectors, 441 literal oracle rows, and 441 exact
-Cabal flag/condition/`-D` mappings with zero two-way identity delta. Production and oracle compile warning-free
-under the strict component diagnostic, the clean exact oracle and independent SHA control run green, and seven
-representative new selectors produced distinct changed executables that reddened their assigned rows without
-reddening the independent control. This checkpoint deliberately does not freeze 441 as complete: renderer and
-commitment contributions, UTF-8 boundaries, the complete 441-plus matrix, package-boundary controls, integrated
-qualification, external custody, and the post-matrix adversarial audit remain open. It is a component diagnostic
-only; Sprint 0.2 remains Blocked — NOT VALIDATED.
+The replacement now has a package-hidden implementation and a raw refusal-only public facade. On 2026-08-26,
+static reconciliation found 1,306 once-only selector identities across the public and hidden production modules,
+the independently literal oracle registry, and both Cabal flag and `-D` mappings, with no set delta or duplicate.
+A fixed serial matrix then rebuilt and linked exactly one row at a time from frozen inputs. All 1,306 rows changed
+the preprocessed production subject, subject object, and executable; all 1,306 exited one at the assigned exact
+oracle locus; every paired product control exited zero; no object or executable digest was duplicated; and the
+final input hashes matched the start. The retained result-table SHA-256 is
+`0c16db3d89364ef1e25ba9634b380e27afba6b71879851a4185dffacc03a7c3e`; the diagnostic summary SHA-256 is
+`d1d629814e48dbc8f91c1359cf5db23dae97a5224a3f2ef8e6b12a4c5e0f3453`. Against the actual Cabal-installed
+package boundary, all 36 one-symbol/Internal-module clients failed for the exact missing-export or hidden-module
+reason and the refusal-only public control compiled; its result table has SHA-256
+`8f18d163465be173511b9be41eed4db830fba86c088521a3e99e86d49dcbac82`. This establishes component
+implementation readiness for Sprint 0.3, not validation: parent-harness qualification, authenticated inputs,
+external custody, human correspondence review, and the integrated Phase-0 candidate remain open. Sprint 0.2
+therefore remains Blocked — NOT VALIDATED.
 
 ## Sprint 0.3: Haskell source-closure classifier ⏸️
 
 **Status**: Blocked — NOT VALIDATED
-**Implementation**: `src/validation-kernel/Amoebius/Validation/SourceAcquisition.hs`, `src/validation-kernel/Amoebius/Validation/SourceClosure.hs`, `src/validation-kernel/Amoebius/Validation/SourceConsumerGraph.hs`, `src/validation-kernel/Amoebius/Validation/SourceDebtBaseline.hs`, `src/validation-kernel/Amoebius/Validation/PbBootstrapGrammar.hs`, `src/validation-kernel/Amoebius/Validation/CompilerBuildInfo.hs`, `src/validation-kernel/Amoebius/Validation/CompilerComponentPlan.hs`, `src/validation-kernel/Amoebius/Validation/CompilerElaboratedPlan.hs`, and `src/validation-kernel/Amoebius/Validation/CompilerSourceGraph.hs`
+**Implementation**: `src/validation-kernel/Amoebius/Validation/SourceAcquisition.hs`, package-hidden `src/validation-kernel/Amoebius/Validation/SourceAcquisition/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SourceAcquisitionIngress/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SourceAcquisitionPipeline/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SourceAcquisitionDispatch/Internal.hs`, and `src/validation-kernel/Amoebius/Validation/SourceSnapshot/Internal.hs`, `src/validation-kernel/Amoebius/Validation/SourceClosure.hs`, `src/validation-kernel/Amoebius/Validation/SourceConsumerGraph.hs`, `src/validation-kernel/Amoebius/Validation/SourceDebtBaseline.hs`, `src/validation-kernel/Amoebius/Validation/PbBootstrapGrammar.hs`, `src/validation-kernel/Amoebius/Validation/CompilerBuildInfo.hs`, `src/validation-kernel/Amoebius/Validation/CompilerComponentPlan.hs`, `src/validation-kernel/Amoebius/Validation/CompilerElaboratedPlan.hs`, and `src/validation-kernel/Amoebius/Validation/CompilerSourceGraph.hs`
 **Blocked by**: Sprint 0.2
 **Independent Validation**: Classify every tracked path exactly once by path, extension, mode, shebang,
 content role, and consumer; reject every unbound, stale, duplicate, Phase-0-owned, or wrongly owned
@@ -407,7 +412,7 @@ registry covering every independent predicate, permanent refusal, bound, result-
 alternative, and composition decision in its subject. Exact selector identities must reconcile in both
 directions across production, oracle, and Cabal; each isolated changed subject must red its assigned exact row
 at its named locus while same-harness unaffected controls remain green. The Markdown register is not an input.
-**Oracle**: `test/validation-kernel/SourceAcquisitionOracle.hs`, `test/validation-kernel/SourceClosureOracle.hs`, `test/validation-kernel/SourceConsumerGraphOracle.hs`, `test/validation-kernel/SourceDebtBaselineOracle.hs`, `test/validation-kernel/PbBootstrapGrammarOracle.hs`, `test/validation-kernel/CompilerBuildInfoOracle.hs`, `test/validation-kernel/CompilerComponentPlanOracle.hs`, `test/validation-kernel/CompilerElaboratedPlanOracle.hs`, `test/validation-kernel/CompilerSourceGraphOracle.hs`, and `test/validation-kernel/CompilerSourceGraphAcquiredOracle.hs`; separately authored component diagnostics without authenticated inputs. Their independent review is consolidated into the Phase-0 gate, not requested per sprint.
+**Oracle**: `test/validation-kernel/SourceAcquisitionOracle.hs`, direct-source `test/validation-kernel/SourceAcquisitionInternalOracle.hs`, `test/validation-kernel/SourceAcquisitionIngressOracle.hs`, `test/validation-kernel/SourceAcquisitionPipelineOracle.hs`, and `test/validation-kernel/SourceAcquisitionDispatchOracle.hs`, `test/validation-kernel/SourceClosureOracle.hs`, `test/validation-kernel/SourceConsumerGraphOracle.hs`, `test/validation-kernel/SourceDebtBaselineOracle.hs`, `test/validation-kernel/PbBootstrapGrammarOracle.hs`, `test/validation-kernel/CompilerBuildInfoOracle.hs`, `test/validation-kernel/CompilerComponentPlanOracle.hs`, `test/validation-kernel/CompilerElaboratedPlanOracle.hs`, `test/validation-kernel/CompilerSourceGraphOracle.hs`, and `test/validation-kernel/CompilerSourceGraphAcquiredOracle.hs`; separately authored component diagnostics without authenticated inputs. Their independent review is consolidated into the Phase-0 gate, not requested per sprint.
 **Legacy IDs**: `LTD-SRC-000`, `LTD-SRC-008`
 **Docs to update**: `documents/engineering/repository_layout_doctrine.md`, `documents/engineering/generated_artifacts_doctrine.md`
 
@@ -584,8 +589,9 @@ walk includes nested adapter invocations. Focused clean diagnostics and isolated
 child-call-omission, and handoff-may-return mutants behaved as intended. The integrated component runner reached
 all seventeen then-current oracles and the bootstrap row was green, while the independently stale documentation-residue
 manifest kept the aggregate red. Dispatcher qualification and human review still block removal of the static
-readiness refusal; `LTD-SRC-008` stays Active, and the bootstrap is not executed. The Git index still
-contains the old fifteen-path footprint, so the one-file worktree is not a tracked-snapshot closure claim.
+readiness refusal; `LTD-SRC-008` stays Active, and the bootstrap is not executed. The tracked tree now contains
+the exact one-file footprint, but no authenticated acquired snapshot, qualification, or source-admission
+candidate exists.
 The dispatcher’s stale `PB-GRAMMAR-UNIMPLEMENTED` blanket has now been corrected to the exact
 `PB-GRAMMAR-UNQUALIFIED` residue: the analyzer exists, while an acquired one-file tracked snapshot, applied
 changed-subject qualification, and independent review do not. This message correction is not a closure claim.
@@ -917,6 +923,37 @@ The complete corrected rerun recorded 114/114 strict compilations, changed produ
 hashes, in-oracle refusals, and assigned-locus refusals. Survivors, build failures, unchanged subjects, duplicate
 subjects, out-of-oracle failures, and wrong-locus rows were all zero.
 
+A stronger 2026-08-27 current-byte rerun has rejected that earlier result as a complete isolation matrix. It
+executed every changed subject against the complete oracle rather than only its primary case: all 114 strict
+subjects built, changed their preprocessed bytes, objects, and executables, and remained pairwise distinct, but
+only 82 kept every undeclared exact case green. The other thirty-two exposed real shared-predicate effects in
+duplicate scanning, aggregate ceilings, accepted-field projection, graph guards, locator/path/version grammar,
+component-shape projection, and permanent-refusal rendering. The public-refusal mutation was additionally
+narrowed from every diagnostic result to the successfully decoded observation route, retaining malformed-plan
+results as controls. The oracle now carries a separately literal secondary-impact registry and executes both
+every declared impact and every unaffected case for each selector. The rejected run is retained only as a repair
+diagnostic (frozen-input manifest SHA-256
+`3b9435993cac5770ea94a71dc5b4c867f050a9ad3f51bf3264f7ca004d9b920c`; results SHA-256
+`e71c0a9e464ffbdea5ecf67616c6d51e0085acfcab8f6342f7d205129b9cb01d`). A complete rerun from the repaired
+literal registry then built 114/114 strict changed subjects. Every primary and declared secondary exact case
+reddened, every undeclared executable case remained green, every preprocessed subject/object/executable changed,
+and no digest was duplicated. Clean-before, clean-after, and the frozen-input comparison were green. The current
+ignored receipts have input-manifest SHA-256
+`5c21853f487e9795454657e770febd7aa80e79acd0d5f6067b95dc78a0c50caa` and results SHA-256
+`67b1513c429a1f689958f5b62221d36d0fc47c23d4805db2c0eeb3db049512c3`. This is a component matrix, not
+validation: a fresh post-matrix predicate audit, package-opacity rerun on current bytes, integrated acquisition,
+qualification, authenticated source/toolchain custody, and human review remain open.
+
+The ensuing post-matrix source audit rejects implementation-readiness. The 114 selectors do not yet isolate the
+JSON token-constructor and decode/root routes; generic required/optional missing, empty, and type predicates;
+object/array/text/boolean decoding; unknown-field handling; unit/component/flag ordering and projection;
+duplicate-unit, duplicate-local-component, local-discovery, and empty-component-map invariants; binary-producing
+component classification; shared ASCII grammar; observation/fold/serializer routing; or digest rendering. Those
+families require independently literal selectors, exact cases, impact/isolation declarations, and a replacement
+matrix. A current-byte Cabal-selected public-boundary attempt was also interrupted after several silent minutes
+in offline dependency solving, before configuration or compilation; it is no evidence and leaves the Cabal
+boundary rerun open. The direct-source matrix above remains only a bounded repair checkpoint.
+
 The implementation remains behind a package-hidden `CompilerElaboratedPlan.Internal` facade whose sole public
 export is `checkCompilerElaboratedPlanDiagnostic`. The default cached build root rebuilt the library offline,
 and the independently compiled focused oracle matched when linked only against that Cabal-built package. The
@@ -926,6 +963,114 @@ validation-kernel oracle suite remains open because `DispatchOracle`, `LegacyOra
 still import the package-hidden `SourceClosure.Internal` module. None of these focused diagnostics supplies an
 applied source/binary witness, authenticated plan/toolchain acquisition, qualification, independent custody,
 human review, or validation of Sprint 0.3.
+
+A 2026-08-27 expansion supersedes the 114-row checkpoint without promoting it to implementation readiness.
+One hundred thirty-one reachable selectors now split the previously named JSON token/decode routes, generic
+field decoders, unknown-field handling, unit/component/flag order and projection, duplicate/discovery/component
+invariants, binary classification, ASCII alternatives, observation/fold/refusal routing, and digest rendering.
+Two proposed selectors were removed rather than padded into the registry: declared component-name order is
+unobservable because its only consumer asks whether the list is empty, and the admitted parser cannot construct
+a local unit with zero components. The oracle owns a literal 245-selector registry and separately literal impact
+signatures across 185 executable exact cases. Production CPP, the oracle inventory, 245 manual Cabal flags,
+245 `if flag(...)` conditions, and 245 exact `-D` mappings reconcile in both directions with every production
+identity occurring once. A fresh warning-as-error, fixed-serial matrix built and linked all 245 changed subjects.
+Every assigned and declared-impact case reddened, every undeclared case remained green, every preprocessed
+subject/object/executable changed and remained pairwise distinct, both clean controls exited zero, and the input
+manifest remained byte-identical. Its frozen-manifest, result-table, and summary SHA-256 values are respectively
+`308d1fa5b5c09930cdea6d905598c975d5166e7cebd7efb17d3d4c8cadf4f3ef`,
+`dc8270aaceb1a5292d56b50089d681c8aaceaea511294fbe192c01449acd0a2e`, and
+`44698f665c206ccc13f56b6dbae62ad5aa0850002c71d123c9573079a4b8fb70`. A current-byte isolated GHC package
+then compiled, linked, and ran the public facade client; each of the five one-symbol private-surface clients
+failed for its exact missing export and the Internal-module client failed at the hidden-module boundary. A
+separate Cabal invocation remained in offline dependency solving and was interrupted before configuration, so it
+is not evidence. The ensuing production-line audit rejects 245 as a completeness total: reachable closed
+alternatives in package-source kind/root/location/tag/repository projection and component-name classification
+still share broad selectors rather than owning one-locus changed subjects. Those alternatives, and any further
+reachable routing/composition loci exposed by the same audit, require literal cases, selectors, impact/isolation
+declarations, and a replacement matrix. This remains a bounded component checkpoint, not implementation
+readiness or validation.
+
+A further 2026-08-27 expansion supersedes that 245-row checkpoint without promoting it. Fifty-three selectors
+now isolate the remaining package-source projection alternatives, configured-unit and source-identity routes,
+component-shape mappings and routes, component/flag/platform/portable-identity punctuation alternatives, and
+lower-hex alternatives. The oracle owns 298 literal selector intents and 201 executable exact cases. Production,
+oracle, and the 298 manual Cabal flag/condition/define mappings reconcile exactly in both directions. The first
+strict fixed-serial run refused six variants whose broad grammar mutations bypassed their newly split child
+predicates and therefore failed warning-as-error compilation, and one unknown-dependency row whose literal
+isolation impact was incomplete. After narrowing those six loci and correcting that impact declaration, the
+complete rerun built and passed all 298 changed subjects: assigned, declared-impact, and unaffected controls were
+complete; every preprocessed source, object, and executable changed and remained pairwise distinct; both clean
+controls were green; and the frozen inputs were byte-identical. Its frozen-manifest, result-table, and summary
+SHA-256 values are respectively
+`1e3e3a24aebe02ea9532bc5c1e29e3a191dc16b3c2d0bdf67cd6dcdc633b1ed2`,
+`c12d8d34b3a639d2fc9cdedea25ac364f7547fa15703bddcd22e803e50a84309`, and
+`0b422593c70aee8c8e41de2d9caeec0338aa6e9a784493cb7cf4da35b0072a69`. An isolated package built from the
+same current bytes compiled, linked, and ran the public facade client; five one-symbol private clients failed for
+their exact non-exported symbols and the Internal-module client failed at the package-hidden boundary.
+
+The required post-matrix reachable-decision audit nevertheless rejects 298 as a completeness total. The fold
+routes only the malformed digest and observed-unit order through selected projections; malformed input-byte and
+problem routing plus observed digest, input-byte, problem, schema/compiler/platform identity routing remain
+unselected. The input-to-SHA-256-hash route and semantic residue-subject joins—including dependency edge-role
+composition and the component, configuration, source, artifact, and local-root inclusion decisions—also remain
+without once-only changed subjects. Their independently literal selector intents, exact cases, complete impact
+and isolation declarations, replacement strict matrix, and another current-byte opacity bracket remain open.
+The 298-row evidence is therefore a bounded repair diagnostic, not CompilerElaboratedPlan implementation
+readiness, Sprint 0.3 validation, or Phase-0 candidate evidence.
+
+The first strict replacement run after that audit is also refused rather than reported as a pass. Forty-three
+new selectors split the missing fold, digest-input, semantic-residue projection/order, origin-inclusion, and
+dependency-role routes, bringing production, oracle, and Cabal declarations to 341 exactly reconciled
+identities. A strengthened accepted inplace source-repository case independently binds component-universe,
+configuration-branch, and ordinary/executable dependency-role subjects. All 341 variants built warning-clean,
+changed their preprocessed source, object, and executable, and remained pairwise distinct; the declared-impact
+checks and frozen-input controls were green. The matrix nevertheless accepted only 331 assigned-locus and
+unaffected-case classifications. Four pre-existing permanent-residue selectors omitted the strengthened
+inplace case from their literal collateral declarations, while six observed-fold selectors exposed three
+positive assertions for schema, compiler, and platform identity that were executable but absent from the
+closed exact-case inventory. The retained rejected receipt records input-manifest SHA-256
+`48e115b13f7d39dd669d077fb4ec5889e083ab1dca38c2fbc7a3a2d20c43b0ba` and results SHA-256
+`219b07859443e85605aa9f8e3ddc3f40a9a418b50419b0e548046b8c6d084567`. The exact-case registry, literal
+impact declarations, replacement matrix, post-matrix audit, and current-byte opacity bracket therefore remain
+open; 341 is not yet a completeness or implementation-readiness total.
+
+The repaired 341-row rerun then closed the two oracle defects without weakening isolation. The three schema,
+compiler, and platform assertions became members of a 204-case closed executable inventory, and generated
+literal signatures replaced the legacy 114 selectors' partial collateral registry as well as updating the later
+groups. All 341 rows built and passed their assigned, complete-impact, and unaffected controls; every
+preprocessed source, object, and executable changed and remained pairwise distinct; both clean controls and the
+frozen-input comparison were green. Its frozen-manifest, result-table, and summary SHA-256 values are
+respectively `f116e15738cd20a5eb19212eedf3c3d4dbbf9492672ab8bf2a1f903d36aeea47`,
+`c913317a35d21ef35ee2c84756124e3ae40882179174fd5ede18c5cc5cea65fe`, and
+`e29373519a990214815b9439564b64c4ff6db0e334ab7da1f99caf0b7c9b3e4b`. A fresh production-line audit still
+refused that total: local-source-root subjects were sorted and externally rendered, unlike every neighboring
+semantic subject they had no order selector, and the accepted corpus contained only one local root so reversal
+was unobservable.
+
+A two-local-root accepted case and one once-only local-root subject-order selector close that final audit
+locus. The oracle now owns 342 exact selector intents and 205 executable cases; production CPP, oracle intents,
+and all 342 Cabal flags, conditions, and defines reconcile exactly in both directions. Complete 342-by-205
+impact discovery has main-signature, supplemental-signature, and expanded-report SHA-256 values
+`3d4fd05c16df9f2b97cbc32885b175e4517e7f4f94747b8e13875180ec5fbb9a`,
+`298f3010a9b8ac59be1197f3face741e4e619d477ef7c2b8ecfb0525d0d29579`, and
+`68668542444d525da822ee27d26c79ee7d0fb71c33bb56a825fc1cc92c714c9a`. The final warning-clean fixed-serial
+matrix built and passed all 342 changed subjects with 342 assigned-locus, declared-impact, and unaffected-case
+controls; every artifact layer changed without a duplicate; clean-before, clean-after, and frozen inputs were
+green. Its frozen-manifest, result-table, and summary SHA-256 values are respectively
+`d2143be0fc2af7e208767122b9ccbb865e8564ab753b57b1da4e92e9f4e95d56`,
+`807a934dc948d9a595ed2373f4fcab3424d598ec9dac8ec077418cce68d0bf33`, and
+`e90a3cc3c83ca91b03c0fff2e40f4d3f09199c00f909959e2439202c301b0c28`. A fresh reachable-decision line
+audit finds no known uncovered production locus: the remaining selector-free functions are closed
+data/constructor plumbing, compositions already decomposed by field and route selectors, the deliberately
+unobservable declared-component-name ordering helper, or invariant-recovery arms that clean admitted values
+cannot reach. An isolated package built from the exact current source compiled, linked, and ran the public
+facade client; each of five one-symbol private clients failed for its exact absent export and the Internal-module
+client failed at the hidden-module boundary. The opacity summary and isolated archive SHA-256 values are
+`bede422042354848d8664cb2bc6d82260c44aec781b726bcea220bed1a219e27` and
+`ac1b2df7f3e2efdd8730071fddaf3b0761e977d3541d1013f43c29f3a6b1624f`. This establishes current
+CompilerElaboratedPlan component implementation readiness only; authenticated acquisition, qualification,
+integrated source-graph composition, independent custody/review, and the Phase-0 candidate remain open.
+
 An offline fresh-build-root diagnostic then failed before configuration because the isolated root did not contain
 the two remote source-repository checkouts; the default mutable build root succeeded only by reusing its existing
 cache. Running Cabal's diagnostic `--enable-build-info` switch there produced a component JSON file with the
@@ -1011,7 +1156,7 @@ The completed bounded BuildInfo repair supersedes that forty-nine-row interim in
 module now exports only the refusal-only `compilerBuildInfoDiagnostic` function; parsing, carriers, problem
 constructors, folds, and projections live in package-hidden `CompilerBuildInfo.Internal`. Seventy-five reachable
 problem constructors remain after removing three impossible fallback/mismatch alternatives. The oracle states
-175 independently executable full-result cases, including every reachable constructor, every schema and JSON-
+176 independently executable full-result cases, including every reachable constructor, every schema and JSON-
 scanner predicate, every grammar conjunction and closed alternative, canonical component/problem ordering,
 every scalar and collection maximum/maximum-plus-one boundary, and the exact 14,877-entry and 2,097,152-byte
 pre-render envelopes. Each of the eighteen permanent rows, every output family, every independent acceptance
@@ -1032,6 +1177,176 @@ changed BuildInfo subject but was interrupted during final package registration 
 component diagnostics only: the complete Cabal-selected matrix, applied source/binary identity, authenticated
 elaborated-plan/toolchain acquisition, external compiler execution, independent custody and qualification,
 integrated Dispatch retention, human review, and human promotion remain absent. Sprint 0.3 is NOT VALIDATED.
+
+A 2026-08-27 full-oracle isolation rerun rejects the prior 220-row completeness statement. All 220
+preprocessed subjects changed and were pairwise distinct, but two rows failed strict compilation: the
+diagnostic-only bypass left its finding declaration unused, and the component-order bypass left `sortOn` unused.
+Of the remaining 218 linked subjects, every primary case reddened, but only 130 kept all other 174 executable
+cases green; eighty-eight exposed undeclared result-envelope, boundary-fixture, shared grammar, join, ordering,
+or projection effects. The warning-bearing mutation loci are now narrowed, but the oracle still requires a
+literal dependent-impact registry and a complete fresh rerun. The rejected diagnostic is retained under ignored
+`.build/**` only (input-manifest SHA-256
+`1fea2a883bd66a9401044fb008b97e7edb64d0bac35529409d21cea46e613689`; results SHA-256
+`3b49157fc3f148fba44615416396297dd3c236a59ec408c62e4632484a3ed053`). No earlier BuildInfo matrix is current
+candidate evidence.
+
+The replacement 2026-08-27 BuildInfo checkpoint adds a literal dependent-impact registry and changed-production
+control to every selector row. The diagnostic-only and component-order branches compile without weakening
+strict warnings, and the diagnostic-only selector declares all 175 secondary exact cases it changes. A fresh
+fixed-serial frozen-input run compiled and linked all 220 distinct changed subjects. Every primary locus was red
+and classified, every declared dependent-impact set was red, every undeclared exact case stayed green, and all
+220 changed-production controls stayed green. All 220 preprocessed sources, objects, and executables changed
+and were pairwise distinct; the clean oracle was green before and after the matrix. The frozen-manifest,
+result-table, and summary SHA-256 values are respectively
+`2a2ca1923692ea3c404ebbc43ffc8996f30971a4840507329d615b7ae9848560`,
+`3d5121d4473d36476f71f3ecb5c8d768bbae15c57bd4d10753cbfdc1262a73cf`, and
+`c373ed1b4d29f98b4ec6f306ad66714ad67cabcc60c916e3d5681c3ad2ea9783`. This is a current component
+checkpoint, not readiness or validation. The post-matrix source audit rejects the earlier completeness claim:
+the refusal hard/observed fold and result assembly, diagnostic/check/finding projection, result-envelope metric
+and exceeded-dimension projection, problem-code/detail serialization, observation-family field serializers,
+parser admission and branch routing, accumulator/partition/fallback composition, component carrier projection,
+machine-path and ownership assembly, duplicate ordering, ASCII/path/containment helpers, JSON scanner state and
+delimiter/whitespace/scope composition, and generic required/optional/array decoder routes remain reachable
+without independent one-locus selectors. Those decisions require literal exact-case assignments, Cabal
+mappings, a fresh complete matrix, and another audit before CompilerBuildInfo can claim component
+implementation readiness. Sprint 0.3 remains Blocked — NOT VALIDATED.
+
+The active BuildInfo expansion first added thirty-one refusal/result-envelope selectors and strengthened every
+row with declared-impact, isolation, and changed-production modes. Its deliberately incomplete 251-row census
+rejected three warning-bearing changed subjects and twenty undeclared-impact rows while retaining frozen inputs;
+its manifest, result-table, and summary SHA-256 values are respectively
+`f6a7a425761b9581511f8cff34c596bf02f13ed55696d8675c495b9f80544968`,
+`871900322d3ed7da9e1d41a776b48b923fd16a3d73f7b605f02f0b8ca56f2658`, and
+`93860cfe8e1a6ec424a8cfadcbde98200c018a2da7842c22b42586cafdf03bd5`. The warning branches now retain and
+execute their original dependency paths, the check-name selector uses an independent observation control, and
+the observed secondary effects are literal registry entries. A further seventy-five constructor-to-code,
+nineteen detail-route, and twenty-six accumulator/parser/JSON-state selectors produced a focused 120-row census.
+That diagnostic also rejected itself: 119 subjects built, 98 primaries reddened, only 24 rows had complete
+declared isolation, one route failed strict compilation, and twenty-one primary assignments were ineffective.
+Its frozen manifest, result table, and summary hashes are
+`54fae7e4fef73647777cdeb3e078018a33eebed6b799c82415d3eaf02cd2281c`,
+`c7ad9eca1529292377e9207cfd5afb300883565f00cafdd1dba2e3551b77e04b`, and
+`874494bb4fca43e24a61211ecc7db18742a9de47900c83a78ab1dc5b6707403e`. Post-census analysis removed fourteen
+artificial identities whose expected-input code arms cannot reach `problemFinding` or whose order/disagreement
+branches are erased by canonical sorting or unreachable after the bounded scanner. Seven primaries were
+reassigned to the exact cases they actually change, the observed-body route now executes its original route
+without warning, and all observed secondary effects are stated literally. Production CPP, the oracle registry,
+Cabal flags, conditions, and exact `-D` mappings now reconcile at 460 identities; the oracle has 292 explicit
+dependent-impact rows. The latest 103 identities independently select the top-level, component, identity,
+argument, Cabal-file, indexed-text, generated-input, package, and path observation serializers. Their fresh
+fixed-serial strict matrix built and killed all 103 changed subjects, reddened every complete declared-impact
+set, kept every undeclared exact case and product control green, changed every preprocessed source, object, and
+executable without duplicates, kept both clean controls green, and retained byte-identical inputs. Its frozen
+manifest, result-table, and summary SHA-256 values are respectively
+`225a923ecd481d4a5e11a982ccdfeb65fec1157ef454424935c83754bb7a245e`,
+`12ecdc36e0b4a0beb2ad63f9109cf9660738369aa84021594463b912e4d55f72`, and
+`1e551c87ad76930d407b4de3c860e02281d4083f972d1e72b2fb32de79e450f9`. A subsequent carrier census rejected
+thirteen artificial identities whose independent-compiler, machine-path, or ownership constructor-field changes
+are erased by the public constant diagnostic detail. It retained and repaired twenty-four observable expected-
+identity, component-accessor, and component-key subjects. Their strict replacement matrix passed all twenty-four
+rows under the same complete controls; its frozen-manifest, result-table, and summary hashes are respectively
+`94a011b3c6d1606f20352537c160f92bb914ec06793d09283e1d589b500b57c9`,
+`0f3c3deaa4a4bff88a3c3282aac7ba08a877828132b24feb7e8c6df60ff8f80f`, and
+`3bf2d165cd59f5fb65073866217bc2b43c67a7a5baac02b09cff1f6469676ca8`. At that checkpoint production CPP,
+the oracle, and both Cabal registries reconciled at 484 identities with 313 dependent-impact rows. A subsequent
+parser/decoder census rejected two artificial identities whose raw text-array failure route and unknown-field
+order mutation are erased before any exact public result. The retained twenty-nine parsed-value, partition,
+required/optional field, object/array, and unknown-field subjects passed their strict replacement matrix under
+the same complete controls. Its frozen-manifest, result-table, and summary hashes are respectively
+`479547259f83bff7a44fafe8bd164c11e88ee6ec3b5b47d4ac53b12e1538a753`,
+`9536978b62ce0712b48f8ed5f3d8806333206d2f9046232564e47861ccb14a9b`, and
+`e902583660cbcdb5ea2b728a5bcb8c68da9e0a1476d44c42029bbfec8ef7c606`. An argument-state census then exposed
+fifteen shared effects and two order mutations erased by the public canonical projection. The shared effects
+are now literal dependent-impact entries and the two artificial result-order selectors are removed. Its strict
+thirty-row replacement built and killed every changed subject, reddened every assigned and declared impacted
+case, kept every undeclared case and product control green, produced pairwise-distinct preprocessed sources,
+objects, and executables, kept both clean controls green, and retained byte-identical inputs. Its frozen-
+manifest, result-table, and summary hashes are respectively
+`0e4bc4d22da614ba0a5578fd39b7e90eeffd383d9e77f78b172e924e457f4ad8`,
+`04af7f34e1402225fdb69d4f34959326c7a2a3cadfb26fce0e7bb53bec25b9e4`, and
+`11d98d8a6b48798edc74dac8cc45c21c0b21a66ae3c71ba131b885dfbcdd42da`. A helper/scanner census next exposed
+four strict-warning or syntax failures, two missing exact fixtures, one fixture aimed at the wrong byte metric,
+and twenty-four incomplete isolation sets. Exact cases now exercise both absolute-containment alternatives,
+leading JSON whitespace, and decoded multibyte path width. The duplicated outer whitespace normalization and
+its ineffective identity were removed, leaving `scanJsonValue` as the sole admission owner. The repaired
+thirty-one-row strict matrix built and killed every subject, reddened every primary and all declared collateral
+cases, kept all other cases and product controls green, changed every preprocessed source, object, and
+executable without duplicates, kept both clean controls green, and retained byte-identical inputs. Its frozen-
+manifest, result-table, and summary hashes are respectively
+`5c36b3605c3ee83075832169fac6afe1d37a951b33bdb67c07fc6fa1e324019a`,
+`33148926f5510fab1e7ea6681a0272b1a774396ee908ee5007976348b9855f81`, and
+`f0f111e77497509759f2bb92cbbe648208f684ca4f89f0ddf188066c847cfe16`. Production CPP, the oracle, and both
+Cabal registries now reconcile at 574 identities with 370 dependent-impact rows. These remain bounded
+component checkpoints, not CompilerBuildInfo readiness or validation. The erased machine-path/ownership
+carriers still require an explicit design decision: expose a real bounded public projection or simplify them as
+non-behavioral residue. The earlier expansion identities also require one fresh integrated strict matrix, and
+scanner scope composition, byte-at/end-state handling, admission composition, remaining generic helper routes,
+and the final source audit remain open. Sprint 0.3 remains Blocked — NOT VALIDATED.
+
+The next 2026-08-27 BuildInfo audit resolved the erased carrier decision by simplifying the independent-
+compiler, machine-path, source-ownership, and physical-containment problems to nullary permanent residue and
+removing their unused private observation carriers and projections; no new public behavior was invented for
+values that the refusal deliberately does not expose. Caller expectation validation is now owned solely by the
+private smart constructor, rather than repeated inside the parser. The JSON scanner also removed two redundant
+post-colon and post-comma whitespace identities whose recursive value admission already owns those skips. New
+exact cases distinguish combined caller-expectation order, every remaining structural-whitespace seam, nested
+escaped-key and array-index scopes, escaped and unterminated strings, byte/end-state behavior, and required
+file-path projection. The first focused census rejected one mutant-only precedence error and nineteen incomplete
+isolation sets; its results are diagnostic only. After repair, the literal registry gained nineteen dependent-
+impact rows covering 232 collateral exact-case labels. The replacement fixed-serial strict matrix built and
+killed all twenty-nine admission, scanner-scope, end-state, duplicate, component-scope, safe-path-depth, and
+required-path changed subjects. All twenty-nine assigned, declared-impact, isolation, and product controls were
+green; every preprocessed source, object, and executable changed without duplicates; both clean controls were
+green; and inputs remained byte-identical. Its frozen-manifest, result-table, and summary SHA-256 values are
+respectively `4816951b9790edcb732cf63da000fcb8fb5b9531b10587686d97dda747681594`,
+`aff3ac53c54353d433243053201ddd6e8972ad5329d30b8b5748ed51e5e6a2de`, and
+`83eddb1a9580db83fd28f5e42da4237d08c842b132436f71044ac8b7ec22d175`. Production CPP, the oracle, and both
+Cabal registries now reconcile at 603 identities with 389 dependent-impact rows. This is another bounded
+component checkpoint, not CompilerBuildInfo readiness or validation: the complete 603-row integrated strict
+matrix and a fresh post-matrix source audit remain open. Sprint 0.3 remains Blocked — NOT VALIDATED.
+
+The final shared-helper audit then rejected set-only reconciliation: the Cabal-file present-key selector
+occurred at both absent and present production alternatives. The absent alternative now has its own once-only
+selector and exact case. Ten further selectors cover the previously indirect numeric and file-path renderers,
+clean retained-observation/problem/alternative routes, absolute-file and absolute-directory safety composition,
+both machine-argument path alternatives, and singleton-refusal construction. New paired inputs distinguish an
+absolute compiler path with an unsafe segment character and a relative `.` value on an otherwise admitted
+path-taking compiler option. A census found eight shared effects; the oracle now declares those effects as
+eight dependent-impact rows. The replacement fixed-serial strict matrix built and killed all eleven changed
+subjects. Every assigned, declared-impact, isolation, and product control was green; preprocessed sources,
+objects, and executables all changed without duplicates; both clean controls were green; and inputs remained
+byte-identical. Its frozen-manifest, result-table, and summary SHA-256 values are respectively
+`58bce442c8764092bb79bb85b710e65075c35476318db7e67ce70764f02accbc`,
+`1b2bbc7ab39cc01238b25da16172a94979d608db5f098f5884c4f0ed5721f966`, and
+`e4db82c17d57fb0e50dd62a1dd8439648d06fa534c1bdb230b7f9a21282f80e7`. Production CPP, the literal oracle,
+and Cabal mappings now reconcile at 614 unique identities with one production occurrence each and 397
+dependent-impact rows. The complete integrated 614-row strict matrix and the post-matrix audit remain open, so
+this is still a component checkpoint and Sprint 0.3 remains Blocked — NOT VALIDATED.
+
+The complete integrated census then refused readiness rather than laundering an incomplete registry. All 614
+subjects built, reddened their assigned locus, changed their preprocessed source, object, and executable, and
+kept the product control green, but 235 rows exposed undeclared collateral exact cases, one declared
+Cabal-present relationship was stale, and the result-envelope entry-seed and observation-fold subjects produced
+identical artifacts. The stale relationship was removed by assigning the present-key subject to the existing
+present-only group. The census effects are now literal Haskell impact declarations. The observation-fold subject
+now omits exactly the first observation from envelope measurement and is independently killed by the one-entry-
+over case; its payload-boundary collateral case is also explicit. After one strict rerun correctly exposed that
+last collateral relationship, a fresh fixed-serial frozen-input replacement built and passed all 614 rows. All
+614 assigned-locus, declared-impact, isolation, and product controls were green; all 614 preprocessed sources,
+objects, and executables changed without duplicates; both clean controls were green; and inputs remained byte-
+identical. The frozen-manifest, result-table, and summary SHA-256 values are respectively
+`37810d14ae0464c0e29a703be207d1f805718c15be3defb711a29cdf74a211a0`,
+`d8392112cb7773382895e664916fba54fc5a03be18b0d1d6d6e5927f0f3f1576`, and
+`333779c654274e176b4ae90968ebe5b7b19e16afb8dcbb785ebb4d4bc9aa2ae8`. Production CPP and both Cabal
+registries reconcile at 614 unique once-only identities; the literal oracle owns 614 primary assignments and
+401 dependent-impact rows. The post-matrix reachable-decision audit found only the two closed argument tables
+and six parser/grammar compositions without an enclosing selector; every table alternative, limit, field route,
+grammar alternative, problem family, and composition decision within those functions is already independently
+selected. It found no known uncovered reachable locus. A direct package-database public client compiled, the
+package-hidden `Internal` attack failed at the hidden-module boundary, and all nineteen one-symbol facade attacks
+failed at their exact missing export. This establishes current CompilerBuildInfo component implementation
+readiness only; authenticated source/toolchain custody, qualification, integration, and independent review
+remain open. Sprint 0.3 remains Blocked — NOT VALIDATED.
 
 A later adversarial review rejected the v2 commit decoder's permissive header order and combined privacy
 attack. The decoder now uses a bounded state machine for exact tree, parent, author, and committer order. It
@@ -1266,25 +1581,57 @@ acquired token, and authenticated source custody, subject/outcome registry, mult
 supervised compiler execution, semantic closure, qualification, independent custody, and human review remain
 absent. CompilerSourceGraph is NOT VALIDATED.
 
-A fresh SourceAcquisition post-matrix line audit has superseded any completeness reading of its 231-row
-checkpoint. The provisional source now has 835 once-only selectors, a fail-closed 128-problem result bound, and
+A fresh SourceAcquisition post-matrix line audit superseded any completeness reading of its 231-row
+checkpoint. The source now has 835 once-only selectors, a fail-closed 128-problem result bound, and
 exact 128/129 replay-entry cases; its strict clean oracle exits zero. The first 503-row expansion attempt is
 discarded because its temporary harness omitted dependency interfaces and all 503 subjects build-failed. In the
 replacement run, 497 assigned rows reddened; one genuine no-op/unreachable design and three invalid type-
 constructor projections were removed, while two warning-as-error dead-helper cases were repaired and then
 reddened. The remaining observation, mandatory-residue, decoder/framing, digest, association, aggregate, and
 serializer expansion checkpoints reddened after two real survivors were repaired. A fresh production-line pass
-now reports no known uncovered predicate/result/observation/problem/limit/serializer locus, but that is not a
-completeness witness. The independently literal 835-row registry, exact Cabal reconciliation, paired product
-controls, full frozen-source matrix, opacity rerun, and post-matrix adversarial audit remain open. The earlier
-231-row matrix and every discarded harness run are superseded diagnostics only.
+reports no known uncovered predicate/result/observation/problem/limit/serializer locus. On 2026-08-26 the
+independently literal 835-row registry reconciled exactly with once-only production selectors and Cabal `-D`
+mappings. A fixed serial frozen-input matrix changed the preprocessed subject, object, and executable for all
+835 rows; every row exited one at its assigned exact case, every RFC-8032 product control stayed green, no object
+or executable digest was duplicated, and final input hashes matched the start. The result-table SHA-256 is
+`1364b6dfa321b51471254687f60c9da0f73341db42387ae15889c86d7a03b709`; the summary SHA-256 is
+`9a2258bb64a76ac8d3eb6670ccce98c28af450586ada483358d53efc5ba92fd6`. Against the Cabal-installed package,
+all six private-symbol attacks failed for their exact missing export and the refusal-only public control
+compiled; that result table has SHA-256 `903f1f754e0b4328e5372a5aacebc9e06c38ee7bc48f0120a3bb306d13092fb5`.
+The earlier 231-row matrix and every discarded harness run remain superseded diagnostics. These current results
+establish only component implementation readiness: authenticated acquisition authority and source custody,
+durable replay consumption, qualification, independent custody/review, and candidate integration remain open.
 
 A 2026-08-24 independent selector-authority audit also rejected production-derived matrix enumeration as a
 completeness witness. A driver that discovers its work only from production CPP can silently omit the same
 missing selector from both its enumeration and reported total. SourceAcquisition replaced its production-derived
 124-row baseline with the literal 231-row checkpoint, but the fresh audit above has superseded that count and its
-matrix as a completeness claim. SourceClosure has separately added a literal 124-row registry, but its broader post-matrix audit remains
-open. `PbBootstrapGrammar` now has an oracle-owned literal 78-row selector-to-exact-case registry with duplicate
+matrix as a completeness claim.
+
+A 2026-08-26 SourceClosure completion audit likewise supersedes its earlier 124-row checkpoint. The current
+production source, independently literal oracle registry, manual Cabal flags, `if flag(...)` conditions, and
+exact `-D` mappings reconcile at 606 unique selector identities. The expansion independently addresses every
+finding code/subject/detail projection and result join, all resource and serializer contributions, the closed
+source-class/debt/facet/mode catalogs, each Phase-50 `pb` residue and class count, all 195 governed-document
+paths, UTF-8 and significant-line traversal, bounded-commitment fields, and stage routing/order. The 195-path
+production and oracle catalogs have the independently frozen SHA-256
+`51c38807d39526404f678c6a89ccaf6210ff91d7b17d4cde7989f1bc2a9e55f2`. A strict clean direct-source build and
+the complete clean oracle exited zero. A fixed serial frozen-input matrix then compiled 606 distinct
+changed-production subjects and every changed subject reddened its assigned exact oracle case; no build failure,
+survivor, wrong-locus row, duplicate object, or duplicate executable occurred. The start/current/final tracked
+source manifests are byte-identical with SHA-256
+`1c7b20f75bddc4ce0e0472b10e7b93f9b3a64e4037d70381fa558d083f404b4f`; the result-table SHA-256 is
+`4e3a981ba4fff33a211b32d08fa6da77bc0fdbfb07c9ffcaebe2c9c73d860659` and the summary SHA-256 is
+`5e4f3a94ec151b14afb5d8ed004f83cb66e31081749b38428baec522a50e9753`. After an offline `--jobs=1` Cabal
+rebuild, all fifty-seven private-symbol attacks and the package-hidden Internal-module attack failed at their
+exact intended boundary, while the sole public diagnostic-facade control compiled. That opacity result table
+and summary have SHA-256 `a4e2d7c51e5d7d2b57c06a3d66395b5b88b520347d84c8d4e9056b52bbcf4bae` and
+`2cd6218c98cf7c788a3adfd23b278a54060539ae9291a61a49094948efe13b89`. These receipts establish only current
+component implementation readiness. Caller-supplied input remains permanently diagnostic; authenticated source
+custody, package-hidden acquired-token integration, dispatcher retention, qualification, independent custody and
+review, and the integrated Phase-0 candidate remain open.
+
+`PbBootstrapGrammar` now has an oracle-owned literal 78-row selector-to-exact-case registry with duplicate
 and unknown-target rejection, independent fixture/digest controls, and exact two-way source/oracle/Cabal
 reconciliation. Its first complete strict matrix correctly rejected four warning-as-error subjects and reddened
 the other seventy-four assigned rows. After the four dead-code witnesses were repaired, all seventy-eight
@@ -1312,30 +1659,449 @@ product control. Registry cardinality and clean strict compilation are green, bu
 controls have not yet run against their changed binaries and therefore are not evidence. This is a bounded
 component diagnostic; further claim/control-flow field projections, parser, semantic proof, the complete
 changed-binary control matrix, and the complete post-matrix predicate audit remain open.
-SourceConsumerGraph still has only the rejected 91-row baseline.
-CompilerComponentPlan has expanded beyond its
-rejected 81/83-row baselines to a literal 232-row registry; its complete rerun and post-matrix audit are still in
-progress. Each unfinished seam requires oracle-local literal cardinality, duplicate rejection, exactly-one
-target-case binding, two-way source/oracle/Cabal reconciliation, and an unaffected control before a matrix count
-is admissible. CompilerElaboratedPlan's 114-row registry and earlier rerun are likewise subject to a final
-comprehensive predicate audit. SourceDebt's 55-row and CompilerSourceGraph's combined 47-row raw/acquired
-registries meet only this narrow structural requirement; their separately recorded completeness, integration,
-qualification, external execution, and custody residue remains. This audit is not validation and does not
-advance Sprint 0.3.
 
-The current Git index also still names fifteen condemned legacy `pb/**` paths, while the intended single
-`pb/__main__.py` bootstrap is present only in the unstaged worktree. An agent may neither stage nor commit that
-transition. Consequently no acquired tracked-tree diagnostic can establish the required one-file Pb inventory
-on the current index, and a production literal fed back into both Pb and SourceClosure oracles cannot substitute
-for binding the independently observed tracked bootstrap bytes. This remains explicit integration residue until
-the human applies the source transition and the scoped oracle observes the resulting exact tracked blob.
+A 2026-08-26 structured-proof expansion supersedes that 215-row checkpoint. Forty-six new selectors make every
+wire field in the argv, binary, injection, Phase-50 invocation, ensure, closed-environment, executable,
+platform-limitation, and runtime-boundary static claims independently addressable, including claim tags, shared
+and nested separators, list order, boolean projections, and both platform-limitation alternatives. Production
+CPP, the independently literal oracle registry, Cabal flags, Cabal conditions, and exact `-D` mappings reconcile
+at 261 unique identities. The strict direct-source build and complete clean oracle exited zero against the
+exact pinned package IDs. A fixed serial frozen-source run then compiled all 261 distinct changed subjects;
+every assigned exact result reddened and every registered product control stayed green, with no build failure,
+survivor, wrong-locus result, duplicate object, or duplicate executable. Start/final tracked-source manifests
+are byte-identical with SHA-256 `d6a1b21b102750ec7220e8222f58aa0d1722942ca0be7032d97e4fa6e8c6eedc`;
+the result-table SHA-256 is `beedc28d2006e71003b74c10caaf387e8ef51a560288710cfa29f9226ef18e71`
+and the summary SHA-256 is `ed8677dfd4173555809e77abe77e1e2373096d34f2b56a97d98ba626f149a1db`.
+This closes the previously unexecuted 196-control debt and qualifies the complete current selector inventory as
+a component checkpoint only. The post-matrix source audit still identifies proof-constructor rejection branches
+and parser/closed-grammar alternatives that are grouped behind class-wide bypass selectors rather than assigned
+one-locus negatives. Those predicates must be split and the expanded matrix rerun before PbBootstrapGrammar can
+claim component implementation readiness; acquisition, integration, qualification, custody, and review remain
+separate later residue.
+
+The first 2026-08-28 proof-refusal split removes the compound argv, binary/pin, injection, ensure, and closed-
+environment bypass selectors. Their thirty-three independently named refusal loci now have literal exact-case
+and product-control assignments, bringing production CPP, oracle, Cabal-flag, Cabal-condition, and `-D`
+inventories to an exactly reconciled 288 unique identities. The warnings-as-error clean build and complete
+oracle exit zero. In a fixed serial focused run, all thirty-three replacement subjects changed their
+preprocessed production source, object, and executable; all thirty-three reddened both their assigned exact
+case and the complete oracle, all thirty-three product controls stayed green, and all three artifact layers
+were pairwise unique. This is an intermediate component diagnostic only: the grouped toolchain, platform,
+control-flow, and parser/closed-grammar loci remain open, so PbBootstrapGrammar, Sprint 0.3, and Phase 0 remain
+NOT VALIDATED.
+
+The second 2026-08-28 proof-refusal split removes the compound toolchain, platform, and control-flow bypass
+selectors. Fifteen toolchain, eight reachable platform, and twelve control-flow refusal loci replace them,
+bringing the exactly reconciled production, literal-oracle, Cabal-flag, Cabal-condition, and exact-`-D`
+inventories to 320 unique identities. A warnings-as-error clean build and complete clean oracle exited zero. In
+the fixed serial focused run, all thirty-five replacement subjects changed their preprocessed source, object,
+and executable; every assigned exact case and complete oracle reddened, every product control stayed green,
+and all three artifact layers were pairwise unique. The parser front-end split then removes the compound line-
+discipline, lexical, and parse bypasses in favour of twenty-one candidate-reachable refusal loci, bringing the
+same five inventories to 338 exact identities. Its clean build/oracle and fixed serial focused matrix have the
+same complete result: twenty-one changed and pairwise-unique subjects at all three artifact layers, twenty-one
+assigned and complete-oracle reds, and twenty-one green product controls. Impossible empty-token, unmatched-
+dedent, top-level-dedent, empty-suite, EOF-before-dedent, and unconsumed-token recovery paths are not candidate-
+reachable under the exact-size line discipline and the lexer's seeded indentation stack, synthesized dedents,
+and terminal EOF; they are recovery plumbing rather than suppressed candidate decisions.
+
+The final 2026-08-28 closed-grammar expansion assigns one changed subject to every admitted statement, binary
+operator, postfix expression, index form, primary expression, parenthesized form, list form, argument form, and
+dotted-name extension. Thirty-three alternatives are exercised by the independently literal canonical fixture;
+leading slices, empty tuples, and empty lists have separate exact 4,770-byte fixtures with complete ordered
+finding expectations. The production source, literal oracle registry, manual Cabal flags, Cabal conditions, and
+exact `-D` mappings now reconcile exactly at 374 unique once-only identities. The warnings-as-error clean build,
+complete clean oracle, and Cabal package parse are green; Cabal reports only the repository's pre-existing
+distribution-metadata warnings. In the fixed serial 36-row focused matrix, every assigned exact case and complete
+oracle reddened, every product control stayed green, every artifact layer changed and was pairwise unique, and
+inputs remained frozen. Its result-table and summary SHA-256 values are
+`ce2b190c9bf8a939182cae19c600eee982163126cb0684cc25063c02ea1a4f22` and
+`f21fa1995f43b31cbe86d3544318a2e4d3b4d90c7c960766c7262d607137f297`.
+
+The replacement complete frozen-input matrix then built and linked all 374 selectors sequentially. All 374
+changed subjects reddened their independently assigned exact case, all 374 registered product controls stayed
+green, every preprocessed source, object, and executable differed from the clean baseline, and no artifact-layer
+digest was duplicated. The clean oracle was green before and after the matrix. The before/after input manifests
+are byte-identical with SHA-256 `7de27b7367ba6a25955f685f16e76bb36f878cbfabb3791a87541f3a37e507b6`;
+the result-table SHA-256 is `d1ffd4c4fa571b2abee3ac086b6ccafeae7aa12017cc2c1ae7998ed2db211c8e`
+and the summary SHA-256 is `aab1475edea42802aeb5cecc8bc33e36ea5c3f2caac811c491e74d116628213d`.
+The first complete attempt is explicitly discarded because its non-threaded Haskell harness reached the host
+`select(2)` descriptor ceiling after row 339; it reported no product row failure, and the unchanged harness
+source was relinked with the threaded runtime before the successful uninterrupted replacement run. A fresh
+post-matrix source pass finds no known uncovered candidate-reachable proof-refusal or closed-AST-constructor
+locus. This establishes current PbBootstrapGrammar component implementation readiness only. Authenticated source
+custody, acquired-token integration, dispatcher retention, qualification, independent review, and the integrated
+Phase-0 candidate remain open, so Sprint 0.3 and Phase 0 remain NOT VALIDATED.
+
+The 2026-08-26 SourceDebtBaseline checkpoint replaces its prior whole-oracle mutation treatment with one literal
+55-row selector-to-exact-case table and an independent diagnostic-name product control. Production CPP, oracle
+identities, Cabal flags, and exact `-D` mappings reconcile at 55 unique names. The strict direct-source build and
+complete clean oracle exited zero. In a fixed serial frozen-source matrix, all 55 distinct changed subjects
+reddened only their assigned exact case and all 55 controls stayed green; there were no build failures,
+survivors, wrong-locus results, duplicate objects, or duplicate executables. Start/final tracked-source manifests
+are byte-identical with SHA-256 `435cd4aedd8949da9c8928079add6f740dd71181d9cac7fcb99d706b0b40f70b`;
+the result-table SHA-256 is `8680e0dfa160ad0661a99f5170c9202192f48eb5d3110c9ed2d89b3b3362f74d`
+and the summary SHA-256 is `1669c3736e1cfeab1a13c414a12053864f9f6a088e4aaf3b48865558a7cbc714`.
+This is a current component checkpoint, not readiness or validation: the post-matrix source audit still finds
+unselected result assembly/order, observation and finding projection, state-fold, serializer, and bounded-prefix
+composition loci, and the eighteen private-surface package-opacity attacks have not been refreshed against the
+eventual expanded subject.
+
+The 2026-08-28 SourceDebtBaseline public-diagnostic expansion supersedes the 55-row checkpoint but remains a
+component checkpoint rather than readiness or validation. The raw facade now has exact executable and symbolic-
+link mode cases plus four paired multi-failure precedence cases proving that path, object-identity, blob, and
+aggregate-blob preflight stops before a distinct later failure. Seventy-nine new atomic selectors split raw field
+and mode projection, registered-family preparation, member and family order, observation/result composition,
+hash and path-digest fields, comparison inputs, baseline and observation projections, rendered observations,
+resource-result routing, limit serializers, and bounded-prefix decisions. Production CPP, the 134-row literal
+intent registry, 134 literal impact signatures over twenty-three exact complete-result cases, Cabal manual flags,
+conditions, and exact `-D` mappings reconcile at 134 unique identities. A fixed serial strict matrix built all
+134 distinct changed subjects; every assigned case and complete oracle reddened, all 134 impact signatures and
+all 134 complementary isolation signatures were exact, every registry control stayed green, and every
+preprocessed subject, object, and executable changed uniquely. Clean-before and clean-after stayed green and the
+input manifest remained byte-identical. The frozen-manifest, result-table, and impact-table SHA-256 values are
+respectively `cc76a1c56b52ee992c30941987ab6d0c454ae6c0a4336be3f9d185f3d4f7f917`,
+`f5623d66672e50f3ae989d6f42de143cb88e5edcaeacffdab60dd7590bf9e4a1`, and
+`b5c11eb739ed001ff22fe4710f6cb984b4b86c7e0638b22a881f2a7c06739e3d`. The first strict run correctly refused
+five overclaimed impacts because an initial discovery parser matched `blob ...` inside `aggregate blob ...`; the
+five false labels were removed and the final harness requires the exact diagnostic-line prefix. Acquired-evidence
+assembly and snapshot mismatch, lifecycle state construction/fold behavior, the remaining finding serializers,
+and the eighteen private-surface package-opacity attacks still require a current exact bracket. SourceDebtBaseline
+is therefore still open and NOT VALIDATED.
+
+The subsequent current-byte SourceDebtBaseline run supersedes only the public matrix receipts in the preceding
+paragraph; it does not yet establish component implementation readiness. The production selector union is now
+180 exact identities: 134 public-diagnostic selectors over twenty-three independently literal complete-result
+cases and forty-six package-internal selectors over four independently literal evidence, serializer, integrity,
+and lifecycle cases. The public and Internal oracle registries are disjoint and their union reconciles exactly
+with the real production CPP identities, Cabal manual flags, library conditions, and `-D` mappings; the direct-
+source Internal component has the same forty-six mappings plus one test-hook define that is absent from packaged
+builds. The formerly proposed missing-baseline-detail selector was removed after the closed `SourceDebtId`
+universe proved that branch unreachable: Pb is handled before baseline lookup and every other identifier has a
+baseline. A serial current-source public matrix built all 134 changed subjects, killed every assigned and
+complete oracle, preserved all complementary isolation sets and named controls, changed every preprocessed
+subject/object/executable uniquely, and kept both clean controls and the input manifest stable. Its manifest,
+result-table, impact-table, and summary SHA-256 values are respectively
+`139f508a084e45cca8d5a7ee67f459f06a0a802ba5b73dd6a6398773159bb751`,
+`fc1df5c3e3c9096163331fd54ccc7f8655fc6731c118987c8c78b1ae963a2b43`,
+`b5c11eb739ed001ff22fe4710f6cb984b4b86c7e0638b22a881f2a7c06739e3d`, and
+`1dc9cca925c007ad835c0307c174ede301c2d7bd83459f13c1d8593c6f3de93d`. The corresponding forty-six-row
+Internal matrix has manifest, result-table, impact-table, and summary SHA-256 values
+`6eb8a1418c3f4c0b142ee57098bdbb1882063c98b564ac75c41cafac2bd48f62`,
+`efe3e9aa7aec17e53ff7fd093805aa94c1b1d96874de0b3f6b88881bf868fb89`,
+`41e7dff247a6d61f18273c1ae2236fa50c2d9c2023a6e5bcc5b6dcaf8b011bbc`, and
+`fbfca5a69e8a8b3858fcb821b38a39826b527fd562f07f92f91cda39f9535bda`. A package-database bracket then
+compiled, linked, and ran the public facade and rejected all eighteen private imports at their exact missing-
+export or hidden-module boundary; its summary and isolated archive SHA-256 values are
+`73d54ed75d409b62c5f6a17a3e190f8d18d28510cc17957535f2b9da2251d600` and
+`33a5907d430089f222c8346a30e5f8ef2dea65d828c1bc38e7cc96921ba14bd1`. `cabal check` exits zero with only
+the existing package-metadata warnings. The required post-matrix reachable-decision audit nevertheless rejects
+180 as a completeness total. In particular, the raw diagnostic envelope and invalid-mode serializer retain
+unselected fields/routes; acquired-closure preparation repeats path, object-identity, blob, aggregate, and
+precedence decisions without one-locus subjects; the bounded UTF-8 alternatives are not independently exercised;
+and several analysis/state/problem compositions and private helper projections remain selector-free. Those
+loci require independently literal cases and selectors followed by a replacement full matrix and opacity
+bracket. SourceDebtBaseline therefore remains open and NOT VALIDATED; acquisition integration, qualification,
+independent custody/review, and the integrated Phase-0 candidate remain later residue as well.
+
+The 2026-08-28 final SourceDebtBaseline audit supersedes that 180-selector checkpoint and establishes current
+component implementation readiness only. Eight additional public selectors independently omit each
+later-owned ID from the expected-family register. Nine package-internal selectors independently omit every
+closed `SourceDebtId` from the lifecycle register, while two more independently select observation-bound and
+problem-bound refusal of lifecycle state. The private oracle now states all nine empty-acquisition lifecycle
+folds literally and forces both bound-refusal routes; it does not derive the expected register from production.
+The public and Internal registries are disjoint at 188 and 73 rows, and their 261-name union reconciles exactly
+with 261 unique once-only production CPP identities, manual Cabal flags, library conditions, and exact `-D`
+mappings. The direct-source Internal component contains the exact 73 package-internal mappings plus its
+test-hook define. Both warning-as-error clean builds and complete clean oracles exited zero. In the final fixed-
+serial public matrix, all 188 subjects built and passed: every assigned and complete oracle reddened, all 188
+controls, impact signatures, and complementary isolation signatures were exact, every impact was nonempty,
+every preprocessed subject, object, and executable changed uniquely, both clean controls stayed green, and the
+input manifest remained byte-identical. Its manifest, result-table, impact-table, and summary SHA-256 values
+are respectively `6d4d67a510a65e5fb1486a37af17f1ec9a7c208b020e244dc28d64d8aa43a041`,
+`42e774cb86e48a9738cf6d07542ee29c0d7d77aec2ad640b6103de88da21aeda`,
+`71592217660bbf2120829719e1251a1fb44aed4613dfbe4f0c77f61a030fc874`, and
+`60126f5e7cc0d7f450eddf4329051fd8840488b56023a09c340c8bd46e1a1060`. The corresponding 73-row Internal
+matrix has manifest, result-table, impact-table, and summary SHA-256 values
+`e4a1f5eb265b46f50c164f46a85c25415bd7f735d62b397fc6142b43da3f6ae8`,
+`d83d8301c28247eb21a0c1b9c064cd1dc6aec4ea34c65c22d9486bccfcb6c1c6`,
+`a94a83e45e2485b488b76b49b3cd874741f55fdb1c9ee897d928cae45ab46d3a`, and
+`714cfb724c59e94e1375c929d03e145b19bdae968c9cf9b79d5564533edbea95`. A current-unit package bracket
+compiled, linked, and ran the public facade and rejected all eighteen one-symbol private clients for the exact
+missing-export or hidden-module reason; its summary and isolated archive SHA-256 values are
+`73d54ed75d409b62c5f6a17a3e190f8d18d28510cc17957535f2b9da2251d600` and
+`891d161260c16df8074742473c8b215ee31e3bafeaaaffaad0bede10f16ddf3f`. `cabal check` exits zero with only
+the existing package-metadata warnings. A fresh post-matrix reachable-decision line audit reports no known
+uncovered production predicate, register row, route, result/state/problem composition, projection, serializer,
+hash-field separator, bounded transition, or grammar alternative; the remaining selector-free arms are closed
+constructor plumbing or fail-closed recovery paths unreachable from the clean closed ID universe. This is not
+validation and does not advance Sprint 0.3: authenticated source custody, dispatcher integration,
+qualification, independent custody/review, and the integrated Phase-0 candidate remain open.
+
+The completed SourceConsumerGraph audit now reconciles 476 public-subject and 292 package-internal registry
+entries exactly across production CPP, the two literal oracle registries, Cabal flags, Cabal conditions, and
+Cabal `-D` mappings. The Internal count contains 290 Internal-prefixed names plus the two shared policy selectors.
+Twelve new public selectors split the two top-level cardinality predicates, both preflight branch decisions,
+path byte/shape/depth/segment routing, the field and two structural count predicates, and strict inventory
+comparison. Four new Internal selectors split bounded-prefix transition/observed-count projection, admitted-
+class composition, and admitted-role branch selection. A proposed fifth selector for the non-regular mode arm
+was removed after the exact clean graph proved that SourceClosure cannot construct executable admitted content;
+the reachable lower predicate remains independently selected through `contentModeProblemDiagnostic`, so no
+unreachable test-only authority was manufactured. The legal-name diagnostic seam also independently covers all
+four stems, exact/suffix alternatives, case normalization, filename projection, bypass, and an ordinary negative.
+Strict direct clean builds and both complete clean oracles exited zero against exact pinned package IDs. In a
+fresh fixed serial frozen-source public run, all 476 changed subjects reddened their assigned exact result and
+kept their product control green; no build failure, survivor, wrong-locus result, duplicate object, or duplicate
+executable occurred. Its frozen-manifest, result-table, and summary SHA-256 values are respectively
+`1276c13d053ffbd15e22f0e4021eed2983e1deb13ade3b204654e8826778f9cb`,
+`6194acafa25bf91c39fa8b0c025ae1975eefd9c4d781247b9d06da1f14815aac`, and
+`3a3c6ce69fa566d4656a1ee87d65700f6bf7ef9ce0ef04ffcccfc502e0e6b08c`. The corresponding Internal run killed
+all 292 assigned exact results with green controls and no duplicate artifacts; its frozen-manifest, result-table,
+and summary SHA-256 values are respectively
+`00e35763a8fcbdee65b990822e93762fa75b5deb4aaecb26676b12deedd72a76`,
+`6ff3739392110e42c00ad14f703c6d940aec4d7e2f4f3386ce2d0a18697eb478`, and
+`ce3fc1bc0187e3a0ce012eeb3c43568c91534fefdc5e5f6949183449ac880675`. A fresh production-line audit reports
+no known reachable uncovered predicate, result, observation, problem, limit, serializer, grammar-alternative, or
+composition locus in either subject. This establishes current component implementation readiness only;
+authenticated source custody, dispatcher integration, qualification, independent custody/review, and the
+integrated Phase-0 candidate remain open. CompilerComponentPlan's earlier 653-row result and the 2026-08-24
+concurrent attempt remain superseded diagnostics; the latter remains rejected as documented in
+`CRASH_SUMMARY.md`. The six reachable decisions found by that checkpoint's post-matrix audit now have once-only
+selectors: bounded-prefix exceeded-count projection, UTF-8 exceeded-count projection, aggregate-overflow
+observed projection, the eight-field empty scan-state seed, inherited/current conditional-node merge, and the
+shared module/main candidate-membership predicate. A focused changed-subject census found literal collateral
+sets of 11, 41, 3, 6, and 7 exact cases for five of those selectors and established that the aggregate-overflow
+projection is isolated; all six replacement rows then passed their assigned, declared-impact, unaffected, and
+product-control modes. Production CPP, the literal 659-row oracle registry, Cabal manual flags, `if flag(...)`
+conditions, and exact `-D` mappings reconcile at 659 unique once-only identities. A fresh fixed-serial matrix
+started from row one, rebuilt the clean support universe with warnings as errors, and passed all 659 changed
+subjects. Every row changed its preprocessed source, object, and executable; reddened its primary and complete
+declared-impact set; kept every undeclared exact case and named product control green; and remained pairwise
+distinct at all three artifact layers. Both clean controls exited zero and the dependency/source manifest was
+byte-identical. Its frozen-manifest, result-table, and summary SHA-256 values are respectively
+`b12e82c85267a21271bb90cbcafac48913d94ef0c12d9933cadd7f98f4b3afc6`,
+`e29421cf4f1ea4bafaa8290f715d4da20c64ff5a5e56c2225190b3e30386ef57`, and
+`63f29d2025ab716b143e45e9638cef45464ab50e74c229f1aa16fc20ef054c8c`. A fresh reachable-decision line audit
+finds no known uncovered production locus: the remaining selector-free functions are closed data/constructor
+plumbing, already-decomposed compositions, or truncation recovery arms that clean production cannot reach.
+Against the direct package database, the public diagnostic client compiled, all seventeen one-symbol type/value
+facade attacks failed at their exact missing export, and the Internal-module attack failed at the hidden-module
+boundary. This establishes current CompilerComponentPlan component implementation readiness only;
+authenticated source/toolchain custody, dispatcher integration, qualification, independent custody/review,
+and the integrated Phase-0 candidate remain open. CompilerElaboratedPlan now has a complete 342-row
+current-byte matrix, opacity bracket, and no-known-gap post-matrix audit, establishing component implementation
+readiness only. SourceDebtBaseline now has 188 public and 73 package-internal selectors, while
+CompilerSourceGraph's earlier combined 47-row raw/acquired registry remains superseded by the expansion below.
+SourceAcquisition and SourceClosure expose 835 and 606 production selector identities with complete current-byte
+serial component matrices, CompilerBuildInfo has 614-row current component implementation readiness, and
+PbBootstrapGrammar has a complete 374-row current-byte matrix and no-known-gap reachable-branch audit. Integration,
+qualification, authenticated inputs, and custody remain open for all of them. This audit is not validation and
+does not advance Sprint 0.3.
+
+The tracked tree now names exactly one `pb/__main__.py` blob, at 4,770 bytes with SHA-256
+`e210494d3ad4bcaad716daed5bb89cb5611107547e83eb018a6369e134cd5418`. This closes only the earlier mechanical
+index/worktree mismatch. A production literal fed back into both Pb and SourceClosure oracles still cannot
+substitute for binding independently acquired tracked bytes, and the current agent-authored dirty worktree is
+ineligible for candidate acquisition. Authenticated acquisition, the complete selector/control matrix,
+qualification, and human review remain explicit integration residue.
+
+CompilerSourceGraph's bounded refusal rewrite has now expanded from 47 to 237 independently registered
+changed-production subjects: 167 raw diagnostic selectors and 70 package-hidden acquired-wrapper selectors.
+The raw oracle adds complete field and ordering checks for its nine observations, eight permanent refusals,
+thirty-three problem findings, failure summary, inventory and Git-object serialization, accepted mode/object/
+identity/path alternatives, and result joins. Two new exact full-result rows pin a portable path digit and a
+non-Haskell symbolic-link mode through identity comparison. The acquired oracle now includes the five
+SourceConsumerGraph limit observations in its exact within-bound results and covers opaque-state projections,
+within/exceeded composition, consumer/envelope/refusal retention, all eight local observation fields, all five
+mandatory refusal fields, and result ordering. Production, both literal oracle registries, 237 manual Cabal
+flags, 237 library mappings, and the required second 70 acquired-component mappings reconcile exactly; `cabal
+check` parses with only the pre-existing package-metadata warnings.
+
+Several development runs were correctly discarded before evidence retention: Cabal's enlarged flag solver was
+cancelled before compilation; two matrix attempts stopped on identity/object alphabet widening branches that
+made admitted alternatives warning-dead; one stopped on a CPP-elided raw problem-rendering chain; and one
+completed the raw family before exposing an inverted harness expectation for the acquired impact-control exit.
+After those defects were repaired, an uninterrupted fixed-serial warnings-as-error matrix built all 237 rows.
+Every row changed the preprocessed source, object, and executable, reddened its assigned exact result and the
+complete oracle, and retained a green product control; all 70 acquired rows also retained green declared-impact
+and unaffected-isolation controls. All three artifact layers were pairwise unique, both raw and acquired clean
+controls exited zero before and after, and the input manifest remained frozen. The frozen-manifest, result-table,
+and summary SHA-256 values are respectively
+`0fbbe15c37a3d79333f89c0218b555cdda524efad30854efa3b12d411f1c200e`,
+`cf87c158d733052a53801ea492fd1417025d3ad54a7f2c43c34dc09b6c90e11a`, and
+`5b90f5bbd2aec8e3cd2c6a324930cb2856393669746a656090e6331ae671b488`.
+
+The mandatory fresh production-line audit rejects that 237-row result as a completeness endpoint. Raw tuple and
+successful-summary assembly, top-level and per-entry resource/grammar precedence, and bounded-prefix, UTF-8,
+aggregate-fold, splitter/grouping, and digest-routing transitions still contain independently meaningful
+selector-free composition decisions. The 237-row matrix is therefore retained only as a sound superseded
+component checkpoint for its closed registry, not as CompilerSourceGraph implementation readiness. Those loci
+must receive literal exact cases, atomic selectors, Cabal mappings, and a replacement frozen matrix before
+Sprint 0.3 integration can begin. CompilerSourceGraph and Sprint 0.3 remain NOT VALIDATED.
+
+The first repair pass for that rejected endpoint expands the raw registry from 167 to 259 selectors while the
+acquired registry remains at 70. It adds literal cases and atomic changed-production subjects for tuple and
+successful-summary projections; top-level and per-entry resource/grammar precedence; identity/entry bound
+routes; aggregate accumulation, saturation, overflow, and recursion; bounded-prefix transitions; splitter,
+UTF-8-width, first-result, grouping, serialization, Git-object, and digest transitions; and problem-detail
+projections. Production, the two literal oracle registries, 329 Cabal flags, 329 library CPP mappings, and the
+second 70 acquired-component mappings reconcile exactly, and `cabal check` is clean. Clean raw and acquired
+warnings-as-error binaries both pass. A fixed-serial focused matrix then built the 92 new raw rows: every row
+changed its preprocessed source, object, and executable; reddened its assigned exact result and the complete
+oracle; retained its independent product control; remained pairwise distinct at all three artifact layers; and
+left both clean controls green before and after with a frozen input manifest. Its frozen-manifest, result-table,
+and summary SHA-256 values are respectively
+`0c1dd1d5953b85bbddc59b6ea6144cf5a2d3807fa59dedb39928eca8f797fd86`,
+`c82d7489f6377a64cb0c67429e91d63870f3127cce410cdad99bd1e73da00efe`, and
+`1ef43f9d4e4175d70608c142d7f18ec21e843b3a5a4f0aa1e31db0555ddd6437`. Two earlier focused attempts are
+discarded diagnostics: one exposed a warning-dead aggregate recursion helper and the next exposed an ambiguous
+overloaded digest chunk in the selected branch; both changed-production subjects were repaired before the
+uninterrupted 92-row result.
+
+The post-repair production-line audit still does not promote 259 raw selectors to a completeness endpoint.
+Entry-resource and entry-grammar traversal order, the blob-limit predicate, list-head branch routing,
+Haskell/Cabal empty-inventory precedence, UTF-8 recursion, digest rendering, and several collision/prefix
+selection decisions remain independently meaningful selector-free loci. They require exact compound or
+boundary cases, atomic selectors, Cabal mappings, a focused repair matrix, and a final uninterrupted combined
+matrix followed by another fresh audit. CompilerSourceGraph and Sprint 0.3 remain NOT VALIDATED.
+
+That second audit has now been closed. Fifteen selectors and six new exact compound fixtures isolate
+entry-resource and entry-grammar traversal, path-segment traversal, bounded-prefix and UTF-8 recursion,
+blob-limit and portable-collision predicates, duplicate/portable/prefix selection, portable member order,
+empty-inventory precedence, list-head value routing, and digest rendering. Their fixed-serial focused matrix
+passed all fifteen rows with frozen-manifest, result-table, and summary SHA-256 values respectively
+`dce1aef3c2fe2c9cbf74d92c19ddf9685b17b7bbcd0fbcd2c7971e77ee71c963`,
+`820b98a4e0e6c7d7584d49d0ce71a11f72f4036bb5a757d85cb206e710ad51d2`, and
+`1de28cfd41aa7f1996452847c5c856ff32c2c0c370fc62a3f6e786143a72cbe5`. A final audit then separated the
+two-member duplicate-group predicate as one further atomic subject. After discarding one misselected focused
+diagnostic that re-ran the registry's prior last row, the corrected literal one-row harness passed that subject;
+its corresponding hashes are
+`faf8bf4e2bfd258dbda72f88611b2ad55613af1d7fdb9d60c8f776fb13e712ca`,
+`30b60aaf2d5cdd65a1b14ed2e8e803430ff10f2504f1af5c5e813b36d2949be6`, and
+`a1f4f3943551901c13f3a6791be14e54225207c759b05b37c2ea8db7abba241e`.
+
+CompilerSourceGraph's current registry therefore contains 275 raw and 70 acquired selectors. Production CPP,
+both literal oracle registries, all 345 manual Cabal flags, all 345 library mappings, and the second 70
+acquired-component mappings reconcile exactly; `cabal check` is clean. A fresh uninterrupted fixed-serial
+warnings-as-error matrix rebuilt all 345 changed-production subjects from row one. Every row changed its
+preprocessed source, object, and executable; reddened its assigned exact result and complete oracle; retained a
+green product control; and remained pairwise distinct at all three artifact layers. All 70 acquired rows also
+retained green declared-impact and unaffected-isolation controls. Raw and acquired clean controls exited zero
+before and after, and the input manifest remained frozen. The frozen-manifest, result-table, and summary SHA-256
+values are respectively
+`6d481de6c13e1f4e5ec7046be03d15b32f4f37dd344c4f7eb730cd63d5af18fa`,
+`768bb8e2a79169ad4943489a4596e2c4eb665547ec532d2e95fdd88441dae688`, and
+`88ec9b874c2e1ff35a6ac219878ec5afad310c4b2b1aa152db542c094c6ae203`.
+
+The mandatory post-matrix reachable-line audit finds no known uncovered CompilerSourceGraph locus. Remaining
+selector-free expressions are closed data/constructor/accessor plumbing, direct compositions whose individual
+inputs and order are already isolated, predicates already challenged by their branch/bypass selectors, or the
+`listHead` empty arm whose only production fallback is `Nothing` and therefore has no distinct reachable
+observation. This establishes current CompilerSourceGraph component implementation readiness only.
+Authenticated custody, integrated dispatch/evidence, qualification, independent review, and the Sprint-0.3 and
+Phase-0 candidates remain open; CompilerSourceGraph, Sprint 0.3, and Phase 0 remain NOT VALIDATED.
+
+The source-acquisition implementation now has a package-hidden candidate conversion without widening its sole
+public refusal-only facade. The signed-envelope implementation moved into
+`Amoebius.Validation.SourceAcquisition.Internal`; primitive snapshot representation moved into package-hidden
+`Amoebius.Validation.SourceSnapshot.Internal`; and only the acquisition verifier imports the acquired-wrapper
+constructor in an ordinary build. An anchored session binds the external expectation, independent expected
+manifest, verification key, fresh challenge, and durably reserved replay set. After the existing v2 verifier
+succeeds, the handoff repeats immutable-bundle splitting and byte association, constructs the exact tracked
+entries, recomputes the source identity, and alone mints the opaque snapshot consumed by Dispatch. The public
+facade still exports only `sourceAcquisitionDiagnostic`, and the existing complete public oracle remains green.
+
+A new direct-source internal oracle owns thirty-three literal selectors for every anchored-session field, wire
+and bundle routing, verification refusal/success retention, immutable-member association, tracked-entry
+construction order, split failure/success, content-problem retention, object-format and entry projections,
+identity join, final snapshot projections, and the exact streamed-expected-manifest to anchored-session byte
+join. The final selector additionally requires an atomically reserved replay identity to equal the authenticated
+manifest identity before acquired construction. The first 25-row, second 28-row, third 31-row, and fourth 32-row
+runs were sound but immediately superseded audit
+checkpoints: mandatory production-line reviews found the success/association/order decisions, required direct
+paired negatives for the defensive split and content branches, and finally exposed the missing independent
+transport and replay-reservation joins. The 32-row result-table and summary SHA-256 values
+`c2b5aa62b1daeb29daa2a9c625d9111ceb657e696958735cd18d6361a2c0edd3` and
+`c903504f4d28ba13e193953234a335e0bd979557a8a2937a3a5cdbda5a0ca395` are now superseded by the replay-binding
+change. Production, oracle, thirty-three manual Cabal flags, the library mappings, and the direct-source
+component mappings reconcile exactly in the strengthened fixed harness. Its warning-strict serial run rebuilt
+clean plus all thirty-three isolated changed subjects: every assigned exact case reddened, the public control
+remained green, all three artifact layers changed and remained pairwise unique, final clean controls exited zero,
+and the input set stayed byte-identical. The result-table and summary SHA-256 values are respectively
+`8bec4104db1a00235028adf029437a9fbcf01b958e099072ece882d5836217e4` and
+`1266d1c3e46f2c1754d03879f071c3fb04b525d4833de53bb8b5718136cd95b9`. `cabal check` accepts the package with
+only its existing distribution-metadata warnings; a current Cabal package-boundary rebuild remains pending.
+
+Through the freshly rebuilt current Cabal package registration, external clients of both
+`Amoebius.Validation.SourceAcquisition.Internal` and
+`Amoebius.Validation.SourceSnapshot.Internal` fail at the intended hidden-module boundary, while the public
+`Amoebius.Validation.SourceAcquisition` control compiles warning-strict. A fresh post-matrix production-line
+audit finds no known uncovered reachable locus in the handoff: remaining selector-free expressions are closed
+constructor/accessor plumbing, compositions whose routes and order are already isolated, or defensive branches
+with direct paired cases. This remains a package-hidden handoff component checkpoint, not external acquisition
+or Sprint-0.3 readiness. No qualified external supervisor yet constructs the anchored session; the verification
+key and expected intent are not bound to a reviewed trust root; challenge issuance and replay reservation are
+not observed as durable atomic operations; authored-root and frozen-custody claims lack an authenticated
+external observation; and no production supervisor invokes the anchored handle route. The supervisor protocol,
+CLI composition, qualification, and independent human custody/review remain open. Sprint 0.3 and Phase 0 remain
+NOT VALIDATED.
+
+The strict-ingress residue is now narrowed by a package-hidden bounded streaming adapter. It consumes the
+independent expected-manifest, signed-envelope, and immutable-bundle handles in fixed 32-KiB chunks; refuses at
+16 MiB, 16 MiB plus the exact envelope framing overhead, and 32 MiB respectively; stops before reading a later
+stream after an earlier refusal; retains only a bounded IO-error projection; and preserves exact accepted bytes
+for the verifier. The independently literal oracle owns fifty selectors covering EOF/limit/accumulation,
+multi-chunk order, all handle/failure/success routes, early-refusal read order, all three stream limits,
+construction and accessor mappings, IO/limit refusal routing, and every result projection. Production, oracle,
+fifty manual Cabal flags, and both library/component mappings reconcile exactly. The final current-byte fixed-
+serial matrix changed each selector's preprocessed source, object, and executable; reddened every assigned exact
+case; retained a green independent control; kept all three artifact layers pairwise unique; and froze its inputs.
+The result-table and summary SHA-256 values are respectively
+`f31013826e5483c9e4e0d439151534841abb1e8a2cfab5c6aa81262ca8fae13d` and
+`4501701bfed18d7e578d272d991c52de93d8d8aa0f72244f6c7d0ec69951e4ea`. A fresh reachable-line audit finds no
+known uncovered adapter locus; remaining selector-free expressions are closed representation plumbing or
+compositions whose inputs, routes, order, and projections are isolated. Against the freshly rebuilt Cabal
+package, an external client cannot import the hidden ingress module while the public SourceAcquisition control
+still compiles warning-strict. This establishes transport component implementation readiness only: the adapter
+does not authenticate policy, issue a challenge, reserve replay state, establish external custody, call the
+verifier by itself, dispatch the acquired snapshot by itself, qualify the harness, or authorize promotion.
+
+The bounded adapter is now composed with the verifier and the real acquired-snapshot dispatcher without
+widening either public facade. The package-hidden pipeline joins the streamed expected-manifest bytes to the
+session's exact anchored bytes, passes only the bounded wire and bundle to the verifier, retains ingress and
+verification refusals unchanged, requires the supervisor's reserved replay identity to join the signed manifest,
+and returns only the opaque acquired snapshot. Its independently literal
+seven-row registry, production CPP, Cabal flags, and both mappings reconcile exactly. The fixed-serial matrix
+changed every row's preprocessed source, object, and executable; killed each assigned exact result with a green
+public control; kept all artifact layers pairwise unique; and froze the input set. Its result-table and summary
+SHA-256 values are respectively
+`69441a34297e9c0a6c0b1f32f52dc32c8bdd1479ff4029d6aa5485749f3322c7` and
+`6eac7a8573206346f5869771a87367046b2d58e144a2d57e400af5bbbf674fe0`. The current replay-aware rerun retains
+that summary digest and has result-table SHA-256
+`ee5906e8b6464dcad17f8d4ea90dc964eda01b1d6cd620ebd25bf617a1fd1ef8`; all seven assigned rows, both final
+clean controls, three pairwise-uniqueness checks, registry reconciliation, and frozen inputs pass.
+The adjacent package-hidden dispatch adapter has the closed production import graph: only
+`Amoebius.Validation.Dispatch.Internal` imports it, and that wrapper fixes its callback to the real acquired
+Phase-0 checker. Both pipeline-refusal and acquired-success routes have literal cases and once-only selectors;
+their fixed-serial matrix changed all three artifact layers, reddened both assigned cases, retained green
+controls, kept artifacts pairwise unique, and froze its inputs. Its result-table and summary SHA-256 values are
+respectively `f3ff63393d35ffa9f8814fe17c84b5d1f16e6ce2942f14e397ca38d1634fe64e` and
+`d4ba4f1fd9c5dac1a813c7914cd969e95768e1c04cbfe7a86d875052b0d467df`. The current replay-aware rerun retains
+that summary digest and has result-table SHA-256
+`1c3f00e989fd60f1f45a7998bfc35ddf54d50c2de703d42a0cdaf73d8775c542`; both assigned rows, both final clean
+controls, three pairwise-uniqueness checks, registry reconciliation, and frozen inputs pass. Fresh reachable-line audits find no
+known uncovered locus in either adapter; remaining selector-free expressions are closed representation plumbing
+or direct compositions whose refusal, success, data, order, and callback routes are isolated. These are still
+component diagnostics: no externally qualified supervisor constructs the anchored session or supplies the
+three handles to `checkExternallyAnchoredPhaseZeroHandles`, and the public CLI remains on its permanently
+refusing caller-selected Git path.
 
 ## Sprint 0.4: Haskell documentation and plan-contract checker ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/Documentation.hs`, `src/validation-kernel/Amoebius/Validation/PhaseContract.hs`, internal `src/validation-kernel/Amoebius/Validation/PhaseIdentity.hs`, `src/validation-kernel/Amoebius/Validation/PhaseSemanticContract.hs`, `src/validation-kernel/Amoebius/Validation/PhaseSemanticJoin.hs`, and `src/validation-kernel/Amoebius/Validation/ResourceProvisionContract.hs`
 **Blocked by**: Sprint 0.3
-**Independent Validation**: Complete structural component corpora are accepted and minimally different dependency, inventory, raw-status, retired-path, wildcard, fence, comment, and line-wrap defects are refused at exact loci. The Haskell prose-budget oracle independently states an exact 50-word sentence in single-line and hard-wrapped forms, a seven-sentence paragraph, and table/fence exemptions. Physical-line and measurement-omission production mutants must red those exact controls. The current documentation selector registry has a complete nine-row changed-subject component bracket. PhaseContract now has a literal thirty-two-selector and thirty-two-case registry whose full changed-subject dependency discovery is running; package opacity, qualification, and semantic policy/prose correspondence remain open.
+**Independent Validation**: Complete structural component corpora are accepted and minimally different dependency, inventory, raw-status, retired-path, wildcard, fence, comment, and line-wrap defects are refused at exact loci. The Haskell prose-budget oracle independently states an exact 50-word sentence in single-line and hard-wrapped forms, a seven-sentence paragraph, and table/fence exemptions. Physical-line and measurement-omission production mutants must red those exact controls. The current documentation selector registry has a complete nine-row changed-subject component bracket. PhaseContract has a complete bounded literal 119-selector and 119-case changed-subject bracket plus the package-built component/public-control and four-client opacity bracket from those exact bytes. Its current source, oracle, and Cabal description instead reconcile at 134 reachable selectors and cases; the first fresh 134-row run was deliberately stopped after 62 complete matching rows at the user-requested pause and is not a receipt. The 119-row package boundary is consequently stale, while the remaining atomic inventory, qualification, and semantic policy/prose correspondence remain open.
 **Oracle**: `test/validation-kernel/DocumentationOracle.hs`, `test/validation-kernel/PhaseContractOracle.hs`, and `test/validation-kernel/PhaseSemanticContractOracle.hs`; separately authored component diagnostics whose independent review is consolidated into the Phase-0 gate, not requested per sprint.
 **Legacy IDs**: `LTD-VAL-001`, `LTD-VAL-002`
 **Docs to update**: `documents/documentation_standards.md`, `DEVELOPMENT_PLAN/development_plan_standards.md`
@@ -1377,9 +2143,9 @@ sentences over forty-five words across 195 governed documents, 128 over ninety, 
 table and fenced cases were exempt; the physical-line mutant missed only the wrapped overage, and the omission
 mutant erased both controls. These are supporting diagnostics, not a candidate or validation. The exact live
 counts must be re-frozen after documentation edits stabilize, and both changed-production builds must run
-through the complete component runner. The latest completed aggregate executed all eighteen named component
-oracles; sixteen met their diagnostic expectations, `DispatchOracle` exposed a stale classifier, and
-`DocumentationOracle` refused the deliberately stale manifest. A provisional post-schema measurement observed
+through the complete component runner. The 2026-08-26 aggregate executed all eighteen named component oracles,
+and every oracle reported its bounded diagnostic expectations met after the six missing documentation-header
+finding projections were restored. A provisional post-schema measurement observed
 1,583 over-target sentences and 655 over-target paragraphs, with all 1,728 typed semantic slots represented by
 exact-prefix unresolved gate cells, 385 resource-contract gaps, no reviewed semantic payload, and the permanent diagnostic-only
 join refusals. Subsequent semantic-contract and documentation hardening invalidated those exact bytes. No current
@@ -1552,6 +2318,255 @@ independent parser conjuncts, closed-grammar alternatives, finding/observation r
 decisions remain unselected. The registry must expand and undergo a new complete matrix and another post-matrix
 audit before this component can contribute candidate evidence.
 
+A current-byte strengthened rerun now supersedes the earlier dependency-only receipt without changing that
+completeness verdict. Three selectors that also guarded mutant-only helper definitions were repaired to leave
+their CPP identity at one behavioral production locus; the bounded Markdown-target and container-normalization
+helpers are evaluated on the clean route so warnings-as-errors cannot decide a row. A Haskell-only direct driver
+then exposed the oracle-owned 32-selector, 32-exact-case, and literal impact/control registries. The fixed-serial
+matrix reconciled those identities exactly with production, all manual Cabal flags, and all library CPP mappings,
+and executed every changed binary against all thirty-two exact cases. All 1,024 expected red/green classifications
+matched the literal impact registry; every assigned case reddened, every named product control and undeclared
+case stayed green, all preprocessed subjects, objects, and executables changed and remained pairwise unique,
+clean-before and clean-after controls passed, and the input set stayed byte-identical. Result-table, summary, and
+combined per-row exact-case receipt SHA-256 values are respectively
+`3a09f3ca436b5528729883574f357556b1368efa68af12e68fe3804a8ae7885c`,
+`16d13dce9432f8b97614eb98116409f4964d001b0f8e7e68112caeff261bf7b6`, and
+`3a0e8bd828196217615578e4d728a1cf0e2a91e482400fa854bf8bb83bdf02b6`. The mandatory reachable-decision audit
+then rejected thirty-two as a completeness total: phase discovery/path/title parsing, Gate/tracker state-machine
+transitions, exact cell and inline-code grammars, phase/dependency/Gate/sprint finding projections and ordering,
+closed tracker link/destination grammar alternatives, lexer fence/comment/HTML/container branches, resource
+limit values and refusal projections, observation/result retention, and final component composition do not yet
+have atomic selectors and independently literal exact cases. This is a stronger bounded component checkpoint,
+not PhaseContract implementation readiness or Sprint-0.4 evidence.
+
+The bounded PhaseContract component now also builds and runs through the current Cabal package registration in
+the contained `.build/dist-newstyle` tree with `--offline --jobs=1`; its one component case passes. Four separate
+warning-strict package-external attacks then fail at the exact intended boundaries: the whole Internal module is
+hidden, and `checkPhaseContracts`, `checkPhaseContractStructure`, and `checkPhaseAndTracker` are not exported by
+the public facade. The independent public `phaseContractDiagnostic` client compiles, links, and exits zero
+against the same registration. `cabal check` succeeds with only the repository's existing missing distribution-
+metadata warnings after the component stanza was narrowed from blanket `-Werror` to the package's explicit
+warning policy. These are mutable-worktree package-boundary diagnostics for the bounded registry only; they do
+not cure the uncovered PhaseContract decisions above, authenticate the compiler or inputs, qualify the harness,
+or establish Sprint-0.4 or Phase-0 validation.
+
+The next bounded PhaseContract expansion selects twenty-one additional reachable decisions: governed-directory
+phase discovery; duplicate, missing, extra, empty-discovery, and title findings; tracker corpus cardinality,
+missing-domain, status, title, contract-target, and projection joins; mandatory summary fields and Gate-section
+ownership; genesis, predecessor, and same-or-forward dependency findings; ordered Gate shape and exact command
+and summary-command findings; and sprint heading identity. Production, the independently literal oracle, fifty-
+three manual Cabal flags, and all library mappings reconcile exactly. The first 53-row matrix was correctly
+rejected when complete all-case discovery found three undeclared cross-impacts: indented-code acceptance also
+affects the indented Gate-section case, discovery suppression also affects the out-of-directory decoy, and the
+whole projection join also affects the prefix-specific case. After those literal declarations were repaired, a
+fresh fixed-serial matrix rebuilt clean plus all fifty-three isolated changed subjects and executed all 2,809
+selector/case classifications. Every assigned case reddened, all declared and undeclared classifications matched,
+the named controls and final clean controls remained green, all preprocessed sources, objects, and executables
+changed and remained pairwise unique, and the input set remained byte-identical. Result-table, summary, and
+combined per-row case-receipt SHA-256 values are respectively
+`1ea9e2107d3e24513b3770b6ccf6ddfea5a9dde6f66228b364b123990e2b01db`,
+`223f769aa7fea8db9db64877e3b504ebac63bc85cb7f97c43619fc7e0c97013c`, and
+`2a09ed4d290ca3907f6e9d9504c075e3fd6280566f88881c8401abfd61ab2013`. `cabal check` accepts the expanded package
+with only its existing missing distribution-metadata warnings.
+
+The post-expansion reachable-decision audit still rejects fifty-three as a completeness total. Unselected loci
+remain in phase filename/title grammar and duplicate selection/rendering; observation and final-result
+composition; exact table-cell and inline-code grammar; Gate and tracker state transitions, termination, and
+problem projections; dependency and tracker closed-link label/destination alternatives; tracker duplicate/extra
+and row-cell guards; sprint inventory, heading grammar, schema conjunctions, and blocker alternatives; lexer
+fence/comment/HTML/container branches; resource-limit values and refusal projections; and semantic diagnostic
+retention. The prior package build and four-negative/one-positive opacity bracket predate this expansion, so a
+current package registration and opacity rerun also remain open. This is a stronger bounded component checkpoint,
+not PhaseContract implementation readiness or Sprint-0.4 evidence.
+
+The second PhaseContract expansion raises the bounded registry to sixty-one selectors and cases. It now isolates
+the two-digit phase filename width, ordinal separator, Markdown extension, duplicate H1 cardinality, dependency-
+link finding retention and exact predecessor label, and empty Gate and tracker cell rejection. The unreachable
+`PLAN-GATE-EMPTY` projection was removed instead of being given a manufactured selector: the production parser
+refuses an empty contract cell before any Gate row exists, so that later verdict could never be observed. The
+first 61-row discovery matrix was correctly rejected because the legacy surrounding-prose dependency parser also
+ignores the newly isolated link label. After that cross-impact was declared, the fresh fixed-serial matrix rebuilt
+clean plus all sixty-one changed subjects and executed all 3,721 classifications. Every assigned case reddened,
+all complete-impact classifications matched, named and final controls remained green, preprocessed sources,
+objects, and executables changed and remained pairwise unique, and the input set remained byte-identical. Result-
+table, summary, and combined case-receipt SHA-256 values are respectively
+`15aecb498b214744008dd09ead7c9120532b269940b33482cf7d6916d29d5d92`,
+`605cbc41b8d1867621ea571cb236ded44cbc035afd31cfd6826491eb445e3429`, and
+`29f3e9e1105f4e0454e610c6e9aaf0eb850679c1f52cf9c7c19b68246764d76c`. The expanded `cabal check` again succeeds
+with only the repository's existing missing distribution-metadata warnings.
+
+The post-matrix audit still rejects sixty-one as a completeness total. Phase title-prefix/body grammar,
+selection/rendering of duplicate paths, observation and final-result composition, exact table-cell and inline-
+code alternatives, Gate and tracker transition/termination/problem projections, tracker closed-link destination
+grammar, tracker duplicate/extra reachability, sprint inventory/heading/schema/blocker alternatives, lexer
+fence/comment/HTML/container branches, resource-limit values and refusal projections, and semantic diagnostic
+retention remain unselected or unresolved. The current Cabal package build and opacity bracket also remain
+pending after these source and metadata changes. This remains a bounded component checkpoint, not PhaseContract
+implementation readiness or Sprint-0.4 evidence.
+
+The third PhaseContract expansion selects all seven live within-envelope observations independently: exact
+phase-document, tracker-row, Gate-row, sprint-section, unresolved-marker, missing-marker, and combined refusal-
+marker counts. The literal cases state 96, 96, 1,728, 96, 1, 1, and 2 respectively; the clean warning-strict graph
+confirms those values. Production, oracle, sixty-eight manual Cabal flags, and library mappings reconcile exactly.
+The complete 68-row fixed-serial matrix passed its first all-case discovery run: all sixty-eight assigned cases
+reddened, all 4,624 classifications matched, named and final controls stayed green, all preprocessed sources,
+objects, and executables changed and remained pairwise unique, and inputs remained byte-identical. Result-table,
+summary, and combined case-receipt SHA-256 values are respectively
+`d7bf0ae5701d82aa85289d47bdee61095f480c166d0dd7010f9d2f41d864e781`,
+`6f7d64b4a7b712b596c3325aa305a54f4ec109bb93e4c6676bfe47b88fa3861d`, and
+`53bcb3dfc89a39a8ff889632743320f22770df417b4165c13f4c60b732030e22`. `cabal check` remains accepted with only
+the existing missing distribution-metadata warnings.
+
+The post-observation audit still rejects sixty-eight as a completeness total. Envelope-refusal observation
+values, check-name/finding/semantic-diagnostic result composition, and all parser/state/resource loci named by
+the prior audit remain open. The current Cabal package and opacity bracket likewise remain stale after this
+expansion. This is a bounded reporting checkpoint, not PhaseContract implementation readiness or Sprint-0.4
+evidence.
+
+The fourth PhaseContract expansion selects the five envelope-refusal observations: the permanent
+`refused-before-parse` state and exact entry, path-character, document-character, and aggregate-character ceilings
+of 256, 4,096, 524,288, and 8,388,608. Literal impact declarations include the necessary corresponding limit-
+guard relationships and the pre-parse marker's impact on all four earlier refusal cases. Production, oracle,
+seventy-three Cabal flags, and library mappings reconcile exactly. The complete 73-row fixed-serial matrix passed
+its first all-case discovery run: all seventy-three assigned cases reddened, all 5,329 classifications matched,
+named and final controls remained green, every preprocessed source, object, and executable changed and remained
+pairwise unique, and inputs stayed byte-identical. Result-table, summary, and combined case-receipt SHA-256 values
+are respectively `37a2f72c090f5725b7f766febe5fec04f4dded20627bc5d026e51df4edc0f41f`,
+`d5f74c218c9a91859e094d55008ad0e81bcce980f15b8b22343eb14908d89011`, and
+`b4fd7fa45d1ac6a98f72a306395b9df277cc25fedaa2a2cb699d18d593a5bd77`. `cabal check` remains accepted with only
+the existing missing distribution-metadata warnings.
+
+The post-envelope audit still rejects seventy-three as a completeness total. Check-name, finding-list, semantic-
+observation/finding retention, final result composition, and the parser/state/resource loci named by the prior
+audit remain open. This is a bounded result-reporting checkpoint, not PhaseContract implementation readiness or
+Sprint-0.4 evidence.
+
+The contained `.build/dist-newstyle` Cabal package was then rebuilt from the exact seventy-three-row source and
+metadata with `--offline --jobs=1`, and the package-built component case passed. Against that refreshed
+registration, four warning-strict external clients failed independently at the intended boundary: the Internal
+module was hidden, while `checkPhaseContracts`, `checkPhaseContractStructure`, and `checkPhaseAndTracker` were
+absent from the public export list. The public `phaseContractDiagnostic` client compiled, linked, and exited zero
+against the same package. That mutable-worktree package diagnostic was current only for the seventy-three-row
+checkpoint; it did not close the post-envelope audit, authenticate toolchain or inputs, qualify the harness, or
+establish Sprint-0.4 or Phase-0 evidence.
+
+The fifth PhaseContract expansion selects ten additional Gate/tracker frame-state decisions: a second exact
+header, nonblank content at the required end boundary, a row after a completed frame, terminal missing-header
+finding retention, and terminal incomplete-row finding retention for each table. The first 83-row discovery
+matrix was correctly rejected at tracker missing-header suppression because malformed container, indented-code,
+and raw-HTML inputs also lost their terminal frame finding. The failed `matrix-83` checkpoint remains preserved;
+the literal assignment now keeps `tracker-missing-header` as its unique primary case and declares those three
+observed cross-impacts. A fresh fixed-serial bracket rebuilt clean plus all eighty-three isolated changed subjects
+and executed all 6,889 selector/case classifications. Every assigned case reddened, every declared and
+undeclared classification matched, named and final clean controls remained green, all preprocessed subjects,
+objects, and executables changed and remained pairwise unique, and the frozen input set remained byte-identical.
+Result-table, summary, and combined per-row case-receipt SHA-256 values are respectively
+`5093773991a102e395c79f3e5f886aa853e57aeb9b95bd81985d396c88975f62`,
+`88ce780881a8ae63ba1306d80674c6adbe6c4ea7e08ea7c10b7c470dbf55974d`, and
+`6cb3d9c8951b806ff7a450d2009a82477f424c611835c52c80526e65d9cca180`. `cabal check` accepts the expanded
+package description with only the existing missing distribution-metadata warnings.
+
+The Haskell component driver now also exposes one batched exact-case mode. The development harness still fixes
+compiler and linker concurrency at one: it builds the complete clean graph once, copies that graph's exact
+dependency interfaces into each isolated row, recompiles only the selected PhaseContract subject, relinks it
+against the clean dependency objects, and executes every literal exact case serially inside one process. A fresh
+current-byte 83-row rerun after that driver change passed all 6,889 classifications, named and final clean
+controls, pairwise preprocessed/object/executable uniqueness checks, registry reconciliation, and frozen-input
+checks. Its result-table and combined case-receipt SHA-256 values are respectively
+`b9364f4aaef19581f667d772ea962cdd17be462529577a88af378916c55d5639` and
+`5e68ec49fefa1b2b70d1f1e7733d207f96e0d21c26942b2634da53e0784d0ea3`; the unchanged summary digest is
+`88ce780881a8ae63ba1306d80674c6adbe6c4ea7e08ea7c10b7c470dbf55974d`. This supersedes the prior current-byte
+receipt without changing the bounded-completeness verdict.
+
+The post-state-machine audit still rejects eighty-three as a completeness total. Missing-delimiter termination,
+exact opening/closing-pipe and Gate-row arity decisions, full opaque-boundary interruption alternatives, phase
+title and filename-suffix grammar, exact tracker-link label/destination grammar, inline-code and command-count
+alternatives, tracker frame-finding projection, check-name and final result composition, bounded output
+rendering, internal semantic observation/finding retention, sprint inventory and remaining heading/schema/blocker
+alternatives, and unreachable tracker duplicate/extra projections remain open. The existing package and opacity
+receipt was built from the earlier seventy-three-row source and Cabal registration, so it is stale again. This is
+a bounded frame-state checkpoint, not PhaseContract implementation readiness or Sprint-0.4 evidence.
+
+The sixth PhaseContract expansion selects twenty-five additional atomic parser and frame decisions: exact check
+name; comment and fence opacity; Gate command cardinality, missing-delimiter finding, two-cell row arity, raw
+summary-line cardinality, parsed summary value, and pre-header-row refusal; exact opening and closing table pipes;
+inline-code width; closed link-target characters; the `phase_` path prefix plus nonempty segmented lowercase slug;
+the exact Phase-title prefix plus nonempty title body; tracker delimiter, row, and end-boundary transitions; tracker
+frame and missing-delimiter findings; and the exact tracker link label. Unreachable tracker duplicate/extra finding
+projections were removed from the claimed inventory rather than assigned artificial subjects. Production, the
+independently literal oracle registry, 108 manual Cabal flags, and all library mappings reconcile exactly.
+
+The first complete 108-row discovery bracket correctly rejected two impact declarations while all changed
+subjects compiled and linked distinctly and both final clean controls remained green. Tracker link-prose also
+changed the exact tracker-link-label case, and tracker row-boundary also changed the tracker fence-boundary case;
+the failed `matrix-108-discovery` checkpoint is preserved with result-table, summary, and combined per-row case-
+receipt SHA-256 values respectively
+`856c5e8f3067a8876de16234313b8d3c564eb9505fa84077a413cc071c481b45`,
+`af8e31c7cb4e8255aa9d663be98486590a137837855259ae2a48b38b6c46358d`, and
+`fb38fd3f5aa0bde6e619aef24896f69b80d91170bc9532fee9ee781e26b14fa8`. The literal declarations now retain
+their unique primary cases and name those observed cross-impacts. A fresh fixed-serial restart rebuilt all 108
+changed subjects and executed all 11,664 selector/case classifications. Every assigned case reddened, every
+declared and undeclared impact classification matched, named and final clean controls remained green, all
+preprocessed subjects, objects, and executables changed and remained pairwise unique, and the frozen input set
+remained byte-identical. Result-table, summary, and combined per-row case-receipt SHA-256 values are respectively
+`90a76fa2f29dabf6cd25d55a1960f65bbc3accf9563df2b6589475001d6a3018`,
+`ed0a70c2f4781f09b4fcf754a632be352bcb62df0c3f527f0e56717cb114d4ae`, and
+`b7573e07e155816d5c2a457d4b6da03923e82ffbc1952311a177f5a3ad596843`. `cabal check` accepts the expanded
+description with only the existing missing distribution-metadata warnings, and `git diff --check` is clean.
+
+The post-parser audit still rejects 108 as a completeness total. Final result composition and bounded output
+rendering, internal semantic observation/finding retention, phase duplicate selection/rendering and remaining
+number/path/link grammar alternatives, canonical sprint inventory and remaining heading/schema/blocker
+conjuncts, and other reachable composition routes remain open. The package-built component and opacity receipt
+still describes the earlier seventy-three-row source and registration and must be refreshed against current
+bytes. This is a bounded parser/state checkpoint, not PhaseContract implementation readiness, Sprint-0.4
+evidence, or human validation.
+
+The seventh PhaseContract expansion selects eleven top-level result-composition routes: the input-envelope
+finding and observation carriers; the within-envelope structural observation carrier; and the dependency, Gate,
+phase-domain, phase-structure, projection-vocabulary, sprint, tracker parser/shape, and tracker-to-phase join
+finding carriers. The independent route cases use paired defects from separate leaf predicates, or require the
+complete observation-key universe across independent envelope attacks, so one older leaf mutation cannot stand
+in for its parent route. The projection-vocabulary leaf and route are necessarily overlapping changed loci and
+declare their shared exact cases explicitly. Production, the independently literal oracle, 119 manual Cabal
+flags, and all library mappings reconcile exactly with no duplicate token.
+
+The first `matrix-119-discovery` clean gate stopped before row one because one route declaration named the
+nonexistent exact case `indented-code`; no selector result from that aborted root was accepted. The declaration
+was removed rather than redirected to the unrelated tracker-indented-code case, and the clean gate plus complete
+matrix restarted from a fresh `matrix-119-discovery2` root. That fixed-serial run rebuilt all 119 changed subjects
+and executed all 14,161 selector/case classifications. Every assigned case reddened, every declared and
+undeclared impact classification matched, named and final clean controls remained green, all preprocessed
+subjects, objects, and executables changed and remained pairwise unique, and the frozen input set remained byte-
+identical. Result-table, summary, and combined per-row case-receipt SHA-256 values are respectively
+`41e1c5115bfd614d5a26d00aea951c9366b1e76870c86b82c5bf31f83eee6bbb`,
+`154221f409d355f34befd9ba4e497f84a7e5a84dd17d062c2c317f1e46f30543`, and
+`7bfddaa3e023e752af5ba3daf9f060e43237e72a5a1a754631fc383d060837df`. `cabal check` again accepts the
+description with only the existing missing distribution-metadata warnings, and `git diff --check` is clean.
+
+The post-composition audit still rejects 119 as a completeness total. Internal semantic observation and finding
+retention require a direct-source full-mode oracle rather than the refusal-only public facade. Canonical sprint
+inventory and remaining heading/schema/blocker conjuncts, phase duplicate selection/rendering, remaining
+number/path/link grammar alternatives, and other reachable parser and result-carrier decisions remain open. This
+is a bounded result-composition checkpoint, not PhaseContract implementation readiness, Sprint-0.4 evidence, or
+human validation.
+
+The contained `.build/dist-newstyle` package was then rebuilt from the exact 119-row source and Cabal bytes with
+`--offline --jobs=1`. Both the package-built component and the admitted `phaseContractDiagnostic` public client
+compiled, linked, and passed; their log SHA-256 values are respectively
+`4a2fe06ca1a9e1bf33da2bfeadf4227efa1965038a0d45350ad2abed7305c692` and
+`78156dbd3a1d9e7cf8a9780935c26337b03562ae3ce6c4c5dc521d5904833a29`. Against that same refreshed package
+registration, four warning-strict `-j1` one-symbol clients failed independently and exactly at the intended
+boundary: `Amoebius.Validation.PhaseContract.Internal` is hidden, while `checkPhaseContracts`,
+`checkPhaseContractStructure`, and `checkPhaseAndTracker` are absent from the public facade export list. The
+registration, combined five-client source set, static library, and dynamic library SHA-256 values are respectively
+`da2666517eed599ff7288938fa9510bb0a550e31275da81fa8abc61c9c5fb8cc`,
+`e60fff76bffceb8966a979fa7a64ec70be96bb537773bd7aa247b19a8fb9a78c`,
+`346f32fa142638addd2e10671c859967b7677fba5c0995a8fa060c43408024be`, and
+`d7b5eff0c70a2c7f4e50036ab778a4b7cf5075437b6ad18c6f41276443c2d92d`. This refresh closes only the current
+package-opacity diagnostic seam; it does not close the remaining source audit, qualify the mutable harness,
+authenticate toolchain or inputs, establish Sprint-0.4 evidence, or authorize validation.
+
 The subsequent integration rerun exposed that PhaseContract's initial 128-entry and 4,194,304-character
 envelope could not admit the complete governed documentation corpus passed by both Documentation and Dispatch;
 it refused before evaluating any plan contract. Those checkpoints are invalid. The envelope now shares the
@@ -1664,6 +2679,49 @@ An isolated warning sweep then compiled all 101 selected variants from the clean
 with `-Wall -Wcompat -Werror`. Every row reached the Documentation subject and compiled without warning or
 error. This proves only that none of the current selector branches wins by making helpers dead; it supplies no
 assigned oracle result, binary witness, Cabal reconciliation, completeness claim, or validation authority.
+
+The current production source has since reached 153 unique selectors by adding the provisional metadata/header
+grammar loci. The literal oracle and Cabal registries still contain only the earlier 24-row tested subset, so
+129 production selectors are intentionally unreconciled and no 153-row matrix is admissible. The 2026-08-26
+strict serialized build exposed six missing header-finding projections introduced during that expansion; those
+projections are now restored, and the aggregate component binary executes all eighteen named oracles green on
+the mutable worktree. The Documentation oracle still freezes the bounded live prose observation at 1,601
+over-target sentences. This is a repair and component diagnostic only. Completing the independent 153-plus
+oracle/Cabal registry, the broader parser/output audit, package-opacity matrix, qualification, authenticated
+inputs, custody, and human prose review remains open.
+
+The next PhaseContract parser audit initially proposed eighteen additional selectors beyond the 119-row
+checkpoint: four closed-link decisions, five sprint-heading decisions, five sprint-schema conjuncts, three
+sprint-blocker alternatives, and the sprint-heading prefix. It found and repaired one real production defect:
+`## Sprint 10.01` had been accepted as the canonical `10.1` identity, so the parser now requires the digit text
+to equal the rendered positive ordinal. The first `matrix-137-discovery` clean gate stopped before row one on a
+duplicate exact-case declaration. After that registry defect was corrected, the next clean gate rejected the
+sprint-heading-prefix case: a wrong `## Sprint` prefix is refused earlier by the exact mandatory Phase-section
+shape and cannot independently reach the sprint parser. That false selector was removed rather than weakening
+the outer parser or manufacturing a subject.
+
+The resulting 136-selector discovery run ended without a summary while building row 81, so none of that root is
+a bracket receipt. Its eighty complete row tables nevertheless exposed three useful discovery mismatches. The
+nested-bracket and empty-label cases stayed green under their proposed parser mutants because both actual callers
+already require the complete fixed label (`Contract` or the exact predecessor label); those two checks and their
+selectors were observationally redundant and have been removed. The shared trailing-content selector also
+reddened the existing dependency-link-prose case, and its literal impact declaration now records that route.
+Production, the independently literal oracle, the manual Cabal flags, and library CPP mappings consequently
+reconcile at 134 unique reachable identities and 134 exact cases. `cabal check` accepts that package description
+with only the repository's existing missing distribution-metadata warnings, and `git diff --check` is clean.
+
+A fresh fixed-serial `matrix-134-final` restart passed its clean controls and exact registry gate, then completed
+rows 1 through 62. All 8,308 observed selector/case classifications in those complete rows matched their literal
+impact declarations; every assigned case reddened, every named control stayed green, and each completed row had
+changed preprocessing, object, and linked-executable identities. At the user's requested pause, the harness was
+terminated while row 63 was incomplete. It therefore has no result table or summary, no final clean controls,
+no final frozen-input comparison, and no pairwise-uniqueness verdict across all rows. The root is diagnostic-only
+and must not be resumed or represented as a partial pass. Continuation starts a new clean 134-row root from the
+current bytes, executes all rows serially, investigates every complete-impact mismatch, and records hashes only
+if the full bracket and final controls pass. Even a complete 134-row receipt will leave the direct-source
+full-semantic result carriers, canonical sprint inventory, duplicate-phase selection/rendering, further
+reachable-decision audit, refreshed package-opacity bracket, parent-harness qualification, authenticated inputs,
+independent custody, and human correspondence review open. Sprint 0.4 remains Blocked — NOT VALIDATED.
 
 ## Sprint 0.5: Gate-kernel qualification and spoof corpus ⏸️
 

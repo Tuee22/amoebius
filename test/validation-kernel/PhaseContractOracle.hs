@@ -25,44 +25,428 @@ import qualified Data.Text as Text
 -- production change is allowed to affect and one unrelated product control.
 phaseContractSelectorMatrixRows :: [(String, [String], String)]
 phaseContractSelectorMatrixRows =
-  [ ("VALIDATION_PHASE_CONTRACT_COMMENT_SPLICE_BYPASS_MUTANT", ["tracker-comment-splice"], "input-entry-limit")
+  [ ("VALIDATION_PHASE_CONTRACT_CHECK_NAME_BYPASS_MUTANT", ["check-name"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_COMMENT_OPACITY_BYPASS_MUTANT", ["tracker-comment-opacity"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_COMMENT_SPLICE_BYPASS_MUTANT", ["tracker-comment-splice"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_CONTAINER_PREFIX_BYPASS_MUTANT", ["tracker-container-prefix"], "input-entry-limit")
-  , ("VALIDATION_PHASE_CONTRACT_DEPENDENCY_LINK_PROSE_BYPASS_MUTANT", ["dependency-link-prose"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_DEPENDENCY_FORWARD_FINDING_BYPASS_MUTANT", ["dependency-forward"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_DEPENDENCY_GENESIS_FINDING_BYPASS_MUTANT", ["dependency-genesis"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_DEPENDENCY_LINK_FINDING_BYPASS_MUTANT"
+    , ["dependency-link-finding", "dependency-link-label", "dependency-link-prose"]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_DEPENDENCY_LINK_LABEL_BYPASS_MUTANT", ["dependency-link-label"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_DEPENDENCY_LINK_PROSE_BYPASS_MUTANT", ["dependency-link-prose", "dependency-link-label"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_DEPENDENCY_PREDECESSOR_FINDING_BYPASS_MUTANT", ["dependency-predecessor"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_DEPENDENCY_RESULT_COMPOSITION_BYPASS_MUTANT"
+    , [ "dependency-result-composition"
+      , "dependency-forward"
+      , "dependency-genesis"
+      , "dependency-link-finding"
+      , "dependency-link-label"
+      , "dependency-link-prose"
+      , "dependency-predecessor"
+      ]
+    , "input-entry-limit"
+    )
   , ("VALIDATION_PHASE_CONTRACT_FENCE_BOUNDARY_BYPASS_MUTANT", ["tracker-fence-boundary"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_FENCE_OPACITY_BYPASS_MUTANT", ["tracker-fence-opacity"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_COMMAND_COUNT_BYPASS_MUTANT", ["gate-command-count"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_COMMAND_FINDING_BYPASS_MUTANT", ["gate-command", "gate-command-count", "inline-code-width"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_GATE_DELIMITER_SHAPE_BYPASS_MUTANT", ["gate-delimiter-shape"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_END_CONTENT_BYPASS_MUTANT", ["gate-end-content"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_GATE_HEADER_WILDCARD_BYPASS_MUTANT", ["gate-header-wildcard"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_INCOMPLETE_ROWS_FINDING_BYPASS_MUTANT", ["gate-incomplete-rows"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_GATE_IGNORED_ROW_BYPASS_MUTANT", ["gate-ignored-row"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_GATE_KEY_CODE_BYPASS_MUTANT", ["gate-key-code"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_MISSING_DELIMITER_FINDING_BYPASS_MUTANT", ["gate-missing-delimiter"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_MISSING_HEADER_FINDING_BYPASS_MUTANT", ["gate-missing-header"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_OUTSIDE_ROW_BYPASS_MUTANT", ["gate-outside-row", "gate-table-frame"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_GATE_REFUSAL_BYPASS_MUTANT", ["unresolved-gate-cell"], "input-entry-limit")
-  , ("VALIDATION_PHASE_CONTRACT_INDENTED_CODE_BYPASS_MUTANT", ["tracker-indented-code"], "input-entry-limit")
-  , ("VALIDATION_PHASE_CONTRACT_INPUT_DOCUMENT_LIMIT_BYPASS_MUTANT", ["input-document-limit"], "input-total-limit")
-  , ("VALIDATION_PHASE_CONTRACT_INPUT_ENTRY_LIMIT_BYPASS_MUTANT", ["input-entry-limit"], "input-path-limit")
-  , ("VALIDATION_PHASE_CONTRACT_INPUT_PATH_LIMIT_BYPASS_MUTANT", ["input-path-limit"], "input-document-limit")
-  , ("VALIDATION_PHASE_CONTRACT_INPUT_TOTAL_LIMIT_BYPASS_MUTANT", ["input-total-limit"], "input-entry-limit")
-  , ("VALIDATION_PHASE_CONTRACT_PROJECTION_VOCABULARY_BYPASS_MUTANT", ["projection-vocabulary"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_GATE_RESULT_COMPOSITION_BYPASS_MUTANT"
+    , [ "gate-result-composition"
+      , "gate-command"
+      , "gate-command-count"
+      , "gate-delimiter-shape"
+      , "gate-end-content"
+      , "gate-header-wildcard"
+      , "gate-ignored-row"
+      , "gate-incomplete-rows"
+      , "gate-key-code"
+      , "gate-missing-delimiter"
+      , "gate-missing-header"
+      , "gate-outside-row"
+      , "gate-row-arity"
+      , "gate-row-empty"
+      , "gate-second-header"
+      , "gate-shape"
+      , "gate-summary-command"
+      , "gate-summary-raw-line-count"
+      , "gate-summary-value"
+      , "gate-table-frame"
+      , "gate-unframed-row"
+      , "inline-code-width"
+      , "table-closing-pipe"
+      , "table-opening-pipe"
+      , "unresolved-gate-cell"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_GATE_ROW_COUNT_OBSERVATION_BYPASS_MUTANT", ["gate-row-count-observation"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_ROW_ARITY_BYPASS_MUTANT", ["gate-row-arity"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_ROW_EMPTY_BYPASS_MUTANT", ["gate-row-empty"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_SECTION_FINDING_BYPASS_MUTANT", ["gate-section"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_SECOND_HEADER_BYPASS_MUTANT", ["gate-second-header"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_SHAPE_FINDING_BYPASS_MUTANT", ["gate-shape"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_SUMMARY_COMMAND_FINDING_BYPASS_MUTANT", ["gate-summary-command", "gate-summary-raw-line-count", "gate-summary-value"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_SUMMARY_RAW_LINE_COUNT_BYPASS_MUTANT", ["gate-summary-raw-line-count"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_SUMMARY_VALUE_BYPASS_MUTANT", ["gate-summary-value"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_GATE_UNFRAMED_ROW_BYPASS_MUTANT", ["gate-unframed-row"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_INDENTED_CODE_BYPASS_MUTANT", ["tracker-indented-code", "gate-section"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_INLINE_CODE_WIDTH_BYPASS_MUTANT", ["inline-code-width"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_INPUT_DOCUMENT_LIMIT_BYPASS_MUTANT"
+    , ["input-document-limit", "input-document-limit-observation"]
+    , "input-total-limit"
+    )
+  , ( "VALIDATION_PHASE_CONTRACT_INPUT_ENTRY_LIMIT_BYPASS_MUTANT"
+    , ["input-entry-limit", "input-envelope-observation", "input-entry-limit-observation"]
+    , "input-path-limit"
+    )
+  , ( "VALIDATION_PHASE_CONTRACT_INPUT_ENVELOPE_FINDING_COMPOSITION_BYPASS_MUTANT"
+    , [ "input-envelope-finding-composition"
+      , "input-document-limit"
+      , "input-entry-limit"
+      , "input-path-limit"
+      , "input-total-limit"
+      ]
+    , "phase-status"
+    )
+  , ( "VALIDATION_PHASE_CONTRACT_INPUT_ENVELOPE_OBSERVATION_BYPASS_MUTANT"
+    , ["input-envelope-observation", "input-document-limit", "input-entry-limit", "input-path-limit", "input-total-limit"]
+    , "phase-status"
+    )
+  , ( "VALIDATION_PHASE_CONTRACT_INPUT_ENVELOPE_OBSERVATION_COMPOSITION_BYPASS_MUTANT"
+    , [ "input-envelope-observation-composition"
+      , "input-document-limit"
+      , "input-document-limit-observation"
+      , "input-envelope-observation"
+      , "input-entry-limit"
+      , "input-entry-limit-observation"
+      , "input-path-limit"
+      , "input-path-limit-observation"
+      , "input-total-limit"
+      , "input-total-limit-observation"
+      ]
+    , "phase-status"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_INPUT_DOCUMENT_LIMIT_OBSERVATION_BYPASS_MUTANT", ["input-document-limit-observation"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_INPUT_ENTRY_LIMIT_OBSERVATION_BYPASS_MUTANT", ["input-entry-limit-observation"], "input-path-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_INPUT_PATH_LIMIT_BYPASS_MUTANT"
+    , ["input-path-limit", "input-path-limit-observation"]
+    , "input-document-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_INPUT_PATH_LIMIT_OBSERVATION_BYPASS_MUTANT", ["input-path-limit-observation"], "input-document-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_INPUT_TOTAL_LIMIT_BYPASS_MUTANT"
+    , ["input-total-limit", "input-total-limit-observation"]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_INPUT_TOTAL_LIMIT_OBSERVATION_BYPASS_MUTANT", ["input-total-limit-observation"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_LINK_TARGET_CHARACTER_BYPASS_MUTANT", ["link-target-character"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_LINK_TARGET_EMPTY_BYPASS_MUTANT", ["link-target-empty"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_LINK_TRAILING_CONTENT_BYPASS_MUTANT"
+    , ["link-trailing-content", "dependency-link-prose"]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_MISSING_MARKER_COUNT_OBSERVATION_BYPASS_MUTANT", ["missing-marker-count-observation"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_OBSERVATION_RESULT_COMPOSITION_BYPASS_MUTANT"
+    , [ "observation-result-composition"
+      , "gate-row-count-observation"
+      , "missing-marker-count-observation"
+      , "phase-document-count-observation"
+      , "refusal-marker-count-observation"
+      , "sprint-section-count-observation"
+      , "tracker-row-count-observation"
+      , "unresolved-marker-count-observation"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_DOCUMENT_COUNT_OBSERVATION_BYPASS_MUTANT", ["phase-document-count-observation"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_PHASE_DOMAIN_RESULT_COMPOSITION_BYPASS_MUTANT"
+    , [ "phase-domain-result-composition"
+      , "phase-discovery"
+      , "phase-duplicate"
+      , "phase-extra"
+      , "phase-missing"
+      , "phase-path-digit-width"
+      , "phase-path-directory"
+      , "phase-path-extension"
+      , "phase-path-prefix"
+      , "phase-path-separator"
+      , "phase-path-slug-character"
+      , "phase-path-slug-empty"
+      , "phase-path-slug-segment"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_PROJECTION_VOCABULARY_BYPASS_MUTANT", ["projection-vocabulary", "projection-result-composition"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_PHASE_DISCOVERY_FINDING_BYPASS_MUTANT"
+    , [ "phase-discovery"
+      , "phase-path-digit-width"
+      , "phase-path-directory"
+      , "phase-path-extension"
+      , "phase-path-prefix"
+      , "phase-path-separator"
+      , "phase-path-slug-character"
+      , "phase-path-slug-empty"
+      , "phase-path-slug-segment"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_DUPLICATE_FINDING_BYPASS_MUTANT", ["phase-duplicate"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_EXTRA_FINDING_BYPASS_MUTANT", ["phase-extra"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_MISSING_FINDING_BYPASS_MUTANT", ["phase-missing"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_PATH_DIGIT_WIDTH_BYPASS_MUTANT", ["phase-path-digit-width"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_PATH_DIRECTORY_BYPASS_MUTANT", ["phase-path-directory"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_PATH_EXTENSION_BYPASS_MUTANT", ["phase-path-extension"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_PATH_PREFIX_BYPASS_MUTANT", ["phase-path-prefix"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_PATH_SEPARATOR_BYPASS_MUTANT", ["phase-path-separator"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_PATH_SLUG_CHARACTER_BYPASS_MUTANT", ["phase-path-slug-character"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_PATH_SLUG_EMPTY_BYPASS_MUTANT", ["phase-path-slug-empty"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_PATH_SLUG_SEGMENT_BYPASS_MUTANT", ["phase-path-slug-segment"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_TITLE_CARDINALITY_BYPASS_MUTANT", ["phase-title-cardinality"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_TITLE_EMPTY_BYPASS_MUTANT", ["phase-title-empty"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_TITLE_FINDING_BYPASS_MUTANT", ["phase-title", "phase-title-cardinality", "phase-title-empty", "phase-title-prefix"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_PHASE_TITLE_PREFIX_BYPASS_MUTANT", ["phase-title-prefix"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_PHASE_STRUCTURE_RESULT_COMPOSITION_BYPASS_MUTANT"
+    , [ "phase-structure-result-composition"
+      , "gate-section"
+      , "phase-section-shape"
+      , "phase-status"
+      , "phase-title"
+      , "phase-title-cardinality"
+      , "phase-title-empty"
+      , "phase-title-prefix"
+      , "summary-containment"
+      , "summary-field"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_PROJECTION_RESULT_COMPOSITION_BYPASS_MUTANT", ["projection-result-composition", "projection-vocabulary"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_RAW_HTML_BYPASS_MUTANT", ["tracker-raw-html"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_REFUSAL_MARKER_COUNT_OBSERVATION_BYPASS_MUTANT", ["refusal-marker-count-observation"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_SECTION_SHAPE_BYPASS_MUTANT", ["phase-section-shape"], "input-entry-limit")
-  , ("VALIDATION_PHASE_CONTRACT_SPRINT_BLOCKER_BYPASS_MUTANT", ["sprint-blocker"], "input-entry-limit")
-  , ("VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_BYPASS_MUTANT", ["sprint-schema"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_SPRINT_BLOCKER_BYPASS_MUTANT"
+    , ["sprint-blocker", "sprint-blocker-genesis", "sprint-blocker-predecessor", "sprint-blocker-prior-sprint"]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_BLOCKER_GENESIS_BYPASS_MUTANT", ["sprint-blocker-genesis"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_BLOCKER_PREDECESSOR_BYPASS_MUTANT", ["sprint-blocker-predecessor"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_BLOCKER_PRIOR_SPRINT_BYPASS_MUTANT", ["sprint-blocker-prior-sprint"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_SPRINT_IDENTITY_FINDING_BYPASS_MUTANT"
+    , [ "sprint-identity"
+      , "sprint-heading-marker"
+      , "sprint-heading-ordinal-canonical"
+      , "sprint-heading-ordinal-positive"
+      , "sprint-heading-separator"
+      , "sprint-heading-title-empty"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_HEADING_MARKER_BYPASS_MUTANT", ["sprint-heading-marker"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_HEADING_ORDINAL_CANONICAL_BYPASS_MUTANT", ["sprint-heading-ordinal-canonical"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_HEADING_ORDINAL_POSITIVE_BYPASS_MUTANT", ["sprint-heading-ordinal-positive"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_HEADING_SEPARATOR_BYPASS_MUTANT", ["sprint-heading-separator"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_HEADING_TITLE_EMPTY_BYPASS_MUTANT", ["sprint-heading-title-empty"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_SPRINT_RESULT_COMPOSITION_BYPASS_MUTANT"
+    , [ "sprint-result-composition"
+      , "sprint-blocker"
+      , "sprint-blocker-genesis"
+      , "sprint-blocker-predecessor"
+      , "sprint-blocker-prior-sprint"
+      , "sprint-heading-marker"
+      , "sprint-heading-ordinal-canonical"
+      , "sprint-heading-ordinal-positive"
+      , "sprint-heading-separator"
+      , "sprint-heading-title-empty"
+      , "sprint-identity"
+      , "sprint-schema"
+      , "sprint-schema-field-nonempty"
+      , "sprint-schema-field-order"
+      , "sprint-schema-late-field"
+      , "sprint-schema-subsection-nonempty"
+      , "sprint-schema-subsection-order"
+      , "sprint-status"
+      ]
+    , "input-entry-limit"
+    )
+  , ( "VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_BYPASS_MUTANT"
+    , [ "sprint-schema"
+      , "sprint-schema-field-nonempty"
+      , "sprint-schema-field-order"
+      , "sprint-schema-late-field"
+      , "sprint-schema-subsection-nonempty"
+      , "sprint-schema-subsection-order"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_FIELD_NONEMPTY_BYPASS_MUTANT", ["sprint-schema-field-nonempty"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_FIELD_ORDER_BYPASS_MUTANT", ["sprint-schema-field-order", "sprint-schema"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_LATE_FIELD_BYPASS_MUTANT", ["sprint-schema-late-field"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_SUBSECTION_NONEMPTY_BYPASS_MUTANT", ["sprint-schema-subsection-nonempty"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_SUBSECTION_ORDER_BYPASS_MUTANT", ["sprint-schema-subsection-order"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SPRINT_SECTION_COUNT_OBSERVATION_BYPASS_MUTANT", ["sprint-section-count-observation"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_SPRINT_STATUS_BYPASS_MUTANT", ["sprint-status"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_STATUS_BYPASS_MUTANT", ["phase-status"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_STRUCTURE_DIAGNOSTIC_BYPASS_MUTANT", ["structure-diagnostic-refusal"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_SUMMARY_CONTAINMENT_BYPASS_MUTANT", ["summary-containment"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_SUMMARY_FIELD_FINDING_BYPASS_MUTANT", ["summary-field"], "input-entry-limit")
   , ( "VALIDATION_PHASE_CONTRACT_TABLE_FRAME_BYPASS_MUTANT"
-    , ["gate-table-frame", "gate-delimiter-shape", "gate-header-wildcard", "gate-ignored-row", "gate-key-code"]
+    , [ "gate-table-frame"
+      , "gate-delimiter-shape"
+      , "gate-end-content"
+      , "gate-header-wildcard"
+      , "gate-ignored-row"
+      , "gate-incomplete-rows"
+      , "gate-key-code"
+      , "gate-missing-delimiter"
+      , "gate-missing-header"
+      , "gate-outside-row"
+      , "gate-row-arity"
+      , "gate-row-empty"
+      , "gate-second-header"
+      , "gate-unframed-row"
+      , "table-closing-pipe"
+      , "table-opening-pipe"
+      ]
     , "input-entry-limit"
     )
-  , ("VALIDATION_PHASE_CONTRACT_TRACKER_DELIMITER_SHAPE_BYPASS_MUTANT", ["tracker-delimiter-shape"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TABLE_CLOSING_PIPE_BYPASS_MUTANT", ["table-closing-pipe"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TABLE_OPENING_PIPE_BYPASS_MUTANT", ["table-opening-pipe"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_DELIMITER_BOUNDARY_BYPASS_MUTANT", ["tracker-delimiter-boundary"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_DELIMITER_SHAPE_BYPASS_MUTANT", ["tracker-delimiter-shape", "tracker-frame-finding"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_END_BOUNDARY_BYPASS_MUTANT", ["tracker-end-boundary"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_END_CONTENT_BYPASS_MUTANT", ["tracker-end-content"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_TRACKER_EXTRA_CELL_BYPASS_MUTANT", ["tracker-extra-cell"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_TRACKER_FRAME_FINDING_BYPASS_MUTANT"
+    , [ "tracker-frame-finding"
+      , "link-target-empty"
+      , "link-target-character"
+      , "link-trailing-content"
+      , "tracker-comment-opacity"
+      , "tracker-comment-splice"
+      , "tracker-container-prefix"
+      , "tracker-delimiter-boundary"
+      , "tracker-delimiter-shape"
+      , "tracker-end-boundary"
+      , "tracker-end-content"
+      , "tracker-extra-cell"
+      , "tracker-fence-boundary"
+      , "tracker-fence-opacity"
+      , "tracker-header-wildcard"
+      , "tracker-incomplete-rows"
+      , "tracker-indented-code"
+      , "tracker-link-label"
+      , "tracker-link-prose"
+      , "tracker-missing-delimiter"
+      , "tracker-missing-header"
+      , "tracker-order"
+      , "tracker-ordinal-canonical"
+      , "tracker-outside-row"
+      , "tracker-raw-html"
+      , "tracker-row-boundary"
+      , "tracker-row-empty"
+      , "tracker-second-header"
+      , "tracker-unframed-rows"
+      ]
+    , "input-entry-limit"
+    )
   , ("VALIDATION_PHASE_CONTRACT_TRACKER_HEADER_WILDCARD_BYPASS_MUTANT", ["tracker-header-wildcard"], "input-entry-limit")
-  , ("VALIDATION_PHASE_CONTRACT_TRACKER_LINK_PROSE_BYPASS_MUTANT", ["tracker-link-prose"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_INCOMPLETE_ROWS_FINDING_BYPASS_MUTANT", ["tracker-incomplete-rows"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_TRACKER_JOIN_RESULT_COMPOSITION_BYPASS_MUTANT"
+    , [ "tracker-join-result-composition"
+      , "tracker-contract-join"
+      , "tracker-projection-join"
+      , "tracker-projection-prefix"
+      , "tracker-title-join"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_LINK_LABEL_BYPASS_MUTANT", ["tracker-link-label"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_TRACKER_LINK_PROSE_BYPASS_MUTANT"
+    , [ "tracker-link-prose"
+      , "link-target-character"
+      , "link-trailing-content"
+      , "tracker-link-label"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_CARDINALITY_FINDING_BYPASS_MUTANT", ["tracker-cardinality"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_CONTRACT_JOIN_FINDING_BYPASS_MUTANT", ["tracker-contract-join"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_MISSING_FINDING_BYPASS_MUTANT", ["tracker-missing"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_TRACKER_MISSING_HEADER_FINDING_BYPASS_MUTANT"
+    , [ "tracker-missing-header"
+      , "tracker-comment-opacity"
+      , "tracker-container-prefix"
+      , "tracker-fence-opacity"
+      , "tracker-indented-code"
+      , "tracker-raw-html"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_MISSING_DELIMITER_FINDING_BYPASS_MUTANT", ["tracker-missing-delimiter"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_OUTSIDE_ROW_BYPASS_MUTANT", ["tracker-outside-row"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_TRACKER_ORDER_BYPASS_MUTANT", ["tracker-order"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_TRACKER_ORDINAL_CANONICAL_BYPASS_MUTANT", ["tracker-ordinal-canonical"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_PROJECTION_JOIN_FINDING_BYPASS_MUTANT", ["tracker-projection-join", "tracker-projection-prefix"], "input-entry-limit")
   , ("VALIDATION_PHASE_CONTRACT_TRACKER_PROJECTION_PREFIX_BYPASS_MUTANT", ["tracker-projection-prefix"], "input-entry-limit")
+  , ( "VALIDATION_PHASE_CONTRACT_TRACKER_RESULT_COMPOSITION_BYPASS_MUTANT"
+    , [ "tracker-result-composition"
+      , "link-target-character"
+      , "link-target-empty"
+      , "link-trailing-content"
+      , "tracker-cardinality"
+      , "tracker-comment-opacity"
+      , "tracker-comment-splice"
+      , "tracker-container-prefix"
+      , "tracker-delimiter-boundary"
+      , "tracker-delimiter-shape"
+      , "tracker-end-boundary"
+      , "tracker-end-content"
+      , "tracker-extra-cell"
+      , "tracker-fence-boundary"
+      , "tracker-fence-opacity"
+      , "tracker-frame-finding"
+      , "tracker-header-wildcard"
+      , "tracker-incomplete-rows"
+      , "tracker-indented-code"
+      , "tracker-link-label"
+      , "tracker-link-prose"
+      , "tracker-missing"
+      , "tracker-missing-delimiter"
+      , "tracker-missing-header"
+      , "tracker-order"
+      , "tracker-ordinal-canonical"
+      , "tracker-outside-row"
+      , "tracker-raw-html"
+      , "tracker-row-boundary"
+      , "tracker-row-empty"
+      , "tracker-second-header"
+      , "tracker-status"
+      , "tracker-unframed-rows"
+      ]
+    , "input-entry-limit"
+    )
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_ROW_BOUNDARY_BYPASS_MUTANT", ["tracker-row-boundary", "tracker-fence-boundary"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_ROW_EMPTY_BYPASS_MUTANT", ["tracker-row-empty"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_ROW_COUNT_OBSERVATION_BYPASS_MUTANT", ["tracker-row-count-observation"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_SECOND_HEADER_BYPASS_MUTANT", ["tracker-second-header"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_STATUS_FINDING_BYPASS_MUTANT", ["tracker-status"], "input-entry-limit")
+  , ("VALIDATION_PHASE_CONTRACT_TRACKER_TITLE_JOIN_FINDING_BYPASS_MUTANT", ["tracker-title-join"], "input-entry-limit")
   , ( "VALIDATION_PHASE_CONTRACT_TRACKER_UNFRAMED_ROWS_BYPASS_MUTANT"
     , ["tracker-unframed-rows", "tracker-header-wildcard"]
     , "input-entry-limit"
     )
+  , ("VALIDATION_PHASE_CONTRACT_UNRESOLVED_MARKER_COUNT_OBSERVATION_BYPASS_MUTANT", ["unresolved-marker-count-observation"], "input-entry-limit")
   ]
 
 phaseContractSelectorNames :: [String]
@@ -70,47 +454,149 @@ phaseContractSelectorNames = [selector | (selector, _, _) <- phaseContractSelect
 
 phaseContractExactCaseNames :: [String]
 phaseContractExactCaseNames =
-  [ "dependency-link-prose"
+  [ "check-name"
+  , "dependency-result-composition"
+  , "dependency-forward"
+  , "dependency-genesis"
+  , "dependency-link-finding"
+  , "dependency-link-label"
+  , "dependency-link-prose"
+  , "dependency-predecessor"
+  , "gate-command"
+  , "gate-command-count"
   , "gate-delimiter-shape"
+  , "gate-end-content"
   , "gate-header-wildcard"
   , "gate-ignored-row"
+  , "gate-incomplete-rows"
   , "gate-key-code"
+  , "gate-missing-delimiter"
+  , "gate-missing-header"
+  , "gate-outside-row"
+  , "gate-result-composition"
+  , "gate-row-arity"
+  , "gate-row-empty"
+  , "gate-row-count-observation"
+  , "gate-section"
+  , "gate-second-header"
+  , "gate-shape"
+  , "gate-summary-command"
+  , "gate-summary-raw-line-count"
+  , "gate-summary-value"
   , "gate-table-frame"
+  , "gate-unframed-row"
   , "input-document-limit"
+  , "input-document-limit-observation"
+  , "input-envelope-finding-composition"
+  , "input-envelope-observation"
+  , "input-envelope-observation-composition"
   , "input-entry-limit"
+  , "input-entry-limit-observation"
   , "input-path-limit"
+  , "input-path-limit-observation"
   , "input-total-limit"
+  , "input-total-limit-observation"
+  , "inline-code-width"
+  , "link-target-character"
+  , "link-target-empty"
+  , "link-trailing-content"
+  , "missing-marker-count-observation"
+  , "observation-result-composition"
+  , "phase-document-count-observation"
+  , "phase-domain-result-composition"
+  , "phase-discovery"
+  , "phase-duplicate"
+  , "phase-extra"
+  , "phase-missing"
+  , "phase-path-digit-width"
+  , "phase-path-directory"
+  , "phase-path-extension"
+  , "phase-path-prefix"
+  , "phase-path-separator"
+  , "phase-path-slug-character"
+  , "phase-path-slug-empty"
+  , "phase-path-slug-segment"
   , "phase-section-shape"
   , "phase-status"
+  , "phase-structure-result-composition"
+  , "phase-title"
+  , "phase-title-cardinality"
+  , "phase-title-empty"
+  , "phase-title-prefix"
   , "projection-vocabulary"
+  , "projection-result-composition"
+  , "refusal-marker-count-observation"
   , "sprint-blocker"
+  , "sprint-blocker-genesis"
+  , "sprint-blocker-predecessor"
+  , "sprint-blocker-prior-sprint"
+  , "sprint-heading-marker"
+  , "sprint-heading-ordinal-canonical"
+  , "sprint-heading-ordinal-positive"
+  , "sprint-heading-separator"
+  , "sprint-heading-title-empty"
+  , "sprint-identity"
+  , "sprint-result-composition"
   , "sprint-schema"
+  , "sprint-schema-field-nonempty"
+  , "sprint-schema-field-order"
+  , "sprint-schema-late-field"
+  , "sprint-schema-subsection-nonempty"
+  , "sprint-schema-subsection-order"
+  , "sprint-section-count-observation"
   , "sprint-status"
   , "structure-diagnostic-refusal"
   , "summary-containment"
+  , "summary-field"
+  , "table-closing-pipe"
+  , "table-opening-pipe"
+  , "tracker-cardinality"
+  , "tracker-comment-opacity"
   , "tracker-comment-splice"
   , "tracker-container-prefix"
+  , "tracker-contract-join"
+  , "tracker-delimiter-boundary"
   , "tracker-delimiter-shape"
+  , "tracker-end-boundary"
+  , "tracker-end-content"
   , "tracker-extra-cell"
   , "tracker-fence-boundary"
+  , "tracker-fence-opacity"
+  , "tracker-frame-finding"
   , "tracker-header-wildcard"
+  , "tracker-incomplete-rows"
   , "tracker-indented-code"
+  , "tracker-join-result-composition"
+  , "tracker-link-label"
   , "tracker-link-prose"
+  , "tracker-missing"
+  , "tracker-missing-delimiter"
+  , "tracker-missing-header"
+  , "tracker-outside-row"
   , "tracker-order"
   , "tracker-ordinal-canonical"
+  , "tracker-projection-join"
   , "tracker-projection-prefix"
+  , "tracker-result-composition"
   , "tracker-raw-html"
+  , "tracker-row-boundary"
+  , "tracker-row-empty"
+  , "tracker-row-count-observation"
+  , "tracker-second-header"
+  , "tracker-status"
+  , "tracker-title-join"
   , "tracker-unframed-rows"
   , "unresolved-gate-cell"
+  , "unresolved-marker-count-observation"
   ]
 
 phaseContractSelectorIntegrityProblems :: [String]
 phaseContractSelectorIntegrityProblems =
-  [ "phase-contract selector registry must contain exactly 32 distinct selectors"
-  | length phaseContractSelectorNames /= 32 || not (allDistinct phaseContractSelectorNames)
+  [ "phase-contract selector registry must contain exactly 134 distinct selectors"
+  | length phaseContractSelectorNames /= 134 || not (allDistinct phaseContractSelectorNames)
   ]
-    <> [ "phase-contract exact-case registry must contain exactly 32 distinct cases"
-       | length phaseContractExactCaseNames /= 32 || not (allDistinct phaseContractExactCaseNames)
+    <> [ "phase-contract exact-case registry must contain exactly 134 distinct cases"
+       | length phaseContractExactCaseNames /= 134 || not (allDistinct phaseContractExactCaseNames)
        ]
     <> [ selector <> ": selector has no assigned exact impact"
        | (selector, impacts, _) <- phaseContractSelectorMatrixRows
@@ -1562,18 +2048,201 @@ expectedSprintSubsectionNames = ["Objective", "Deliverables", "Validation", "Rem
 phaseContractExactCaseProblems :: String -> [String]
 phaseContractExactCaseProblems exactCase =
   case exactCase of
+    "check-name" ->
+      expectCheckName
+        "selector case: exact component check name"
+        "phase-contracts"
+        (phaseContractDiagnostic validCorpus)
+    "dependency-result-composition" ->
+      expectAnyFindingCode
+        "selector case: dependency findings retain their result route"
+        ["PLAN-DEPENDENCY", "PLAN-DEPENDENCY-FORWARD"]
+        ( phaseContractDiagnostic
+            ( replaceIn
+                (phasePath 0)
+                "**Depends on:** genesis"
+                "**Depends on:** `genesis`"
+                (replaceIn (phasePath 10) (dependencyValue 10) "[Phase 9](phase_10_synthetic_capability.md)" validCorpus)
+            )
+        )
+    "dependency-forward" ->
+      expectFinding
+        "selector case: dependency same-or-forward edge"
+        "PLAN-DEPENDENCY-FORWARD"
+        (phasePath 10)
+        (replaceIn (phasePath 10) (dependencyValue 10) "[Phase 9](phase_10_synthetic_capability.md)" validCorpus)
+    "dependency-genesis" ->
+      expectFinding
+        "selector case: Phase 0 genesis dependency"
+        "PLAN-DEPENDENCY"
+        (phasePath 0)
+        (replaceIn (phasePath 0) "**Depends on:** genesis" "**Depends on:** `genesis`" validCorpus)
+    "dependency-link-finding" ->
+      expectFinding
+        "selector case: malformed dependency link retains its finding"
+        "PLAN-DEPENDENCY-LINK"
+        (phasePath 10)
+        (replaceIn (phasePath 10) (dependencyValue 10) "[Phase 9](phase_09_synthetic_capability.md" validCorpus)
+    "dependency-link-label" ->
+      expectFinding
+        "selector case: dependency link label"
+        "PLAN-DEPENDENCY-LINK"
+        (phasePath 10)
+        (replaceIn (phasePath 10) (dependencyValue 10) "[Earlier phase](phase_09_synthetic_capability.md)" validCorpus)
     "dependency-link-prose" ->
       expectFinding "selector case: dependency link prose" "PLAN-DEPENDENCY-LINK" (phasePath 10) dependencyLinkProseCorpus
+    "dependency-predecessor" ->
+      expectFinding
+        "selector case: dependency immediate predecessor"
+        "PLAN-DEPENDENCY-PREDECESSOR"
+        (phasePath 10)
+        (replaceIn (phasePath 10) (dependencyValue 10) "[Phase 8](phase_08_synthetic_capability.md)" validCorpus)
+    "gate-command" ->
+      expectFinding
+        "selector case: exact canonical gate command"
+        "PLAN-GATE-COMMAND"
+        (phasePath 9)
+        (replaceIn (phasePath 9) (gateRow "Command" (commandValue 9)) (gateRow "Command" "`pb validate phase 9`") validCorpus)
+    "gate-command-count" ->
+      let expected = commandValue 9
+          duplicateInsideOpaqueSpan = expected <> " plus ``opaque " <> expected <> "``"
+       in expectFinding
+            "selector case: canonical gate command occurs exactly once"
+            "PLAN-GATE-COMMAND"
+            (phasePath 9)
+            (replaceIn (phasePath 9) (gateRow "Command" expected) (gateRow "Command" duplicateInsideOpaqueSpan) validCorpus)
     "gate-delimiter-shape" ->
       expectFinding "selector case: gate delimiter shape" "PLAN-GATE-TABLE-FRAME" (phasePath 7) gateDelimiterShapeCorpus
+    "gate-end-content" ->
+      expectFinding
+        "selector case: nonblank content cannot continue the completed gate table"
+        "PLAN-GATE-TABLE-FRAME"
+        (phasePath 7)
+        ( replaceIn
+            (phasePath 7)
+            (gateRow "Human authority" "Promotion authority is human-only.")
+            (gateRow "Human authority" "Promotion authority is human-only." <> "\ntrailing gate content")
+            validCorpus
+        )
     "gate-header-wildcard" ->
       expectFinding "selector case: gate header wildcard" "PLAN-GATE-TABLE-FRAME" (phasePath 7) gateHeaderWildcardCorpus
     "gate-ignored-row" ->
       expectFinding "selector case: ignored gate row" "PLAN-GATE-TABLE-FRAME" (phasePath 7) gateExtraDelimiterCorpus
+    "gate-incomplete-rows" ->
+      expectFinding
+        "selector case: gate section ends before all rows"
+        "PLAN-GATE-TABLE-FRAME"
+        (phasePath 7)
+        ( replaceIn
+            (phasePath 7)
+            (gateRow "Human authority" "Promotion authority is human-only." <> "\n\n## Doctrine adopted")
+            "## Doctrine adopted"
+            validCorpus
+        )
     "gate-key-code" ->
       expectFinding "selector case: gate key code delimiters" "PLAN-GATE-TABLE-FRAME" (phasePath 7) gateUnbacktickedKeyCorpus
+    "gate-missing-delimiter" ->
+      expectFinding
+        "selector case: gate header at section end retains the missing-delimiter finding"
+        "PLAN-GATE-TABLE-FRAME"
+        (phasePath 7)
+        ( replaceIn
+            (phasePath 7)
+            (gateTable 7 <> "\n\n## Doctrine adopted")
+            (expectedGateHeader <> "\n## Doctrine adopted")
+            validCorpus
+        )
+    "gate-missing-header" ->
+      expectFinding
+        "selector case: gate frame requires its exact header"
+        "PLAN-GATE-TABLE-FRAME"
+        (phasePath 7)
+        (replaceIn (phasePath 7) (gateTable 7) "No gate table." validCorpus)
+    "gate-outside-row" ->
+      expectFinding
+        "selector case: gate row after the completed frame"
+        "PLAN-GATE-TABLE-FRAME"
+        (phasePath 7)
+        ( replaceIn
+            (phasePath 7)
+            (gateRow "Human authority" "Promotion authority is human-only.")
+            (gateRow "Human authority" "Promotion authority is human-only." <> "\n\n" <> gateRow "Decoy" "outside")
+            validCorpus
+        )
+    "gate-result-composition" ->
+      expectAnyFindingCode
+        "selector case: Gate findings retain their result route"
+        ["PLAN-GATE-TABLE-FRAME", "PLAN-GATE-COMMAND"]
+        ( phaseContractDiagnostic
+            ( replaceIn
+                (phasePath 9)
+                (gateRow "Command" (commandValue 9))
+                (gateRow "Command" "`pb validate phase 9`")
+                (replaceIn (phasePath 7) (gateRow "Challenge" standardChallenge) "" validCorpus)
+            )
+        )
+    "gate-row-arity" ->
+      let canonical = gateRow "Challenge" standardChallenge
+       in expectFinding
+            "selector case: gate row has exactly two cells"
+            "PLAN-GATE-TABLE-FRAME"
+            (phasePath 7)
+            (replaceIn (phasePath 7) canonical (Text.dropEnd 1 canonical <> "| extra |") validCorpus)
+    "gate-row-empty" ->
+      expectFinding
+        "selector case: empty gate contract cell"
+        "PLAN-GATE-TABLE-FRAME"
+        (phasePath 7)
+        (replaceIn (phasePath 7) (gateRow "Challenge" standardChallenge) (gateRow "Challenge" "") validCorpus)
+    "gate-row-count-observation" ->
+      expectObservation
+        "selector case: exact aggregate gate-row observation"
+        "gate-row-count"
+        "1728"
+        (phaseContractDiagnostic validCorpus)
+    "gate-section" ->
+      expectFinding "selector case: Gate integrity section" "PLAN-GATE-SECTION" (phasePath 7) gateIndentedHeadingCorpus
+    "gate-second-header" ->
+      expectFinding
+        "selector case: second exact gate header"
+        "PLAN-GATE-TABLE-FRAME"
+        (phasePath 7)
+        (replaceIn (phasePath 7) expectedGateHeader (expectedGateHeader <> "\n" <> expectedGateHeader) validCorpus)
+    "gate-shape" ->
+      expectFinding
+        "selector case: gate ordered row shape"
+        "PLAN-GATE-SHAPE"
+        (phasePath 7)
+        (replaceIn (phasePath 7) (gateRow "Challenge" standardChallenge) "" validCorpus)
+    "gate-summary-command" ->
+      expectFinding
+        "selector case: exact phase-summary gate command"
+        "PLAN-GATE-SUMMARY-COMMAND"
+        (phasePath 9)
+        (replaceIn (phasePath 9) (gateSummaryLine 9) "**Gate:** `pb validate phase 9` — NOT VALIDATED." validCorpus)
+    "gate-summary-raw-line-count" ->
+      let expected = gateSummaryLine 9
+       in expectFinding
+            "selector case: the exact Gate summary raw line occurs once"
+            "PLAN-GATE-SUMMARY-COMMAND"
+            (phasePath 9)
+            (replaceIn (phasePath 9) "## Related Documents" (expected <> "\n\n## Related Documents") validCorpus)
+    "gate-summary-value" ->
+      let expected = gateSummaryLine 9
+          modified = replaceIn (phasePath 9) expected (expected <> " trailing") validCorpus
+       in expectFinding
+            "selector case: the parsed Gate summary value is exact"
+            "PLAN-GATE-SUMMARY-COMMAND"
+            (phasePath 9)
+            (replaceIn (phasePath 9) "## Related Documents" (expected <> "\n\n## Related Documents") modified)
     "gate-table-frame" ->
       expectFinding "selector case: gate table frame" "PLAN-GATE-TABLE-FRAME" (phasePath 7) gateThreeCellOutsideCorpus
+    "gate-unframed-row" ->
+      expectFinding
+        "selector case: a gate row cannot precede the exact frame"
+        "PLAN-GATE-TABLE-FRAME"
+        (phasePath 7)
+        (replaceIn (phasePath 7) expectedGateHeader (gateRow "Decoy" "outside" <> "\n" <> expectedGateHeader) validCorpus)
     "input-document-limit" ->
       expectExactFindingInResult
         "selector case: document input limit"
@@ -1586,6 +2255,33 @@ phaseContractExactCaseProblems exactCase =
           "phase-contract-input-envelope"
           "refused-before-parse"
           documentLimitAttackResult
+    "input-document-limit-observation" ->
+      expectObservation
+        "selector case: exact document-character ceiling observation"
+        "phase-contract-input-document-character-limit"
+        "524288"
+        documentLimitAttackResult
+    "input-envelope-finding-composition" ->
+      expectAnyFindingCodeInResults
+        "selector case: an envelope refusal finding retains its result route"
+        ["PLAN-INPUT-ENTRY-LIMIT", "PLAN-INPUT-PATH-LIMIT", "PLAN-INPUT-DOCUMENT-LIMIT", "PLAN-INPUT-TOTAL-LIMIT"]
+        envelopeAttackResults
+    "input-envelope-observation" ->
+      expectObservation
+        "selector case: envelope refusal records pre-parse state"
+        "phase-contract-input-envelope"
+        "refused-before-parse"
+        entryLimitAttackResult
+    "input-envelope-observation-composition" ->
+      expectAnyObservationKeySequence
+        "selector case: an envelope refusal retains the complete observation-key route"
+        [ "phase-contract-input-envelope"
+        , "phase-contract-input-entry-limit"
+        , "phase-contract-input-path-character-limit"
+        , "phase-contract-input-document-character-limit"
+        , "phase-contract-input-total-character-limit"
+        ]
+        envelopeAttackResults
     "input-entry-limit" ->
       expectExactFindingInResult
         "selector case: entry input limit"
@@ -1598,6 +2294,12 @@ phaseContractExactCaseProblems exactCase =
           "phase-contract-input-envelope"
           "refused-before-parse"
           entryLimitAttackResult
+    "input-entry-limit-observation" ->
+      expectObservation
+        "selector case: exact entry ceiling observation"
+        "phase-contract-input-entry-limit"
+        "256"
+        entryLimitAttackResult
     "input-path-limit" ->
       expectExactFindingInResult
         "selector case: path input limit"
@@ -1610,6 +2312,12 @@ phaseContractExactCaseProblems exactCase =
           "phase-contract-input-envelope"
           "refused-before-parse"
           pathLimitAttackResult
+    "input-path-limit-observation" ->
+      expectObservation
+        "selector case: exact path-character ceiling observation"
+        "phase-contract-input-path-character-limit"
+        "4096"
+        pathLimitAttackResult
     "input-total-limit" ->
       expectExactFindingInResult
         "selector case: aggregate input limit"
@@ -1622,6 +2330,144 @@ phaseContractExactCaseProblems exactCase =
           "phase-contract-input-envelope"
           "refused-before-parse"
           totalLimitAttackResult
+    "input-total-limit-observation" ->
+      expectObservation
+        "selector case: exact aggregate-character ceiling observation"
+        "phase-contract-input-total-character-limit"
+        "8388608"
+        totalLimitAttackResult
+    "inline-code-width" ->
+      expectFinding
+        "selector case: the canonical command uses one-backtick inline code"
+        "PLAN-GATE-COMMAND"
+        (phasePath 9)
+        (replaceIn (phasePath 9) (gateRow "Command" (commandValue 9)) (gateRow "Command" "```pb validate phase 09```") validCorpus)
+    "link-target-character" ->
+      expectFinding
+        "selector case: tracker link destinations use only the closed character grammar"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        (replaceIn trackerPath "phase_10_synthetic_capability.md)" "phase_10_synthetic_capability.md?)" validCorpus)
+    "link-target-empty" ->
+      let canonical = trackerRow 10 blockedTrackerStatus
+       in expectFinding
+            "selector case: closed Markdown link targets are non-empty"
+            "PLAN-TRACKER-TABLE-FRAME"
+            trackerPath
+            (replaceIn trackerPath canonical (Text.replace "(phase_10_synthetic_capability.md)" "()" canonical) validCorpus)
+    "link-trailing-content" ->
+      let canonical = trackerRow 10 blockedTrackerStatus
+       in expectFinding
+            "selector case: closed Markdown links reject trailing cell content"
+            "PLAN-TRACKER-TABLE-FRAME"
+            trackerPath
+            ( replaceIn
+                trackerPath
+                canonical
+                (Text.replace "(phase_10_synthetic_capability.md)" "(phase_10_synthetic_capability.md)tail" canonical)
+                validCorpus
+            )
+    "missing-marker-count-observation" ->
+      expectObservation
+        "selector case: exact missing-marker observation"
+        "missing-marker-cell-count"
+        "1"
+        (phaseContractDiagnostic markerCorpus)
+    "observation-result-composition" ->
+      expectObservationKeySequence
+        "selector case: structural observations retain their complete result route"
+        [ "phase-document-count"
+        , "tracker-row-count"
+        , "gate-row-count"
+        , "sprint-section-count"
+        , "unresolved-marker-cell-count"
+        , "missing-marker-cell-count"
+        , "refusal-marker-cell-count"
+        ]
+        (phaseContractDiagnostic validCorpus)
+    "phase-document-count-observation" ->
+      expectObservation
+        "selector case: exact phase-document observation"
+        "phase-document-count"
+        "96"
+        (phaseContractDiagnostic validCorpus)
+    "phase-domain-result-composition" ->
+      expectAnyFindingCode
+        "selector case: phase-domain findings retain their result route"
+        ["PLAN-PHASE-DUPLICATE", "PLAN-PHASE-MISSING"]
+        ( phaseContractDiagnostic
+            ( filter ((/= phasePath 95) . fst) validCorpus
+                <> [("DEVELOPMENT_PLAN/phase_10_duplicate.md", phaseDocument 10)]
+            )
+        )
+    "phase-discovery" ->
+      expectFinding "selector case: empty phase discovery" "PLAN-PHASE-DISCOVERY" planRoot []
+    "phase-duplicate" ->
+      expectFinding
+        "selector case: duplicate phase ordinal"
+        "PLAN-PHASE-DUPLICATE"
+        "DEVELOPMENT_PLAN/phase_10_duplicate.md"
+        (validCorpus <> [("DEVELOPMENT_PLAN/phase_10_duplicate.md", phaseDocument 10)])
+    "phase-extra" ->
+      expectFinding
+        "selector case: phase above closed domain"
+        "PLAN-PHASE-EXTRA"
+        (phasePath 96)
+        (validCorpus <> [(phasePath 96, phaseDocument 96)])
+    "phase-missing" ->
+      expectFinding
+        "selector case: missing phase in closed domain"
+        "PLAN-PHASE-MISSING"
+        planRoot
+        (filter ((/= phasePath 95) . fst) validCorpus)
+    "phase-path-digit-width" ->
+      expectFinding
+        "selector case: phase filename requires a two-digit ordinal"
+        "PLAN-PHASE-DISCOVERY"
+        planRoot
+        [("DEVELOPMENT_PLAN/phase_0_decoy.md", phaseDocument 0)]
+    "phase-path-directory" ->
+      expectFinding
+        "selector case: phase-shaped decoy outside governed directory"
+        "PLAN-PHASE-DISCOVERY"
+        planRoot
+        [("archive/phase_00_decoy.md", phaseDocument 0)]
+    "phase-path-extension" ->
+      expectFinding
+        "selector case: phase filename requires the Markdown extension"
+        "PLAN-PHASE-DISCOVERY"
+        planRoot
+        [("DEVELOPMENT_PLAN/phase_00_decoy.txt", phaseDocument 0)]
+    "phase-path-prefix" ->
+      expectFinding
+        "selector case: phase filename requires the exact phase_ prefix"
+        "PLAN-PHASE-DISCOVERY"
+        planRoot
+        [("DEVELOPMENT_PLAN/stage_00_decoy.md", phaseDocument 0)]
+    "phase-path-separator" ->
+      expectFinding
+        "selector case: phase filename requires the ordinal separator"
+        "PLAN-PHASE-DISCOVERY"
+        planRoot
+        [("DEVELOPMENT_PLAN/phase_00decoy.md", phaseDocument 0)]
+    "phase-path-slug-character" ->
+      expectFinding
+        "selector case: phase filename slug uses lowercase snake-case characters"
+        "PLAN-PHASE-DISCOVERY"
+        planRoot
+        [("DEVELOPMENT_PLAN/phase_00_Bad.md", phaseDocument 0)]
+    "phase-path-slug-empty" ->
+      expectFinding
+        "selector case: phase filename slug is non-empty"
+        "PLAN-PHASE-DISCOVERY"
+        planRoot
+        [("DEVELOPMENT_PLAN/phase_00_.md", phaseDocument 0)]
+    "phase-path-slug-segment" ->
+      expectFinding
+        "selector case: phase filename slug has no empty snake-case segment"
+        "PLAN-PHASE-DISCOVERY"
+        planRoot
+        [("DEVELOPMENT_PLAN/phase_00_bad__slug.md", phaseDocument 0)]
     "phase-section-shape" ->
       expectFinding
         "selector case: phase section shape"
@@ -1639,24 +2485,204 @@ phaseContractExactCaseProblems exactCase =
         "PLAN-PHASE-STATUS"
         (phasePath 10)
         (replaceIn (phasePath 10) blockedStatus activeStatus validCorpus)
+    "phase-structure-result-composition" ->
+      expectAnyFindingCode
+        "selector case: phase-structure findings retain their result route"
+        ["PLAN-PHASE-TITLE", "PLAN-PHASE-STATUS"]
+        ( phaseContractDiagnostic
+            ( replaceIn
+                (phasePath 10)
+                "# Phase 10: Synthetic capability 10"
+                "# Unrelated heading"
+                (replaceIn (phasePath 10) blockedStatus activeStatus validCorpus)
+            )
+        )
+    "phase-title" ->
+      expectFinding
+        "selector case: exact phase H1 title"
+        "PLAN-PHASE-TITLE"
+        (phasePath 10)
+        (replaceIn (phasePath 10) "# Phase 10: Synthetic capability 10" "# Unrelated heading" validCorpus)
+    "phase-title-cardinality" ->
+      expectFinding
+        "selector case: phase H1 title cardinality"
+        "PLAN-PHASE-TITLE"
+        (phasePath 10)
+        ( replaceIn
+            (phasePath 10)
+            "# Phase 10: Synthetic capability 10"
+            "# Phase 10: Synthetic capability 10\n# Phase 10: Synthetic capability 10"
+            validCorpus
+        )
+    "phase-title-empty" ->
+      expectFinding
+        "selector case: phase H1 title body is non-empty"
+        "PLAN-PHASE-TITLE"
+        (phasePath 10)
+        (replaceIn (phasePath 10) "# Phase 10: Synthetic capability 10" "# Phase 10:" validCorpus)
+    "phase-title-prefix" ->
+      expectFinding
+        "selector case: phase H1 uses the exact Phase prefix"
+        "PLAN-PHASE-TITLE"
+        (phasePath 10)
+        (replaceIn (phasePath 10) "# Phase 10: Synthetic capability 10" "# Stage 10: Synthetic capability 10" validCorpus)
     "projection-vocabulary" ->
       expectFinding
         "selector case: projection vocabulary"
         "PLAN-PROJECTION-VOCABULARY"
         (phasePath 10)
         (replaceProjection 10 "Substrate" (substrateValue 10) "invented-substrate" validCorpus)
+    "projection-result-composition" ->
+      expectFinding
+        "selector case: projection-vocabulary findings retain their result route"
+        "PLAN-PROJECTION-VOCABULARY"
+        (phasePath 10)
+        (replaceProjection 10 "Substrate" (substrateValue 10) "invented-substrate" validCorpus)
+    "refusal-marker-count-observation" ->
+      expectObservation
+        "selector case: exact combined refusal-marker observation"
+        "refusal-marker-cell-count"
+        "2"
+        (phaseContractDiagnostic markerCorpus)
     "sprint-blocker" ->
       expectFinding
         "selector case: sprint blocker"
         "PLAN-SPRINT-BLOCKER"
         (phasePath 10)
         (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9)) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 8)) validCorpus)
+    "sprint-blocker-genesis" ->
+      expectFinding
+        "selector case: genesis sprint blocker uses exact inline code"
+        "PLAN-SPRINT-BLOCKER"
+        (phasePath 0)
+        (replaceIn (phasePath 0) (sprintFieldLine "Blocked by" "`genesis`") (sprintFieldLine "Blocked by" "genesis") validCorpus)
+    "sprint-blocker-predecessor" ->
+      expectFinding
+        "selector case: first sprint predecessor blocker rejects appended dependencies"
+        "PLAN-SPRINT-BLOCKER"
+        (phasePath 10)
+        ( replaceIn
+            (phasePath 10)
+            (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9))
+            (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9 <> "; " <> phaseApprovalBlocker 8))
+            validCorpus
+        )
+    "sprint-blocker-prior-sprint" ->
+      expectFinding
+        "selector case: later sprint blocker is its immediate prior sprint"
+        "PLAN-SPRINT-BLOCKER"
+        (phasePath 10)
+        (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" "Sprint 10.2") twoSprintCorpus)
+    "sprint-heading-marker" ->
+      expectFinding
+        "selector case: sprint heading marker belongs to the closed status marker set"
+        "PLAN-SPRINT-IDENTITY"
+        (phasePath 10)
+        (replaceIn (phasePath 10) "## Sprint 10.1: Synthetic seam ⏸️" "## Sprint 10.1: Synthetic seam ❌" validCorpus)
+    "sprint-heading-ordinal-canonical" ->
+      expectFinding
+        "selector case: sprint heading ordinal has canonical unsigned spelling"
+        "PLAN-SPRINT-IDENTITY"
+        (phasePath 10)
+        (replaceIn (phasePath 10) "## Sprint 10.1: Synthetic seam ⏸️" "## Sprint 10.01: Synthetic seam ⏸️" validCorpus)
+    "sprint-heading-ordinal-positive" ->
+      expectFinding
+        "selector case: sprint heading ordinal is positive"
+        "PLAN-SPRINT-IDENTITY"
+        (phasePath 10)
+        (replaceIn (phasePath 10) "## Sprint 10.1: Synthetic seam ⏸️" "## Sprint 10.0: Synthetic seam ⏸️" validCorpus)
+    "sprint-heading-separator" ->
+      expectFinding
+        "selector case: sprint heading colon is followed by one space"
+        "PLAN-SPRINT-IDENTITY"
+        (phasePath 10)
+        (replaceIn (phasePath 10) "## Sprint 10.1: Synthetic seam ⏸️" "## Sprint 10.1:Synthetic seam ⏸️" validCorpus)
+    "sprint-heading-title-empty" ->
+      expectFinding
+        "selector case: sprint heading title is non-empty"
+        "PLAN-SPRINT-IDENTITY"
+        (phasePath 10)
+        (replaceIn (phasePath 10) "## Sprint 10.1: Synthetic seam ⏸️" "## Sprint 10.1:  ⏸️" validCorpus)
+    "sprint-identity" ->
+      expectFinding
+        "selector case: sprint phase identity"
+        "PLAN-SPRINT-IDENTITY"
+        (phasePath 10)
+        (replaceIn (phasePath 10) "## Sprint 10.1:" "## Sprint 9.1:" validCorpus)
+    "sprint-result-composition" ->
+      expectAnyFindingCode
+        "selector case: sprint findings retain their result route"
+        ["PLAN-SPRINT-STATUS", "PLAN-SPRINT-BLOCKER"]
+        ( phaseContractDiagnostic
+            ( replaceIn
+                (phasePath 10)
+                (sprintFieldLine "Status" "Blocked — NOT VALIDATED")
+                (sprintFieldLine "Status" "Validated — NOT VALIDATED")
+                ( replaceIn
+                    (phasePath 10)
+                    (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9))
+                    (sprintFieldLine "Blocked by" (phaseApprovalBlocker 8))
+                    validCorpus
+                )
+            )
+        )
     "sprint-schema" ->
       expectFinding
         "selector case: sprint schema"
         "PLAN-SPRINT-SCHEMA"
         (phasePath 10)
         (replaceIn (phasePath 10) (sprintFieldLine "Oracle" syntheticOracle) "" validCorpus)
+    "sprint-schema-field-nonempty" ->
+      expectFinding
+        "selector case: sprint schema fields are non-empty"
+        "PLAN-SPRINT-SCHEMA"
+        (phasePath 10)
+        (replaceIn (phasePath 10) (sprintFieldLine "Docs to update" syntheticDocs) (sprintFieldLine "Docs to update" "") validCorpus)
+    "sprint-schema-field-order" ->
+      expectFinding
+        "selector case: sprint schema fields retain exact order"
+        "PLAN-SPRINT-SCHEMA"
+        (phasePath 10)
+        ( replaceIn
+            (phasePath 10)
+            (sprintFieldLine "Independent Validation" syntheticValidation <> "\n" <> sprintFieldLine "Oracle" syntheticOracle)
+            (sprintFieldLine "Oracle" syntheticOracle <> "\n" <> sprintFieldLine "Independent Validation" syntheticValidation)
+            validCorpus
+        )
+    "sprint-schema-late-field" ->
+      expectFinding
+        "selector case: known sprint fields cannot recur after the first subsection"
+        "PLAN-SPRINT-SCHEMA"
+        (phasePath 10)
+        ( replaceIn
+            (phasePath 10)
+            "### Objective\n\nSynthetic objective."
+            ("### Objective\n\n" <> sprintFieldLine "Oracle" syntheticOracle <> "\n\nSynthetic objective.")
+            validCorpus
+        )
+    "sprint-schema-subsection-nonempty" ->
+      expectFinding
+        "selector case: sprint schema subsections are non-empty"
+        "PLAN-SPRINT-SCHEMA"
+        (phasePath 10)
+        (replaceIn (phasePath 10) "### Validation\n\nSynthetic validation details." "### Validation" validCorpus)
+    "sprint-schema-subsection-order" ->
+      expectFinding
+        "selector case: sprint schema subsections retain exact order"
+        "PLAN-SPRINT-SCHEMA"
+        (phasePath 10)
+        ( replaceIn
+            (phasePath 10)
+            "### Deliverables\n\nSynthetic deliverable.\n\n### Validation\n\nSynthetic validation details."
+            "### Validation\n\nSynthetic validation details.\n\n### Deliverables\n\nSynthetic deliverable."
+            validCorpus
+        )
+    "sprint-section-count-observation" ->
+      expectObservation
+        "selector case: exact aggregate sprint-section observation"
+        "sprint-section-count"
+        "96"
+        (phaseContractDiagnostic validCorpus)
     "sprint-status" ->
       expectFinding
         "selector case: sprint status"
@@ -1676,30 +2702,200 @@ phaseContractExactCaseProblems exactCase =
         "PLAN-SUMMARY-CONTAINMENT"
         (phasePath 7)
         (relocateAfter (phasePath 7) (summaryLine "Substrate" (substrateValue 7)) "## Related Documents" validCorpus)
+    "summary-field" ->
+      expectFinding
+        "selector case: mandatory Phase Summary field"
+        "PLAN-SUMMARY-FIELD"
+        (phasePath 10)
+        (replaceIn (phasePath 10) (summaryLine "Lane" (laneValue 10) <> "\n\n") "" validCorpus)
+    "table-closing-pipe" ->
+      let canonical = gateRow "Challenge" standardChallenge
+       in expectFinding
+            "selector case: exact table rows require a closing pipe"
+            "PLAN-GATE-TABLE-FRAME"
+            (phasePath 7)
+            (replaceIn (phasePath 7) canonical (Text.dropEnd 1 canonical) validCorpus)
+    "table-opening-pipe" ->
+      let canonical = gateRow "Challenge" standardChallenge
+       in expectFinding
+            "selector case: exact table rows require an opening pipe"
+            "PLAN-GATE-TABLE-FRAME"
+            (phasePath 7)
+            (replaceIn (phasePath 7) canonical (Text.drop 1 canonical) validCorpus)
+    "tracker-cardinality" ->
+      expectFinding
+        "selector case: one tracker document"
+        "PLAN-TRACKER-CARDINALITY"
+        trackerPath
+        (filter ((/= trackerPath) . fst) validCorpus)
+    "tracker-comment-opacity" ->
+      expectFinding
+        "selector case: an HTML comment cannot supply a complete tracker"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        (replaceDocument trackerPath ("<!--\n" <> trackerDocument [0 .. 95] <> "\n-->\n") validCorpus)
     "tracker-comment-splice" ->
       expectFinding "selector case: tracker comment splice" "PLAN-TRACKER-TABLE-FRAME" trackerPath trackerCommentPrefixCorpus
     "tracker-container-prefix" ->
       expectFinding "selector case: tracker container prefix" "PLAN-TRACKER-TABLE-FRAME" trackerPath listContainedTrackerCorpus
+    "tracker-contract-join" ->
+      expectFinding "selector case: tracker contract target join" "PLAN-TRACKER-CONTRACT" trackerPath trackerPathAliasCorpus
+    "tracker-delimiter-boundary" ->
+      expectFinding
+        "selector case: an opaque boundary interrupts the expected tracker delimiter"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        (replaceIn trackerPath expectedTrackerHeader (expectedTrackerHeader <> "\n> opaque boundary") validCorpus)
     "tracker-delimiter-shape" ->
       expectFinding "selector case: tracker delimiter shape" "PLAN-TRACKER-TABLE-FRAME" trackerPath trackerDelimiterShapeCorpus
+    "tracker-end-boundary" ->
+      expectFinding
+        "selector case: an opaque boundary interrupts the tracker terminator"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        (replaceIn trackerPath (trackerRow 95 blockedTrackerStatus) (trackerRow 95 blockedTrackerStatus <> "\n> opaque boundary") validCorpus)
+    "tracker-end-content" ->
+      expectFinding
+        "selector case: nonblank content cannot continue the completed tracker table"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        ( replaceIn
+            trackerPath
+            (trackerRow 95 blockedTrackerStatus)
+            (trackerRow 95 blockedTrackerStatus <> "\ntrailing tracker content")
+            validCorpus
+        )
     "tracker-extra-cell" ->
       expectFinding "selector case: tracker extra cell" "PLAN-TRACKER-TABLE-FRAME" trackerPath extraCellTrackerCorpus
     "tracker-fence-boundary" ->
       expectFinding "selector case: tracker fence boundary" "PLAN-TRACKER-TABLE-FRAME" trackerPath trackerFenceSplitCorpus
+    "tracker-fence-opacity" ->
+      expectFinding
+        "selector case: a fenced block cannot supply a complete tracker"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        (replaceDocument trackerPath ("```text\n" <> trackerDocument [0 .. 95] <> "\n```\n") validCorpus)
+    "tracker-frame-finding" ->
+      expectFinding
+        "selector case: tracker frame problems retain their finding projection"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        trackerDelimiterShapeCorpus
     "tracker-header-wildcard" ->
       expectFinding "selector case: tracker header wildcard" "PLAN-TRACKER-TABLE-FRAME" trackerPath trackerHeaderWildcardCorpus
+    "tracker-incomplete-rows" ->
+      expectFinding
+        "selector case: tracker ends before Phase 95"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        (replaceDocument trackerPath (trackerDocument [0 .. 94]) validCorpus)
     "tracker-indented-code" ->
       expectFinding "selector case: tracker indented code" "PLAN-TRACKER-TABLE-FRAME" trackerPath (indentedTrackerCorpus "    ")
+    "tracker-join-result-composition" ->
+      expectAnyFindingCode
+        "selector case: tracker-join findings retain their result route"
+        ["PLAN-TRACKER-TITLE", "PLAN-TRACKER-CONTRACT"]
+        ( phaseContractDiagnostic
+            (replaceIn trackerPath "| 10 | Synthetic capability 10 |" "| 10 | Divergent title |" trackerPathAliasCorpus)
+        )
+    "tracker-link-label" ->
+      let canonical = trackerRow 10 blockedTrackerStatus
+       in expectFinding
+            "selector case: tracker contract links retain the exact Contract label"
+            "PLAN-TRACKER-TABLE-FRAME"
+            trackerPath
+            (replaceIn trackerPath canonical (Text.replace "[Contract]" "[Different]" canonical) validCorpus)
     "tracker-link-prose" ->
       expectFinding "selector case: tracker link prose" "PLAN-TRACKER-TABLE-FRAME" trackerPath trackerLinkProseCorpus
+    "tracker-missing" ->
+      expectFinding
+        "selector case: tracker closed domain omission"
+        "PLAN-TRACKER-MISSING"
+        trackerPath
+        (replaceDocument trackerPath (trackerDocument [0 .. 94]) validCorpus)
+    "tracker-missing-delimiter" ->
+      expectFinding
+        "selector case: tracker header at end of file retains the missing-delimiter finding"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        (replaceDocument trackerPath (expectedTrackerHeader <> "\n") validCorpus)
+    "tracker-missing-header" ->
+      expectFinding
+        "selector case: tracker frame requires its exact header"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        (replaceDocument trackerPath "No tracker table.\n" validCorpus)
+    "tracker-outside-row" ->
+      expectFinding
+        "selector case: tracker row after the completed frame"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        ( replaceIn
+            trackerPath
+            (trackerRow 95 blockedTrackerStatus)
+            (trackerRow 95 blockedTrackerStatus <> "\n\n" <> trackerRow 0 activeTrackerStatus)
+            validCorpus
+        )
     "tracker-order" ->
       expectFinding "selector case: tracker order" "PLAN-TRACKER-TABLE-FRAME" trackerPath reorderedTrackerCorpus
     "tracker-ordinal-canonical" ->
       expectFinding "selector case: tracker ordinal canonical form" "PLAN-TRACKER-TABLE-FRAME" trackerPath leadingZeroTrackerCorpus
+    "tracker-projection-join" ->
+      expectFinding
+        "selector case: tracker and phase projection join"
+        "PLAN-TRACKER-PROJECTION"
+        trackerPath
+        (replaceIn trackerPath (trackerRow 10 blockedTrackerStatus) (trackerRowWith 10 "linux-cpu" "none" "2" blockedTrackerStatus) validCorpus)
     "tracker-projection-prefix" ->
       expectFinding "selector case: tracker projection prefix" "PLAN-TRACKER-PROJECTION" trackerPath trackerProjectionSuffixCorpus
+    "tracker-result-composition" ->
+      expectAnyFindingCode
+        "selector case: tracker parser and shape findings retain their result route"
+        ["PLAN-TRACKER-CARDINALITY", "PLAN-TRACKER-TABLE-FRAME", "PLAN-TRACKER-MISSING"]
+        (phaseContractDiagnostic (filter ((/= trackerPath) . fst) validCorpus))
     "tracker-raw-html" ->
       expectFinding "selector case: tracker raw HTML" "PLAN-TRACKER-TABLE-FRAME" trackerPath (rawHtmlTrackerCorpus "<script>" "</script>")
+    "tracker-row-boundary" ->
+      expectFinding
+        "selector case: an opaque boundary interrupts the expected tracker row"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        (replaceIn trackerPath expectedTrackerDelimiter (expectedTrackerDelimiter <> "\n> opaque boundary") validCorpus)
+    "tracker-row-empty" ->
+      expectFinding
+        "selector case: empty required tracker cell"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        ( replaceIn
+            trackerPath
+            (trackerRow 10 blockedTrackerStatus)
+            (Text.replace "| Synthetic capability 10 |" "|  |" (trackerRow 10 blockedTrackerStatus))
+            validCorpus
+        )
+    "tracker-row-count-observation" ->
+      expectObservation
+        "selector case: exact tracker-row observation"
+        "tracker-row-count"
+        "96"
+        (phaseContractDiagnostic validCorpus)
+    "tracker-second-header" ->
+      expectFinding
+        "selector case: second exact tracker header"
+        "PLAN-TRACKER-TABLE-FRAME"
+        trackerPath
+        (replaceIn trackerPath expectedTrackerHeader (expectedTrackerHeader <> "\n" <> expectedTrackerHeader) validCorpus)
+    "tracker-status" ->
+      expectFinding
+        "selector case: tracker status reset"
+        "PLAN-TRACKER-STATUS"
+        trackerPath
+        (replaceIn trackerPath (trackerRow 10 blockedTrackerStatus) (trackerRow 10 "Done") validCorpus)
+    "tracker-title-join" ->
+      expectFinding
+        "selector case: tracker title and phase H1 join"
+        "PLAN-TRACKER-TITLE"
+        trackerPath
+        (replaceIn trackerPath "| 10 | Synthetic capability 10 |" "| 10 | Divergent title |" validCorpus)
     "tracker-unframed-rows" ->
       expectFinding "selector case: unframed tracker rows" "PLAN-TRACKER-TABLE-FRAME" trackerPath trackerRowsWithoutFrameCorpus
     "unresolved-gate-cell" ->
@@ -1708,6 +2904,12 @@ phaseContractExactCaseProblems exactCase =
         "PLAN-GATE-UNRESOLVED"
         (phasePath 8)
         (replaceIn (phasePath 8) (gateRow "Oracle" standardOracle) (gateRow "Oracle" "UNRESOLVED") validCorpus)
+    "unresolved-marker-count-observation" ->
+      expectObservation
+        "selector case: exact unresolved-marker observation"
+        "unresolved-marker-cell-count"
+        "1"
+        (phaseContractDiagnostic markerCorpus)
     _ -> ["unknown PhaseContract exact case: " <> exactCase]
  where
   entryLimitAttackResult = phaseContractDiagnostic (replicate 257 ("scratch/repeated.md", ""))
@@ -1718,6 +2920,12 @@ phaseContractExactCaseProblems exactCase =
       ( [("scratch/total-" <> show ordinal <> ".md", Text.replicate 524288 "x") | ordinal <- [(1 :: Int) .. 16]]
           <> [("scratch/total-17.md", "x")]
       )
+  envelopeAttackResults =
+    [ entryLimitAttackResult
+    , pathLimitAttackResult
+    , documentLimitAttackResult
+    , totalLimitAttackResult
+    ]
 
 oracleUniverseProblems :: [String]
 oracleUniverseProblems =
@@ -2080,6 +3288,50 @@ expectNoFindingCode label code result
           <> show (checkFindings result)
       ]
 
+expectAnyFindingCode :: String -> [Text] -> CheckResult -> [String]
+expectAnyFindingCode label codes result
+  | any ((`elem` codes) . findingCode) (checkFindings result) = []
+  | otherwise =
+      [ label
+          <> ": expected at least one finding code from "
+          <> show codes
+          <> ", observed "
+          <> show (map findingCode (checkFindings result))
+      ]
+
+expectAnyFindingCodeInResults :: String -> [Text] -> [CheckResult] -> [String]
+expectAnyFindingCodeInResults label codes results
+  | any (null . expectAnyFindingCode label codes) results = []
+  | otherwise =
+      [ label
+          <> ": no result retained any finding code from "
+          <> show codes
+          <> "; observed "
+          <> show (map (map findingCode . checkFindings) results)
+      ]
+
+expectObservationKeySequence :: String -> [Text] -> CheckResult -> [String]
+expectObservationKeySequence label expected result
+  | map observationKey (checkObservations result) == expected = []
+  | otherwise =
+      [ label
+          <> ": expected observation keys "
+          <> show expected
+          <> ", observed "
+          <> show (map observationKey (checkObservations result))
+      ]
+
+expectAnyObservationKeySequence :: String -> [Text] -> [CheckResult] -> [String]
+expectAnyObservationKeySequence label expected results
+  | any (null . expectObservationKeySequence label expected) results = []
+  | otherwise =
+      [ label
+          <> ": no result retained observation keys "
+          <> show expected
+          <> "; observed "
+          <> show (map (map observationKey . checkObservations) results)
+      ]
+
 expectExactFindingInResult :: String -> Text -> FilePath -> Text -> CheckResult -> [String]
 expectExactFindingInResult label code locus detail result
   | any matches (checkFindings result) = []
@@ -2095,6 +3347,17 @@ expectExactFindingInResult label code locus detail result
     findingCode item == code
       && findingSubject item == locus
       && findingDetail item == detail
+
+expectCheckName :: String -> Text -> CheckResult -> [String]
+expectCheckName label expected result
+  | checkName result == expected = []
+  | otherwise =
+      [ label
+          <> ": expected check name "
+          <> Text.unpack expected
+          <> ", observed "
+          <> Text.unpack (checkName result)
+      ]
 
 expectObservation :: String -> Text -> Text -> CheckResult -> [String]
 expectObservation label key expected result =

@@ -802,7 +802,12 @@ boundedPrefix limit = go 0 []
   go count reversed remaining = case remaining of
     [] -> Bounded (reverse reversed)
     value : rest
-      | boundedPrefixLimitReached count limit -> Exceeded (limit + 1)
+      | boundedPrefixLimitReached count limit ->
+#if defined(VALIDATION_COMPILER_PLAN_BOUNDED_PREFIX_EXCEEDED_COUNT_PROJECTION_MUTANT)
+          Exceeded limit
+#else
+          Exceeded (limit + 1)
+#endif
       | otherwise -> go (count + 1) (value : reversed) rest
 
 boundedPrefixLimitReached :: Int -> Int -> Bool
@@ -1751,10 +1756,17 @@ boundedAggregateBytes = go 0
       let size = ByteString.length (rawComponentBytes entry)
        in if aggregateAdditionExceedsLimit total size
             then
-              if aggregateBlobLimitExceeded (maxAggregateBlobBytes + 1)
-                then Left (maxAggregateBlobBytes + 1)
+              if aggregateBlobLimitExceeded aggregateOverflowObserved
+                then Left aggregateOverflowObserved
                 else go total rest
             else go (rawAggregateNextTotal total size) rest
+
+aggregateOverflowObserved :: Int
+#if defined(VALIDATION_COMPILER_PLAN_AGGREGATE_OVERFLOW_OBSERVED_PROJECTION_MUTANT)
+aggregateOverflowObserved = maxAggregateBlobBytes
+#else
+aggregateOverflowObserved = maxAggregateBlobBytes + 1
+#endif
 
 rawAggregateNextTotal :: Int -> Int -> Int
 #if defined(VALIDATION_COMPILER_PLAN_RAW_AGGREGATE_TOTAL_ACCUMULATION_MUTANT)
@@ -1784,7 +1796,12 @@ boundedUtf8Chars limit = go 0 []
     character : rest ->
       let next = utf8NextTotal count (utf8Width character)
        in if utf8LimitExceeded next limit
-            then Exceeded next
+            then
+#if defined(VALIDATION_COMPILER_PLAN_UTF8_EXCEEDED_COUNT_PROJECTION_MUTANT)
+              Exceeded count
+#else
+              Exceeded next
+#endif
             else go next (character : reversed) rest
 
 utf8NextTotal :: Int -> Int -> Int
@@ -2177,8 +2194,8 @@ boundedTypedAggregateBytes = go 0
       let size = ByteString.length (trackedBytes tracked)
        in if aggregateAdditionExceedsLimit total size
             then
-              if aggregateBlobLimitExceeded (maxAggregateBlobBytes + 1)
-                then Left (maxAggregateBlobBytes + 1)
+              if aggregateBlobLimitExceeded aggregateOverflowObserved
+                then Left aggregateOverflowObserved
                 else go total rest
             else go (typedAggregateNextTotal total size) rest
 
@@ -2243,7 +2260,11 @@ data CabalScanCounts = CabalScanCounts
   }
 
 emptyCabalScanCounts :: CabalScanCounts
+#if defined(VALIDATION_COMPILER_PLAN_EMPTY_CABAL_SCAN_STATE_SEED_MUTANT)
+emptyCabalScanCounts = CabalScanCounts 1 0 0 0 0 0 0 0
+#else
 emptyCabalScanCounts = CabalScanCounts 0 0 0 0 0 0 0 0
+#endif
 
 scannedCabalStructureProblems :: TrackedEntry -> [ComponentPlanProblem]
 scannedCabalStructureProblems tracked =
@@ -3342,10 +3363,14 @@ viewsForTree packageRoot project = map (project packageRoot) . cumulativeNodes m
 
 cumulativeNodes :: Monoid component => component -> CondTree variable constraints component -> [component]
 cumulativeNodes inherited (CondNode datum _ branches) =
-  projectCurrentConditionalNodeContribution [current]
+ projectCurrentConditionalNodeContribution [current]
     <> concatMap branchNodes branches
  where
+#if defined(VALIDATION_COMPILER_PLAN_CONDITIONAL_NODE_INHERITED_MERGE_DROP_MUTANT)
+  current = inherited `seq` datum
+#else
   current = inherited <> datum
+#endif
   branchNodes (CondBranch _ trueBranch falseBranch) =
     projectTrueConditionalNodeContribution (cumulativeNodes current trueBranch)
       <> projectFalseConditionalNodeContribution (maybe [] (cumulativeNodes current) falseBranch)
@@ -4158,14 +4183,23 @@ projectMainModuleAmbiguousProblems = id
 #endif
 
 moduleCandidates :: Map FilePath HaskellSubject -> ComponentView -> Text -> [FilePath]
-moduleCandidates byPath view moduleName = filter (`Map.member` byPath) (candidateModulePaths view moduleName)
+moduleCandidates byPath view moduleName =
+  filter (candidateMembership byPath) (candidateModulePaths view moduleName)
 
 candidateModulePaths :: ComponentView -> Text -> [FilePath]
 candidateModulePaths view moduleName =
   [joinRepoPath directory (Text.unpack moduleName <> ".hs") | directory <- viewSourceDirs view]
 
 mainCandidates :: Map FilePath HaskellSubject -> ComponentView -> FilePath -> [FilePath]
-mainCandidates byPath view mainPath = filter (`Map.member` byPath) (candidateMainPaths view mainPath)
+mainCandidates byPath view mainPath =
+  filter (candidateMembership byPath) (candidateMainPaths view mainPath)
+
+candidateMembership :: Map FilePath HaskellSubject -> FilePath -> Bool
+#if defined(VALIDATION_COMPILER_PLAN_CANDIDATE_MEMBERSHIP_DROP_MUTANT)
+candidateMembership byPath path = Map.size byPath `seq` path `seq` False
+#else
+candidateMembership byPath path = Map.member path byPath
+#endif
 
 candidateMainPaths :: ComponentView -> FilePath -> [FilePath]
 candidateMainPaths view mainPath =

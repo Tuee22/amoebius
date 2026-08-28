@@ -2,7 +2,11 @@
 {-# LANGUAGE PackageImports #-}
 
 module SourceAcquisitionOracle
-  ( runSourceAcquisitionOracle
+  ( CanonicalAcquisitionEntry (..)
+  , CanonicalAcquisitionInputs (..)
+  , canonicalAcquisitionInputs
+  , runSourceAcquisitionCanonicalControl
+  , runSourceAcquisitionOracle
   , runSourceAcquisitionSelectorOracle
   , sourceAcquisitionSelectorIntents
   , sourceAcquisitionSelectorNames
@@ -113,6 +117,75 @@ data OracleFixture = OracleFixture
   , fixtureMembers :: [(OracleEntry, ByteString)]
   , fixtureBundle :: ByteString
   }
+
+-- | Oracle-local primitive inputs for the package-hidden acquired-snapshot
+-- handoff oracle. No production manifest, entry, custody, or expectation type
+-- is shared across this boundary.
+data CanonicalAcquisitionInputs = CanonicalAcquisitionInputs
+  { canonicalInputPhase :: Text
+  , canonicalInputAuthority :: Text
+  , canonicalInputObserverToolDigest :: Text
+  , canonicalInputChallenge :: Text
+  , canonicalInputConsumedReplayIdentities :: Set.Set Text
+  , canonicalInputRepositoryIdentity :: Text
+  , canonicalInputRequestedRevision :: Text
+  , canonicalInputReplayIdentity :: Text
+  , canonicalInputHeadIdentity :: Text
+  , canonicalInputSourceSnapshotIdentity :: Text
+  , canonicalInputAuthoredRootIdentity :: Text
+  , canonicalInputExpectedManifestBytes :: ByteString
+  , canonicalInputPublicKeyBytes :: ByteString
+  , canonicalInputWireBytes :: ByteString
+  , canonicalInputBundleBytes :: ByteString
+  , canonicalInputExpectedPaths :: [FilePath]
+  , canonicalInputEntries :: [CanonicalAcquisitionEntry]
+  }
+
+data CanonicalAcquisitionEntry = CanonicalAcquisitionEntry
+  { canonicalEntryPath :: FilePath
+  , canonicalEntryMode :: Text
+  , canonicalEntryGitObjectId :: Text
+  , canonicalEntryByteLength :: Word64
+  , canonicalEntryBlobSha256 :: Text
+  }
+
+canonicalAcquisitionInputs :: IO CanonicalAcquisitionInputs
+canonicalAcquisitionInputs = do
+  secret <- Ed25519.generateSecretKey
+  let public = Ed25519.toPublic secret
+      fixture = canonicalFixture OracleObjectSha1
+      manifest = fixtureManifest fixture
+      expected = alignFullExpectation manifest (canonicalExpectation fixture)
+  pure
+    CanonicalAcquisitionInputs
+      { canonicalInputPhase = oracleExpectedPhase expected
+      , canonicalInputAuthority = oracleExpectedAuthority expected
+      , canonicalInputObserverToolDigest = oracleExpectedObserverToolDigest expected
+      , canonicalInputChallenge = oracleExpectedChallenge expected
+      , canonicalInputConsumedReplayIdentities = oracleConsumedReplayIdentities expected
+      , canonicalInputRepositoryIdentity = oracleExpectedRepositoryIdentity expected
+      , canonicalInputRequestedRevision = oracleExpectedRequestedRevision expected
+      , canonicalInputReplayIdentity = oracleReplayIdentity manifest
+      , canonicalInputHeadIdentity = oracleExpectedHeadIdentity expected
+      , canonicalInputSourceSnapshotIdentity = oracleExpectedSourceSnapshotIdentity expected
+      , canonicalInputAuthoredRootIdentity = oracleExpectedAuthoredRootIdentity expected
+      , canonicalInputExpectedManifestBytes = oracleExpectedManifestBytes expected
+      , canonicalInputPublicKeyBytes = convert public
+      , canonicalInputWireBytes = signFixture secret public fixture
+      , canonicalInputBundleBytes = fixtureBundle fixture
+      , canonicalInputExpectedPaths = map oracleEntryPath (oracleEntries manifest)
+      , canonicalInputEntries = map canonicalPrimitiveEntry (oracleEntries manifest)
+      }
+
+canonicalPrimitiveEntry :: OracleEntry -> CanonicalAcquisitionEntry
+canonicalPrimitiveEntry entry =
+  CanonicalAcquisitionEntry
+    { canonicalEntryPath = oracleEntryPath entry
+    , canonicalEntryMode = oracleRenderMode (oracleEntryMode entry)
+    , canonicalEntryGitObjectId = oracleEntryGitObjectId entry
+    , canonicalEntryByteLength = oracleEntryByteLength entry
+    , canonicalEntryBlobSha256 = oracleEntryBlobSha256 entry
+    }
 
 data ExactCase = ExactCase String [String]
 
@@ -1749,6 +1822,24 @@ runSourceAcquisitionOracle = do
     (null problems)
     ( fail
         ( "SourceAcquisitionOracle component diagnostic failures:\n  "
+            <> unlinesWith "\n  " problems
+        )
+    )
+
+runSourceAcquisitionCanonicalControl :: IO ()
+runSourceAcquisitionCanonicalControl = do
+  cases <- sourceAcquisitionExactCases
+  let matching = exactCasesNamed "canonical SHA-1 frozen source bundle" cases
+      problems = case matching of
+        [candidate] -> exactCaseProblems candidate
+        candidates ->
+          [ "canonical SourceAcquisition control is not exactly resolvable; count="
+              <> show (length candidates)
+          ]
+  unless
+    (null problems)
+    ( fail
+        ( "SourceAcquisitionOracle canonical control failures:\n  "
             <> unlinesWith "\n  " problems
         )
     )

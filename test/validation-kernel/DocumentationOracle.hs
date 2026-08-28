@@ -769,7 +769,7 @@ productionCorpusProblems = do
             <> expectObservation
               "independent production paragraph-spanning over-target count"
               "prose-budget.sentence-over-target-count"
-              "1596"
+              "1601"
               result
             <> expectObservation
               "independent production severe-sentence count"

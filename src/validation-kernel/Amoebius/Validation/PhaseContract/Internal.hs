@@ -20,6 +20,7 @@ import Amoebius.Validation.ResourceProvisionContract
 import Amoebius.Validation.Types
   ( CheckResult (..)
   , Finding
+  , Observation
   , finding
   , observation
   )
@@ -114,40 +115,26 @@ checkPhaseContractsWithSemanticBarrier requireSemanticAudit supplied =
     [] -> checkPhaseContractsWithinEnvelope requireSemanticAudit supplied
     envelopeFindings ->
       CheckResult
-        { checkName = "phase-contracts"
-        , checkObservations =
-            [ observation "phase-contract-input-envelope" "refused-before-parse"
-            , observation "phase-contract-input-entry-limit" (showText phaseContractInputEntryLimit)
-            , observation "phase-contract-input-path-character-limit" (showText phaseContractInputPathCharacterLimit)
-            , observation "phase-contract-input-document-character-limit" (showText phaseContractInputDocumentCharacterLimit)
-            , observation "phase-contract-input-total-character-limit" (showText phaseContractInputTotalCharacterLimit)
-            ]
-        , checkFindings = structuralDiagnosticRefusal requireSemanticAudit <> envelopeFindings
+        { checkName = phaseContractCheckName
+        , checkObservations = phaseContractInputEnvelopeObservations
+        , checkFindings = structuralDiagnosticRefusal requireSemanticAudit <> phaseContractInputEnvelopeResultFindings envelopeFindings
         }
 
 checkPhaseContractsWithinEnvelope :: Bool -> [(FilePath, Text)] -> CheckResult
 checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
   CheckResult
-    { checkName = "phase-contracts"
-    , checkObservations =
-        [ observation "phase-document-count" (showText (Map.size phases))
-        , observation "tracker-row-count" (showText (length trackerRows))
-        , observation "gate-row-count" (showText (sum (map (length . phaseGateRows) (Map.elems phases))))
-        , observation "sprint-section-count" (showText (sum (map (length . sprintSectionsFor) (Map.elems phases))))
-        , observation "unresolved-marker-cell-count" (showText unresolvedMarkerCount)
-        , observation "missing-marker-cell-count" (showText missingMarkerCount)
-        , observation "refusal-marker-cell-count" (showText refusalMarkerCount)
-        ]
+    { checkName = phaseContractCheckName
+    , checkObservations = structuralResultObservations
           <> concatMap checkObservations semanticDiagnostics
     , checkFindings =
-        phaseDomainFindings
-          <> concatMap checkPhaseStructure (Map.elems phases)
-          <> concatMap (checkDependency phases) (Map.elems phases)
-          <> concatMap checkGate (Map.elems phases)
-          <> concatMap (checkSprintContracts phases requireSemanticAudit) (Map.elems phases)
-          <> trackerFindings
-          <> checkTrackerJoin phases trackerRows
-          <> checkProjectionVocabulary phases trackerRows
+        phaseDomainResultFindings
+          <> phaseStructureResultFindings
+          <> dependencyResultFindings
+          <> gateResultFindings
+          <> sprintResultFindings
+          <> trackerResultFindings
+          <> trackerJoinResultFindings
+          <> projectionVocabularyResultFindings
           <> structuralDiagnosticRefusal requireSemanticAudit
           <> concatMap checkFindings semanticDiagnostics
     }
@@ -156,7 +143,74 @@ checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
   parsed = mapMaybe (uncurry parsePhaseDocument) normalized
   grouped = Map.fromListWith (<>) [(phaseNumber phase, [phase]) | phase <- parsed]
   phases = Map.mapMaybe (listToMaybe . sortOnPath) grouped
+  structuralResultObservations =
+    guardedStructuralResultObservations
+#if defined(VALIDATION_PHASE_CONTRACT_OBSERVATION_RESULT_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedStructuralResultObservations =
+    [ observation "phase-document-count" (phaseDocumentCountObservationValue (Map.size phases))
+    , observation "tracker-row-count" (trackerRowCountObservationValue (length trackerRows))
+    , observation "gate-row-count" (gateRowCountObservationValue (sum (map (length . phaseGateRows) (Map.elems phases))))
+    , observation "sprint-section-count" (sprintSectionCountObservationValue (sum (map (length . sprintSectionsFor) (Map.elems phases))))
+    , observation "unresolved-marker-cell-count" (unresolvedMarkerCountObservationValue unresolvedMarkerCount)
+    , observation "missing-marker-cell-count" (missingMarkerCountObservationValue missingMarkerCount)
+    , observation "refusal-marker-cell-count" (refusalMarkerCountObservationValue refusalMarkerCount)
+    ]
+  phaseDomainResultFindings =
+    guardedPhaseDomainResultFindings
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_DOMAIN_RESULT_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedPhaseDomainResultFindings = phaseDomainFindings
+  phaseStructureResultFindings =
+    guardedPhaseStructureResultFindings
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_STRUCTURE_RESULT_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedPhaseStructureResultFindings = concatMap checkPhaseStructure (Map.elems phases)
+  dependencyResultFindings =
+    guardedDependencyResultFindings
+#if defined(VALIDATION_PHASE_CONTRACT_DEPENDENCY_RESULT_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedDependencyResultFindings = concatMap (checkDependency phases) (Map.elems phases)
+  gateResultFindings =
+    guardedGateResultFindings
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_RESULT_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedGateResultFindings = concatMap checkGate (Map.elems phases)
+  sprintResultFindings =
+    guardedSprintResultFindings
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_RESULT_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedSprintResultFindings = concatMap (checkSprintContracts phases requireSemanticAudit) (Map.elems phases)
+  trackerResultFindings =
+    guardedTrackerResultFindings
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_RESULT_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedTrackerResultFindings = trackerFindings
+  trackerJoinResultFindings =
+    guardedTrackerJoinResultFindings
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_JOIN_RESULT_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedTrackerJoinResultFindings = checkTrackerJoin phases trackerRows
+  projectionVocabularyResultFindings =
+    guardedProjectionVocabularyResultFindings
+#if defined(VALIDATION_PHASE_CONTRACT_PROJECTION_RESULT_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedProjectionVocabularyResultFindings = checkProjectionVocabulary phases trackerRows
   duplicatePhaseFindings =
+    guardedDuplicatePhaseFindings
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_DUPLICATE_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedDuplicatePhaseFindings =
     [ finding
         "PLAN-PHASE-DUPLICATE"
         (phasePath first)
@@ -170,25 +224,51 @@ checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
   extraNumbers = Set.toAscList (actualNumbers Set.\\ expectedNumbers)
   phaseDomainFindings =
     duplicatePhaseFindings
-      <> [finding "PLAN-PHASE-MISSING" "DEVELOPMENT_PLAN/" ("missing Phase " <> showText number) | number <- missingNumbers]
-      <> [finding "PLAN-PHASE-EXTRA" (phasePath phase) ("phase ordinal lies outside the closed " <> phaseDomainLabel <> " domain") | number <- extraNumbers, Just phase <- [Map.lookup number phases]]
-      <> [finding "PLAN-PHASE-DISCOVERY" "DEVELOPMENT_PLAN/" "no numbered phase contracts were supplied" | Map.null phases]
+      <> missingPhaseFindings
+      <> extraPhaseFindings
+      <> discoveryPhaseFindings
+  missingPhaseFindings =
+    guardedMissingPhaseFindings
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_MISSING_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedMissingPhaseFindings =
+    [finding "PLAN-PHASE-MISSING" "DEVELOPMENT_PLAN/" ("missing Phase " <> showText number) | number <- missingNumbers]
+  extraPhaseFindings =
+    guardedExtraPhaseFindings
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_EXTRA_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedExtraPhaseFindings =
+    [finding "PLAN-PHASE-EXTRA" (phasePath phase) ("phase ordinal lies outside the closed " <> phaseDomainLabel <> " domain") | number <- extraNumbers, Just phase <- [Map.lookup number phases]]
+  discoveryPhaseFindings =
+    guardedDiscoveryPhaseFindings
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_DISCOVERY_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedDiscoveryPhaseFindings =
+    [finding "PLAN-PHASE-DISCOVERY" "DEVELOPMENT_PLAN/" "no numbered phase contracts were supplied" | Map.null phases]
   trackerCandidates = [contents | (path, contents) <- normalized, path == trackerPath]
   trackerFrame = case trackerCandidates of
     [contents] -> parseTrackerDocument contents
     _ -> TrackerFrame [] []
   trackerRows = trackerFrameRows trackerFrame
   trackerFindings =
+    trackerCardinalityFindings
+      <> trackerFrameFindings trackerFrame
+      <> checkTrackerShape trackerRows
+  trackerCardinalityFindings =
+    guardedTrackerCardinalityFindings
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_CARDINALITY_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedTrackerCardinalityFindings =
     [ finding
         "PLAN-TRACKER-CARDINALITY"
         trackerPath
         "the supplied corpus must contain exactly one development-plan tracker"
     | length trackerCandidates /= 1
     ]
-      <> [ finding "PLAN-TRACKER-TABLE-FRAME" trackerPath problem
-         | problem <- trackerFrameProblems trackerFrame
-         ]
-      <> checkTrackerShape trackerRows
   gateCellValues = [value | phase <- Map.elems phases, (_, value) <- phaseGateRows phase]
   unresolvedMarkerCount = length (filter containsUnresolvedMarker gateCellValues)
   missingMarkerCount = length (filter containsMissingMarker gateCellValues)
@@ -201,6 +281,74 @@ checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
         , phaseSemanticJoinDiagnostic supplied
         ]
       else []
+
+trackerFrameFindings :: TrackerFrame -> [Finding]
+trackerFrameFindings frame =
+  guardedTrackerFrameFindings
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_FRAME_FINDING_BYPASS_MUTANT)
+    `seq` []
+#endif
+ where
+  guardedTrackerFrameFindings =
+    [ finding "PLAN-TRACKER-TABLE-FRAME" trackerPath problem
+    | problem <- trackerFrameProblems frame
+    ]
+
+phaseContractCheckName :: Text
+#if defined(VALIDATION_PHASE_CONTRACT_CHECK_NAME_BYPASS_MUTANT)
+phaseContractCheckName = "phase-contracts-mutant"
+#else
+phaseContractCheckName = "phase-contracts"
+#endif
+
+phaseDocumentCountObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_DOCUMENT_COUNT_OBSERVATION_BYPASS_MUTANT)
+phaseDocumentCountObservationValue value = value `seq` "0"
+#else
+phaseDocumentCountObservationValue = showText
+#endif
+
+trackerRowCountObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_ROW_COUNT_OBSERVATION_BYPASS_MUTANT)
+trackerRowCountObservationValue value = value `seq` "0"
+#else
+trackerRowCountObservationValue = showText
+#endif
+
+gateRowCountObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_ROW_COUNT_OBSERVATION_BYPASS_MUTANT)
+gateRowCountObservationValue value = value `seq` "0"
+#else
+gateRowCountObservationValue = showText
+#endif
+
+sprintSectionCountObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_SECTION_COUNT_OBSERVATION_BYPASS_MUTANT)
+sprintSectionCountObservationValue value = value `seq` "0"
+#else
+sprintSectionCountObservationValue = showText
+#endif
+
+unresolvedMarkerCountObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_UNRESOLVED_MARKER_COUNT_OBSERVATION_BYPASS_MUTANT)
+unresolvedMarkerCountObservationValue value = value `seq` "0"
+#else
+unresolvedMarkerCountObservationValue = showText
+#endif
+
+missingMarkerCountObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_MISSING_MARKER_COUNT_OBSERVATION_BYPASS_MUTANT)
+missingMarkerCountObservationValue value = value `seq` "0"
+#else
+missingMarkerCountObservationValue = showText
+#endif
+
+refusalMarkerCountObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_REFUSAL_MARKER_COUNT_OBSERVATION_BYPASS_MUTANT)
+refusalMarkerCountObservationValue value = value `seq` "0"
+#else
+refusalMarkerCountObservationValue = showText
+#endif
 
 phaseContractInputEnvelopeFindings :: [(FilePath, Text)] -> [Finding]
 phaseContractInputEnvelopeFindings supplied
@@ -290,6 +438,63 @@ phaseContractInputDocumentCharacterLimit = 524288
 phaseContractInputTotalCharacterLimit :: Int
 phaseContractInputTotalCharacterLimit = 8388608
 
+phaseContractInputEnvelopeObservationValue :: Text
+#if defined(VALIDATION_PHASE_CONTRACT_INPUT_ENVELOPE_OBSERVATION_BYPASS_MUTANT)
+phaseContractInputEnvelopeObservationValue = "parse-state-unknown"
+#else
+phaseContractInputEnvelopeObservationValue = "refused-before-parse"
+#endif
+
+phaseContractInputEntryLimitObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_INPUT_ENTRY_LIMIT_OBSERVATION_BYPASS_MUTANT)
+phaseContractInputEntryLimitObservationValue value = value `seq` "0"
+#else
+phaseContractInputEntryLimitObservationValue = showText
+#endif
+
+phaseContractInputPathLimitObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_INPUT_PATH_LIMIT_OBSERVATION_BYPASS_MUTANT)
+phaseContractInputPathLimitObservationValue value = value `seq` "0"
+#else
+phaseContractInputPathLimitObservationValue = showText
+#endif
+
+phaseContractInputDocumentLimitObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_INPUT_DOCUMENT_LIMIT_OBSERVATION_BYPASS_MUTANT)
+phaseContractInputDocumentLimitObservationValue value = value `seq` "0"
+#else
+phaseContractInputDocumentLimitObservationValue = showText
+#endif
+
+phaseContractInputTotalLimitObservationValue :: Int -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_INPUT_TOTAL_LIMIT_OBSERVATION_BYPASS_MUTANT)
+phaseContractInputTotalLimitObservationValue value = value `seq` "0"
+#else
+phaseContractInputTotalLimitObservationValue = showText
+#endif
+
+phaseContractInputEnvelopeObservations :: [Observation]
+phaseContractInputEnvelopeObservations =
+  guardedPhaseContractInputEnvelopeObservations
+#if defined(VALIDATION_PHASE_CONTRACT_INPUT_ENVELOPE_OBSERVATION_COMPOSITION_BYPASS_MUTANT)
+    `seq` []
+#endif
+ where
+  guardedPhaseContractInputEnvelopeObservations =
+    [ observation "phase-contract-input-envelope" phaseContractInputEnvelopeObservationValue
+    , observation "phase-contract-input-entry-limit" (phaseContractInputEntryLimitObservationValue phaseContractInputEntryLimit)
+    , observation "phase-contract-input-path-character-limit" (phaseContractInputPathLimitObservationValue phaseContractInputPathCharacterLimit)
+    , observation "phase-contract-input-document-character-limit" (phaseContractInputDocumentLimitObservationValue phaseContractInputDocumentCharacterLimit)
+    , observation "phase-contract-input-total-character-limit" (phaseContractInputTotalLimitObservationValue phaseContractInputTotalCharacterLimit)
+    ]
+
+phaseContractInputEnvelopeResultFindings :: [Finding] -> [Finding]
+#if defined(VALIDATION_PHASE_CONTRACT_INPUT_ENVELOPE_FINDING_COMPOSITION_BYPASS_MUTANT)
+phaseContractInputEnvelopeResultFindings findings = length findings `seq` []
+#else
+phaseContractInputEnvelopeResultFindings = id
+#endif
+
 structuralDiagnosticRefusal :: Bool -> [Finding]
 #if defined(VALIDATION_PHASE_CONTRACT_STRUCTURE_DIAGNOSTIC_BYPASS_MUTANT)
 structuralDiagnosticRefusal _ = []
@@ -340,28 +545,135 @@ parsePhaseDocument path contents = do
       }
 
 phaseNumberFromPath :: FilePath -> Maybe Int
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_PATH_DIRECTORY_BYPASS_MUTANT)
+phaseNumberFromPath path = takeDirectory path `seq` phaseNumberFromFileName path
+#else
 phaseNumberFromPath path
   | takeDirectory path /= "DEVELOPMENT_PLAN" = Nothing
-  | otherwise = do
-      remainder <- Text.stripPrefix "phase_" (Text.pack (takeFileName path))
-      let (digits, suffix) = Text.splitAt 2 remainder
-      if Text.length digits == 2
-          && Text.all isDigit digits
-          && "_" `Text.isPrefixOf` suffix
-          && ".md" `Text.isSuffixOf` suffix
-        then readMaybe (Text.unpack digits)
-        else Nothing
+  | otherwise = phaseNumberFromFileName path
+#endif
+
+phaseNumberFromFileName :: FilePath -> Maybe Int
+phaseNumberFromFileName path = do
+  remainder <- phasePathPrefix (Text.pack (takeFileName path))
+  (digits, suffix) <- phasePathDigitPrefix remainder
+  if Text.all isDigit digits
+      && phasePathSeparatorValid suffix
+      && phasePathExtensionValid suffix
+      && phasePathSlugNonEmpty suffix
+      && phasePathSlugCharactersValid suffix
+      && phasePathSlugSegmentsValid suffix
+    then readMaybe (Text.unpack digits)
+    else Nothing
+
+phasePathPrefix :: Text -> Maybe Text
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_PATH_PREFIX_BYPASS_MUTANT)
+phasePathPrefix fileName =
+  case Text.stripPrefix "phase_" fileName of
+    Just remainder -> Just remainder
+    Nothing -> Text.stripPrefix "stage_" fileName
+#else
+phasePathPrefix = Text.stripPrefix "phase_"
+#endif
+
+phasePathDigitPrefix :: Text -> Maybe (Text, Text)
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_PATH_DIGIT_WIDTH_BYPASS_MUTANT)
+phasePathDigitPrefix remainder =
+  let result@(digits, _) = Text.span isDigit remainder
+   in if Text.null digits then Nothing else Just result
+#else
+phasePathDigitPrefix remainder =
+  let result@(digits, _) = Text.splitAt 2 remainder
+   in if Text.length digits == 2 then Just result else Nothing
+#endif
+
+phasePathSeparatorValid :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_PATH_SEPARATOR_BYPASS_MUTANT)
+phasePathSeparatorValid suffix = not (Text.null suffix)
+#else
+phasePathSeparatorValid = Text.isPrefixOf "_"
+#endif
+
+phasePathExtensionValid :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_PATH_EXTENSION_BYPASS_MUTANT)
+phasePathExtensionValid suffix =
+  Text.length suffix `seq` (Text.isSuffixOf ".md" suffix || Text.isSuffixOf ".txt" suffix)
+#else
+phasePathExtensionValid = Text.isSuffixOf ".md"
+#endif
+
+phasePathSlug :: Text -> Text
+phasePathSlug suffix =
+  let withoutExtension =
+        case Text.stripSuffix ".md" suffix of
+          Just value -> value
+          Nothing -> maybe suffix id (Text.stripSuffix ".txt" suffix)
+   in maybe withoutExtension id (Text.stripPrefix "_" withoutExtension)
+
+phasePathSlugNonEmpty :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_PATH_SLUG_EMPTY_BYPASS_MUTANT)
+phasePathSlugNonEmpty suffix = Text.null (phasePathSlug suffix) `seq` True
+#else
+phasePathSlugNonEmpty = not . Text.null . phasePathSlug
+#endif
+
+phasePathSlugCharactersValid :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_PATH_SLUG_CHARACTER_BYPASS_MUTANT)
+phasePathSlugCharactersValid suffix =
+  Text.all phaseSlugCharacter (phasePathSlug suffix) `seq` True
+#else
+phasePathSlugCharactersValid = Text.all phaseSlugCharacter . phasePathSlug
+#endif
+
+phaseSlugCharacter :: Char -> Bool
+phaseSlugCharacter character =
+  (character >= 'a' && character <= 'z') || isDigit character || character == '_'
+
+phasePathSlugSegmentsValid :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_PATH_SLUG_SEGMENT_BYPASS_MUTANT)
+phasePathSlugSegmentsValid suffix =
+  any Text.null (Text.splitOn "_" (phasePathSlug suffix)) `seq` True
+#else
+phasePathSlugSegmentsValid suffix =
+  let slug = phasePathSlug suffix
+   in Text.null slug || all (not . Text.null) (Text.splitOn "_" slug)
+#endif
 
 parsePhaseTitle :: Int -> [(Int, Text)] -> Maybe Text
 parsePhaseTitle number visible =
-  case
-      [ Text.strip title
-      | (_, line) <- visible
-      , Just title <- [Text.stripPrefix ("# Phase " <> showText number <> ":") (trimAsciiEnd line)]
-      , not (Text.null (Text.strip title))
-      ] of
+  selectPhaseTitle
+    [ Text.strip title
+    | (_, line) <- visible
+    , Just title <- [phaseTitleRemainder number (trimAsciiEnd line)]
+    , phaseTitleBodyNonEmpty title
+    ]
+
+phaseTitleRemainder :: Int -> Text -> Maybe Text
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_TITLE_PREFIX_BYPASS_MUTANT)
+phaseTitleRemainder number line =
+  case Text.stripPrefix ("# Phase " <> showText number <> ":") line of
+    Just title -> Just title
+    Nothing -> Text.stripPrefix ("# Stage " <> showText number <> ":") line
+#else
+phaseTitleRemainder number = Text.stripPrefix ("# Phase " <> showText number <> ":")
+#endif
+
+phaseTitleBodyNonEmpty :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_TITLE_EMPTY_BYPASS_MUTANT)
+phaseTitleBodyNonEmpty title = Text.null (Text.strip title) `seq` True
+#else
+phaseTitleBodyNonEmpty = not . Text.null . Text.strip
+#endif
+
+selectPhaseTitle :: [Text] -> Maybe Text
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_TITLE_CARDINALITY_BYPASS_MUTANT)
+selectPhaseTitle = listToMaybe
+#else
+selectPhaseTitle candidates =
+  case candidates of
     [title] -> Just title
     _ -> Nothing
+#endif
 
 summaryFieldNames :: [Text]
 summaryFieldNames = ["Phase scope", "Substrate", "Lane", "Register", "Depends on", "Gate"]
@@ -467,21 +779,29 @@ scanGateLine scanned (lineNumber, line)
             , gateScanHeaderCount = 1
             }
         stage ->
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_SECOND_HEADER_BYPASS_MUTANT)
+          stage `seq` lineNumber `seq` scanned
+#else
           addGateProblem
             ("line " <> showText lineNumber <> ": a second exact gate-table header is not permitted")
             ( scanned
               { gateScanStage = if stage == GateFinished then GateFinished else GateBroken
               , gateScanHeaderCount = gateScanHeaderCount scanned + 1
-              }
+                }
             )
+#endif
   | otherwise =
       case gateScanStage scanned of
         GateSeekingHeader ->
           if isGateTableCandidate line
             then
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_UNFRAMED_ROW_BYPASS_MUTANT)
+              lineNumber `seq` scanned
+#else
               addGateProblem
                 ("line " <> showText lineNumber <> ": a gate-table row occurs before the exact header")
                 scanned
+#endif
             else scanned
         GateExpectingDelimiter ->
           if isGateDelimiter line
@@ -510,21 +830,35 @@ scanGateLine scanned (lineNumber, line)
         GateExpectingEnd ->
           if physicalBlankLine line
             then scanned {gateScanStage = GateFinished}
-            else
-              addGateProblem
-                ( "line "
-                    <> showText lineNumber
-                    <> ": the eighteen-row gate table must end at a physical blank line or section end"
-                )
-                (scanned {gateScanStage = GateBroken})
+            else rejectGateTrailingContent scanned lineNumber
         GateFinished ->
           if isGateTableCandidate line
-            then
-              addGateProblem
-                ("line " <> showText lineNumber <> ": a gate-table row occurs outside the single exact frame")
-                scanned
+            then rejectOutsideGateRow scanned lineNumber
             else scanned
         GateBroken -> scanned
+
+rejectGateTrailingContent :: GateScan -> Int -> GateScan
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_END_CONTENT_BYPASS_MUTANT)
+rejectGateTrailingContent scanned lineNumber = lineNumber `seq` scanned {gateScanStage = GateFinished}
+#else
+rejectGateTrailingContent scanned lineNumber =
+  addGateProblem
+    ( "line "
+        <> showText lineNumber
+        <> ": the eighteen-row gate table must end at a physical blank line or section end"
+    )
+    (scanned {gateScanStage = GateBroken})
+#endif
+
+rejectOutsideGateRow :: GateScan -> Int -> GateScan
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_OUTSIDE_ROW_BYPASS_MUTANT)
+rejectOutsideGateRow scanned lineNumber = lineNumber `seq` scanned
+#else
+rejectOutsideGateRow scanned lineNumber =
+  addGateProblem
+    ("line " <> showText lineNumber <> ": a gate-table row occurs outside the single exact frame")
+    scanned
+#endif
 
 handleGateRowFailure :: GateScan -> Int -> Text -> Text -> Text -> GateScan
 handleGateRowFailure scanned lineNumber expectedKey line reason =
@@ -557,20 +891,40 @@ legacyIgnorableGateRow line =
 finishGateScan :: GateScan -> GateScan
 finishGateScan scanned =
   case gateScanStage scanned of
-    GateSeekingHeader ->
-      addGateProblem "one exact '| Key | Contract |' gate-table header is required" scanned
-    GateExpectingDelimiter ->
-      addGateProblem "the exact gate-table header has no following '|---|---|' delimiter" scanned
-    GateExpectingRow index ->
-      addGateProblem
-        ( "the gate table ended after "
-            <> showText index
-            <> " rows; all eighteen exact ordered rows are required"
-        )
-        scanned
+    GateSeekingHeader -> finishGateWithoutHeader scanned
+    GateExpectingDelimiter -> finishGateWithoutDelimiter scanned
+    GateExpectingRow index -> finishIncompleteGateRows scanned index
     GateExpectingEnd -> scanned {gateScanStage = GateFinished}
     GateFinished -> scanned
     GateBroken -> scanned
+
+finishGateWithoutHeader :: GateScan -> GateScan
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_MISSING_HEADER_FINDING_BYPASS_MUTANT)
+finishGateWithoutHeader scanned = scanned
+#else
+finishGateWithoutHeader = addGateProblem "one exact '| Key | Contract |' gate-table header is required"
+#endif
+
+finishGateWithoutDelimiter :: GateScan -> GateScan
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_MISSING_DELIMITER_FINDING_BYPASS_MUTANT)
+finishGateWithoutDelimiter scanned = scanned
+#else
+finishGateWithoutDelimiter =
+  addGateProblem "the exact gate-table header has no following '|---|---|' delimiter"
+#endif
+
+finishIncompleteGateRows :: GateScan -> Int -> GateScan
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_INCOMPLETE_ROWS_FINDING_BYPASS_MUTANT)
+finishIncompleteGateRows scanned index = index `seq` scanned
+#else
+finishIncompleteGateRows scanned index =
+  addGateProblem
+    ( "the gate table ended after "
+        <> showText index
+        <> " rows; all eighteen exact ordered rows are required"
+    )
+    scanned
+#endif
 
 addGateProblem :: Text -> GateScan -> GateScan
 addGateProblem problem scanned =
@@ -604,15 +958,32 @@ gateDelimiterCells = ["---", "---"]
 
 parseExactGateRow :: Text -> Text -> Either Text (Text, Text)
 parseExactGateRow expectedKey line =
-  case exactTableCells line of
-    Just [keyCell, value]
+  case gateRowCells line of
+    Right (keyCell, value)
       | not (gateKeyMatches expectedKey keyCell) ->
           Left ("the key cell must be exactly `" <> expectedKey <> "` including its Markdown code delimiters")
-      | Text.null value -> Left "the contract cell is empty"
+      | gateContractCellEmpty value -> Left "the contract cell is empty"
       | otherwise -> Right (expectedKey, value)
-    Just cells ->
-      Left ("the row must have exactly two cells; observed " <> showText (length cells))
+    Left problem -> Left problem
+
+gateRowCells :: Text -> Either Text (Text, Text)
+gateRowCells line =
+  case exactTableCells line of
     Nothing -> Left "the row must have exact opening and closing pipes on one top-level physical line"
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_ROW_ARITY_BYPASS_MUTANT)
+    Just (keyCell : value : _) -> Right (keyCell, value)
+    Just cells -> Left ("the row must have at least two cells; observed " <> showText (length cells))
+#else
+    Just [keyCell, value] -> Right (keyCell, value)
+    Just cells -> Left ("the row must have exactly two cells; observed " <> showText (length cells))
+#endif
+
+gateContractCellEmpty :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_ROW_EMPTY_BYPASS_MUTANT)
+gateContractCellEmpty value = Text.null value `seq` False
+#else
+gateContractCellEmpty = Text.null
+#endif
 
 gateKeyMatches :: Text -> Text -> Bool
 #if defined(VALIDATION_PHASE_CONTRACT_GATE_KEY_CODE_BYPASS_MUTANT)
@@ -626,9 +997,23 @@ isGateTableCandidate = Text.isInfixOf "|"
 
 exactTableCells :: Text -> Maybe [Text]
 exactTableCells rawLine = do
-  withoutOpen <- Text.stripPrefix "|" (trimAsciiEnd rawLine)
-  withoutClose <- Text.stripSuffix "|" withoutOpen
+  withoutOpen <- stripTableOpeningPipe (trimAsciiEnd rawLine)
+  withoutClose <- stripTableClosingPipe withoutOpen
   pure (map trimAscii (Text.splitOn "|" withoutClose))
+
+stripTableOpeningPipe :: Text -> Maybe Text
+#if defined(VALIDATION_PHASE_CONTRACT_TABLE_OPENING_PIPE_BYPASS_MUTANT)
+stripTableOpeningPipe line = Just (maybe line id (Text.stripPrefix "|" line))
+#else
+stripTableOpeningPipe = Text.stripPrefix "|"
+#endif
+
+stripTableClosingPipe :: Text -> Maybe Text
+#if defined(VALIDATION_PHASE_CONTRACT_TABLE_CLOSING_PIPE_BYPASS_MUTANT)
+stripTableClosingPipe line = Just (maybe line id (Text.stripSuffix "|" line))
+#else
+stripTableClosingPipe = Text.stripSuffix "|"
+#endif
 
 trimAscii :: Text -> Text
 trimAscii = Text.dropWhile asciiWhitespace . trimAsciiEnd
@@ -651,6 +1036,11 @@ checkPhaseStructure phase =
   path = phasePath phase
   number = phaseNumber phase
   titleFindings =
+    guardedTitleFindings
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_TITLE_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedTitleFindings =
     [ finding "PLAN-PHASE-TITLE" path ("expected exactly one '# Phase " <> showText number <> ": <title>' heading")
     | phaseTitle phase == Nothing
     ]
@@ -686,7 +1076,12 @@ checkPhaseStructure phase =
         || not (null additionalStatusFields)
         || rawExpectedStatusCount /= 1
     ]
-  summaryFindings = concatMap checkSummaryField summaryFieldNames
+  summaryFindings =
+    guardedSummaryFindings
+#if defined(VALIDATION_PHASE_CONTRACT_SUMMARY_FIELD_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedSummaryFindings = concatMap checkSummaryField summaryFieldNames
   checkSummaryField name =
     case Map.findWithDefault [] name (phaseFields phase) of
       [value]
@@ -699,6 +1094,11 @@ checkPhaseStructure phase =
         ]
   gateHeadings = sectionBodies "## Gate integrity" (phaseLines phase)
   gateHeadingFindings =
+    guardedGateHeadingFindings
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_SECTION_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedGateHeadingFindings =
     [ finding "PLAN-GATE-SECTION" path "exactly one Gate integrity section is required"
     | length gateHeadings /= 1
     ]
@@ -767,13 +1167,20 @@ checkDependency phases phase =
   case Map.findWithDefault [] "Depends on" (phaseFields phase) of
     [dependency]
       | phaseNumber phase == phaseDomainLowerNumber ->
-          [ finding "PLAN-DEPENDENCY" (phasePath phase) "Phase 0 must depend on genesis only"
-          | Text.toCaseFold (Text.strip dependency) /= "genesis"
-          ]
+          genesisFindings dependency
       | otherwise -> checkNumbered dependency
     _ -> []
  where
   number = phaseNumber phase
+  genesisFindings dependency =
+    guardedGenesisFindings dependency
+#if defined(VALIDATION_PHASE_CONTRACT_DEPENDENCY_GENESIS_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedGenesisFindings dependency =
+    [ finding "PLAN-DEPENDENCY" (phasePath phase) "Phase 0 must depend on genesis only"
+    | Text.toCaseFold (Text.strip dependency) /= "genesis"
+    ]
   checkNumbered dependency =
     let predecessor = policyPredecessorNumber number
         expectedLabel = "Phase " <> showText predecessor
@@ -788,30 +1195,50 @@ checkDependency phases phase =
           , Just targetNumber <- [phaseNumberFromPath ("DEVELOPMENT_PLAN/" <> Text.unpack target)]
           , targetNumber >= number
           ]
-     in [ finding
-            "PLAN-DEPENDENCY-LINK"
-            (phasePath phase)
-            ("Depends on is not one structurally valid inline Markdown link: " <> problem)
-        | problem <- linkProblems
-        ]
-          <> [ finding
+     in dependencyLinkFindings linkProblems
+          <> predecessorFindings targets expectedTarget predecessor
+          <> forwardFindings forward
+  dependencyLinkFindings linkProblems =
+    guardedDependencyLinkFindings linkProblems
+#if defined(VALIDATION_PHASE_CONTRACT_DEPENDENCY_LINK_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedDependencyLinkFindings linkProblems =
+    [ finding
+        "PLAN-DEPENDENCY-LINK"
+        (phasePath phase)
+        ("Depends on is not one structurally valid inline Markdown link: " <> problem)
+    | problem <- linkProblems
+    ]
+  predecessorFindings targets expectedTarget predecessor =
+    guardedPredecessorFindings targets expectedTarget predecessor
+#if defined(VALIDATION_PHASE_CONTRACT_DEPENDENCY_PREDECESSOR_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedPredecessorFindings targets expectedTarget predecessor =
+    [ finding
             "PLAN-DEPENDENCY-PREDECESSOR"
             (phasePath phase)
             ("Depends on must contain only one link, to immediate Phase " <> showText predecessor)
-        | targets /= maybeToList expectedTarget
-        ]
-          <> [ finding
-                 "PLAN-DEPENDENCY-FORWARD"
-                 (phasePath phase)
-                 ("Depends on contains a same-or-forward phase edge to Phase " <> showText targetNumber)
-             | targetNumber <- forward
-             ]
+    | targets /= maybeToList expectedTarget
+    ]
+  forwardFindings forward =
+    guardedForwardFindings forward
+#if defined(VALIDATION_PHASE_CONTRACT_DEPENDENCY_FORWARD_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedForwardFindings forward =
+    [ finding
+        "PLAN-DEPENDENCY-FORWARD"
+        (phasePath phase)
+        ("Depends on contains a same-or-forward phase edge to Phase " <> showText targetNumber)
+    | targetNumber <- forward
+    ]
 
 checkGate :: PhaseDocument -> [Finding]
 checkGate phase =
   gateFrameFindings phase
     <> shapeFindings
-    <> emptyFindings
     <> unresolvedFindings
     <> commandFindings
     <> summaryCommandFindings
@@ -826,6 +1253,11 @@ checkGate phase =
   expectedSummaryValue = expectedCommand <> "; see [Gate integrity](#gate-integrity). NOT VALIDATED."
   expectedSummaryLine = "**Gate:** " <> expectedSummaryValue
   shapeFindings =
+    guardedShapeFindings
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_SHAPE_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedShapeFindings =
     [ finding
         "PLAN-GATE-SHAPE"
         path
@@ -833,11 +1265,6 @@ checkGate phase =
             <> Text.intercalate ", " keys
         )
     | keys /= gateKeys
-    ]
-  emptyFindings =
-    [ finding "PLAN-GATE-EMPTY" path (key <> " has an empty gate-contract cell")
-    | (key, value) <- rows
-    , Text.null (Text.strip value)
     ]
   unresolvedFindings =
 #if defined(VALIDATION_PHASE_CONTRACT_GATE_REFUSAL_BYPASS_MUTANT)
@@ -851,28 +1278,61 @@ checkGate phase =
     , containsRefusalMarker value
     ]
 #endif
-  commandFindings = case Map.lookup "Command" rowMap of
+  commandFindings =
+    guardedCommandFindings
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_COMMAND_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedCommandFindings = case Map.lookup "Command" rowMap of
     Just value ->
       [ finding
           "PLAN-GATE-COMMAND"
           path
           ("Command row must name exactly one canonical " <> expectedCommand)
       | validationCommandSpans value /= [(1, commandText)]
-          || countOccurrences expectedCommand value /= 1
+          || gateCommandCountMismatch expectedCommand value
       ]
     Nothing -> []
-  summaryCommandFindings = case Map.findWithDefault [] "Gate" (phaseFields phase) of
+  summaryCommandFindings =
+    guardedSummaryCommandFindings
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_SUMMARY_COMMAND_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedSummaryCommandFindings = case Map.findWithDefault [] "Gate" (phaseFields phase) of
     [value] ->
       [ finding
           "PLAN-GATE-SUMMARY-COMMAND"
           path
           ("Gate summary must be the exact one-line reset form '" <> expectedSummaryLine <> "'")
-      | value /= expectedSummaryValue
+      | gateSummaryValueMismatch expectedSummaryValue value
           || validationCommandSpans value /= [(1, commandText)]
           || countOccurrences expectedCommand value /= 1
-          || length (filter (== expectedSummaryLine) (phaseRawLines phase)) /= 1
+          || gateSummaryRawLineCountMismatch expectedSummaryLine (phaseRawLines phase)
       ]
     _ -> []
+
+gateCommandCountMismatch :: Text -> Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_COMMAND_COUNT_BYPASS_MUTANT)
+gateCommandCountMismatch expected value = countOccurrences expected value `seq` False
+#else
+gateCommandCountMismatch expected value = countOccurrences expected value /= 1
+#endif
+
+gateSummaryValueMismatch :: Text -> Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_SUMMARY_VALUE_BYPASS_MUTANT)
+gateSummaryValueMismatch expected value = (value /= expected) `seq` False
+#else
+gateSummaryValueMismatch = (/=)
+#endif
+
+gateSummaryRawLineCountMismatch :: Text -> [Text] -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_GATE_SUMMARY_RAW_LINE_COUNT_BYPASS_MUTANT)
+gateSummaryRawLineCountMismatch expected rawLines =
+  length (filter (== expected) rawLines) `seq` False
+#else
+gateSummaryRawLineCountMismatch expected rawLines =
+  length (filter (== expected) rawLines) /= 1
+#endif
 
 gateFrameFindings :: PhaseDocument -> [Finding]
 #if defined(VALIDATION_PHASE_CONTRACT_TABLE_FRAME_BYPASS_MUTANT)
@@ -904,8 +1364,15 @@ inlineCodeSpans = go . Text.unpack
   close width reversed (character : rest) = close width (character : reversed) rest
 
 validationCommandSpans :: Text -> [(Int, Text)]
+#if defined(VALIDATION_PHASE_CONTRACT_INLINE_CODE_WIDTH_BYPASS_MUTANT)
+validationCommandSpans =
+  map (\(_, contents) -> (1, contents))
+    . filter (Text.isPrefixOf "pb validate" . Text.toCaseFold . snd)
+    . inlineCodeSpans
+#else
 validationCommandSpans =
   filter (Text.isPrefixOf "pb validate" . Text.toCaseFold . snd) . inlineCodeSpans
+#endif
 
 containsRefusalMarker :: Text -> Bool
 containsRefusalMarker value = containsUnresolvedMarker value || containsMissingMarker value
@@ -999,12 +1466,19 @@ checkSprintContracts phases enforceCanonicalInventory phase =
 #else
           guardedSprintStatusFindings
 #endif
-     in [ finding
+        sprintIdentityFindings =
+          guardedSprintIdentityFindings
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_IDENTITY_FINDING_BYPASS_MUTANT)
+            `seq` []
+#endif
+        guardedSprintIdentityFindings =
+          [ finding
             "PLAN-SPRINT-IDENTITY"
             (phasePath phase)
             ("sprint heading is not the exact current-phase identity/title/status-marker form: " <> Text.strip heading)
-        | parseSprintHeading (phaseNumber phase) heading == Nothing
-        ]
+          | parseSprintHeading (phaseNumber phase) heading == Nothing
+          ]
+     in sprintIdentityFindings
           <> sprintStatusFindings
           <> sprintSchemaFindings phase heading body
           <> sprintBlockerFindings phases phase heading body
@@ -1018,20 +1492,62 @@ data SprintHeading = SprintHeading
 
 parseSprintHeading :: Int -> Text -> Maybe SprintHeading
 parseSprintHeading owner heading = do
-  remainder <- Text.stripPrefix ("## Sprint " <> showText owner <> ".") (trimAsciiEnd heading)
+  remainder <- sprintHeadingPrefix owner (trimAsciiEnd heading)
   let (digits, afterDigits) = Text.span isDigit remainder
   ordinal <- readMaybe (Text.unpack digits)
-  afterColon <- Text.stripPrefix ": " afterDigits
+  if sprintHeadingOrdinalCanonical digits ordinal && sprintHeadingOrdinalPositive ordinal
+    then pure ()
+    else Nothing
+  afterColon <- sprintHeadingSeparator afterDigits
   (title, marker) <-
     listToMaybe
       [ (Text.strip candidateTitle, candidateMarker)
-      | candidateMarker <- currentStatusMarkers
+      | candidateMarker <- sprintHeadingMarkers
       , Just candidateTitle <- [Text.stripSuffix (" " <> candidateMarker) afterColon]
-      , not (Text.null (Text.strip candidateTitle))
+      , sprintHeadingTitleNonEmpty candidateTitle
       ]
-  if ordinal > 0
-    then Just (SprintHeading ordinal title marker)
-    else Nothing
+  pure (SprintHeading ordinal title marker)
+
+sprintHeadingPrefix :: Int -> Text -> Maybe Text
+sprintHeadingPrefix owner = Text.stripPrefix ("## Sprint " <> showText owner <> ".")
+
+sprintHeadingOrdinalCanonical :: Text -> Int -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_HEADING_ORDINAL_CANONICAL_BYPASS_MUTANT)
+sprintHeadingOrdinalCanonical digits ordinal = digits `seq` ordinal `seq` True
+#else
+sprintHeadingOrdinalCanonical digits ordinal = digits == showText ordinal
+#endif
+
+sprintHeadingOrdinalPositive :: Int -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_HEADING_ORDINAL_POSITIVE_BYPASS_MUTANT)
+sprintHeadingOrdinalPositive ordinal = ordinal `seq` True
+#else
+sprintHeadingOrdinalPositive = (> 0)
+#endif
+
+sprintHeadingSeparator :: Text -> Maybe Text
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_HEADING_SEPARATOR_BYPASS_MUTANT)
+sprintHeadingSeparator value =
+  case Text.stripPrefix ": " value of
+    Just remainder -> Just remainder
+    Nothing -> Text.stripPrefix ":" value
+#else
+sprintHeadingSeparator = Text.stripPrefix ": "
+#endif
+
+sprintHeadingMarkers :: [Text]
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_HEADING_MARKER_BYPASS_MUTANT)
+sprintHeadingMarkers = currentStatusMarkers <> ["❌"]
+#else
+sprintHeadingMarkers = currentStatusMarkers
+#endif
+
+sprintHeadingTitleNonEmpty :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_HEADING_TITLE_EMPTY_BYPASS_MUTANT)
+sprintHeadingTitleNonEmpty title = Text.null (Text.strip title) `seq` True
+#else
+sprintHeadingTitleNonEmpty = not . Text.null . Text.strip
+#endif
 
 sprintFieldNames :: [Text]
 sprintFieldNames =
@@ -1098,12 +1614,47 @@ sprintSchemaFindings phase heading body =
   expectedSubsections = map ("### " <>) sprintSubsectionNames
   nonEmptySubsections = all (hasNonEmptySubsection body) expectedSubsections
   schemaSatisfied =
-    observedFieldNames == expectedFieldNames
-      && nonEmptyFields
-      && null laterKnownEntries
-      && observedSubsections == expectedSubsections
-      && nonEmptySubsections
+    sprintSchemaFieldOrderValid observedFieldNames expectedFieldNames
+      && sprintSchemaFieldsNonEmpty nonEmptyFields
+      && sprintSchemaLaterFieldsAbsent laterKnownEntries
+      && sprintSchemaSubsectionOrderValid observedSubsections expectedSubsections
+      && sprintSchemaSubsectionsNonEmpty nonEmptySubsections
   third (_, _, value) = value
+
+sprintSchemaFieldOrderValid :: [Text] -> [Text] -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_FIELD_ORDER_BYPASS_MUTANT)
+sprintSchemaFieldOrderValid observed expected = observed `seq` expected `seq` True
+#else
+sprintSchemaFieldOrderValid = (==)
+#endif
+
+sprintSchemaFieldsNonEmpty :: Bool -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_FIELD_NONEMPTY_BYPASS_MUTANT)
+sprintSchemaFieldsNonEmpty value = value `seq` True
+#else
+sprintSchemaFieldsNonEmpty = id
+#endif
+
+sprintSchemaLaterFieldsAbsent :: [Text] -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_LATE_FIELD_BYPASS_MUTANT)
+sprintSchemaLaterFieldsAbsent values = length values `seq` True
+#else
+sprintSchemaLaterFieldsAbsent = null
+#endif
+
+sprintSchemaSubsectionOrderValid :: [Text] -> [Text] -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_SUBSECTION_ORDER_BYPASS_MUTANT)
+sprintSchemaSubsectionOrderValid observed expected = observed `seq` expected `seq` True
+#else
+sprintSchemaSubsectionOrderValid = (==)
+#endif
+
+sprintSchemaSubsectionsNonEmpty :: Bool -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_SCHEMA_SUBSECTION_NONEMPTY_BYPASS_MUTANT)
+sprintSchemaSubsectionsNonEmpty value = value `seq` True
+#else
+sprintSchemaSubsectionsNonEmpty = id
+#endif
 
 isH3 :: Text -> Bool
 isH3 line = "### " `Text.isPrefixOf` line && not ("#### " `Text.isPrefixOf` line)
@@ -1140,7 +1691,7 @@ sprintBlockerFindings phases phase heading body =
   blockerSatisfied = case (ordinal, entries) of
     (Just 1, [value])
       | owner == phaseDomainLowerNumber ->
-          Text.strip value == "`genesis`"
+          sprintGenesisBlockerValid value
       | otherwise ->
           let predecessor = policyPredecessorNumber owner
               linkedEdge = do
@@ -1151,11 +1702,37 @@ sprintBlockerFindings phases phase heading body =
                       <> "](" <> Text.pack (takeFileName (phasePath predecessorPhase))
                       <> ") human approval"
                   )
-           in Text.strip value `elem` maybeToList linkedEdge
+           in sprintPredecessorBlockerValid value linkedEdge
     (Just sprintOrdinal, [value]) ->
-      Text.strip value
-        == "Sprint " <> showText owner <> "." <> showText (sprintOrdinal - 1)
+      sprintPriorSprintBlockerValid owner sprintOrdinal value
     _ -> False
+#endif
+
+sprintGenesisBlockerValid :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_BLOCKER_GENESIS_BYPASS_MUTANT)
+sprintGenesisBlockerValid value = Text.strip value `elem` ["`genesis`", "genesis"]
+#else
+sprintGenesisBlockerValid value = Text.strip value == "`genesis`"
+#endif
+
+sprintPredecessorBlockerValid :: Text -> Maybe Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_BLOCKER_PREDECESSOR_BYPASS_MUTANT)
+sprintPredecessorBlockerValid value linkedEdge =
+  maybe False (`Text.isPrefixOf` Text.strip value) linkedEdge
+#else
+sprintPredecessorBlockerValid value linkedEdge = Text.strip value `elem` maybeToList linkedEdge
+#endif
+
+sprintPriorSprintBlockerValid :: Int -> Int -> Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_BLOCKER_PRIOR_SPRINT_BYPASS_MUTANT)
+sprintPriorSprintBlockerValid owner sprintOrdinal value =
+  Text.strip value
+    `elem` [ "Sprint " <> showText owner <> "." <> showText (sprintOrdinal - 1)
+           , "Sprint " <> showText owner <> "." <> showText sprintOrdinal
+           ]
+#else
+sprintPriorSprintBlockerValid owner sprintOrdinal value =
+  Text.strip value == "Sprint " <> showText owner <> "." <> showText (sprintOrdinal - 1)
 #endif
 
 isBareCurrentStatusClaim :: Text -> Bool
@@ -1304,13 +1881,17 @@ scanTrackerLine scanned planLine =
                 , trackerScanHeaderCount = 1
                 }
             stage ->
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_SECOND_HEADER_BYPASS_MUTANT)
+              stage `seq` lineNumber `seq` scanned
+#else
               addTrackerProblem
                 ("line " <> showText lineNumber <> ": a second exact tracker header is not permitted")
                 ( scanned
                   { trackerScanStage = if stage == TrackerFinished then TrackerFinished else TrackerBroken
                   , trackerScanHeaderCount = trackerScanHeaderCount scanned + 1
-                  }
+                    }
                 )
+#endif
       | otherwise -> scanNonHeaderTrackerLine scanned lineNumber line
     OpaqueBoundary lineNumber -> scanTrackerBoundary scanned lineNumber
 
@@ -1351,21 +1932,35 @@ scanNonHeaderTrackerLine scanned lineNumber line =
     TrackerExpectingEnd ->
       if physicalBlankLine line
         then scanned {trackerScanStage = TrackerFinished}
-        else
-          addTrackerProblem
-            ( "line "
-                <> showText lineNumber
-                <> ": the 96-row tracker table must end at a physical blank line or end of file"
-            )
-            (scanned {trackerScanStage = TrackerBroken})
+        else rejectTrackerTrailingContent scanned lineNumber
     TrackerFinished ->
       if isTrackerRawCandidate line
-        then
-          addTrackerProblem
-            ("line " <> showText lineNumber <> ": a tracker candidate occurs outside the single exact frame")
-            scanned
+        then rejectOutsideTrackerRow scanned lineNumber
         else scanned
     TrackerBroken -> scanned
+
+rejectTrackerTrailingContent :: TrackerScan -> Int -> TrackerScan
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_END_CONTENT_BYPASS_MUTANT)
+rejectTrackerTrailingContent scanned lineNumber = lineNumber `seq` scanned {trackerScanStage = TrackerFinished}
+#else
+rejectTrackerTrailingContent scanned lineNumber =
+  addTrackerProblem
+    ( "line "
+        <> showText lineNumber
+        <> ": the 96-row tracker table must end at a physical blank line or end of file"
+    )
+    (scanned {trackerScanStage = TrackerBroken})
+#endif
+
+rejectOutsideTrackerRow :: TrackerScan -> Int -> TrackerScan
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_OUTSIDE_ROW_BYPASS_MUTANT)
+rejectOutsideTrackerRow scanned lineNumber = lineNumber `seq` scanned
+#else
+rejectOutsideTrackerRow scanned lineNumber =
+  addTrackerProblem
+    ("line " <> showText lineNumber <> ": a tracker candidate occurs outside the single exact frame")
+    scanned
+#endif
 
 scanSeekingTrackerLine :: TrackerScan -> Int -> Text -> TrackerScan
 #if defined(VALIDATION_PHASE_CONTRACT_TRACKER_UNFRAMED_ROWS_BYPASS_MUTANT)
@@ -1390,39 +1985,85 @@ scanSeekingTrackerLine scanned lineNumber line =
 scanTrackerBoundary :: TrackerScan -> Int -> TrackerScan
 scanTrackerBoundary scanned lineNumber =
   case trackerScanStage scanned of
-    TrackerExpectingDelimiter -> interrupted "delimiter"
-    TrackerExpectingRow expectedNumber -> interrupted ("Phase " <> showText expectedNumber <> " row")
-    TrackerExpectingEnd -> interrupted "physical table terminator"
+    TrackerExpectingDelimiter -> interruptTrackerDelimiterBoundary scanned lineNumber
+    TrackerExpectingRow expectedNumber -> interruptTrackerRowBoundary scanned lineNumber expectedNumber
+    TrackerExpectingEnd -> interruptTrackerEndBoundary scanned lineNumber
     _ -> scanned
- where
-  interrupted expected =
-    addTrackerProblem
-      ( "line "
-          <> showText lineNumber
-          <> ": an opaque Markdown boundary interrupts the expected tracker "
-          <> expected
-      )
-      (scanned {trackerScanStage = TrackerBroken})
+
+interruptTrackerDelimiterBoundary :: TrackerScan -> Int -> TrackerScan
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_DELIMITER_BOUNDARY_BYPASS_MUTANT)
+interruptTrackerDelimiterBoundary scanned lineNumber = lineNumber `seq` scanned
+#else
+interruptTrackerDelimiterBoundary scanned lineNumber =
+  interruptTrackerBoundary scanned lineNumber "delimiter"
+#endif
+
+interruptTrackerRowBoundary :: TrackerScan -> Int -> Int -> TrackerScan
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_ROW_BOUNDARY_BYPASS_MUTANT)
+interruptTrackerRowBoundary scanned lineNumber expectedNumber =
+  lineNumber `seq` expectedNumber `seq` scanned
+#else
+interruptTrackerRowBoundary scanned lineNumber expectedNumber =
+  interruptTrackerBoundary scanned lineNumber ("Phase " <> showText expectedNumber <> " row")
+#endif
+
+interruptTrackerEndBoundary :: TrackerScan -> Int -> TrackerScan
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_END_BOUNDARY_BYPASS_MUTANT)
+interruptTrackerEndBoundary scanned lineNumber = lineNumber `seq` scanned
+#else
+interruptTrackerEndBoundary scanned lineNumber =
+  interruptTrackerBoundary scanned lineNumber "physical table terminator"
+#endif
+
+interruptTrackerBoundary :: TrackerScan -> Int -> Text -> TrackerScan
+interruptTrackerBoundary scanned lineNumber expected =
+  addTrackerProblem
+    ( "line "
+        <> showText lineNumber
+        <> ": an opaque Markdown boundary interrupts the expected tracker "
+        <> expected
+    )
+    (scanned {trackerScanStage = TrackerBroken})
 
 finishTrackerScan :: TrackerScan -> TrackerScan
 finishTrackerScan scanned =
   case trackerScanStage scanned of
-    TrackerSeekingHeader ->
-      addTrackerProblem
-        "one exact '| Phase | Name | Substrate | Lane | Register | Status | Validation contract |' tracker header is required"
-        scanned
-    TrackerExpectingDelimiter ->
-      addTrackerProblem "the exact tracker header has no following seven-cell delimiter" scanned
-    TrackerExpectingRow expectedNumber ->
-      addTrackerProblem
-        ( "the tracker table ended before canonical Phase "
-            <> showText expectedNumber
-            <> "; exact ordered rows 0..95 are required"
-        )
-        scanned
+    TrackerSeekingHeader -> finishTrackerWithoutHeader scanned
+    TrackerExpectingDelimiter -> finishTrackerWithoutDelimiter scanned
+    TrackerExpectingRow expectedNumber -> finishIncompleteTrackerRows scanned expectedNumber
     TrackerExpectingEnd -> scanned {trackerScanStage = TrackerFinished}
     TrackerFinished -> scanned
     TrackerBroken -> scanned
+
+finishTrackerWithoutHeader :: TrackerScan -> TrackerScan
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_MISSING_HEADER_FINDING_BYPASS_MUTANT)
+finishTrackerWithoutHeader scanned = scanned
+#else
+finishTrackerWithoutHeader =
+  addTrackerProblem
+    "one exact '| Phase | Name | Substrate | Lane | Register | Status | Validation contract |' tracker header is required"
+#endif
+
+finishTrackerWithoutDelimiter :: TrackerScan -> TrackerScan
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_MISSING_DELIMITER_FINDING_BYPASS_MUTANT)
+finishTrackerWithoutDelimiter scanned = scanned
+#else
+finishTrackerWithoutDelimiter =
+  addTrackerProblem "the exact tracker header has no following seven-cell delimiter"
+#endif
+
+finishIncompleteTrackerRows :: TrackerScan -> Int -> TrackerScan
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_INCOMPLETE_ROWS_FINDING_BYPASS_MUTANT)
+finishIncompleteTrackerRows scanned expectedNumber = expectedNumber `seq` scanned
+#else
+finishIncompleteTrackerRows scanned expectedNumber =
+  addTrackerProblem
+    ( "the tracker table ended before canonical Phase "
+        <> showText expectedNumber
+        <> "; exact ordered rows 0..95 are required"
+    )
+    scanned
+#endif
 
 addTrackerProblem :: Text -> TrackerScan -> TrackerScan
 addTrackerProblem problem scanned =
@@ -1481,7 +2122,7 @@ parseExactTrackerRow expectedNumber line =
     Left problem -> Left problem
     Right [number, title, substrate, lane, register, status, contract] -> do
       parsedNumber <- trackerRowOrdinal expectedNumber number
-      if any Text.null [title, substrate, lane, register, status, contract]
+      if trackerRequiredCellEmpty [title, substrate, lane, register, status, contract]
         then Left "one or more required tracker cells are empty"
         else
           if trackerLinkTarget contract == Nothing
@@ -1498,6 +2139,13 @@ parseExactTrackerRow expectedNumber line =
                   , trackerContract = contract
                   }
     Right cells -> Left ("internal tracker row arity mismatch: " <> showText (length cells))
+
+trackerRequiredCellEmpty :: [Text] -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_ROW_EMPTY_BYPASS_MUTANT)
+trackerRequiredCellEmpty cells = any Text.null cells `seq` False
+#else
+trackerRequiredCellEmpty = any Text.null
+#endif
 
 trackerRowCells :: Text -> Either Text [Text]
 trackerRowCells line =
@@ -1556,7 +2204,15 @@ trackerLinkTarget value =
     ([target], []) -> Just target
     _ -> Nothing
 #else
-trackerLinkTarget = fmap snd . exactClosedMarkdownLink
+trackerLinkTarget value =
+  markdownTargets value `seq` case exactClosedMarkdownLink value of
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_LINK_LABEL_BYPASS_MUTANT)
+    Just (label, target)
+      | not (Text.null label) -> Just target
+#else
+    Just ("Contract", target) -> Just target
+#endif
+    _ -> Nothing
 #endif
 
 dependencyLinkTarget :: Text -> Text -> Either Text Text
@@ -1567,9 +2223,13 @@ dependencyLinkTarget _ value =
     _ -> Left "the field must contain exactly one resolvable Markdown target"
 #else
 dependencyLinkTarget expectedLabel value =
-  case exactClosedMarkdownLink value of
+  markdownTargets value `seq` case exactClosedMarkdownLink value of
     Just (label, target)
+#if defined(VALIDATION_PHASE_CONTRACT_DEPENDENCY_LINK_LABEL_BYPASS_MUTANT)
+      | expectedLabel `seq` not (Text.null label) -> Right target
+#else
       | label == expectedLabel -> Right target
+#endif
     _ ->
       Left
         ( "the complete field value must be exactly one closed Markdown link labelled '"
@@ -1584,42 +2244,56 @@ exactClosedMarkdownLink value = do
   let (label, afterLabel) = Text.breakOn "](" afterLabelOpen
   afterTargetOpen <- Text.stripPrefix "](" afterLabel
   let (target, afterTarget) = Text.breakOn ")" afterTargetOpen
-  if Text.null label
-      || Text.null target
-      || afterTarget /= ")"
-      || Text.any (`elem` ['[', ']']) label
+  if not (exactLinkTargetNonEmpty target)
+      || not (exactLinkTrailingContentClosed afterTarget)
       || not (Text.all isCanonicalLinkTargetCharacter target)
     then Nothing
     else Just (label, target)
 
+exactLinkTargetNonEmpty :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_LINK_TARGET_EMPTY_BYPASS_MUTANT)
+exactLinkTargetNonEmpty target = Text.null target `seq` True
+#else
+exactLinkTargetNonEmpty = not . Text.null
+#endif
+
+exactLinkTrailingContentClosed :: Text -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_LINK_TRAILING_CONTENT_BYPASS_MUTANT)
+exactLinkTrailingContentClosed value = not (Text.null value) && ")" `Text.isPrefixOf` value
+#else
+exactLinkTrailingContentClosed = (== ")")
+#endif
+
 isCanonicalLinkTargetCharacter :: Char -> Bool
+#if defined(VALIDATION_PHASE_CONTRACT_LINK_TARGET_CHARACTER_BYPASS_MUTANT)
+isCanonicalLinkTargetCharacter character =
+  (isAlphaNum character || character `elem` ['/', '.', '_', '-', '#']) `seq` True
+#else
 isCanonicalLinkTargetCharacter character =
   isAlphaNum character || character `elem` ['/', '.', '_', '-', '#']
+#endif
 
 checkTrackerShape :: [TrackerRow] -> [Finding]
 checkTrackerShape rows =
-  duplicateFindings
-    <> missingFindings
-    <> extraFindings
-    <> statusFindings
+  missingFindings <> statusFindings
  where
-  grouped = Map.fromListWith (+) [(trackerNumber row, 1 :: Int) | row <- rows]
-  actual = Map.keysSet grouped
+  actual = Set.fromList (map trackerNumber rows)
   expected = Set.fromList [phaseDomainLowerNumber .. phaseDomainUpperNumber]
-  duplicateFindings =
-    [ finding "PLAN-TRACKER-DUPLICATE" trackerPath ("tracker repeats Phase " <> showText number)
-    | (number, count) <- Map.toAscList grouped
-    , count /= 1
-    ]
   missingFindings =
+    guardedMissingFindings
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_MISSING_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedMissingFindings =
     [ finding "PLAN-TRACKER-MISSING" trackerPath ("tracker omits Phase " <> showText number)
     | number <- Set.toAscList (expected Set.\\ actual)
     ]
-  extraFindings =
-    [ finding "PLAN-TRACKER-EXTRA" trackerPath ("tracker includes out-of-domain Phase " <> showText number)
-    | number <- Set.toAscList (actual Set.\\ expected)
-    ]
-  statusFindings = concatMap checkStatus rows
+  statusFindings =
+    guardedStatusFindings
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_STATUS_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedStatusFindings = concatMap checkStatus rows
   checkStatus row =
     let expectedStatus = Policy.resetPhaseStatusText (policyResetStatus (trackerNumber row))
      in [ finding
@@ -1647,6 +2321,11 @@ checkTrackerJoin phases rows = concatMap checkRow rows
         <> projectionFinding phase row "Lane" trackerLane
         <> projectionFinding phase row "Register" trackerRegister
   titleFinding phase row =
+    guardedTitleFinding phase row
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_TITLE_JOIN_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedTitleFinding phase row =
     [ finding
         "PLAN-TRACKER-TITLE"
         trackerPath
@@ -1654,6 +2333,11 @@ checkTrackerJoin phases rows = concatMap checkRow rows
     | phaseTitle phase /= Just (trackerTitle row)
     ]
   contractFinding phase row =
+    guardedContractFinding phase row
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_CONTRACT_JOIN_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedContractFinding phase row =
     let suppliedTarget = trackerLinkTarget (trackerContract row)
         expectedTarget = Text.pack (takeFileName (phasePath phase))
      in [ finding
@@ -1663,6 +2347,11 @@ checkTrackerJoin phases rows = concatMap checkRow rows
         | suppliedTarget /= Just expectedTarget
         ]
   projectionFinding phase row field accessor =
+    guardedProjectionFinding phase row field accessor
+#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_PROJECTION_JOIN_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedProjectionFinding phase row field accessor =
     case Map.findWithDefault [] field (phaseFields phase) of
       [value] ->
         [ finding
@@ -1742,7 +2431,6 @@ firstToken =
     . Text.takeWhile (\character -> not (isSpace character) && character `notElem` ['`', '.', ';', ','])
     . Text.dropWhile (\character -> isSpace character || character == '`')
 
-#if defined(VALIDATION_PHASE_CONTRACT_TRACKER_LINK_PROSE_BYPASS_MUTANT) || defined(VALIDATION_PHASE_CONTRACT_DEPENDENCY_LINK_PROSE_BYPASS_MUTANT)
 markdownTargets :: Text -> ([Text], [Text])
 markdownTargets = go
  where
@@ -1794,7 +2482,6 @@ openBracketDepth = go 0 False . Text.unpack
 
 escapedAtEnd :: Text -> Bool
 escapedAtEnd = odd . length . takeWhile (== '\\') . reverse . Text.unpack
-#endif
 
 outsideFences :: Text -> [(Int, Text)]
 outsideFences = map planLinePair . lexPlanLines
@@ -1894,12 +2581,17 @@ containerDisposition active rawLine =
     `seq` hasContainerContinuationIndent rawLine
     `seq` ContainerTopLevel (containerSyntaxLine rawLine)
 #else
-containerDisposition active rawLine
-  | physicalBlankLine rawLine =
-      if active then ContainerBlank else ContainerTopLevel rawLine
-  | hasExplicitContainerMarker rawLine = ContainerOwned
-  | active && hasContainerContinuationIndent rawLine = ContainerOwned
-  | otherwise = ContainerTopLevel rawLine
+containerDisposition active rawLine =
+  containerSyntaxLine rawLine `seq`
+    if physicalBlankLine rawLine
+      then if active then ContainerBlank else ContainerTopLevel rawLine
+      else
+        if hasExplicitContainerMarker rawLine
+          then ContainerOwned
+          else
+            if active && hasContainerContinuationIndent rawLine
+              then ContainerOwned
+              else ContainerTopLevel rawLine
 #endif
 
 hasContainerContinuationIndent :: Text -> Bool
@@ -1949,7 +2641,15 @@ topLevelStructuralLine line =
 #endif
 
 maskHtmlComments :: Bool -> Text -> (Bool, Text)
-maskHtmlComments initiallyActive input = go initiallyActive input initialChunks
+maskHtmlComments initiallyActive input =
+#if defined(VALIDATION_PHASE_CONTRACT_COMMENT_OPACITY_BYPASS_MUTANT)
+  guardedMaskHtmlComments initiallyActive input `seq` (False, input)
+#else
+  guardedMaskHtmlComments initiallyActive input
+#endif
+
+guardedMaskHtmlComments :: Bool -> Text -> (Bool, Text)
+guardedMaskHtmlComments initiallyActive input = go initiallyActive input initialChunks
  where
   initialChunks = [phaseContractCommentSentinel | initiallyActive]
 
@@ -2070,7 +2770,6 @@ balancedHtmlQuotes = go Nothing . Text.unpack
       | character == wanted -> go Nothing rest
       | otherwise -> go quote rest
 
-#if defined(VALIDATION_PHASE_CONTRACT_CONTAINER_PREFIX_BYPASS_MUTANT)
 containerSyntaxLine :: Text -> Text
 containerSyntaxLine = stripContainers . dropContainerIndent
  where
@@ -2107,10 +2806,17 @@ containerSyntaxLine = stripContainers . dropContainerIndent
   dropContainerIndent line =
     let (indent, remainder) = Text.span (== ' ') line
      in if Text.length indent <= 3 then remainder else line
-#endif
 
 fenceOpener :: Text -> Maybe Fence
-fenceOpener line = do
+fenceOpener line =
+#if defined(VALIDATION_PHASE_CONTRACT_FENCE_OPACITY_BYPASS_MUTANT)
+  classifiedFenceOpener line `seq` Nothing
+#else
+  classifiedFenceOpener line
+#endif
+
+classifiedFenceOpener :: Text -> Maybe Fence
+classifiedFenceOpener line = do
   afterIndent <- dropFenceIndent line
   (marker, width, trailing) <- fenceRun afterIndent
   if width >= 3 && (marker /= '`' || not (Text.any (== '`') trailing))

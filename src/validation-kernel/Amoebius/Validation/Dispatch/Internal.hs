@@ -3,6 +3,7 @@
 
 module Amoebius.Validation.Dispatch.Internal
   ( dispatchDiagnostic
+  , checkExternallyAnchoredPhaseZeroHandles
   , checkPhaseZeroSnapshot
   , discoverRepositoryRoot
   , phaseZeroReadinessBlockers
@@ -14,6 +15,12 @@ import Amoebius.Validation.CompilerSourceGraph.Internal
   ( AcquiredCompilerSourceGraph
   , acquiredCompilerSourceCheck
   , analyzeAcquiredCompilerSourceGraph
+  )
+import Amoebius.Validation.SourceAcquisition.Internal
+  ( AnchoredSourceAcquisitionSession
+  )
+import Amoebius.Validation.SourceAcquisitionDispatch.Internal
+  ( runSourceAcquisitionDispatch
   )
 import Amoebius.Validation.Documentation.Internal (checkDocuments)
 import Amoebius.Validation.Legacy.Internal (legacyCheck, legacyCheckAcquired)
@@ -66,6 +73,7 @@ import System.Directory
 import System.Environment (getExecutablePath)
 import System.Exit (ExitCode (ExitFailure))
 import System.FilePath ((</>), isAbsolute, takeDirectory, takeExtension)
+import System.IO (Handle)
 import Text.Read (readMaybe)
 
 maximumDispatchPhaseBytes, maximumDispatchComponents :: Int
@@ -681,6 +689,20 @@ checkPhaseZeroSnapshot snapshot =
     [ checkPhaseZeroSnapshotCore snapshot
     , syntheticSnapshotRefusal
     ]
+
+-- | The sole production route from an externally anchored, bounded streaming
+-- acquisition into the real acquired Phase-0 dispatcher. The external
+-- supervisor owns session construction and handle custody; this package-hidden
+-- wrapper fixes the success callback to the real checker.
+checkExternallyAnchoredPhaseZeroHandles
+  :: AnchoredSourceAcquisitionSession
+  -> Text
+  -> Handle
+  -> Handle
+  -> Handle
+  -> IO CheckResult
+checkExternallyAnchoredPhaseZeroHandles =
+  runSourceAcquisitionDispatch checkAcquiredPhaseZeroSnapshot
 
 checkAcquiredPhaseZeroSnapshot :: AcquiredSourceSnapshot -> IO CheckResult
 checkAcquiredPhaseZeroSnapshot acquired = do

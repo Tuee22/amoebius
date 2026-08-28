@@ -3,6 +3,7 @@
 module SourceClosureOracle
   ( runSourceClosureOracle
   , runSourceClosureSelectorOracle
+  , sourceClosureSelectorIntents
   , sourceClosureSelectorNames
   ) where
 
@@ -101,6 +102,21 @@ maximumResultFindings = 196
 -- diagnostic; neither is used to construct this closed inventory.
 sourceClosureSelectorIntents :: [(String, String)]
 sourceClosureSelectorIntents =
+  sourceClosureSelectorIntentsInitial
+    <> sourceClosureSelectorIntentsExpansion
+    <> sourceClosureSelectorIntentsFindingMappings
+    <> sourceClosureSelectorIntentsSerialization
+    <> sourceClosureSelectorIntentsRetention
+    <> sourceClosureSelectorIntentsIngress
+    <> sourceClosureSelectorIntentsRenderers
+    <> sourceClosureSelectorIntentsClassification
+    <> sourceClosureSelectorIntentsDocumentationCatalog
+    <> sourceClosureSelectorIntentsTraversal
+    <> sourceClosureSelectorIntentsBoundedCommitment
+    <> sourceClosureSelectorIntentsAnalysisStages
+
+sourceClosureSelectorIntentsInitial :: [(String, String)]
+sourceClosureSelectorIntentsInitial =
   [ ("VALIDATION_SOURCE_CLOSURE_AGGREGATE_BLOB_BYTE_LIMIT_BYPASS_MUTANT", "aggregate blob bytes maximum plus one")
   , ("VALIDATION_SOURCE_CLOSURE_BINARY_FACET_BYPASS_MUTANT", "mode and structural facet catalog")
   , ("VALIDATION_SOURCE_CLOSURE_BLOB_BYTE_LIMIT_BYPASS_MUTANT", "blob bytes maximum plus one")
@@ -227,6 +243,532 @@ sourceClosureSelectorIntents =
   , ("VALIDATION_SOURCE_CLOSURE_VENDOR_ROOT_REMOVAL_MUTANT", "closed primary-class and project identifier catalog")
   ]
 
+sourceClosureSelectorIntentsExpansion :: [(String, String)]
+sourceClosureSelectorIntentsExpansion =
+  [ ("VALIDATION_SOURCE_CLOSURE_DERIVED_CLASSIFICATION_SHA256_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_CLASSIFICATION_SHA256_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_CLASSIFICATION_SHA256_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_DOCUMENTATION_COUNT_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_DOCUMENTATION_COUNT_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_DOCUMENTATION_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_HASKELL_COUNT_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_HASKELL_COUNT_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_HASKELL_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_LEGACY_COUNT_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_LEGACY_COUNT_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_LEGACY_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_PB_DEBT_COUNT_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_PB_DEBT_COUNT_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_PB_DEBT_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_PROJECT_COUNT_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_PROJECT_COUNT_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_PROJECT_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_SNAPSHOT_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_SNAPSHOT_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_SNAPSHOT_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_UNREGISTERED_COUNT_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_UNREGISTERED_COUNT_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DERIVED_UNREGISTERED_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DIAGNOSTIC_STATUS_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DIAGNOSTIC_STATUS_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_DIAGNOSTIC_STATUS_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_AGGREGATE_BLOB_BYTES_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_AGGREGATE_BLOB_BYTES_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_AGGREGATE_BLOB_BYTES_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_CLAIMED_SNAPSHOT_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_CLAIMED_SNAPSHOT_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_CLAIMED_SNAPSHOT_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_KIND_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_KIND_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_KIND_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_SHA256_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_SHA256_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_COMMITMENT_SHA256_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_ENTRY_COUNT_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_ENTRY_COUNT_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_ENTRY_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PREFLIGHT_PROBLEM_COUNT_OBSERVATION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PREFLIGHT_PROBLEM_COUNT_OBSERVATION_KEY_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PREFLIGHT_PROBLEM_COUNT_OBSERVATION_VALUE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_RESULT_CHECK_NAME_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_RESULT_FINDING_ORDER_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_RESULT_OBSERVATION_ORDER_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  ]
+
+sourceClosureSelectorIntentsFindingMappings :: [(String, String)]
+sourceClosureSelectorIntentsFindingMappings =
+  [ ("VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_BYTE_LIMIT_CODE_MAPPING_MUTANT", "claimed identity bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT", "claimed identity bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_BYTE_LIMIT_DETAIL_MAPPING_MUTANT", "claimed identity bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_LIMIT_CODE_MAPPING_MUTANT", "entry count maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_LIMIT_SUBJECT_MAPPING_MUTANT", "entry count maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_LIMIT_DETAIL_MAPPING_MUTANT", "entry count maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_BYTE_LIMIT_CODE_MAPPING_MUTANT", "portable path bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT", "portable path bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_BYTE_LIMIT_DETAIL_MAPPING_MUTANT", "portable path bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_DEPTH_LIMIT_CODE_MAPPING_MUTANT", "portable path depth maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_DEPTH_LIMIT_SUBJECT_MAPPING_MUTANT", "portable path depth maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_DEPTH_LIMIT_DETAIL_MAPPING_MUTANT", "portable path depth maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_SEGMENT_BYTE_LIMIT_CODE_MAPPING_MUTANT", "portable segment bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_SEGMENT_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT", "portable segment bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_SEGMENT_BYTE_LIMIT_DETAIL_MAPPING_MUTANT", "portable segment bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MODE_BYTE_LIMIT_CODE_MAPPING_MUTANT", "mode bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MODE_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT", "mode bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MODE_BYTE_LIMIT_DETAIL_MAPPING_MUTANT", "mode bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_BYTE_LIMIT_CODE_MAPPING_MUTANT", "object identity bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT", "object identity bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_BYTE_LIMIT_DETAIL_MAPPING_MUTANT", "object identity bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_BLOB_BYTE_LIMIT_CODE_MAPPING_MUTANT", "blob bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_BLOB_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT", "blob bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_BLOB_BYTE_LIMIT_DETAIL_MAPPING_MUTANT", "blob bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_AGGREGATE_BLOB_BYTE_LIMIT_CODE_MAPPING_MUTANT", "aggregate blob bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_AGGREGATE_BLOB_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT", "aggregate blob bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_AGGREGATE_BLOB_BYTE_LIMIT_DETAIL_MAPPING_MUTANT", "aggregate blob bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_SEMANTIC_LINE_BYTE_LIMIT_CODE_MAPPING_MUTANT", "semantic inspection bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_SEMANTIC_LINE_BYTE_LIMIT_SUBJECT_MAPPING_MUTANT", "semantic inspection bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_SEMANTIC_LINE_BYTE_LIMIT_DETAIL_MAPPING_MUTANT", "semantic inspection bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_GRAMMAR_CODE_MAPPING_MUTANT", "claimed identity width is exact")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_GRAMMAR_SUBJECT_MAPPING_MUTANT", "claimed identity width is exact")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_GRAMMAR_DETAIL_MAPPING_MUTANT", "claimed identity width is exact")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_MISMATCH_CODE_MAPPING_MUTANT", "claimed snapshot identity is joined exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_MISMATCH_SUBJECT_MAPPING_MUTANT", "claimed snapshot identity is joined exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_IDENTITY_MISMATCH_DETAIL_MAPPING_MUTANT", "claimed snapshot identity is joined exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_INVENTORY_EMPTY_CODE_MAPPING_MUTANT", "empty inventory refuses exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_INVENTORY_EMPTY_SUBJECT_MAPPING_MUTANT", "empty inventory refuses exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_INVENTORY_EMPTY_DETAIL_MAPPING_MUTANT", "empty inventory refuses exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_GRAMMAR_CODE_MAPPING_MUTANT", "empty path")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_GRAMMAR_SUBJECT_MAPPING_MUTANT", "empty path")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PATH_GRAMMAR_DETAIL_MAPPING_MUTANT", "empty path")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MODE_GRAMMAR_CODE_MAPPING_MUTANT", "mode grammar is closed")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MODE_GRAMMAR_SUBJECT_MAPPING_MUTANT", "mode grammar is closed")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MODE_GRAMMAR_DETAIL_MAPPING_MUTANT", "mode grammar is closed")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_GRAMMAR_CODE_MAPPING_MUTANT", "object identity width is closed")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_GRAMMAR_SUBJECT_MAPPING_MUTANT", "object identity width is closed")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_GRAMMAR_DETAIL_MAPPING_MUTANT", "object identity width is closed")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_MISMATCH_CODE_MAPPING_MUTANT", "blob object identity recomputes ObjectSha1")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_MISMATCH_SUBJECT_MAPPING_MUTANT", "blob object identity recomputes ObjectSha1")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_ID_MISMATCH_DETAIL_MAPPING_MUTANT", "blob object identity recomputes ObjectSha1")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_FORMAT_MIXED_CODE_MAPPING_MUTANT", "mixed object formats refuse exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_FORMAT_MIXED_SUBJECT_MAPPING_MUTANT", "mixed object formats refuse exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_OBJECT_FORMAT_MIXED_DETAIL_MAPPING_MUTANT", "mixed object formats refuse exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_DUPLICATE_PATH_CODE_MAPPING_MUTANT", "duplicate paths refuse exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_DUPLICATE_PATH_SUBJECT_MAPPING_MUTANT", "duplicate paths refuse exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_DUPLICATE_PATH_DETAIL_MAPPING_MUTANT", "duplicate paths refuse exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_ORDER_CODE_MAPPING_MUTANT", "entry order is exact")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_ORDER_SUBJECT_MAPPING_MUTANT", "entry order is exact")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_ENTRY_ORDER_DETAIL_MAPPING_MUTANT", "entry order is exact")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_CASE_COLLISION_CODE_MAPPING_MUTANT", "portable case collision refuses exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_CASE_COLLISION_SUBJECT_MAPPING_MUTANT", "portable case collision refuses exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_CASE_COLLISION_DETAIL_MAPPING_MUTANT", "portable case collision refuses exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_PREFIX_CONFLICT_CODE_MAPPING_MUTANT", "portable prefix conflict survives an intervening sibling")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_PREFIX_CONFLICT_SUBJECT_MAPPING_MUTANT", "portable prefix conflict survives an intervening sibling")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PORTABLE_PREFIX_CONFLICT_DETAIL_MAPPING_MUTANT", "portable prefix conflict survives an intervening sibling")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PROBLEM_LIMIT_CODE_MAPPING_MUTANT", "problem traversal maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PROBLEM_LIMIT_SUBJECT_MAPPING_MUTANT", "problem traversal maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_PROBLEM_LIMIT_DETAIL_MAPPING_MUTANT", "problem traversal maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_CODE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_SUBJECT_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_DETAIL_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_CODE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_SUBJECT_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_DETAIL_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_CODE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_SUBJECT_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_DETAIL_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_RESULT_FINDING_LIMIT_CODE_MAPPING_MUTANT", "result findings maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_RESULT_FINDING_LIMIT_SUBJECT_MAPPING_MUTANT", "result findings maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_RESULT_FINDING_LIMIT_DETAIL_MAPPING_MUTANT", "result findings maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_UNREGISTERED_CODE_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_UNREGISTERED_SUBJECT_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_UNREGISTERED_DETAIL_MAPPING_MUTANT", "mode and structural facet catalog")
+  ]
+
+sourceClosureSelectorIntentsSerialization :: [(String, String)]
+sourceClosureSelectorIntentsSerialization =
+  [ ("VALIDATION_SOURCE_CLOSURE_BOUNDED_DIGEST_CLAIMED_DROP_MUTANT", "claimed identity bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_DIGEST_DOMAIN_DROP_MUTANT", "claimed identity bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_DIGEST_ENTRY_STATE_DROP_MUTANT", "entry count maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_CLASS_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_DOMAIN_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_FACETS_DROP_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_ITEM_ORDER_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_MODE_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_OBJECT_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_PATH_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASSIFICATION_DIGEST_REASONS_DROP_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_HEX_HIGH_NIBBLE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_HEX_LOW_NIBBLE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_BYTES_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_CLAIMED_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_DOMAIN_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_ENTRY_ORDER_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_MODE_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_OBJECT_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INPUT_DIGEST_PATH_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_LENGTH_PREFIX_LENGTH_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_LENGTH_PREFIX_SEPARATOR_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_LENGTH_PREFIX_VALUE_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_SNAPSHOT_BLOB_SEPARATOR_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_SNAPSHOT_DIGEST_DOMAIN_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_SNAPSHOT_FORMAT_SEPARATOR_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_SNAPSHOT_MEMBER_ORDER_MUTANT", "all three exact Git mode identifiers remain distinct")
+  , ("VALIDATION_SOURCE_CLOSURE_SNAPSHOT_MODE_SEPARATOR_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_SNAPSHOT_OBJECT_SEPARATOR_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_SNAPSHOT_PATH_SEPARATOR_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  ]
+
+sourceClosureSelectorIntentsRetention :: [(String, String)]
+sourceClosureSelectorIntentsRetention =
+  [ ("VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_DOCUMENTATION_PREDICATE_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_HASKELL_PREDICATE_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_LEGACY_PREDICATE_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_ORDER_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_PB_PREDICATE_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_PROJECT_PREDICATE_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_CLASS_COUNT_UNREGISTERED_PREDICATE_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_FINDING_COMMITMENT_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_FINDING_ORDER_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_INPUT_BYTES_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_INPUT_MODE_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_INPUT_PATH_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_02_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_03_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_04_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_05_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_06_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_07_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_08_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_09_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_10_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_11_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_12_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_13_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_14_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_15_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_16_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_17_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_18_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_19_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_20_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PB_RUNTIME_21_RETENTION_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  ]
+
+sourceClosureSelectorIntentsIngress :: [(String, String)]
+sourceClosureSelectorIntentsIngress =
+  [ ("VALIDATION_SOURCE_CLOSURE_INDEX_MODE_EXECUTABLE_ROUTE_MUTANT", "all three exact Git mode identifiers remain distinct")
+  , ("VALIDATION_SOURCE_CLOSURE_INDEX_MODE_REGULAR_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_INDEX_MODE_SYMLINK_ROUTE_MUTANT", "all three exact Git mode identifiers remain distinct")
+  , ("VALIDATION_SOURCE_CLOSURE_OBJECT_FORMAT_SHA1_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_OBJECT_FORMAT_SHA256_ROUTE_MUTANT", "canonical SHA-256 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_TRACKED_BYTES_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_TRACKED_OBJECT_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_TRACKED_PATH_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_TUPLE_BYTES_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_TUPLE_MODE_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_TUPLE_OBJECT_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_TUPLE_PATH_ROUTE_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  ]
+
+sourceClosureSelectorIntentsRenderers :: [(String, String)]
+sourceClosureSelectorIntentsRenderers =
+  [ ("VALIDATION_SOURCE_CLOSURE_RENDER_CLASS_01_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_CLASS_02_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_CLASS_03_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_CLASS_04_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_CLASS_05_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_01_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_02_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_03_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_04_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_05_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_06_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_07_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_08_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_DEBT_09_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_FACET_01_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_FACET_02_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_FACET_03_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_FACET_04_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_FACET_05_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_MODE_01_MAPPING_MUTANT", "all three exact Git mode identifiers remain distinct")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_MODE_02_MAPPING_MUTANT", "all three exact Git mode identifiers remain distinct")
+  , ("VALIDATION_SOURCE_CLOSURE_RENDER_MODE_03_MAPPING_MUTANT", "all three exact Git mode identifiers remain distinct")
+  ]
+
+sourceClosureSelectorIntentsClassification :: [(String, String)]
+sourceClosureSelectorIntentsClassification =
+  [ ("VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_BINARY_DROP_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_EXECUTABLE_DROP_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_FOREIGN_DROP_MUTANT", "foreign signature identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_ORDER_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_REGULAR_MODE_ROUTE_MUTANT", "all three exact Git mode identifiers remain distinct")
+  , ("VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_SHEBANG_DROP_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_SYMLINK_DROP_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_FINAL_CLASS_GUARD_WIDEN_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_PRIMARY_REASON_01_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_PRIMARY_REASON_02_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_REASON_ORDER_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_REASON_PRIMARY_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_REASON_SIGNATURE_DROP_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_REASON_STRUCTURAL_DROP_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_SIGNATURE_REASON_01_MAPPING_MUTANT", "closed primary-class and project identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_SIGNATURE_REASON_02_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_SIGNATURE_REASON_03_MAPPING_MUTANT", "foreign signature identifier catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_SIGNATURE_REASON_04_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_STRUCTURAL_REASON_01_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_STRUCTURAL_REASON_02_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_STRUCTURAL_REASON_03_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_STRUCTURAL_REASON_04_MAPPING_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_TEXTUAL_NUL_CHECK_BYPASS_MUTANT", "mode and structural facet catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_TEXTUAL_UTF8_CHECK_BYPASS_MUTANT", "mode and structural facet catalog")
+  ]
+
+sourceClosureSelectorIntentsDocumentationCatalog :: [(String, String)]
+sourceClosureSelectorIntentsDocumentationCatalog =
+  [ ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_001_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_002_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_003_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_004_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_005_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_006_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_007_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_008_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_009_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_010_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_011_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_012_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_013_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_014_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_015_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_016_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_017_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_018_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_019_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_020_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_021_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_022_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_023_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_024_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_025_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_026_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_027_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_028_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_029_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_030_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_031_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_032_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_033_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_034_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_035_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_036_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_037_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_038_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_039_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_040_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_041_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_042_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_043_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_044_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_045_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_046_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_047_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_048_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_049_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_050_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_051_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_052_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_053_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_054_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_055_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_056_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_057_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_058_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_059_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_060_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_061_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_062_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_063_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_064_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_065_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_066_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_067_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_068_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_069_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_070_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_071_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_072_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_073_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_074_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_075_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_076_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_077_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_078_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_079_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_080_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_081_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_082_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_083_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_084_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_085_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_086_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_087_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_088_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_089_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_090_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_091_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_092_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_093_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_094_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_095_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_096_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_097_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_098_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_099_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_100_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_101_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_102_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_103_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_104_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_105_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_106_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_107_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_108_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_109_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_110_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_111_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_112_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_113_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_114_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_115_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_116_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_117_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_118_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_119_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_120_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_121_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_122_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_123_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_124_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_125_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_126_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_127_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_128_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_129_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_130_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_131_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_132_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_133_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_134_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_135_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_136_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_137_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_138_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_139_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_140_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_141_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_142_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_143_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_144_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_145_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_146_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_147_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_148_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_149_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_150_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_151_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_152_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_153_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_154_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_155_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_156_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_157_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_158_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_159_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_160_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_161_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_162_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_163_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_164_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_165_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_166_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_167_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_168_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_169_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_170_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_171_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_172_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_173_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_174_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_175_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_176_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_177_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_178_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_179_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_180_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_181_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_182_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_183_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_184_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_185_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_186_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_187_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_188_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_189_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_190_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_191_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_192_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_193_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_194_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_195_RETENTION_MUTANT", "governed documentation path catalog")
+  ]
+
+sourceClosureSelectorIntentsTraversal :: [(String, String)]
+sourceClosureSelectorIntentsTraversal =
+  [ ("VALIDATION_SOURCE_CLOSURE_SEMANTIC_BLOB_WITHIN_LIMIT_MUTANT", "semantic inspection bytes exact maximum")
+  , ("VALIDATION_SOURCE_CLOSURE_SEMANTIC_CR_BYPASS_MUTANT", "significant CR terminates an overlong blob scan")
+  , ("VALIDATION_SOURCE_CLOSURE_SEMANTIC_LF_BYPASS_MUTANT", "significant LF terminates an overlong blob scan")
+  , ("VALIDATION_SOURCE_CLOSURE_SEMANTIC_LIMIT_RESULT_MUTANT", "semantic inspection bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_SEMANTIC_SIGNIFICANT_BYPASS_MUTANT", "significant LF terminates an overlong blob scan")
+  , ("VALIDATION_SOURCE_CLOSURE_SEMANTIC_SPACE_BYPASS_MUTANT", "space-only line does not terminate semantic scan")
+  , ("VALIDATION_SOURCE_CLOSURE_SEMANTIC_TAB_BYPASS_MUTANT", "tab-only line does not terminate semantic scan")
+  , ("VALIDATION_SOURCE_CLOSURE_UTF8_ASCII_WIDTH_MUTANT", "portable path bytes exact maximum")
+  , ("VALIDATION_SOURCE_CLOSURE_UTF8_FOUR_BYTE_WIDTH_MUTANT", "four-byte UTF-8 path measurement")
+  , ("VALIDATION_SOURCE_CLOSURE_UTF8_THREE_BYTE_WIDTH_MUTANT", "three-byte UTF-8 path measurement")
+  , ("VALIDATION_SOURCE_CLOSURE_UTF8_TWO_BYTE_WIDTH_MUTANT", "two-byte UTF-8 path measurement")
+  ]
+
+sourceClosureSelectorIntentsBoundedCommitment :: [(String, String)]
+sourceClosureSelectorIntentsBoundedCommitment =
+  [ ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_ORDER_MUTANT", "bounded resource problem order is exact")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_01_MAPPING_MUTANT", "claimed identity bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_02_MAPPING_MUTANT", "entry count maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_03_MAPPING_MUTANT", "portable path bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_04_MAPPING_MUTANT", "portable path depth maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_05_MAPPING_MUTANT", "portable segment bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_06_MAPPING_MUTANT", "mode bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_07_MAPPING_MUTANT", "object identity bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_08_MAPPING_MUTANT", "blob bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_09_MAPPING_MUTANT", "aggregate blob bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_BOUNDED_PROBLEM_TAG_10_MAPPING_MUTANT", "semantic inspection bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_COMMITMENT_DETAIL_DIGEST_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_COMMITMENT_DETAIL_KIND_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  ]
+
+sourceClosureSelectorIntentsAnalysisStages :: [(String, String)]
+sourceClosureSelectorIntentsAnalysisStages =
+  [ ("VALIDATION_SOURCE_CLOSURE_AGGREGATE_STAGE_DROP_MUTANT", "aggregate blob bytes maximum plus one")
+  , ("VALIDATION_SOURCE_CLOSURE_ALL_PROBLEM_ORDER_MUTANT", "ordered multi-grammar problems")
+  , ("VALIDATION_SOURCE_CLOSURE_ENTRY_GRAMMAR_PROBLEM_ORDER_MUTANT", "ordered multi-grammar problems")
+  , ("VALIDATION_SOURCE_CLOSURE_FORMAT_STAGE_DROP_MUTANT", "mixed object formats refuse exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_GRAMMAR_PROBLEM_ORDER_MUTANT", "ordered multi-grammar problems")
+  , ("VALIDATION_SOURCE_CLOSURE_GRAMMAR_STAGE_DROP_MUTANT", "ordered multi-grammar problems")
+  , ("VALIDATION_SOURCE_CLOSURE_IDENTITY_STAGE_DROP_MUTANT", "claimed snapshot identity is joined exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_INVENTORY_STAGE_DROP_MUTANT", "duplicate paths refuse exactly")
+  , ("VALIDATION_SOURCE_CLOSURE_RESOURCE_PROBLEM_ORDER_MUTANT", "bounded resource problem order is exact")
+  , ("VALIDATION_SOURCE_CLOSURE_RESOURCE_STAGE_DROP_MUTANT", "bounded resource problem order is exact")
+  , ("VALIDATION_SOURCE_CLOSURE_TRACKED_STAGE_DROP_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  ]
+
 runSourceClosureOracle :: IO ()
 runSourceClosureOracle = do
   caseProblems <- case literalIntegrityProblems of
@@ -291,8 +833,8 @@ literalIntegrityProblems =
        | sha256Hex canonicalPbBytes
            /= "e210494d3ad4bcaad716daed5bb89cb5611107547e83eb018a6369e134cd5418"
        ]
-    <> [ "selector intent cardinality changed: expected=124; observed=" <> show (length sourceClosureSelectorIntents)
-       | length sourceClosureSelectorIntents /= 124
+    <> [ "selector intent cardinality changed: expected=606; observed=" <> show (length sourceClosureSelectorIntents)
+       | length sourceClosureSelectorIntents /= 606
        ]
     <> [ "duplicate selector intent: " <> selector
        | selector <- duplicateStrings sourceClosureSelectorNames
@@ -611,6 +1153,48 @@ resourceBoundaryCases =
       (wireEntry ObjectSha1 "src/LongLine.hs" "100644" (ByteString8.replicate (maximumSemanticBytes + 1) 'x'))
       "semantic-line-bytes:1:4096:4097"
       (resourceFinding "SOURCE-CLOSURE-SEMANTIC-LINE-BYTE-LIMIT" "<entry-1>" maximumSemanticBytes (maximumSemanticBytes + 1))
+  , boundedSingleEntryResourceCase
+      "two-byte UTF-8 path measurement"
+      (wireEntry ObjectSha1 (replicate 512 '\x00e9' <> "a") "100644" "x\n")
+      "path-bytes:1:1024:1025"
+      (resourceFinding "SOURCE-CLOSURE-PATH-BYTE-LIMIT" "<entry-1>" maximumPathBytes (maximumPathBytes + 1))
+  , boundedSingleEntryResourceCase
+      "three-byte UTF-8 path measurement"
+      (wireEntry ObjectSha1 (replicate 341 '\x20ac' <> "aa") "100644" "x\n")
+      "path-bytes:1:1024:1025"
+      (resourceFinding "SOURCE-CLOSURE-PATH-BYTE-LIMIT" "<entry-1>" maximumPathBytes (maximumPathBytes + 1))
+  , boundedSingleEntryResourceCase
+      "four-byte UTF-8 path measurement"
+      (wireEntry ObjectSha1 (replicate 256 '\x1f600' <> "a") "100644" "x\n")
+      "path-bytes:1:1024:1025"
+      (resourceFinding "SOURCE-CLOSURE-PATH-BYTE-LIMIT" "<entry-1>" maximumPathBytes (maximumPathBytes + 1))
+  , successCase "significant LF terminates an overlong blob scan" ObjectSha1 significantLfBoundary
+  , successCase "significant CR terminates an overlong blob scan" ObjectSha1 significantCrBoundary
+  , boundedSingleEntryResourceCase
+      "space-only line does not terminate semantic scan"
+      (wireEntry ObjectSha1 "src/SpaceLine.hs" "100644" (" \n" <> ByteString8.replicate maximumSemanticBytes 'x'))
+      "semantic-line-bytes:1:4096:4097"
+      (resourceFinding "SOURCE-CLOSURE-SEMANTIC-LINE-BYTE-LIMIT" "<entry-1>" maximumSemanticBytes (maximumSemanticBytes + 1))
+  , boundedSingleEntryResourceCase
+      "tab-only line does not terminate semantic scan"
+      (wireEntry ObjectSha1 "src/TabLine.hs" "100644" ("\t\n" <> ByteString8.replicate maximumSemanticBytes 'x'))
+      "semantic-line-bytes:1:4096:4097"
+      (resourceFinding "SOURCE-CLOSURE-SEMANTIC-LINE-BYTE-LIMIT" "<entry-1>" maximumSemanticBytes (maximumSemanticBytes + 1))
+  , boundedProblemCase
+      "bounded resource problem order is exact"
+      zeroIdentity
+      [ (wireEntry ObjectSha1 overPath1025 "100644" "x\n")
+          { wireMode = "1006440"
+          }
+      ]
+      "1"
+      "2"
+      [ "path-bytes:1:1024:1025"
+      , "mode-bytes:1:6:7"
+      ]
+      [ resourceFinding "SOURCE-CLOSURE-PATH-BYTE-LIMIT" "<entry-1>" maximumPathBytes (maximumPathBytes + 1)
+      , resourceFinding "SOURCE-CLOSURE-MODE-BYTE-LIMIT" "<entry-1>" maximumModeBytes (maximumModeBytes + 1)
+      ]
   , boundedProblemCase
       "claimed identity bytes maximum plus one"
       (Text.replicate (maximumIdentityBytes + 1) "0")
@@ -735,10 +1319,35 @@ exactSemanticBoundary :: [WireEntry]
 exactSemanticBoundary =
   sortedWithPb [wireEntry ObjectSha1 "src/LongLine.hs" "100644" (ByteString8.replicate maximumSemanticBytes 'x')]
 
+significantLfBoundary, significantCrBoundary :: [WireEntry]
+significantLfBoundary =
+  sortedWithPb [wireEntry ObjectSha1 "misc/line-lf.txt" "100644" ("x\n" <> ByteString8.replicate maximumSemanticBytes 'x')]
+significantCrBoundary =
+  sortedWithPb [wireEntry ObjectSha1 "misc/line-cr.txt" "100644" ("x\r" <> ByteString8.replicate maximumSemanticBytes 'x')]
+
 sortedWithPb :: [WireEntry] -> [WireEntry]
 sortedWithPb entries = sortOn wirePath (pbEntry ObjectSha1 : entries)
 
 grammarCases = identityGrammarCases <> pathGrammarCases <> modeObjectGrammarCases
+  <> [orderedGrammarProblemsCase]
+
+orderedGrammarProblemsCase :: ExactCase
+orderedGrammarProblemsCase =
+  completeProblemCase
+    "ordered multi-grammar problems"
+    (Text.replicate 63 "0")
+    [ (wireEntry ObjectSha1 "" "100644" "x\n")
+        { wireMode = "100600"
+        , wireObject = Text.replicate 39 "0"
+        }
+    ]
+    "unavailable"
+    "4"
+    [ Finding "SOURCE-CLOSURE-IDENTITY-GRAMMAR" "<claimed-snapshot>" ("expected exactly 64 lowercase ASCII hexadecimal characters; observed=" <> Text.replicate 63 "0")
+    , Finding "SOURCE-CLOSURE-PATH-GRAMMAR" "<entry-1>" "path is empty"
+    , Finding "SOURCE-CLOSURE-MODE-GRAMMAR" "<entry-1>" "observed=100600"
+    , Finding "SOURCE-CLOSURE-OBJECT-ID-GRAMMAR" "<entry-1>" ("observed=" <> Text.replicate 39 "0")
+    ]
 
 identityGrammarCases :: [ExactCase]
 identityGrammarCases =
@@ -951,7 +1560,17 @@ classificationCases =
   [ successCase "closed primary-class and project identifier catalog" ObjectSha1 classificationCatalog
   , successCase "mode and structural facet catalog" ObjectSha1 facetCatalog
   , successCase "foreign signature identifier catalog" ObjectSha1 signatureCatalog
+  , successCase "governed documentation path catalog" ObjectSha1 governedDocumentationCatalog
   ]
+
+governedDocumentationCatalog :: [WireEntry]
+governedDocumentationCatalog =
+  sortOn wirePath
+    ( pbEntry ObjectSha1
+        : [ wireEntry ObjectSha1 path "100644" "# governed documentation\n"
+          | path <- expectedDocumentationPathList
+          ]
+    )
 
 classificationCatalog :: [WireEntry]
 classificationCatalog =
@@ -1295,7 +1914,206 @@ expectedPrimaryClass path
   | otherwise = ExpectedUnregistered
 
 expectedDocumentationPaths :: Set.Set FilePath
-expectedDocumentationPaths = Set.fromList ["AGENTS.md", "CLAUDE.md", "README.md"]
+expectedDocumentationPaths = Set.fromList expectedDocumentationPathList
+
+expectedDocumentationPathList :: [FilePath]
+expectedDocumentationPathList =
+  [ "AGENTS.md"
+  , "CLAUDE.md"
+  , "DEVELOPMENT_PLAN/README.md"
+  , "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
+  , "DEVELOPMENT_PLAN/development_plan_phase_model.md"
+  , "DEVELOPMENT_PLAN/development_plan_standards.md"
+  , "DEVELOPMENT_PLAN/later_phases.md"
+  , "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
+  , "DEVELOPMENT_PLAN/overview.md"
+  , "DEVELOPMENT_PLAN/phase_00_documentation_suite.md"
+  , "DEVELOPMENT_PLAN/phase_01_toolchain_spike.md"
+  , "DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md"
+  , "DEVELOPMENT_PLAN/phase_03_artifact_calculus.md"
+  , "DEVELOPMENT_PLAN/phase_04_budget_calculus.md"
+  , "DEVELOPMENT_PLAN/phase_05_lift_calculus.md"
+  , "DEVELOPMENT_PLAN/phase_06_workflow_calculus.md"
+  , "DEVELOPMENT_PLAN/phase_07_evidence_calculus.md"
+  , "DEVELOPMENT_PLAN/phase_08_scope_index.md"
+  , "DEVELOPMENT_PLAN/phase_09_resource_index.md"
+  , "DEVELOPMENT_PLAN/phase_10_calculus_composition.md"
+  , "DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md"
+  , "DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md"
+  , "DEVELOPMENT_PLAN/phase_13_symbolic_checker.md"
+  , "DEVELOPMENT_PLAN/phase_14_refinement_checker.md"
+  , "DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md"
+  , "DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md"
+  , "DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md"
+  , "DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md"
+  , "DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md"
+  , "DEVELOPMENT_PLAN/phase_20_extension_declaration.md"
+  , "DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md"
+  , "DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md"
+  , "DEVELOPMENT_PLAN/phase_23_extension_security_laws.md"
+  , "DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md"
+  , "DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md"
+  , "DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md"
+  , "DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md"
+  , "DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md"
+  , "DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md"
+  , "DEVELOPMENT_PLAN/phase_30_capability_bind.md"
+  , "DEVELOPMENT_PLAN/phase_31_provision_seal.md"
+  , "DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md"
+  , "DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md"
+  , "DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md"
+  , "DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md"
+  , "DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md"
+  , "DEVELOPMENT_PLAN/phase_37_ui_program_schema.md"
+  , "DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md"
+  , "DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md"
+  , "DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md"
+  , "DEVELOPMENT_PLAN/phase_41_offline_language_plan.md"
+  , "DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md"
+  , "DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md"
+  , "DEVELOPMENT_PLAN/phase_44_ui_local_composition.md"
+  , "DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md"
+  , "DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md"
+  , "DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md"
+  , "DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md"
+  , "DEVELOPMENT_PLAN/phase_49_self_referential_gates.md"
+  , "DEVELOPMENT_PLAN/phase_50_host_assert_cli.md"
+  , "DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md"
+  , "DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md"
+  , "DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md"
+  , "DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md"
+  , "DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md"
+  , "DEVELOPMENT_PLAN/phase_56_base_image_registry.md"
+  , "DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md"
+  , "DEVELOPMENT_PLAN/phase_58_object_reconciler.md"
+  , "DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md"
+  , "DEVELOPMENT_PLAN/phase_60_retained_storage.md"
+  , "DEVELOPMENT_PLAN/phase_61_vault_pki.md"
+  , "DEVELOPMENT_PLAN/phase_62_platform_backbone.md"
+  , "DEVELOPMENT_PLAN/phase_63_platform_services_2.md"
+  , "DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md"
+  , "DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md"
+  , "DEVELOPMENT_PLAN/phase_66_app_tenancy.md"
+  , "DEVELOPMENT_PLAN/phase_67_pulsar_client.md"
+  , "DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md"
+  , "DEVELOPMENT_PLAN/phase_69_content_store_workflow.md"
+  , "DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md"
+  , "DEVELOPMENT_PLAN/phase_71_release_lifecycle.md"
+  , "DEVELOPMENT_PLAN/phase_72_ui_program_release.md"
+  , "DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md"
+  , "DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md"
+  , "DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md"
+  , "DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md"
+  , "DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md"
+  , "DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md"
+  , "DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md"
+  , "DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md"
+  , "DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md"
+  , "DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md"
+  , "DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md"
+  , "DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md"
+  , "DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md"
+  , "DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md"
+  , "DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md"
+  , "DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md"
+  , "DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md"
+  , "DEVELOPMENT_PLAN/phase_90_test_topology_live.md"
+  , "DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md"
+  , "DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md"
+  , "DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md"
+  , "DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md"
+  , "DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md"
+  , "DEVELOPMENT_PLAN/substrates.md"
+  , "DEVELOPMENT_PLAN/system_components.md"
+  , "README.md"
+  , "documents/README.md"
+  , "documents/documentation_standards.md"
+  , "documents/engineering/README.md"
+  , "documents/engineering/app_vs_deployment_doctrine.md"
+  , "documents/engineering/apple_metal_headless_builds.md"
+  , "documents/engineering/backup_recovery_doctrine.md"
+  , "documents/engineering/bootstrap_sequence_doctrine.md"
+  , "documents/engineering/browser_offline_runtime_doctrine.md"
+  , "documents/engineering/capability_extension_doctrine.md"
+  , "documents/engineering/chaos_failover_doctrine.md"
+  , "documents/engineering/chaos_failover_second_axis.md"
+  , "documents/engineering/chaos_failover_worked_examples.md"
+  , "documents/engineering/cluster_lifecycle_doctrine.md"
+  , "documents/engineering/cluster_topology_doctrine.md"
+  , "documents/engineering/conformance_harness_doctrine.md"
+  , "documents/engineering/consistency_pacelc_doctrine.md"
+  , "documents/engineering/content_addressing_determinism.md"
+  , "documents/engineering/content_addressing_doctrine.md"
+  , "documents/engineering/daemon_topology_doctrine.md"
+  , "documents/engineering/deterministic_simulation_doctrine.md"
+  , "documents/engineering/diagram_conventions.md"
+  , "documents/engineering/dsl_doctrine.md"
+  , "documents/engineering/evidence_calculus_doctrine.md"
+  , "documents/engineering/extension_conformance_doctrine.md"
+  , "documents/engineering/extension_conformance_laws.md"
+  , "documents/engineering/extension_conformance_security.md"
+  , "documents/engineering/extension_conformance_transactions.md"
+  , "documents/engineering/formal_model_doctrine.md"
+  , "documents/engineering/gateway_migration_doctrine.md"
+  , "documents/engineering/gateway_migration_model_doctrine.md"
+  , "documents/engineering/generated_artifacts_doctrine.md"
+  , "documents/engineering/host_cluster_comms_doctrine.md"
+  , "documents/engineering/image_build_doctrine.md"
+  , "documents/engineering/inforcespec_migration_doctrine.md"
+  , "documents/engineering/jit_artifact_doctrine.md"
+  , "documents/engineering/jit_budget_doctrine.md"
+  , "documents/engineering/lift_and_compose_doctrine.md"
+  , "documents/engineering/low_code_ui_runtime_doctrine.md"
+  , "documents/engineering/low_code_ui_workflow_lifting.md"
+  , "documents/engineering/manifest_generation_doctrine.md"
+  , "documents/engineering/migration_doctrine.md"
+  , "documents/engineering/monitoring_doctrine.md"
+  , "documents/engineering/namespace_layout_doctrine.md"
+  , "documents/engineering/network_fabric_doctrine.md"
+  , "documents/engineering/platform_services_doctrine.md"
+  , "documents/engineering/preflight_validation_doctrine.md"
+  , "documents/engineering/pulsar_client_doctrine.md"
+  , "documents/engineering/pulumi_ebs_credential_model.md"
+  , "documents/engineering/pulumi_iac_doctrine.md"
+  , "documents/engineering/readiness_ordering_doctrine.md"
+  , "documents/engineering/release_lifecycle_doctrine.md"
+  , "documents/engineering/repository_layout_doctrine.md"
+  , "documents/engineering/resource_capacity_construction.md"
+  , "documents/engineering/resource_capacity_doctrine.md"
+  , "documents/engineering/resource_capacity_folds.md"
+  , "documents/engineering/resource_capacity_schema.md"
+  , "documents/engineering/resource_capacity_sources.md"
+  , "documents/engineering/resource_capacity_storage.md"
+  , "documents/engineering/resource_capacity_types.md"
+  , "documents/engineering/service_capability_doctrine.md"
+  , "documents/engineering/single_logical_data_plane_doctrine.md"
+  , "documents/engineering/storage_lifecycle_doctrine.md"
+  , "documents/engineering/substrate_doctrine.md"
+  , "documents/engineering/substrate_node_inventory.md"
+  , "documents/engineering/tenancy_doctrine.md"
+  , "documents/engineering/test_derivation_analysis.md"
+  , "documents/engineering/testing_doctrine.md"
+  , "documents/engineering/testing_spoof_resistance.md"
+  , "documents/engineering/tla_modelling_assumptions.md"
+  , "documents/engineering/ui_realtime_coordination_doctrine.md"
+  , "documents/engineering/validation_frame_doctrine.md"
+  , "documents/engineering/vault_pki_doctrine.md"
+  , "documents/engineering/workflow_calculus_doctrine.md"
+  , "documents/glossary.md"
+  , "documents/illegal_state/README.md"
+  , "documents/illegal_state/illegal_state_capability_messaging.md"
+  , "documents/illegal_state/illegal_state_capacity.md"
+  , "documents/illegal_state/illegal_state_catalog.md"
+  , "documents/illegal_state/illegal_state_lifecycle.md"
+  , "documents/illegal_state/illegal_state_ml_asset.md"
+  , "documents/illegal_state/illegal_state_multicluster.md"
+  , "documents/illegal_state/illegal_state_security.md"
+  , "documents/illegal_state/illegal_state_storage.md"
+  , "documents/illegal_state/illegal_state_techniques.md"
+  , "documents/illegal_state/illegal_state_tenancy.md"
+  , "documents/illegal_state/illegal_state_topology.md"
+  , "documents/reading_order.md"
+  ]
 
 expectedProjectPaths :: [FilePath]
 expectedProjectPaths =

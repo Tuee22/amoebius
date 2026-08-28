@@ -8,6 +8,11 @@ module Amoebius.Validation.SourceDebtBaseline.Internal
   , sourceDebtClosureDiagnosticCheck
   , sourceDebtEvidenceCheck
   , sourceDebtRawDiagnosticCheck
+#if defined(VALIDATION_SOURCE_DEBT_INTERNAL_TEST_HOOKS)
+  , sourceDebtInternalTestIntegrityFindings
+  , sourceDebtInternalTestProblemFindings
+  , sourceDebtInternalTestStateResults
+#endif
   ) where
 
 -- The frozen baseline, observations, comparison problems, and comparison
@@ -151,29 +156,102 @@ maximumSourceDebtAggregateBlobBytes = 33554432
 
 allSourceDebtIds :: [SourceDebtId]
 allSourceDebtIds =
-  [ SourceTools
-  , SourceDhall
-  , SourceProto
-  , SourceUi
-  , SourcePulumi
-  , SourceTest
-  , SourceProbe
-  , SourcePb
-  , SourceVendor
-  ]
+  concat
+    [
+#if defined(VALIDATION_SOURCE_DEBT_ALL_ID_TOOLS_OMISSION_MUTANT)
+      []
+#else
+      [SourceTools]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_ALL_ID_DHALL_OMISSION_MUTANT)
+    , []
+#else
+    , [SourceDhall]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_ALL_ID_PROTO_OMISSION_MUTANT)
+    , []
+#else
+    , [SourceProto]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_ALL_ID_UI_OMISSION_MUTANT)
+    , []
+#else
+    , [SourceUi]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_ALL_ID_PULUMI_OMISSION_MUTANT)
+    , []
+#else
+    , [SourcePulumi]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_ALL_ID_TEST_OMISSION_MUTANT)
+    , []
+#else
+    , [SourceTest]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_ALL_ID_PROBE_OMISSION_MUTANT)
+    , []
+#else
+    , [SourceProbe]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_ALL_ID_PB_OMISSION_MUTANT)
+    , []
+#else
+    , [SourcePb]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_ALL_ID_VENDOR_OMISSION_MUTANT)
+    , []
+#else
+    , [SourceVendor]
+#endif
+    ]
 
 laterOwnedSourceDebtIds :: Set SourceDebtId
 laterOwnedSourceDebtIds =
   Set.fromList
-    [ SourceTools
-    , SourceDhall
-    , SourceProto
-    , SourceUi
-    , SourcePulumi
-    , SourceTest
-    , SourceProbe
-    , SourceVendor
-    ]
+    ( concat
+        [
+#if defined(VALIDATION_SOURCE_DEBT_LATER_ID_TOOLS_OMISSION_MUTANT)
+          []
+#else
+          [SourceTools]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LATER_ID_DHALL_OMISSION_MUTANT)
+        , []
+#else
+        , [SourceDhall]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LATER_ID_PROTO_OMISSION_MUTANT)
+        , []
+#else
+        , [SourceProto]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LATER_ID_UI_OMISSION_MUTANT)
+        , []
+#else
+        , [SourceUi]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LATER_ID_PULUMI_OMISSION_MUTANT)
+        , []
+#else
+        , [SourcePulumi]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LATER_ID_TEST_OMISSION_MUTANT)
+        , []
+#else
+        , [SourceTest]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LATER_ID_PROBE_OMISSION_MUTANT)
+        , []
+#else
+        , [SourceProbe]
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LATER_ID_VENDOR_OMISSION_MUTANT)
+        , []
+#else
+        , [SourceVendor]
+#endif
+        ]
+    )
 
 laterOwnedSourceDebtBaselines :: Map SourceDebtId SourceDebtBaseline
 laterOwnedSourceDebtBaselines =
@@ -377,7 +455,18 @@ sourceDebtBaseline SourceVendor =
 -- projection with which a caller can fabricate an accepted comparison.
 analyzeAcquiredSourceDebt :: AcquiredSourceSnapshot -> SourceDebtEvidence
 analyzeAcquiredSourceDebt acquired =
-  SourceDebtEvidence acquired result states
+  SourceDebtEvidence
+    acquired
+#if defined(VALIDATION_SOURCE_DEBT_EVIDENCE_RESULT_ASSEMBLY_MUTANT)
+    (result {checkObservations = []})
+#else
+    result
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_EVIDENCE_STATE_ASSEMBLY_MUTANT)
+    (states `seq` Map.empty)
+#else
+    states
+#endif
  where
   snapshot = acquiredSourceSnapshot acquired
   closure = classifySnapshot snapshot
@@ -390,12 +479,20 @@ sourceDebtEvidenceCheck
   -> SourceDebtEvidence
   -> CheckResult
 sourceDebtEvidenceCheck acquired (SourceDebtEvidence evidenceAcquired result _)
+#if defined(VALIDATION_SOURCE_DEBT_EVIDENCE_MATCH_PREDICATE_MUTANT)
+  | acquired /= evidenceAcquired = result
+#else
   | acquired == evidenceAcquired = result
+#endif
   | otherwise =
       result
         { checkFindings =
+#if defined(VALIDATION_SOURCE_DEBT_EVIDENCE_MISMATCH_COMPOSITION_MUTANT)
+            checkFindings result `seq` [sourceDebtEvidenceMismatchFinding expectedIdentity evidenceIdentity]
+#else
             checkFindings result
               <> [sourceDebtEvidenceMismatchFinding expectedIdentity evidenceIdentity]
+#endif
         }
  where
   expectedIdentity = snapshotIdentity (acquiredSourceSnapshot acquired)
@@ -413,6 +510,10 @@ foldAcquiredSourceDebtState
   -> (Int -> Text -> result)
   -> result
 foldAcquiredSourceDebtState acquired (SourceDebtEvidence evidenceAcquired _ states) identifier onRefused onZero onOpen
+#if defined(VALIDATION_SOURCE_DEBT_STATE_FOLD_SNAPSHOT_PREDICATE_MUTANT)
+  | acquired == evidenceAcquired =
+      expectedIdentity `seq` evidenceIdentity `seq` onRefused "source-debt evidence snapshot mismatch mutant"
+#else
   | acquired /= evidenceAcquired =
       onRefused
         ( "source-debt evidence snapshot mismatch: expected="
@@ -420,12 +521,10 @@ foldAcquiredSourceDebtState acquired (SourceDebtEvidence evidenceAcquired _ stat
             <> ", actual="
             <> evidenceIdentity
         )
+#endif
   | otherwise = case Map.lookup identifier states of
       Nothing -> onRefused ("closed source-debt evidence is missing " <> renderSourceDebtId identifier)
-      Just state -> case state of
-        SourceDebtStateOpen count fingerprint -> onOpen count fingerprint
-        SourceDebtStateZero -> onZero
-        SourceDebtStateRefused detail -> onRefused detail
+      Just state -> foldSourceDebtState state onRefused onZero onOpen
  where
   expectedIdentity = snapshotIdentity (acquiredSourceSnapshot acquired)
   evidenceIdentity = snapshotIdentity (acquiredSourceSnapshot evidenceAcquired)
@@ -433,9 +532,62 @@ foldAcquiredSourceDebtState acquired (SourceDebtEvidence evidenceAcquired _ stat
 sourceDebtEvidenceMismatchFinding :: Text -> Text -> Finding
 sourceDebtEvidenceMismatchFinding expected actual =
   finding
+#if defined(VALIDATION_SOURCE_DEBT_EVIDENCE_MISMATCH_CODE_MUTANT)
+    "SOURCE-DEBT-EVIDENCE-SNAPSHOT-MISMATCH-MUTANT"
+#else
     "SOURCE-DEBT-EVIDENCE-SNAPSHOT-MISMATCH"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_EVIDENCE_MISMATCH_SUBJECT_MUTANT)
+    "source-debt-baseline-mutant"
+#else
     "source-debt-baseline"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_EVIDENCE_MISMATCH_DETAIL_MUTANT)
+    (expected `seq` actual `seq` "mutant")
+#else
     ("expected=" <> expected <> ", actual=" <> actual)
+#endif
+
+foldSourceDebtState
+  :: SourceDebtState
+  -> (Text -> result)
+  -> result
+  -> (Int -> Text -> result)
+  -> result
+foldSourceDebtState state onRefused onZero onOpen = case state of
+  SourceDebtStateOpen count fingerprint ->
+#if defined(VALIDATION_SOURCE_DEBT_STATE_FOLD_OPEN_ROUTE_MUTANT)
+    count `seq` fingerprint `seq` onOpen 0 "" `seq` onZero
+#else
+    onOpen
+#if defined(VALIDATION_SOURCE_DEBT_STATE_FOLD_OPEN_COUNT_MUTANT)
+      (count `seq` 0)
+#else
+      count
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_STATE_FOLD_OPEN_FINGERPRINT_MUTANT)
+      (fingerprint `seq` "")
+#else
+      fingerprint
+#endif
+#endif
+  SourceDebtStateZero ->
+#if defined(VALIDATION_SOURCE_DEBT_STATE_FOLD_ZERO_ROUTE_MUTANT)
+    onZero `seq` onRefused "source-debt zero route mutant"
+#else
+    onZero
+#endif
+  SourceDebtStateRefused detail ->
+#if defined(VALIDATION_SOURCE_DEBT_STATE_FOLD_REFUSED_ROUTE_MUTANT)
+    detail `seq` onRefused "" `seq` onZero
+#else
+    onRefused
+#if defined(VALIDATION_SOURCE_DEBT_STATE_FOLD_REFUSED_DETAIL_MUTANT)
+      (detail `seq` "mutant")
+#else
+      detail
+#endif
+#endif
 
 -- | The raw standard-value facade is bounded before it constructs production
 -- source types. Mode text has one closed interpretation and invalid values
@@ -446,6 +598,10 @@ sourceDebtRawDiagnosticCheck
 sourceDebtRawDiagnosticCheck rawEntries =
   case boundedPrefix maximumSourceDebtTraversalEntries rawEntries of
     PrefixExceeded observedAtLeast ->
+#if defined(VALIDATION_SOURCE_DEBT_RAW_TRAVERSAL_RESULT_ROUTE_MUTANT)
+      observedAtLeast `seq`
+        diagnosticResult (analysisResult (analyzeBoundedSourceDebt (PreparedSourceDebt Map.empty)))
+#else
       diagnosticResult
         ( analysisResult
             ( limitAnalysis
@@ -455,23 +611,56 @@ sourceDebtRawDiagnosticCheck rawEntries =
                 observedAtLeast
             )
         )
+#endif
     PrefixWithin boundedEntries ->
       case rawSourceDebtResourceFailure boundedEntries of
         Just resourceFailure ->
+#if defined(VALIDATION_SOURCE_DEBT_RAW_RESOURCE_RESULT_ROUTE_MUTANT)
+          resourceFailure `seq`
+            diagnosticResult (analysisResult (analyzeBoundedSourceDebt (PreparedSourceDebt Map.empty)))
+#else
           diagnosticResult
             (analysisResult (resourceLimitAnalysis resourceFailure))
+#endif
         Nothing ->
           case traverse rawTrackedEntry boundedEntries of
             Left _ ->
               CheckResult
-                { checkName = "source-debt-baseline"
-                , checkObservations = []
+                { checkName =
+#if defined(VALIDATION_SOURCE_DEBT_RAW_MODE_RESULT_NAME_MUTANT)
+                    "source-debt-baseline-mutant"
+#else
+                    "source-debt-baseline"
+#endif
+                , checkObservations =
+#if defined(VALIDATION_SOURCE_DEBT_RAW_MODE_RESULT_OBSERVATIONS_MUTANT)
+                    [observation "source-debt.raw-mode-mutant" "mutant"]
+#else
+                    []
+#endif
                 , checkFindings =
+#if defined(VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_COMPOSITION_MUTANT)
+                    sourceDebtDiagnosticFindings `seq`
+                      [ finding
+#else
                     sourceDebtDiagnosticFindings
                       <> [ finding
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_CODE_MUTANT)
+                             "SOURCE-DEBT-RAW-MODE-INVALID-MUTANT"
+#else
                              "SOURCE-DEBT-RAW-MODE-INVALID"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_SUBJECT_MUTANT)
+                             "source-debt-baseline-mutant"
+#else
                              "source-debt-baseline"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RAW_MODE_FINDING_DETAIL_MUTANT)
+                             "mutant"
+#else
                              "raw mode must be exactly one of 100644,100755,120000"
+#endif
                          ]
                 }
             Right entries ->
@@ -495,23 +684,64 @@ rawSourceDebtResourceFailure = go 0
  where
   go _ [] = Nothing
   go aggregateBytes ((path, _mode, objectId, bytes) : rest) =
-    let pathBytes = boundedFilePathUtf8Length maximumSourceDebtPathUtf8Bytes path
-        objectIdBytes = boundedTextUtf8Length maximumSourceDebtObjectIdUtf8Bytes objectId
-        blobBytes = boundedByteStringLength maximumSourceDebtBlobBytes bytes
+    let pathBytes =
+#if defined(VALIDATION_SOURCE_DEBT_RAW_PATH_RESOURCE_PROJECTION_MUTANT)
+          boundedFilePathUtf8Length maximumSourceDebtPathUtf8Bytes path `seq` 0
+#else
+          boundedFilePathUtf8Length maximumSourceDebtPathUtf8Bytes path
+#endif
+        objectIdBytes =
+#if defined(VALIDATION_SOURCE_DEBT_RAW_OBJECT_ID_RESOURCE_PROJECTION_MUTANT)
+          boundedTextUtf8Length maximumSourceDebtObjectIdUtf8Bytes objectId `seq` 0
+#else
+          boundedTextUtf8Length maximumSourceDebtObjectIdUtf8Bytes objectId
+#endif
+        blobBytes =
+#if defined(VALIDATION_SOURCE_DEBT_RAW_BLOB_RESOURCE_PROJECTION_MUTANT)
+          boundedByteStringLength maximumSourceDebtBlobBytes bytes `seq` 0
+#else
+          boundedByteStringLength maximumSourceDebtBlobBytes bytes
+#endif
         nextAggregate =
+#if defined(VALIDATION_SOURCE_DEBT_RAW_AGGREGATE_RESOURCE_TRANSITION_MUTANT)
+          min
+            (maximumSourceDebtAggregateBlobBytes + 1)
+            aggregateBytes
+#else
           min
             (maximumSourceDebtAggregateBlobBytes + 1)
             (aggregateBytes + blobBytes)
-     in if pathBytes > maximumSourceDebtPathUtf8Bytes
+#endif
+     in if
+#if defined(VALIDATION_SOURCE_DEBT_RAW_PATH_RESOURCE_PREDICATE_MUTANT)
+          pathBytes `seq` False
+#else
+          pathBytes > maximumSourceDebtPathUtf8Bytes
+#endif
           then Just (SourceDebtPathUtf8LimitExceeded pathBytes)
           else
-            if objectIdBytes > maximumSourceDebtObjectIdUtf8Bytes
+            if
+#if defined(VALIDATION_SOURCE_DEBT_RAW_OBJECT_ID_RESOURCE_PREDICATE_MUTANT)
+              objectIdBytes `seq` False
+#else
+              objectIdBytes > maximumSourceDebtObjectIdUtf8Bytes
+#endif
               then Just (SourceDebtObjectIdLimitExceeded objectIdBytes)
               else
-                if blobBytes > maximumSourceDebtBlobBytes
+                if
+#if defined(VALIDATION_SOURCE_DEBT_RAW_BLOB_RESOURCE_PREDICATE_MUTANT)
+                  blobBytes `seq` False
+#else
+                  blobBytes > maximumSourceDebtBlobBytes
+#endif
                   then Just (SourceDebtBlobLimitExceeded blobBytes)
                   else
-                    if nextAggregate > maximumSourceDebtAggregateBlobBytes
+                    if
+#if defined(VALIDATION_SOURCE_DEBT_RAW_AGGREGATE_RESOURCE_PREDICATE_MUTANT)
+                      nextAggregate `seq` False
+#else
+                      nextAggregate > maximumSourceDebtAggregateBlobBytes
+#endif
                       then Just (SourceDebtAggregateBlobLimitExceeded nextAggregate)
                       else go nextAggregate rest
 
@@ -524,14 +754,47 @@ rawTrackedEntry (path, mode, objectId, bytes) =
     Just indexMode ->
       Right
         TrackedEntry
-          { trackedIndex = IndexEntry path indexMode objectId
-          , trackedBytes = bytes
+          { trackedIndex =
+              IndexEntry
+#if defined(VALIDATION_SOURCE_DEBT_RAW_ENTRY_PATH_PROJECTION_MUTANT)
+                (path `seq` "src/ValidationSourceDebtMutant.hs")
+#else
+                path
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RAW_ENTRY_MODE_PROJECTION_MUTANT)
+                (indexMode `seq` SymbolicLink)
+#else
+                indexMode
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RAW_ENTRY_OBJECT_ID_PROJECTION_MUTANT)
+                (objectId `seq` "0000000000000000000000000000000000000000")
+#else
+                objectId
+#endif
+          , trackedBytes =
+#if defined(VALIDATION_SOURCE_DEBT_RAW_ENTRY_BLOB_PROJECTION_MUTANT)
+              bytes `seq` ByteString.empty
+#else
+              bytes
+#endif
           }
 
 rawIndexMode :: Text -> Maybe IndexMode
+#if defined(VALIDATION_SOURCE_DEBT_RAW_MODE_REGULAR_MAPPING_MUTANT)
+rawIndexMode "100644" = Just ExecutableFile
+#else
 rawIndexMode "100644" = Just RegularFile
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RAW_MODE_EXECUTABLE_MAPPING_MUTANT)
+rawIndexMode "100755" = Just RegularFile
+#else
 rawIndexMode "100755" = Just ExecutableFile
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RAW_MODE_SYMLINK_MAPPING_MUTANT)
+rawIndexMode "120000" = Just RegularFile
+#else
 rawIndexMode "120000" = Just SymbolicLink
+#endif
 #if defined(VALIDATION_SOURCE_DEBT_RAW_MODE_BYPASS_MUTANT)
 rawIndexMode _ = Just RegularFile
 #else
@@ -539,11 +802,19 @@ rawIndexMode _ = Nothing
 #endif
 
 analysisResult :: SourceDebtAnalysis -> CheckResult
+#if defined(VALIDATION_SOURCE_DEBT_ANALYSIS_RESULT_PROJECTION_MUTANT)
+analysisResult (SourceDebtAnalysis result _) = result {checkFindings = []}
+#else
 analysisResult (SourceDebtAnalysis result _) = result
+#endif
 
 diagnosticResult :: CheckResult -> CheckResult
 diagnosticResult result =
+#if defined(VALIDATION_SOURCE_DEBT_DIAGNOSTIC_RESULT_COMPOSITION_MUTANT)
+  result {checkFindings = checkFindings result `seq` sourceDebtDiagnosticFindings}
+#else
   result {checkFindings = sourceDebtDiagnosticFindings <> checkFindings result}
+#endif
 
 -- | The private raw-closure front is permanently diagnostic. Even exact
 -- frozen bytes
@@ -558,9 +829,21 @@ sourceDebtDiagnosticFindings = []
 #else
 sourceDebtDiagnosticFindings =
   [ finding
+#if defined(VALIDATION_SOURCE_DEBT_DIAGNOSTIC_FINDING_CODE_MUTANT)
+      "SOURCE-DEBT-DIAGNOSTIC-ONLY-MUTANT"
+#else
       "SOURCE-DEBT-DIAGNOSTIC-ONLY"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_DIAGNOSTIC_FINDING_SUBJECT_MUTANT)
+      "<caller-supplied-source-closure-mutant>"
+#else
       "<caller-supplied-source-closure>"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_DIAGNOSTIC_FINDING_DETAIL_MUTANT)
+      "mutant"
+#else
       "caller-supplied source-debt observations are diagnostic input, not candidate acquisition authority"
+#endif
   ]
 #endif
 
@@ -568,27 +851,44 @@ analyzeSourceDebt :: SourceClosure -> SourceDebtAnalysis
 analyzeSourceDebt closure =
   case boundedPrefix maximumSourceDebtTraversalEntries (closurePaths closure) of
     PrefixExceeded observedAtLeast ->
+#if defined(VALIDATION_SOURCE_DEBT_ANALYSIS_TRAVERSAL_RESULT_ROUTE_MUTANT)
+      observedAtLeast `seq` analyzeBoundedSourceDebt (PreparedSourceDebt Map.empty)
+#else
       limitAnalysis
         "traversal"
         "SOURCE-DEBT-TRAVERSAL-LIMIT"
         maximumSourceDebtTraversalEntries
         observedAtLeast
+#endif
     PrefixWithin _ ->
       case boundedPrefix maximumSourceDebtPreallocationEntries registeredPaths of
         PrefixExceeded observedAtLeast ->
+#if defined(VALIDATION_SOURCE_DEBT_ANALYSIS_PREALLOCATION_RESULT_ROUTE_MUTANT)
+          observedAtLeast `seq` analyzeBoundedSourceDebt (PreparedSourceDebt Map.empty)
+#else
           limitAnalysis
             "preallocation"
             "SOURCE-DEBT-PREALLOCATION-LIMIT"
             maximumSourceDebtPreallocationEntries
             observedAtLeast
+#endif
         PrefixWithin _ -> case prepareSourceDebt closure of
-          Left resourceFailure -> resourceLimitAnalysis resourceFailure
+          Left resourceFailure ->
+#if defined(VALIDATION_SOURCE_DEBT_ANALYSIS_RESOURCE_RESULT_ROUTE_MUTANT)
+            resourceFailure `seq` analyzeBoundedSourceDebt (PreparedSourceDebt Map.empty)
+#else
+            resourceLimitAnalysis resourceFailure
+#endif
           Right prepared -> analyzeBoundedSourceDebt prepared
  where
   registeredPaths =
     [ ()
     | classified <- closurePaths closure
+#if defined(VALIDATION_SOURCE_DEBT_REGISTERED_PATH_CLASSIFICATION_MUTANT)
+    , classifiedAs classified `seq` False
+#else
     , RegisteredLegacy _ <- [classifiedAs classified]
+#endif
     ]
 
 prepareSourceDebt :: SourceClosure -> Either SourceDebtResourceFailure PreparedSourceDebt
@@ -601,58 +901,154 @@ prepareSourceDebt closure =
       RegisteredLegacy identifier ->
         let entry = classifiedEntry classified
             indexed = trackedIndex entry
-            pathBytes = boundedFilePathUtf8Length maximumSourceDebtPathUtf8Bytes (indexPath indexed)
-            objectIdBytes = boundedTextUtf8Length maximumSourceDebtObjectIdUtf8Bytes (indexObjectId indexed)
-            blobBytes = boundedByteStringLength maximumSourceDebtBlobBytes (trackedBytes entry)
+            pathBytes =
+#if defined(VALIDATION_SOURCE_DEBT_PREPARED_PATH_RESOURCE_PROJECTION_MUTANT)
+              boundedFilePathUtf8Length maximumSourceDebtPathUtf8Bytes (indexPath indexed) `seq` 0
+#else
+              boundedFilePathUtf8Length maximumSourceDebtPathUtf8Bytes (indexPath indexed)
+#endif
+            objectIdBytes =
+#if defined(VALIDATION_SOURCE_DEBT_PREPARED_OBJECT_ID_RESOURCE_PROJECTION_MUTANT)
+              boundedTextUtf8Length maximumSourceDebtObjectIdUtf8Bytes (indexObjectId indexed) `seq` 0
+#else
+              boundedTextUtf8Length maximumSourceDebtObjectIdUtf8Bytes (indexObjectId indexed)
+#endif
+            blobBytes =
+#if defined(VALIDATION_SOURCE_DEBT_PREPARED_BLOB_RESOURCE_PROJECTION_MUTANT)
+              boundedByteStringLength maximumSourceDebtBlobBytes (trackedBytes entry) `seq` 0
+#else
+              boundedByteStringLength maximumSourceDebtBlobBytes (trackedBytes entry)
+#endif
             nextAggregate =
+#if defined(VALIDATION_SOURCE_DEBT_PREPARED_AGGREGATE_RESOURCE_TRANSITION_MUTANT)
+              min
+                (maximumSourceDebtAggregateBlobBytes + 1)
+                aggregateBytes
+#else
               min
                 (maximumSourceDebtAggregateBlobBytes + 1)
                 (aggregateBytes + blobBytes)
-         in if pathBytes > maximumSourceDebtPathUtf8Bytes
+#endif
+         in if
+#if defined(VALIDATION_SOURCE_DEBT_PREPARED_PATH_RESOURCE_PREDICATE_MUTANT)
+              pathBytes `seq` False
+#else
+              pathBytes > maximumSourceDebtPathUtf8Bytes
+#endif
               then Left (SourceDebtPathUtf8LimitExceeded pathBytes)
               else
-                if objectIdBytes > maximumSourceDebtObjectIdUtf8Bytes
+                if
+#if defined(VALIDATION_SOURCE_DEBT_PREPARED_OBJECT_ID_RESOURCE_PREDICATE_MUTANT)
+                  objectIdBytes `seq` False
+#else
+                  objectIdBytes > maximumSourceDebtObjectIdUtf8Bytes
+#endif
                   then Left (SourceDebtObjectIdLimitExceeded objectIdBytes)
                   else
-                    if blobBytes > maximumSourceDebtBlobBytes
+                    if
+#if defined(VALIDATION_SOURCE_DEBT_PREPARED_BLOB_RESOURCE_PREDICATE_MUTANT)
+                      blobBytes `seq` False
+#else
+                      blobBytes > maximumSourceDebtBlobBytes
+#endif
                       then Left (SourceDebtBlobLimitExceeded blobBytes)
                       else
-                        if nextAggregate > maximumSourceDebtAggregateBlobBytes
+                        if
+#if defined(VALIDATION_SOURCE_DEBT_PREPARED_AGGREGATE_RESOURCE_PREDICATE_MUTANT)
+                          nextAggregate `seq` False
+#else
+                          nextAggregate > maximumSourceDebtAggregateBlobBytes
+#endif
                           then Left (SourceDebtAggregateBlobLimitExceeded nextAggregate)
                           else
                             go
                               nextAggregate
-                              (Map.insertWith (<>) identifier [entry] members)
+                              ( Map.insertWith
+                                  (<>)
+#if defined(VALIDATION_SOURCE_DEBT_PREPARED_FAMILY_PROJECTION_MUTANT)
+                                  (identifier `seq` SourceTools)
+#else
+                                  identifier
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_PREPARED_ENTRY_PROJECTION_MUTANT)
+                                  (entry `seq` [])
+#else
+                                  [entry]
+#endif
+                                  members
+                              )
                               rest
       _ -> go aggregateBytes members rest
 
 boundedFilePathUtf8Length :: Integer -> FilePath -> Integer
 boundedFilePathUtf8Length maximumBytes = go 0
  where
-  go observed _ | observed > maximumBytes = maximumBytes + 1
+  go observed _
+#if defined(VALIDATION_SOURCE_DEBT_PATH_LENGTH_EARLY_PREDICATE_MUTANT)
+    | observed >= maximumBytes = maximumBytes + 1
+#else
+    | observed > maximumBytes = maximumBytes + 1
+#endif
   go observed [] = observed
   go observed (character : rest) =
+#if defined(VALIDATION_SOURCE_DEBT_PATH_LENGTH_TRANSITION_MUTANT)
+    utf8CharacterBytes character `seq` go observed rest
+#else
     go (min (maximumBytes + 1) (observed + utf8CharacterBytes character)) rest
+#endif
 
 boundedTextUtf8Length :: Integer -> Text -> Integer
 boundedTextUtf8Length maximumBytes = go 0
  where
-  go observed _ | observed > maximumBytes = maximumBytes + 1
+  go observed _
+#if defined(VALIDATION_SOURCE_DEBT_TEXT_LENGTH_EARLY_PREDICATE_MUTANT)
+    | observed >= maximumBytes = maximumBytes + 1
+#else
+    | observed > maximumBytes = maximumBytes + 1
+#endif
   go observed remaining = case Text.uncons remaining of
     Nothing -> observed
     Just (character, rest) ->
+#if defined(VALIDATION_SOURCE_DEBT_TEXT_LENGTH_TRANSITION_MUTANT)
+      utf8CharacterBytes character `seq` go observed rest
+#else
       go (min (maximumBytes + 1) (observed + utf8CharacterBytes character)) rest
+#endif
 
 boundedByteStringLength :: Integer -> ByteString.ByteString -> Integer
+#if defined(VALIDATION_SOURCE_DEBT_BYTESTRING_LENGTH_PROJECTION_MUTANT)
+boundedByteStringLength maximumBytes bytes = maximumBytes `seq` ByteString.length bytes `seq` 0
+#else
 boundedByteStringLength maximumBytes =
   min (maximumBytes + 1) . fromIntegral . ByteString.length
+#endif
 
 utf8CharacterBytes :: Char -> Integer
 utf8CharacterBytes character
-  | codePoint <= 0x7f = 1
-  | codePoint <= 0x7ff = 2
-  | codePoint <= 0xffff = 3
-  | otherwise = 4
+  | codePoint <= 0x7f =
+#if defined(VALIDATION_SOURCE_DEBT_UTF8_ASCII_WIDTH_MUTANT)
+      0
+#else
+      1
+#endif
+  | codePoint <= 0x7ff =
+#if defined(VALIDATION_SOURCE_DEBT_UTF8_TWO_BYTE_WIDTH_MUTANT)
+      0
+#else
+      2
+#endif
+  | codePoint <= 0xffff =
+#if defined(VALIDATION_SOURCE_DEBT_UTF8_THREE_BYTE_WIDTH_MUTANT)
+      0
+#else
+      3
+#endif
+  | otherwise =
+#if defined(VALIDATION_SOURCE_DEBT_UTF8_FOUR_BYTE_WIDTH_MUTANT)
+      0
+#else
+      4
+#endif
  where
   codePoint = ord character
 
@@ -662,10 +1058,26 @@ analyzeBoundedSourceDebt prepared =
  where
   observed = observeSourceDebt prepared
   rawObservations =
-    [ observation "source-debt.expected-family-count" (renderInt (Set.size laterOwnedSourceDebtIds))
-    , observation "source-debt.actual-family-count" (renderInt (Map.size observed))
+    [ observation
+        "source-debt.expected-family-count"
+#if defined(VALIDATION_SOURCE_DEBT_EXPECTED_FAMILY_COUNT_PROJECTION_MUTANT)
+        (renderInt (Set.size laterOwnedSourceDebtIds) `seq` "0")
+#else
+        (renderInt (Set.size laterOwnedSourceDebtIds))
+#endif
+    , observation
+        "source-debt.actual-family-count"
+#if defined(VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_COUNT_PROJECTION_MUTANT)
+        (renderInt (Map.size observed) `seq` "0")
+#else
+        (renderInt (Map.size observed))
+#endif
     ]
+#if defined(VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_ORDER_MUTANT)
+      <> concatMap renderObserved (reverse (Map.toAscList observed))
+#else
       <> concatMap renderObserved (Map.toAscList observed)
+#endif
   rawProblems = sourceDebtProblems observed
   observationBound = boundedPrefix maximumSourceDebtObservations rawObservations
   problemBound = boundedPrefix maximumSourceDebtProblems rawProblems
@@ -674,26 +1086,85 @@ analyzeBoundedSourceDebt prepared =
     PrefixExceeded observedAtLeast ->
       [limitFinding "SOURCE-DEBT-OBSERVATION-LIMIT" maximumSourceDebtObservations observedAtLeast]
   boundedObservations = case observationBound of
-    PrefixWithin values -> values
+    PrefixWithin values ->
+#if defined(VALIDATION_SOURCE_DEBT_BOUNDED_OBSERVATION_PROJECTION_MUTANT)
+      values `seq` []
+#else
+      values
+#endif
     PrefixExceeded observedAtLeast ->
       limitObservations "observation" maximumSourceDebtObservations observedAtLeast
   boundedProblemFindings = case problemBound of
-    PrefixWithin problems -> map problemFinding problems
+    PrefixWithin problems ->
+#if defined(VALIDATION_SOURCE_DEBT_BOUNDED_PROBLEM_PROJECTION_MUTANT)
+      map problemFinding problems `seq` []
+#else
+      map problemFinding problems
+#endif
     PrefixExceeded observedAtLeast ->
       [limitFinding "SOURCE-DEBT-PROBLEM-LIMIT" maximumSourceDebtProblems observedAtLeast]
   result =
     CheckResult
-      { checkName = "source-debt-baseline"
-      , checkObservations = boundedObservations
-      , checkFindings = observationLimitFindings <> boundedProblemFindings <> stateIntegrityFindings states
+      { checkName =
+#if defined(VALIDATION_SOURCE_DEBT_RESULT_NAME_PROJECTION_MUTANT)
+          "source-debt-baseline-mutant"
+#else
+          "source-debt-baseline"
+#endif
+      , checkObservations =
+#if defined(VALIDATION_SOURCE_DEBT_RESULT_OBSERVATION_PROJECTION_MUTANT)
+          boundedObservations `seq` []
+#else
+          boundedObservations
+#endif
+      , checkFindings =
+#if defined(VALIDATION_SOURCE_DEBT_RESULT_FINDING_COMPOSITION_MUTANT)
+          observationLimitFindings `seq` boundedProblemFindings `seq` stateIntegrityFindings states
+#elif defined(VALIDATION_SOURCE_DEBT_RESULT_FINDING_ORDER_MUTANT)
+          stateIntegrityFindings states <> boundedProblemFindings <> observationLimitFindings
+#else
+          observationLimitFindings <> boundedProblemFindings <> stateIntegrityFindings states
+#endif
       }
-  states = case (observationBound, problemBound) of
-    (PrefixWithin _, PrefixWithin _) -> sourceDebtStates observed
-    _ -> refusedStates "source-debt analysis exceeded a closed result bound"
+  states = boundedSourceDebtStates observationBound problemBound observed
+
+boundedSourceDebtStates
+  :: BoundedPrefix Observation
+  -> BoundedPrefix SourceDebtProblem
+  -> Map SourceDebtId SourceDebtObservation
+  -> Map SourceDebtId SourceDebtState
+boundedSourceDebtStates observationBound problemBound observed
+  | sourceDebtObservationBoundWithin observationBound
+      && sourceDebtProblemBoundWithin problemBound =
+      sourceDebtStates observed
+  | otherwise =
+      refusedStates "source-debt analysis exceeded a closed result bound"
+
+sourceDebtObservationBoundWithin :: BoundedPrefix Observation -> Bool
+sourceDebtObservationBoundWithin (PrefixWithin _) = True
+sourceDebtObservationBoundWithin (PrefixExceeded _) =
+#if defined(VALIDATION_SOURCE_DEBT_STATE_OBSERVATION_BOUND_PREDICATE_MUTANT)
+  True
+#else
+  False
+#endif
+
+sourceDebtProblemBoundWithin :: BoundedPrefix SourceDebtProblem -> Bool
+sourceDebtProblemBoundWithin (PrefixWithin _) = True
+sourceDebtProblemBoundWithin (PrefixExceeded _) =
+#if defined(VALIDATION_SOURCE_DEBT_STATE_PROBLEM_BOUND_PREDICATE_MUTANT)
+  True
+#else
+  False
+#endif
 
 observeSourceDebt :: PreparedSourceDebt -> Map SourceDebtId SourceDebtObservation
 observeSourceDebt (PreparedSourceDebt membersByFamily) =
+#if defined(VALIDATION_SOURCE_DEBT_OBSERVED_MAP_PROJECTION_MUTANT)
+  Map.mapWithKey observeOne (Map.deleteMin membersByFamily)
+#else
   Map.mapWithKey observeOne membersByFamily
+#endif
 
 observeOne :: SourceDebtId -> [TrackedEntry] -> SourceDebtObservation
 observeOne identifier unsortedMembers =
@@ -702,7 +1173,12 @@ observeOne identifier unsortedMembers =
           (observedPathCount members)
           (observedFingerprint identifier members)
           (observedPathInventoryDigest identifier members)
-      members = sortOn (indexPath . trackedIndex) unsortedMembers
+      members =
+#if defined(VALIDATION_SOURCE_DEBT_MEMBER_ORDER_PROJECTION_MUTANT)
+        sortOn (indexPath . trackedIndex) unsortedMembers `seq` unsortedMembers
+#else
+        sortOn (indexPath . trackedIndex) unsortedMembers
+#endif
 #if defined(VALIDATION_SOURCE_DEBT_OBSERVER_FABRICATION_MUTANT)
    in actual `seq` SourceDebtObservation 0 _zeroDigest _zeroDigest
 #else
@@ -734,23 +1210,80 @@ sourceDebtFingerprintIncremental :: SourceDebtId -> [TrackedEntry] -> Text
 sourceDebtFingerprintIncremental identifier members =
   hex (SHA256.finalize finalContext)
  where
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_DOMAIN_PROJECTION_MUTANT)
+  domainContext = SHA256.update SHA256.init "amoebius-source-debt-v1\0"
+#else
   domainContext = SHA256.update SHA256.init "amoebius-source-debt-v2\0"
-  identifierContext = updateText domainContext (renderSourceDebtId identifier)
-  prefixContext = SHA256.update identifierContext nulByte
+#endif
+  identifierContext =
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_IDENTITY_PROJECTION_MUTANT)
+    updateText domainContext (renderSourceDebtId identifier) `seq` domainContext
+#else
+    updateText domainContext (renderSourceDebtId identifier)
+#endif
+  prefixContext =
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_IDENTIFIER_SEPARATOR_MUTANT)
+    SHA256.update identifierContext nulByte `seq` identifierContext
+#else
+    SHA256.update identifierContext nulByte
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_MEMBER_ORDER_MUTANT)
+  finalContext = foldl' updateDebtMember prefixContext (reverse members)
+#else
   finalContext = foldl' updateDebtMember prefixContext members
+#endif
 
 updateDebtMember :: SHA256.Ctx -> TrackedEntry -> SHA256.Ctx
 updateDebtMember initialContext entry =
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_BLOB_SEPARATOR_MUTANT)
+  SHA256.update blobSeparatorContext nulByte `seq` blobSeparatorContext
+#else
   SHA256.update blobSeparatorContext nulByte
+#endif
  where
   indexed = trackedIndex entry
-  pathContext = updateText initialContext (Text.pack (indexPath indexed))
-  pathSeparatorContext = SHA256.update pathContext nulByte
-  modeContext = updateText pathSeparatorContext (renderIndexMode (indexMode indexed))
-  modeSeparatorContext = SHA256.update modeContext nulByte
-  objectContext = updateText modeSeparatorContext (indexObjectId indexed)
-  objectSeparatorContext = SHA256.update objectContext nulByte
-  blobSeparatorContext = updateText objectSeparatorContext (sourceDebtBlobCommitment entry)
+  pathContext =
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_PATH_PROJECTION_MUTANT)
+    updateText initialContext (Text.pack (indexPath indexed)) `seq` initialContext
+#else
+    updateText initialContext (Text.pack (indexPath indexed))
+#endif
+  pathSeparatorContext =
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_PATH_SEPARATOR_MUTANT)
+    SHA256.update pathContext nulByte `seq` pathContext
+#else
+    SHA256.update pathContext nulByte
+#endif
+  modeContext =
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_MODE_PROJECTION_MUTANT)
+    updateText pathSeparatorContext (renderIndexMode (indexMode indexed)) `seq` pathSeparatorContext
+#else
+    updateText pathSeparatorContext (renderIndexMode (indexMode indexed))
+#endif
+  modeSeparatorContext =
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_MODE_SEPARATOR_MUTANT)
+    SHA256.update modeContext nulByte `seq` modeContext
+#else
+    SHA256.update modeContext nulByte
+#endif
+  objectContext =
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_OBJECT_PROJECTION_MUTANT)
+    updateText modeSeparatorContext (indexObjectId indexed) `seq` modeSeparatorContext
+#else
+    updateText modeSeparatorContext (indexObjectId indexed)
+#endif
+  objectSeparatorContext =
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_OBJECT_SEPARATOR_MUTANT)
+    SHA256.update objectContext nulByte `seq` objectContext
+#else
+    SHA256.update objectContext nulByte
+#endif
+  blobSeparatorContext =
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_BLOB_PROJECTION_MUTANT)
+    updateText objectSeparatorContext (sourceDebtBlobCommitment entry) `seq` objectSeparatorContext
+#else
+    updateText objectSeparatorContext (sourceDebtBlobCommitment entry)
+#endif
 
 sourceDebtBlobCommitment :: TrackedEntry -> Text
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_BYTE_COMMITMENT_MUTANT)
@@ -774,63 +1307,192 @@ sourceDebtPathInventoryDigestUnmutated :: SourceDebtId -> [TrackedEntry] -> Text
 sourceDebtPathInventoryDigestUnmutated identifier members =
   hex (SHA256.finalize finalContext)
  where
+#if defined(VALIDATION_SOURCE_DEBT_PATH_DIGEST_DOMAIN_PROJECTION_MUTANT)
+  domainContext = SHA256.update SHA256.init "amoebius-source-debt-path-inventory-v0\0"
+#else
   domainContext = SHA256.update SHA256.init "amoebius-source-debt-path-inventory-v1\0"
-  identifierContext = updateText domainContext (renderSourceDebtId identifier)
-  prefixContext = SHA256.update identifierContext nulByte
+#endif
+  identifierContext =
+#if defined(VALIDATION_SOURCE_DEBT_PATH_DIGEST_IDENTITY_PROJECTION_MUTANT)
+    updateText domainContext (renderSourceDebtId identifier) `seq` domainContext
+#else
+    updateText domainContext (renderSourceDebtId identifier)
+#endif
+  prefixContext =
+#if defined(VALIDATION_SOURCE_DEBT_PATH_DIGEST_IDENTIFIER_SEPARATOR_MUTANT)
+    SHA256.update identifierContext nulByte `seq` identifierContext
+#else
+    SHA256.update identifierContext nulByte
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_PATH_DIGEST_MEMBER_ORDER_MUTANT)
+  finalContext = foldl' updatePathMember prefixContext (reverse members)
+#else
   finalContext = foldl' updatePathMember prefixContext members
+#endif
   updatePathMember context entry =
+#if defined(VALIDATION_SOURCE_DEBT_PATH_DIGEST_PATH_PROJECTION_MUTANT)
+    updateText context (Text.pack (indexPath (trackedIndex entry))) `seq` SHA256.update context nulByte
+#elif defined(VALIDATION_SOURCE_DEBT_PATH_DIGEST_MEMBER_SEPARATOR_MUTANT)
     SHA256.update
       (updateText context (Text.pack (indexPath (trackedIndex entry))))
       nulByte
+      `seq` updateText context (Text.pack (indexPath (trackedIndex entry)))
+#else
+    SHA256.update
+      (updateText context (Text.pack (indexPath (trackedIndex entry))))
+      nulByte
+#endif
 
 sha256Incremental :: ByteString.ByteString -> ByteString.ByteString
 sha256Incremental = SHA256.finalize . SHA256.update SHA256.init
 
 updateText :: SHA256.Ctx -> Text -> SHA256.Ctx
+#if defined(VALIDATION_SOURCE_DEBT_UPDATE_TEXT_ENCODING_MUTANT)
+updateText context value = TextEncoding.encodeUtf8 value `seq` context
+#else
 updateText context = SHA256.update context . TextEncoding.encodeUtf8
+#endif
 
 renderIndexMode :: IndexMode -> Text
+#if defined(VALIDATION_SOURCE_DEBT_RENDER_MODE_REGULAR_MUTANT)
+renderIndexMode RegularFile = "100755"
+#else
 renderIndexMode RegularFile = "100644"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RENDER_MODE_EXECUTABLE_MUTANT)
+renderIndexMode ExecutableFile = "100644"
+#else
 renderIndexMode ExecutableFile = "100755"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RENDER_MODE_SYMLINK_MUTANT)
+renderIndexMode SymbolicLink = "100644"
+#else
 renderIndexMode SymbolicLink = "120000"
+#endif
 
 nulByte :: ByteString.ByteString
 nulByte = ByteString.singleton 0
 
 sourceDebtProblems :: Map SourceDebtId SourceDebtObservation -> [SourceDebtProblem]
 sourceDebtProblems observed =
+#if defined(VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_ORDER_MUTANT)
+  comparisonProblems
+    <> pbProblems
+    <> observedFamilyProblems
+    <> baselineFamilyProblems
+#else
   baselineFamilyProblems
     <> observedFamilyProblems
     <> pbProblems
-    <> concatMap compareOne (Map.toAscList laterOwnedSourceDebtBaselines)
+    <> comparisonProblems
+#endif
  where
-  declaredFamilies = Map.keysSet laterOwnedSourceDebtBaselines
+  comparisonProblems =
+#if defined(VALIDATION_SOURCE_DEBT_COMPARISON_FAMILY_ORDER_MUTANT)
+    concatMap compareOne (reverse (Map.toAscList laterOwnedSourceDebtBaselines))
+#else
+    concatMap compareOne (Map.toAscList laterOwnedSourceDebtBaselines)
+#endif
+  declaredFamilies =
+#if defined(VALIDATION_SOURCE_DEBT_DECLARED_FAMILY_PROJECTION_MUTANT)
+    Map.keysSet laterOwnedSourceDebtBaselines `seq` Set.empty
+#else
+    Map.keysSet laterOwnedSourceDebtBaselines
+#endif
   baselineFamilyProblems =
     [ SourceDebtBaselineFamilySetMismatch laterOwnedSourceDebtIds declaredFamilies
     | not (sourceDebtBaselineFamilySetMatches laterOwnedSourceDebtIds declaredFamilies)
     ]
-  actualLaterOwned = Set.delete SourcePb (Map.keysSet observed)
+  actualLaterOwned =
+#if defined(VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_PROJECTION_MUTANT)
+    Set.delete SourcePb (Map.keysSet observed) `seq` Set.empty
+#else
+    Set.delete SourcePb (Map.keysSet observed)
+#endif
   observedFamilyProblems =
+#if defined(VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_PROBLEM_COMPOSITION_MUTANT)
+    sourceDebtObservedFamilySetMatches laterOwnedSourceDebtIds actualLaterOwned `seq` []
+#else
     [ SourceDebtFamilySetMismatch laterOwnedSourceDebtIds actualLaterOwned
     | not (sourceDebtObservedFamilySetMatches laterOwnedSourceDebtIds actualLaterOwned)
     ]
+#endif
   pbProblems =
+#if defined(VALIDATION_SOURCE_DEBT_PB_PROBLEM_COMPOSITION_MUTANT)
+    Map.lookup SourcePb observed `seq` []
+#else
     [ SourcePbObservationPresent value
     | not (sourceDebtPbIsZero observed)
+#if defined(VALIDATION_SOURCE_DEBT_PB_OBSERVATION_PROJECTION_MUTANT)
+    , Just value <- [Map.lookup SourcePb observed >>= const Nothing]
+#else
     , Just value <- [Map.lookup SourcePb observed]
+#endif
     ]
+#endif
   compareOne (identifier, expected) = case Map.lookup identifier observed of
     Nothing -> []
     Just actual ->
-      [ SourceDebtPathCountMismatch identifier (baselineCount expected) (observationCount actual)
+      (
+#if defined(VALIDATION_SOURCE_DEBT_COUNT_PROBLEM_COMPOSITION_MUTANT)
+        sourceDebtCountMatches expected actual `seq` []
+#else
+        [ SourceDebtPathCountMismatch
+          identifier
+#if defined(VALIDATION_SOURCE_DEBT_COUNT_EXPECTED_PROJECTION_MUTANT)
+          (baselineCount expected `seq` 0)
+#else
+          (baselineCount expected)
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_COUNT_ACTUAL_PROJECTION_MUTANT)
+          (observationCount actual `seq` 0)
+#else
+          (observationCount actual)
+#endif
       | not (sourceDebtCountMatches expected actual)
-      ]
-        <> [ SourceDebtFingerprintMismatch identifier (baselineFingerprint expected) (observationFingerprint actual)
+        ]
+#endif
+      )
+        <> (
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_PROBLEM_COMPOSITION_MUTANT)
+              sourceDebtFingerprintMatches expected actual `seq` []
+#else
+              [ SourceDebtFingerprintMismatch
+               identifier
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_EXPECTED_PROJECTION_MUTANT)
+               (baselineFingerprint expected `seq` "")
+#else
+               (baselineFingerprint expected)
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_ACTUAL_PROJECTION_MUTANT)
+               (observationFingerprint actual `seq` "")
+#else
+               (observationFingerprint actual)
+#endif
            | not (sourceDebtFingerprintMatches expected actual)
-           ]
-        <> [ SourceDebtPathInventoryDigestMismatch identifier (baselinePathDigest expected) (observationPathDigest actual)
+              ]
+#endif
+           )
+        <> (
+#if defined(VALIDATION_SOURCE_DEBT_PATH_PROBLEM_COMPOSITION_MUTANT)
+              sourceDebtPathInventoryMatches expected actual `seq` []
+#else
+              [ SourceDebtPathInventoryDigestMismatch
+               identifier
+#if defined(VALIDATION_SOURCE_DEBT_PATH_EXPECTED_PROJECTION_MUTANT)
+               (baselinePathDigest expected `seq` "")
+#else
+               (baselinePathDigest expected)
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_PATH_ACTUAL_PROJECTION_MUTANT)
+               (observationPathDigest actual `seq` "")
+#else
+               (observationPathDigest actual)
+#endif
            | not (sourceDebtPathInventoryMatches expected actual)
-           ]
+              ]
+#endif
+           )
 
 sourceDebtBaselineFamilySetMatches :: Set SourceDebtId -> Set SourceDebtId -> Bool
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_FAMILY_SET_INVERSION_MUTANT)
@@ -876,26 +1538,64 @@ sourceDebtPathInventoryMatches expected actual = baselinePathDigest expected == 
 
 sourceDebtStates :: Map SourceDebtId SourceDebtObservation -> Map SourceDebtId SourceDebtState
 sourceDebtStates observed =
-  Map.fromList [(identifier, sourceDebtState identifier observed) | identifier <- allSourceDebtIds]
+  Map.fromList
+    [ (
+#if defined(VALIDATION_SOURCE_DEBT_STATE_INVENTORY_ID_PROJECTION_MUTANT)
+        identifier `seq` SourcePb
+#else
+        identifier
+#endif
+      , sourceDebtState identifier observed
+      )
+    | identifier <- allSourceDebtIds
+    ]
 
 stateIntegrityFindings :: Map SourceDebtId SourceDebtState -> [Finding]
 stateIntegrityFindings states =
+#if defined(VALIDATION_SOURCE_DEBT_STATE_INTEGRITY_ORDER_MUTANT)
+  zeroFindings <> keyFindings
+#else
   keyFindings <> zeroFindings
+#endif
  where
   expectedKeys = Set.fromList allSourceDebtIds
   actualKeys = Map.keysSet states
   keyFindings =
     [ finding
+#if defined(VALIDATION_SOURCE_DEBT_STATE_INVENTORY_CODE_MUTANT)
+        "SOURCE-DEBT-STATE-INVENTORY-MISMATCH-MUTANT"
+#else
         "SOURCE-DEBT-STATE-INVENTORY-MISMATCH"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_STATE_INVENTORY_SUBJECT_MUTANT)
+        "source-debt-baseline-mutant"
+#else
         "source-debt-baseline"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_STATE_INVENTORY_DETAIL_MUTANT)
+        (expectedKeys `seq` actualKeys `seq` "mutant")
+#else
         ("expected=" <> renderIds expectedKeys <> ", actual=" <> renderIds actualKeys)
+#endif
     | actualKeys /= expectedKeys
     ]
   zeroFindings =
     [ finding
+#if defined(VALIDATION_SOURCE_DEBT_STATE_ZERO_CODE_MUTANT)
+        "SOURCE-DEBT-STATE-ZERO-UNAUTHORIZED-MUTANT"
+#else
         "SOURCE-DEBT-STATE-ZERO-UNAUTHORIZED"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_STATE_ZERO_SUBJECT_MUTANT)
+        "source-debt-zero-mutant"
+#else
         (Text.unpack (renderSourceDebtId identifier))
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_STATE_ZERO_DETAIL_MUTANT)
+        "mutant"
+#else
         "only the acquired Phase-0-owned pb family may have a zero source-debt lifecycle state"
+#endif
     | identifier <- Set.toAscList laterOwnedSourceDebtIds
     , Just SourceDebtStateZero <- [Map.lookup identifier states]
     ]
@@ -903,122 +1603,344 @@ stateIntegrityFindings states =
 sourceDebtState :: SourceDebtId -> Map SourceDebtId SourceDebtObservation -> SourceDebtState
 sourceDebtState SourcePb observed
   | sourceDebtPbIsZero observed = SourceDebtStateZero
-  | otherwise = SourceDebtStateRefused "bounded pb source debt is not zero"
+  | otherwise =
+      SourceDebtStateRefused
+#if defined(VALIDATION_SOURCE_DEBT_STATE_PB_REFUSED_DETAIL_MUTANT)
+        "bounded pb source debt mutant"
+#else
+        "bounded pb source debt is not zero"
+#endif
 sourceDebtState identifier observed =
-  case (sourceDebtBaseline identifier, Map.lookup identifier observed) of
+  case
+      ( sourceDebtBaseline
+#if defined(VALIDATION_SOURCE_DEBT_STATE_BASELINE_ID_PROJECTION_MUTANT)
+          (identifier `seq` SourcePb)
+#else
+          identifier
+#endif
+      , Map.lookup
+#if defined(VALIDATION_SOURCE_DEBT_STATE_OBSERVATION_ID_PROJECTION_MUTANT)
+          (identifier `seq` SourcePb)
+#else
+          identifier
+#endif
+          observed
+      )
+    of
     (Nothing, _) ->
-      SourceDebtStateRefused ("missing closed source-debt baseline for " <> renderSourceDebtId identifier)
+      SourceDebtStateRefused
+        ("missing closed source-debt baseline for " <> renderSourceDebtId identifier)
     (Just _, Nothing) ->
 #if defined(VALIDATION_SOURCE_DEBT_MISSING_OBSERVATION_ZERO_MUTANT)
       SourceDebtStateZero
 #else
-      SourceDebtStateRefused ("missing acquired source-debt observation for " <> renderSourceDebtId identifier)
+      SourceDebtStateRefused
+#if defined(VALIDATION_SOURCE_DEBT_STATE_MISSING_OBSERVATION_DETAIL_MUTANT)
+        (identifier `seq` "missing acquired source-debt observation mutant")
+#else
+        ("missing acquired source-debt observation for " <> renderSourceDebtId identifier)
+#endif
 #endif
     (Just expected, Just actual)
-      | sourceDebtCountMatches expected actual
-          && sourceDebtFingerprintMatches expected actual
-          && sourceDebtPathInventoryMatches expected actual ->
-          SourceDebtStateOpen (observationCount actual) (observationFingerprint actual)
+      | (
+#if defined(VALIDATION_SOURCE_DEBT_STATE_COUNT_MATCH_COMPOSITION_MUTANT)
+          sourceDebtCountMatches expected actual `seq` True
+#else
+          sourceDebtCountMatches expected actual
+#endif
+        )
+          && (
+#if defined(VALIDATION_SOURCE_DEBT_STATE_FINGERPRINT_MATCH_COMPOSITION_MUTANT)
+                sourceDebtFingerprintMatches expected actual `seq` True
+#else
+                sourceDebtFingerprintMatches expected actual
+#endif
+             )
+          && (
+#if defined(VALIDATION_SOURCE_DEBT_STATE_PATH_MATCH_COMPOSITION_MUTANT)
+                sourceDebtPathInventoryMatches expected actual `seq` True
+#else
+                sourceDebtPathInventoryMatches expected actual
+#endif
+             ) ->
+          SourceDebtStateOpen
+#if defined(VALIDATION_SOURCE_DEBT_STATE_OPEN_COUNT_PROJECTION_MUTANT)
+            (observationCount actual `seq` 0)
+#else
+            (observationCount actual)
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_STATE_OPEN_FINGERPRINT_PROJECTION_MUTANT)
+            (observationFingerprint actual `seq` "")
+#else
+            (observationFingerprint actual)
+#endif
       | otherwise ->
-          SourceDebtStateRefused ("source-debt baseline mismatch for " <> renderSourceDebtId identifier)
+          SourceDebtStateRefused
+#if defined(VALIDATION_SOURCE_DEBT_STATE_MISMATCH_DETAIL_MUTANT)
+            (identifier `seq` "source-debt baseline mismatch mutant")
+#else
+            ("source-debt baseline mismatch for " <> renderSourceDebtId identifier)
+#endif
 
 baselineCount :: SourceDebtBaseline -> Int
+#if defined(VALIDATION_SOURCE_DEBT_BASELINE_COUNT_PROJECTION_MUTANT)
+baselineCount baseline@(SourceDebtBaseline value _ _) = baseline `seq` value `seq` 0
+#else
 baselineCount (SourceDebtBaseline value _ _) = value
+#endif
 
 baselineFingerprint :: SourceDebtBaseline -> Text
+#if defined(VALIDATION_SOURCE_DEBT_BASELINE_FINGERPRINT_PROJECTION_MUTANT)
+baselineFingerprint baseline@(SourceDebtBaseline _ value _) = baseline `seq` value `seq` ""
+#else
 baselineFingerprint (SourceDebtBaseline _ value _) = value
+#endif
 
 baselinePathDigest :: SourceDebtBaseline -> Text
+#if defined(VALIDATION_SOURCE_DEBT_BASELINE_PATH_PROJECTION_MUTANT)
+baselinePathDigest baseline@(SourceDebtBaseline _ _ value) = baseline `seq` value `seq` ""
+#else
 baselinePathDigest (SourceDebtBaseline _ _ value) = value
+#endif
 
 observationCount :: SourceDebtObservation -> Int
+#if defined(VALIDATION_SOURCE_DEBT_OBSERVATION_COUNT_PROJECTION_MUTANT)
+observationCount observed@(SourceDebtObservation value _ _) = observed `seq` value `seq` 0
+#else
 observationCount (SourceDebtObservation value _ _) = value
+#endif
 
 observationFingerprint :: SourceDebtObservation -> Text
+#if defined(VALIDATION_SOURCE_DEBT_OBSERVATION_FINGERPRINT_PROJECTION_MUTANT)
+observationFingerprint observed@(SourceDebtObservation _ value _) = observed `seq` value `seq` ""
+#else
 observationFingerprint (SourceDebtObservation _ value _) = value
+#endif
 
 observationPathDigest :: SourceDebtObservation -> Text
+#if defined(VALIDATION_SOURCE_DEBT_OBSERVATION_PATH_PROJECTION_MUTANT)
+observationPathDigest observed@(SourceDebtObservation _ _ value) = observed `seq` value `seq` ""
+#else
 observationPathDigest (SourceDebtObservation _ _ value) = value
+#endif
 
 renderObserved :: (SourceDebtId, SourceDebtObservation) -> [Observation]
 renderObserved (identifier, value) =
-  [ observation ("source-debt.count." <> renderSourceDebtId identifier) (renderInt (observationCount value))
-  , observation ("source-debt.fingerprint." <> renderSourceDebtId identifier) (observationFingerprint value)
-  , observation ("source-debt.path-inventory." <> renderSourceDebtId identifier) (observationPathDigest value)
+#if defined(VALIDATION_SOURCE_DEBT_RENDER_OBSERVATION_ORDER_MUTANT)
+  reverse
+#else
+  id
+#endif
+    [ observation
+#if defined(VALIDATION_SOURCE_DEBT_RENDER_COUNT_KEY_MUTANT)
+        ("source-debt.count-mutant." <> renderSourceDebtId identifier)
+#else
+        ("source-debt.count." <> renderSourceDebtId identifier)
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RENDER_COUNT_VALUE_MUTANT)
+        (renderInt (observationCount value) `seq` "0")
+#else
+        (renderInt (observationCount value))
+#endif
+    , observation
+#if defined(VALIDATION_SOURCE_DEBT_RENDER_FINGERPRINT_KEY_MUTANT)
+        ("source-debt.fingerprint-mutant." <> renderSourceDebtId identifier)
+#else
+        ("source-debt.fingerprint." <> renderSourceDebtId identifier)
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RENDER_FINGERPRINT_VALUE_MUTANT)
+        (observationFingerprint value `seq` "")
+#else
+        (observationFingerprint value)
+#endif
+    , observation
+#if defined(VALIDATION_SOURCE_DEBT_RENDER_PATH_KEY_MUTANT)
+        ("source-debt.path-inventory-mutant." <> renderSourceDebtId identifier)
+#else
+        ("source-debt.path-inventory." <> renderSourceDebtId identifier)
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_RENDER_PATH_VALUE_MUTANT)
+        (observationPathDigest value `seq` "")
+#else
+        (observationPathDigest value)
+#endif
   ]
 
 problemFinding :: SourceDebtProblem -> Finding
 problemFinding problem = case problem of
   SourceDebtBaselineFamilySetMismatch expected actual ->
     finding
+#if defined(VALIDATION_SOURCE_DEBT_BASELINE_FAMILY_FINDING_CODE_MUTANT)
+      "SOURCE-DEBT-BASELINE-FAMILY-SET-MISMATCH-MUTANT"
+#else
       "SOURCE-DEBT-BASELINE-FAMILY-SET-MISMATCH"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_BASELINE_FAMILY_FINDING_SUBJECT_MUTANT)
+      "source-debt-baseline-mutant"
+#else
       "source-debt-baseline"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_BASELINE_FAMILY_FINDING_DETAIL_MUTANT)
+      (expected `seq` actual `seq` "mutant")
+#else
       ("expected=" <> renderIds expected <> ", actual=" <> renderIds actual)
+#endif
   SourceDebtFamilySetMismatch expected actual ->
     finding
+#if defined(VALIDATION_SOURCE_DEBT_FAMILY_FINDING_CODE_MUTANT)
+      "SOURCE-DEBT-FAMILY-SET-MISMATCH-MUTANT"
+#else
       "SOURCE-DEBT-FAMILY-SET-MISMATCH"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_FAMILY_FINDING_SUBJECT_MUTANT)
+      "source-debt-baseline-mutant"
+#else
       "source-debt-baseline"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_FAMILY_FINDING_DETAIL_MUTANT)
+      (expected `seq` actual `seq` "mutant")
+#else
       ("expected=" <> renderIds expected <> ", actual=" <> renderIds actual)
+#endif
   SourcePbObservationPresent actual ->
     finding
+#if defined(VALIDATION_SOURCE_DEBT_PB_FINDING_CODE_MUTANT)
+      "SOURCE-DEBT-PB-NOT-ZERO-MUTANT"
+#else
       "SOURCE-DEBT-PB-NOT-ZERO"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_PB_FINDING_SUBJECT_MUTANT)
+      "source-debt-pb-mutant"
+#else
       (Text.unpack (renderSourceDebtId SourcePb))
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_PB_FINDING_DETAIL_MUTANT)
+      (actual `seq` "mutant")
+#else
       ( "expected absent/zero, actual count="
           <> renderInt (observationCount actual)
           <> ", fingerprint="
           <> observationFingerprint actual
       )
+#endif
   SourceDebtPathCountMismatch identifier expected actual ->
     finding
+#if defined(VALIDATION_SOURCE_DEBT_COUNT_FINDING_CODE_MUTANT)
+      "SOURCE-DEBT-COUNT-MISMATCH-MUTANT"
+#else
       "SOURCE-DEBT-COUNT-MISMATCH"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_COUNT_FINDING_SUBJECT_MUTANT)
+      (identifier `seq` "source-debt-count-mutant")
+#else
       (Text.unpack (renderSourceDebtId identifier))
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_COUNT_FINDING_DETAIL_MUTANT)
+      (expected `seq` actual `seq` "mutant")
+#else
       ("expected=" <> renderInt expected <> ", actual=" <> renderInt actual)
+#endif
   SourceDebtFingerprintMismatch identifier expected actual ->
     finding
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_FINDING_CODE_MUTANT)
+      "SOURCE-DEBT-FINGERPRINT-MISMATCH-MUTANT"
+#else
       "SOURCE-DEBT-FINGERPRINT-MISMATCH"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_FINDING_SUBJECT_MUTANT)
+      (identifier `seq` "source-debt-fingerprint-mutant")
+#else
       (Text.unpack (renderSourceDebtId identifier))
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_FINDING_DETAIL_MUTANT)
+      (expected `seq` actual `seq` "mutant")
+#else
       ("expected=" <> expected <> ", actual=" <> actual)
+#endif
   SourceDebtPathInventoryDigestMismatch identifier expected actual ->
     finding
+#if defined(VALIDATION_SOURCE_DEBT_PATH_FINDING_CODE_MUTANT)
+      "SOURCE-DEBT-PATH-INVENTORY-MISMATCH-MUTANT"
+#else
       "SOURCE-DEBT-PATH-INVENTORY-MISMATCH"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_PATH_FINDING_SUBJECT_MUTANT)
+      (identifier `seq` "source-debt-path-mutant")
+#else
       (Text.unpack (renderSourceDebtId identifier))
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_PATH_FINDING_DETAIL_MUTANT)
+      (expected `seq` actual `seq` "mutant")
+#else
       ("expected=" <> expected <> ", actual=" <> actual)
+#endif
 
 resourceLimitAnalysis :: SourceDebtResourceFailure -> SourceDebtAnalysis
 resourceLimitAnalysis resourceFailure =
   case resourceFailure of
     SourceDebtPathUtf8LimitExceeded observedAtLeast ->
+#if defined(VALIDATION_SOURCE_DEBT_PATH_RESOURCE_ROUTING_MUTANT)
+      observedAtLeast `seq` resourceBoundedAnalysis "path-utf8-mutant" "SOURCE-DEBT-PATH-UTF8-LIMIT" maximumSourceDebtPathUtf8Bytes observedAtLeast
+#else
       resourceBoundedAnalysis
         "path-utf8"
         "SOURCE-DEBT-PATH-UTF8-LIMIT"
         maximumSourceDebtPathUtf8Bytes
         observedAtLeast
+#endif
     SourceDebtObjectIdLimitExceeded observedAtLeast ->
+#if defined(VALIDATION_SOURCE_DEBT_OBJECT_ID_RESOURCE_ROUTING_MUTANT)
+      observedAtLeast `seq` resourceBoundedAnalysis "object-id-mutant" "SOURCE-DEBT-OBJECT-ID-LIMIT" maximumSourceDebtObjectIdUtf8Bytes observedAtLeast
+#else
       resourceBoundedAnalysis
         "object-id"
         "SOURCE-DEBT-OBJECT-ID-LIMIT"
         maximumSourceDebtObjectIdUtf8Bytes
         observedAtLeast
+#endif
     SourceDebtBlobLimitExceeded observedAtLeast ->
+#if defined(VALIDATION_SOURCE_DEBT_BLOB_RESOURCE_ROUTING_MUTANT)
+      observedAtLeast `seq` resourceBoundedAnalysis "blob-mutant" "SOURCE-DEBT-BLOB-LIMIT" maximumSourceDebtBlobBytes observedAtLeast
+#else
       resourceBoundedAnalysis
         "blob"
         "SOURCE-DEBT-BLOB-LIMIT"
         maximumSourceDebtBlobBytes
         observedAtLeast
+#endif
     SourceDebtAggregateBlobLimitExceeded observedAtLeast ->
+#if defined(VALIDATION_SOURCE_DEBT_AGGREGATE_RESOURCE_ROUTING_MUTANT)
+      observedAtLeast `seq` resourceBoundedAnalysis "aggregate-blob-mutant" "SOURCE-DEBT-AGGREGATE-BLOB-LIMIT" maximumSourceDebtAggregateBlobBytes observedAtLeast
+#else
       resourceBoundedAnalysis
         "aggregate-blob"
         "SOURCE-DEBT-AGGREGATE-BLOB-LIMIT"
         maximumSourceDebtAggregateBlobBytes
         observedAtLeast
+#endif
 
 resourceBoundedAnalysis :: Text -> Text -> Integer -> Integer -> SourceDebtAnalysis
 resourceBoundedAnalysis dimension code maximumBytes observedAtLeast =
   SourceDebtAnalysis
     CheckResult
-      { checkName = "source-debt-baseline"
-      , checkObservations = limitObservations dimension maximumBytes observedAtLeast
-      , checkFindings = [limitFinding code maximumBytes observedAtLeast]
+      { checkName =
+#if defined(VALIDATION_SOURCE_DEBT_RESOURCE_RESULT_NAME_MUTANT)
+          "source-debt-baseline-mutant"
+#else
+          "source-debt-baseline"
+#endif
+      , checkObservations =
+#if defined(VALIDATION_SOURCE_DEBT_RESOURCE_RESULT_OBSERVATIONS_MUTANT)
+          limitObservations dimension maximumBytes observedAtLeast `seq` []
+#else
+          limitObservations dimension maximumBytes observedAtLeast
+#endif
+      , checkFindings =
+#if defined(VALIDATION_SOURCE_DEBT_RESOURCE_RESULT_FINDINGS_MUTANT)
+          limitFinding code maximumBytes observedAtLeast `seq` []
+#else
+          [limitFinding code maximumBytes observedAtLeast]
+#endif
       }
     ( refusedStates
         ( dimension
@@ -1033,9 +1955,24 @@ limitAnalysis :: Text -> Text -> Int -> Int -> SourceDebtAnalysis
 limitAnalysis dimension code maximumValue observedAtLeast =
   SourceDebtAnalysis
     CheckResult
-      { checkName = "source-debt-baseline"
-      , checkObservations = limitObservations dimension maximumValue observedAtLeast
-      , checkFindings = [limitFinding code maximumValue observedAtLeast]
+      { checkName =
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_RESULT_NAME_MUTANT)
+          "source-debt-baseline-mutant"
+#else
+          "source-debt-baseline"
+#endif
+      , checkObservations =
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_RESULT_OBSERVATIONS_MUTANT)
+          limitObservations dimension maximumValue observedAtLeast `seq` []
+#else
+          limitObservations dimension maximumValue observedAtLeast
+#endif
+      , checkFindings =
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_RESULT_FINDINGS_MUTANT)
+          limitFinding code maximumValue observedAtLeast `seq` []
+#else
+          [limitFinding code maximumValue observedAtLeast]
+#endif
       }
     ( refusedStates
         ( dimension
@@ -1048,31 +1985,95 @@ limitAnalysis dimension code maximumValue observedAtLeast =
 
 limitObservations :: Show number => Text -> number -> number -> [Observation]
 limitObservations dimension maximumValue observedAtLeast =
-  [ observation ("source-debt." <> dimension <> "-limit.maximum") (renderNumber maximumValue)
-  , observation ("source-debt." <> dimension <> "-limit.observed-at-least") (renderNumber observedAtLeast)
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_OBSERVATION_ORDER_MUTANT)
+  reverse
+#else
+  id
+#endif
+    [ observation
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_MAXIMUM_KEY_MUTANT)
+        ("source-debt." <> dimension <> "-limit.maximum-mutant")
+#else
+        ("source-debt." <> dimension <> "-limit.maximum")
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_MAXIMUM_VALUE_MUTANT)
+        (renderNumber maximumValue `seq` "0")
+#else
+        (renderNumber maximumValue)
+#endif
+    , observation
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_OBSERVED_KEY_MUTANT)
+        ("source-debt." <> dimension <> "-limit.observed-at-least-mutant")
+#else
+        ("source-debt." <> dimension <> "-limit.observed-at-least")
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_OBSERVED_VALUE_MUTANT)
+        (renderNumber observedAtLeast `seq` "0")
+#else
+        (renderNumber observedAtLeast)
+#endif
   ]
 
 limitFinding :: Show number => Text -> number -> number -> Finding
 limitFinding code maximumValue observedAtLeast =
   finding
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_FINDING_CODE_MUTANT)
+    (code <> "-MUTANT")
+#else
     code
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_FINDING_SUBJECT_MUTANT)
+    "source-debt-baseline-mutant"
+#else
     "source-debt-baseline"
+#endif
+#if defined(VALIDATION_SOURCE_DEBT_LIMIT_FINDING_DETAIL_MUTANT)
+    (renderNumber maximumValue `seq` renderNumber observedAtLeast `seq` "mutant")
+#else
     ( "maximum="
         <> renderNumber maximumValue
         <> ", observed-at-least="
         <> renderNumber observedAtLeast
     )
+#endif
 
 refusedStates :: Text -> Map SourceDebtId SourceDebtState
 refusedStates detail =
-  Map.fromList [(identifier, SourceDebtStateRefused detail) | identifier <- allSourceDebtIds]
+  Map.fromList
+    [ (
+#if defined(VALIDATION_SOURCE_DEBT_REFUSED_STATE_ID_PROJECTION_MUTANT)
+        identifier `seq` SourcePb
+#else
+        identifier
+#endif
+      , SourceDebtStateRefused
+#if defined(VALIDATION_SOURCE_DEBT_REFUSED_STATE_DETAIL_PROJECTION_MUTANT)
+          (detail `seq` "mutant")
+#else
+          detail
+#endif
+      )
+    | identifier <- allSourceDebtIds
+    ]
 
 boundedPrefix :: Int -> [value] -> BoundedPrefix value
 boundedPrefix maximumValue values =
-  let prefix = take (maximumValue + 1) values
-   in if length prefix > maximumValue
-        then PrefixExceeded (maximumValue + 1)
-        else PrefixWithin prefix
+  let prefix =
+#if defined(VALIDATION_SOURCE_DEBT_BOUNDED_PREFIX_LENGTH_MUTANT)
+        take maximumValue values
+#else
+        take (maximumValue + 1) values
+#endif
+   in if
+#if defined(VALIDATION_SOURCE_DEBT_BOUNDED_PREFIX_PREDICATE_MUTANT)
+          length prefix >= maximumValue
+#else
+          length prefix > maximumValue
+#endif
+        then
+          PrefixExceeded (maximumValue + 1)
+        else
+          PrefixWithin prefix
 
 renderIds :: Set SourceDebtId -> Text
 renderIds = Text.intercalate "," . map renderSourceDebtId . Set.toAscList
@@ -1086,6 +2087,119 @@ renderInteger = Text.pack . show
 renderNumber :: Show number => number -> Text
 renderNumber = Text.pack . show
 
+#if defined(VALIDATION_SOURCE_DEBT_INTERNAL_TEST_HOOKS)
+-- These direct-source hooks exist only in the focused package-hidden oracle
+-- build. They exercise private eliminators and serializers without exporting
+-- a constructor or proof value from the packaged library.
+sourceDebtInternalTestProblemFindings :: [Finding]
+sourceDebtInternalTestProblemFindings =
+  map
+    problemFinding
+    [ SourceDebtBaselineFamilySetMismatch (Set.singleton SourceTools) (Set.singleton SourceDhall)
+    , SourceDebtFamilySetMismatch (Set.singleton SourceProto) (Set.singleton SourceUi)
+    , SourcePbObservationPresent (SourceDebtObservation 1 "pb-fingerprint" "pb-path")
+    , SourceDebtPathCountMismatch SourcePulumi 2 3
+    , SourceDebtFingerprintMismatch SourceTest "expected-fingerprint" "actual-fingerprint"
+    , SourceDebtPathInventoryDigestMismatch SourceVendor "expected-path" "actual-path"
+    ]
+
+sourceDebtInternalTestIntegrityFindings :: [Finding]
+sourceDebtInternalTestIntegrityFindings =
+  stateIntegrityFindings
+    ( Map.delete SourceVendor
+        ( Map.fromList
+            [ (identifier, if identifier == SourceTools then SourceDebtStateZero else SourceDebtStateRefused "closed")
+            | identifier <- allSourceDebtIds
+            ]
+        )
+    )
+
+sourceDebtInternalTestStateResults :: [Text]
+sourceDebtInternalTestStateResults =
+  [ renderFoldState (SourceDebtStateOpen 3 "open-fingerprint")
+  , renderFoldState SourceDebtStateZero
+  , renderFoldState (SourceDebtStateRefused "refused-detail")
+  , renderStateForTest (sourceDebtState SourcePb Map.empty)
+  , renderStateForTest
+      ( sourceDebtState
+          SourcePb
+          (Map.singleton SourcePb (SourceDebtObservation 1 "pb-fingerprint" "pb-path"))
+      )
+  , renderStateForTest (sourceDebtState SourceTools Map.empty)
+  , renderStateForTest (sourceDebtState SourceTools exactToolsObservation)
+  , renderStateForTest (sourceDebtState SourceTools mismatchedToolsObservation)
+  , renderStateForTest (sourceDebtState SourceTools fingerprintMismatchedToolsObservation)
+  , renderStateForTest (sourceDebtState SourceTools pathMismatchedToolsObservation)
+  , renderBoundedStateForTest
+      SourcePb
+      (boundedSourceDebtStates (PrefixExceeded 27) (PrefixWithin []) Map.empty)
+  , renderBoundedStateForTest
+      SourcePb
+      (boundedSourceDebtStates (PrefixWithin []) (PrefixExceeded 25) Map.empty)
+  ]
+ where
+  exactToolsObservation = case sourceDebtBaseline SourceTools of
+    Nothing -> Map.empty
+    Just baseline ->
+      Map.singleton
+        SourceTools
+        ( SourceDebtObservation
+            (baselineCount baseline)
+            (baselineFingerprint baseline)
+            (baselinePathDigest baseline)
+        )
+  mismatchedToolsObservation = case sourceDebtBaseline SourceTools of
+    Nothing -> Map.empty
+    Just baseline ->
+      Map.singleton
+        SourceTools
+        ( SourceDebtObservation
+            (baselineCount baseline + 1)
+            (baselineFingerprint baseline)
+            (baselinePathDigest baseline)
+        )
+  fingerprintMismatchedToolsObservation = case sourceDebtBaseline SourceTools of
+    Nothing -> Map.empty
+    Just baseline ->
+      Map.singleton
+        SourceTools
+        ( SourceDebtObservation
+            (baselineCount baseline)
+            "mismatched-fingerprint"
+            (baselinePathDigest baseline)
+        )
+  pathMismatchedToolsObservation = case sourceDebtBaseline SourceTools of
+    Nothing -> Map.empty
+    Just baseline ->
+      Map.singleton
+        SourceTools
+        ( SourceDebtObservation
+            (baselineCount baseline)
+            (baselineFingerprint baseline)
+            "mismatched-path"
+        )
+
+renderFoldState :: SourceDebtState -> Text
+renderFoldState state =
+  foldSourceDebtState
+    state
+    ("refused:" <>)
+    "zero"
+    (\count fingerprint -> "open:" <> renderInt count <> ":" <> fingerprint)
+
+renderStateForTest :: SourceDebtState -> Text
+renderStateForTest state = case state of
+  SourceDebtStateOpen count fingerprint -> "open:" <> renderInt count <> ":" <> fingerprint
+  SourceDebtStateZero -> "zero"
+  SourceDebtStateRefused detail -> "refused:" <> detail
+
+renderBoundedStateForTest :: SourceDebtId -> Map SourceDebtId SourceDebtState -> Text
+renderBoundedStateForTest identifier states =
+  case Map.lookup identifier states of
+    Nothing -> "missing:" <> renderSourceDebtId identifier
+    Just state -> renderStateForTest state
+#endif
+
 _zeroDigest :: Text
 _zeroDigest = Text.replicate 64 "0"
 
@@ -1093,6 +2207,16 @@ hex :: ByteString.ByteString -> Text
 hex = Text.pack . concatMap byteHex . ByteString.unpack
  where
   byteHex byte =
-    [ intToDigit (fromIntegral byte `div` 16)
-    , intToDigit (fromIntegral byte `mod` 16)
+    [ intToDigit
+#if defined(VALIDATION_SOURCE_DEBT_HEX_HIGH_NIBBLE_MUTANT)
+        (((fromIntegral byte :: Int) `div` 16) `seq` 0)
+#else
+        (fromIntegral byte `div` 16)
+#endif
+    , intToDigit
+#if defined(VALIDATION_SOURCE_DEBT_HEX_LOW_NIBBLE_MUTANT)
+        (((fromIntegral byte :: Int) `mod` 16) `seq` 0)
+#else
+        (fromIntegral byte `mod` 16)
+#endif
     ]

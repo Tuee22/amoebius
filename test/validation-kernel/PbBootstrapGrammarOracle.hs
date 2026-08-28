@@ -70,11 +70,21 @@ pbBootstrapGrammarSelectorIntents =
   , ("VALIDATION_PB_GRAMMAR_ADAPTER_COUNT_BYPASS_MUTANT", "the sole concrete adapter construction is counted exactly", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_ADAPTER_EFFECT_OMISSION_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_AMBIENT_INTERPRETER_ENV_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_ARGV_BYPASS_MUTANT", "argv slicing remains an independently located proof", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ARGV_ARGUMENTS_COUNT_REFUSAL_BYPASS_MUTANT", "argv proof counts the bootstrap argument exactly", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ARGV_BOOTSTRAP_ABSENT_REFUSAL_BYPASS_MUTANT", "argv proof refuses an absent bootstrap definition", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ARGV_HANDOFF_REFUSAL_BYPASS_MUTANT", "argv proof requires the exact final handoff expression", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ARGV_MAIN_ABSENT_REFUSAL_BYPASS_MUTANT", "argv proof refuses an absent main definition", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ARGV_MAIN_BODY_REFUSAL_BYPASS_MUTANT", "argv slicing remains an independently located proof", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ARGV_SYS_ARGV_COUNT_REFUSAL_BYPASS_MUTANT", "argv proof counts sys.argv exactly", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_AST_LIMIT_WIDEN_MUTANT", resourceOverCaseLabel "AST nodes", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_ATOMIC_ARTIFACT_PUBLICATION_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_AUTHENTICATED_INTERPRETER_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_BINARY_BYPASS_MUTANT", "binary decoding is exact before handoff", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_ASSIGNMENT_COUNT_REFUSAL_BYPASS_MUTANT", "binary proof requires one binary-text assignment", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_BOOTSTRAP_ABSENT_REFUSAL_BYPASS_MUTANT", "binary proof refuses an absent bootstrap definition", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_DECODE_REFUSAL_BYPASS_MUTANT", "binary decoding is exact before handoff", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_LOCATOR_REFUSAL_BYPASS_MUTANT", "binary bytes require the contained list-bin locator", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_ORDER_REFUSAL_BYPASS_MUTANT", "binary build must precede the locator", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_PATH_REFUSAL_BYPASS_MUTANT", "binary path derives only from stripped locator output", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_BINDING_BYPASS_MUTANT", "duplicate bindings retain scope and name", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_CABAL_LIST_BIN_PATH_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_CALL_LIMIT_WIDEN_MUTANT", resourceOverCaseLabel "call markers", diagnosticNameControlLabel)
@@ -82,7 +92,18 @@ pbBootstrapGrammarSelectorIntents =
   , ("VALIDATION_PB_GRAMMAR_CHILD_CALL_OMISSION_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_CHILD_TOOL_SEARCH_PATH_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_CONCRETE_ADAPTER_EFFECT_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_CONTROL_FLOW_BYPASS_MUTANT", "a returning handoff cannot stand in for an exec request", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_BOOTSTRAP_ABSENT_REFUSAL_BYPASS_MUTANT", "binary proof refuses an absent bootstrap definition", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_BOOTSTRAP_END_REFUSAL_BYPASS_MUTANT", "argv proof requires the exact final handoff expression", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_BOOTSTRAP_TERMINATION_REFUSAL_BYPASS_MUTANT", "control flow refuses bootstrap termination before handoff", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_HANDOFF_ABSENT_REFUSAL_BYPASS_MUTANT", "control flow refuses an absent handoff method", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_HANDOFF_BODY_REFUSAL_BYPASS_MUTANT", "a returning handoff cannot stand in for an exec request", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_HANDOFF_COUNT_REFUSAL_BYPASS_MUTANT", "argv proof requires the exact final handoff expression", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_HANDOFF_REACHABILITY_REFUSAL_BYPASS_MUTANT", "control flow refuses bootstrap termination before handoff", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_MAIN_ABSENT_REFUSAL_BYPASS_MUTANT", "argv proof refuses an absent main definition", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_MAIN_END_REFUSAL_BYPASS_MUTANT", "argv slicing remains an independently located proof", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_MODULE_SAFETY_REFUSAL_BYPASS_MUTANT", "injection proof counts the module main call exactly", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_MODULE_TERMINATION_REFUSAL_BYPASS_MUTANT", "control flow refuses module termination before the guard", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CONTROL_UNREACHABLE_NODE_REFUSAL_BYPASS_MUTANT", "control flow refuses bootstrap termination before handoff", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_CONTROL_FLOW_LIMIT_WIDEN_MUTANT", resourceOverCaseLabel "control-flow markers", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_CONTROL_FLOW_RETENTION_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_DEPTH_LIMIT_WIDEN_MUTANT", resourceOverCaseLabel "syntax depth", diagnosticNameControlLabel)
@@ -92,8 +113,14 @@ pbBootstrapGrammarSelectorIntents =
   , ("VALIDATION_PB_GRAMMAR_DYNAMIC_IMPORT_BYPASS_MUTANT", "dynamic import calls remain a distinct problem class", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_EFFECT_LIMIT_WIDEN_MUTANT", resourceOverCaseLabel "effect markers", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_EFFECT_RETENTION_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_ENSURE_BYPASS_MUTANT", "existing-artifact equality remains fail-closed", diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_BYPASS_MUTANT", "ambient environment copying remains outside the closed mapping", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENSURE_BODY_REFUSAL_BYPASS_MUTANT", "existing-artifact equality remains fail-closed", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENSURE_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT", "ensure proof refuses an absent adapter method", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_BODY_REFUSAL_BYPASS_MUTANT", "ambient environment copying remains outside the closed mapping", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_CAPTURE_BODY_REFUSAL_BYPASS_MUTANT", "capture requires the exact closed subprocess call", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_CAPTURE_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT", "environment proof refuses an absent capture method", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT", "environment proof refuses an absent environment method", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_RUN_BODY_REFUSAL_BYPASS_MUTANT", "run requires the exact closed subprocess call", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_RUN_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT", "environment proof refuses an absent run method", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_EXACT_BYTE_COUNT_BYPASS_MUTANT", shortIdentityCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_EXACT_INVENTORY_BYPASS_MUTANT", emptyInventoryCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_EXECUTABLE_MODE_OBSERVATION_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
@@ -105,22 +132,94 @@ pbBootstrapGrammarSelectorIntents =
   , ("VALIDATION_PB_GRAMMAR_HOOK_BYPASS_MUTANT", "hook calls remain a distinct problem class", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_IMPORT_BYPASS_MUTANT", "unsupported import cannot widen the closed import universe", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_IMPORT_RETENTION_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_INJECTION_BYPASS_MUTANT", "the injection guard literal remains exact", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_BOOTSTRAP_DEFINITION_REFUSAL_BYPASS_MUTANT", "injection proof refuses an absent bootstrap definition", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_BOOTSTRAP_SIGNATURE_REFUSAL_BYPASS_MUTANT", "injection proof requires the exact bootstrap signature", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_CONSTRUCTION_SCOPE_REFUSAL_BYPASS_MUTANT", "injection proof confines construction to main", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_MAIN_BODY_REFUSAL_BYPASS_MUTANT", "argv slicing remains an independently located proof", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_MAIN_CALL_REFUSAL_BYPASS_MUTANT", "injection proof counts the module main call exactly", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_MAIN_DEFINITION_REFUSAL_BYPASS_MUTANT", "injection proof refuses an absent main definition", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_MAIN_GUARD_REFUSAL_BYPASS_MUTANT", "the injection guard literal remains exact", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_MAIN_SIGNATURE_REFUSAL_BYPASS_MUTANT", "injection proof requires an empty main signature", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_ISOLATION_FLAGS_ORDER_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_LEXICAL_BYPASS_MUTANT", "unsupported lexical syntax has exact location and detail", diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_LINE_DISCIPLINE_BYPASS_MUTANT", "CR is rejected by exact line discipline", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LEXICAL_INDENT_INCREASE_REFUSAL_BYPASS_MUTANT", "indentation may increase by only one level", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LEXICAL_INDENT_MULTIPLE_REFUSAL_BYPASS_MUTANT", "indentation requires a multiple of four spaces", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LEXICAL_STRING_CONTROL_REFUSAL_BYPASS_MUTANT", "string literals refuse control characters", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LEXICAL_STRING_ESCAPE_REFUSAL_BYPASS_MUTANT", "string literals refuse escapes", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LEXICAL_UNSUPPORTED_CHARACTER_REFUSAL_BYPASS_MUTANT", "unsupported lexical syntax has exact location and detail", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LEXICAL_UNTERMINATED_STRING_REFUSAL_BYPASS_MUTANT", "string literals require termination", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LINE_BLANK_LINE_REFUSAL_BYPASS_MUTANT", "blank physical lines are outside the grammar", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LINE_BOM_REFUSAL_BYPASS_MUTANT", "UTF-8 BOM is rejected by exact line discipline", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LINE_CR_REFUSAL_BYPASS_MUTANT", "CR is rejected by exact line discipline", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LINE_FINAL_LF_REFUSAL_BYPASS_MUTANT", "the source requires one final LF", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LINE_NUL_REFUSAL_BYPASS_MUTANT", "NUL is rejected by exact line discipline", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LINE_TAB_REFUSAL_BYPASS_MUTANT", "tabs are rejected by exact line discipline", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_LINE_TRAILING_BLANK_REFUSAL_BYPASS_MUTANT", "trailing blank lines are rejected", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_MODE_BYPASS_MUTANT", executableModeCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_MODE_LIMIT_WIDEN_MUTANT", modeLimitCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_MONKEYPATCH_BYPASS_MUTANT", "indexed monkeypatch targets retain their scope and subject", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_NESTED_IMPORT_BYPASS_MUTANT", "nested imports cannot acquire module authority", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_NETWORK_PROXY_ENV_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_NETWORK_TRANSPORT_CERTIFICATE_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_PARSE_BYPASS_MUTANT", "parser refusal has exact token location", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_ARGUMENT_KEYWORD_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_ARGUMENT_POSITIONAL_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_BINARY_ADD_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_BINARY_AND_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_BINARY_EQUAL_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_BINARY_NOT_EQUAL_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_BINARY_PATH_JOIN_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_DOTTED_NAME_EXTENSION_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_ATTRIBUTE_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_CALL_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_DICTIONARY_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_FALSE_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_INDEX_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_INTEGER_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_LIST_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_NAME_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_PARENTHESIZED_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_STRING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_EXPRESSION_TRUE_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_INDEX_LEADING_SLICE_MUTANT", "closed grammar admits a leading slice independently", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_INDEX_PLAIN_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_INDEX_STARTED_SLICE_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_LIST_EMPTY_MUTANT", "closed grammar admits an empty list independently", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_LIST_NONEMPTY_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_PARENTHESIZED_EMPTY_TUPLE_MUTANT", "closed grammar admits an empty tuple independently", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_PARENTHESIZED_GROUPED_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_PARENTHESIZED_TUPLE_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_ASSIGNMENT_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_CLASS_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_EXPRESSION_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_FROM_IMPORT_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_FUNCTION_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_IF_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_IMPORT_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_RAISE_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_ALTERNATIVE_STATEMENT_RETURN_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_EXPECTED_EXPRESSION_REFUSAL_BYPASS_MUTANT", "parser refuses a missing expression", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_EXPECTED_KEYWORD_NAME_REFUSAL_BYPASS_MUTANT", "parser requires the from-import keyword", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_EXPECTED_NAME_REFUSAL_BYPASS_MUTANT", "parser refusal has exact token location", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_EXPECTED_TOKEN_REFUSAL_BYPASS_MUTANT", "parser requires exact structural tokens", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_INVALID_ASSIGNMENT_REFUSAL_BYPASS_MUTANT", "parser refuses invalid assignment targets", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_NONE_REFUSAL_BYPASS_MUTANT", "None remains outside the closed grammar", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_TOP_INDENT_REFUSAL_BYPASS_MUTANT", "parser refuses top-level indentation", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PARSE_UNSUPPORTED_STATEMENT_REFUSAL_BYPASS_MUTANT", "unsupported statements remain outside the grammar", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_PATH_BYPASS_MUTANT", differentPathCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_PATH_LIMIT_WIDEN_MUTANT", pathLimitCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_PHYSICAL_LINE_LIMIT_WIDEN_MUTANT", resourceOverCaseLabel "physical lines", diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_PIN_BYPASS_MUTANT", "toolchain pins are derived from the AST", diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_PLATFORM_BYPASS_MUTANT", "platform branch literals remain a closed exact set", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PIN_ASSIGNMENT_COUNT_REFUSAL_BYPASS_MUTANT", "pin proof requires one exact module string assignment", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PIN_BUILD_TARGET_REFUSAL_BYPASS_MUTANT", "build-target pin is exact", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PIN_CABAL_VERSION_REFUSAL_BYPASS_MUTANT", "Cabal pin is exact", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PIN_GHCUP_VERSION_REFUSAL_BYPASS_MUTANT", "ghcup pin is exact", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PIN_GHC_VERSION_REFUSAL_BYPASS_MUTANT", "toolchain pins are derived from the AST", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_ARTIFACT_SET_REFUSAL_BYPASS_MUTANT", "platform branch literals remain a closed exact set", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_BRANCH_COUNT_REFUSAL_BYPASS_MUTANT", "platform selector requires exactly four top-level branches", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_BRANCH_SHAPE_REFUSAL_BYPASS_MUTANT", "platform branches require pure literal tuple returns", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_CONDITION_REFUSAL_BYPASS_MUTANT", "platform branch conditions require exact equalities", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT", "platform proof refuses an absent adapter method", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_OBSERVATION_BODY_REFUSAL_BYPASS_MUTANT", "platform observation body is exact", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_SELECTOR_ABSENT_REFUSAL_BYPASS_MUTANT", "platform proof refuses an absent pure selector", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_TERMINAL_REFUSAL_BYPASS_MUTANT", "platform selector ends in the exact refusal", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_PLATFORM_RETENTION_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_PROBLEM_LIMIT_WIDEN_MUTANT", problemFloodCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_PROBLEM_MARKER_LIMIT_WIDEN_MUTANT", resourceOverCaseLabel "problem markers", diagnosticNameControlLabel)
@@ -138,7 +237,21 @@ pbBootstrapGrammarSelectorIntents =
   , ("VALIDATION_PB_GRAMMAR_SUBJECT_RETENTION_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_SYMLINK_TOCTOU_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_TOKEN_LIMIT_WIDEN_MUTANT", resourceOverCaseLabel "lexical tokens", diagnosticNameControlLabel)
-  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_BYPASS_MUTANT", "build directory provenance remains below the toolchain", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_ARTIFACT_PROVENANCE_REFUSAL_BYPASS_MUTANT", "toolchain artifact is selected from the observed platform", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_ASSIGNMENT_COUNT_REFUSAL_BYPASS_MUTANT", "toolchain proof requires one root assignment", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_BOOTSTRAP_ABSENT_REFUSAL_BYPASS_MUTANT", "binary proof refuses an absent bootstrap definition", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_BUILDDIR_REFUSAL_BYPASS_MUTANT", "build directory provenance remains below the toolchain", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_CHILD_CALLS_REFUSAL_BYPASS_MUTANT", "toolchain child calls are structurally exact", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_ENVIRONMENT_PROVENANCE_REFUSAL_BYPASS_MUTANT", "toolchain environment comes only from the adapter", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_EXECUTABLE_PATHS_REFUSAL_BYPASS_MUTANT", "toolchain executable paths are exact", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_GHCUP_RESULT_REFUSAL_BYPASS_MUTANT", "toolchain ghcup executable is the ensure result", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_GHCUP_TARGET_REFUSAL_BYPASS_MUTANT", "toolchain ghcup target is contained", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_PLATFORM_PROVENANCE_REFUSAL_BYPASS_MUTANT", "unresolved adapter methods retain caller and syntax", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_REPOSITORY_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT", "toolchain proof refuses an absent repository-root method", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_REPOSITORY_SHAPE_REFUSAL_BYPASS_MUTANT", "toolchain repository root shape is exact", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_ROOT_PATH_REFUSAL_BYPASS_MUTANT", "toolchain root path is closed below the repository", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_ROOT_PROVENANCE_REFUSAL_BYPASS_MUTANT", "direct effects outside the adapter remain explicit", diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_TOOLCHAIN_STORE_REFUSAL_BYPASS_MUTANT", "Cabal store provenance remains below the toolchain", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_UNCHANGED_ARGUMENT_TAIL_RESIDUE_DROP_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_UTF8_BYPASS_MUTANT", "invalid UTF-8 has one exact private problem", diagnosticNameControlLabel)
   , ("VALIDATION_PB_GRAMMAR_WEAK_HANDOFF_PROVENANCE_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
@@ -293,6 +406,54 @@ pbBootstrapGrammarSelectorIntents =
   , ("VALIDATION_PB_GRAMMAR_CONTROL_FLOW_EDGES_FIELD_MAPPING_MUTANT", canonicalCaseLabel, emptyInventoryFindingsControlLabel)
   , ("VALIDATION_PB_GRAMMAR_CONTROL_FLOW_HANDOFFS_FIELD_MAPPING_MUTANT", canonicalCaseLabel, emptyInventoryFindingsControlLabel)
   , ("VALIDATION_PB_GRAMMAR_CONTROL_FLOW_FALLTHROUGH_FIELD_MAPPING_MUTANT", canonicalCaseLabel, emptyInventoryFindingsControlLabel)
+  -- Every wire field in the nine structured static claims is now changed at
+  -- one production locus and observed by the complete canonical result.
+  , ("VALIDATION_PB_GRAMMAR_ARGV_CLAIM_TAG_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ARGV_SOURCE_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ARGV_PARAMETER_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ARGV_EXECUTABLE_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_CLAIM_TAG_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_TARGET_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_GHCUP_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_COMPILER_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_CABAL_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_LOCATOR_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_BINARY_HANDOFF_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_CLAIM_TAG_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_FUNCTION_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_ADAPTER_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_ARGUMENTS_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_CONSTRUCTION_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_INJECTION_GUARD_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PHASE50_CLAIM_TAG_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PHASE50_INTERPRETER_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PHASE50_FLAGS_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PHASE50_FLAGS_SEPARATOR_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PHASE50_SUBJECT_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PHASE50_ARGUMENTS_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENSURE_CLAIM_TAG_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENSURE_MATCHING_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENSURE_MISMATCHED_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENSURE_ABSENT_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_CLAIM_TAG_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_STARTS_EMPTY_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_EXACT_KEYS_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_CONTAINED_KEYS_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_ENVIRONMENT_CHILD_MAPPING_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_EXECUTABLE_CLAIM_TAG_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_EXECUTABLE_ROOT_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_EXECUTABLE_GHCUP_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_EXECUTABLE_GHC_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_EXECUTABLE_CABAL_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_EXECUTABLE_ARGV_ZERO_FIELD_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_LIMITATIONS_CLAIM_TAG_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_LIMITATION_ORDER_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_PLATFORM_LIMITATION_SEPARATOR_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_WINDOWS_PLATFORM_LIMITATION_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_OTHER_PLATFORM_LIMITATION_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_RUNTIME_BOUNDARY_CLAIM_TAG_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_RUNTIME_BOUNDARY_MAPPING_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
+  , ("VALIDATION_PB_GRAMMAR_CLAIM_FIELD_SEPARATOR_MUTANT", canonicalCaseLabel, diagnosticNameControlLabel)
   ]
 
 pbBootstrapGrammarSelectorNames :: [String]
@@ -341,9 +502,9 @@ runPbBootstrapGrammarSelectedOracle = do
 
 selectorRegistryIntegrityProblems :: [String]
 selectorRegistryIntegrityProblems =
-  [ "selector registry cardinality changed: expected=215; observed="
+    [ "selector registry cardinality changed: expected=374; observed="
       <> show (length pbBootstrapGrammarSelectorIntents)
-  | length pbBootstrapGrammarSelectorIntents /= 215
+  | length pbBootstrapGrammarSelectorIntents /= 374
   ]
     <> ["duplicate selector identity: " <> value | value <- duplicates pbBootstrapGrammarSelectorNames]
     <> ["unknown exact-case target: " <> target | (_, target, _) <- pbBootstrapGrammarSelectorIntents, target `notElem` selectorExactCaseLabels]
@@ -696,6 +857,40 @@ grammarCases =
       (replaceSame "import hashlib" "import(hashlib" canonicalBytes)
       "PB-GRAMMAR-PARSE"
       "PbParseProblem \"pb/__main__.py\" 1 7 \"expected name\""
+  , GrammarCase
+      "closed grammar admits a leading slice independently"
+      (replaceLine "    bootstrap(adapter, sys.argv[1:])" "    bootstrap(adapter, sys.argv[:])" canonicalBytes)
+      [ problemFinding
+          "PB-GRAMMAR-ARGV"
+          "PbArgvProvenanceProblem \"main must pass sys.argv[1:] unchanged to the injected bootstrap seam\""
+      , problemFinding
+          "PB-GRAMMAR-INJECTION"
+          "PbInjectionSeamProblem \"main alone must construct BootstrapAdapter and call bootstrap(adapter, sys.argv[1:])\""
+      , problemFinding
+          "PB-GRAMMAR-CONTROL-FLOW"
+          "PbHandoffControlFlowProblem \"main must end with exact bootstrap(adapter, sys.argv[1:])\""
+      ]
+  , grammar
+      "closed grammar admits an empty tuple independently"
+      (replaceLine "GHCUP_VERSION = \"0.2.6.2\"" "GHCUP_VERSION = ()" canonicalBytes)
+      "PB-GRAMMAR-PIN"
+      "PbPinProblem \"GHCUP_VERSION exact string assignment count is 0\""
+  , GrammarCase
+      "closed grammar admits an empty list independently"
+      (replaceLine "    adapter.handoff(binary, [binary] + arguments)" "    adapter.handoff(binary, [] + arguments)" canonicalBytes)
+      [ problemFinding
+          "PB-GRAMMAR-ARGV"
+          "PbArgvProvenanceProblem \"bootstrap must hand off [binary] + arguments exactly\""
+      , problemFinding
+          "PB-GRAMMAR-CONTROL-FLOW"
+          "PbHandoffControlFlowProblem \"bootstrap must end with exact adapter.handoff(binary, [binary] + arguments)\""
+      , problemFinding
+          "PB-GRAMMAR-CONTROL-FLOW"
+          "PbHandoffControlFlowProblem \"bootstrap must contain exactly one handoff request and it must be the final reachable statement\""
+      , problemFinding
+          "PB-GRAMMAR-CONTROL-FLOW"
+          "PbHandoffControlFlowProblem \"bootstrap handoff request is absent, duplicated, or unreachable\""
+      ]
   , grammarWithAdditional "unsupported import cannot widen the closed import universe"
       (replaceSame "import os" "import xx" canonicalBytes)
       "PB-GRAMMAR-IMPORT"
@@ -810,6 +1005,394 @@ grammarCases =
       (replaceLine "        os.execv(binary, arguments)" "        return binary" canonicalBytes)
       "PB-GRAMMAR-CONTROL-FLOW"
       "PbHandoffControlFlowProblem \"handoff must contain exactly one final os.execv request\""
+  , GrammarCase
+      "argv proof refuses an absent main definition"
+      (replaceSame "def main():" "def mian():" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"top-level functions/classes or their signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"<module>\" \"main\""
+      , problemFinding "PB-GRAMMAR-ARGV" "PbArgvProvenanceProblem \"main function is absent\""
+      , problemFinding "PB-GRAMMAR-INJECTION" "PbInjectionSeamProblem \"main function is absent or duplicated\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"main function is absent\""
+      ]
+  , GrammarCase
+      "argv proof refuses an absent bootstrap definition"
+      (replaceSame "def bootstrap(adapter, arguments):" "def bootstrup(adapter, arguments):" canonicalBytes)
+      absentBootstrapProblems
+  , grammarWithAdditional
+      "argv proof requires the exact final handoff expression"
+      (replaceLine "    adapter.handoff(binary, [binary] + arguments)" "    adapter.handoff(binary, [binary] + binary)" canonicalBytes)
+      "PB-GRAMMAR-ARGV"
+      "PbArgvProvenanceProblem \"bootstrap must hand off [binary] + arguments exactly\""
+      [ problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"bootstrap must end with exact adapter.handoff(binary, [binary] + arguments)\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"bootstrap must contain exactly one handoff request and it must be the final reachable statement\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"bootstrap handoff request is absent, duplicated, or unreachable\""
+      ]
+  , grammarWithAdditional
+      "argv proof counts sys.argv exactly"
+      (replaceLine "    binary = binary_text.strip()" "    binary = sys.argv" canonicalBytes)
+      "PB-GRAMMAR-ARGV"
+      "PbArgvProvenanceProblem \"sys.argv occurrence count is 2\""
+      [problemFinding "PB-GRAMMAR-BINARY" "PbBinaryProvenanceProblem \"binary path is not derived only from list-bin output\""]
+  , grammarWithAdditional
+      "argv proof counts the bootstrap argument exactly"
+      (replaceLine "    binary = binary_text.strip()" "    binary = arguments" canonicalBytes)
+      "PB-GRAMMAR-ARGV"
+      "PbArgvProvenanceProblem \"bootstrap arguments occurrence count is 2\""
+      [problemFinding "PB-GRAMMAR-BINARY" "PbBinaryProvenanceProblem \"binary path is not derived only from list-bin output\""]
+  , GrammarCase
+      "injection proof refuses an absent bootstrap definition"
+      (replaceSame "def bootstrap(adapter, arguments):" "def bootstrup(adapter, arguments):" canonicalBytes)
+      absentBootstrapProblems
+  , GrammarCase
+      "injection proof refuses an absent main definition"
+      (replaceSame "def main():" "def mian():" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"top-level functions/classes or their signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"<module>\" \"main\""
+      , problemFinding "PB-GRAMMAR-ARGV" "PbArgvProvenanceProblem \"main function is absent\""
+      , problemFinding "PB-GRAMMAR-INJECTION" "PbInjectionSeamProblem \"main function is absent or duplicated\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"main function is absent\""
+      ]
+  , GrammarCase
+      "injection proof requires the exact bootstrap signature"
+      (replaceSame "def bootstrap(adapter, arguments):" "def bootstrap(adapter, argumentz):" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"top-level functions/classes or their signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-INJECTION" "PbInjectionSeamProblem \"bootstrap signature must be exactly (adapter, arguments)\""
+      ]
+  , GrammarCase
+      "injection proof requires an empty main signature"
+      ( replaceBalanced
+          "def main():\n"
+          "def main(x):\n"
+          "GHCUP_VERSION = \"0.2.6.2\""
+          "GHCUP_VERSION = \"0.2.6.\""
+          canonicalBytes
+      )
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"top-level functions/classes or their signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-PIN" "PbPinProblem \"GHCUP_VERSION must be 0.2.6.2\""
+      , problemFinding "PB-GRAMMAR-INJECTION" "PbInjectionSeamProblem \"main signature must be empty\""
+      ]
+  , grammarWithAdditional
+      "injection proof confines construction to main"
+      (replaceLine "    root = adapter.repository_root()" "    root = BootstrapAdapter()" canonicalBytes)
+      "PB-GRAMMAR-ADAPTER-COUNT"
+      "PbAdapterConstructionCount 2"
+      [ problemFinding "PB-GRAMMAR-INJECTION" "PbInjectionSeamProblem \"the sole concrete adapter construction must occur in main\""
+      , problemFinding "PB-GRAMMAR-TOOLCHAIN" "PbToolchainExecutableProblem \"repository root must come only from BootstrapAdapter.repository_root\""
+      ]
+  , GrammarCase
+      "injection proof counts the module main call exactly"
+      (replaceLine "BUILD_TARGET = \"exe:amoebius\"" "main()" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-PIN" "PbPinProblem \"BUILD_TARGET exact string assignment count is 0\""
+      , problemFinding "PB-GRAMMAR-INJECTION" "PbInjectionSeamProblem \"main must be called exactly once by the module guard\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"module body before the exact main guard may contain only direct imports, literal constants, and the closed definitions\""
+      ]
+  , grammar "pin proof requires one exact module string assignment"
+      (replaceSame "GHCUP_VERSION" "GHCUP_VERSIOM" canonicalBytes)
+      "PB-GRAMMAR-PIN"
+      "PbPinProblem \"GHCUP_VERSION exact string assignment count is 0\""
+  , grammar "ghcup pin is exact"
+      (replaceSame "0.2.6.2\"" "0.2.6.3\"" canonicalBytes)
+      "PB-GRAMMAR-PIN"
+      "PbPinProblem \"GHCUP_VERSION must be 0.2.6.2\""
+  , grammar "Cabal pin is exact"
+      (replaceSame "CABAL_VERSION = \"3.16.1.0\"" "CABAL_VERSION = \"3.16.1.1\"" canonicalBytes)
+      "PB-GRAMMAR-PIN"
+      "PbPinProblem \"CABAL_VERSION must be 3.16.1.0\""
+  , grammar "build-target pin is exact"
+      (replaceSame "BUILD_TARGET = \"exe:amoebius\"" "BUILD_TARGET = \"exe:amoebiux\"" canonicalBytes)
+      "PB-GRAMMAR-PIN"
+      "PbPinProblem \"BUILD_TARGET must be exe:amoebius\""
+  , GrammarCase
+      "binary proof refuses an absent bootstrap definition"
+      (replaceSame "def bootstrap(adapter, arguments):" "def bootstrup(adapter, arguments):" canonicalBytes)
+      absentBootstrapProblems
+  , GrammarCase
+      "binary proof requires one binary-text assignment"
+      (replaceSame "binary_text = binary_bytes.decode" "binary_texx = binary_bytes.decode" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"binary_text.strip\""
+      , problemFinding "PB-GRAMMAR-BINARY" "PbBinaryProvenanceProblem \"binary_text assignment count is 0\""
+      ]
+  , grammarWithAdditional
+      "binary bytes require the contained list-bin locator"
+      ( replaceLine
+          "    binary_bytes = adapter.capture(root, [str(cabal), \"--store-dir=\" + str(store), \"list-bin\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), BUILD_TARGET], environment)"
+          "    binary_bytes = adapter.run(root, [str(cabal), \"--store-dir=\" + str(store), \"list-bin\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), BUILD_TARGET], environment)"
+          canonicalBytes
+      )
+      "PB-GRAMMAR-BINARY"
+      "PbBinaryProvenanceProblem \"binary bytes do not come from contained cabal list-bin\""
+      [problemFinding "PB-GRAMMAR-TOOLCHAIN" "PbToolchainExecutableProblem \"the four contained child calls, methods, and argv lists are not structurally exact or an additional child call is present\""]
+  , GrammarCase
+      "binary path derives only from stripped locator output"
+      (replaceSame "binary_text.strip()" "binary_text.strix()" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"binary_text.strix\""
+      , problemFinding "PB-GRAMMAR-BINARY" "PbBinaryProvenanceProblem \"binary path is not derived only from list-bin output\""
+      ]
+  , grammarWithAdditional
+      "binary build must precede the locator"
+      (replaceSame "\"build\"" "\"builx\"" canonicalBytes)
+      "PB-GRAMMAR-BINARY"
+      "PbBinaryProvenanceProblem \"one exact build must precede one exact list-bin\""
+      [problemFinding "PB-GRAMMAR-TOOLCHAIN" "PbToolchainExecutableProblem \"the four contained child calls, methods, and argv lists are not structurally exact or an additional child call is present\""]
+  , GrammarCase
+      "ensure proof refuses an absent adapter method"
+      (replaceSame "def ensure_ghcup(self, url, digest, target):" "def ensure_ghcap(self, url, digest, target):" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"BootstrapAdapter method set or signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"adapter.ensure_ghcup\""
+      , problemFinding "PB-GRAMMAR-GHCUP-ENSURE" "PbGhcupEnsureProblem \"BootstrapAdapter.ensure_ghcup is absent\""
+      ]
+  , GrammarCase
+      "environment proof refuses an absent environment method"
+      (replaceSame "def environment(self, toolchain):" "def environmant(self, toolchain):" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-MONKEYPATCH" "PbMonkeypatchAssignment \"BootstrapAdapter.environmant\" \"environment[...]\""
+      , problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"BootstrapAdapter method set or signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"adapter.environment\""
+      , problemFinding "PB-GRAMMAR-ENVIRONMENT" "PbClosedEnvironmentProblem \"BootstrapAdapter.environment is absent\""
+      ]
+  , GrammarCase
+      "environment proof refuses an absent run method"
+      (replaceSame "def run(self, root, arguments, environment):" "def rum(self, root, arguments, environment):" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"BootstrapAdapter method set or signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"adapter.run\""
+      , problemFinding "PB-GRAMMAR-ENVIRONMENT" "PbClosedEnvironmentProblem \"BootstrapAdapter.run is absent\""
+      ]
+  , GrammarCase
+      "environment proof refuses an absent capture method"
+      (replaceSame "def capture(self, root, arguments, environment):" "def captare(self, root, arguments, environment):" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"BootstrapAdapter method set or signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"adapter.capture\""
+      , problemFinding "PB-GRAMMAR-ENVIRONMENT" "PbClosedEnvironmentProblem \"BootstrapAdapter.capture is absent\""
+      ]
+  , grammar "run requires the exact closed subprocess call"
+      (replaceSame "check=True, shell=False)" "check=True, shell=True )" canonicalBytes)
+      "PB-GRAMMAR-ENVIRONMENT"
+      "PbClosedEnvironmentProblem \"run must invoke subprocess.run with the injected argv/environment, shell=False, and no ambient lookup\""
+  , grammar "capture requires the exact closed subprocess call"
+      (replaceSame "stdout=subprocess.PIPE" "stdout=subprocess.NONE" canonicalBytes)
+      "PB-GRAMMAR-ENVIRONMENT"
+      "PbClosedEnvironmentProblem \"capture must invoke exact shell=False subprocess.run and return only stdout\""
+  , GrammarCase
+      "toolchain proof refuses an absent repository-root method"
+      (replaceSame "def repository_root(self):" "def repository_roat(self):" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"BootstrapAdapter method set or signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"adapter.repository_root\""
+      , problemFinding "PB-GRAMMAR-TOOLCHAIN" "PbToolchainExecutableProblem \"BootstrapAdapter.repository_root is absent\""
+      ]
+  , grammar "toolchain proof requires one root assignment"
+      (replaceSame "    root = adapter.repository_root()" "    roat = adapter.repository_root()" canonicalBytes)
+      "PB-GRAMMAR-TOOLCHAIN"
+      "PbToolchainExecutableProblem \"root assignment count is 0\""
+  , grammar "toolchain repository root shape is exact"
+      (replaceSame "resolve().parents[1]" "resolve().parents[0]" canonicalBytes)
+      "PB-GRAMMAR-TOOLCHAIN"
+      "PbToolchainExecutableProblem \"repository root must be the absolute source-relative Path(__file__).resolve().parents[1]\""
+  , grammar "toolchain artifact is selected from the observed platform"
+      (replaceSame "select_artifact(observed_platform[0], observed_platform[1])" "select_artifact(observed_platform[1], observed_platform[1])" canonicalBytes)
+      "PB-GRAMMAR-TOOLCHAIN"
+      "PbToolchainExecutableProblem \"platform artifact must come from the pure selector fed by adapter.platform()\""
+  , grammar "toolchain root path is closed below the repository"
+      (replaceSame "root / \".build\"" "root / \".builx\"" canonicalBytes)
+      "PB-GRAMMAR-TOOLCHAIN"
+      "PbToolchainExecutableProblem \"toolchain root is not the closed adapter path below the absolute repository root\""
+  , grammar "toolchain ghcup target is contained"
+      (replaceSame "toolchain / \"bootstrap\"" "toolchain / \"bootstrup\"" canonicalBytes)
+      "PB-GRAMMAR-TOOLCHAIN"
+      "PbToolchainExecutableProblem \"ghcup target is not rooted in the contained toolchain with the adapter filename\""
+  , GrammarCase
+      "toolchain ghcup executable is the ensure result"
+      (replaceLine "    ghcup = adapter.ensure_ghcup(artifact[0], artifact[1], ghcup_target)" "    ghcup = adapter.ensure_ghcap(artifact[0], artifact[1], ghcup_target)" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"adapter.ensure_ghcap\""
+      , problemFinding "PB-GRAMMAR-TOOLCHAIN" "PbToolchainExecutableProblem \"ghcup executable must be the verified ensure result\""
+      ]
+  , GrammarCase
+      "toolchain environment comes only from the adapter"
+      (replaceLine "    environment = adapter.environment(toolchain)" "    environment = adapter.environmant(toolchain)" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"adapter.environmant\""
+      , problemFinding "PB-GRAMMAR-TOOLCHAIN" "PbToolchainExecutableProblem \"child environment must be derived only from the contained toolchain\""
+      ]
+  , grammar "toolchain executable paths are exact"
+      (replaceLine "    ghc = toolchain / \".ghcup\" / \"ghc\" / GHC_VERSION / \"bin\" / (\"ghc\" + artifact[4])" "    ghc = toolchain / \".ghcup\" / \"ghc\" / GHC_VERSION / \"bin\" / (\"ghx\" + artifact[4])" canonicalBytes)
+      "PB-GRAMMAR-TOOLCHAIN"
+      "PbToolchainExecutableProblem \"GHC/Cabal executables are not exact contained versioned paths\""
+  , grammar "Cabal store provenance remains below the toolchain"
+      (replaceSame "toolchain / \"cabal-store\"" "toolchain / \"cabal-storz\"" canonicalBytes)
+      "PB-GRAMMAR-TOOLCHAIN"
+      "PbToolchainExecutableProblem \"Cabal store must be below the exact adapter toolchain root\""
+  , grammar "toolchain child calls are structurally exact"
+      (replaceSame "\"--set\"" "\"--sea\"" canonicalBytes)
+      "PB-GRAMMAR-TOOLCHAIN"
+      "PbToolchainExecutableProblem \"the four contained child calls, methods, and argv lists are not structurally exact or an additional child call is present\""
+  , GrammarCase
+      "platform proof refuses an absent pure selector"
+      (replaceSame "def select_artifact(system, machine):" "def select_artifect(system, machine):" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"top-level functions/classes or their signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"select_artifact\""
+      , problemFinding "PB-GRAMMAR-PLATFORM" "PbPlatformProofProblem \"select_artifact is absent or duplicated\""
+      ]
+  , GrammarCase
+      "platform proof refuses an absent adapter method"
+      (replaceSame "def platform(self):" "def platforn(self):" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"BootstrapAdapter method set or signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"adapter.platform\""
+      , problemFinding "PB-GRAMMAR-PLATFORM" "PbPlatformProofProblem \"BootstrapAdapter.platform is absent\""
+      ]
+  , GrammarCase
+      "platform observation body is exact"
+      (replaceSame "return (platform.system(), platform.machine())" "return (platform.system(), platform.systemx())" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"BootstrapAdapter.platform\" \"platform.systemx\""
+      , problemFinding "PB-GRAMMAR-PLATFORM" "PbPlatformProofProblem \"concrete platform observation must return only platform.system() and platform.machine()\""
+      ]
+  , grammar "platform selector ends in the exact refusal"
+      (replaceSame "unsupported-platform" "unsupported-platforn" canonicalBytes)
+      "PB-GRAMMAR-PLATFORM"
+      "PbPlatformProofProblem \"pure platform selector must end in the exact unsupported-platform raise\""
+  , GrammarCase
+      "platform selector requires exactly four top-level branches"
+      ( sequenceReplace
+          [ ("    if system == \"Linux\" and machine == \"aarch64\":", "        if system == \"Linux\" and machine == \"aarch64\":")
+          , ("        return (\"https://downloads.haskell.org/~ghcup/0.2.6.2/aarch64-linux-ghcup-0.2.6.2\"", "            return (\"https://downloads.haskell.org/~ghcup/0.2.6.2/aarch64-linux-ghcup-0.2.6.2\"")
+          , ("\"linux-arm64\"", "\"lin\"")
+          ]
+          canonicalBytes
+      )
+      [ problemFinding "PB-GRAMMAR-PLATFORM" "PbPlatformProofProblem \"pure platform selector must contain exactly four branches\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"control-flow graph contains unreachable nodes in select_artifact: 3,4\""
+      ]
+  , grammar "platform branches require pure literal tuple returns"
+      (sequenceReplace [("        return (", "        return ["), (", \"\")\n", ", \"\"]\n")] canonicalBytes)
+      "PB-GRAMMAR-PLATFORM"
+      "PbPlatformProofProblem \"platform branch is not an exact pure literal return\""
+  , grammar "platform branch conditions require exact equalities"
+      (replaceSame "system == \"Linux\"" "system != \"Linux\"" canonicalBytes)
+      "PB-GRAMMAR-PLATFORM"
+      "PbPlatformProofProblem \"platform branch condition is not exact pure system/machine equality\""
+  , GrammarCase
+      "control flow refuses an absent handoff method"
+      ( replaceBalanced
+          "def handoff(self, binary, arguments):"
+          "def handoffx(self, binary, arguments):"
+          "GHCUP_VERSION = \"0.2.6.2\""
+          "GHCUP_VERSION = \"0.2.6.\""
+          canonicalBytes
+      )
+      [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"BootstrapAdapter method set or signatures are not exact\""
+      , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrap\" \"adapter.handoff\""
+      , problemFinding "PB-GRAMMAR-PIN" "PbPinProblem \"GHCUP_VERSION must be 0.2.6.2\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"BootstrapAdapter.handoff is absent\""
+      ]
+  , GrammarCase
+      "control flow refuses bootstrap termination before handoff"
+      (replaceLine "    binary = binary_text.strip()" "    return binary" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-BINARY" "PbBinaryProvenanceProblem \"binary assignment count is 0\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"bootstrap may not return or raise before its final handoff request\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"bootstrap handoff request is absent, duplicated, or unreachable\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"control-flow graph contains unreachable nodes in bootstrap: 18\""
+      ]
+  , GrammarCase
+      "control flow refuses module termination before the guard"
+      (replaceLine "BUILD_TARGET = \"exe:amoebius\"" "raise RuntimeError(\"stop\")" canonicalBytes)
+      [ problemFinding "PB-GRAMMAR-PIN" "PbPinProblem \"BUILD_TARGET exact string assignment count is 0\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"module body may not return or raise before the exact main guard\""
+      , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"module body before the exact main guard may contain only direct imports, literal constants, and the closed definitions\""
+      ]
+  , grammar "UTF-8 BOM is rejected by exact line discipline"
+      ( sequenceReplace
+          [ ("import hashlib", ByteString.pack [0xef, 0xbb, 0xbf] <> "mport hashlib")
+          , ("GHCUP_VERSION = \"0.2.6.2\"", "GHCUP_VERSION = \"0.2.6\"")
+          ]
+          canonicalBytes
+      )
+      "PB-GRAMMAR-LINE-DISCIPLINE"
+      "PbLineDiscipline \"pb/__main__.py\" \"UTF-8 BOM is forbidden\""
+  , grammar "tabs are rejected by exact line discipline"
+      (replaceFirstByte 9 canonicalBytes)
+      "PB-GRAMMAR-LINE-DISCIPLINE"
+      "PbLineDiscipline \"pb/__main__.py\" \"tabs are forbidden\""
+  , grammar "NUL is rejected by exact line discipline"
+      (replaceFirstByte 0 canonicalBytes)
+      "PB-GRAMMAR-LINE-DISCIPLINE"
+      "PbLineDiscipline \"pb/__main__.py\" \"NUL is forbidden\""
+  , grammar "the source requires one final LF"
+      (replaceLastByte 32 canonicalBytes)
+      "PB-GRAMMAR-LINE-DISCIPLINE"
+      "PbLineDiscipline \"pb/__main__.py\" \"exact final LF is required\""
+  , grammar "trailing blank lines are rejected"
+      (replacePenultimateByte 10 canonicalBytes)
+      "PB-GRAMMAR-LINE-DISCIPLINE"
+      "PbLineDiscipline \"pb/__main__.py\" \"trailing blank lines are forbidden\""
+  , grammar "blank physical lines are outside the grammar"
+      (replaceLine "import os" "" canonicalBytes)
+      "PB-GRAMMAR-LINE-DISCIPLINE"
+      "PbLineDiscipline \"pb/__main__.py\" \"blank lines are outside the grammar\""
+  , grammar "indentation requires a multiple of four spaces"
+      (replaceLine "    if system == \"Linux\" and machine == \"x86_64\":" "  if system == \"Linux\" and machine == \"x86_64\":" canonicalBytes)
+      "PB-GRAMMAR-LEXICAL"
+      "PbLexicalProblem \"pb/__main__.py\" 13 1 \"indentation must be a multiple of four spaces\""
+  , grammar "indentation may increase by only one level"
+      ( sequenceReplace
+          [ ("    if system == \"Linux\" and machine == \"x86_64\":", "        if system == \"Linux\" and machine == \"x86_64\":")
+          , ("\"linux-amd64\"", "\"linux-a\"")
+          ]
+          canonicalBytes
+      )
+      "PB-GRAMMAR-LEXICAL"
+      "PbLexicalProblem \"pb/__main__.py\" 13 1 \"indentation may increase by exactly four spaces\""
+  , grammar "string literals require termination"
+      (replaceSame "GHC_VERSION = \"9.12.4\"" "GHC_VERSION = \"9.12.4 " canonicalBytes)
+      "PB-GRAMMAR-LEXICAL"
+      "PbLexicalProblem \"pb/__main__.py\" 9 15 \"unterminated string literal\""
+  , grammar "string literals refuse escapes"
+      (replaceSame "\"9.12.4\"" "\"9.12\\4\"" canonicalBytes)
+      "PB-GRAMMAR-LEXICAL"
+      "PbLexicalProblem \"pb/__main__.py\" 9 20 \"string escapes are outside the grammar\""
+  , grammar "string literals refuse control characters"
+      (replaceOnce "\"9.12.4\"" (ByteString.pack [34, 31, 46, 49, 50, 46, 52, 34]) canonicalBytes)
+      "PB-GRAMMAR-LEXICAL"
+      "PbLexicalProblem \"pb/__main__.py\" 9 16 \"control character in string literal\""
+  , grammar "parser refuses top-level indentation"
+      ( sequenceReplace
+          [ ("import hashlib", "    import hashlib")
+          , ("\"linux-amd64\"", "\"linux-a\"")
+          ]
+          canonicalBytes
+      )
+      "PB-GRAMMAR-PARSE"
+      "PbParseProblem \"pb/__main__.py\" 1 1 \"unexpected top-level indentation\""
+  , grammar "unsupported statements remain outside the grammar"
+      (replaceLine "BUILD_TARGET = \"exe:amoebius\"" "pass" canonicalBytes)
+      "PB-GRAMMAR-PARSE"
+      "PbParseProblem \"pb/__main__.py\" 11 1 \"unsupported statement pass\""
+  , grammar "parser refuses invalid assignment targets"
+      (replaceLine "GHCUP_VERSION = \"0.2.6.2\"" "f() = \"0.2.6.2\"" canonicalBytes)
+      "PB-GRAMMAR-PARSE"
+      "PbParseProblem \"pb/__main__.py\" 8 5 \"invalid assignment target\""
+  , grammar "None remains outside the closed grammar"
+      (replaceLine "GHCUP_VERSION = \"0.2.6.2\"" "GHCUP_VERSION = None" canonicalBytes)
+      "PB-GRAMMAR-PARSE"
+      "PbParseProblem \"pb/__main__.py\" 8 17 \"None is outside the grammar\""
+  , grammar "parser refuses a missing expression"
+      (replaceLine "GHCUP_VERSION = \"0.2.6.2\"" "GHCUP_VERSION = )" canonicalBytes)
+      "PB-GRAMMAR-PARSE"
+      "PbParseProblem \"pb/__main__.py\" 8 17 \"expected expression\""
+  , grammar "parser requires exact structural tokens"
+      (replaceLine "import hashlib" "import x(" canonicalBytes)
+      "PB-GRAMMAR-PARSE"
+      "PbParseProblem \"pb/__main__.py\" 1 9 \"expected TokNewline\""
+  , grammar "parser requires the from-import keyword"
+      (replaceLine "from pathlib import Path" "from pathlib nope Path" canonicalBytes)
+      "PB-GRAMMAR-PARSE"
+      "PbParseProblem \"pb/__main__.py\" 7 14 \"expected keyword/name import\""
+  ]
+
+absentBootstrapProblems :: [Finding]
+absentBootstrapProblems =
+  [ problemFinding "PB-GRAMMAR-SIGNATURE" "PbSignatureProblem \"top-level functions/classes or their signatures are not exact\""
+  , problemFinding "PB-GRAMMAR-UNRESOLVED-CALL" "PbUnresolvedCall \"bootstrup\" \"adapter.repository_root\""
+  , problemFinding "PB-GRAMMAR-ARGV" "PbArgvProvenanceProblem \"bootstrap function is absent\""
+  , problemFinding "PB-GRAMMAR-BINARY" "PbBinaryProvenanceProblem \"bootstrap function is absent\""
+  , problemFinding "PB-GRAMMAR-INJECTION" "PbInjectionSeamProblem \"bootstrap function is absent or duplicated\""
+  , problemFinding "PB-GRAMMAR-TOOLCHAIN" "PbToolchainExecutableProblem \"bootstrap function is absent\""
+  , problemFinding "PB-GRAMMAR-CONTROL-FLOW" "PbHandoffControlFlowProblem \"bootstrap function is absent\""
   ]
 
 grammar :: String -> ByteString -> Text -> Text -> GrammarCase
@@ -1497,6 +2080,21 @@ replaceFirstByte byte bytes =
     Nothing -> ByteString.singleton byte
     Just (_, rest) -> ByteString.cons byte rest
 
+replaceLastByte :: Word8 -> ByteString -> ByteString
+replaceLastByte byte bytes =
+  case ByteString.unsnoc bytes of
+    Nothing -> ByteString.singleton byte
+    Just (prefix, _) -> ByteString.snoc prefix byte
+
+replacePenultimateByte :: Word8 -> ByteString -> ByteString
+replacePenultimateByte byte bytes =
+  case ByteString.unsnoc bytes of
+    Nothing -> ByteString.singleton byte
+    Just (prefix, finalByte) ->
+      case ByteString.unsnoc prefix of
+        Nothing -> ByteString.pack [byte, finalByte]
+        Just (before, _) -> before <> ByteString.pack [byte, finalByte]
+
 replaceSame :: ByteString -> ByteString -> ByteString -> ByteString
 replaceSame old new bytes
   | ByteString.length old /= ByteString.length new = bytes
@@ -1510,6 +2108,14 @@ replaceLine old new bytes
         (old <> "\n")
         (new <> ByteString8.replicate (ByteString.length old - ByteString.length new) ' ' <> "\n")
         bytes
+
+replaceBalanced :: ByteString -> ByteString -> ByteString -> ByteString -> ByteString -> ByteString
+replaceBalanced growOld growNew shrinkOld shrinkNew bytes =
+  replaceOnce shrinkOld shrinkNew (replaceOnce growOld growNew bytes)
+
+sequenceReplace :: [(ByteString, ByteString)] -> ByteString -> ByteString
+sequenceReplace replacements bytes =
+  foldl (\current (old, new) -> replaceOnce old new current) bytes replacements
 
 replaceOnce :: ByteString -> ByteString -> ByteString -> ByteString
 replaceOnce old new bytes =

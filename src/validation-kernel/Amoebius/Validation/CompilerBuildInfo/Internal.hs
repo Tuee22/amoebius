@@ -256,28 +256,6 @@ data DiagnosticCompilerBuildInfoPackageObservation
   = DiagnosticCompilerBuildInfoPackageObservation Int Text Int Text
   deriving (Eq, Ord, Show)
 
-data DiagnosticCompilerBuildInfoMachinePathObservation
-  = DiagnosticCompilerBuildInfoCompilerPath FilePath
-  | DiagnosticCompilerBuildInfoSourceDirectoryPath
-      DiagnosticCompilerBuildInfoComponentIdentity FilePath
-  | DiagnosticCompilerBuildInfoCabalFilePath
-      DiagnosticCompilerBuildInfoComponentIdentity FilePath
-  | DiagnosticCompilerBuildInfoSourceFilePath
-      DiagnosticCompilerBuildInfoComponentIdentity FilePath
-  | DiagnosticCompilerBuildInfoHaskellSourceDirectoryPath
-      DiagnosticCompilerBuildInfoComponentIdentity FilePath
-  | DiagnosticCompilerBuildInfoArgumentPath
-      DiagnosticCompilerBuildInfoComponentIdentity
-      DiagnosticCompilerBuildInfoPathObservation
-  deriving (Eq, Ord, Show)
-
-data DiagnosticCompilerBuildInfoSourceOwnershipObservation
-  = DiagnosticCompilerBuildInfoModuleOwnership
-      DiagnosticCompilerBuildInfoComponentIdentity Text
-  | DiagnosticCompilerBuildInfoSourceFileOwnership
-      DiagnosticCompilerBuildInfoComponentIdentity FilePath
-  deriving (Eq, Ord, Show)
-
 data DiagnosticCompilerBuildInfoComponentObservation
   = DiagnosticCompilerBuildInfoComponentObservation
       DiagnosticCompilerBuildInfoComponentIdentity
@@ -361,9 +339,8 @@ data DiagnosticCompilerBuildInfoProblem
   | BuildInfoExpectedComponentIdentityMismatch Text Text Text Text Text
   | BuildInfoGeneratorBytesUnauthenticated Text
   | BuildInfoCompilerIdentityUnauthenticated Text Text FilePath
-  | BuildInfoIndependentExpectedCompilerUnavailable Text Text FilePath
+  | BuildInfoIndependentExpectedCompilerUnavailable
   | BuildInfoMachinePathStateUnauthenticated
-      [DiagnosticCompilerBuildInfoMachinePathObservation]
   | BuildInfoCompilerArgumentsUnauthenticated
       [(DiagnosticCompilerBuildInfoComponentIdentity,
         [DiagnosticCompilerBuildInfoArgumentObservation])]
@@ -371,7 +348,6 @@ data DiagnosticCompilerBuildInfoProblem
   | BuildInfoIndependentExpectedUniverseUnavailable
       [DiagnosticCompilerBuildInfoComponentIdentity]
   | BuildInfoExactModuleSourceOwnershipUnresolved
-      [DiagnosticCompilerBuildInfoSourceOwnershipObservation]
   | BuildInfoCabalFileSourceJoinUnavailable
       [(DiagnosticCompilerBuildInfoComponentIdentity, Maybe FilePath)]
   | BuildInfoGeneratedCompilerInputsUnauthenticated
@@ -385,7 +361,6 @@ data DiagnosticCompilerBuildInfoProblem
   | BuildInfoSourcePragmaSemanticsUnavailable
       [DiagnosticCompilerBuildInfoComponentIdentity]
   | BuildInfoPhysicalPathContainmentUnavailable
-      [DiagnosticCompilerBuildInfoMachinePathObservation]
   | BuildInfoPathPlatformSemanticsUnavailable Text
   | BuildInfoElaboratedPlanJoinUnavailable
       [DiagnosticCompilerBuildInfoComponentIdentity]
@@ -409,7 +384,13 @@ data ArgumentInspection = ArgumentInspection
   }
 
 emptyProblemAccumulator :: DiagnosticProblemAccumulator
+#ifdef VALIDATION_COMPILER_BUILDINFO_ACCUMULATOR_EMPTY_COUNT_SEED_MUTANT
+emptyProblemAccumulator = DiagnosticProblemAccumulator 1 False []
+#elif defined(VALIDATION_COMPILER_BUILDINFO_ACCUMULATOR_EMPTY_OVERFLOW_SEED_MUTANT)
+emptyProblemAccumulator = DiagnosticProblemAccumulator 0 True []
+#else
 emptyProblemAccumulator = DiagnosticProblemAccumulator 0 False []
+#endif
 
 addProblemToAccumulator
   :: DiagnosticCompilerBuildInfoProblem
@@ -417,15 +398,33 @@ addProblemToAccumulator
   -> DiagnosticProblemAccumulator
 addProblemToAccumulator problem accumulator@(DiagnosticProblemAccumulator count overflow problems)
   | overflow = accumulator
-  | count < maximumDiagnosticProblems =
-      DiagnosticProblemAccumulator (count + 1) False (problem : problems)
+  |
+#ifdef VALIDATION_COMPILER_BUILDINFO_ACCUMULATOR_BOUNDARY_PREDICATE_MUTANT
+      count <= maximumDiagnosticProblems =
+#else
+      count < maximumDiagnosticProblems =
+#endif
+      DiagnosticProblemAccumulator
+#ifdef VALIDATION_COMPILER_BUILDINFO_ACCUMULATOR_COUNT_PROJECTION_MUTANT
+        (count + 2)
+#else
+        (count + 1)
+#endif
+        False
+        (problem : problems)
   | otherwise = DiagnosticProblemAccumulator count True problems
 
 addProblemsToAccumulator
   :: [DiagnosticCompilerBuildInfoProblem]
   -> DiagnosticProblemAccumulator
   -> DiagnosticProblemAccumulator
-addProblemsToAccumulator [] accumulator = accumulator
+addProblemsToAccumulator [] accumulator =
+#ifdef VALIDATION_COMPILER_BUILDINFO_ACCUMULATOR_EMPTY_LIST_ROUTE_MUTANT
+  addProblemToAccumulator
+    (BuildInfoDuplicateKeyScanFailed "empty problem-list route mutated") accumulator
+#else
+  accumulator
+#endif
 addProblemsToAccumulator (problem : problems) accumulator =
   case addProblemToAccumulator problem accumulator of
     next@(DiagnosticProblemAccumulator _ True _) -> next
@@ -436,8 +435,13 @@ finishProblemAccumulator
   -> [DiagnosticCompilerBuildInfoProblem]
 finishProblemAccumulator (DiagnosticProblemAccumulator _ True _) =
   [BuildInfoResourceLimitExceeded "problem-count" maximumDiagnosticProblems
+#ifdef VALIDATION_COMPILER_BUILDINFO_ACCUMULATOR_OVERFLOW_OBSERVED_PROJECTION_MUTANT
+    (maximumDiagnosticProblems + 2)]
+#else
     (maximumDiagnosticProblems + 1)]
-finishProblemAccumulator (DiagnosticProblemAccumulator _ False problems) = reverse problems
+#endif
+finishProblemAccumulator (DiagnosticProblemAccumulator _ False problems) =
+  reverse problems
 
 makeDiagnosticCompilerBuildInfoExpectations
   :: Text
@@ -458,8 +462,20 @@ makeDiagnosticCompilerBuildInfoExpectations flavour compilerId compilerPath rawI
       Left "an expected component identity exceeds the 512-byte per-field diagnostic bound"
   | otherwise =
       case boundedProblems
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTATION_VALIDATION_COMPILER_DROP_MUTANT
+        (validateExpectedCompiler expectedCompiler `seq`
+          validateExpectedIdentities expectedIdentities) of
+#elif defined(VALIDATION_COMPILER_BUILDINFO_EXPECTATION_VALIDATION_IDENTITIES_DROP_MUTANT)
+        (validateExpectedIdentities expectedIdentities `seq`
+          validateExpectedCompiler expectedCompiler) of
+#elif defined(VALIDATION_COMPILER_BUILDINFO_EXPECTATION_VALIDATION_ORDER_REVERSE_MUTANT)
+        (reverse
+          (validateExpectedCompiler expectedCompiler
+            <> validateExpectedIdentities expectedIdentities)) of
+#else
         (validateExpectedCompiler expectedCompiler
           <> validateExpectedIdentities expectedIdentities) of
+#endif
         [] -> Right
           (DiagnosticCompilerBuildInfoExpectations expectedCompiler expectedIdentities)
         problem : _ -> Left (Text.pack (show problem))
@@ -492,16 +508,33 @@ compilerBuildInfoDiagnostic flavour compilerId compilerPath rawIdentities bytes 
           (parseCompilerBuildInfoDiagnostic expectedCompiler expectedIdentities bytes)
 
 diagnosticCheckName, diagnosticSubject :: Text
+#ifdef VALIDATION_COMPILER_BUILDINFO_DIAGNOSTIC_CHECK_NAME_PROJECTION_MUTANT
+diagnosticCheckName = "compiler-build-info-diagnostic-mutant"
+#else
 diagnosticCheckName = "compiler-build-info-diagnostic"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_DIAGNOSTIC_SUBJECT_PROJECTION_MUTANT
+diagnosticSubject =
+  "Amoebius.Validation.CompilerBuildInfo.compilerBuildInfoDiagnostic.mutant"
+#else
 diagnosticSubject =
   "Amoebius.Validation.CompilerBuildInfo.compilerBuildInfoDiagnostic"
+#endif
 
 diagnosticOnlyFinding :: Finding
 diagnosticOnlyFinding =
   finding
+#ifdef VALIDATION_COMPILER_BUILDINFO_DIAGNOSTIC_ONLY_CODE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-DIAGNOSTIC-ONLY-MUTANT"
+#else
     "COMPILER-BUILDINFO-DIAGNOSTIC-ONLY"
+#endif
     (Text.unpack diagnosticSubject)
+#ifdef VALIDATION_COMPILER_BUILDINFO_DIAGNOSTIC_ONLY_DETAIL_PROJECTION_MUTANT
+    "Cabal build-info diagnostics were mutated"
+#else
     "Cabal build-info and caller expectations are unauthenticated diagnostics and cannot establish compiler or source closure"
+#endif
 
 expectationRefusalCheckResult :: Text -> CheckResult
 expectationRefusalCheckResult detail =
@@ -509,10 +542,27 @@ expectationRefusalCheckResult detail =
     { checkName = diagnosticCheckName
     , checkObservations = []
     , checkFindings =
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTATION_REFUSAL_DIAGNOSTIC_COMPOSITION_DROP_MUTANT
+        diagnosticOnlyFindings `seq`
+          [finding expectationRefusalCode
+            (Text.unpack diagnosticSubject) expectationRefusalDetail]
+#else
         diagnosticOnlyFindings
-          <> [finding "COMPILER-BUILDINFO-EXPECTATION-REFUSED"
-                (Text.unpack diagnosticSubject) detail]
+          <> [finding expectationRefusalCode
+                (Text.unpack diagnosticSubject) expectationRefusalDetail]
+#endif
     }
+ where
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTATION_REFUSAL_CODE_PROJECTION_MUTANT
+  expectationRefusalCode = "COMPILER-BUILDINFO-EXPECTATION-REFUSED-MUTANT"
+#else
+  expectationRefusalCode = "COMPILER-BUILDINFO-EXPECTATION-REFUSED"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTATION_REFUSAL_DETAIL_PROJECTION_MUTANT
+  expectationRefusalDetail = detail <> "-mutant"
+#else
+  expectationRefusalDetail = detail
+#endif
 
 refusalCheckResult
   :: DiagnosticCompilerBuildInfoExpectations
@@ -522,8 +572,20 @@ refusalCheckResult
 refusalCheckResult expectations bytes =
   foldDiagnosticCompilerBuildInfoRefusal hardResult observedResult
  where
-  hardResult problems = result False problems []
-  observedResult problems snapshot = result True problems (snapshotObservations snapshot)
+  hardResult problems =
+#ifdef VALIDATION_COMPILER_BUILDINFO_REFUSAL_HARD_FOLD_ROUTE_MUTANT
+    result False (NonEmpty.head problems :| NonEmpty.toList problems) []
+#else
+    result False problems []
+#endif
+  observedResult problems snapshot =
+#ifdef VALIDATION_COMPILER_BUILDINFO_REFUSAL_OBSERVED_FOLD_ROUTE_MUTANT
+    result True problems (reverse (snapshotObservations snapshot))
+#elif defined(VALIDATION_COMPILER_BUILDINFO_REFUSAL_OBSERVED_ENVELOPE_RETENTION_ROUTE_MUTANT)
+    result False problems (snapshotObservations snapshot)
+#else
+    result True problems (snapshotObservations snapshot)
+#endif
   result retainProblemsOnEnvelope problems observed =
     case resultEnvelopeProblem proposedObservations proposedFindings of
       Nothing ->
@@ -538,25 +600,59 @@ refusalCheckResult expectations bytes =
           envelopeProblem
    where
     proposedObservations =
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_OBSERVATION_COMPOSITION_ORDER_MUTANT
+      observed
+        <> retainedObservations retainInputBytesObservation
+          [observation "input.bytes" (decimal (ByteString.length bytes))]
+        <> expectationObservations expectations
+#else
       expectationObservations expectations
         <> retainedObservations retainInputBytesObservation
           [observation "input.bytes" (decimal (ByteString.length bytes))]
         <> observed
+#endif
     proposedFindings =
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_FINDING_COMPOSITION_ORDER_MUTANT
+      map problemFinding (NonEmpty.toList problems) <> diagnosticOnlyFindings
+#else
       diagnosticOnlyFindings <> map problemFinding (NonEmpty.toList problems)
+#endif
 
 resultEnvelopeRefusal :: [Finding] -> DiagnosticCompilerBuildInfoProblem -> CheckResult
 resultEnvelopeRefusal retainedFindings envelopeProblem =
   CheckResult
     { checkName = diagnosticCheckName
     , checkObservations =
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_OBSERVATION_ORDER_MUTANT
+        reverse
+#endif
         [ observation "result-envelope.status"
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_STATUS_PROJECTION_MUTANT
+            "refused-after-result-materialization"
+#else
             "refused-before-result-materialization"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_EXCEEDED_PROJECTION_MUTANT
+        , observation "result-envelope.exceeded" (exceededDimension <> "-mutant")
+#else
         , observation "result-envelope.exceeded" exceededDimension
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_LIMIT_PROJECTION_MUTANT
+        , observation "result-envelope.limit" (decimal (limitValue + 1))
+#else
         , observation "result-envelope.limit" (decimal limitValue)
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_OBSERVED_PROJECTION_MUTANT
+        , observation "result-envelope.observed" (decimal (observedValue - 1))
+#else
         , observation "result-envelope.observed" (decimal observedValue)
+#endif
         ]
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_FINDING_COMPOSITION_DROP_MUTANT
+    , checkFindings = problemFinding envelopeProblem `seq` retainedFindings
+#else
     , checkFindings = retainedFindings <> [problemFinding envelopeProblem]
+#endif
     }
  where
   (exceededDimension, limitValue, observedValue) = case envelopeProblem of
@@ -566,10 +662,25 @@ resultEnvelopeRefusal retainedFindings envelopeProblem =
 
 resultEnvelopeProblem :: [Observation] -> [Finding] -> Maybe DiagnosticCompilerBuildInfoProblem
 resultEnvelopeProblem observations findings =
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_OBSERVATION_FOLD_ROUTE_MUTANT
+  case observations of
+    [] -> measureFindings 0 (textByteLength diagnosticCheckName) findings
+    (_ : remaining) ->
+      measureObservations 0 (textByteLength diagnosticCheckName) remaining
+#elif defined(VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_ENTRY_COUNT_SEED_MUTANT)
+  measureObservations 1 (textByteLength diagnosticCheckName) observations
+#elif defined(VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_PAYLOAD_SEED_MUTANT)
+  measureObservations 0 0 observations
+#else
   measureObservations 0 (textByteLength diagnosticCheckName) observations
+#endif
  where
   measureObservations !entryCount !payloadBytes [] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_FINDING_FOLD_ROUTE_MUTANT
+    measureFindings entryCount (payloadBytes + 1) findings
+#else
     measureFindings entryCount payloadBytes findings
+#endif
   measureObservations !entryCount !payloadBytes (item : remaining) =
     addEntry entryCount payloadBytes (observationPayloadBytes item)
       (\nextCount nextBytes -> measureObservations nextCount nextBytes remaining)
@@ -582,22 +693,44 @@ resultEnvelopeProblem observations findings =
      in if nextCount > maximumResultEntries
           then Just
             (BuildInfoResultEnvelopeExceeded
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_ENTRY_COUNT_PROJECTION_MUTANT
+              "entries" maximumResultEntries entryCount)
+#else
               "entries" maximumResultEntries nextCount)
+#endif
           else
             let nextBytes = payloadBytes + entryBytes
              in if nextBytes > maximumResultPayloadBytes
                   then Just
                     (BuildInfoResultEnvelopeExceeded
+#ifdef VALIDATION_COMPILER_BUILDINFO_RESULT_ENVELOPE_PAYLOAD_PROJECTION_MUTANT
+                      "payload-bytes" maximumResultPayloadBytes payloadBytes)
+#else
                       "payload-bytes" maximumResultPayloadBytes nextBytes)
+#endif
                   else continue nextCount nextBytes
 
 observationPayloadBytes :: Observation -> Int
 observationPayloadBytes (Observation key value) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVATION_PAYLOAD_KEY_PROJECTION_MUTANT
+  value `seq` textByteLength key
+#elif defined(VALIDATION_COMPILER_BUILDINFO_OBSERVATION_PAYLOAD_VALUE_PROJECTION_MUTANT)
+  key `seq` textByteLength value
+#else
   textByteLength key + textByteLength value
+#endif
 
 findingPayloadBytes :: Finding -> Int
 findingPayloadBytes (Finding code subject detail) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_FINDING_PAYLOAD_CODE_PROJECTION_MUTANT
+  subject `seq` detail `seq` textByteLength code
+#elif defined(VALIDATION_COMPILER_BUILDINFO_FINDING_PAYLOAD_SUBJECT_PROJECTION_MUTANT)
+  code `seq` detail `seq` textByteLength (Text.pack subject)
+#elif defined(VALIDATION_COMPILER_BUILDINFO_FINDING_PAYLOAD_DETAIL_PROJECTION_MUTANT)
+  code `seq` subject `seq` textByteLength detail
+#else
   textByteLength code + textByteLength (Text.pack subject) + textByteLength detail
+#endif
 
 foldDiagnosticCompilerBuildInfoRefusal
   :: (NonEmpty DiagnosticCompilerBuildInfoProblem -> result)
@@ -614,95 +747,594 @@ foldDiagnosticCompilerBuildInfoRefusal _ observedResult
 diagnosticOnlyFindings :: [Finding]
 diagnosticOnlyFindings =
 #ifdef VALIDATION_COMPILER_BUILDINFO_DIAGNOSTIC_ONLY_BYPASS_MUTANT
-  []
+  diagnosticOnlyFinding `seq` []
 #else
   [diagnosticOnlyFinding]
 #endif
 
 problemFinding :: DiagnosticCompilerBuildInfoProblem -> Finding
 problemFinding problem =
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_FINDING_CODE_PROJECTION_MUTANT
+  problemCode problem `seq`
+    finding "COMPILER-BUILDINFO-PROBLEM-MUTANT"
+      (Text.unpack diagnosticSubject) (problemDetail problem)
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_FINDING_SUBJECT_PROJECTION_MUTANT)
+  finding (problemCode problem) "compiler-build-info-mutant" (problemDetail problem)
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_FINDING_DETAIL_PROJECTION_MUTANT)
+  problemDetail problem `seq`
+    finding (problemCode problem) (Text.unpack diagnosticSubject) "mutated problem detail"
+#else
   finding (problemCode problem) (Text.unpack diagnosticSubject) (problemDetail problem)
+#endif
 
 problemCode :: DiagnosticCompilerBuildInfoProblem -> Text
 problemCode problem = case problem of
-  BuildInfoResourceLimitExceeded {} -> "COMPILER-BUILDINFO-RESOURCE-LIMIT"
-  BuildInfoJsonDuplicateKey {} -> "COMPILER-BUILDINFO-JSON-DUPLICATE-KEY"
-  BuildInfoDuplicateKeyScanFailed {} -> "COMPILER-BUILDINFO-JSON-SCAN-FAILED"
-  BuildInfoRootNotObject -> "COMPILER-BUILDINFO-ROOT-NOT-OBJECT"
-  BuildInfoFieldMissing {} -> "COMPILER-BUILDINFO-FIELD-MISSING"
-  BuildInfoFieldUnknown {} -> "COMPILER-BUILDINFO-FIELD-UNKNOWN"
-  BuildInfoFieldWrongType {} -> "COMPILER-BUILDINFO-FIELD-WRONG-TYPE"
-  BuildInfoArrayElementWrongType {} -> "COMPILER-BUILDINFO-ARRAY-ELEMENT-WRONG-TYPE"
-  BuildInfoTextEmpty {} -> "COMPILER-BUILDINFO-TEXT-EMPTY"
-  BuildInfoArrayTextEmpty {} -> "COMPILER-BUILDINFO-ARRAY-TEXT-EMPTY"
-  BuildInfoCabalLibraryVersionUnsupported {} -> "COMPILER-BUILDINFO-CABAL-VERSION"
-  BuildInfoCompilerFlavourUnsupported {} -> "COMPILER-BUILDINFO-COMPILER-FLAVOUR"
-  BuildInfoCompilerIdMalformed {} -> "COMPILER-BUILDINFO-COMPILER-ID"
-  BuildInfoComponentsEmpty -> "COMPILER-BUILDINFO-COMPONENTS-EMPTY"
-  BuildInfoComponentTypeUnsupported {} -> "COMPILER-BUILDINFO-COMPONENT-TYPE"
-  BuildInfoComponentNameMalformed {} -> "COMPILER-BUILDINFO-COMPONENT-NAME"
-  BuildInfoComponentSourceDiscoveryEmpty {} -> "COMPILER-BUILDINFO-SOURCE-DISCOVERY-EMPTY"
-  BuildInfoHaskellSourceDirectoriesEmpty {} -> "COMPILER-BUILDINFO-HS-SOURCE-DIRS-EMPTY"
-  BuildInfoUnitIdMalformed {} -> "COMPILER-BUILDINFO-UNIT-ID"
-  BuildInfoModuleNameMalformed {} -> "COMPILER-BUILDINFO-MODULE-NAME"
-  BuildInfoModuleNameDuplicate {} -> "COMPILER-BUILDINFO-MODULE-DUPLICATE"
-  BuildInfoSourceFileDuplicate {} -> "COMPILER-BUILDINFO-SOURCE-FILE-DUPLICATE"
-  BuildInfoHaskellSourceDirectoryDuplicate {} -> "COMPILER-BUILDINFO-HS-SOURCE-DIR-DUPLICATE"
-  BuildInfoPathUnsafe {} -> "COMPILER-BUILDINFO-PATH-UNSAFE"
-  BuildInfoPathEscapesSourceDirectory {} -> "COMPILER-BUILDINFO-PATH-ESCAPES-SOURCE"
-  BuildInfoSourceDirectoryNotAbsolute {} -> "COMPILER-BUILDINFO-SOURCE-DIR-NOT-ABSOLUTE"
-  BuildInfoSourceDirectoryMissingTrailingSeparator {} -> "COMPILER-BUILDINFO-SOURCE-DIR-SEPARATOR"
-  BuildInfoCabalFileExtensionInvalid {} -> "COMPILER-BUILDINFO-CABAL-EXTENSION"
-  BuildInfoSourceFileExtensionUnsupported {} -> "COMPILER-BUILDINFO-SOURCE-EXTENSION"
-  BuildInfoCompilerArgumentHazardous {} -> "COMPILER-BUILDINFO-ARGUMENT-HAZARDOUS"
-  BuildInfoCompilerArgumentUnclassified {} -> "COMPILER-BUILDINFO-ARGUMENT-UNCLASSIFIED"
-  BuildInfoCompilerArgumentValueMissing {} -> "COMPILER-BUILDINFO-ARGUMENT-VALUE-MISSING"
-  BuildInfoCompilerArgumentValueMalformed {} -> "COMPILER-BUILDINFO-ARGUMENT-VALUE-MALFORMED"
-  BuildInfoCompilerArgumentPathUnsafe {} -> "COMPILER-BUILDINFO-ARGUMENT-PATH-UNSAFE"
-  BuildInfoCompilerGeneratedInputArgumentMalformed {} -> "COMPILER-BUILDINFO-GENERATED-INPUT-ARGUMENT"
-  BuildInfoCompilerPackageBoundaryMissing {} -> "COMPILER-BUILDINFO-PACKAGE-BOUNDARY-MISSING"
-  BuildInfoCompilerPackageBoundaryDuplicate {} -> "COMPILER-BUILDINFO-PACKAGE-BOUNDARY-DUPLICATE"
-  BuildInfoCompilerThisUnitIdMissing {} -> "COMPILER-BUILDINFO-THIS-UNIT-MISSING"
-  BuildInfoCompilerThisUnitIdDuplicate {} -> "COMPILER-BUILDINFO-THIS-UNIT-DUPLICATE"
-  BuildInfoCompilerThisUnitIdMismatch {} -> "COMPILER-BUILDINFO-THIS-UNIT-MISMATCH"
-  BuildInfoObservedUnitIdDuplicate {} -> "COMPILER-BUILDINFO-OBSERVED-UNIT-DUPLICATE"
-  BuildInfoObservedComponentIdentityDuplicate {} -> "COMPILER-BUILDINFO-OBSERVED-COMPONENT-DUPLICATE"
-  BuildInfoExpectedCompilerFlavourUnsupported {} -> "COMPILER-BUILDINFO-EXPECTED-COMPILER-FLAVOUR"
-  BuildInfoExpectedCompilerIdMalformed {} -> "COMPILER-BUILDINFO-EXPECTED-COMPILER-ID"
-  BuildInfoExpectedCompilerPathUnsafe {} -> "COMPILER-BUILDINFO-EXPECTED-COMPILER-PATH"
-  BuildInfoExpectedCompilerIdMismatch {} -> "COMPILER-BUILDINFO-COMPILER-ID-MISMATCH"
-  BuildInfoExpectedCompilerPathMismatch {} -> "COMPILER-BUILDINFO-COMPILER-PATH-MISMATCH"
-  BuildInfoExpectedIdentityTypeUnsupported {} -> "COMPILER-BUILDINFO-EXPECTED-IDENTITY-TYPE"
-  BuildInfoExpectedIdentityTextMalformed {} -> "COMPILER-BUILDINFO-EXPECTED-IDENTITY-TEXT"
-  BuildInfoExpectedIdentityUniverseEmpty -> "COMPILER-BUILDINFO-EXPECTED-UNIVERSE-EMPTY"
-  BuildInfoExpectedUnitIdDuplicate {} -> "COMPILER-BUILDINFO-EXPECTED-UNIT-DUPLICATE"
-  BuildInfoExpectedComponentIdentityDuplicate {} -> "COMPILER-BUILDINFO-EXPECTED-COMPONENT-DUPLICATE"
-  BuildInfoExpectedIdentityMissing {} -> "COMPILER-BUILDINFO-EXPECTED-IDENTITY-MISSING"
-  BuildInfoUnexpectedIdentity {} -> "COMPILER-BUILDINFO-UNEXPECTED-IDENTITY"
-  BuildInfoExpectedUnitIdentityMismatch {} -> "COMPILER-BUILDINFO-EXPECTED-UNIT-MISMATCH"
-  BuildInfoExpectedComponentIdentityMismatch {} -> "COMPILER-BUILDINFO-EXPECTED-COMPONENT-MISMATCH"
-  BuildInfoGeneratorBytesUnauthenticated {} -> "COMPILER-BUILDINFO-GENERATOR-BYTES-UNAUTHENTICATED"
-  BuildInfoCompilerIdentityUnauthenticated {} -> "COMPILER-BUILDINFO-COMPILER-UNAUTHENTICATED"
-  BuildInfoIndependentExpectedCompilerUnavailable {} -> "COMPILER-BUILDINFO-INDEPENDENT-COMPILER-UNAVAILABLE"
-  BuildInfoMachinePathStateUnauthenticated {} -> "COMPILER-BUILDINFO-MACHINE-PATHS-UNAUTHENTICATED"
-  BuildInfoCompilerArgumentsUnauthenticated {} -> "COMPILER-BUILDINFO-ARGUMENTS-UNAUTHENTICATED"
-  BuildInfoDuplicateKeyDetectionDiagnosticOnly -> "COMPILER-BUILDINFO-DUPLICATE-DETECTION-DIAGNOSTIC"
-  BuildInfoIndependentExpectedUniverseUnavailable {} -> "COMPILER-BUILDINFO-INDEPENDENT-UNIVERSE-UNAVAILABLE"
-  BuildInfoExactModuleSourceOwnershipUnresolved {} -> "COMPILER-BUILDINFO-SOURCE-OWNERSHIP-UNRESOLVED"
-  BuildInfoCabalFileSourceJoinUnavailable {} -> "COMPILER-BUILDINFO-CABAL-SOURCE-JOIN-UNAVAILABLE"
-  BuildInfoGeneratedCompilerInputsUnauthenticated {} -> "COMPILER-BUILDINFO-GENERATED-INPUTS-UNAUTHENTICATED"
-  BuildInfoPackageDependencyJoinUnavailable {} -> "COMPILER-BUILDINFO-PACKAGE-JOIN-UNAVAILABLE"
-  BuildInfoConfigurationJoinUnavailable {} -> "COMPILER-BUILDINFO-CONFIGURATION-JOIN-UNAVAILABLE"
-  BuildInfoSourcePragmaSemanticsUnavailable {} -> "COMPILER-BUILDINFO-PRAGMA-SEMANTICS-UNAVAILABLE"
-  BuildInfoPhysicalPathContainmentUnavailable {} -> "COMPILER-BUILDINFO-PHYSICAL-PATHS-UNAVAILABLE"
-  BuildInfoPathPlatformSemanticsUnavailable {} -> "COMPILER-BUILDINFO-PATH-PLATFORM-UNAVAILABLE"
-  BuildInfoElaboratedPlanJoinUnavailable {} -> "COMPILER-BUILDINFO-PLAN-JOIN-UNAVAILABLE"
-  BuildInfoCompilerInvocationUnavailable {} -> "COMPILER-BUILDINFO-COMPILER-INVOCATION-UNAVAILABLE"
-  BuildInfoOracleQualificationUnavailable -> "COMPILER-BUILDINFO-ORACLE-QUALIFICATION-UNAVAILABLE"
-  BuildInfoResultEnvelopeExceeded {} -> "COMPILER-BUILDINFO-RESULT-ENVELOPE"
+  BuildInfoResourceLimitExceeded {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_RESOURCE_LIMIT_EXCEEDED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-RESOURCE-LIMIT-MUTANT"
+#else
+    "COMPILER-BUILDINFO-RESOURCE-LIMIT"
+#endif
+  BuildInfoJsonDuplicateKey {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_JSON_DUPLICATE_KEY_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-JSON-DUPLICATE-KEY-MUTANT"
+#else
+    "COMPILER-BUILDINFO-JSON-DUPLICATE-KEY"
+#endif
+  BuildInfoDuplicateKeyScanFailed {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_DUPLICATE_KEY_SCAN_FAILED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-JSON-SCAN-FAILED-MUTANT"
+#else
+    "COMPILER-BUILDINFO-JSON-SCAN-FAILED"
+#endif
+  BuildInfoRootNotObject ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_ROOT_NOT_OBJECT_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-ROOT-NOT-OBJECT-MUTANT"
+#else
+    "COMPILER-BUILDINFO-ROOT-NOT-OBJECT"
+#endif
+  BuildInfoFieldMissing {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_FIELD_MISSING_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-FIELD-MISSING-MUTANT"
+#else
+    "COMPILER-BUILDINFO-FIELD-MISSING"
+#endif
+  BuildInfoFieldUnknown {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_FIELD_UNKNOWN_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-FIELD-UNKNOWN-MUTANT"
+#else
+    "COMPILER-BUILDINFO-FIELD-UNKNOWN"
+#endif
+  BuildInfoFieldWrongType {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_FIELD_WRONG_TYPE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-FIELD-WRONG-TYPE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-FIELD-WRONG-TYPE"
+#endif
+  BuildInfoArrayElementWrongType {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_ARRAY_ELEMENT_WRONG_TYPE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-ARRAY-ELEMENT-WRONG-TYPE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-ARRAY-ELEMENT-WRONG-TYPE"
+#endif
+  BuildInfoTextEmpty {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_TEXT_EMPTY_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-TEXT-EMPTY-MUTANT"
+#else
+    "COMPILER-BUILDINFO-TEXT-EMPTY"
+#endif
+  BuildInfoArrayTextEmpty {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_ARRAY_TEXT_EMPTY_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-ARRAY-TEXT-EMPTY-MUTANT"
+#else
+    "COMPILER-BUILDINFO-ARRAY-TEXT-EMPTY"
+#endif
+  BuildInfoCabalLibraryVersionUnsupported {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_CABAL_LIBRARY_VERSION_UNSUPPORTED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-CABAL-VERSION-MUTANT"
+#else
+    "COMPILER-BUILDINFO-CABAL-VERSION"
+#endif
+  BuildInfoCompilerFlavourUnsupported {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_FLAVOUR_UNSUPPORTED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-COMPILER-FLAVOUR-MUTANT"
+#else
+    "COMPILER-BUILDINFO-COMPILER-FLAVOUR"
+#endif
+  BuildInfoCompilerIdMalformed {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_ID_MALFORMED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-COMPILER-ID-MUTANT"
+#else
+    "COMPILER-BUILDINFO-COMPILER-ID"
+#endif
+  BuildInfoComponentsEmpty ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPONENTS_EMPTY_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-COMPONENTS-EMPTY-MUTANT"
+#else
+    "COMPILER-BUILDINFO-COMPONENTS-EMPTY"
+#endif
+  BuildInfoComponentTypeUnsupported {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPONENT_TYPE_UNSUPPORTED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-COMPONENT-TYPE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-COMPONENT-TYPE"
+#endif
+  BuildInfoComponentNameMalformed {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPONENT_NAME_MALFORMED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-COMPONENT-NAME-MUTANT"
+#else
+    "COMPILER-BUILDINFO-COMPONENT-NAME"
+#endif
+  BuildInfoComponentSourceDiscoveryEmpty {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPONENT_SOURCE_DISCOVERY_EMPTY_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-SOURCE-DISCOVERY-EMPTY-MUTANT"
+#else
+    "COMPILER-BUILDINFO-SOURCE-DISCOVERY-EMPTY"
+#endif
+  BuildInfoHaskellSourceDirectoriesEmpty {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_HASKELL_SOURCE_DIRECTORIES_EMPTY_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-HS-SOURCE-DIRS-EMPTY-MUTANT"
+#else
+    "COMPILER-BUILDINFO-HS-SOURCE-DIRS-EMPTY"
+#endif
+  BuildInfoUnitIdMalformed {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_UNIT_ID_MALFORMED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-UNIT-ID-MUTANT"
+#else
+    "COMPILER-BUILDINFO-UNIT-ID"
+#endif
+  BuildInfoModuleNameMalformed {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_MODULE_NAME_MALFORMED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-MODULE-NAME-MUTANT"
+#else
+    "COMPILER-BUILDINFO-MODULE-NAME"
+#endif
+  BuildInfoModuleNameDuplicate {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_MODULE_NAME_DUPLICATE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-MODULE-DUPLICATE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-MODULE-DUPLICATE"
+#endif
+  BuildInfoSourceFileDuplicate {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_SOURCE_FILE_DUPLICATE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-SOURCE-FILE-DUPLICATE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-SOURCE-FILE-DUPLICATE"
+#endif
+  BuildInfoHaskellSourceDirectoryDuplicate {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_HASKELL_SOURCE_DIRECTORY_DUPLICATE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-HS-SOURCE-DIR-DUPLICATE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-HS-SOURCE-DIR-DUPLICATE"
+#endif
+  BuildInfoPathUnsafe {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_PATH_UNSAFE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-PATH-UNSAFE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-PATH-UNSAFE"
+#endif
+  BuildInfoPathEscapesSourceDirectory {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_PATH_ESCAPES_SOURCE_DIRECTORY_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-PATH-ESCAPES-SOURCE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-PATH-ESCAPES-SOURCE"
+#endif
+  BuildInfoSourceDirectoryNotAbsolute {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_SOURCE_DIRECTORY_NOT_ABSOLUTE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-SOURCE-DIR-NOT-ABSOLUTE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-SOURCE-DIR-NOT-ABSOLUTE"
+#endif
+  BuildInfoSourceDirectoryMissingTrailingSeparator {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_SOURCE_DIRECTORY_MISSING_TRAILING_SEPARATOR_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-SOURCE-DIR-SEPARATOR-MUTANT"
+#else
+    "COMPILER-BUILDINFO-SOURCE-DIR-SEPARATOR"
+#endif
+  BuildInfoCabalFileExtensionInvalid {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_CABAL_FILE_EXTENSION_INVALID_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-CABAL-EXTENSION-MUTANT"
+#else
+    "COMPILER-BUILDINFO-CABAL-EXTENSION"
+#endif
+  BuildInfoSourceFileExtensionUnsupported {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_SOURCE_FILE_EXTENSION_UNSUPPORTED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-SOURCE-EXTENSION-MUTANT"
+#else
+    "COMPILER-BUILDINFO-SOURCE-EXTENSION"
+#endif
+  BuildInfoCompilerArgumentHazardous {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_ARGUMENT_HAZARDOUS_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-ARGUMENT-HAZARDOUS-MUTANT"
+#else
+    "COMPILER-BUILDINFO-ARGUMENT-HAZARDOUS"
+#endif
+  BuildInfoCompilerArgumentUnclassified {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_ARGUMENT_UNCLASSIFIED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-ARGUMENT-UNCLASSIFIED-MUTANT"
+#else
+    "COMPILER-BUILDINFO-ARGUMENT-UNCLASSIFIED"
+#endif
+  BuildInfoCompilerArgumentValueMissing {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_ARGUMENT_VALUE_MISSING_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-ARGUMENT-VALUE-MISSING-MUTANT"
+#else
+    "COMPILER-BUILDINFO-ARGUMENT-VALUE-MISSING"
+#endif
+  BuildInfoCompilerArgumentValueMalformed {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_ARGUMENT_VALUE_MALFORMED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-ARGUMENT-VALUE-MALFORMED-MUTANT"
+#else
+    "COMPILER-BUILDINFO-ARGUMENT-VALUE-MALFORMED"
+#endif
+  BuildInfoCompilerArgumentPathUnsafe {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_ARGUMENT_PATH_UNSAFE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-ARGUMENT-PATH-UNSAFE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-ARGUMENT-PATH-UNSAFE"
+#endif
+  BuildInfoCompilerGeneratedInputArgumentMalformed {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_GENERATED_INPUT_ARGUMENT_MALFORMED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-GENERATED-INPUT-ARGUMENT-MUTANT"
+#else
+    "COMPILER-BUILDINFO-GENERATED-INPUT-ARGUMENT"
+#endif
+  BuildInfoCompilerPackageBoundaryMissing {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_PACKAGE_BOUNDARY_MISSING_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-PACKAGE-BOUNDARY-MISSING-MUTANT"
+#else
+    "COMPILER-BUILDINFO-PACKAGE-BOUNDARY-MISSING"
+#endif
+  BuildInfoCompilerPackageBoundaryDuplicate {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_PACKAGE_BOUNDARY_DUPLICATE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-PACKAGE-BOUNDARY-DUPLICATE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-PACKAGE-BOUNDARY-DUPLICATE"
+#endif
+  BuildInfoCompilerThisUnitIdMissing {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_THIS_UNIT_ID_MISSING_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-THIS-UNIT-MISSING-MUTANT"
+#else
+    "COMPILER-BUILDINFO-THIS-UNIT-MISSING"
+#endif
+  BuildInfoCompilerThisUnitIdDuplicate {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_THIS_UNIT_ID_DUPLICATE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-THIS-UNIT-DUPLICATE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-THIS-UNIT-DUPLICATE"
+#endif
+  BuildInfoCompilerThisUnitIdMismatch {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_THIS_UNIT_ID_MISMATCH_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-THIS-UNIT-MISMATCH-MUTANT"
+#else
+    "COMPILER-BUILDINFO-THIS-UNIT-MISMATCH"
+#endif
+  BuildInfoObservedUnitIdDuplicate {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_OBSERVED_UNIT_ID_DUPLICATE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-OBSERVED-UNIT-DUPLICATE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-OBSERVED-UNIT-DUPLICATE"
+#endif
+  BuildInfoObservedComponentIdentityDuplicate {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_OBSERVED_COMPONENT_IDENTITY_DUPLICATE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-OBSERVED-COMPONENT-DUPLICATE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-OBSERVED-COMPONENT-DUPLICATE"
+#endif
+  BuildInfoExpectedCompilerFlavourUnsupported {} ->
+    "COMPILER-BUILDINFO-EXPECTED-COMPILER-FLAVOUR"
+  BuildInfoExpectedCompilerIdMalformed {} ->
+    "COMPILER-BUILDINFO-EXPECTED-COMPILER-ID"
+  BuildInfoExpectedCompilerPathUnsafe {} ->
+    "COMPILER-BUILDINFO-EXPECTED-COMPILER-PATH"
+  BuildInfoExpectedCompilerIdMismatch {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_EXPECTED_COMPILER_ID_MISMATCH_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-COMPILER-ID-MISMATCH-MUTANT"
+#else
+    "COMPILER-BUILDINFO-COMPILER-ID-MISMATCH"
+#endif
+  BuildInfoExpectedCompilerPathMismatch {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_EXPECTED_COMPILER_PATH_MISMATCH_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-COMPILER-PATH-MISMATCH-MUTANT"
+#else
+    "COMPILER-BUILDINFO-COMPILER-PATH-MISMATCH"
+#endif
+  BuildInfoExpectedIdentityTypeUnsupported {} ->
+    "COMPILER-BUILDINFO-EXPECTED-IDENTITY-TYPE"
+  BuildInfoExpectedIdentityTextMalformed {} ->
+    "COMPILER-BUILDINFO-EXPECTED-IDENTITY-TEXT"
+  BuildInfoExpectedIdentityUniverseEmpty ->
+    "COMPILER-BUILDINFO-EXPECTED-UNIVERSE-EMPTY"
+  BuildInfoExpectedUnitIdDuplicate {} ->
+    "COMPILER-BUILDINFO-EXPECTED-UNIT-DUPLICATE"
+  BuildInfoExpectedComponentIdentityDuplicate {} ->
+    "COMPILER-BUILDINFO-EXPECTED-COMPONENT-DUPLICATE"
+  BuildInfoExpectedIdentityMissing {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_EXPECTED_IDENTITY_MISSING_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-EXPECTED-IDENTITY-MISSING-MUTANT"
+#else
+    "COMPILER-BUILDINFO-EXPECTED-IDENTITY-MISSING"
+#endif
+  BuildInfoUnexpectedIdentity {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_UNEXPECTED_IDENTITY_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-UNEXPECTED-IDENTITY-MUTANT"
+#else
+    "COMPILER-BUILDINFO-UNEXPECTED-IDENTITY"
+#endif
+  BuildInfoExpectedUnitIdentityMismatch {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_EXPECTED_UNIT_IDENTITY_MISMATCH_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-EXPECTED-UNIT-MISMATCH-MUTANT"
+#else
+    "COMPILER-BUILDINFO-EXPECTED-UNIT-MISMATCH"
+#endif
+  BuildInfoExpectedComponentIdentityMismatch {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_EXPECTED_COMPONENT_IDENTITY_MISMATCH_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-EXPECTED-COMPONENT-MISMATCH-MUTANT"
+#else
+    "COMPILER-BUILDINFO-EXPECTED-COMPONENT-MISMATCH"
+#endif
+  BuildInfoGeneratorBytesUnauthenticated {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_GENERATOR_BYTES_UNAUTHENTICATED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-GENERATOR-BYTES-UNAUTHENTICATED-MUTANT"
+#else
+    "COMPILER-BUILDINFO-GENERATOR-BYTES-UNAUTHENTICATED"
+#endif
+  BuildInfoCompilerIdentityUnauthenticated {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_IDENTITY_UNAUTHENTICATED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-COMPILER-UNAUTHENTICATED-MUTANT"
+#else
+    "COMPILER-BUILDINFO-COMPILER-UNAUTHENTICATED"
+#endif
+  BuildInfoIndependentExpectedCompilerUnavailable {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_INDEPENDENT_EXPECTED_COMPILER_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-INDEPENDENT-COMPILER-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-INDEPENDENT-COMPILER-UNAVAILABLE"
+#endif
+  BuildInfoMachinePathStateUnauthenticated {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_MACHINE_PATH_STATE_UNAUTHENTICATED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-MACHINE-PATHS-UNAUTHENTICATED-MUTANT"
+#else
+    "COMPILER-BUILDINFO-MACHINE-PATHS-UNAUTHENTICATED"
+#endif
+  BuildInfoCompilerArgumentsUnauthenticated {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_ARGUMENTS_UNAUTHENTICATED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-ARGUMENTS-UNAUTHENTICATED-MUTANT"
+#else
+    "COMPILER-BUILDINFO-ARGUMENTS-UNAUTHENTICATED"
+#endif
+  BuildInfoDuplicateKeyDetectionDiagnosticOnly ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_DUPLICATE_KEY_DETECTION_DIAGNOSTIC_ONLY_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-DUPLICATE-DETECTION-DIAGNOSTIC-MUTANT"
+#else
+    "COMPILER-BUILDINFO-DUPLICATE-DETECTION-DIAGNOSTIC"
+#endif
+  BuildInfoIndependentExpectedUniverseUnavailable {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_INDEPENDENT_EXPECTED_UNIVERSE_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-INDEPENDENT-UNIVERSE-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-INDEPENDENT-UNIVERSE-UNAVAILABLE"
+#endif
+  BuildInfoExactModuleSourceOwnershipUnresolved {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_EXACT_MODULE_SOURCE_OWNERSHIP_UNRESOLVED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-SOURCE-OWNERSHIP-UNRESOLVED-MUTANT"
+#else
+    "COMPILER-BUILDINFO-SOURCE-OWNERSHIP-UNRESOLVED"
+#endif
+  BuildInfoCabalFileSourceJoinUnavailable {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_CABAL_FILE_SOURCE_JOIN_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-CABAL-SOURCE-JOIN-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-CABAL-SOURCE-JOIN-UNAVAILABLE"
+#endif
+  BuildInfoGeneratedCompilerInputsUnauthenticated {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_GENERATED_COMPILER_INPUTS_UNAUTHENTICATED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-GENERATED-INPUTS-UNAUTHENTICATED-MUTANT"
+#else
+    "COMPILER-BUILDINFO-GENERATED-INPUTS-UNAUTHENTICATED"
+#endif
+  BuildInfoPackageDependencyJoinUnavailable {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_PACKAGE_DEPENDENCY_JOIN_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-PACKAGE-JOIN-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-PACKAGE-JOIN-UNAVAILABLE"
+#endif
+  BuildInfoConfigurationJoinUnavailable {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_CONFIGURATION_JOIN_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-CONFIGURATION-JOIN-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-CONFIGURATION-JOIN-UNAVAILABLE"
+#endif
+  BuildInfoSourcePragmaSemanticsUnavailable {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_SOURCE_PRAGMA_SEMANTICS_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-PRAGMA-SEMANTICS-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-PRAGMA-SEMANTICS-UNAVAILABLE"
+#endif
+  BuildInfoPhysicalPathContainmentUnavailable {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_PHYSICAL_PATH_CONTAINMENT_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-PHYSICAL-PATHS-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-PHYSICAL-PATHS-UNAVAILABLE"
+#endif
+  BuildInfoPathPlatformSemanticsUnavailable {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_PATH_PLATFORM_SEMANTICS_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-PATH-PLATFORM-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-PATH-PLATFORM-UNAVAILABLE"
+#endif
+  BuildInfoElaboratedPlanJoinUnavailable {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_ELABORATED_PLAN_JOIN_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-PLAN-JOIN-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-PLAN-JOIN-UNAVAILABLE"
+#endif
+  BuildInfoCompilerInvocationUnavailable {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_COMPILER_INVOCATION_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-COMPILER-INVOCATION-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-COMPILER-INVOCATION-UNAVAILABLE"
+#endif
+  BuildInfoOracleQualificationUnavailable ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_ORACLE_QUALIFICATION_UNAVAILABLE_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-ORACLE-QUALIFICATION-UNAVAILABLE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-ORACLE-QUALIFICATION-UNAVAILABLE"
+#endif
+  BuildInfoResultEnvelopeExceeded {} ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_CODE_RESULT_ENVELOPE_EXCEEDED_PROJECTION_MUTANT
+    "COMPILER-BUILDINFO-RESULT-ENVELOPE-MUTANT"
+#else
+    "COMPILER-BUILDINFO-RESULT-ENVELOPE"
+#endif
 
 problemDetail :: DiagnosticCompilerBuildInfoProblem -> Text
-problemDetail problem = case problem of
+problemDetail problem =
+#ifdef VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_GENERATOR_BYTES_UNAUTHENTICATED_PROJECTION_MUTANT
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoGeneratorBytesUnauthenticated {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_COMPILER_IDENTITY_UNAUTHENTICATED_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoCompilerIdentityUnauthenticated {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_INDEPENDENT_EXPECTED_COMPILER_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoIndependentExpectedCompilerUnavailable {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_MACHINE_PATH_STATE_UNAUTHENTICATED_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoMachinePathStateUnauthenticated {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_COMPILER_ARGUMENTS_UNAUTHENTICATED_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoCompilerArgumentsUnauthenticated {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_DUPLICATE_KEY_DETECTION_DIAGNOSTIC_ONLY_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoDuplicateKeyDetectionDiagnosticOnly -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_INDEPENDENT_EXPECTED_UNIVERSE_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoIndependentExpectedUniverseUnavailable {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_EXACT_MODULE_SOURCE_OWNERSHIP_UNRESOLVED_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoExactModuleSourceOwnershipUnresolved {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_CABAL_FILE_SOURCE_JOIN_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoCabalFileSourceJoinUnavailable {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_GENERATED_COMPILER_INPUTS_UNAUTHENTICATED_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoGeneratedCompilerInputsUnauthenticated {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_PACKAGE_DEPENDENCY_JOIN_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoPackageDependencyJoinUnavailable {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_CONFIGURATION_JOIN_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoConfigurationJoinUnavailable {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_SOURCE_PRAGMA_SEMANTICS_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoSourcePragmaSemanticsUnavailable {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_PHYSICAL_PATH_CONTAINMENT_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoPhysicalPathContainmentUnavailable {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_PATH_PLATFORM_SEMANTICS_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoPathPlatformSemanticsUnavailable {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_ELABORATED_PLAN_JOIN_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoElaboratedPlanJoinUnavailable {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_COMPILER_INVOCATION_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoCompilerInvocationUnavailable {} -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_ORACLE_QUALIFICATION_UNAVAILABLE_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoOracleQualificationUnavailable -> True
+      _ -> False)
+    problem
+#elif defined(VALIDATION_COMPILER_BUILDINFO_PROBLEM_DETAIL_GENERIC_SHOW_PROJECTION_MUTANT)
+  mutateProblemDetail
+    (\candidate -> case candidate of
+      BuildInfoGeneratorBytesUnauthenticated {} -> False
+      BuildInfoCompilerIdentityUnauthenticated {} -> False
+      BuildInfoIndependentExpectedCompilerUnavailable {} -> False
+      BuildInfoMachinePathStateUnauthenticated {} -> False
+      BuildInfoCompilerArgumentsUnauthenticated {} -> False
+      BuildInfoDuplicateKeyDetectionDiagnosticOnly -> False
+      BuildInfoIndependentExpectedUniverseUnavailable {} -> False
+      BuildInfoExactModuleSourceOwnershipUnresolved {} -> False
+      BuildInfoCabalFileSourceJoinUnavailable {} -> False
+      BuildInfoGeneratedCompilerInputsUnauthenticated {} -> False
+      BuildInfoPackageDependencyJoinUnavailable {} -> False
+      BuildInfoConfigurationJoinUnavailable {} -> False
+      BuildInfoSourcePragmaSemanticsUnavailable {} -> False
+      BuildInfoPhysicalPathContainmentUnavailable {} -> False
+      BuildInfoPathPlatformSemanticsUnavailable {} -> False
+      BuildInfoElaboratedPlanJoinUnavailable {} -> False
+      BuildInfoCompilerInvocationUnavailable {} -> False
+      BuildInfoOracleQualificationUnavailable -> False
+      _ -> True)
+    problem
+#else
+  mutateProblemDetail (const False) problem
+#endif
+
+mutateProblemDetail
+  :: (DiagnosticCompilerBuildInfoProblem -> Bool)
+  -> DiagnosticCompilerBuildInfoProblem
+  -> Text
+mutateProblemDetail selected problem =
+  originalProblemDetail problem
+    <> if selected problem then "-MUTANT" else ""
+
+originalProblemDetail :: DiagnosticCompilerBuildInfoProblem -> Text
+originalProblemDetail problem = case problem of
   BuildInfoGeneratorBytesUnauthenticated _ ->
     "generated build-info bytes have no authenticated generator or custody"
   BuildInfoCompilerIdentityUnauthenticated {} ->
@@ -748,16 +1380,61 @@ expectationObservations (DiagnosticCompilerBuildInfoExpectations
   (DiagnosticCompilerBuildInfoExpectedCompiler flavour compilerId compilerPath)
   identities) =
     retainedObservations retainExpectedCompilerFlavourObservation
-      [observation "expected.compiler.flavour" flavour]
+      [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_FLAVOUR_KEY_PROJECTION_MUTANT
+        "expected.compiler.flavour.mutant"
+#else
+        "expected.compiler.flavour"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_FLAVOUR_VALUE_PROJECTION_MUTANT
+        (flavour <> "-mutant")]
+#else
+        flavour]
+#endif
       <> retainedObservations retainExpectedCompilerIdObservation
-        [observation "expected.compiler.id" compilerId]
+        [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_ID_KEY_PROJECTION_MUTANT
+          "expected.compiler.id.mutant"
+#else
+          "expected.compiler.id"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_ID_VALUE_PROJECTION_MUTANT
+          (compilerId <> "-mutant")]
+#else
+          compilerId]
+#endif
       <> retainedObservations retainExpectedCompilerPathObservation
-        [observation "expected.compiler.path" (Text.pack compilerPath)]
+        [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_PATH_KEY_PROJECTION_MUTANT
+          "expected.compiler.path.mutant"
+#else
+          "expected.compiler.path"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPILER_PATH_VALUE_PROJECTION_MUTANT
+          (Text.pack compilerPath <> "/mutant")]
+#else
+          (Text.pack compilerPath)]
+#endif
       <> retainedObservations retainExpectedComponentCountObservation
-        [observation "expected.component.count" (decimal (length identities))]
+        [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPONENT_COUNT_KEY_PROJECTION_MUTANT
+          "expected.component.count.mutant"
+#else
+          "expected.component.count"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPONENT_COUNT_VALUE_PROJECTION_MUTANT
+          (decimal (length identities + 1))]
+#else
+          (decimal (length identities))]
+#endif
       <> concat
         [ expectedIdentityObservations
-            ("expected.component." <> decimal index)
+            ("expected.component." <>
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPONENT_PREFIX_INDEX_PROJECTION_MUTANT
+              decimal (index + 1))
+#else
+              decimal index)
+#endif
             (expectedIdentityComponent identity)
         | (index, identity) <- zip [0 :: Int ..] identities
         ]
@@ -766,17 +1443,74 @@ snapshotObservations :: DiagnosticCompilerBuildInfoSnapshot -> [Observation]
 snapshotObservations
   (DiagnosticCompilerBuildInfoSnapshot _ version flavour compilerId compilerPath components) =
     retainedObservations retainObservedCabalVersionObservation
-      [observation "observed.cabal-library-version" version]
+      [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_CABAL_VERSION_KEY_PROJECTION_MUTANT
+        "observed.cabal-library-version.mutant"
+#else
+        "observed.cabal-library-version"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_CABAL_VERSION_VALUE_PROJECTION_MUTANT
+        (version <> "-mutant")]
+#else
+        version]
+#endif
       <> retainedObservations retainObservedCompilerFlavourObservation
-        [observation "observed.compiler.flavour" flavour]
+        [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_FLAVOUR_KEY_PROJECTION_MUTANT
+          "observed.compiler.flavour.mutant"
+#else
+          "observed.compiler.flavour"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_FLAVOUR_VALUE_PROJECTION_MUTANT
+          (flavour <> "-mutant")]
+#else
+          flavour]
+#endif
       <> retainedObservations retainObservedCompilerIdObservation
-        [observation "observed.compiler.id" compilerId]
+        [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_ID_KEY_PROJECTION_MUTANT
+          "observed.compiler.id.mutant"
+#else
+          "observed.compiler.id"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_ID_VALUE_PROJECTION_MUTANT
+          (compilerId <> "-mutant")]
+#else
+          compilerId]
+#endif
       <> retainedObservations retainObservedCompilerPathObservation
-        [observation "observed.compiler.path" (Text.pack compilerPath)]
+        [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_PATH_KEY_PROJECTION_MUTANT
+          "observed.compiler.path.mutant"
+#else
+          "observed.compiler.path"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPILER_PATH_VALUE_PROJECTION_MUTANT
+          (Text.pack compilerPath <> "/mutant")]
+#else
+          (Text.pack compilerPath)]
+#endif
       <> retainedObservations retainObservedComponentCountObservation
-        [observation "observed.component.count" (decimal (length components))]
+        [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPONENT_COUNT_KEY_PROJECTION_MUTANT
+          "observed.component.count.mutant"
+#else
+          "observed.component.count"
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPONENT_COUNT_VALUE_PROJECTION_MUTANT
+          (decimal (length components + 1))]
+#else
+          (decimal (length components))]
+#endif
       <> concat
-        [ componentObservations ("observed.component." <> decimal index) component
+        [ componentObservations
+            ("observed.component." <>
+#ifdef VALIDATION_COMPILER_BUILDINFO_OBSERVED_COMPONENT_PREFIX_INDEX_PROJECTION_MUTANT
+              decimal (index + 1))
+#else
+              decimal index)
+#endif
+            component
         | (index, component) <- zip [0 :: Int ..] components
         ]
 
@@ -789,9 +1523,42 @@ identityObservations
   -> [Observation]
 identityObservations retainType retainName retainUnit prefix
   (DiagnosticCompilerBuildInfoComponentIdentity componentType componentName unitId) =
-    retainedObservations retainType [observation (prefix <> ".type") componentType]
-      <> retainedObservations retainName [observation (prefix <> ".name") componentName]
-      <> retainedObservations retainUnit [observation (prefix <> ".unit-id") unitId]
+    retainedObservations retainType
+      [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_IDENTITY_TYPE_KEY_PROJECTION_MUTANT
+        (prefix <> ".type.mutant")
+#else
+        (prefix <> ".type")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_IDENTITY_TYPE_VALUE_PROJECTION_MUTANT
+        (componentType <> "-mutant")]
+#else
+        componentType]
+#endif
+      <> retainedObservations retainName
+        [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_IDENTITY_NAME_KEY_PROJECTION_MUTANT
+          (prefix <> ".name.mutant")
+#else
+          (prefix <> ".name")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_IDENTITY_NAME_VALUE_PROJECTION_MUTANT
+          (componentName <> "-mutant")]
+#else
+          componentName]
+#endif
+      <> retainedObservations retainUnit
+        [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_IDENTITY_UNIT_KEY_PROJECTION_MUTANT
+          (prefix <> ".unit-id.mutant")
+#else
+          (prefix <> ".unit-id")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_IDENTITY_UNIT_VALUE_PROJECTION_MUTANT
+          (unitId <> "-mutant")]
+#else
+          unitId]
+#endif
 
 expectedIdentityObservations
   :: Text
@@ -814,22 +1581,55 @@ componentObservations
   -> DiagnosticCompilerBuildInfoComponentObservation
   -> [Observation]
 componentObservations prefix component =
-  observedIdentityObservations (prefix <> ".identity")
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_OBSERVATION_FAMILY_ORDER_MUTANT
+  reverse
+#endif
+  (
+  observedIdentityObservations
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_IDENTITY_PREFIX_PROJECTION_MUTANT
+      (prefix <> ".identity.mutant")
+#else
+      (prefix <> ".identity")
+#endif
       (componentObservationIdentity component)
     <> retainedObservations retainCompilerArgumentObservations
       (indexedArgumentObservations prefix (componentObservationCompilerArguments component))
     <> retainedObservations retainModuleObservations
-      (indexedTextObservations (prefix <> ".module") (componentObservationModules component))
+      (indexedTextObservations
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_MODULE_PREFIX_PROJECTION_MUTANT
+        (prefix <> ".module.mutant")
+#else
+        (prefix <> ".module")
+#endif
+        (componentObservationModules component))
     <> retainedObservations retainSourceFileObservations
       (indexedFilePathObservations
-        (prefix <> ".source-file") (componentObservationSourceFiles component))
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_SOURCE_FILE_PREFIX_PROJECTION_MUTANT
+        (prefix <> ".source-file.mutant")
+#else
+        (prefix <> ".source-file")
+#endif
+        (componentObservationSourceFiles component))
     <> retainedObservations retainHaskellSourceDirectoryObservations
       (indexedFilePathObservations
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_SOURCE_DIRECTORY_PREFIX_PROJECTION_MUTANT
+        (prefix <> ".haskell-source-directory.mutant")
+#else
         (prefix <> ".haskell-source-directory")
+#endif
         (componentObservationSourceDirectories component))
     <> retainedObservations retainSourceDirectoryObservation
-      [observation (prefix <> ".source-directory")
+      [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_SOURCE_ROOT_KEY_PROJECTION_MUTANT
+        (prefix <> ".source-directory.mutant")
+#else
+        (prefix <> ".source-directory")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_SOURCE_ROOT_VALUE_PROJECTION_MUTANT
+        (Text.pack (componentObservationSourceDirectory component) <> "-mutant")]
+#else
         (Text.pack (componentObservationSourceDirectory component))]
+#endif
     <> retainedObservations retainCabalFileObservations
       (cabalFileObservations prefix (componentObservationCabalFile component))
     <> retainedObservations retainArgumentPathObservations
@@ -839,9 +1639,15 @@ componentObservations prefix component =
         (componentObservationGeneratedInputs component))
     <> retainedObservations retainPackageObservations
       (indexedPackageObservations prefix (componentObservationPackageIds component))
+  )
 
 retainedObservations :: Bool -> [value] -> [value]
-retainedObservations True values = values
+retainedObservations True values =
+#ifdef VALIDATION_COMPILER_BUILDINFO_RETAINED_OBSERVATIONS_TRUE_ROUTE_DROP_MUTANT
+  values `seq` []
+#else
+  values
+#endif
 retainedObservations False _ = []
 
 retainInputBytesObservation, retainExpectedCompilerFlavourObservation,
@@ -985,19 +1791,75 @@ retainPackageObservations = True
 
 indexedTextObservations :: Text -> [Text] -> [Observation]
 indexedTextObservations prefix values =
-  observation (prefix <> ".count") (decimal (length values))
-    : [observation (prefix <> "." <> decimal index) value
+  observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_INDEXED_TEXT_COUNT_KEY_PROJECTION_MUTANT
+    (prefix <> ".count.mutant")
+#else
+    (prefix <> ".count")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_INDEXED_TEXT_COUNT_VALUE_PROJECTION_MUTANT
+    (decimal (length values + 1))
+#else
+    (decimal (length values))
+#endif
+    : [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_INDEXED_TEXT_INDEX_KEY_PROJECTION_MUTANT
+        (prefix <> "." <> decimal (index + 1))
+#else
+        (prefix <> "." <> decimal index)
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_INDEXED_TEXT_INDEX_VALUE_PROJECTION_MUTANT
+        (value <> "-mutant")
+#else
+        value
+#endif
       | (index, value) <- zip [0 :: Int ..] values]
 
 indexedFilePathObservations :: Text -> [FilePath] -> [Observation]
-indexedFilePathObservations prefix = indexedTextObservations prefix . map Text.pack
+indexedFilePathObservations prefix paths =
+  indexedTextObservations prefix
+#ifdef VALIDATION_COMPILER_BUILDINFO_INDEXED_FILE_PATH_TEXT_MAPPING_MUTANT
+    [Text.pack path <> "-mutant" | path <- paths]
+#else
+    (map Text.pack paths)
+#endif
 
 cabalFileObservations :: Text -> Maybe FilePath -> [Observation]
 cabalFileObservations prefix Nothing =
-  [observation (prefix <> ".cabal-file.present") "false"]
+  [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_CABAL_FILE_ABSENT_KEY_PROJECTION_MUTANT
+    (prefix <> ".cabal-file.present.mutant")
+#else
+    (prefix <> ".cabal-file.present")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_CABAL_FILE_ABSENT_VALUE_PROJECTION_MUTANT
+    "false-mutant"]
+#else
+    "false"]
+#endif
 cabalFileObservations prefix (Just path) =
-  [ observation (prefix <> ".cabal-file.present") "true"
-  , observation (prefix <> ".cabal-file.path") (Text.pack path)
+  [ observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_CABAL_FILE_PRESENT_KEY_PROJECTION_MUTANT
+      (prefix <> ".cabal-file.present.mutant")
+#else
+      (prefix <> ".cabal-file.present")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_CABAL_FILE_PRESENT_VALUE_PROJECTION_MUTANT
+      "true-mutant"
+#else
+      "true"
+#endif
+  , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_CABAL_FILE_PATH_KEY_PROJECTION_MUTANT
+      (prefix <> ".cabal-file.path.mutant")
+#else
+      (prefix <> ".cabal-file.path")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_CABAL_FILE_PATH_VALUE_PROJECTION_MUTANT
+      (Text.pack path <> "/mutant")
+#else
+      (Text.pack path)
+#endif
   ]
 
 indexedArgumentObservations
@@ -1005,43 +1867,182 @@ indexedArgumentObservations
   -> [DiagnosticCompilerBuildInfoArgumentObservation]
   -> [Observation]
 indexedArgumentObservations componentPrefix values =
-  observation (componentPrefix <> ".compiler-argument.count") (decimal (length values))
+  observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_COUNT_KEY_PROJECTION_MUTANT
+    (componentPrefix <> ".compiler-argument.count.mutant")
+#else
+    (componentPrefix <> ".compiler-argument.count")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_COUNT_VALUE_PROJECTION_MUTANT
+    (decimal (length values + 1))
+#else
+    (decimal (length values))
+#endif
     : concat
       [argumentObservations
-        (componentPrefix <> ".compiler-argument." <> decimal ordinal) value
+        (componentPrefix <> ".compiler-argument." <>
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_ORDINAL_PROJECTION_MUTANT
+          decimal (ordinal + 1))
+#else
+          decimal ordinal)
+#endif
+        value
       | (ordinal, value) <- zip [0 :: Int ..] values]
 
 argumentObservations :: Text -> DiagnosticCompilerBuildInfoArgumentObservation -> [Observation]
 argumentObservations prefix argument = case argument of
   DiagnosticCompilerBuildInfoBoundaryArgument optionIndex option ->
-    optionOnly "package-boundary" optionIndex option
+    optionOnly
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_BOUNDARY_KIND_VALUE_PROJECTION_MUTANT
+      "package-boundary-mutant"
+#else
+      "package-boundary"
+#endif
+      optionIndex option
   DiagnosticCompilerBuildInfoThisUnitArgument optionIndex option valueIndex value ->
-    optionValue "this-unit" optionIndex option valueIndex value
+    optionValue
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_THIS_UNIT_KIND_VALUE_PROJECTION_MUTANT
+      "this-unit-mutant"
+#else
+      "this-unit"
+#endif
+      optionIndex option valueIndex value
   DiagnosticCompilerBuildInfoPackageArgument optionIndex option valueIndex value ->
-    optionValue "package" optionIndex option valueIndex value
+    optionValue
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_PACKAGE_KIND_VALUE_PROJECTION_MUTANT
+      "package-mutant"
+#else
+      "package"
+#endif
+      optionIndex option valueIndex value
   DiagnosticCompilerBuildInfoPathArgument optionIndex option valueIndex raw path ->
-    optionOnly "path" optionIndex option
-      <> maybe [] (\index -> [observation (prefix <> ".value-index") (decimal index)]) valueIndex
-      <> [ observation (prefix <> ".raw") raw
-         , observation (prefix <> ".path") (Text.pack path)
+    optionOnly
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_PATH_KIND_VALUE_PROJECTION_MUTANT
+      "path-mutant"
+#else
+      "path"
+#endif
+      optionIndex option
+      <> maybe [] (\index -> [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_PATH_VALUE_INDEX_KEY_PROJECTION_MUTANT
+            (prefix <> ".value-index.mutant")
+#else
+            (prefix <> ".value-index")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_PATH_VALUE_INDEX_VALUE_PROJECTION_MUTANT
+            (decimal (index + 1))])
+#else
+            (decimal index)])
+#endif
+        valueIndex
+      <> [ observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_RAW_KEY_PROJECTION_MUTANT
+            (prefix <> ".raw.mutant")
+#else
+            (prefix <> ".raw")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_RAW_VALUE_PROJECTION_MUTANT
+            (raw <> "-mutant")
+#else
+            raw
+#endif
+         , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_PATH_KEY_PROJECTION_MUTANT
+            (prefix <> ".path.mutant")
+#else
+            (prefix <> ".path")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_PATH_VALUE_PROJECTION_MUTANT
+            (Text.pack path <> "/mutant")
+#else
+            (Text.pack path)
+#endif
          ]
   DiagnosticCompilerBuildInfoGeneratedInputArgument optionIndex option valueIndex raw path ->
-    optionValue "generated-input" optionIndex option valueIndex raw
-      <> [observation (prefix <> ".path") (Text.pack path)]
+    optionValue
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_GENERATED_KIND_VALUE_PROJECTION_MUTANT
+      "generated-input-mutant"
+#else
+      "generated-input"
+#endif
+      optionIndex option valueIndex raw
+      <> [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_GENERATED_PATH_KEY_PROJECTION_MUTANT
+            (prefix <> ".path.mutant")
+#else
+            (prefix <> ".path")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_GENERATED_PATH_VALUE_PROJECTION_MUTANT
+            (Text.pack path <> "/mutant")]
+#else
+            (Text.pack path)]
+#endif
   DiagnosticCompilerBuildInfoStandaloneArgument optionIndex option ->
-    optionOnly "standalone" optionIndex option
+    optionOnly
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_STANDALONE_KIND_VALUE_PROJECTION_MUTANT
+      "standalone-mutant"
+#else
+      "standalone"
+#endif
+      optionIndex option
   DiagnosticCompilerBuildInfoBypassedArgument optionIndex option ->
     optionOnly "bypassed" optionIndex option
  where
   optionOnly kind optionIndex option =
-    [ observation (prefix <> ".kind") kind
-    , observation (prefix <> ".option-index") (decimal optionIndex)
-    , observation (prefix <> ".option") option
+    [ observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_KIND_KEY_PROJECTION_MUTANT
+        (prefix <> ".kind.mutant")
+#else
+        (prefix <> ".kind")
+#endif
+        kind
+    , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_OPTION_INDEX_KEY_PROJECTION_MUTANT
+        (prefix <> ".option-index.mutant")
+#else
+        (prefix <> ".option-index")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_OPTION_INDEX_VALUE_PROJECTION_MUTANT
+        (decimal (optionIndex + 1))
+#else
+        (decimal optionIndex)
+#endif
+    , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_OPTION_KEY_PROJECTION_MUTANT
+        (prefix <> ".option.mutant")
+#else
+        (prefix <> ".option")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_OPTION_VALUE_PROJECTION_MUTANT
+        (option <> "-mutant")
+#else
+        option
+#endif
     ]
   optionValue kind optionIndex option valueIndex value =
     optionOnly kind optionIndex option
-      <> [ observation (prefix <> ".value-index") (decimal valueIndex)
-         , observation (prefix <> ".value") value
+      <> [ observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_VALUE_INDEX_KEY_PROJECTION_MUTANT
+            (prefix <> ".value-index.mutant")
+#else
+            (prefix <> ".value-index")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_VALUE_INDEX_VALUE_PROJECTION_MUTANT
+            (decimal (valueIndex + 1))
+#else
+            (decimal valueIndex)
+#endif
+         , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_VALUE_KEY_PROJECTION_MUTANT
+            (prefix <> ".value.mutant")
+#else
+            (prefix <> ".value")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_VALUE_VALUE_PROJECTION_MUTANT
+            (value <> "-mutant")
+#else
+            value
+#endif
          ]
 
 indexedPathObservations
@@ -1049,18 +2050,74 @@ indexedPathObservations
   -> [DiagnosticCompilerBuildInfoPathObservation]
   -> [Observation]
 indexedPathObservations componentPrefix values =
-  observation (componentPrefix <> ".argument-path.count") (decimal (length values))
+  observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_COUNT_KEY_PROJECTION_MUTANT
+    (componentPrefix <> ".argument-path.count.mutant")
+#else
+    (componentPrefix <> ".argument-path.count")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_COUNT_VALUE_PROJECTION_MUTANT
+    (decimal (length values + 1))
+#else
+    (decimal (length values))
+#endif
     : concat
       [ case value of
           DiagnosticCompilerBuildInfoPathObservation optionIndex option valueIndex path ->
-            [ observation (prefix <> ".option-index") (decimal optionIndex)
-            , observation (prefix <> ".option") option
+            [ observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_OPTION_INDEX_KEY_PROJECTION_MUTANT
+                (prefix <> ".option-index.mutant")
+#else
+                (prefix <> ".option-index")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_OPTION_INDEX_VALUE_PROJECTION_MUTANT
+                (decimal (optionIndex + 1))
+#else
+                (decimal optionIndex)
+#endif
+            , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_OPTION_KEY_PROJECTION_MUTANT
+                (prefix <> ".option.mutant")
+#else
+                (prefix <> ".option")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_OPTION_VALUE_PROJECTION_MUTANT
+                (option <> "-mutant")
+#else
+                option
+#endif
             ]
               <> maybe [] (\index ->
-                [observation (prefix <> ".value-index") (decimal index)]) valueIndex
-              <> [observation (prefix <> ".path") (Text.pack path)]
+                [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_VALUE_INDEX_KEY_PROJECTION_MUTANT
+                  (prefix <> ".value-index.mutant")
+#else
+                  (prefix <> ".value-index")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_VALUE_INDEX_VALUE_PROJECTION_MUTANT
+                  (decimal (index + 1))])
+#else
+                  (decimal index)])
+#endif
+                valueIndex
+              <> [observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_PATH_KEY_PROJECTION_MUTANT
+                    (prefix <> ".path.mutant")
+#else
+                    (prefix <> ".path")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_PATH_VALUE_PROJECTION_MUTANT
+                    (Text.pack path <> "/mutant")]
+#else
+                    (Text.pack path)]
+#endif
       | (ordinal, value) <- zip [0 :: Int ..] values
-      , let prefix = componentPrefix <> ".argument-path." <> decimal ordinal
+      , let prefix = componentPrefix <> ".argument-path." <>
+#ifdef VALIDATION_COMPILER_BUILDINFO_PATH_OBSERVATION_ORDINAL_PROJECTION_MUTANT
+              decimal (ordinal + 1)
+#else
+              decimal ordinal
+#endif
       ]
 
 indexedGeneratedInputObservations
@@ -1068,19 +2125,84 @@ indexedGeneratedInputObservations
   -> [DiagnosticCompilerBuildInfoGeneratedInputObservation]
   -> [Observation]
 indexedGeneratedInputObservations componentPrefix values =
-  observation (componentPrefix <> ".generated-input.count") (decimal (length values))
+  observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_COUNT_KEY_PROJECTION_MUTANT
+    (componentPrefix <> ".generated-input.count.mutant")
+#else
+    (componentPrefix <> ".generated-input.count")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_COUNT_VALUE_PROJECTION_MUTANT
+    (decimal (length values + 1))
+#else
+    (decimal (length values))
+#endif
     : concat
       [ case value of
           DiagnosticCompilerBuildInfoGeneratedInputObservation
             optionIndex option valueIndex raw path ->
-              [ observation (prefix <> ".option-index") (decimal optionIndex)
-              , observation (prefix <> ".option") option
-              , observation (prefix <> ".value-index") (decimal valueIndex)
-              , observation (prefix <> ".raw") raw
-              , observation (prefix <> ".path") (Text.pack path)
+              [ observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_OPTION_INDEX_KEY_PROJECTION_MUTANT
+                  (prefix <> ".option-index.mutant")
+#else
+                  (prefix <> ".option-index")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_OPTION_INDEX_VALUE_PROJECTION_MUTANT
+                  (decimal (optionIndex + 1))
+#else
+                  (decimal optionIndex)
+#endif
+              , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_OPTION_KEY_PROJECTION_MUTANT
+                  (prefix <> ".option.mutant")
+#else
+                  (prefix <> ".option")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_OPTION_VALUE_PROJECTION_MUTANT
+                  (option <> "-mutant")
+#else
+                  option
+#endif
+              , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_VALUE_INDEX_KEY_PROJECTION_MUTANT
+                  (prefix <> ".value-index.mutant")
+#else
+                  (prefix <> ".value-index")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_VALUE_INDEX_VALUE_PROJECTION_MUTANT
+                  (decimal (valueIndex + 1))
+#else
+                  (decimal valueIndex)
+#endif
+              , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_RAW_KEY_PROJECTION_MUTANT
+                  (prefix <> ".raw.mutant")
+#else
+                  (prefix <> ".raw")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_RAW_VALUE_PROJECTION_MUTANT
+                  (raw <> "-mutant")
+#else
+                  raw
+#endif
+              , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_PATH_KEY_PROJECTION_MUTANT
+                  (prefix <> ".path.mutant")
+#else
+                  (prefix <> ".path")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_PATH_VALUE_PROJECTION_MUTANT
+                  (Text.pack path <> "/mutant")
+#else
+                  (Text.pack path)
+#endif
               ]
       | (ordinal, value) <- zip [0 :: Int ..] values
-      , let prefix = componentPrefix <> ".generated-input." <> decimal ordinal
+      , let prefix = componentPrefix <> ".generated-input." <>
+#ifdef VALIDATION_COMPILER_BUILDINFO_GENERATED_OBSERVATION_ORDINAL_PROJECTION_MUTANT
+              decimal (ordinal + 1)
+#else
+              decimal ordinal
+#endif
       ]
 
 indexedPackageObservations
@@ -1088,21 +2210,82 @@ indexedPackageObservations
   -> [DiagnosticCompilerBuildInfoPackageObservation]
   -> [Observation]
 indexedPackageObservations componentPrefix values =
-  observation (componentPrefix <> ".package.count") (decimal (length values))
+  observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_COUNT_KEY_PROJECTION_MUTANT
+    (componentPrefix <> ".package.count.mutant")
+#else
+    (componentPrefix <> ".package.count")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_COUNT_VALUE_PROJECTION_MUTANT
+    (decimal (length values + 1))
+#else
+    (decimal (length values))
+#endif
     : concat
       [ case value of
           DiagnosticCompilerBuildInfoPackageObservation optionIndex option valueIndex valueText ->
-            [ observation (prefix <> ".option-index") (decimal optionIndex)
-            , observation (prefix <> ".option") option
-            , observation (prefix <> ".value-index") (decimal valueIndex)
-            , observation (prefix <> ".value") valueText
+            [ observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_OPTION_INDEX_KEY_PROJECTION_MUTANT
+                (prefix <> ".option-index.mutant")
+#else
+                (prefix <> ".option-index")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_OPTION_INDEX_VALUE_PROJECTION_MUTANT
+                (decimal (optionIndex + 1))
+#else
+                (decimal optionIndex)
+#endif
+            , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_OPTION_KEY_PROJECTION_MUTANT
+                (prefix <> ".option.mutant")
+#else
+                (prefix <> ".option")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_OPTION_VALUE_PROJECTION_MUTANT
+                (option <> "-mutant")
+#else
+                option
+#endif
+            , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_VALUE_INDEX_KEY_PROJECTION_MUTANT
+                (prefix <> ".value-index.mutant")
+#else
+                (prefix <> ".value-index")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_VALUE_INDEX_VALUE_PROJECTION_MUTANT
+                (decimal (valueIndex + 1))
+#else
+                (decimal valueIndex)
+#endif
+            , observation
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_VALUE_KEY_PROJECTION_MUTANT
+                (prefix <> ".value.mutant")
+#else
+                (prefix <> ".value")
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_VALUE_VALUE_PROJECTION_MUTANT
+                (valueText <> "-mutant")
+#else
+                valueText
+#endif
             ]
       | (ordinal, value) <- zip [0 :: Int ..] values
-      , let prefix = componentPrefix <> ".package." <> decimal ordinal
+      , let prefix = componentPrefix <> ".package." <>
+#ifdef VALIDATION_COMPILER_BUILDINFO_PACKAGE_OBSERVATION_ORDINAL_PROJECTION_MUTANT
+              decimal (ordinal + 1)
+#else
+              decimal ordinal
+#endif
       ]
 
 decimal :: Int -> Text
-decimal = Text.pack . show
+decimal value = Text.pack (show
+#ifdef VALIDATION_COMPILER_BUILDINFO_DECIMAL_TEXT_MAPPING_MUTANT
+  (value + 1)
+#else
+  value
+#endif
+  )
 
 parseCompilerBuildInfoDiagnostic
   :: DiagnosticCompilerBuildInfoExpectedCompiler
@@ -1110,34 +2293,40 @@ parseCompilerBuildInfoDiagnostic
   -> ByteString
   -> DiagnosticCompilerBuildInfoRefusal
 parseCompilerBuildInfoDiagnostic expectedCompiler expectedIdentities bytes
-  | ByteString.length bytes > maximumBuildInfoBytes =
+  | inputLength > maximumBuildInfoBytes =
       singleProblemRefusal
-        (BuildInfoResourceLimitExceeded "input-bytes" maximumBuildInfoBytes (ByteString.length bytes))
-  | expectedCount > maximumExpectedIdentities =
-      singleProblemRefusal
-        (BuildInfoResourceLimitExceeded "expected-identities" maximumExpectedIdentities expectedCount)
-  | not (null expectationProblems) = hardRefusal expectationProblems
+        (BuildInfoResourceLimitExceeded "input-bytes" maximumBuildInfoBytes inputLength)
   | otherwise =
       case scanDuplicateJsonKeys bytes of
-        Left problem -> singleProblemRefusal problem
-        Right duplicateProblems
-          | not (null duplicateProblems) -> hardRefusal duplicateProblems
-          | otherwise ->
+        Left problem ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PARSE_DUPLICATE_SCAN_LEFT_ROUTE_MUTANT
+          hardRefusal [problem, problem]
+#else
+          singleProblemRefusal problem
+#endif
+        Right () ->
               case eitherDecodeStrict' bytes of
                 Left message ->
                   singleProblemRefusal
                     (BuildInfoDuplicateKeyScanFailed
                       ("bounded JSON scanner and Aeson decoder disagreed: "
                         <> Text.pack message))
-                Right (Object root) -> parseBuildInfoRoot expectedCompiler expectedIdentities root
+                Right (Object root) ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_PARSE_OBJECT_ROUTE_MUTANT
+                  parseBuildInfoRoot expectedCompiler expectedIdentities root `seq`
+                    hardRefusal
+                      [BuildInfoDuplicateKeyScanFailed "object decode route mutated"]
+#else
+                  parseBuildInfoRoot expectedCompiler expectedIdentities root
+#endif
                 Right _
                   | enforceRootObject -> singleProblemRefusal BuildInfoRootNotObject
                   | otherwise -> hardRefusal []
  where
-  expectedCount = boundedLength (maximumExpectedIdentities + 1) expectedIdentities
-  expectationProblems =
-    validateExpectedCompiler expectedCompiler <> validateExpectedIdentities expectedIdentities
-
+  inputLength = ByteString.length bytes
+#ifdef VALIDATION_COMPILER_BUILDINFO_PARSE_INPUT_LENGTH_INCREMENT_MUTANT
+    + 1
+#endif
 parseBuildInfoRoot
   :: DiagnosticCompilerBuildInfoExpectedCompiler
   -> [DiagnosticCompilerBuildInfoExpectedIdentity]
@@ -1151,8 +2340,15 @@ parseBuildInfoRoot expectedCompiler expectedIdentities root =
           singleProblemRefusal
             (BuildInfoResourceLimitExceeded "components" maximumBuildInfoComponents componentCount)
       | otherwise ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_ROOT_SUCCESS_TUPLE_ROUTE_MUTANT
+          parseBuildInfoBody expectedCompiler expectedIdentities observedVersion
+            encodedCompiler encodedComponents `seq`
+              hardRefusal
+                [BuildInfoDuplicateKeyScanFailed "root success tuple route mutated"]
+#else
           parseBuildInfoBody expectedCompiler expectedIdentities observedVersion
             encodedCompiler encodedComponents
+#endif
     _ -> hardRefusal rootProblems
  where
   scope = "build-info"
@@ -1182,15 +2378,40 @@ parseBuildInfoBody
 parseBuildInfoBody expectedCompiler expectedIdentities cabalVersion compilerObject encodedComponents =
   case (parsedValue parsedCompiler, partitionedComponents) of
     (Just compilerIdentity, (_, Just parsedComponentValues))
-      | not (null syntaxAndSemanticProblems) -> hardRefusal syntaxAndSemanticProblems
-      | not (null identityProblems) -> hardRefusal identityProblems
+      | not (null syntaxAndSemanticProblems) ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_BODY_SYNTAX_REFUSAL_ROUTE_MUTANT
+          hardRefusal (syntaxAndSemanticProblems <> syntaxAndSemanticProblems)
+#else
+          hardRefusal syntaxAndSemanticProblems
+#endif
+      | not (null identityProblems) ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_BODY_IDENTITY_REFUSAL_ROUTE_MUTANT
+          hardRefusal (identityProblems <> identityProblems)
+#else
+          hardRefusal identityProblems
+#endif
       | otherwise ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_BODY_OBSERVED_REFUSAL_ROUTE_MUTANT
+          let permanent =
+                permanentProblems expectedCompiler expectedIdentities cabalVersion
+                  compilerIdentity parsedComponentValues
+              snapshot =
+                makeSnapshot expectedCompiler expectedIdentities cabalVersion
+                  compilerIdentity parsedComponentValues
+           in observedRefusal permanent snapshot `seq` hardRefusal permanent
+#else
           observedRefusal
             (permanentProblems expectedCompiler expectedIdentities cabalVersion
               compilerIdentity parsedComponentValues)
             (makeSnapshot expectedCompiler expectedIdentities cabalVersion
               compilerIdentity parsedComponentValues)
-    _ -> hardRefusal syntaxAndSemanticProblems
+#endif
+    _ ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_BODY_PARSE_FALLBACK_ROUTE_MUTANT
+      hardRefusal (syntaxAndSemanticProblems <> syntaxAndSemanticProblems)
+#else
+      hardRefusal syntaxAndSemanticProblems
+#endif
  where
   parsedCompiler = parseCompilerIdentity compilerObject
   parsedComponents = zipWith parseBuildInfoComponent [0 ..] encodedComponents
@@ -1230,7 +2451,7 @@ makeSnapshot expectedCompiler expectedIdentities cabalVersion
       (DiagnosticCompilerBuildInfoExpectations expectedCompiler expectedIdentities)
       cabalVersion flavour compilerId compilerPath
 #ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_ORDER_BYPASS_MUTANT
-      components
+      (sortOn (const ()) components)
 #else
       (sortOn componentObservationIdentity components)
 #endif
@@ -1242,17 +2463,17 @@ permanentProblems
   -> CompilerIdentity
   -> [DiagnosticCompilerBuildInfoComponentObservation]
   -> [DiagnosticCompilerBuildInfoProblem]
-permanentProblems expectedCompiler expectedIdentities cabalVersion
+permanentProblems _expectedCompiler expectedIdentities cabalVersion
   (CompilerIdentity flavour compilerId compilerPath) components =
-    concat
+    (concat
       [ retainedProblem retainGeneratorBytesResidue
           (BuildInfoGeneratorBytesUnauthenticated cabalVersion)
       , retainedProblem retainCompilerIdentityResidue
           (BuildInfoCompilerIdentityUnauthenticated flavour compilerId compilerPath)
       , retainedProblem retainIndependentCompilerResidue
-          (uncurryExpectedCompiler BuildInfoIndependentExpectedCompilerUnavailable expectedCompiler)
+          BuildInfoIndependentExpectedCompilerUnavailable
       , retainedProblem retainMachinePathStateResidue
-          (BuildInfoMachinePathStateUnauthenticated machinePaths)
+          BuildInfoMachinePathStateUnauthenticated
       , retainedProblem retainCompilerArgumentsResidue
           (BuildInfoCompilerArgumentsUnauthenticated
             [(componentObservationIdentity component,
@@ -1264,8 +2485,7 @@ permanentProblems expectedCompiler expectedIdentities cabalVersion
           (BuildInfoIndependentExpectedUniverseUnavailable
             (sort (map expectedIdentityComponent expectedIdentities)))
       , retainedProblem retainSourceOwnershipResidue
-          (BuildInfoExactModuleSourceOwnershipUnresolved
-            (sort (concatMap unresolvedOwnershipObservations components)))
+          BuildInfoExactModuleSourceOwnershipUnresolved
       , retainedProblem retainCabalJoinResidue
           (BuildInfoCabalFileSourceJoinUnavailable
             (sort
@@ -1289,7 +2509,7 @@ permanentProblems expectedCompiler expectedIdentities cabalVersion
           (BuildInfoSourcePragmaSemanticsUnavailable
             (sort (map componentObservationIdentity components)))
       , retainedProblem retainPhysicalPathContainmentResidue
-          (BuildInfoPhysicalPathContainmentUnavailable machinePaths)
+          BuildInfoPhysicalPathContainmentUnavailable
       , retainedProblem retainPlatformResidue
           (BuildInfoPathPlatformSemanticsUnavailable "posix-lexical-only")
       , retainedProblem retainElaboratedPlanJoinResidue
@@ -1298,12 +2518,14 @@ permanentProblems expectedCompiler expectedIdentities cabalVersion
       , retainedProblem retainCompilerInvocationResidue
           (BuildInfoCompilerInvocationUnavailable flavour compilerId compilerPath)
       , retainedProblem retainOracleResidue BuildInfoOracleQualificationUnavailable
-      ]
- where
-  machinePaths = Set.toAscList (explicitMachinePaths compilerPath components)
-
+      ])
 retainedProblem :: Bool -> problem -> [problem]
-retainedProblem True problem = [problem]
+retainedProblem True problem =
+#ifdef VALIDATION_COMPILER_BUILDINFO_RETAINED_PROBLEM_TRUE_ROUTE_DUPLICATE_MUTANT
+  [problem, problem]
+#else
+  [problem]
+#endif
 retainedProblem False _ = []
 
 retainGeneratorBytesResidue, retainCompilerIdentityResidue,
@@ -1693,16 +2915,52 @@ inspectCompilerArguments :: Text -> [Text] -> ArgumentInspection
 inspectCompilerArguments unitId arguments =
   ArgumentInspection
     (finishProblemAccumulator
-      (addProblemsToAccumulator (boundaryProblems <> thisUnitProblems) accumulatedProblems))
+      (addProblemsToAccumulator
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_BOUNDARY_PROBLEM_COMPOSITION_MUTANT
+        (boundaryProblems `seq` thisUnitProblems)
+#elif defined(VALIDATION_COMPILER_BUILDINFO_ARGUMENT_THIS_UNIT_PROBLEM_COMPOSITION_MUTANT)
+        (thisUnitProblems `seq` boundaryProblems)
+#else
+        (boundaryProblems <> thisUnitProblems)
+#endif
+        accumulatedProblems))
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_RESULT_ARGUMENT_ORDER_MUTANT
+    parsedArguments
+#else
     (reverse parsedArguments)
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_RESULT_PATH_ORDER_MUTANT
+    parsedPaths
+#else
     (reverse parsedPaths)
+#endif
     (reverse generatedInputs)
     (reverse packageIds)
  where
   (!accumulatedProblems, !parsedArguments, !parsedPaths, !generatedInputs, !packageIds,
    !hideCount, !noUserCount, !thisUnits) =
-    go (0 :: Int) arguments emptyProblemAccumulator [] [] [] []
-      (0 :: Int) (0 :: Int) []
+    go
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_INDEX_SEED_MUTANT
+      (1 :: Int)
+#else
+      (0 :: Int)
+#endif
+      arguments emptyProblemAccumulator [] [] [] []
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_HIDE_COUNT_SEED_MUTANT
+      (1 :: Int)
+#else
+      (0 :: Int)
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_NO_USER_COUNT_SEED_MUTANT
+      (1 :: Int)
+#else
+      (0 :: Int)
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARGUMENT_THIS_UNIT_SEED_MUTANT
+      [unitId]
+#else
+      []
+#endif
 
   go !_index [] !problems !parsed !paths !generated !packages !hideAll !noUser !units =
     (problems, parsed, paths, generated, packages, hideAll, noUser, units)
@@ -1867,20 +3125,69 @@ inspectCompilerArguments unitId arguments =
       <> exactCountProblems enforceNoUserBoundary "-no-user-package-db" noUserCount
   exactCountProblems False _ _ = []
   exactCountProblems True boundary count = case count of
-    0 -> [BuildInfoCompilerPackageBoundaryMissing unitId boundary]
-    1 -> []
-    _ -> [BuildInfoCompilerPackageBoundaryDuplicate unitId boundary]
+    0 ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXACT_COUNT_MISSING_RESULT_ROUTE_MUTANT
+      [ BuildInfoCompilerPackageBoundaryMissing unitId boundary
+      , BuildInfoCompilerPackageBoundaryMissing unitId boundary
+      ]
+#else
+      [BuildInfoCompilerPackageBoundaryMissing unitId boundary]
+#endif
+    1 ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXACT_COUNT_MATCH_RESULT_ROUTE_MUTANT
+      [BuildInfoCompilerPackageBoundaryMissing unitId boundary]
+#else
+      []
+#endif
+    _ ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXACT_COUNT_DUPLICATE_RESULT_ROUTE_MUTANT
+      [ BuildInfoCompilerPackageBoundaryDuplicate unitId boundary
+      , BuildInfoCompilerPackageBoundaryDuplicate unitId boundary
+      ]
+#else
+      [BuildInfoCompilerPackageBoundaryDuplicate unitId boundary]
+#endif
   thisUnitProblems = case reverse thisUnits of
     [] ->
+      (
+#ifdef VALIDATION_COMPILER_BUILDINFO_THIS_UNIT_MISSING_RESULT_ROUTE_MUTANT
       [BuildInfoCompilerThisUnitIdMissing unitId | enforceThisUnitMissing]
+        <> [BuildInfoCompilerThisUnitIdMissing unitId | enforceThisUnitMissing]
+#else
+      [BuildInfoCompilerThisUnitIdMissing unitId | enforceThisUnitMissing]
+#endif
+      )
     [observed]
-      | observed == unitId -> []
+      | observed == unitId ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_THIS_UNIT_MATCH_RESULT_ROUTE_MUTANT
+          [BuildInfoCompilerThisUnitIdMismatch unitId observed]
+#else
+          []
+#endif
       | otherwise ->
+          (
+#ifdef VALIDATION_COMPILER_BUILDINFO_THIS_UNIT_MISMATCH_RESULT_ROUTE_MUTANT
           [BuildInfoCompilerThisUnitIdMismatch unitId observed
           | enforceThisUnitMismatch]
+            <> [BuildInfoCompilerThisUnitIdMismatch unitId observed
+               | enforceThisUnitMismatch]
+#else
+          [BuildInfoCompilerThisUnitIdMismatch unitId observed
+          | enforceThisUnitMismatch]
+#endif
+          )
     observed ->
+      (
+#ifdef VALIDATION_COMPILER_BUILDINFO_THIS_UNIT_DUPLICATE_RESULT_ROUTE_MUTANT
       [BuildInfoCompilerThisUnitIdDuplicate unitId observed
       | enforceThisUnitDuplicate]
+        <> [BuildInfoCompilerThisUnitIdDuplicate unitId observed
+           | enforceThisUnitDuplicate]
+#else
+      [BuildInfoCompilerThisUnitIdDuplicate unitId observed
+      | enforceThisUnitDuplicate]
+#endif
+      )
 
 enforceHideAllBoundary, enforceNoUserBoundary, enforceThisUnitMissing,
   enforceThisUnitDuplicate, enforceThisUnitMismatch :: Bool
@@ -2022,11 +3329,29 @@ attachedAllowedPath argument =
   firstAttached (prefix : prefixes)
     | Just value <- Text.stripPrefix prefix argument,
       allowEmptyAttachedPath || not (Text.null value) =
-        Just (Text.dropEnd 1 prefix, value)
+        Just
+          (
+#ifdef VALIDATION_COMPILER_BUILDINFO_ATTACHED_OPTION_PROJECTION_MUTANT
+            Text.dropEnd 1 prefix <> "-mutant"
+#else
+            Text.dropEnd 1 prefix
+#endif
+          ,
+#ifdef VALIDATION_COMPILER_BUILDINFO_ATTACHED_VALUE_PROJECTION_MUTANT
+            value <> "-mutant"
+#else
+            value
+#endif
+          )
     | otherwise = firstAttached prefixes
 
 retainedAlternative :: Bool -> value -> [value]
-retainedAlternative True value = [value]
+retainedAlternative True value =
+#ifdef VALIDATION_COMPILER_BUILDINFO_RETAINED_ALTERNATIVE_TRUE_ROUTE_DROP_MUTANT
+  value `seq` []
+#else
+  [value]
+#endif
 retainedAlternative False _ = []
 
 retainStandaloneO, retainStandaloneO0, retainStandaloneO1,
@@ -2135,41 +3460,93 @@ retainAttachedTmpDir = True
 argumentHazard :: Text -> Maybe Text
 argumentHazard argument
   | enforceResponseFileHazard && Text.isPrefixOf "@" argument =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_RESPONSE_REASON_PROJECTION_MUTANT
+      Just "response files can hide unenumerated compiler arguments-mutant"
+#else
       Just "response files can hide unenumerated compiler arguments"
+#endif
   | enforceCompilerPluginHazard && Text.isPrefixOf "-fplugin" argument =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_COMPILER_PLUGIN_REASON_PROJECTION_MUTANT
+      Just "compiler plugin execution is not admitted-mutant"
+#else
       Just "compiler plugin execution is not admitted"
+#endif
   | enforcePluginPackageHazard && Text.isPrefixOf "-plugin-package" argument =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_PLUGIN_PACKAGE_REASON_PROJECTION_MUTANT
+      Just "compiler plugin packages are not admitted-mutant"
+#else
       Just "compiler plugin packages are not admitted"
+#endif
   | enforceTemplateHaskellHazard
       && elem argument ["-XTemplateHaskell", "-XTemplateHaskellQuotes", "-XQuasiQuotes"] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_TEMPLATE_HASKELL_REASON_PROJECTION_MUTANT
+      Just "compile-time Haskell execution is not admitted-mutant"
+#else
       Just "compile-time Haskell execution is not admitted"
+#endif
   | enforceInterpreterHazard
       && elem argument ["-fexternal-interpreter", "-fprefer-byte-code", "-fbyte-code-and-object-code"] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_INTERPRETER_REASON_PROJECTION_MUTANT
+      Just "compile-time interpreter execution is not admitted-mutant"
+#else
       Just "compile-time interpreter execution is not admitted"
+#endif
   | enforcePreprocessorHazard && elem argument ["-F", "-cpp", "-XCPP"] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_PREPROCESSOR_REASON_PROJECTION_MUTANT
+      Just "unbound preprocessing is not admitted-mutant"
+#else
       Just "unbound preprocessing is not admitted"
+#endif
   | enforceCustomPreprocessorHazard
       && any (\prefix -> Text.isPrefixOf prefix argument) ["-pgmF", "-optF", "-pgmP", "-pgmL"] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_CUSTOM_PREPROCESSOR_REASON_PROJECTION_MUTANT
+      Just "custom preprocessing tools are not admitted-mutant"
+#else
       Just "custom preprocessing tools are not admitted"
+#endif
   | enforceForeignCallHazard && elem argument
       ["-XForeignFunctionInterface", "-XCApiFFI", "-XGHCForeignImportPrim",
        "-XInterruptibleFFI", "-XUnliftedFFITypes", "-XJavaScriptFFI"] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_FOREIGN_CALL_REASON_PROJECTION_MUTANT
+      Just "foreign-call compilation is not admitted-mutant"
+#else
       Just "foreign-call compilation is not admitted"
+#endif
   | enforceLinkerHazard && any (\prefix -> Text.isPrefixOf prefix argument)
       ["-optl", "-pgml", "-framework", "-L", "-l"] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_LINKER_REASON_PROJECTION_MUTANT
+      Just "linker or foreign-library arguments are not admitted-mutant"
+#else
       Just "linker or foreign-library arguments are not admitted"
+#endif
   | enforceForeignToolHazard && any (\prefix -> Text.isPrefixOf prefix argument)
       ["-pgmc", "-pgma", "-optc", "-opta", "-optlo"] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_FOREIGN_TOOL_REASON_PROJECTION_MUTANT
+      Just "custom foreign compiler tools are not admitted-mutant"
+#else
       Just "custom foreign compiler tools are not admitted"
+#endif
   | enforcePackageEnvironmentHazard
       && elem argument ["-package", "-package-env", "-user-package-db"] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_PACKAGE_ENVIRONMENT_REASON_PROJECTION_MUTANT
+      Just "unbounded package or user environment selection is not admitted-mutant"
+#else
       Just "unbounded package or user environment selection is not admitted"
+#endif
   | enforceAttachedPackageEnvironmentHazard
       && any (\prefix -> Text.isPrefixOf prefix argument)
       ["-package=", "-package-env=", "-user-package-db="] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_ATTACHED_PACKAGE_ENVIRONMENT_REASON_PROJECTION_MUTANT
+      Just "unbounded package or user environment selection is not admitted-mutant"
+#else
       Just "unbounded package or user environment selection is not admitted"
+#endif
   | enforceInteractiveHazard && elem argument ["-e", "-interactive", "-ghci-script"] =
+#ifdef VALIDATION_COMPILER_BUILDINFO_HAZARD_INTERACTIVE_REASON_PROJECTION_MUTANT
+      Just "interactive compiler execution is not admitted-mutant"
+#else
       Just "interactive compiler execution is not admitted"
+#endif
   | otherwise = Nothing
 
 enforceResponseFileHazard, enforceCompilerPluginHazard,
@@ -2663,25 +4040,78 @@ allowModuleTailCharacter = False
 
 isAsciiAlphaNumeric, isAsciiDigit, isAsciiUpper, isAsciiLower :: Char -> Bool
 isAsciiAlphaNumeric character =
+#ifdef VALIDATION_COMPILER_BUILDINFO_ASCII_ALPHANUMERIC_DIGIT_BRANCH_DROP_MUTANT
+  isAsciiUpper character || isAsciiLower character
+#elif defined(VALIDATION_COMPILER_BUILDINFO_ASCII_ALPHANUMERIC_LOWER_BRANCH_DROP_MUTANT)
+  isAsciiLower character `seq` (isAsciiDigit character || isAsciiUpper character)
+#else
   isAsciiDigit character || isAsciiUpper character || isAsciiLower character
-isAsciiDigit character = character >= '0' && character <= '9'
-isAsciiUpper character = character >= 'A' && character <= 'Z'
-isAsciiLower character = character >= 'a' && character <= 'z'
+#endif
+isAsciiDigit character =
+#ifdef VALIDATION_COMPILER_BUILDINFO_ASCII_DIGIT_UPPER_BOUND_DROP_MUTANT
+  character >= '0'
+#else
+  character >= '0' && character <= '9'
+#endif
+isAsciiUpper character =
+#ifdef VALIDATION_COMPILER_BUILDINFO_ASCII_UPPER_UPPER_BOUND_DROP_MUTANT
+  character >= 'A'
+#else
+  character >= 'A' && character <= 'Z'
+#endif
+isAsciiLower character =
+#ifdef VALIDATION_COMPILER_BUILDINFO_ASCII_LOWER_LOWER_BOUND_DROP_MUTANT
+  character <= 'z'
+#else
+  character >= 'a' && character <= 'z'
+#endif
 
 expectedComponentIdentity :: DiagnosticCompilerBuildInfoExpectedIdentity -> (Text, Text)
 expectedComponentIdentity
   (DiagnosticCompilerBuildInfoExpectedIdentity componentType componentName _) =
-    (componentType, componentName)
+    (
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPONENT_KEY_TYPE_PROJECTION_MUTANT
+      componentType <> "-mutant"
+#else
+      componentType
+#endif
+    ,
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_COMPONENT_KEY_NAME_PROJECTION_MUTANT
+      componentName <> "-mutant"
+#else
+      componentName
+#endif
+    )
 
 expectedUnitIdentity :: DiagnosticCompilerBuildInfoExpectedIdentity -> Text
-expectedUnitIdentity (DiagnosticCompilerBuildInfoExpectedIdentity _ _ unitId) = unitId
+expectedUnitIdentity (DiagnosticCompilerBuildInfoExpectedIdentity _ _ unitId) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_UNIT_PROJECTION_MUTANT
+  unitId <> "-mutant"
+#else
+  unitId
+#endif
 
 expectedIdentityComponent
   :: DiagnosticCompilerBuildInfoExpectedIdentity
   -> DiagnosticCompilerBuildInfoComponentIdentity
 expectedIdentityComponent
   (DiagnosticCompilerBuildInfoExpectedIdentity componentType componentName unitId) =
-    DiagnosticCompilerBuildInfoComponentIdentity componentType componentName unitId
+    DiagnosticCompilerBuildInfoComponentIdentity
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_COMPONENT_TYPE_PROJECTION_MUTANT
+      (componentType <> "-mutant")
+#else
+      componentType
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_COMPONENT_NAME_PROJECTION_MUTANT
+      (componentName <> "-mutant")
+#else
+      componentName
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_EXPECTED_IDENTITY_COMPONENT_UNIT_PROJECTION_MUTANT
+      (unitId <> "-mutant")
+#else
+      unitId
+#endif
 
 uncurryExpected
   :: (Text -> Text -> Text -> problem)
@@ -2689,128 +4119,217 @@ uncurryExpected
   -> problem
 uncurryExpected constructor
   (DiagnosticCompilerBuildInfoExpectedIdentity componentType componentName unitId) =
-    constructor componentType componentName unitId
-
-uncurryExpectedCompiler
-  :: (Text -> Text -> FilePath -> problem)
-  -> DiagnosticCompilerBuildInfoExpectedCompiler
-  -> problem
-uncurryExpectedCompiler constructor
-  (DiagnosticCompilerBuildInfoExpectedCompiler flavour compilerId compilerPath) =
-    constructor flavour compilerId compilerPath
+    constructor
+#ifdef VALIDATION_COMPILER_BUILDINFO_UNCURRY_EXPECTED_TYPE_PROJECTION_MUTANT
+      (componentType <> "-mutant")
+#else
+      componentType
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_UNCURRY_EXPECTED_NAME_PROJECTION_MUTANT
+      (componentName <> "-mutant")
+#else
+      componentName
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_UNCURRY_EXPECTED_UNIT_PROJECTION_MUTANT
+      (unitId <> "-mutant")
+#else
+      unitId
+#endif
 
 componentObservationType :: DiagnosticCompilerBuildInfoComponentObservation -> Text
 componentObservationType component =
   case componentObservationIdentity component of
-    DiagnosticCompilerBuildInfoComponentIdentity value _ _ -> value
+    DiagnosticCompilerBuildInfoComponentIdentity value _ _ ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_OBSERVATION_TYPE_ACCESSOR_MUTANT
+      value <> "-mutant"
+#else
+      value
+#endif
 componentObservationName :: DiagnosticCompilerBuildInfoComponentObservation -> Text
 componentObservationName component =
   case componentObservationIdentity component of
-    DiagnosticCompilerBuildInfoComponentIdentity _ value _ -> value
+    DiagnosticCompilerBuildInfoComponentIdentity _ value _ ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_OBSERVATION_NAME_ACCESSOR_MUTANT
+      value <> "-mutant"
+#else
+      value
+#endif
 componentObservationUnitId :: DiagnosticCompilerBuildInfoComponentObservation -> Text
 componentObservationUnitId component =
   case componentObservationIdentity component of
-    DiagnosticCompilerBuildInfoComponentIdentity _ _ value -> value
+    DiagnosticCompilerBuildInfoComponentIdentity _ _ value ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_OBSERVATION_UNIT_ACCESSOR_MUTANT
+      value <> "-mutant"
+#else
+      value
+#endif
 componentObservationCompilerArguments
   :: DiagnosticCompilerBuildInfoComponentObservation
   -> [DiagnosticCompilerBuildInfoArgumentObservation]
 componentObservationCompilerArguments
-  (DiagnosticCompilerBuildInfoComponentObservation _ value _ _ _ _ _ _ _ _) = value
+  (DiagnosticCompilerBuildInfoComponentObservation _ value _ _ _ _ _ _ _ _) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_COMPILER_ARGUMENTS_ACCESSOR_MUTANT
+    value <> take 1 value
+#else
+    value
+#endif
 componentObservationModules :: DiagnosticCompilerBuildInfoComponentObservation -> [Text]
 componentObservationModules
-  (DiagnosticCompilerBuildInfoComponentObservation _ _ value _ _ _ _ _ _ _) = value
+  (DiagnosticCompilerBuildInfoComponentObservation _ _ value _ _ _ _ _ _ _) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_MODULES_ACCESSOR_MUTANT
+    value <> take 1 value
+#else
+    value
+#endif
 componentObservationSourceFiles
   :: DiagnosticCompilerBuildInfoComponentObservation -> [FilePath]
 componentObservationSourceFiles
-  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ value _ _ _ _ _ _) = value
+  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ value _ _ _ _ _ _) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_SOURCE_FILES_ACCESSOR_MUTANT
+    value <> take 1 value
+#else
+    value
+#endif
 componentObservationSourceDirectories
   :: DiagnosticCompilerBuildInfoComponentObservation -> [FilePath]
 componentObservationSourceDirectories
-  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ value _ _ _ _ _) = value
+  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ value _ _ _ _ _) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_SOURCE_DIRECTORIES_ACCESSOR_MUTANT
+    value <> take 1 value
+#else
+    value
+#endif
 componentObservationSourceDirectory
   :: DiagnosticCompilerBuildInfoComponentObservation -> FilePath
 componentObservationSourceDirectory
-  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ _ value _ _ _ _) = value
+  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ _ value _ _ _ _) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_SOURCE_ROOT_ACCESSOR_MUTANT
+    value <> "-mutant"
+#else
+    value
+#endif
 componentObservationCabalFile
   :: DiagnosticCompilerBuildInfoComponentObservation -> Maybe FilePath
 componentObservationCabalFile
-  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ _ _ value _ _ _) = value
+  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ _ _ value _ _ _) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_CABAL_FILE_ACCESSOR_MUTANT
+    (<> "-mutant") <$> value
+#else
+    value
+#endif
 componentObservationArgumentPaths
   :: DiagnosticCompilerBuildInfoComponentObservation
   -> [DiagnosticCompilerBuildInfoPathObservation]
 componentObservationArgumentPaths
-  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ _ _ _ value _ _) = value
+  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ _ _ _ value _ _) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_ARGUMENT_PATHS_ACCESSOR_MUTANT
+    value <> take 1 value
+#else
+    value
+#endif
 componentObservationGeneratedInputs
   :: DiagnosticCompilerBuildInfoComponentObservation
   -> [DiagnosticCompilerBuildInfoGeneratedInputObservation]
 componentObservationGeneratedInputs
-  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ _ _ _ _ value _) = value
+  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ _ _ _ _ value _) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_GENERATED_INPUTS_ACCESSOR_MUTANT
+    value <> take 1 value
+#else
+    value
+#endif
 componentObservationPackageIds
   :: DiagnosticCompilerBuildInfoComponentObservation
   -> [DiagnosticCompilerBuildInfoPackageObservation]
 componentObservationPackageIds
-  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ _ _ _ _ _ value) = value
+  (DiagnosticCompilerBuildInfoComponentObservation _ _ _ _ _ _ _ _ _ value) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_PACKAGE_IDS_ACCESSOR_MUTANT
+    value <> take 1 value
+#else
+    value
+#endif
 
 componentObservationIdentity
   :: DiagnosticCompilerBuildInfoComponentObservation
   -> DiagnosticCompilerBuildInfoComponentIdentity
 componentObservationIdentity
-  (DiagnosticCompilerBuildInfoComponentObservation value _ _ _ _ _ _ _ _ _) = value
+  (DiagnosticCompilerBuildInfoComponentObservation value _ _ _ _ _ _ _ _ _) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_IDENTITY_ACCESSOR_MUTANT
+    case value of
+      DiagnosticCompilerBuildInfoComponentIdentity componentType componentName unitId ->
+        DiagnosticCompilerBuildInfoComponentIdentity componentType componentName
+          (unitId <> "-mutant")
+#else
+    value
+#endif
 
 componentObservationComponentKey
   :: DiagnosticCompilerBuildInfoComponentObservation -> (Text, Text)
 componentObservationComponentKey component =
-  (componentObservationType component, componentObservationName component)
-
-explicitMachinePaths
-  :: FilePath
-  -> [DiagnosticCompilerBuildInfoComponentObservation]
-  -> Set DiagnosticCompilerBuildInfoMachinePathObservation
-explicitMachinePaths compilerPath components =
-  Set.fromList
-    (DiagnosticCompilerBuildInfoCompilerPath compilerPath
-      : concatMap componentPaths components)
- where
-  componentPaths component =
-    [DiagnosticCompilerBuildInfoSourceDirectoryPath identity
-      (componentObservationSourceDirectory component)]
-      <> [DiagnosticCompilerBuildInfoCabalFilePath identity path
-         | path <- maybeToList (componentObservationCabalFile component)]
-      <> [DiagnosticCompilerBuildInfoSourceFilePath identity path
-         | path <- componentObservationSourceFiles component]
-      <> [DiagnosticCompilerBuildInfoHaskellSourceDirectoryPath identity path
-         | path <- componentObservationSourceDirectories component]
-      <> [DiagnosticCompilerBuildInfoArgumentPath identity path
-         | path <- componentObservationArgumentPaths component]
-   where
-    identity = componentObservationIdentity component
-
-unresolvedOwnershipObservations
-  :: DiagnosticCompilerBuildInfoComponentObservation
-  -> [DiagnosticCompilerBuildInfoSourceOwnershipObservation]
-unresolvedOwnershipObservations component =
-  [DiagnosticCompilerBuildInfoModuleOwnership identity moduleName
-  | moduleName <- componentObservationModules component]
-    <> [DiagnosticCompilerBuildInfoSourceFileOwnership identity sourceFile
-       | sourceFile <- componentObservationSourceFiles component]
- where
-  identity = componentObservationIdentity component
+  (
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_KEY_TYPE_PROJECTION_MUTANT
+    componentObservationType component <> "-mutant"
+#else
+    componentObservationType component
+#endif
+  ,
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_KEY_NAME_PROJECTION_MUTANT
+    componentObservationName component <> "-mutant"
+#else
+    componentObservationName component
+#endif
+  )
 
 parsedProblems :: Parsed value -> [DiagnosticCompilerBuildInfoProblem]
-parsedProblems (Parsed problems _) = problems
+parsedProblems (Parsed problems _) =
+#ifdef VALIDATION_COMPILER_BUILDINFO_PARSED_PROBLEMS_ACCESSOR_MUTANT
+  problems <> problems
+#else
+  problems
+#endif
 parsedValue :: Parsed value -> Maybe value
+#ifdef VALIDATION_COMPILER_BUILDINFO_PARSED_VALUE_ACCESSOR_MUTANT
+parsedValue (Parsed _ _) = Nothing
+#else
 parsedValue (Parsed _ value) = value
+#endif
 
 partitionParsed :: [Parsed value] -> ([DiagnosticCompilerBuildInfoProblem], Maybe [value])
-partitionParsed = go emptyProblemAccumulator True []
+partitionParsed = go emptyProblemAccumulator
+#ifdef VALIDATION_COMPILER_BUILDINFO_PARTITION_COMPLETE_SEED_MUTANT
+  False
+#else
+  True
+#endif
+  []
  where
   go accumulator complete values [] =
     (finishProblemAccumulator accumulator,
-      if complete then Just (reverse values) else Nothing)
+      if complete then Just
+#ifdef VALIDATION_COMPILER_BUILDINFO_PARTITION_FINAL_VALUE_ORDER_MUTANT
+        values
+#else
+        (reverse values)
+#endif
+      else Nothing)
   go accumulator complete values (Parsed problems value : remaining) =
-    let nextAccumulator = addProblemsToAccumulator problems accumulator
-        nextComplete = complete && maybe False (const True) value
-        nextValues = maybe values (: values) value
+    let nextAccumulator =
+#ifdef VALIDATION_COMPILER_BUILDINFO_PARTITION_PROBLEM_ACCUMULATION_ROUTE_MUTANT
+          problems `seq` accumulator
+#else
+          addProblemsToAccumulator problems accumulator
+#endif
+        nextComplete =
+#ifdef VALIDATION_COMPILER_BUILDINFO_PARTITION_COMPLETENESS_ROUTE_MUTANT
+          value `seq` complete
+#else
+          complete && maybe False (const True) value
+#endif
+        nextValues =
+#ifdef VALIDATION_COMPILER_BUILDINFO_PARTITION_VALUE_ACCUMULATION_ROUTE_MUTANT
+          value `seq` values
+#else
+          maybe values (: values) value
+#endif
      in case nextAccumulator of
           DiagnosticProblemAccumulator _ True _ ->
             (finishProblemAccumulator nextAccumulator, Nothing)
@@ -2818,42 +4337,140 @@ partitionParsed = go emptyProblemAccumulator True []
 
 requiredText :: Text -> Object -> Text -> Parsed Text
 requiredText scope object field = case KeyMap.lookup (Key.fromText field) object of
-  Nothing -> Parsed [BuildInfoFieldMissing scope field | enforceRequiredTextPresence] Nothing
+  Nothing -> Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_TEXT_MISSING_RESULT_ROUTE_MUTANT
+    ([BuildInfoFieldMissing scope field | enforceRequiredTextPresence]
+      <> [BuildInfoFieldMissing scope field | enforceRequiredTextPresence])
+#else
+    [BuildInfoFieldMissing scope field | enforceRequiredTextPresence]
+#endif
+    Nothing
   Just (String value)
     | Text.null value ->
-        Parsed [BuildInfoTextEmpty scope field | enforceRequiredTextNonEmpty] Nothing
-    | otherwise -> Parsed [] (Just value)
+        Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_TEXT_EMPTY_RESULT_ROUTE_MUTANT
+          ([BuildInfoTextEmpty scope field | enforceRequiredTextNonEmpty]
+            <> [BuildInfoTextEmpty scope field | enforceRequiredTextNonEmpty])
+#else
+          [BuildInfoTextEmpty scope field | enforceRequiredTextNonEmpty]
+#endif
+          Nothing
+    | otherwise -> Parsed [] (Just
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_TEXT_SUCCESS_RESULT_ROUTE_MUTANT
+        (value <> "-mutant")
+#else
+        value
+#endif
+        )
   Just _ ->
-    Parsed [BuildInfoFieldWrongType scope field "text" | enforceRequiredTextType] Nothing
+    Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_TEXT_TYPE_RESULT_ROUTE_MUTANT
+      ([BuildInfoFieldWrongType scope field "text" | enforceRequiredTextType]
+        <> [BuildInfoFieldWrongType scope field "text" | enforceRequiredTextType])
+#else
+      [BuildInfoFieldWrongType scope field "text" | enforceRequiredTextType]
+#endif
+      Nothing
 
 requiredFilePath :: Text -> Object -> Text -> Parsed FilePath
-requiredFilePath scope object field = fmapParsed Text.unpack (requiredText scope object field)
+requiredFilePath scope object field = fmapParsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_FILE_PATH_TRANSFORM_MUTANT
+  ((<> "-mutant") . Text.unpack)
+#else
+  Text.unpack
+#endif
+  (requiredText scope object field)
 
 optionalFilePath :: Text -> Object -> Text -> Parsed (Maybe FilePath)
 optionalFilePath scope object field = case KeyMap.lookup (Key.fromText field) object of
-  Nothing -> Parsed [] (Just Nothing)
+  Nothing -> Parsed []
+#ifdef VALIDATION_COMPILER_BUILDINFO_OPTIONAL_FILE_ABSENT_RESULT_ROUTE_MUTANT
+    Nothing
+#else
+    (Just Nothing)
+#endif
   Just (String value)
     | Text.null value ->
-        Parsed [BuildInfoTextEmpty scope field | enforceOptionalTextNonEmpty] Nothing
-    | otherwise -> Parsed [] (Just (Just (Text.unpack value)))
+        Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_OPTIONAL_FILE_EMPTY_RESULT_ROUTE_MUTANT
+          ([BuildInfoTextEmpty scope field | enforceOptionalTextNonEmpty]
+            <> [BuildInfoTextEmpty scope field | enforceOptionalTextNonEmpty])
+#else
+          [BuildInfoTextEmpty scope field | enforceOptionalTextNonEmpty]
+#endif
+          Nothing
+    | otherwise -> Parsed [] (Just (Just
+#ifdef VALIDATION_COMPILER_BUILDINFO_OPTIONAL_FILE_SUCCESS_RESULT_ROUTE_MUTANT
+        (Text.unpack value <> "-mutant")
+#else
+        (Text.unpack value)
+#endif
+        ))
   Just _ ->
-    Parsed [BuildInfoFieldWrongType scope field "text" | enforceOptionalTextType] Nothing
+    Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_OPTIONAL_FILE_TYPE_RESULT_ROUTE_MUTANT
+      ([BuildInfoFieldWrongType scope field "text" | enforceOptionalTextType]
+        <> [BuildInfoFieldWrongType scope field "text" | enforceOptionalTextType])
+#else
+      [BuildInfoFieldWrongType scope field "text" | enforceOptionalTextType]
+#endif
+      Nothing
 
 requiredObject :: Text -> Object -> Text -> Parsed Object
 requiredObject scope object field = case KeyMap.lookup (Key.fromText field) object of
   Nothing ->
-    Parsed [BuildInfoFieldMissing scope field | enforceRequiredObjectPresence] Nothing
-  Just (Object value) -> Parsed [] (Just value)
+    Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_OBJECT_MISSING_RESULT_ROUTE_MUTANT
+      ([BuildInfoFieldMissing scope field | enforceRequiredObjectPresence]
+        <> [BuildInfoFieldMissing scope field | enforceRequiredObjectPresence])
+#else
+      [BuildInfoFieldMissing scope field | enforceRequiredObjectPresence]
+#endif
+      Nothing
+  Just (Object value) -> Parsed [] (Just
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_OBJECT_SUCCESS_RESULT_ROUTE_MUTANT
+    (value `seq` KeyMap.empty)
+#else
+    value
+#endif
+    )
   Just _ ->
-    Parsed [BuildInfoFieldWrongType scope field "object" | enforceRequiredObjectType] Nothing
+    Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_OBJECT_TYPE_RESULT_ROUTE_MUTANT
+      ([BuildInfoFieldWrongType scope field "object" | enforceRequiredObjectType]
+        <> [BuildInfoFieldWrongType scope field "object" | enforceRequiredObjectType])
+#else
+      [BuildInfoFieldWrongType scope field "object" | enforceRequiredObjectType]
+#endif
+      Nothing
 
 requiredArray :: Text -> Object -> Text -> Parsed [Value]
 requiredArray scope object field = case KeyMap.lookup (Key.fromText field) object of
   Nothing ->
-    Parsed [BuildInfoFieldMissing scope field | enforceRequiredArrayPresence] Nothing
-  Just (Array values) -> Parsed [] (Just (foldr (:) [] values))
+    Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_ARRAY_MISSING_RESULT_ROUTE_MUTANT
+      ([BuildInfoFieldMissing scope field | enforceRequiredArrayPresence]
+        <> [BuildInfoFieldMissing scope field | enforceRequiredArrayPresence])
+#else
+      [BuildInfoFieldMissing scope field | enforceRequiredArrayPresence]
+#endif
+      Nothing
+  Just (Array values) -> Parsed [] (Just
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_ARRAY_SUCCESS_RESULT_ROUTE_MUTANT
+    (drop 1 (foldr (:) [] values))
+#else
+    (foldr (:) [] values)
+#endif
+    )
   Just _ ->
-    Parsed [BuildInfoFieldWrongType scope field "array" | enforceRequiredArrayType] Nothing
+    Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_ARRAY_TYPE_RESULT_ROUTE_MUTANT
+      ([BuildInfoFieldWrongType scope field "array" | enforceRequiredArrayType]
+        <> [BuildInfoFieldWrongType scope field "array" | enforceRequiredArrayType])
+#else
+      [BuildInfoFieldWrongType scope field "array" | enforceRequiredArrayType]
+#endif
+      Nothing
 
 requiredTextArray :: Int -> Text -> Object -> Text -> Parsed [Text]
 requiredTextArray maximumEntries scope object field =
@@ -2862,9 +4479,20 @@ requiredTextArray maximumEntries scope object field =
     Parsed problems (Just values)
       | entryCount > maximumEntries ->
           Parsed [BuildInfoResourceLimitExceeded (scope <> "." <> field)
-            maximumEntries entryCount] Nothing
+            maximumEntries
+#ifdef VALIDATION_COMPILER_BUILDINFO_TEXT_ARRAY_LIMIT_COUNT_PROJECTION_MUTANT
+            (entryCount + 1)
+#else
+            entryCount
+#endif
+            ] Nothing
       | otherwise ->
-          let entries = zipWith parseTextArrayEntry [0 ..] values
+          let entries = zipWith parseTextArrayEntry [0 ..]
+#ifdef VALIDATION_COMPILER_BUILDINFO_TEXT_ARRAY_PARTITION_COMPOSITION_MUTANT
+                (reverse values)
+#else
+                values
+#endif
               (entryProblems, parsedEntries) = partitionParsed entries
            in Parsed (problems <> entryProblems) parsedEntries
  where
@@ -2873,25 +4501,64 @@ requiredTextArray maximumEntries scope object field =
     maybe 0 (boundedLength (maximumEntries + 1)) (parsedValue rawArray)
   parseTextArrayEntry index (String value)
     | Text.null value =
-        Parsed [BuildInfoArrayTextEmpty scope field index | enforceArrayTextNonEmpty] Nothing
+        Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARRAY_TEXT_EMPTY_RESULT_ROUTE_MUTANT
+          ([BuildInfoArrayTextEmpty scope field index | enforceArrayTextNonEmpty]
+            <> [BuildInfoArrayTextEmpty scope field index | enforceArrayTextNonEmpty])
+#else
+          [BuildInfoArrayTextEmpty scope field index | enforceArrayTextNonEmpty]
+#endif
+          Nothing
     | otherwise = Parsed [] (Just value)
   parseTextArrayEntry index _ =
     Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_ARRAY_TEXT_TYPE_RESULT_ROUTE_MUTANT
+      ([BuildInfoArrayElementWrongType scope field index "text" | enforceArrayTextType]
+        <> [BuildInfoArrayElementWrongType scope field index "text" | enforceArrayTextType])
+#else
       [BuildInfoArrayElementWrongType scope field index "text" | enforceArrayTextType]
+#endif
       Nothing
 
 requiredFilePathArray :: Int -> Text -> Object -> Text -> Parsed [FilePath]
 requiredFilePathArray maximumEntries scope object field =
-  fmapParsed (map Text.unpack) (requiredTextArray maximumEntries scope object field)
+  fmapParsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_REQUIRED_FILE_PATH_ARRAY_TRANSFORM_MUTANT
+    (map ((<> "-mutant") . Text.unpack))
+#else
+    (map Text.unpack)
+#endif
+    (requiredTextArray maximumEntries scope object field)
 
 fmapParsed :: (left -> right) -> Parsed left -> Parsed right
-fmapParsed transform (Parsed problems value) = Parsed problems (transform <$> value)
+fmapParsed transform (Parsed problems value) = Parsed
+#ifdef VALIDATION_COMPILER_BUILDINFO_FMAP_PARSED_PROBLEM_PROJECTION_MUTANT
+  (problems <> problems)
+#else
+  problems
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_FMAP_PARSED_VALUE_ROUTE_MUTANT
+  (transform `seq` value `seq` Nothing)
+#else
+  (transform <$> value)
+#endif
 
 unknownFields :: Text -> Set Text -> Object -> [DiagnosticCompilerBuildInfoProblem]
 unknownFields scope allowed object =
-  [BuildInfoFieldUnknown scope field
+  [BuildInfoFieldUnknown
+#ifdef VALIDATION_COMPILER_BUILDINFO_UNKNOWN_FIELD_SCOPE_PROJECTION_MUTANT
+    (scope <> "-mutant")
+#else
+    scope
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_UNKNOWN_FIELD_NAME_PROJECTION_MUTANT
+    (field <> "-mutant")
+#else
+    field
+#endif
   | enforceUnknownFields,
-    field <- sort (map Key.toText (KeyMap.keys object)), Set.notMember field allowed]
+    field <- sort (map Key.toText (KeyMap.keys object))
+  , Set.notMember field allowed]
 
 enforceComponentObject, enforceRequiredTextPresence, enforceRequiredTextNonEmpty,
   enforceRequiredTextType, enforceOptionalTextNonEmpty, enforceOptionalTextType,
@@ -2965,27 +4632,54 @@ enforceUnknownFields = True
 #endif
 
 componentScope :: Int -> Text
-componentScope index = "build-info.components[" <> Text.pack (show index) <> "]"
+componentScope index = "build-info.components[" <> Text.pack (show
+#ifdef VALIDATION_COMPILER_BUILDINFO_COMPONENT_SCOPE_INDEX_INCREMENT_MUTANT
+  (index + 1)
+#else
+  index
+#endif
+  ) <> "]"
 
 duplicates :: Ord value => [value] -> [value]
 duplicates = mapMaybe duplicateHead . group . sort
  where
+#ifdef VALIDATION_COMPILER_BUILDINFO_DUPLICATES_PAIR_THRESHOLD_MUTANT
+  duplicateHead (value : _ : _ : _) = Just value
+#else
   duplicateHead (value : _ : _) = Just value
+#endif
   duplicateHead _ = Nothing
 
 safeAbsolutePath :: FilePath -> Bool
 safeAbsolutePath path =
   isAbsolutePath path
     && (allowAbsoluteFileTrailingSeparator || not (hasTrailingSeparator path))
-    && safeAbsoluteSegments path
+    &&
+#ifdef VALIDATION_COMPILER_BUILDINFO_SAFE_ABSOLUTE_PATH_SEGMENT_COMPOSITION_DROP_MUTANT
+      (safeAbsoluteSegments path `seq` True)
+#else
+      safeAbsoluteSegments path
+#endif
 
 safeAbsolutePathAllowDirectory :: FilePath -> Bool
-safeAbsolutePathAllowDirectory path = isAbsolutePath path && safeAbsoluteSegments path
+safeAbsolutePathAllowDirectory path =
+  isAbsolutePath path &&
+#ifdef VALIDATION_COMPILER_BUILDINFO_SAFE_ABSOLUTE_DIRECTORY_SEGMENT_COMPOSITION_DROP_MUTANT
+    (safeAbsoluteSegments path `seq` True)
+#else
+    safeAbsoluteSegments path
+#endif
 
 safeAbsoluteSegments :: FilePath -> Bool
 safeAbsoluteSegments path =
   not (unsafePathCharacters path)
-    && length segments <= maximumPathDepth && all validSegment segments
+    &&
+#ifdef VALIDATION_COMPILER_BUILDINFO_SAFE_ABSOLUTE_DEPTH_INCREMENT_MUTANT
+      length segments + 1 <= maximumPathDepth
+#else
+      length segments <= maximumPathDepth
+#endif
+    && all validSegment segments
  where
   withoutEdges = Text.dropWhileEnd (== '/') (Text.dropWhile (== '/') (Text.pack path))
   segments = Text.splitOn "/" withoutEdges
@@ -2997,7 +4691,12 @@ safeAbsoluteSegments path =
 
 safeRelativePath :: Bool -> FilePath -> Bool
 safeRelativePath allowDot path =
-  not (unsafePathCharacters path) && length segments <= maximumPathDepth
+  not (unsafePathCharacters path) &&
+#ifdef VALIDATION_COMPILER_BUILDINFO_SAFE_RELATIVE_DEPTH_INCREMENT_MUTANT
+    length segments + 1 <= maximumPathDepth
+#else
+    length segments <= maximumPathDepth
+#endif
     && ((allowDot && retainRelativeDotAlternative && path == ".")
       || all validSegment segments)
  where
@@ -3010,18 +4709,46 @@ safeRelativePath allowDot path =
 
 safeMachineArgumentPath :: FilePath -> Bool
 safeMachineArgumentPath path
-  | isAbsolutePath path = safeAbsolutePathAllowDirectory path
-  | otherwise = safeRelativePath True path
+  | isAbsolutePath path =
+#ifdef VALIDATION_COMPILER_BUILDINFO_SAFE_MACHINE_ARGUMENT_ABSOLUTE_ROUTE_MUTANT
+      safeAbsolutePathAllowDirectory path `seq` safeRelativePath True path
+#else
+      safeAbsolutePathAllowDirectory path
+#endif
+  | otherwise =
+#ifdef VALIDATION_COMPILER_BUILDINFO_SAFE_MACHINE_ARGUMENT_RELATIVE_ROUTE_MUTANT
+      safeRelativePath True path `seq` safeAbsolutePathAllowDirectory path
+#else
+      safeRelativePath True path
+#endif
 
 isAbsolutePath :: FilePath -> Bool
+#ifdef VALIDATION_COMPILER_BUILDINFO_IS_ABSOLUTE_PATH_PREFIX_DROP_MUTANT
+isAbsolutePath = Text.isPrefixOf "//" . Text.pack
+#else
 isAbsolutePath = Text.isPrefixOf "/" . Text.pack
+#endif
 
 hasTrailingSeparator :: FilePath -> Bool
+#ifdef VALIDATION_COMPILER_BUILDINFO_TRAILING_SEPARATOR_SUFFIX_DROP_MUTANT
+hasTrailingSeparator = Text.isSuffixOf "//" . Text.pack
+#else
 hasTrailingSeparator = Text.isSuffixOf "/" . Text.pack
+#endif
 
 unsafePathCharacters :: FilePath -> Bool
 unsafePathCharacters path =
-  Text.any unsafeCharacter text || (not allowPathBackslash && Text.isInfixOf "\\" text)
+#ifdef VALIDATION_COMPILER_BUILDINFO_UNSAFE_PATH_TEXT_PREDICATE_DROP_MUTANT
+  unsafeCharacter 'x' `seq` False
+#else
+  Text.any unsafeCharacter text
+#endif
+    ||
+#ifdef VALIDATION_COMPILER_BUILDINFO_UNSAFE_PATH_BACKSLASH_PREDICATE_DROP_MUTANT
+      allowPathBackslash `seq` False
+#else
+      (not allowPathBackslash && Text.isInfixOf "\\" text)
+#endif
  where
   text = Text.pack path
   unsafeCharacter character =
@@ -3076,31 +4803,79 @@ absolutePathWithin :: FilePath -> FilePath -> Bool
 absolutePathWithin sourceDirectory path =
   let root = Text.pack sourceDirectory
       candidate = Text.pack path
-   in candidate == Text.dropWhileEnd (== '/') root || Text.isPrefixOf root candidate
+   in
+#ifdef VALIDATION_COMPILER_BUILDINFO_ABSOLUTE_PATH_WITHIN_NORMALIZED_EQUALITY_DROP_MUTANT
+      False
+#else
+      candidate == Text.dropWhileEnd (== '/') root
+#endif
+        ||
+#ifdef VALIDATION_COMPILER_BUILDINFO_ABSOLUTE_PATH_WITHIN_PREFIX_DROP_MUTANT
+          False
+#else
+          Text.isPrefixOf root candidate
+#endif
 
 textByteLength :: Text -> Int
+#ifdef VALIDATION_COMPILER_BUILDINFO_TEXT_BYTE_LENGTH_ASCII_WIDTH_MUTANT
+textByteLength = Text.length
+#else
 textByteLength = ByteString.length . TextEncoding.encodeUtf8
+#endif
 
 boundedTextBytes :: Int -> Text -> Bool
 boundedTextBytes limit value =
-  ByteString.length (TextEncoding.encodeUtf8 (Text.take (limit + 1) value)) <= limit
+  let measured = ByteString.length (TextEncoding.encodeUtf8 (Text.take (limit + 1) value))
+   in
+#ifdef VALIDATION_COMPILER_BUILDINFO_BOUNDED_TEXT_EXACT_BOUNDARY_NARROW_MUTANT
+      measured < limit
+#elif defined(VALIDATION_COMPILER_BUILDINFO_BOUNDED_TEXT_ONE_OVER_WIDEN_MUTANT)
+      measured <= limit + 1
+#else
+      measured <= limit
+#endif
 
 boundedFilePathBytes :: Int -> FilePath -> Bool
 boundedFilePathBytes limit value =
-  let prefix = take (limit + 1) value
+  let prefix = take
+#ifdef VALIDATION_COMPILER_BUILDINFO_BOUNDED_FILE_PATH_PREFIX_THRESHOLD_DROP_MUTANT
+        limit
+#else
+        (limit + 1)
+#endif
+        value
    in boundedLength (limit + 1) prefix <= limit
         && boundedTextBytes limit (Text.pack prefix)
 
 maybeToList :: Maybe value -> [value]
 maybeToList Nothing = []
+#ifdef VALIDATION_COMPILER_BUILDINFO_MAYBE_TO_LIST_JUST_DROP_MUTANT
+maybeToList (Just _) = []
+#else
 maybeToList (Just value) = [value]
+#endif
 
 boundedLength :: Int -> [value] -> Int
 boundedLength limit = go 0
  where
-  go !count _ | count >= limit = count
+  go !count _
+#ifdef VALIDATION_COMPILER_BUILDINFO_BOUNDED_LENGTH_THRESHOLD_NARROW_MUTANT
+    | count >= limit - 1 = count
+#else
+    | count >= limit = count
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_BOUNDED_LENGTH_EMPTY_INCREMENT_MUTANT
+  go !count [] = count + 1
+#else
   go !count [] = count
-  go !count (_ : rest) = go (count + 1) rest
+#endif
+  go !count (_ : rest) = go
+#ifdef VALIDATION_COMPILER_BUILDINFO_BOUNDED_LENGTH_STEP_DOUBLE_MUTANT
+    (count + 2)
+#else
+    (count + 1)
+#endif
+    rest
 
 boundedProblems
   :: [DiagnosticCompilerBuildInfoProblem]
@@ -3110,7 +4885,11 @@ boundedProblems problems =
 
 singleProblemRefusal :: DiagnosticCompilerBuildInfoProblem -> DiagnosticCompilerBuildInfoRefusal
 singleProblemRefusal problem =
+#ifdef VALIDATION_COMPILER_BUILDINFO_SINGLE_PROBLEM_REFUSAL_DUPLICATE_ROUTE_MUTANT
+  DiagnosticCompilerBuildInfoRefusal (problem :| [problem]) Nothing
+#else
   DiagnosticCompilerBuildInfoRefusal (problem :| []) Nothing
+#endif
 
 hardRefusal :: [DiagnosticCompilerBuildInfoProblem] -> DiagnosticCompilerBuildInfoRefusal
 hardRefusal problems =
@@ -3130,7 +4909,12 @@ boundedProblemSet
   -> NonEmpty DiagnosticCompilerBuildInfoProblem
 boundedProblemSet label problems =
   case NonEmpty.nonEmpty canonicalProblems of
-    Just nonEmpty -> nonEmpty
+    Just nonEmpty ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_BOUNDED_PROBLEM_NONEMPTY_ROUTE_MUTANT
+      NonEmpty.head nonEmpty :| NonEmpty.toList nonEmpty
+#else
+      nonEmpty
+#endif
     Nothing ->
       BuildInfoDuplicateKeyScanFailed
         ("empty diagnostic problem set at " <> label) :| []
@@ -3150,16 +4934,25 @@ data JsonScanState
 
 scanDuplicateJsonKeys
   :: ByteString
-  -> Either DiagnosticCompilerBuildInfoProblem [DiagnosticCompilerBuildInfoProblem]
+  -> Either DiagnosticCompilerBuildInfoProblem ()
 scanDuplicateJsonKeys bytes = do
   (afterValue, _) <-
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_SCAN_STATE_SEED_MUTANT
+    scanJsonValue "build-info" bytes 1 (JsonScanState 1)
+#else
     scanJsonValue "build-info" bytes 1 (JsonScanState 0)
-      (skipWhitespace bytes 0)
-  let afterWhitespace = skipWhitespace bytes afterValue
+#endif
+      0
+  let afterWhitespace =
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_FINAL_WHITESPACE_ROUTE_DROP_MUTANT
+        afterValue
+#else
+        skipWhitespace bytes afterValue
+#endif
   if afterWhitespace == ByteString.length bytes
-    then Right []
+    then Right ()
     else if allowTrailingJsonBytes
-      then Right []
+      then Right ()
     else malformed
       ("unexpected bytes after JSON value at offset " <> Text.pack (show afterWhitespace))
 
@@ -3173,22 +4966,54 @@ scanJsonValue scope bytes depth state offset
       nextState <- consumeJsonToken state
       case byteAt bytes start of
         Nothing -> malformed ("unexpected end of JSON at " <> scope)
-        Just 123 -> scanJsonObject scope bytes depth nextState start
-        Just 91 -> scanJsonArray scope bytes depth nextState start
+        Just 123 ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_OBJECT_DISPATCH_ROUTE_MUTANT
+          do
+            (afterObject, finalState) <-
+              scanJsonObject scope bytes depth nextState start
+            Right (afterObject + 1, finalState)
+#else
+          scanJsonObject scope bytes depth nextState start
+#endif
+        Just 91 ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_ARRAY_DISPATCH_ROUTE_MUTANT
+          do
+            (afterArray, finalState) <- scanJsonArray scope bytes depth nextState start
+            Right (afterArray + 1, finalState)
+#else
+          scanJsonArray scope bytes depth nextState start
+#endif
         Just 34 -> do
           (afterString, _) <- scanJsonString scope bytes start
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_STRING_DISPATCH_ROUTE_MUTANT
+          Right (afterString + 1, nextState)
+#else
           Right (afterString, nextState)
+#endif
         Just _ -> do
           afterScalar <- scanJsonScalar scope bytes start
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_SCALAR_DISPATCH_ROUTE_MUTANT
+          Right (afterScalar + 1, nextState)
+#else
           Right (afterScalar, nextState)
+#endif
  where
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_VALUE_START_WHITESPACE_DROP_MUTANT
+  start = offset
+#else
   start = skipWhitespace bytes offset
+#endif
 
 scanJsonObject
   :: Text -> ByteString -> Int -> JsonScanState -> Int
   -> Either DiagnosticCompilerBuildInfoProblem (Int, JsonScanState)
 scanJsonObject scope bytes depth state opening =
-  loop Set.empty 0 state (skipWhitespace bytes (opening + 1))
+  loop Set.empty 0 state
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_OBJECT_OPENING_WHITESPACE_DROP_MUTANT
+    (opening + 1)
+#else
+    (skipWhitespace bytes (opening + 1))
+#endif
  where
   loop seen memberCount currentState offset = case byteAt bytes offset of
     Just 125 -> Right (offset + 1, currentState)
@@ -3208,16 +5033,48 @@ scanJsonObject scope bytes depth state opening =
               else Right stateAfterKey
 #endif
           afterColon <-
-            expectByte bytes 58 (skipWhitespace bytes afterKey) ("':' after key in " <> scope)
+            expectByte bytes 58
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_OBJECT_AFTER_KEY_WHITESPACE_DROP_MUTANT
+              afterKey
+#else
+              (skipWhitespace bytes afterKey)
+#endif
+              ("':' after key in " <> scope)
           (afterValue, stateAfterValue) <-
-            scanJsonValue (scope <> "." <> escapedScopeToken key) bytes (depth + 1)
-              stateAfterDuplicate (skipWhitespace bytes afterColon)
-          let next = skipWhitespace bytes afterValue
-              nextSeen = Set.insert key seen
+            scanJsonValue
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_OBJECT_VALUE_SCOPE_DROP_MUTANT
+              (escapedScopeToken key `seq` scope)
+#else
+              (scope <> "." <> escapedScopeToken key)
+#endif
+              bytes (depth + 1) stateAfterDuplicate
+              afterColon
+          let next =
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_OBJECT_AFTER_VALUE_WHITESPACE_DROP_MUTANT
+                afterValue
+#else
+                skipWhitespace bytes afterValue
+#endif
+              nextSeen =
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_OBJECT_SEEN_INSERT_DROP_MUTANT
+                seen
+#else
+                Set.insert key seen
+#endif
           case byteAt bytes next of
             Just 44 ->
-              loop nextSeen (memberCount + 1) stateAfterValue
+              loop nextSeen
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_OBJECT_MEMBER_INCREMENT_DOUBLE_MUTANT
+                (memberCount + 2)
+#else
+                (memberCount + 1)
+#endif
+                stateAfterValue
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_OBJECT_COMMA_WHITESPACE_DROP_MUTANT
+                (next + 1)
+#else
                 (skipWhitespace bytes (next + 1))
+#endif
             Just 125 -> Right (next + 1, stateAfterValue)
             _ | allowMissingObjectSeparator ->
               loop nextSeen (memberCount + 1) stateAfterValue next
@@ -3230,7 +5087,12 @@ scanJsonArray
   :: Text -> ByteString -> Int -> JsonScanState -> Int
   -> Either DiagnosticCompilerBuildInfoProblem (Int, JsonScanState)
 scanJsonArray scope bytes depth state opening =
-  loop 0 state (skipWhitespace bytes (opening + 1))
+  loop 0 state
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_ARRAY_OPENING_WHITESPACE_DROP_MUTANT
+    (opening + 1)
+#else
+    (skipWhitespace bytes (opening + 1))
+#endif
  where
   loop index currentState offset = case byteAt bytes offset of
     Just 93 -> Right (offset + 1, currentState)
@@ -3240,12 +5102,23 @@ scanJsonArray scope bytes depth state opening =
             maximumJsonArrayElements (index + 1))
       | otherwise -> do
           (afterValue, nextState) <-
-            scanJsonValue (scope <> "[" <> Text.pack (show index) <> "]")
+            scanJsonValue
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_ARRAY_VALUE_SCOPE_DROP_MUTANT
+              scope
+#else
+              (scope <> "[" <> Text.pack (show index) <> "]")
+#endif
               bytes (depth + 1) currentState offset
-          let next = skipWhitespace bytes afterValue
+          let next =
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_ARRAY_AFTER_VALUE_WHITESPACE_DROP_MUTANT
+                afterValue
+#else
+                skipWhitespace bytes afterValue
+#endif
           case byteAt bytes next of
             Just 44 ->
-              loop (index + 1) nextState (skipWhitespace bytes (next + 1))
+              loop (index + 1) nextState
+                (next + 1)
             Just 93 -> Right (next + 1, nextState)
             _ | allowMissingArraySeparator ->
               loop (index + 1) nextState next
@@ -3265,8 +5138,18 @@ scanJsonString scope bytes opening = seek (opening + 1) False
         Nothing -> malformed
           ("unterminated JSON string at offset " <> Text.pack (show opening))
         Just byte
-          | escaped -> seek (offset + 1) False
-          | byte == 92 -> seek (offset + 1) True
+          | escaped ->
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_STRING_ESCAPED_STATE_EARLY_RETURN_MUTANT
+              Right (offset + 1, "")
+#else
+              seek (offset + 1) False
+#endif
+          | byte == 92 -> seek (offset + 1)
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_STRING_BACKSLASH_STATE_DROP_MUTANT
+              False
+#else
+              True
+#endif
           | byte == 34 ->
               let encoded =
                     ByteString.take (offset - opening + 1)
@@ -3277,7 +5160,12 @@ scanJsonString scope bytes opening = seek (opening + 1) False
                       | otherwise -> malformed
                           ("invalid JSON string at offset " <> Text.pack (show opening)
                             <> ": " <> Text.pack message)
-                    Right decoded -> Right (offset + 1, decoded)
+                    Right decoded -> Right (offset + 1,
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_STRING_DECODED_PROJECTION_MUTANT
+                      decoded <> "-mutant")
+#else
+                      decoded)
+#endif
           | otherwise -> seek (offset + 1) False
 
 scanJsonScalar
@@ -3285,7 +5173,12 @@ scanJsonScalar
 scanJsonScalar scope bytes start = do
   end <- findScalarEnd scope bytes start
   let encoded = ByteString.take (end - start) (ByteString.drop start bytes)
-  if ByteString.null encoded
+  if
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_SCALAR_EMPTY_PREDICATE_MUTANT
+    not (ByteString.null encoded)
+#else
+    ByteString.null encoded
+#endif
     then malformed
       ("empty JSON scalar in " <> scope <> " at offset " <> Text.pack (show start))
     else case (eitherDecodeStrict' encoded :: Either String Value) of
@@ -3314,24 +5207,49 @@ consumeJsonToken (JsonScanState tokenCount)
       Left (BuildInfoResourceLimitExceeded "json-structural-tokens"
         maximumJsonStructuralTokens (tokenCount + 1))
   | otherwise =
-      Right (JsonScanState (tokenCount + 1))
+      Right (JsonScanState
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_TOKEN_INCREMENT_DOUBLE_MUTANT
+        (tokenCount + 2))
+#else
+        (tokenCount + 1))
+#endif
 
 escapedScopeToken :: Text -> Text
 escapedScopeToken =
   Text.concatMap
     (\character ->
-      if isAsciiAlphaNumeric character || elem character ['-', '_']
+      if
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_SCOPE_ASCII_RETENTION_DROP_MUTANT
+        isAsciiAlphaNumeric character `seq` elem character ['-', '_']
+#else
+        isAsciiAlphaNumeric character || elem character ['-', '_']
+#endif
         then Text.singleton character
-        else "\\u{" <> Text.pack (show (ord character)) <> "}")
+        else "\\u{" <> Text.pack (show
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_SCOPE_ORDINAL_INCREMENT_MUTANT
+          (ord character + 1)
+#else
+          (ord character)
+#endif
+          ) <> "}")
 
 malformed :: Text -> Either DiagnosticCompilerBuildInfoProblem value
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_MALFORMED_DETAIL_SUFFIX_MUTANT
+malformed detail = Left (BuildInfoDuplicateKeyScanFailed (detail <> "-mutant"))
+#else
 malformed = Left . BuildInfoDuplicateKeyScanFailed
+#endif
 
 expectByte
   :: ByteString -> Word8 -> Int -> Text
   -> Either DiagnosticCompilerBuildInfoProblem Int
 expectByte bytes expected offset label = case byteAt bytes offset of
-  Just observed | observed == expected -> Right (offset + 1)
+  Just observed | observed == expected -> Right
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_EXPECT_BYTE_SUCCESS_INCREMENT_DOUBLE_MUTANT
+    (offset + 2)
+#else
+    (offset + 1)
+#endif
   _ | allowMissingObjectColon -> Right offset
   _ -> malformed ("expected " <> label <> " at offset " <> Text.pack (show offset))
 
@@ -3370,19 +5288,65 @@ allowInvalidJsonScalar = False
 #endif
 
 isJsonDelimiter :: Word8 -> Bool
-isJsonDelimiter byte = isJsonWhitespace byte || elem byte [44, 93, 125]
+isJsonDelimiter byte =
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_SCALAR_WHITESPACE_DELIMITER_DROP_MUTANT
+  False
+#else
+  isJsonWhitespace byte
+#endif
+    ||
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_SCALAR_COMMA_DELIMITER_DROP_MUTANT
+      False
+#else
+      byte == 44
+#endif
+    ||
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_SCALAR_ARRAY_END_DELIMITER_DROP_MUTANT
+      False
+#else
+      byte == 93
+#endif
+    ||
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_SCALAR_OBJECT_END_DELIMITER_DROP_MUTANT
+      False
+#else
+      byte == 125
+#endif
 
 skipWhitespace :: ByteString -> Int -> Int
 skipWhitespace bytes = go
  where
   go offset = case byteAt bytes offset of
-    Just byte | isJsonWhitespace byte -> go (offset + 1)
+    Just byte | isJsonWhitespace byte -> go
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_WHITESPACE_ADVANCE_DOUBLE_MUTANT
+      (offset + 2)
+#else
+      (offset + 1)
+#endif
     _ -> offset
 
 isJsonWhitespace :: Word8 -> Bool
-isJsonWhitespace byte = elem byte [9, 10, 13, 32]
+isJsonWhitespace byte =
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_WHITESPACE_TAB_DROP_MUTANT
+  byte /= 9 &&
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_WHITESPACE_LINE_FEED_DROP_MUTANT
+  byte /= 10 &&
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_WHITESPACE_CARRIAGE_RETURN_DROP_MUTANT
+  byte /= 13 &&
+#endif
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_WHITESPACE_SPACE_DROP_MUTANT
+  byte /= 32 &&
+#endif
+  elem byte [9, 10, 13, 32]
 
 byteAt :: ByteString -> Int -> Maybe Word8
 byteAt bytes offset
-  | offset < 0 || offset >= ByteString.length bytes = Nothing
+  | offset < 0 || offset >= ByteString.length bytes =
+#ifdef VALIDATION_COMPILER_BUILDINFO_JSON_BYTE_AT_UPPER_BOUND_SENTINEL_MUTANT
+      Just 0
+#else
+      Nothing
+#endif
   | otherwise = Just (ByteString.index bytes offset)

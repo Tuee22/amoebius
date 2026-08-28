@@ -1623,14 +1623,7 @@ unresolvedSubstringMutationFinding :: ExpectedFinding
 unresolvedSubstringMutationFinding = unresolvedMarkerMutationFinding
 
 indentedGateRowMutationFindings :: [ExpectedFinding]
-indentedGateRowMutationFindings =
-  [ semanticMismatch
-      1
-      "gate-row-order"
-      gateCategories
-      (filter (/= "Subject") gateCategories)
-  , unresolvedMarkerMutationFinding
-  ]
+indentedGateRowMutationFindings = hiddenGateTableFindings
 
 hiddenGateTableFindings :: [ExpectedFinding]
 hiddenGateTableFindings =

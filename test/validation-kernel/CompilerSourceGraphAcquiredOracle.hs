@@ -94,16 +94,26 @@ runCompilerSourceGraphAcquiredSelectorIsolationOracle selector = do
 runCompilerSourceGraphAcquiredSelectorProductControlOracle :: String -> IO ()
 runCompilerSourceGraphAcquiredSelectorProductControlOracle selector =
   case selectorCases selector of
-    [ExactCase _ acquired _ _] -> do
+    [ExactCase _ acquired expectedIdentity _] -> do
       graph <- analyzeAcquiredCompilerSourceGraph acquired
-      let observed = checkName (acquiredCompilerSourceCheck graph)
+      let observedIdentity = acquiredCompilerSnapshotIdentity graph
+          observedName = checkName (acquiredCompilerSourceCheck graph)
           problems =
-            [ "assigned fixture lost the independent check-name control: selector="
-                <> selector
-                <> "; observed="
-                <> show observed
-            | observed /= "acquired-compiler-source-graph-refusal"
-            ]
+            if selector == "VALIDATION_COMPILER_GRAPH_ACQUIRED_CHECK_NAME_MAPPING_MUTANT"
+              then
+                [ "check-name selector disturbed the independent identity control: selector="
+                    <> selector
+                    <> "; observed="
+                    <> show observedIdentity
+                | observedIdentity /= expectedIdentity
+                ]
+              else
+                [ "assigned fixture lost the independent check-name control: selector="
+                    <> selector
+                    <> "; observed="
+                    <> show observedName
+                | observedName /= "acquired-compiler-source-graph-refusal"
+                ]
       unless (null (registryProblems <> problems))
         (failWith "product-control" (registryProblems <> problems))
     candidates ->
@@ -146,6 +156,70 @@ acquiredMutationIntent =
   , ( "VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_RESIDUE_DROP_MUTANT"
     , "acquired source custody retains all five compiler-boundary refusals"
     )
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_BOUNDED_ENTRIES_PROJECTION_MUTANT", "acquired entry exact maximum reaches the source-consumer diagnostic")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_CHECK_NAME_MAPPING_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_COMPOSITION_OBSERVATION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_COMPOSITION_OBSERVATION_NAME_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_COMPOSITION_OBSERVATION_VALUE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_CONSUMER_FINDINGS_RETENTION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_CONSUMER_OBSERVATIONS_RETENTION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_OBSERVATION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_OBSERVATION_NAME_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_OBSERVATION_VALUE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_RESIDUE_CODE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_RESIDUE_DETAIL_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_RESIDUE_SUBJECT_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENTRY_COUNT_EXCEEDED_MAPPING_MUTANT", "acquired entry maximum plus one refuses before consumer construction")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENTRY_COUNT_OBSERVATION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENTRY_COUNT_OBSERVATION_NAME_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENTRY_COUNT_OBSERVATION_VALUE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENTRY_COUNT_SUFFIX_MAPPING_MUTANT", "acquired entry maximum plus one refuses before consumer construction")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENVELOPE_FINDING_CODE_MUTANT", "acquired entry maximum plus one refuses before consumer construction")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENVELOPE_FINDING_DETAIL_MUTANT", "acquired entry maximum plus one refuses before consumer construction")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENVELOPE_FINDING_RETENTION_DROP_MUTANT", "acquired entry maximum plus one refuses before consumer construction")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENVELOPE_FINDING_SUBJECT_MUTANT", "acquired entry maximum plus one refuses before consumer construction")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXCEEDED_COMPOSITION_MAPPING_MUTANT", "acquired entry maximum plus one refuses before consumer construction")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_OBSERVATION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_OBSERVATION_NAME_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_OBSERVATION_VALUE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_RESIDUE_CODE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_RESIDUE_DETAIL_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_RESIDUE_SUBJECT_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_FINDING_COMPOSITION_ORDER_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_LOCAL_OBSERVATION_ORDER_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_MANDATORY_FINDING_ORDER_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_OBSERVATION_COMPOSITION_ORDER_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_REFUSAL_FINDINGS_RETENTION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_RESULT_FINDING_ORDER_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_RESULT_OBSERVATION_ORDER_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_OBSERVATION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_OBSERVATION_NAME_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_OBSERVATION_VALUE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_RESIDUE_CODE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_RESIDUE_DETAIL_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_RESIDUE_SUBJECT_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SNAPSHOT_IDENTITY_MAPPING_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SNAPSHOT_IDENTITY_PROJECTION_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SNAPSHOT_OBSERVATION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SNAPSHOT_OBSERVATION_NAME_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SNAPSHOT_OBSERVATION_VALUE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SOURCE_CHECK_PROJECTION_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_STATE_IDENTITY_ASSEMBLY_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_STATE_RESULT_ASSEMBLY_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_OBSERVATION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_OBSERVATION_NAME_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_OBSERVATION_VALUE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_RESIDUE_CODE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_RESIDUE_DETAIL_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_RESIDUE_SUBJECT_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_OBSERVATION_DROP_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_OBSERVATION_NAME_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_OBSERVATION_VALUE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_RESIDUE_CODE_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_RESIDUE_DETAIL_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_RESIDUE_SUBJECT_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_WITHIN_COMPOSITION_MAPPING_MUTANT", "acquired source custody retains all five compiler-boundary refusals")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_WITHIN_ENTRY_COUNT_MAPPING_MUTANT", "acquired entry exact maximum reaches the source-consumer diagnostic")
   ]
 
 acquiredSelectorDependentCaseLabels :: [(String, [String])]
@@ -176,6 +250,76 @@ acquiredSelectorDependentCaseLabels =
       , "acquired entry maximum plus one refuses before consumer construction"
       ]
     )
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_BOUNDED_ENTRIES_PROJECTION_MUTANT", ["acquired source custody retains all five compiler-boundary refusals"])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_CHECK_NAME_MAPPING_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_COMPOSITION_OBSERVATION_DROP_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_COMPOSITION_OBSERVATION_NAME_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_COMPOSITION_OBSERVATION_VALUE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_CONSUMER_FINDINGS_RETENTION_DROP_MUTANT", ["acquired entry exact maximum reaches the source-consumer diagnostic"])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_CONSUMER_OBSERVATIONS_RETENTION_DROP_MUTANT", ["acquired entry exact maximum reaches the source-consumer diagnostic"])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_OBSERVATION_DROP_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_OBSERVATION_NAME_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_OBSERVATION_VALUE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_RESIDUE_CODE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_RESIDUE_DETAIL_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ELABORATION_RESIDUE_SUBJECT_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENTRY_COUNT_EXCEEDED_MAPPING_MUTANT", [])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENTRY_COUNT_OBSERVATION_DROP_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENTRY_COUNT_OBSERVATION_NAME_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENTRY_COUNT_OBSERVATION_VALUE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENTRY_COUNT_SUFFIX_MAPPING_MUTANT", [])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENVELOPE_FINDING_CODE_MUTANT", [])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENVELOPE_FINDING_DETAIL_MUTANT", [])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENVELOPE_FINDING_RETENTION_DROP_MUTANT", [])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_ENVELOPE_FINDING_SUBJECT_MUTANT", [])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXCEEDED_COMPOSITION_MAPPING_MUTANT", [])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_OBSERVATION_DROP_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_OBSERVATION_NAME_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_OBSERVATION_VALUE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_RESIDUE_CODE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_RESIDUE_DETAIL_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_EXECUTION_RESIDUE_SUBJECT_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_FINDING_COMPOSITION_ORDER_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_LOCAL_OBSERVATION_ORDER_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_MANDATORY_FINDING_ORDER_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_OBSERVATION_COMPOSITION_ORDER_MUTANT", ["acquired entry exact maximum reaches the source-consumer diagnostic"])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_REFUSAL_FINDINGS_RETENTION_DROP_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_RESULT_FINDING_ORDER_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_RESULT_OBSERVATION_ORDER_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_OBSERVATION_DROP_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_OBSERVATION_NAME_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_OBSERVATION_VALUE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_RESIDUE_CODE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_RESIDUE_DETAIL_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SEMANTIC_RESIDUE_SUBJECT_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SNAPSHOT_IDENTITY_MAPPING_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SNAPSHOT_IDENTITY_PROJECTION_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SNAPSHOT_OBSERVATION_DROP_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SNAPSHOT_OBSERVATION_NAME_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SNAPSHOT_OBSERVATION_VALUE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SOURCE_CHECK_PROJECTION_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_STATE_IDENTITY_ASSEMBLY_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_STATE_RESULT_ASSEMBLY_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_OBSERVATION_DROP_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_OBSERVATION_NAME_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_OBSERVATION_VALUE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_RESIDUE_CODE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_RESIDUE_DETAIL_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_SUBJECT_REGISTRY_RESIDUE_SUBJECT_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_OBSERVATION_DROP_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_OBSERVATION_NAME_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_OBSERVATION_VALUE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_RESIDUE_CODE_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_RESIDUE_DETAIL_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_TOOLCHAIN_RESIDUE_SUBJECT_MUTANT", allOtherAcquiredCases)
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_WITHIN_COMPOSITION_MAPPING_MUTANT", ["acquired entry exact maximum reaches the source-consumer diagnostic"])
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED_WITHIN_ENTRY_COUNT_MAPPING_MUTANT", ["acquired source custody retains all five compiler-boundary refusals"])
+  ]
+
+allOtherAcquiredCases :: [String]
+allOtherAcquiredCases =
+  [ "acquired entry exact maximum reaches the source-consumer diagnostic"
+  , "acquired entry maximum plus one refuses before consumer construction"
   ]
 
 compilerSourceGraphAcquiredSelectorNames :: [String]
@@ -208,13 +352,13 @@ selectorAffectedCases selector =
 
 registryProblems :: [String]
 registryProblems =
-  [ "expected 6 acquired mutation-intent rows, observed " <> show (length acquiredMutationIntent)
-  | length acquiredMutationIntent /= 6
+  [ "expected 70 acquired mutation-intent rows, observed " <> show (length acquiredMutationIntent)
+  | length acquiredMutationIntent /= 70
   ]
     <> ["duplicate acquired selector " <> selector | selector <- duplicates (map fst acquiredMutationIntent)]
     <> ["duplicate acquired exact-case label " <> label | label <- duplicates exactCaseLabels]
-    <> [ "expected 6 acquired dependency rows, observed " <> show (length acquiredSelectorDependentCaseLabels)
-       | length acquiredSelectorDependentCaseLabels /= 6
+    <> [ "expected 70 acquired dependency rows, observed " <> show (length acquiredSelectorDependentCaseLabels)
+       | length acquiredSelectorDependentCaseLabels /= 70
        ]
     <> [ "acquired dependency selector registry is not two-way complete"
        | map fst acquiredSelectorDependentCaseLabels /= map fst acquiredMutationIntent
@@ -273,7 +417,8 @@ simpleExpected =
   CheckResult
     { checkName = "acquired-compiler-source-graph-refusal"
     , checkObservations =
-        [ observation "source-consumer.snapshot" "acquired-simple"
+        consumerLimitObservations
+          <> [ observation "source-consumer.snapshot" "acquired-simple"
         , observation "source-consumer.binding-count" "1"
         , observation "source-consumer.pending-haskell-count" "1"
         , observation
@@ -298,7 +443,8 @@ maximumExpected =
   CheckResult
     { checkName = "acquired-compiler-source-graph-refusal"
     , checkObservations =
-        [ observation "source-consumer.snapshot" "acquired-maximum"
+        consumerLimitObservations
+          <> [ observation "source-consumer.snapshot" "acquired-maximum"
         , observation "source-consumer.binding-count" "0"
         , observation "source-consumer.pending-haskell-count" "0"
         ]
@@ -343,6 +489,15 @@ acquiredObservations identity count composition =
   , observation "source-compiler.toolchain-authentication" "absent"
   , observation "source-compiler.execution" "not-attempted"
   , observation "source-compiler.semantic-closure" "absent"
+  ]
+
+consumerLimitObservations :: [Observation]
+consumerLimitObservations =
+  [ observation "limit.snapshot-entries" "16384"
+  , observation "limit.resolved-effects" "64"
+  , observation "limit.consumer-graph-problems" "128"
+  , observation "limit.result-observations" "16392"
+  , observation "limit.result-findings" "129"
   ]
 
 acquiredRefusalFindings :: [Finding]

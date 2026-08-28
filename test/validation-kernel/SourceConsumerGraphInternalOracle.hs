@@ -35,6 +35,7 @@ import Amoebius.Validation.SourceConsumerGraph.Internal
   , consumerGraphResidue
   , consumerGraphSnapshotIdentity
   , contentModeProblemDiagnostic
+  , legalNameRefusedDiagnostic
   , makeCompilerGraphResidueDiagnostic
   , makeSourceConsumerGraphDiagnostic
   , problemFindingDiagnostic
@@ -133,9 +134,9 @@ sourceConsumerGraphInternalSelectorRegistryProblems =
   targets = map snd sourceConsumerGraphInternalSelectorIntents
   exactLabels = map exactCaseLabel sourceConsumerGraphInternalExactCases
   cardinalityProblems =
-    [ "selector registry cardinality changed: expected 288; observed "
+    [ "selector registry cardinality changed: expected 292; observed "
         <> show (length selectors)
-    | length selectors /= 288
+    | length selectors /= 292
     ]
   duplicateSelectorProblems =
     [ "selector registry contains duplicate identity: " <> selector
@@ -509,7 +510,25 @@ selectorUnaffectedControl =
 
 roleGrammarProblems :: [String]
 roleGrammarProblems =
-  expectEqual "documentation suffix admitted"
+  expectEqual "nested mixed-case license exact deny predicate"
+    True
+    (legalNameRefusedDiagnostic "documents/LiCeNsE")
+    <> expectEqual "license suffix deny predicate"
+      True
+      (legalNameRefusedDiagnostic "LICENSE.md")
+    <> expectEqual "licence suffix deny predicate"
+      True
+      (legalNameRefusedDiagnostic "LICENCE.md")
+    <> expectEqual "copying suffix deny predicate"
+      True
+      (legalNameRefusedDiagnostic "COPYING.md")
+    <> expectEqual "notice suffix deny predicate"
+      True
+      (legalNameRefusedDiagnostic "NOTICE.md")
+    <> expectEqual "ordinary documentation deny predicate"
+      False
+      (legalNameRefusedDiagnostic "documents/design.md")
+    <> expectEqual "documentation suffix admitted"
     (Just GovernanceDocumentation)
     (roleForAdmittedPath DocumentationInput "documents/design.md")
     <> expectEqual "documentation non-suffix refused"
@@ -1203,6 +1222,9 @@ sourceConsumerGraphInternalSelectorIntents =
   , ( "VALIDATION_SOURCE_CONSUMER_INTERNAL_AMOEBIUS_ROOT_PATH_ALTERNATIVE_DROP_MUTANT"
     , "all resolved-effect routes"
     )
+  , ( "VALIDATION_SOURCE_CONSUMER_INTERNAL_ADMITTED_CONTENT_ROUTE_BYPASS_MUTANT"
+    , "canonical Internal graph and full result"
+    )
   , ( "VALIDATION_SOURCE_CONSUMER_INTERNAL_ANALYSIS_PROBLEM_ORDER_MUTANT"
     , "duplicate bindings and analysis order"
     )
@@ -1223,6 +1245,15 @@ sourceConsumerGraphInternalSelectorIntents =
     )
   , ( "VALIDATION_SOURCE_CONSUMER_INTERNAL_BEHAVIOURAL_CONSUMER_FIELD_MAPPING_MUTANT"
     , "behavioural authorization invariant"
+    )
+  , ( "VALIDATION_SOURCE_CONSUMER_INTERNAL_BIND_ADMITTED_ROLE_ROUTE_BYPASS_MUTANT"
+    , "canonical Internal graph and full result"
+    )
+  , ( "VALIDATION_SOURCE_CONSUMER_INTERNAL_BOUNDED_PREFIX_OBSERVED_MAPPING_MUTANT"
+    , "snapshot and observation maximum/refusal"
+    )
+  , ( "VALIDATION_SOURCE_CONSUMER_INTERNAL_BOUNDED_PREFIX_TRANSITION_MUTANT"
+    , "snapshot and observation maximum/refusal"
     )
   , ( "VALIDATION_SOURCE_CONSUMER_INTERNAL_BEHAVIOURAL_INVARIANT_BYPASS_MUTANT"
     , "behavioural authorization invariant"
