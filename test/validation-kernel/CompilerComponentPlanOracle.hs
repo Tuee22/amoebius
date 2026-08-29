@@ -267,7 +267,7 @@ compilerComponentPlanSelectorIntents =
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_BYTE_LIMIT_BYPASS_MUTANT", "snapshot identity max+1 is refused before inventory traversal")
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_GRAMMAR_WIDEN_MUTANT", "snapshot identity grammar is exact")
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_MATCH_BYPASS_MUTANT", "snapshot identity content binding is exact")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", "supported raw input remains an exact refusing diagnostic")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", "supported raw input remains an exact refusing diagnostic")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DIRECTORY_LIMIT_BYPASS_MUTANT", "source-directory max+1 is refused before parsing")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DIRECTORY_PROJECTION_MUTANT", "supported raw input remains an exact refusing diagnostic")
   , ("VALIDATION_COMPILER_PLAN_UNOWNED_SUBJECT_BYPASS_MUTANT", "an unlisted Haskell subject is exact residue")
@@ -739,9 +739,9 @@ compilerComponentPlanSelectorIntents =
   , ("VALIDATION_COMPILER_PLAN_SOURCE_AUTOGEN_MODULES_CONTRIBUTION_DROP_MUTANT", "autogen modules remain exact residue")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_BUILD_DEPENDS_CONTRIBUTION_DROP_MUTANT", "dependency environment residue is exact")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_CPP_OPTIONS_CONTRIBUTION_DROP_MUTANT", "CPP option residue is exact")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", "supported raw input remains an exact refusing diagnostic")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", "supported raw input remains an exact refusing diagnostic")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", "supported raw input remains an exact refusing diagnostic")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", "supported raw input remains an exact refusing diagnostic")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", "supported raw input remains an exact refusing diagnostic")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", "supported raw input remains an exact refusing diagnostic")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DEFAULT_EXTENSIONS_CONTRIBUTION_DROP_MUTANT", "extension residue is exact")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DEFAULT_LANGUAGE_CONTRIBUTION_DROP_MUTANT", "language drift is exact")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_EXPOSED_MODULES_CONTRIBUTION_DROP_MUTANT", "supported raw input remains an exact refusing diagnostic")
@@ -3418,7 +3418,7 @@ compilerComponentPlanSelectorDependentCaseLabels =
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_BYTE_LIMIT_BYPASS_MUTANT", [])
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_GRAMMAR_WIDEN_MUTANT", [])
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_MATCH_BYPASS_MUTANT", [])
-  , ( "VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT"
+  , ( "VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT"
     , [ "39-byte object identity is refused independently"
       , "41-byte object identity is refused independently"
       , "63-byte object identity is refused independently"
@@ -14942,7 +14942,7 @@ compilerComponentPlanSelectorDependentCaseLabels =
     , [ "true and false conditional nodes contribute independently"
       ]
     )
-  , ( "VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT"
+  , ( "VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT"
     , [ "39-byte object identity is refused independently"
       , "41-byte object identity is refused independently"
       , "63-byte object identity is refused independently"
@@ -15072,7 +15072,7 @@ compilerComponentPlanSelectorDependentCaseLabels =
       , "uppercase, space, and tab scan normalization alternatives are independent"
       ]
     )
-  , ( "VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT"
+  , ( "VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT"
     , [ "39-byte object identity is refused independently"
       , "41-byte object identity is refused independently"
       , "63-byte object identity is refused independently"
@@ -15202,7 +15202,7 @@ compilerComponentPlanSelectorDependentCaseLabels =
       , "uppercase, space, and tab scan normalization alternatives are independent"
       ]
     )
-  , ( "VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT"
+  , ( "VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT"
     , [ "39-byte object identity is refused independently"
       , "41-byte object identity is refused independently"
       , "63-byte object identity is refused independently"
@@ -18544,42 +18544,42 @@ compilerComponentPlanContinuationDependentCasePairs =
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_LOWER_HEX_ALTERNATIVE_DROP_MUTANT", "test code generators remain explicit residue")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_AUTOGEN_MODULES_CONTRIBUTION_DROP_MUTANT", "parsed combined module fields are bounded before sorting")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_BUILD_DEPENDS_CONTRIBUTION_DROP_MUTANT", "parsed dependency resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", "legacy build tools remain explicit residue")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", "legacy extensions remain bounded compiler configuration")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", "parsed combined module fields are bounded before sorting")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", "parsed dependency resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", "parsed option resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", "parsed resource refusal cannot mint a partial assignment")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", "parsed source-directory resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", "test BuildInfo other-modules contribute exactly once")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", "test code generators remain explicit residue")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", "legacy build tools remain explicit residue")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", "legacy extensions remain bounded compiler configuration")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", "parsed combined module fields are bounded before sorting")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", "parsed dependency resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", "parsed option resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", "parsed resource refusal cannot mint a partial assignment")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", "parsed source-directory resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", "test BuildInfo other-modules contribute exactly once")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", "test code generators remain explicit residue")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", "legacy build tools remain explicit residue")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", "legacy extensions remain bounded compiler configuration")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", "parsed combined module fields are bounded before sorting")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", "parsed dependency resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", "parsed option resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", "parsed resource refusal cannot mint a partial assignment")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", "parsed source-directory resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", "test BuildInfo other-modules contribute exactly once")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", "test code generators remain explicit residue")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", "legacy build tools remain explicit residue")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", "legacy extensions remain bounded compiler configuration")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", "parsed combined module fields are bounded before sorting")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", "parsed dependency resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", "parsed option resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", "parsed resource refusal cannot mint a partial assignment")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", "parsed source-directory resource residue survives scanner undercount")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", "test BuildInfo other-modules contribute exactly once")
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", "test code generators remain explicit residue")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", "legacy build tools remain explicit residue")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", "legacy extensions remain bounded compiler configuration")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", "parsed combined module fields are bounded before sorting")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", "parsed dependency resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", "parsed option resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", "parsed resource refusal cannot mint a partial assignment")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", "parsed source-directory resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", "test BuildInfo other-modules contribute exactly once")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", "test code generators remain explicit residue")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", "legacy build tools remain explicit residue")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", "legacy extensions remain bounded compiler configuration")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", "parsed combined module fields are bounded before sorting")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", "parsed dependency resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", "parsed option resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", "parsed resource refusal cannot mint a partial assignment")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", "parsed source-directory resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", "test BuildInfo other-modules contribute exactly once")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", "test code generators remain explicit residue")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", "legacy build tools remain explicit residue")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", "legacy extensions remain bounded compiler configuration")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", "parsed combined module fields are bounded before sorting")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", "parsed dependency resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", "parsed option resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", "parsed resource refusal cannot mint a partial assignment")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", "parsed source-directory resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", "test BuildInfo other-modules contribute exactly once")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", "test code generators remain explicit residue")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", "legacy build tools remain explicit residue")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", "legacy extensions remain bounded compiler configuration")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", "parsed combined module fields are bounded before sorting")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", "parsed dependency resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", "parsed option resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", "parsed resource refusal cannot mint a partial assignment")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", "parsed source-directory resource residue survives scanner undercount")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", "test BuildInfo other-modules contribute exactly once")
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", "test code generators remain explicit residue")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DEFAULT_LANGUAGE_CONTRIBUTION_DROP_MUTANT", "legacy build tools remain explicit residue")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DEFAULT_LANGUAGE_CONTRIBUTION_DROP_MUTANT", "legacy extensions remain bounded compiler configuration")
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DEFAULT_LANGUAGE_CONTRIBUTION_DROP_MUTANT", "parsed combined module fields are bounded before sorting")
@@ -18690,12 +18690,12 @@ exactCasesForLabels labels =
 -- The control uses the same assigned product fixture and changes only the
 -- asserted result dimension.  Every atomic selector except the check-name
 -- selector must preserve the exact public name; that selector must preserve an
--- independent mandatory source-custody refusal.  Thus every selector has one
+-- independent mandatory source-binding refusal.  Thus every selector has one
 -- named, minimally different, public-product control without weakening its
 -- full exact-result primary case.
 data SelectorProductControl
   = PublicCheckNameControl
-  | SourceCustodyResidueControl
+  | SourceBindingResidueControl
   deriving (Eq, Show)
 
 compilerComponentPlanSelectorProductControls :: [(String, SelectorProductControl)]
@@ -18847,7 +18847,7 @@ compilerComponentPlanSelectorProductControls =
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_BYTE_LIMIT_BYPASS_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_GRAMMAR_WIDEN_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_MATCH_BYPASS_MUTANT", PublicCheckNameControl)
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT", PublicCheckNameControl)
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DIRECTORY_LIMIT_BYPASS_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DIRECTORY_PROJECTION_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_UNOWNED_SUBJECT_BYPASS_MUTANT", PublicCheckNameControl)
@@ -19107,7 +19107,7 @@ compilerComponentPlanSelectorProductControls =
   , ("VALIDATION_COMPILER_PLAN_RENDER_CONFIG_GHC_OPTIONS_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_RENDER_CONFIG_LANGUAGE_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_RENDER_CONFIG_SOURCE_DIRECTORIES_MUTANT", PublicCheckNameControl)
-  , ("VALIDATION_COMPILER_PLAN_RESULT_CHECK_NAME_MUTANT", SourceCustodyResidueControl)
+  , ("VALIDATION_COMPILER_PLAN_RESULT_CHECK_NAME_MUTANT", SourceBindingResidueControl)
   , ("VALIDATION_COMPILER_PLAN_RESULT_FINDINGS_PROJECTION_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_RESULT_FINDING_ORDER_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_SNAPSHOT_IDENTITY_DIGIT_ALTERNATIVE_DROP_MUTANT", PublicCheckNameControl)
@@ -19323,9 +19323,9 @@ compilerComponentPlanSelectorProductControls =
   , ("VALIDATION_COMPILER_PLAN_SOURCE_AUTOGEN_MODULES_CONTRIBUTION_DROP_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_SOURCE_BUILD_DEPENDS_CONTRIBUTION_DROP_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_SOURCE_CPP_OPTIONS_CONTRIBUTION_DROP_MUTANT", PublicCheckNameControl)
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT", PublicCheckNameControl)
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT", PublicCheckNameControl)
-  , ("VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT", PublicCheckNameControl)
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT", PublicCheckNameControl)
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT", PublicCheckNameControl)
+  , ("VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DEFAULT_EXTENSIONS_CONTRIBUTION_DROP_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_SOURCE_DEFAULT_LANGUAGE_CONTRIBUTION_DROP_MUTANT", PublicCheckNameControl)
   , ("VALIDATION_COMPILER_PLAN_SOURCE_EXPOSED_MODULES_CONTRIBUTION_DROP_MUTANT", PublicCheckNameControl)
@@ -19365,11 +19365,11 @@ compilerComponentPlanSelectorProductControls =
 runSelectorProductControl :: String -> ExactCase -> [String]
 runSelectorProductControl selector exactCase
   = case [control | (candidate, control) <- compilerComponentPlanSelectorProductControls, candidate == selector] of
-      [SourceCustodyResidueControl] ->
+      [SourceBindingResidueControl] ->
         expectEqual
-          (selector <> " assigned fixture preserves independent source-custody residue")
+          (selector <> " assigned fixture preserves independent source-binding residue")
           True
-          (sourceCustodyControlFinding `elem` checkFindings actual)
+          (sourceBindingControlFinding `elem` checkFindings actual)
       [PublicCheckNameControl] ->
         expectEqual
           (selector <> " assigned fixture preserves the public check-name envelope")
@@ -19389,12 +19389,12 @@ runSelectorProductControl selector exactCase
       | entry <- exactCaseEntries exactCase
       ]
 
-sourceCustodyControlFinding :: Finding
-sourceCustodyControlFinding =
+sourceBindingControlFinding :: Finding
+sourceBindingControlFinding =
   Finding
-    "COMPONENT-PLAN-SOURCE-CUSTODY-UNAVAILABLE"
+    "COMPONENT-PLAN-SOURCE-BINDING-UNAVAILABLE"
     "compiler-component-plan"
-    "an authenticated network-independent source-custody observation is not attached"
+    "an authenticated network-independent source-binding observation is not attached"
 
 compilerComponentPlanSelectorNames :: [String]
 compilerComponentPlanSelectorNames = map fst compilerComponentPlanSelectorIntents
@@ -19512,17 +19512,17 @@ registryIntegrityProblems =
     <> [ "product-control selector registry is not two-way complete against primary intents"
        | Set.fromList productControlSelectors /= primarySelectorSet
        ]
-    <> [ "source-custody product control must belong only to the check-name selector: observed="
-           <> show sourceCustodyControlSelectors
-       | sourceCustodyControlSelectors /= ["VALIDATION_COMPILER_PLAN_RESULT_CHECK_NAME_MUTANT"]
+    <> [ "source-binding product control must belong only to the check-name selector: observed="
+           <> show sourceBindingControlSelectors
+       | sourceBindingControlSelectors /= ["VALIDATION_COMPILER_PLAN_RESULT_CHECK_NAME_MUTANT"]
        ]
  where
   assignedLabels = Set.fromList (map snd compilerComponentPlanSelectorIntents)
   unassignedExactCaseLabels = filter (`Set.notMember` assignedLabels) exactCaseLabels
   dependentSelectors = map fst compilerComponentPlanSelectorDependentCaseLabels
   productControlSelectors = map fst compilerComponentPlanSelectorProductControls
-  sourceCustodyControlSelectors =
-    [selector | (selector, SourceCustodyResidueControl) <- compilerComponentPlanSelectorProductControls]
+  sourceBindingControlSelectors =
+    [selector | (selector, SourceBindingResidueControl) <- compilerComponentPlanSelectorProductControls]
   primarySelectorSet = Set.fromList compilerComponentPlanSelectorNames
   primaryTargetBySelector = Map.fromList compilerComponentPlanSelectorIntents
   continuationDependentPairSet = Set.fromList compilerComponentPlanContinuationDependentCasePairs
@@ -21555,7 +21555,7 @@ observationLiteralsFor label = case label of
 mandatoryFindings :: [Finding]
 mandatoryFindings =
   [ problem "COMPONENT-PLAN-DIAGNOSTIC-ONLY" "compiler-component-plan" "raw caller input can produce diagnostics only; it cannot mint component-plan evidence"
-  , problem "COMPONENT-PLAN-SOURCE-CUSTODY-UNAVAILABLE" "compiler-component-plan" "an authenticated network-independent source-custody observation is not attached"
+  , problem "COMPONENT-PLAN-SOURCE-BINDING-UNAVAILABLE" "compiler-component-plan" "an authenticated network-independent source-binding observation is not attached"
   , problem "COMPONENT-PLAN-CABAL-ELABORATION-UNAVAILABLE" "compiler-component-plan" "Cabal project and conditional-unit elaboration remains outside this restricted parser"
   , problem "COMPONENT-PLAN-COMPILER-EXECUTION-UNAVAILABLE" "compiler-component-plan" "the linked compiler has not parsed, renamed, and typechecked the exact assignments"
   ]

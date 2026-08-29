@@ -60,7 +60,7 @@ dispatchSelectorIntents =
   , ("VALIDATION_DISPATCH_OMIT_DOCUMENTATION_MUTANT", "select documentation component", "canonical phase zero")
   , ("VALIDATION_DISPATCH_OMIT_PHASE_CONTRACT_MUTANT", "select phase-contract component", "canonical phase zero")
   , ("VALIDATION_DISPATCH_DIAGNOSTIC_ONLY_DROP_MUTANT", "retain diagnostic-only refusal", "canonical phase zero")
-  , ("VALIDATION_DISPATCH_SOURCE_CUSTODY_RESIDUE_DROP_MUTANT", "retain source-custody refusal", "canonical phase zero")
+  , ("VALIDATION_DISPATCH_SOURCE_BINDING_RESIDUE_DROP_MUTANT", "retain source-binding refusal", "canonical phase zero")
   , ("VALIDATION_DISPATCH_PREDECESSOR_RESIDUE_DROP_MUTANT", "retain predecessor refusal", "canonical phase zero")
   , ("VALIDATION_DISPATCH_QUALIFICATION_RESIDUE_DROP_MUTANT", "retain qualification refusal", "canonical phase zero")
   , ("VALIDATION_DISPATCH_LATER_PHASE_BLOCK_BYPASS_MUTANT", "block a later phase", "later phase route")
@@ -380,7 +380,7 @@ literalExpectedResult phase components safePhase safeCount commitment selectedRo
           <> [ Finding
                  "DISPATCH-PHASE-BLOCKED"
                  ("phase-" <> Text.unpack safePhase)
-                 ("every later phase requires its immediate predecessor's external reviewer approval" <> commitmentDetail)
+                 ("every later phase requires its immediate predecessor's gate pass" <> commitmentDetail)
              | phaseBlocked
              ]
     }
@@ -397,13 +397,13 @@ literalMandatoryFindings commitmentDetail =
       "Amoebius.Validation.Dispatch.dispatchDiagnostic"
       ("caller-supplied dispatch wire cannot mint candidate evidence" <> commitmentDetail)
   , Finding
-      "DISPATCH-SOURCE-CUSTODY-UNAVAILABLE"
+      "DISPATCH-SOURCE-BINDING-UNAVAILABLE"
       "<caller-supplied-dispatch-input>"
-      ("no authenticated atomic source acquisition is attached" <> commitmentDetail)
+      ("no exact local source snapshot is attached" <> commitmentDetail)
   , Finding
-      "DISPATCH-PREDECESSOR-APPROVAL-UNAVAILABLE"
+      "DISPATCH-PREDECESSOR-PASS-UNAVAILABLE"
       "phase-order"
-      ("no externally authenticated predecessor approval is attached" <> commitmentDetail)
+      ("no predecessor gate pass result is attached" <> commitmentDetail)
   , Finding
       "DISPATCH-QUALIFICATION-UNAVAILABLE"
       "Amoebius.Validation.Gate"

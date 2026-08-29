@@ -948,7 +948,7 @@ diagnosticFinding =
   Finding
     "SOURCE-DEBT-DIAGNOSTIC-ONLY"
     "<caller-supplied-source-closure>"
-    "caller-supplied source-debt observations are diagnostic input, not candidate acquisition authority"
+    "caller-supplied source-debt observations are diagnostic input, not candidate capture authority"
 
 familySetFinding :: Text -> Finding
 familySetFinding actual =

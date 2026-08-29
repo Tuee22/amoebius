@@ -300,7 +300,7 @@ produce identical **canonical state-fingerprint *sets*** — not merely equal ca
 alone do not establish (equal count + equal verdict is not equal state set) — alongside the same verdict,
 shrinking any divergence to a minimal offending model. This differential faithfulness claim is **scoped to the safety sub-fragment**: the generator exercises `emitTLA`'s `Init`/`Next`/`INVARIANT`/`CONSTRAINT` rendering, and
 the explorer checks no liveness, so the `modelFairness`/`modelProperties` (`WF`/`SF`/`PROPERTY`) rendering is
-**not** covered by this test and rests on the independently reviewed Haskell renderer-semantics oracle and the TLC-only liveness
+**not** covered by this test and rests on the separately authored Haskell renderer-semantics oracle and the TLC-only liveness
 runs instead. This is the single most valuable place in the
 kernel for a **proof assistant**: a machine-checked meta-theorem that each `Expr`/`Temporal` constructor's
 `interpret`-denotation equals the TLA+ denotation `emitTLA` targets would upgrade faithfulness from
@@ -324,7 +324,7 @@ the snapshot after a failure erases its evidence. The content address already ob
 therefore asks what the generated module *means*, not whether its whitespace and declaration layout remained
 frozen.
 
-**The chosen rule.** The kernel carries a **reference model** — one small, complete, independently reviewed Haskell `Model`
+**The chosen rule.** The kernel carries a **reference model** — one small, complete, separately authored Haskell `Model`
 that exists only to validate the renderers, distinct from every model that describes a real amoebius protocol.
 Its committed Haskell expectations are semantic:
 
@@ -509,7 +509,7 @@ live forest). The concrete obligation for the one model is owned by
 This document remains the normative formal-model doctrine. Phase order, validation status, gate ownership,
 and remaining work live only in
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This doctrine records no current validation
-result. Hardware-free model, DSL, and generator checks must pass the reviewer-approved promotion barrier before
+result. Hardware-free model, DSL, and generator checks must pass the complete Phase-49 gate before
 any live runtime correspondence check begins.
 
 ---

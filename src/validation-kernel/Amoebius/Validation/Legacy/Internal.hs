@@ -136,7 +136,7 @@ data LegacyAnalyzer
   | AnalyzeValidationProtocol
   | AnalyzePhaseContracts
   | AnalyzeStatusEvidence
-  | AnalyzeDelegatedPromotion
+  | AnalyzeGateCompletion
   | AnalyzeHardwareFreeDsl
   | AnalyzeRunInputClosure
   | AnalyzeBehavioralDocumentConsumers
@@ -161,10 +161,10 @@ data LegacyObservationRule
   | ObserveSourcePb
   | ObserveSourceVendor
   | ObserveParsedIgnoreGrammars
-  | ObserveValidationAuthorityGraph
-  | ObserveTypedPhaseContractCustody
+  | ObserveValidationGateGraph
+  | ObserveTypedPhaseContractBinding
   | ObserveStatusEvidenceProjection
-  | ObservePromotionAuthorization
+  | ObserveGateCompletionResult
   | ObserveHardwareFreeDslTrace
   | ObserveRunInputProvenance
   | ObserveDocumentConsumerGraph
@@ -192,7 +192,7 @@ data LegacyClosureRule
   | CloseValidationProtocol
   | ClosePhaseContracts
   | CloseStatusEvidence
-  | CloseDelegatedPromotion
+  | CloseGateCompletion
   | CloseHardwareFreeDsl
   | CloseRunInputClosure
   | CloseBehavioralDocumentConsumers
@@ -219,11 +219,11 @@ data LegacyReintroductionCase
   | RejectWidenedPbBehavior
   | RejectTopLevelVendorDebt
   | RejectRetiredIgnoreRule
-  | RejectNonHaskellValidationAuthority
+  | RejectNonHaskellValidationVerdict
   | RejectUnboundPhaseContract
   | RejectForgedStatusEvidence
-  | RejectUnqualifiedPromotion
-  | RejectHardwareBeforeDslPromotion
+  | RejectIncompleteGate
+  | RejectHardwareBeforeDslGatePass
   | RejectAmbientOrStaleRunInput
   | RejectBehavioralMarkdownConsumer
   | RejectRuntimePhaseOrdinal
@@ -264,7 +264,7 @@ data LegacyObservedState
 -- it. This value is input, not authority: the evaluator rejects a key that
 -- differs from the canonical binding. An Active zero is admissible only at
 -- the owning phase, where it is candidate readiness rather than retirement;
--- delegated promotion must precede the compiled Retired transition used by a
+-- gate completion must precede the compiled Retired transition used by a
 -- later phase.
 data LegacyObservation = LegacyObservation
   { legacyObservationAnalyzer :: LegacyAnalyzer
@@ -1148,7 +1148,7 @@ legacyIdAnalyzer LtdVal004 =
 #if defined(VALIDATION_LEGACY_LTD_VAL004_ANALYZER_MUTANT)
   AnalyzeCompleteSourceGrammar
 #else
-  AnalyzeDelegatedPromotion
+  AnalyzeGateCompletion
 #endif
 legacyIdAnalyzer LtdVal005 =
 #if defined(VALIDATION_LEGACY_LTD_VAL005_ANALYZER_MUTANT)
@@ -1282,13 +1282,13 @@ legacyIdObservationRule LtdVal001 =
 #if defined(VALIDATION_LEGACY_LTD_VAL001_OBSERVATION_MUTANT)
   ObserveCompleteSourceSnapshot
 #else
-  ObserveValidationAuthorityGraph
+  ObserveValidationGateGraph
 #endif
 legacyIdObservationRule LtdVal002 =
 #if defined(VALIDATION_LEGACY_LTD_VAL002_OBSERVATION_MUTANT)
   ObserveCompleteSourceSnapshot
 #else
-  ObserveTypedPhaseContractCustody
+  ObserveTypedPhaseContractBinding
 #endif
 legacyIdObservationRule LtdVal003 =
 #if defined(VALIDATION_LEGACY_LTD_VAL003_OBSERVATION_MUTANT)
@@ -1300,7 +1300,7 @@ legacyIdObservationRule LtdVal004 =
 #if defined(VALIDATION_LEGACY_LTD_VAL004_OBSERVATION_MUTANT)
   ObserveCompleteSourceSnapshot
 #else
-  ObservePromotionAuthorization
+  ObserveGateCompletionResult
 #endif
 legacyIdObservationRule LtdVal005 =
 #if defined(VALIDATION_LEGACY_LTD_VAL005_OBSERVATION_MUTANT)
@@ -1452,7 +1452,7 @@ legacyIdClosureRule LtdVal004 =
 #if defined(VALIDATION_LEGACY_LTD_VAL004_CLOSURE_MUTANT)
   CloseCompleteSourceGrammar
 #else
-  CloseDelegatedPromotion
+  CloseGateCompletion
 #endif
 legacyIdClosureRule LtdVal005 =
 #if defined(VALIDATION_LEGACY_LTD_VAL005_CLOSURE_MUTANT)
@@ -1586,7 +1586,7 @@ legacyIdReintroductionCases LtdVal001 =
 #if defined(VALIDATION_LEGACY_LTD_VAL001_REINTRODUCTION_MUTANT)
   RejectDisguisedOrConcealedSource :| []
 #else
-  RejectNonHaskellValidationAuthority :| []
+  RejectNonHaskellValidationVerdict :| []
 #endif
 legacyIdReintroductionCases LtdVal002 =
 #if defined(VALIDATION_LEGACY_LTD_VAL002_REINTRODUCTION_MUTANT)
@@ -1604,13 +1604,13 @@ legacyIdReintroductionCases LtdVal004 =
 #if defined(VALIDATION_LEGACY_LTD_VAL004_REINTRODUCTION_MUTANT)
   RejectDisguisedOrConcealedSource :| []
 #else
-  RejectUnqualifiedPromotion :| []
+  RejectIncompleteGate :| []
 #endif
 legacyIdReintroductionCases LtdVal005 =
 #if defined(VALIDATION_LEGACY_LTD_VAL005_REINTRODUCTION_MUTANT)
   RejectDisguisedOrConcealedSource :| []
 #else
-  RejectHardwareBeforeDslPromotion :| []
+  RejectHardwareBeforeDslGatePass :| []
 #endif
 legacyIdReintroductionCases LtdVal006 =
 #if defined(VALIDATION_LEGACY_LTD_VAL006_REINTRODUCTION_MUTANT)
@@ -2136,11 +2136,11 @@ renderLegacyAnalyzer value = case value of
 #else
     "status-evidence"
 #endif
-  AnalyzeDelegatedPromotion ->
+  AnalyzeGateCompletion ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL004_ANALYZER_MUTANT)
-    "delegated-promotionx"
+    "gate-completionx"
 #else
-    "delegated-promotion"
+    "gate-completion"
 #endif
   AnalyzeHardwareFreeDsl ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL005_ANALYZER_MUTANT)
@@ -2271,17 +2271,17 @@ renderLegacyObservationRule value = case value of
 #else
     "parsed-ignore-grammars"
 #endif
-  ObserveValidationAuthorityGraph ->
+  ObserveValidationGateGraph ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL001_OBSERVATION_MUTANT)
-    "validation-authority-graphx"
+    "validation-gate-graphx"
 #else
-    "validation-authority-graph"
+    "validation-gate-graph"
 #endif
-  ObserveTypedPhaseContractCustody ->
+  ObserveTypedPhaseContractBinding ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL002_OBSERVATION_MUTANT)
-    "typed-phase-contract-custodyx"
+    "typed-phase-contract-bindingx"
 #else
-    "typed-phase-contract-custody"
+    "typed-phase-contract-binding"
 #endif
   ObserveStatusEvidenceProjection ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL003_OBSERVATION_MUTANT)
@@ -2289,11 +2289,11 @@ renderLegacyObservationRule value = case value of
 #else
     "status-evidence-projection"
 #endif
-  ObservePromotionAuthorization ->
+  ObserveGateCompletionResult ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL004_OBSERVATION_MUTANT)
-    "promotion-authorizationx"
+    "gate-completion-resultx"
 #else
-    "promotion-authorization"
+    "gate-completion-result"
 #endif
   ObserveHardwareFreeDslTrace ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL005_OBSERVATION_MUTANT)
@@ -2442,11 +2442,11 @@ renderLegacyClosureRule value = case value of
 #else
     "status-evidence"
 #endif
-  CloseDelegatedPromotion ->
+  CloseGateCompletion ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL004_CLOSURE_MUTANT)
-    "delegated-promotionx"
+    "gate-completionx"
 #else
-    "delegated-promotion"
+    "gate-completion"
 #endif
   CloseHardwareFreeDsl ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL005_CLOSURE_MUTANT)
@@ -2577,11 +2577,11 @@ renderLegacyReintroductionCase value = case value of
 #else
     "reject-retired-ignore-rule"
 #endif
-  RejectNonHaskellValidationAuthority ->
+  RejectNonHaskellValidationVerdict ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL001_REINTRODUCTION_MUTANT)
-    "reject-non-haskell-validation-authorityx"
+    "reject-non-haskell-validation-verdictx"
 #else
-    "reject-non-haskell-validation-authority"
+    "reject-non-haskell-validation-verdict"
 #endif
   RejectUnboundPhaseContract ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL002_REINTRODUCTION_MUTANT)
@@ -2595,17 +2595,17 @@ renderLegacyReintroductionCase value = case value of
 #else
     "reject-forged-status-evidence"
 #endif
-  RejectUnqualifiedPromotion ->
+  RejectIncompleteGate ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL004_REINTRODUCTION_MUTANT)
-    "reject-unqualified-promotionx"
+    "reject-incomplete-gatex"
 #else
-    "reject-unqualified-promotion"
+    "reject-incomplete-gate"
 #endif
-  RejectHardwareBeforeDslPromotion ->
+  RejectHardwareBeforeDslGatePass ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL005_REINTRODUCTION_MUTANT)
-    "reject-hardware-before-dsl-promotionx"
+    "reject-hardware-before-dsl-gate-passx"
 #else
-    "reject-hardware-before-dsl-promotion"
+    "reject-hardware-before-dsl-gate-pass"
 #endif
   RejectAmbientOrStaleRunInput ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL006_REINTRODUCTION_MUTANT)
@@ -2664,7 +2664,7 @@ renderLegacyReintroductionCase value = case value of
 
 -- | A fixed, pure, standard-value projection of the genuine hidden parser,
 -- lifecycle evaluator, source-debt dispatcher, structural register parser,
--- and diagnostic-authority boundary.  The public facade may retain these
+-- and diagnostic-evidence boundary.  The public facade may retain these
 -- observations, but it cannot construct or recover any hidden value from
 -- them and its result remains permanently refusing.
 legacyInternalDiagnosticProjection :: [Observation]
@@ -2680,7 +2680,7 @@ legacyInternalDiagnosticProjection =
         <> registerProjectionObservation
         <> registerFindingProjectionObservation
         <> rawCheckProjectionObservation
-        <> authorityMappingProjectionObservation
+        <> gateMappingProjectionObservation
         <> closedEvidenceIntegrityProjectionObservation
     )
 
@@ -2841,19 +2841,19 @@ rawCheckProjectionKey = "legacy.internal.mutated.sha256"
 rawCheckProjectionKey = "legacy.internal.raw-check-wire.sha256"
 #endif
 
-authorityMappingProjectionObservation :: [Observation]
-#if defined(VALIDATION_LEGACY_INTERNAL_PROJECTION_AUTHORITY_MAPPING_DROP_MUTANT)
-authorityMappingProjectionObservation =
-  authorityMappingProjectionKey `seq` Text.length authorityMappingProjection `seq` []
+gateMappingProjectionObservation :: [Observation]
+#if defined(VALIDATION_LEGACY_INTERNAL_PROJECTION_GATE_MAPPING_DROP_MUTANT)
+gateMappingProjectionObservation =
+  gateMappingProjectionKey `seq` Text.length gateMappingProjection `seq` []
 #else
-authorityMappingProjectionObservation = [projectionObservation authorityMappingProjectionKey authorityMappingProjection]
+gateMappingProjectionObservation = [projectionObservation gateMappingProjectionKey gateMappingProjection]
 #endif
 
-authorityMappingProjectionKey :: Text
-#if defined(VALIDATION_LEGACY_INTERNAL_PROJECTION_AUTHORITY_MAPPING_KEY_MUTANT)
-authorityMappingProjectionKey = "legacy.internal.mutated.sha256"
+gateMappingProjectionKey :: Text
+#if defined(VALIDATION_LEGACY_INTERNAL_PROJECTION_GATE_MAPPING_KEY_MUTANT)
+gateMappingProjectionKey = "legacy.internal.mutated.sha256"
 #else
-authorityMappingProjectionKey = "legacy.internal.authority-mapping-wire.sha256"
+gateMappingProjectionKey = "legacy.internal.gate-mapping-wire.sha256"
 #endif
 
 closedEvidenceIntegrityProjectionObservation :: [Observation]
@@ -3366,8 +3366,8 @@ rawCheckProjection =
     )
 #endif
 
-authorityMappingProjection :: Text
-authorityMappingProjection = authorityMappingProjectionComposition $
+gateMappingProjection :: Text
+gateMappingProjection = gateMappingProjectionComposition $
   projectionFrame (renderObservedState (legacyCompleteObservedState []))
     <> projectionFrame
       ( renderObservedState
@@ -3426,17 +3426,17 @@ authorityMappingProjection = authorityMappingProjectionComposition $
       )
     <> projectionFrame "missing-owner-render-control"
     <> projectionFrame (renderOwner Nothing)
-    <> projectionFrame "raw-acquisition-result-control"
+    <> projectionFrame "raw-capture-result-control"
     <> projectionFrame
-      (renderProjectedCheck (legacyRawAcquisitionUnavailable "projection"))
+      (renderProjectedCheck (legacyRawCaptureUnavailable "projection"))
  where
-  emptyProjectionCheck = CheckResult "legacy-authority-projection" [] []
+  emptyProjectionCheck = CheckResult "legacy-gate-projection" [] []
 
-authorityMappingProjectionComposition :: Text -> Text
-#if defined(VALIDATION_LEGACY_INTERNAL_AUTHORITY_MAPPING_PROJECTION_COMPOSITION_MUTANT)
-authorityMappingProjectionComposition = Text.reverse
+gateMappingProjectionComposition :: Text -> Text
+#if defined(VALIDATION_LEGACY_INTERNAL_GATE_MAPPING_PROJECTION_COMPOSITION_MUTANT)
+gateMappingProjectionComposition = Text.reverse
 #else
-authorityMappingProjectionComposition = id
+gateMappingProjectionComposition = id
 #endif
 
 closedEvidenceIntegrityProjection :: Text
@@ -3820,7 +3820,7 @@ evaluateCanonicalBinding candidatePhase binding supplied =
                   ( renderLegacyId identifier
                       <> " is still Active after owner Phase "
                       <> renderOwner ownerNumber
-                      <> "; the owning candidate's zero observation did not receive a compiled post-promotion retirement transition"
+                      <> "; the owning candidate's zero observation did not receive a compiled post-pass retirement transition"
                   )
               ]
           LegacyObservedOpen count digest
@@ -5475,31 +5475,31 @@ legacyCheck candidatePhase snapshot =
         rawConsumerCheck
     )
  where
-  -- A caller-authored snapshot is not authenticated acquisition.  These
+  -- A caller-authored snapshot is not the exact local capture.  These
   -- fixed role-labelled refusals are constructed without classifying a blob,
   -- traversing a consumer graph, or invoking a nested source analyzer.  The
   -- only snapshot traversal that remains is the literal structural register
   -- preflight inside legacyCheckCore.
   rawClosureCheck =
 #if defined(VALIDATION_LEGACY_INTERNAL_RAW_CLOSURE_ROUTE_MUTANT)
-    legacyRawAcquisitionUnavailable "source-closure" `seq`
+    legacyRawCaptureUnavailable "source-closure" `seq`
       CheckResult "legacy-mutated-closure-route" [] []
 #else
-    legacyRawAcquisitionUnavailable "source-closure"
+    legacyRawCaptureUnavailable "source-closure"
 #endif
   rawDebtCheck =
 #if defined(VALIDATION_LEGACY_INTERNAL_RAW_DEBT_ROUTE_MUTANT)
-    legacyRawAcquisitionUnavailable "source-debt" `seq`
+    legacyRawCaptureUnavailable "source-debt" `seq`
       CheckResult "legacy-mutated-debt-route" [] []
 #else
-    legacyRawAcquisitionUnavailable "source-debt"
+    legacyRawCaptureUnavailable "source-debt"
 #endif
   rawConsumerCheck =
 #if defined(VALIDATION_LEGACY_INTERNAL_RAW_CONSUMER_ROUTE_MUTANT)
-    legacyRawAcquisitionUnavailable "source-consumer" `seq`
+    legacyRawCaptureUnavailable "source-consumer" `seq`
       CheckResult "legacy-mutated-consumer-route" [] []
 #else
-    legacyRawAcquisitionUnavailable "source-consumer"
+    legacyRawCaptureUnavailable "source-consumer"
 #endif
 
 legacyRawCheckRefusalComposition :: CheckResult -> CheckResult
@@ -5510,69 +5510,69 @@ legacyRawCheckRefusalComposition result =
 legacyRawCheckRefusalComposition = appendLegacySnapshotDiagnosticRefusal
 #endif
 
-legacyRawAcquisitionUnavailable :: Text -> CheckResult
-legacyRawAcquisitionUnavailable role =
+legacyRawCaptureUnavailable :: Text -> CheckResult
+legacyRawCaptureUnavailable role =
   CheckResult
-    { checkName = legacyRawAcquisitionResultName
+    { checkName = legacyRawCaptureResultName
     , checkObservations = []
-    , checkFindings = legacyRawAcquisitionFindings role
+    , checkFindings = legacyRawCaptureFindings role
     }
 
-legacyRawAcquisitionResultName :: Text
-#if defined(VALIDATION_LEGACY_INTERNAL_RAW_ACQUISITION_RESULT_NAME_MUTANT)
-legacyRawAcquisitionResultName = "legacy-raw-acquisition-mutated"
+legacyRawCaptureResultName :: Text
+#if defined(VALIDATION_LEGACY_INTERNAL_RAW_CAPTURE_RESULT_NAME_MUTANT)
+legacyRawCaptureResultName = "legacy-raw-capture-mutated"
 #else
-legacyRawAcquisitionResultName = "legacy-raw-acquisition-unavailable"
+legacyRawCaptureResultName = "legacy-raw-capture-unavailable"
 #endif
 
-legacyRawAcquisitionFindings :: Text -> [Finding]
-#if defined(VALIDATION_LEGACY_INTERNAL_RAW_ACQUISITION_FINDING_DROP_MUTANT)
-legacyRawAcquisitionFindings role =
-  legacyRawAcquisitionFinding role `seq` []
+legacyRawCaptureFindings :: Text -> [Finding]
+#if defined(VALIDATION_LEGACY_INTERNAL_RAW_CAPTURE_FINDING_DROP_MUTANT)
+legacyRawCaptureFindings role =
+  legacyRawCaptureFinding role `seq` []
 #else
-legacyRawAcquisitionFindings role = [legacyRawAcquisitionFinding role]
+legacyRawCaptureFindings role = [legacyRawCaptureFinding role]
 #endif
 
-legacyRawAcquisitionFinding :: Text -> Finding
-#if defined(VALIDATION_LEGACY_INTERNAL_RAW_ACQUISITION_FINDING_COMPOSITION_MUTANT)
-legacyRawAcquisitionFinding role =
+legacyRawCaptureFinding :: Text -> Finding
+#if defined(VALIDATION_LEGACY_INTERNAL_RAW_CAPTURE_FINDING_COMPOSITION_MUTANT)
+legacyRawCaptureFinding role =
   finding
-    (legacyRawAcquisitionDetail role)
-    (legacyRawAcquisitionSubject role)
-    legacyRawAcquisitionCode
+    (legacyRawCaptureDetail role)
+    (legacyRawCaptureSubject role)
+    legacyRawCaptureCode
 #else
-legacyRawAcquisitionFinding role =
+legacyRawCaptureFinding role =
   finding
-    legacyRawAcquisitionCode
-    (legacyRawAcquisitionSubject role)
-    (legacyRawAcquisitionDetail role)
+    legacyRawCaptureCode
+    (legacyRawCaptureSubject role)
+    (legacyRawCaptureDetail role)
 #endif
 
-legacyRawAcquisitionCode :: Text
-#if defined(VALIDATION_LEGACY_INTERNAL_RAW_ACQUISITION_CODE_MUTANT)
-legacyRawAcquisitionCode = "LEGACY-MUTATED"
+legacyRawCaptureCode :: Text
+#if defined(VALIDATION_LEGACY_INTERNAL_RAW_CAPTURE_CODE_MUTANT)
+legacyRawCaptureCode = "LEGACY-MUTATED"
 #else
-legacyRawAcquisitionCode = "LEGACY-RAW-ACQUISITION-UNAVAILABLE"
+legacyRawCaptureCode = "LEGACY-RAW-CAPTURE-UNAVAILABLE"
 #endif
 
-legacyRawAcquisitionSubject :: Text -> FilePath
-#if defined(VALIDATION_LEGACY_INTERNAL_RAW_ACQUISITION_SUBJECT_MUTANT)
-legacyRawAcquisitionSubject _ = "<mutated>"
+legacyRawCaptureSubject :: Text -> FilePath
+#if defined(VALIDATION_LEGACY_INTERNAL_RAW_CAPTURE_SUBJECT_MUTANT)
+legacyRawCaptureSubject _ = "<mutated>"
 #else
-legacyRawAcquisitionSubject role =
+legacyRawCaptureSubject role =
   "Amoebius.Validation.Legacy.Internal/" <> Text.unpack role
 #endif
 
-legacyRawAcquisitionDetail :: Text -> Text
-#if defined(VALIDATION_LEGACY_INTERNAL_RAW_ACQUISITION_DETAIL_MUTANT)
-legacyRawAcquisitionDetail _ = "mutated"
+legacyRawCaptureDetail :: Text -> Text
+#if defined(VALIDATION_LEGACY_INTERNAL_RAW_CAPTURE_DETAIL_MUTANT)
+legacyRawCaptureDetail _ = "mutated"
 #else
-legacyRawAcquisitionDetail role =
-  "caller-authored snapshots cannot invoke the acquired analyzer route; role=" <> role
+legacyRawCaptureDetail role =
+  "caller-authored snapshots cannot invoke the captured analyzer route; role=" <> role
 #endif
 
 -- | Candidate legacy evaluation over the opaque acquired snapshot and the
--- compiler evidence derived from that same acquisition.  Neither constructor
+-- compiler evidence derived from that same capture.  Neither constructor
 -- is caller-accessible.  A mismatched evidence wrapper refuses explicitly.
 legacyCheckAcquired
   :: Policy.PhaseOrdinal
@@ -5655,7 +5655,7 @@ compilerSnapshotMismatchDetail :: Text
 compilerSnapshotMismatchDetail = "mutated"
 #else
 compilerSnapshotMismatchDetail =
-  "the acquired compiler evidence is bound to a different source snapshot"
+  "the captured compiler evidence is bound to a different source snapshot"
 #endif
 
 legacyCheckCore

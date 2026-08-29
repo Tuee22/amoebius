@@ -11,8 +11,8 @@ module PhaseContractOracle
   , runPhaseContractUnaffectedControl
   ) where
 
--- Component diagnostics only.  This oracle does not perform reviewer inspection,
--- qualify the phase-contract harness, validate a phase, or promote status.
+-- Component diagnostics only.  This oracle does not perform documentation correspondence check,
+-- qualify the phase-contract harness, validate a phase, or pass the gate.
 
 import Amoebius.Validation.PhaseContract (phaseContractDiagnostic)
 import Amoebius.Validation.Types (CheckResult (..), Finding (..), Observation (..))
@@ -722,7 +722,7 @@ runPhaseContractOracle =
             "Phase Summary rejects a seventh caller-authored field"
             "PLAN-SUMMARY-CONTAINMENT"
             (phasePath 7)
-            (replaceIn (phasePath 7) (summaryLine "Lane" (laneValue 7)) (summaryLine "Lane" (laneValue 7) <> "\n\n**Unreviewed:** decoy") validCorpus)
+            (replaceIn (phasePath 7) (summaryLine "Lane" (laneValue 7)) (summaryLine "Lane" (laneValue 7) <> "\n\n**Unchecked:** decoy") validCorpus)
         , expectFinding
             "phase status reset"
             "PLAN-PHASE-STATUS"
@@ -909,7 +909,7 @@ runPhaseContractOracle =
             trackerPath
             (indentedTrackerCorpus "\t")
         , expectFinding
-            "Unicode whitespace cannot promote the tracker header to top-level structure"
+            "Unicode whitespace cannot elevate the tracker header to top-level structure"
             "PLAN-TRACKER-TABLE-FRAME"
             trackerPath
             (indentedTrackerCorpus "\160")
@@ -943,7 +943,7 @@ runPhaseContractOracle =
             "gate row outside the one framed table is refused"
             "PLAN-GATE-TABLE-FRAME"
             (phasePath 7)
-            (replaceIn (phasePath 7) (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.") (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\n\n" <> gateRow "Decoy" "outside") validCorpus)
+            (replaceIn (phasePath 7) (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate.") (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate." <> "\n\n" <> gateRow "Decoy" "outside") validCorpus)
         , expectFinding
             "an arity-mutated gate row outside the exact frame is refused"
             "PLAN-GATE-TABLE-FRAME"
@@ -1146,8 +1146,8 @@ runPhaseContractOracle =
             (phasePath 10)
             ( replaceIn
                 (phasePath 10)
-                (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9) <> "\n" <> sprintFieldLine "Requires" "natural-linux-cpu-amd64-host")
-                (sprintFieldLine "Requires" "natural-linux-cpu-amd64-host" <> "\n" <> sprintFieldLine "Blocked by" (phaseApprovalBlocker 9))
+                (sprintFieldLine "Blocked by" (phasePassBlocker 9) <> "\n" <> sprintFieldLine "Requires" "natural-linux-cpu-amd64-host")
+                (sprintFieldLine "Requires" "natural-linux-cpu-amd64-host" <> "\n" <> sprintFieldLine "Blocked by" (phasePassBlocker 9))
                 requiresCorpus
             )
         , expectFinding
@@ -1194,12 +1194,12 @@ runPhaseContractOracle =
             "a first sprint must bind the immediate predecessor phase"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9)) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 8)) validCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phasePassBlocker 9)) (sprintFieldLine "Blocked by" (phasePassBlocker 8)) validCorpus)
         , expectFinding
             "a first sprint cannot replace the canonical predecessor link with unlinked prose"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9)) (sprintFieldLine "Blocked by" "Phase 9 reviewer approval") validCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phasePassBlocker 9)) (sprintFieldLine "Blocked by" "Phase 9 gate pass") validCorpus)
         , expectFinding
             "the genesis sprint blocker uses the one exact raw reset value"
             "PLAN-SPRINT-BLOCKER"
@@ -1219,20 +1219,20 @@ runPhaseContractOracle =
             (phasePath 10)
             (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" "Sprint 10.1; Sprint 9.99") twoSprintCorpus)
         , expectFinding
-            "a downstream sprint cannot append an earlier phase approval after its immediate sprint edge"
+            "a downstream sprint cannot append an earlier phase gate after its immediate sprint edge"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" ("Sprint 10.1; " <> phaseApprovalBlocker 9)) twoSprintCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" ("Sprint 10.1; " <> phasePassBlocker 9)) twoSprintCorpus)
         , expectFinding
-            "a downstream sprint cannot append candidate or reviewer-inspection prose after its immediate sprint edge"
+            "a downstream sprint cannot append candidate or unrelated check prose after its immediate sprint edge"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" "Sprint 10.1 candidate and reviewer sprint inspection") twoSprintCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" "Sprint 10.1 candidate and check detail") twoSprintCorpus)
         , expectFinding
             "a first sprint cannot append another earlier phase after its immediate predecessor"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9)) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9 <> "; " <> phaseApprovalBlocker 8)) validCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phasePassBlocker 9)) (sprintFieldLine "Blocked by" (phasePassBlocker 9 <> "; " <> phasePassBlocker 8)) validCorpus)
         , expectFinding
             "a dual Validated and NOT VALIDATED sprint status is refused"
             "PLAN-SPRINT-STATUS"
@@ -1259,7 +1259,7 @@ runPhaseContractOracle =
             (phasePath 10)
             (replaceIn (phasePath 10) "Synthetic seam ⏸️" "Synthetic seam ❌" validCorpus)
         , expectFinding
-            "a known sprint marker cannot contradict its reviewed current Status field"
+            "a known sprint marker cannot contradict its recorded current Status field"
             "PLAN-SPRINT-STATUS"
             (phasePath 10)
             (replaceIn (phasePath 10) "Synthetic seam ⏸️" "Synthetic seam ✅" validCorpus)
@@ -1282,7 +1282,7 @@ dependencyLinkProseCorpus =
   replaceIn
     (phasePath 10)
     (summaryLine "Depends on" (dependencyValue 10))
-    (summaryLine "Depends on" (dependencyValue 10 <> " reviewer approval"))
+    (summaryLine "Depends on" (dependencyValue 10 <> " gate pass"))
     validCorpus
 
 dependencyPathAliasCorpus :: [(FilePath, Text)]
@@ -1537,14 +1537,14 @@ gateThreeCellOutsideCorpus, gateMalformedOutsideCorpus, gateExtraDelimiterCorpus
 gateThreeCellOutsideCorpus =
   replaceIn
     (phasePath 7)
-    (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.")
-    (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\n\n| decoy | outside | extra |")
+    (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate.")
+    (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate." <> "\n\n| decoy | outside | extra |")
     validCorpus
 gateMalformedOutsideCorpus =
   replaceIn
     (phasePath 7)
-    (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.")
-    (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\n\n| malformed gate candidate")
+    (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate.")
+    (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate." <> "\n\n| malformed gate candidate")
     validCorpus
 gateExtraDelimiterCorpus =
   replaceIn
@@ -1611,8 +1611,8 @@ requiresCorpus :: [(FilePath, Text)]
 requiresCorpus =
   replaceIn
     (phasePath 10)
-    (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9))
-    ( sprintFieldLine "Blocked by" (phaseApprovalBlocker 9)
+    (sprintFieldLine "Blocked by" (phasePassBlocker 9))
+    ( sprintFieldLine "Blocked by" (phasePassBlocker 9)
         <> "\n"
         <> sprintFieldLine "Requires" "natural-linux-cpu-amd64-host"
     )
@@ -1635,8 +1635,8 @@ gateSemanticProseDecoyCorpus :: [(FilePath, Text)]
 gateSemanticProseDecoyCorpus =
   replaceIn
     (phasePath 10)
-    (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.")
-    (gateRow "Promotion authority" "This reader-facing explanation carries no executable policy value.")
+    (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate.")
+    (gateRow "Pass criterion" "This reader-facing explanation carries no executable policy value.")
     ( replaceIn
         (phasePath 10)
         (gateRow "Residue" "Later layers remain UNVERIFIED.")
@@ -1658,11 +1658,11 @@ phaseFortyNineProseDecoyCorpus :: [(FilePath, Text)]
 phaseFortyNineProseDecoyCorpus =
   replaceIn
     trackerPath
-    "| 49 | No-hardware DSL promotion barrier |"
+    "| 49 | No-hardware DSL gate barrier |"
     "| 49 | Semantically opaque prose |"
     ( replaceIn
         (phasePath 49)
-        "# Phase 49: No-hardware DSL promotion barrier"
+        "# Phase 49: No-hardware DSL gate barrier"
         "# Phase 49: Semantically opaque prose"
         ( replaceIn
             (phasePath 49)
@@ -1745,7 +1745,7 @@ phaseDocument number =
               number
               1
               (if number == 0 then "Active — NOT VALIDATED" else "Blocked — NOT VALIDATED")
-              (if number == 0 then "`genesis`" else phaseApprovalBlocker (number - 1))
+              (if number == 0 then "`genesis`" else phasePassBlocker (number - 1))
           )
         <> [ "## Documentation Requirements"
            , ""
@@ -1780,7 +1780,7 @@ gateValues number =
   , "Active owner-phase rows must reach zero."
   , if number == 0 then "genesis" else "Phase " <> formatPhase (number - 1)
   , "Later layers remain UNVERIFIED."
-  , "Promotion authority requires an authorized reviewer."
+  , "Pass criterion requires an complete qualified gate."
   ]
 
 expectedGateKeys :: [Text]
@@ -1802,7 +1802,7 @@ expectedGateKeys =
   , "Legacy closure"
   , "Predecessor"
   , "Residue"
-  , "Promotion authority"
+  , "Pass criterion"
   ]
 
 expectedGateHeader :: Text
@@ -1851,7 +1851,7 @@ phaseFortyNineSubject =
     ]
 
 phaseTitle :: Int -> Text
-phaseTitle 49 = "No-hardware DSL promotion barrier"
+phaseTitle 49 = "No-hardware DSL gate barrier"
 phaseTitle number = "Synthetic capability " <> showText number
 
 phasePath :: Int -> FilePath
@@ -1860,13 +1860,13 @@ phasePath number =
     <> Text.unpack (formatPhase number)
     <> "_synthetic_capability.md"
 
-phaseApprovalBlocker :: Int -> Text
-phaseApprovalBlocker predecessor =
+phasePassBlocker :: Int -> Text
+phasePassBlocker predecessor =
   "[Phase "
     <> showText predecessor
     <> "](phase_"
     <> formatPhase predecessor
-    <> "_synthetic_capability.md) reviewer approval"
+    <> "_synthetic_capability.md) gate pass"
 
 dependencyValue :: Int -> Text
 dependencyValue 0 = "genesis"
@@ -1928,7 +1928,7 @@ syntheticValidation :: Text
 syntheticValidation = "Independent positive, paired negative, changed-subject mutant, and residue observation."
 
 syntheticOracle :: Text
-syntheticOracle = "test/SyntheticOracle.hs, independent literal expectation, authorized reviewer."
+syntheticOracle = "test/SyntheticOracle.hs, independent literal expectation, complete qualified gate."
 
 syntheticDocs :: Text
 syntheticDocs = "documents/engineering/synthetic_doctrine.md"
@@ -2126,8 +2126,8 @@ phaseContractExactCaseProblems exactCase =
         (phasePath 7)
         ( replaceIn
             (phasePath 7)
-            (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.")
-            (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\ntrailing gate content")
+            (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate.")
+            (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate." <> "\ntrailing gate content")
             validCorpus
         )
     "gate-header-wildcard" ->
@@ -2141,7 +2141,7 @@ phaseContractExactCaseProblems exactCase =
         (phasePath 7)
         ( replaceIn
             (phasePath 7)
-            (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\n\n## Doctrine adopted")
+            (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate." <> "\n\n## Doctrine adopted")
             "## Doctrine adopted"
             validCorpus
         )
@@ -2171,8 +2171,8 @@ phaseContractExactCaseProblems exactCase =
         (phasePath 7)
         ( replaceIn
             (phasePath 7)
-            (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.")
-            (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\n\n" <> gateRow "Decoy" "outside")
+            (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate.")
+            (gateRow "Pass criterion" "Pass criterion requires an complete qualified gate." <> "\n\n" <> gateRow "Decoy" "outside")
             validCorpus
         )
     "gate-result-composition" ->
@@ -2555,7 +2555,7 @@ phaseContractExactCaseProblems exactCase =
         "selector case: sprint blocker"
         "PLAN-SPRINT-BLOCKER"
         (phasePath 10)
-        (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9)) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 8)) validCorpus)
+        (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phasePassBlocker 9)) (sprintFieldLine "Blocked by" (phasePassBlocker 8)) validCorpus)
     "sprint-blocker-genesis" ->
       expectFinding
         "selector case: genesis sprint blocker uses exact inline code"
@@ -2569,8 +2569,8 @@ phaseContractExactCaseProblems exactCase =
         (phasePath 10)
         ( replaceIn
             (phasePath 10)
-            (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9))
-            (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9 <> "; " <> phaseApprovalBlocker 8))
+            (sprintFieldLine "Blocked by" (phasePassBlocker 9))
+            (sprintFieldLine "Blocked by" (phasePassBlocker 9 <> "; " <> phasePassBlocker 8))
             validCorpus
         )
     "sprint-blocker-prior-sprint" ->
@@ -2626,8 +2626,8 @@ phaseContractExactCaseProblems exactCase =
                 (sprintFieldLine "Status" "Validated — NOT VALIDATED")
                 ( replaceIn
                     (phasePath 10)
-                    (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9))
-                    (sprintFieldLine "Blocked by" (phaseApprovalBlocker 8))
+                    (sprintFieldLine "Blocked by" (phasePassBlocker 9))
+                    (sprintFieldLine "Blocked by" (phasePassBlocker 8))
                     validCorpus
                 )
             )
@@ -3051,7 +3051,7 @@ mutantFixtureProblems =
     [ ( "dependency closed-link bypass"
       , phasePath 10
       , dependencyLinkProseCorpus
-      , [summaryLine "Depends on" (dependencyValue 10 <> " reviewer approval")]
+      , [summaryLine "Depends on" (dependencyValue 10 <> " gate pass")]
       , []
       )
     , ( "fence-boundary bypass"
@@ -3254,7 +3254,7 @@ diagnosticRefusalCode = "PLAN-STRUCTURE-DIAGNOSTIC-ONLY"
 
 diagnosticRefusalMessage :: Text
 diagnosticRefusalMessage =
-  "caller-authored structural input has no semantic, acquisition, reviewer-custody, observer, or promotion authority"
+  "caller-authored structural input has no semantic, capture, gate-evidence, observer, or gate-pass rule"
 
 expectDiagnosticOnly :: String -> [(FilePath, Text)] -> [String]
 expectDiagnosticOnly label corpus =

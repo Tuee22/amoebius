@@ -2,10 +2,10 @@
 
 -- | Refusal-only raw diagnostic for the tracked-source closure seam.
 --
--- No snapshot, acquisition token, classifier value, parser, projection, bound,
+-- No snapshot, capture token, classifier value, parser, projection, bound,
 -- or candidate-capable check crosses this facade.  The claimed identity and
 -- inventory are caller input; the implementation independently bounds and
--- recomputes them and always retains custody and complete-discovery residue.
+-- recomputes them and always retains exact-source and complete-discovery residue.
 module Amoebius.Validation.SourceClosure
   ( sourceClosureDiagnostic
   ) where

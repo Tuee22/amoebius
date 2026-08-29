@@ -1,9 +1,9 @@
 module Main (main) where
 
--- Component diagnostics only. A successful process is not independent reviewer
--- review, harness qualification, phase validation, or promotion evidence.
+-- Component diagnostics only. A successful process is not a complete qualified
+-- gate, phase validation, or status evidence.
 
-import ApprovalOracle (runApprovalOracle)
+import GatePassOracle (runGatePassOracle)
 import Control.Exception (SomeException, displayException, try)
 import Control.Monad (forM)
 import CompilerBuildInfoOracle (runCompilerBuildInfoOracle)
@@ -19,32 +19,30 @@ import PhaseSemanticContractOracle (runPhaseSemanticContractOracle)
 import PbBootstrapGrammarOracle (runPbBootstrapGrammarOracle)
 import PolicyContractOracle (runPolicyContractOracle)
 import QualificationOracle (runQualificationOracle)
-import SourceAcquisitionOracle (runSourceAcquisitionOracle)
 import SourceClosureOracle (runSourceClosureOracle)
 import SourceConsumerGraphOracle (runSourceConsumerGraphOracle)
 import SourceDebtBaselineOracle (runSourceDebtBaselineOracle)
 
 main :: IO ()
 main = do
-  putStrLn "Running validation-kernel component diagnostics; this cannot qualify or promote a phase."
+  putStrLn "Running validation-kernel component diagnostics; this cannot make a phase gate pass."
   outcomes <- forM componentOracles runComponentOracle
   case [failure | Just failure <- outcomes] of
     [] ->
-      putStrLn "Component diagnostics completed; no validation or reviewer-inspection claim is implied."
+      putStrLn "Component diagnostics completed; no validation or documentation-correspondence claim is implied."
     failures ->
       fail
         ( unlines
-            ( "Component diagnostics reported failures after every named oracle executed; no validation or reviewer-inspection claim is implied."
+            ( "Component diagnostics reported failures after every named oracle executed; no validation or documentation-correspondence claim is implied."
                 : concatMap renderFailure failures
             )
         )
 
 componentOracles :: [(String, IO ())]
 componentOracles =
-  [ ("ApprovalOracle", runApprovalOracle)
+  [ ("GatePassOracle", runGatePassOracle)
   , ("DispatchOracle", runDispatchOracle)
   , ("EvidenceOracle", runEvidenceOracle)
-  , ("SourceAcquisitionOracle", runSourceAcquisitionOracle)
   , ("SourceClosureOracle", runSourceClosureOracle)
   , ("PbBootstrapGrammarOracle", runPbBootstrapGrammarOracle)
   , ("SourceDebtBaselineOracle", runSourceDebtBaselineOracle)

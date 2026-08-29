@@ -11,8 +11,8 @@ module DocumentationOracle
   , runDocumentationUnaffectedControl
   ) where
 
--- Component diagnostics only.  This oracle does not perform reviewer inspection,
--- qualify the documentation harness, validate a phase, or promote status.
+-- Component diagnostics only.  This oracle does not perform documentation correspondence check,
+-- qualify the documentation harness, validate a phase, or set Done status.
 
 import Amoebius.Validation.Documentation
   ( documentationInventoryDiagnostic
@@ -224,7 +224,7 @@ runDocumentationOracle = do
             (appendTo "AGENTS.md" "\nThe committed Haskell fixture changes the subject.\n" linkedCorpus)
         , expectClean
             "an exact Haskell mutant path remains admissible"
-            (appendTo "AGENTS.md" "\nThe reviewed mutation source is `test/mutant/ExampleMutant.hs`.\n" unlinkedCorpus)
+            (appendTo "AGENTS.md" "\nThe authored mutation source is `test/mutant/ExampleMutant.hs`.\n" unlinkedCorpus)
         , expectClean
             "a policy keyword decoy is structurally inert"
             (appendTo "AGENTS.md" "\nA prose decoy mentions Harbor but has no executable authority.\n" unlinkedCorpus)
@@ -455,7 +455,7 @@ establishedDocumentationTargetProblems selector =
             ( Finding
                 "DOC-INVENTORY-COUNT"
                 "documents/"
-                "governed path count differs from the reviewed Haskell baseline: expected=195, observed=6"
+                "governed path count differs from the authored Haskell baseline: expected=195, observed=6"
             )
             (documentationInventoryDiagnostic linkedCorpus)
         )
@@ -597,7 +597,7 @@ establishedDocumentationControlProblems selector =
       pure
         ( expectClean
             "exact Haskell path control"
-            (appendTo "AGENTS.md" "\nThe reviewed mutation source is `test/mutant/ExampleMutant.hs`.\n" unlinkedCorpus)
+            (appendTo "AGENTS.md" "\nThe authored mutation source is `test/mutant/ExampleMutant.hs`.\n" unlinkedCorpus)
         )
     ["one-line sentence control"] ->
       pure
@@ -746,7 +746,7 @@ sentenceLong = sentenceFirstHalf <> " " <> sentenceSecondHalf
 -- retained, but an omitted, added, relocated, or textually changed finding
 -- makes this oracle red. Reading the mutable worktree still does not
 -- authenticate a snapshot, qualify this oracle, validate a phase, perform
--- prose-correspondence review, or promote status.
+-- prose-correspondence check, or set Done status.
 productionCorpusProblems :: IO [String]
 productionCorpusProblems = do
   current <- getCurrentDirectory
@@ -769,7 +769,7 @@ productionCorpusProblems = do
             <> expectObservation
               "independent production paragraph-spanning over-target count"
               "prose-budget.sentence-over-target-count"
-              "1623"
+              "1591"
               result
             <> expectObservation
               "independent production severe-sentence count"
@@ -784,7 +784,7 @@ productionCorpusProblems = do
             <> expectObservation
               "independent production over-target paragraph count"
               "prose-budget.paragraph-over-target-count"
-              "660"
+              "656"
               result
             <> findingManifestProblems
               expectedProductionFindingCounts
@@ -822,7 +822,7 @@ expectedProductionFindingCounts =
   ]
 
 expectedProductionFindingManifestSha256 :: Text
-expectedProductionFindingManifestSha256 = "9d86382ee1b7c5e3340bdefadf31c9d4abcc37169074de36f0d9e1f8707bae69"
+expectedProductionFindingManifestSha256 = "4c64dc3928ba3647570e90819769c6af060c034852b1dd4e5479c2085f673b74"
 
 findingManifestProblems :: [(Text, Int)] -> Text -> [Finding] -> [String]
 findingManifestProblems expectedCounts expectedDigest findings =
@@ -1178,7 +1178,7 @@ outputTotalCommonPathLength :: Int
 outputTotalCommonPathLength = 726
 
 outputTotalSpecialTargetLength :: Int
-outputTotalSpecialTargetLength = 976
+outputTotalSpecialTargetLength = 986
 
 outputBoundarySentence :: Text
 outputBoundarySentence = Text.unwords (replicate 45 "x" <> ["x."])
@@ -1188,7 +1188,7 @@ structureDiagnosticRefusal =
   Finding
     "DOC-STRUCTURE-DIAGNOSTIC-ONLY"
     "Amoebius.Validation.Documentation.documentationStructureDiagnostic"
-    "caller-authored Markdown has no acquisition, semantic, reviewer-custody, observer, or promotion authority"
+    "caller-authored Markdown has no capture, semantic, gate-evidence, observer, or gate-pass result"
 
 expectedOutputRefusal :: Text -> CheckResult
 expectedOutputRefusal problem =
@@ -1648,7 +1648,7 @@ policyOwnerCorpus =
       "## E. One canonical phase model\n\n## L. One-substrate discipline"
   , ownerDocument
       "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
-      "### M.6 Candidate evidence and delegated promotion"
+      "### M.6 Candidate evidence and gate pass"
   ]
 
 ownerDocument :: FilePath -> Text -> (FilePath, Text)
@@ -1665,8 +1665,8 @@ oracleOwnerContract =
   , owner "ValidationStatusReset" "DEVELOPMENT_PLAN/phase_00_documentation_suite.md" "phase-status" "Phase Status"
   , owner "NumericPhaseOrder" "DEVELOPMENT_PLAN/development_plan_phase_model.md" "e-one-canonical-phase-model" "E. One canonical phase model"
   , owner "DslBarrierSourceClosurePolicy" "DEVELOPMENT_PLAN/development_plan_phase_model.md" "e-one-canonical-phase-model" "E. One canonical phase model"
-  , owner "PrehardwarePromotionBarrier" "DEVELOPMENT_PLAN/development_plan_phase_model.md" "l-one-substrate-discipline" "L. One-substrate discipline"
-  , owner "PromotionAuthorityPolicy" "DEVELOPMENT_PLAN/development_plan_gate_integrity.md" "m6-candidate-evidence-and-delegated-promotion" "M.6 Candidate evidence and delegated promotion"
+  , owner "PrehardwareGateBarrier" "DEVELOPMENT_PLAN/development_plan_phase_model.md" "l-one-substrate-discipline" "L. One-substrate discipline"
+  , owner "GatePassPolicy" "DEVELOPMENT_PLAN/development_plan_gate_integrity.md" "m6-candidate-evidence-and-gate-pass" "M.6 Candidate evidence and gate pass"
   ]
  where
   owner identifier path anchor section =
@@ -1744,7 +1744,7 @@ expectClean label corpus =
     [item]
       | findingCode item == "DOC-STRUCTURE-DIAGNOSTIC-ONLY"
           && findingSubject item == "Amoebius.Validation.Documentation.documentationStructureDiagnostic"
-          && findingDetail item == "caller-authored Markdown has no acquisition, semantic, reviewer-custody, observer, or promotion authority" -> []
+          && findingDetail item == "caller-authored Markdown has no capture, semantic, gate-evidence, observer, or gate-pass result" -> []
     findings -> [label <> ": unexpected findings " <> show findings]
 
 expectOnlyPolicyDiagnostic :: String -> CheckResult -> [String]
@@ -1754,7 +1754,7 @@ expectOnlyPolicyDiagnostic label result =
       /= [ Finding
              "DOC-POLICY-OWNER-DIAGNOSTIC-ONLY"
              "Amoebius.Validation.Documentation.documentationPolicyOwnerDiagnostic"
-             "caller-supplied owner documents have no authenticated source, reviewer-custody, qualification, observer, or promotion authority"
+             "caller-supplied owner documents have no exact source binding, gate-evidence, qualification, observer, or gate-pass result"
          ]
   ]
  where

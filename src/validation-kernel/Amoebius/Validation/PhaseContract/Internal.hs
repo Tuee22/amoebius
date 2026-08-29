@@ -536,7 +536,7 @@ structuralDiagnosticRefusal requireSemanticAudit =
   [ finding
       "PLAN-STRUCTURE-DIAGNOSTIC-ONLY"
       "DEVELOPMENT_PLAN/"
-      "caller-authored structural input has no semantic, acquisition, reviewer-custody, observer, or promotion authority"
+      "caller-authored structural input has no semantic, capture, gate-evidence, observer, or gate-pass rule"
   | not requireSemanticAudit
   ]
 #endif
@@ -1438,7 +1438,7 @@ gateKeys =
   , "Legacy closure"
   , "Predecessor"
   , "Residue"
-  , "Promotion authority"
+  , "Pass criterion"
   ]
 
 checkSprintContracts :: Map Int PhaseDocument -> Bool -> PhaseDocument -> [Finding]
@@ -1457,7 +1457,7 @@ checkSprintContracts phases enforceCanonicalInventory phase =
     [ finding
         "PLAN-SPRINT-INVENTORY"
         (phasePath phase)
-        ( "sprint identities must be the reviewed contiguous inventory "
+        ( "sprint identities must be the recorded contiguous inventory "
             <> showText expectedOrdinals
             <> "; observed "
             <> showText parsedOrdinals
@@ -1487,7 +1487,7 @@ checkSprintContracts phases enforceCanonicalInventory phase =
               "PLAN-SPRINT-STATUS"
               (phasePath phase)
               ( Text.strip heading
-                  <> " must contain exactly the reviewed reset status "
+                  <> " must contain exactly the recorded reset status "
                   <> maybe "for a valid sprint ordinal" ("'" <>) ((<> "'") <$> expectedStatus)
               )
           | case expectedStatus of
@@ -1715,7 +1715,7 @@ sprintBlockerFindings phases phase heading body =
   [ finding
       "PLAN-SPRINT-BLOCKER"
       (phasePath phase)
-      (Text.strip heading <> " must equal its one canonical immediate prior plan edge with no appended dependency or review prose")
+      (Text.strip heading <> " must equal its one canonical immediate prior plan edge with no appended dependency or check prose")
   | not blockerSatisfied
   ]
  where
@@ -1738,7 +1738,7 @@ sprintBlockerFindings phases phase heading body =
                   ( "[Phase "
                       <> showText predecessor
                       <> "](" <> Text.pack (takeFileName (phasePath predecessorPhase))
-                      <> ") reviewer approval"
+                      <> ") gate pass"
                   )
            in sprintPredecessorBlockerValid value linkedEdge
     (Just sprintOrdinal, [value]) ->

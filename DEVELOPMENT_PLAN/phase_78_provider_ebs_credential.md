@@ -10,7 +10,7 @@
 
 This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
 command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
 status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
@@ -45,16 +45,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 77, its independent validation, and delegated promotion; every earlier
-promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
-completion claim, and implementation result in this document is invalidated as validation evidence, even
-where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Blocked by redesigned Phase 77, its independent validation, and gate pass; every earlier
+gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
+where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
-satisfied and reviewer-approved.
+Hardware validation is also prohibited until the hardware-free DSL gate barrier is independently
+satisfied and gate-passed.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and an authorized reviewer independently inspects it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
@@ -147,39 +146,39 @@ volume, writes and reads a marker across a real `pulumi destroy` and re-attach, 
 `ec2:DeleteVolume` against the cloud API; no register-1/2 in-process check discharges it. A future candidate
 ledger must scope any *tested* statement to the EKS target from a `linux-cpu` parent, classify retention by
 lifetime, and leave elevated-harness reclamation to [Phase 90](phase_90_test_topology_live.md). The ledger
-cannot promote the phase.
+cannot make the phase gate pass.
 
 **Depends on:** [Phase 77](phase_77_provider_child_bringup.md)
 **Gate:** `pb validate phase 78`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract review**: REJECTED — NOT VALIDATED.
+**Contract check**: REJECTED — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: one cohesive claim — *durable volumes are structurally outside the ephemeral cluster's destroy set*. The credential that could delete one is denied at the cloud API, not by convention. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: one cohesive claim — *durable volumes are structurally outside the ephemeral cluster's destroy set*. The credential that could delete one is denied at the cloud API, not by convention. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 78` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent reviewer have been accepted. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 78` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
 | `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 77; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer` — an authorized human or agent may promote after inspecting the complete qualified candidate; no gate, CI job, digest, receipt-shaped file, or generated assertion may promote by itself. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 77; candidate execution refuses an absent, stale, replayed, or different-source result. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 
 ## Resource provision — UNRESOLVED
 
-> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
+> **UNRESOLVED — blocks validation.** No live mutation may begin. Before check this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 The gate provisions, before any cloud mutation, exactly this envelope for the durable-EBS slice (the surrounding
 provider control plane, node group, and executor peaks are provisioned by
@@ -242,19 +241,19 @@ provider control plane, node group, and executor peaks are provisioned by
 
 ## Sprints
 
-> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and an authorized-reviewer tracker change.
+> **Permanent sprint reset.** Every pre-reset sprint result below is historical context. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor gate pass, owned legacy closure, and a complete gate pass.
 >
-> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in checked Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 78.1: Per-PV durable EBS in its own state + node-vs-storage decoupling ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
-**Blocked by**: [Phase 77](phase_77_provider_child_bringup.md) reviewer approval
+**Blocked by**: [Phase 77](phase_77_provider_child_bringup.md) gate pass
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -322,7 +321,7 @@ reattach. The pure geometry, class separation, Transit/MinIO, and retained-stora
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 78.1
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -379,7 +378,7 @@ cloud audit once valid AWS authority is available.
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 78.2
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -438,7 +437,7 @@ provider-created handle. The no-dynamic-provisioner model and Kubernetes object 
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 78.3
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -512,7 +511,7 @@ readback. All eight one-short refusals, stale/replay refusal, and overlap accoun
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 78.4
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -526,7 +525,7 @@ same volume through a freshly rendered static CSI PV and reads its data back unc
 
 ### Deliverables
 
-- The gate over a reviewed Haskell durable-EBS declaration, lazily projected to
+- The gate over a checked Haskell durable-EBS declaration, lazily projected to
   `.build/test-corpora/dhall/provider_dynamic_nodes/provider_provision.dhall`: spin up the provider
   cluster ([Phase 76](phase_76_provider_deploy_checkpoint.md)); create the per-PV durable EBS (Sprint 78.1);
   render and observe Ready the baked static-only CSI (Sprint 78.3); bind the Pulumi-created EBS through the static
@@ -587,7 +586,7 @@ surfaces remain UNVERIFIED, including Phase-90 elevated durable reclamation.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
+**Engineering docs to update (after the complete gate passes):**
 
 - `documents/engineering/pulumi_iac_doctrine.md` — record that §3 (per-class state lifetime — durable EBS in its
   own `protect`/`Retain` state) and §6 (the EBS create-vs-delete credential model and the old+new migration

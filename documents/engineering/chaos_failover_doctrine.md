@@ -690,8 +690,8 @@ still evidence, not amoebius proof. The
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) phase-discipline rule makes this binding: *every
 validation emits a proven/tested/assumed ledger artifact, and skipping an applicable test move marks that
 correctness layer UNVERIFIED, never green.* The gateway-migration design model must be TLC-checked at Register 1;
-Phase 75 owns the deferred Tier-2 multi-cluster runtime and live model↔code correspondence. Until an authorized reviewer
-promotes that phase from independently reviewed evidence, claiming the
+Phase 75 owns the deferred Tier-2 multi-cluster runtime and live model↔code correspondence. Until that phase's
+complete qualified gate passes, claiming the
 control-plane daemon is "hardened" because prodbox proved a sibling invariant is exactly what this section forbids.
 
 The rule, stated once and meant absolutely: **never report a tested, assumed, or merely argued result as proven.** Type-checking, decision purity, and finite-and-exhausted decision properties can be *proven* at

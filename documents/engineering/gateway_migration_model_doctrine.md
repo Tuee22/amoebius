@@ -154,7 +154,7 @@ Both instruments read the **same** `Model`:
   not the later Register-2.5 daemon simulation.
 - **Prove (TLC).** `emitTLA` renders the `Model` to a spec TLC model-checks exhaustively at a bounded scope,
   and must reach every safety invariant with no counterexample **and** every liveness `PROPERTY` under the
-  fairness `F`. Because the model is the value the runtime interprets, an independently reviewed successful
+  fairness `F`. Because the model is the value the runtime interprets, an separately authored successful
   run can be proven-for-the-model *about the
   shape the code takes*, at the bound. Liveness is a TLC-only verdict — the io-sim and explorer readings assert
   the *safety* predicates only ([formal_model_doctrine.md §3](./formal_model_doctrine.md#3-two-total-renderings)).
@@ -240,7 +240,7 @@ proof lands, at least one over-scope stress run (3 clusters, chained) is checked
 Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline):
 
 - **Target strength: proven-for-the-model at scope 2**, generalized by the
-  [§5](#5-one-and-done-plus-a-per-inforcespec-structural-fit) pairwise cutoff after independent review. What
+  [§5](#5-one-and-done-plus-a-per-inforcespec-structural-fit) pairwise cutoff after the complete gate passes. What
   scope 2 alone cannot prove (concurrent three-way or chained migration) is exactly what the cutoff argument,
   not the raw scope, must discharge; at least one over-scope run (3 clusters, chained) must stress the cutoff
   assumption.

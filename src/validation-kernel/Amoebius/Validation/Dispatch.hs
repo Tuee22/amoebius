@@ -1,7 +1,7 @@
 -- | Refusal-only external dispatch facade.
 --
 -- The executable entry point is retained for the public CLI, but it cannot
--- produce candidate evidence.  Snapshot constructors, acquisition functions,
+-- produce candidate evidence.  Snapshot constructors, capture functions,
 -- component composition, and readiness projections remain package-hidden.
 module Amoebius.Validation.Dispatch
   ( dispatchDiagnostic

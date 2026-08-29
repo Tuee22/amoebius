@@ -200,7 +200,7 @@ and the `routes[].workflow`-vs-`name` reconciliation; `runtime-checked` residue 
 `gadt-decode` (the coverage and non-vacuousness folds and the `routes[].workflow`-vs-`name` reconciliation return `Left` at decode) + `provision-seal` (the monitoring feasibility Σ fold returns a `ProvisionError`
 after binding and before any `ProvisionedSpec` exists) + `rendered-artifact-oracle` (that the emitted monitoring surface renders
 behind the Keycloak-owned edge with no `Public` listener — the no-backdoor-ingress analog of
-[§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress), checked by a separately reviewed
+[§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress), checked by a separately authored
 Haskell semantic predicate over the rendered object projection rather than by tracked expected bytes or a
 cluster) + `live-effect` (that the SLO is actually met, the alert fires, the named `/metrics` series exists, and
 a `SubjectScoped` filter actually excludes another subject's data). Per the validation-locus axis of
@@ -259,7 +259,7 @@ exhaustively (image manifest digest, config digest, per-layer blob digests) and
 *identity* not at all, so any digest inhabited it and an app could name a container amoebius neither built
 nor inspected. Making `identity : ImageIdentity` a required field closes it: the union's three arms are
 named catalog identities — the host-pulled `KindNode` image, the architecture-qualified `Base` image, and a `Runtime`
-variant keyed by the reviewed trusted-adapter set linked into it — with **no `Foreign`, free-digest, or `Url` arm**. An app therefore has no image to name; its checked UI program is immutable release data interpreted by
+variant keyed by the gate-admitted trusted-adapter set linked into it — with **no `Foreign`, free-digest, or `Url` arm**. An app therefore has no image to name; its checked UI program is immutable release data interpreted by
 that generic runtime. Only a new trusted Haskell adapter can mint another runtime variant. This is
 the same closure `EngineRuntime` already carries against an operator-supplied engine address, applied one
 layer out. **Owner:** [`image_build_doctrine.md` §5](../engineering/image_build_doctrine.md#5-what-the-image-identity-is-given-that-the-tag-is-an-address)
@@ -326,7 +326,7 @@ generated projection of that data. **Owner:**
 (the renderer). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (a `NonEmpty` required field) + [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
 (a pinned identity per step rather than a fetched address). **Layer:** `type-foreclosed` — an interpolated
-shell fragment has no constructor — with a `rendered-artifact-oracle` residue applying a separately reviewed
+shell fragment has no constructor — with a `rendered-artifact-oracle` residue applying a separately authored
 Haskell semantic predicate to the emitted Dockerfile. No expected Dockerfile bytes are tracked; any serialized
 projection is materialized only beneath `.build/test-corpora/**`. The total predicate is `decode-foreclosed`.
 
@@ -347,7 +347,7 @@ A trusted linked extension creates a pairing that did not previously exist: a wo
 links some particular set of extensions. Nothing forced those two to agree, so a Web-service host could be
 scheduled for an app whose code its own binary does not carry — a "handler not found" discovered when the
 first request arrives. The membership relation closes it: a `WorkerKind`'s `ExtensionId` must be a member of
-its container's `ImageIdentity.Runtime.linkedAdapters` set. Runtime variants declare their exact reviewed
+its container's `ImageIdentity.Runtime.linkedAdapters` set. Runtime variants declare their exact tested
 adapter set rather than assuming every image carries every adapter; ordinary UI programs are immutable
 release data and do not create image variants ([§3.74](#374-a-container-image-amoebius-did-not-generate)).
 The membership check is therefore a real constraint rather than a tautology. **Owner:**

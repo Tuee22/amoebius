@@ -53,8 +53,8 @@ data ValidationRegister
 data ExecutionStage
   = DirectSourceBoundHaskell
   | PbChildUnderDirectHaskellSupervisor
-  | ApprovalBoundHaskellFakeBoundary
-  | ApprovalBoundHardware
+  | GatePassBoundHaskellFakeBoundary
+  | GatePassBoundHardware
   deriving (Eq, Ord, Show)
 
 data Predecessor
@@ -80,7 +80,7 @@ data GateCategory
   | LegacyClosure
   | PredecessorCategory
   | Residue
-  | PromotionAuthority
+  | PassCriterion
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data GapId = GapId Int GateCategory
@@ -89,16 +89,10 @@ data GapId = GapId Int GateCategory
 data GateDraft = GateDraft Int GateCategory
   deriving (Eq, Ord, Show)
 
-data ReviewMissing = ReviewMissing
-  deriving (Eq, Ord, Show)
-
-data ReviewCustody = ReviewCustody Text
-  deriving (Eq, Ord, Show)
-
 data ContractSlot a
   = ContractGap GapId
-  | Drafted a ReviewMissing
-  | Reviewed a ReviewCustody
+  | Drafted a
+  | GateReady a
   deriving (Eq, Ord, Show)
 
 data Phase49Requirement
@@ -108,7 +102,7 @@ data Phase49Requirement
 
 data Phase50Requirement
   = RequireNoSourceMigrationOwnership
-  | RequireApprovedPhase49SourceSnapshot
+  | RequirePassedPhase49SourceSnapshot
   | RequireDirectHaskellSupervisorWithPbChild
   | RequireIdentityArgvExecHandoff
   | RequirePublicTargetNotSelfSupervising
@@ -168,7 +162,7 @@ phaseSemanticContractDiagnostic =
         , observation "semantic.slot-count" (showText (length allSlots))
         , observation "semantic.gap-count" (showText gapCount)
         , observation "semantic.draft-count" (showText draftCount)
-        , observation "semantic.reviewed-count" (showText reviewedCount)
+        , observation "semantic.gate-ready-count" (showText gateReadyCount)
         , observation "semantic.legacy-count" (showText (length allSemanticLegacyIds))
         ]
           <> map (observation "semantic.phase" . renderPhaseProjection) canonicalPhaseRegistry
@@ -180,8 +174,8 @@ phaseSemanticContractDiagnostic =
  where
   allSlots = concatMap (Map.elems . semanticGateSlots) canonicalPhaseRegistry
   gapCount = length [() | ContractGap _ <- allSlots]
-  draftCount = length [() | Drafted _ _ <- allSlots]
-  reviewedCount = length [() | Reviewed _ _ <- allSlots]
+  draftCount = length [() | Drafted _ <- allSlots]
+  gateReadyCount = length [() | GateReady _ <- allSlots]
   allSemanticLegacyIds = concatMap semanticLegacyIds canonicalPhaseRegistry
 
 permanentRefusal :: Finding
@@ -189,7 +183,7 @@ permanentRefusal =
   finding
     "PLAN-SEMANTIC-DIAGNOSTIC-ONLY"
     "DEVELOPMENT_PLAN/"
-    "all 1,728 semantic slots are ContractGap; no reviewed value or reviewer custody exists, and these observations cannot promote a phase"
+    "all 1,728 semantic slots are ContractGap; no gate-ready value exists, and these observations cannot pass a phase"
 
 slotFindings :: PhaseSemanticContract -> [Finding]
 slotFindings contract = concatMap findingFor gateCategories
@@ -209,19 +203,19 @@ slotFindings contract = concatMap findingFor gateCategories
           category
           ("gap=" <> renderGapId gapIdentifier)
       ]
-    Just (Drafted draftIdentifier ReviewMissing) ->
+    Just (Drafted draftIdentifier) ->
       [ semanticFinding
-          "PLAN-SEMANTIC-REVIEW-MISSING"
+          "PLAN-SEMANTIC-GATE-EVIDENCE-MISSING"
           contract
           category
-          ("draft=" <> renderGateDraft draftIdentifier <> " review=missing")
+          ("draft=" <> renderGateDraft draftIdentifier <> " gate-evidence=missing")
       ]
-    Just (Reviewed _ custody) ->
+    Just (GateReady draftIdentifier) ->
       [ semanticFinding
-          "PLAN-SEMANTIC-REVIEW-CUSTODY-UNAVAILABLE"
+          "PLAN-SEMANTIC-GATE-READY-UNAVAILABLE"
           contract
           category
-          ("a reviewed slot is inadmissible in the reset registry: " <> renderReviewCustody custody)
+          ("a gate-ready slot is inadmissible in the reset registry: " <> renderGateDraft draftIdentifier)
       ]
 
 semanticFinding :: Text -> PhaseSemanticContract -> GateCategory -> Text -> Finding
@@ -271,8 +265,8 @@ registryIntegrityFindings =
         (null drafts)
         "the reset registry must not label an identity-only placeholder as a semantic draft"
     , integrityFinding
-        (null reviews)
-        "no reset slot may be Reviewed before independent reviewer custody exists"
+        (null gateReadySlots)
+        "no reset slot may be GateReady before its complete qualified gate exists"
     , identityIntegrityFindings
     , integrityFinding
         (all phaseIdentityProjectionIsExact canonicalPhaseRegistry)
@@ -302,8 +296,8 @@ registryIntegrityFindings =
  where
   allSlots = concatMap (Map.elems . semanticGateSlots) canonicalPhaseRegistry
   gaps = [gapIdentifier | ContractGap gapIdentifier <- allSlots]
-  drafts = [draftIdentifier | Drafted draftIdentifier ReviewMissing <- allSlots]
-  reviews = [custody | Reviewed _ custody <- allSlots]
+  drafts = [draftIdentifier | Drafted draftIdentifier <- allSlots]
+  gateReadySlots = [draftIdentifier | GateReady draftIdentifier <- allSlots]
 
 integrityFinding :: Bool -> Text -> [Finding]
 integrityFinding condition detail =
@@ -412,7 +406,7 @@ phaseMetadataIdentityJoinIsExact =
 
 phaseMetadata :: [PhaseMetadata]
 phaseMetadata =
-  [ metadata "documentation_suite" "Documentation, source policy, and validation trust root" NoSubstrate NoLane NoRegister
+  [ metadata "documentation_suite" "Documentation, source policy, and validation baseline" NoSubstrate NoLane NoRegister
   , metadata "toolchain_spike" "Haskell toolchain and probe-source closure" NoSubstrate NoLane Register1
   , metadata "repository_layout_conformance" "Repository layout conformance and de-phased naming" NoSubstrate NoLane Register1
   , metadata "artifact_calculus" "The artifact calculus" NoSubstrate NoLane Register1
@@ -461,7 +455,7 @@ phaseMetadata =
   , metadata "ui_contract_generation" "Haskell-generated browser contracts and bundle" NoSubstrate NoLane Register1
   , metadata "tool_and_mutant_generation" "Foreign-source generator closure, checking tools, and mutants" NoSubstrate NoLane Register1
   , metadata "test_workflow_algebra" "The test-workflow algebra" NoSubstrate NoLane Register1
-  , metadata "self_referential_gates" "No-hardware DSL promotion barrier + self-referential gate suite" NoSubstrate NoLane Register2
+  , metadata "self_referential_gates" "No-hardware DSL gate barrier + self-referential gate suite" NoSubstrate NoLane Register2
   , metadata "host_assert_cli" "Validate the bounded `pb` → Haskell handoff" NoSubstrate NoLane Register2
   , metadata "host_ensure_kernel" "The host-ensure kernel" NoSubstrate NoLane Register2
   , metadata "linux_engine_bringup" "Linux: sudoless Docker and the native image" LinuxCpu LinuxCpuAmd64 Register3
@@ -515,11 +509,11 @@ executionStageFor ordinal
   | ordinal <= 49 = DirectSourceBoundHaskell
   | ordinal == 50 = PbChildUnderDirectHaskellSupervisor
 #ifdef VALIDATION_PHASE_SEMANTIC_STAGE_MUTANT
-  | ordinal == 51 = ApprovalBoundHardware
+  | ordinal == 51 = GatePassBoundHardware
 #else
-  | ordinal == 51 = ApprovalBoundHaskellFakeBoundary
+  | ordinal == 51 = GatePassBoundHaskellFakeBoundary
 #endif
-  | otherwise = ApprovalBoundHardware
+  | otherwise = GatePassBoundHardware
 
 predecessorFor :: Int -> Predecessor
 predecessorFor 0 = Genesis
@@ -530,7 +524,7 @@ predecessorFor ordinal = ImmediatePredecessor (ordinal - 1)
 
 slotFor :: Int -> GateCategory -> ContractSlot GateDraft
 #ifdef VALIDATION_PHASE_SEMANTIC_GAP_ACCEPTANCE_MUTANT
-slotFor 1 Subject = Reviewed (GateDraft 1 Subject) (ReviewCustody "mutation-only-local-review")
+slotFor 1 Subject = GateReady (GateDraft 1 Subject)
 #endif
 slotFor ordinal category = ContractGap (GapId ordinal category)
 
@@ -627,7 +621,7 @@ guardsFor 49 = [Phase49SourceBarrier canonicalPhase49Requirements]
 guardsFor 50 =
   [ Phase50HandoffBoundary
       [ RequireNoSourceMigrationOwnership
-      , RequireApprovedPhase49SourceSnapshot
+      , RequirePassedPhase49SourceSnapshot
       , RequireIdentityArgvExecHandoff
       , RequirePublicTargetNotSelfSupervising
       ]
@@ -666,7 +660,7 @@ canonicalPhase49Requirements =
 canonicalPhase50Requirements :: [Phase50Requirement]
 canonicalPhase50Requirements =
   [ RequireNoSourceMigrationOwnership
-  , RequireApprovedPhase49SourceSnapshot
+  , RequirePassedPhase49SourceSnapshot
   , RequireDirectHaskellSupervisorWithPbChild
   , RequireIdentityArgvExecHandoff
   , RequirePublicTargetNotSelfSupervising
@@ -685,8 +679,8 @@ stageMatchesOrdinal :: PhaseSemanticContract -> Bool
 stageMatchesOrdinal contract
   | semanticOrdinal contract <= 49 = semanticExecutionStage contract == DirectSourceBoundHaskell
   | semanticOrdinal contract == 50 = semanticExecutionStage contract == PbChildUnderDirectHaskellSupervisor
-  | semanticOrdinal contract == 51 = semanticExecutionStage contract == ApprovalBoundHaskellFakeBoundary
-  | otherwise = semanticExecutionStage contract == ApprovalBoundHardware
+  | semanticOrdinal contract == 51 = semanticExecutionStage contract == GatePassBoundHaskellFakeBoundary
+  | otherwise = semanticExecutionStage contract == GatePassBoundHardware
 
 predecessorMatchesOrdinal :: PhaseSemanticContract -> Bool
 predecessorMatchesOrdinal contract =
@@ -806,7 +800,7 @@ criticalBoundaryTuplesAreExact =
         NoSubstrate
         NoLane
         Register2
-        ApprovalBoundHaskellFakeBoundary
+        GatePassBoundHaskellFakeBoundary
         (ImmediatePredecessor 50)
         PhaseIdentity.ResourceProvisionRequired
         [Phase51FakeBoundary canonicalPhase51Requirements]
@@ -815,7 +809,7 @@ criticalBoundaryTuplesAreExact =
         LinuxCpu
         LinuxCpuAmd64
         Register3
-        ApprovalBoundHardware
+        GatePassBoundHardware
         (ImmediatePredecessor 51)
         PhaseIdentity.ResourceProvisionRequired
         [Phase52HardwareBoundary canonicalPhase52Requirements]
@@ -882,8 +876,8 @@ renderPhaseProjection contract =
 renderSlot :: ContractSlot GateDraft -> Text
 renderSlot slot = case slot of
   ContractGap _ -> "G"
-  Drafted _ ReviewMissing -> "D"
-  Reviewed _ _ -> "R"
+  Drafted _ -> "D"
+  GateReady _ -> "R"
 
 renderGapId :: GapId -> Text
 renderGapId (GapId ordinal category) =
@@ -892,9 +886,6 @@ renderGapId (GapId ordinal category) =
 renderGateDraft :: GateDraft -> Text
 renderGateDraft (GateDraft ordinal category) =
   "phase-" <> renderOrdinal ordinal <> "-" <> categorySlug category
-
-renderReviewCustody :: ReviewCustody -> Text
-renderReviewCustody (ReviewCustody value) = value
 
 renderGateCategory :: GateCategory -> Text
 renderGateCategory category = case category of
@@ -915,7 +906,7 @@ renderGateCategory category = case category of
   LegacyClosure -> "Legacy closure"
   PredecessorCategory -> "Predecessor"
   Residue -> "Residue"
-  PromotionAuthority -> "Promotion authority"
+  PassCriterion -> "Pass criterion"
 
 categorySlug :: GateCategory -> Text
 categorySlug = Text.map replace . Text.toLower . renderGateCategory
@@ -952,8 +943,8 @@ renderExecutionStage :: ExecutionStage -> Text
 renderExecutionStage executionStage = case executionStage of
   DirectSourceBoundHaskell -> "DirectSourceBoundHaskell"
   PbChildUnderDirectHaskellSupervisor -> "PbChildUnderDirectHaskellSupervisor"
-  ApprovalBoundHaskellFakeBoundary -> "ApprovalBoundHaskellFakeBoundary"
-  ApprovalBoundHardware -> "ApprovalBoundHardware"
+  GatePassBoundHaskellFakeBoundary -> "GatePassBoundHaskellFakeBoundary"
+  GatePassBoundHardware -> "GatePassBoundHardware"
 
 renderPredecessor :: Predecessor -> Text
 renderPredecessor predecessor = case predecessor of
@@ -989,7 +980,7 @@ renderPhase49Requirement requirement = case requirement of
 renderPhase50Requirement :: Phase50Requirement -> Text
 renderPhase50Requirement requirement = case requirement of
   RequireNoSourceMigrationOwnership -> "no-source-migration-ownership"
-  RequireApprovedPhase49SourceSnapshot -> "approved-phase49-source-snapshot"
+  RequirePassedPhase49SourceSnapshot -> "phase49-gate-pass-source-snapshot"
   RequireDirectHaskellSupervisorWithPbChild -> "direct-haskell-supervisor-with-pb-child"
   RequireIdentityArgvExecHandoff -> "identity-argv-exec-handoff"
   RequirePublicTargetNotSelfSupervising -> "public-target-not-self-supervising"
@@ -1096,7 +1087,7 @@ structuralDiagnosticRefusal =
   [ finding
       "PLAN-SEMANTIC-JOIN-DIAGNOSTIC-ONLY"
       "DEVELOPMENT_PLAN/"
-      "caller-supplied structural projections cannot populate, review, or promote a semantic contract slot"
+      "caller-supplied structural projections cannot populate or pass a semantic contract slot"
   ]
 #endif
 

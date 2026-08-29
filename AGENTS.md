@@ -70,28 +70,25 @@ outside `pb/**`, shell, Proto, Pulumi, Dockerfiles,
 SQL, TLA+, CSS/HTML, serialized behavioral fixtures/oracles, and materialized mutants are generated lazily from Haskell into
 ignored `.build/**` paths. Operator values are external or untracked inputs; they are not repository source.
 
-## Validation Authority and Ordering
+## Validation Outcome and Ordering
 
-An authorized reviewer may be the human user or an agent explicitly delegated to complete development-plan
-work. A delegated agent may mark a phase or sprint Done or Validated only after the complete qualified
-candidate satisfies the same evidence, oracle-independence, observation, residue, and predecessor requirements
-regardless of whether the reviewer is a human or delegated agent. A component check, green command, self-report, fixture count, receipt, hash, or
-LLM-authored gate is never promotion authority by itself. Missing independent oracles, paired negatives,
-changed-production-subject mutants, complete discovery, external observation, explicit residue, or predecessor
-approval must refuse a candidate rather than be represented as a pass.
+A complete qualified phase-gate pass is sufficient to mark that phase and its sprints Done.
+Recording the result is a mechanical status-only update after the exact current gate passes. Missing independent
+oracles, paired negatives, changed-production-subject mutants, complete discovery, required external
+observation, explicit residue, or the immediate predecessor's gate pass must make the gate fail rather than be
+represented as a pass. A smaller component check, fixture count, digest, or partial run is not the phase gate.
 The [development-plan standards](DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) own the
 status procedure.
 
-Within one phase, a sprint's `Blocked by` edge and named reviewer are implementation-order and eventual
-phase-gate custody declarations, not requests for intermediate user confirmation. Agents continue through
-implementation-ready sprint seams. After a complete integrated phase candidate qualifies, a delegated agent
-may apply its status-only promotion and continue into the next numerically ordered phase in the same run. A
-component diagnostic or partial candidate must never trigger a promotion or confirmation prompt.
+Within one phase, a sprint's `Blocked by` edge declares implementation order, not a request for intermediate
+user confirmation. Agents continue through implementation-ready sprint seams. After the complete integrated
+phase gate passes, an agent may apply the mechanical status-only update and continue into the next numerically
+ordered phase in the same run. A component diagnostic or partial candidate must never trigger the Done update.
 
 No hardware discovery, container-engine bring-up, cluster creation, image execution, or other live validation
-may begin until the development plan records authorized reviewer approval of the Phase-49 hardware-free DSL promotion
-barrier and all of its predecessors. That barrier requires every source-migration query—including the bounded
-`pb` role—to be zero. Before Phase 50 is approved, `pb` is not an admissible validation transport: Phase 0
+may begin until the development plan records a passing Phase-49 hardware-free DSL gate and passing results for
+all of its predecessors. That barrier requires every source-migration query—including the bounded
+`pb` role—to be zero. Before Phase 50 passes, `pb` is not an admissible validation transport: Phase 0
 through Phase 49 build and invoke the exact source-bound Haskell executable directly from an authenticated,
 network-independent toolchain input. Their `pb validate phase NN` spelling is the future public target, not
 evidence that the unvalidated bootstrap ran correctly. Phase 50 alone validates the already source-bounded
@@ -99,8 +96,8 @@ runtime ensure/build/identity-argv/exec handoff and owns no source migration. It
 source-bound Haskell OS supervisor directly; that supervisor invokes `pb` as the observed child subject, so the
 future public spelling cannot supervise or validate its own handoff. Phase 51 remains a hardware-free
 Haskell host-ensure gate against fake boundaries; Phase 52 is the first hardware-bearing validation phase.
-Validation must follow numeric phase order and fail closed when predecessor evidence or any required trust
-boundary is absent. Batch completion means repeated validate-and-promote steps in one agent run; it never means
+Validation must follow numeric phase order and fail closed when a predecessor gate result or any required test
+boundary is absent. Batch completion means repeated validate-and-record steps in one agent run; it never means
 skipping a phase, sharing one candidate across phases, or treating a later result as evidence for an earlier one.
 
 ## Registry Provider

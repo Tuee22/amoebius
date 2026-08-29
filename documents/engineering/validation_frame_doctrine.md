@@ -40,10 +40,10 @@ accelerator, or cloud account exists.
 This ordering is mandatory:
 
 ```text
-authenticated, network-independent toolchain input builds the exact source-bound Haskell binary
+pinned, network-independent toolchain input builds the exact source-bound Haskell binary
   → direct Haskell source-policy and gate-kernel qualification
   → Haskell DSL/proof/generator validation
-  → Phase 49 no-hardware promotion barrier
+  → Phase 49 no-hardware gate barrier
   → Phase 50 externally observes the already source-bounded pb handoff
   → Phase 51 Haskell host-ensure against fake boundaries
   → Phase 52 first hardware work
@@ -66,7 +66,7 @@ language-validation source exists to require its own host toolchain.
 4. replace itself with that binary while forwarding every user argument unchanged.
 
 It may not discover tests, define expectations, interpret evidence, decide a gate verdict, generate product
-or host-floor policy, implement help/version or another public command, perform phase work, or promote status.
+or host-floor policy, implement help/version or another public command, perform phase work, or set Done status.
 `pb validate phase NN`, `pb --help`, `pb --version`, unknown verbs, and every other argv are opaque to Python;
 after establish/build, the exact argv reaches Haskell by exec. A Python exit-code wrapper around another gate
 is prohibited.
@@ -93,8 +93,8 @@ bounded `pb` runtime handoff; it cannot retroactively strengthen an earlier sema
 
 Pure and fake-boundary gates therefore remain Register 1 or 2 and `Substrate: none`. They record the compiler
 and source snapshot used for provenance, but no toolchain version or host identity strengthens the semantic
-claim. Hardware-specific phases begin only after the complete no-hardware DSL barrier receives authorized-reviewer
-approval.
+claim. Hardware-specific phases begin only after the complete no-hardware DSL barrier receives a passing gate
+result.
 
 ---
 
@@ -117,11 +117,11 @@ the same `.build/**` containment boundary.
 
 ## 5. Container execution is later parity evidence
 
-After host and image phases are reviewer-approved, the same Haskell validation command may be replayed inside the
+After host and image phases pass their qualified gates, the same Haskell validation command may be replayed inside the
 published runtime image. That replay can test toolchain packaging, architecture, library availability, and
 host/image parity. It cannot:
 
-- authorize an earlier DSL phase;
+- establish an earlier DSL phase;
 - replace the native pre-hardware run;
 - turn a model or fake-boundary result into live evidence;
 - make another architecture validated; or

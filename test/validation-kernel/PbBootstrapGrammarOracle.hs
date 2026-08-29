@@ -988,7 +988,7 @@ grammarCases =
   , grammar "existing-artifact equality remains fail-closed"
       (replaceSame "if existing_digest == digest:" "if existing_digest != digest:" canonicalBytes)
       "PB-GRAMMAR-GHCUP-ENSURE"
-      "PbGhcupEnsureProblem \"ensure_ghcup must return a matching existing artifact, fail closed on mismatch, and verify absence acquisition before write\""
+      "PbGhcupEnsureProblem \"ensure_ghcup must return a matching existing artifact, fail closed on mismatch, and verify absence capture before write\""
   , grammar "ambient environment copying remains outside the closed mapping"
       (replaceLine "        temporary.mkdir(parents=True, exist_ok=True)" "        os.environ.copy()" canonicalBytes)
       "PB-GRAMMAR-ENVIRONMENT"
@@ -1516,7 +1516,7 @@ diagnosticOnlyFinding =
   Finding
     "PB-GRAMMAR-DIAGNOSTIC-ONLY"
     diagnosticSubject
-    "caller-supplied pb bytes are diagnostic input and cannot establish source custody or Phase-50 runtime truth"
+    "caller-supplied pb bytes are diagnostic input and cannot establish source binding or Phase-50 runtime truth"
 
 preflightFinding :: Text -> Text -> Finding
 preflightFinding code detail = Finding code diagnosticSubject detail

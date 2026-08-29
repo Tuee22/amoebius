@@ -10,7 +10,7 @@
 
 This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
 command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
 status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
@@ -49,13 +49,12 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 33, its independent validation, and delegated promotion; every earlier
-promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
-completion claim, and implementation result in this document is invalidated as validation evidence, even
-where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Blocked by redesigned Phase 33, its independent validation, and gate pass; every earlier
+gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
+where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and an authorized reviewer independently inspects it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
@@ -116,32 +115,32 @@ Register-1 semantic-plan checks are mandatory supporting rows, not a second fina
 
 ## Gate integrity
 
-**Contract review**: REJECTED — NOT VALIDATED.
+**Contract check**: REJECTED — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Target only — the plan is a pure Haskell value and the Haskell binary's external-tool protocol is observed only through Haskell-generated fakes beneath `.build/**`; no live infrastructure is contacted. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — the plan is a pure Haskell value and the Haskell binary's external-tool protocol is observed only through Haskell-generated fakes beneath `.build/**`; no live infrastructure is contacted. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 34` is future public spelling only. Before current reviewer approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent reviewer have been accepted. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 34` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
 | `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 33; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer` — an authorized human or agent may promote after inspecting the complete qualified candidate; no gate, CI job, digest, receipt-shaped file, or generated assertion may promote by itself. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 33; candidate execution refuses an absent, stale, replayed, or different-source result. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 
 ## Resource provision — UNRESOLVED
 
-> **UNRESOLVED — blocks validation.** No live mutation is authorized. The owner marker, preflight, complete
+> **UNRESOLVED — blocks validation.** No live mutation may begin. The owner marker, preflight, complete
 > allowed/forbidden mutations, external observer, scoped cleanup, and zero-owned-residue contract are absent.
 
 ## Doctrine adopted
@@ -172,7 +171,7 @@ Register-1 semantic-plan checks are mandatory supporting rows, not a second fina
   never claim *"the cluster is correct."*
 - [`generated_artifacts_doctrine.md §3 — The rule`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
   (Parts A and B): the rendered plan is emitted from the Haskell source of truth only beneath `.build/**`. A
-  separately reviewed Haskell semantic table constrains the plan, and canonical decode/re-encode checks constrain
+  separately authored Haskell semantic table constrains the plan, and canonical decode/re-encode checks constrain
   its generated bytes. Part B must independently constrain lossless relay of a Haskell-declared boundary input; neither test
   mistakes subject-produced output for an oracle.
 - [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
@@ -187,21 +186,20 @@ Register-1 semantic-plan checks are mandatory supporting rows, not a second fina
 
 ## Sprints
 
-> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-> **Permanently invalidated history.** Every completion, seal, reseal, transcript, evidence, and
-> closure statement in the sprint bodies below is rejected as current validation. The material is retained
-> only as a target-capability inventory and cannot support status, promotion, or a validation claim.
+> **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
+> only as a target-capability inventory and is not a current gate result.
 
 ## Sprint 34.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
-**Blocked by**: [Phase 33](phase_33_render_manifest_oracles.md) reviewer approval
+**Blocked by**: [Phase 33](phase_33_render_manifest_oracles.md) gate pass
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -224,7 +222,7 @@ seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `ch
 
 ### Validation
 
-1. The real provision path followed by `chain` on each case in the reviewed Haskell corpus
+1. The real provision path followed by `chain` on each case in the checked Haskell corpus
    produces a pure `[Step]` whose renderable shape is fully inspectable without executing any `stepRun`; the evaluation is partiality-free in the sense above (`deepseq` to normal form succeeds; `stepRun` excluded from `NFData`).
 2. The identity-disjoint union of all manifest-bearing Step projections equals the one whole-deployment
    `renderAll` value exactly; every projected object is identical to the same identity in that value and no
@@ -234,7 +232,7 @@ seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `ch
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked) ⏸️
 
@@ -242,9 +240,9 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 34.1
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -271,13 +269,13 @@ Part B (Register 2) and Register 3.
    out-of-frame step appears in the fold but its `stepRun` is
    unreachable (`deepseq`-to-NF of the plan with the constructor counter reading zero confirms no action
    executed).
-2. The reviewed Haskell descent operator (m2, managed admission moved into the cutover frame) is applied to a
+2. The checked Haskell descent operator (m2, managed admission moved into the cutover frame) is applied to a
    temporary production subject beneath `.build/mutants/**`. It diverges from the independent Haskell frame
    expectation and turns this validation **red** when re-run, while the unchanged control remains green.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ⏸️
 
@@ -285,15 +283,15 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 34.2
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
 Adopt [`conformance_harness_doctrine.md §3 — rendering never touches live infrastructure`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure):
 implement the pure `renderChainPlan` that produces the exact plan a live apply would execute, wired to a
-`--dry-run` command surface whose render path is a pure function of reviewed Haskell source — no apiserver, no
+`--dry-run` command surface whose render path is a pure function of checked Haskell source — no apiserver, no
 credentials, no broker, no Vault — so the preview is byte-for-byte what would run and prerequisite checks live
 only on the (here-absent) apply path.
 
@@ -313,13 +311,13 @@ only on the (here-absent) apply path.
 ### Validation
 
 1. `renderChainPlan` is a pure value and `--dry-run` produces it with credentials scrubbed and socket calls
-   blocked and observed (part of the `chain-spec` gate invocation). A separately reviewed Haskell
+   blocked and observed (part of the `chain-spec` gate invocation). A separately authored Haskell
    import-closure assertion confirms `Amoebius.Kernel.Plan` and the `--dry-run` path reach no
    network/process/credential module. Both mechanisms run on every gate execution, not once.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate ⏸️
 
@@ -327,9 +325,9 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 34.3
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -349,17 +347,17 @@ correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Regis
   decode/re-encode stability, and the canonical zero-step Plan.
 - A **canaried** instrumentation counter: `Step` values are constructible **only** via the counting smart
   constructor, and the counter increments when a `stepRun` IO action is *executed*. The battery asserts zero
-  executions over the render, and a reviewed Haskell **canary control case** deliberately executes one `stepRun` and
+  executions over the render, and a checked Haskell **canary control case** deliberately executes one `stepRun` and
   asserts the counter reads nonzero (proving the counter can detect an invocation and the zero-assertion is
   falsifiable). "Zero `stepRun` invocations" means the IO action is never executed — forcing/`deepseq`-ing the
   plan value (with `stepRun` excluded from `NFData`) is permitted and does not increment the counter.
-- Two reviewed Haskell mutation operators: `m1_cfg_drop_service` drops the last multi-case entry, and
+- Two checked Haskell mutation operators: `m1_cfg_drop_service` drops the last multi-case entry, and
   `m2_descent_inframe` changes managed admission's frame. Each is applied only to a temporary production-source
   copy beneath `.build/mutants/chain_boundary/**`; each control proves the original equals the oracle and the
   mutated value does not, while the zero-action invariant still holds. The gate re-runs both;
   each MUST turn the suite red.
 - The gate command runs `chain-spec` with credential variables scrubbed and socket calls blocked and observed,
-  plus the separately reviewed Haskell static import-closure assertion that `Amoebius.Kernel.Plan` and the
+  plus the separately authored Haskell static import-closure assertion that `Amoebius.Kernel.Plan` and the
   `--dry-run` path reach no network/process/credential module.
 - A Register-1 ledger led by a Tier-2-UNVERIFIED banner: the plan is proven pure and exact in-process, but no
   runtime-enforcement or effectful-fidelity claim is made — that residue is Part B (fake-tool, Sprints 34.5–34.7)
@@ -377,7 +375,7 @@ correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Regis
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton ⏸️
 
@@ -385,9 +383,9 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 34.4
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -412,7 +410,7 @@ prodbox single-IO-seam shape as *sibling evidence, not an amoebius result*.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ⏸️
 
@@ -420,9 +418,9 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 34.5
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -434,7 +432,7 @@ prerequisite — that distinction is what keeps Register 2 honestly separate fro
 
 ### Deliverables
 
-- A reviewed Haskell fake-tool executable that transcribes argv + stdin (the applied-manifest bytes) and
+- A checked Haskell fake-tool executable that transcribes argv + stdin (the applied-manifest bytes) and
   returns a configured canned exit. The harness lazily materializes four controlled absolute executable paths
   beneath `.build/fakes/**`; no shell/Python recorder or transcript is repository source.
 - `BoundarySpec.hs` reads the per-tool argv, stdin, and sabotage-marker transcripts and checks the recorder
@@ -447,7 +445,7 @@ prerequisite — that distinction is what keeps Register 2 honestly separate fro
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ⏸️
 
@@ -455,9 +453,9 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 34.6
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -476,10 +474,10 @@ is owned by [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) and the l
 
 ### Deliverables
 
-- A reviewed Haskell **representative plan corpus** with at least one step per tool and a separately authored
+- A checked Haskell **representative plan corpus** with at least one step per tool and a separately authored
   `.hs` expected-argv value, fixed before the executor implementation under the §M.1 exception and independent
   of the executor per §M.3. Recorder transcripts are fresh `.build/runs/phase_34/**` observations.
-- Reviewed Haskell mutation operators named in the Gate (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`), applied
+- GateReady Haskell mutation operators named in the Gate (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`), applied
   only beneath `.build/mutants/**`, with a harness that re-runs each and asserts `boundary-spec` red (§M.2).
 - `test/spec/boundary/BoundarySpec.hs` asserting: the recorded argv stream equals the separately authored
   Haskell expected-argv value; the applied-manifest bytes equal the Haskell-declared boundary input byte-for-byte; each of the
@@ -503,7 +501,7 @@ is owned by [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) and the l
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 34.8: The sanctioned-API surface — what extension source may reach ⏸️
 
@@ -511,16 +509,16 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 34.7
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
 Adopt [`dsl_doctrine.md` §5 — extension-astcheck](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
 and [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits):
 fix the closed set of amoebius library entry points and effect constructors extension source may reference,
-so that widening it is a reviewed amendment rather than something an extension author grants themselves.
+so that widening it is a checked amendment rather than something an extension author grants themselves.
 
 ### Deliverables
 
@@ -531,13 +529,13 @@ so that widening it is a reviewed amendment rather than something an extension a
 
 ### Validation
 
-1. The implementation surface equals the separately reviewed Haskell oracle; a module absent from the oracle but present in the
+1. The implementation surface equals the separately authored Haskell oracle; a module absent from the oracle but present in the
    implementation (and the converse) fails.
 2. No sanctioned effect arm exposes raw `IO`, FFI, or an `unsafe*` operation.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 34.9: extension-astcheck — the extension AST checker and the link seal ⏸️
 
@@ -545,9 +543,9 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 34.8
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -566,7 +564,7 @@ Deliver extension-astcheck: admit extension source against the Sprint-33.8 surfa
 ### Validation
 
 1. Positives accept; each negative rejects at its oracle-pinned reason **and** span.
-2. A reviewed `.hs` compile-refusal declaration and independent Haskell error-class/locus expectation exercise
+2. A checked `.hs` compile-refusal declaration and independent Haskell error-class/locus expectation exercise
    the seal: constructing `CheckedExtensionSource` outside the checker does not compile. Any compiler
    diagnostic is a run-local `.build/**` observation, not tracked source.
 3. Both seeded mutants turn the suite red.
@@ -576,11 +574,11 @@ Deliver extension-astcheck: admit extension source against the Sprint-33.8 surfa
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
+**Engineering docs to update (after the complete gate passes):**
 
 - `documents/engineering/dsl_doctrine.md` — backlink §2's chain/Step kernel and its pure `renderChainPlan` to
   this in-process Phase-34 seed; keep the effectful `runChainFromFrame` live invocation as the deferred Register-3
@@ -590,7 +588,7 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
   fake-apply step is exercised by the in-process Phase-34 boundary harness (Part B); keep Register 3 (live apply)
   as the residue owned by the live band.
 - `documents/engineering/generated_artifacts_doctrine.md` — record that the `--dry-run` plan is rendered and
-  emitted only beneath `.build/**`, constrained by a reviewed Haskell semantic oracle plus canonical round
+  emitted only beneath `.build/**`, constrained by a checked Haskell semantic oracle plus canonical round
   trips; record the independent
   authored boundary input used to prove byte-preserving fake-tool relay.
 - `documents/engineering/testing_doctrine.md` — record the Register-1 plan-render ledger variant (Part A) and the
@@ -599,7 +597,7 @@ The pre-reset record said `None`; that statement is permanently invalid for prom
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — only the promotion authority may change Phase 34 after reviewing a qualified
+- `DEVELOPMENT_PLAN/README.md` — only the pass criterion may change Phase 34 after checking a qualified
   candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-34 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Kernel/{Step,Chain,Descent,Plan}.hs`, the

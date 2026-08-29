@@ -737,7 +737,7 @@ and replacement bytes/count/attachments/copy execution charged together, render 
 over a known EBS handle, observe CSI attach and same-handle reattach, and verify cloud delete denial. Phase 90
 owns the later elevated cleanup/reclamation harness; no Phase-48 pure-algebra result may stand in for either
 live provider observation. All of these targets remain NOT VALIDATED until their numerical predecessors are
-reviewer-approved.
+passed by their complete qualified gates.
 
 This document is normative storage-lifecycle doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by

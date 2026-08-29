@@ -578,7 +578,7 @@ the model generalizes mechanisms built and tested in the sibling `jitML` and `in
 design intent.
 
 The Phase-74 Register-3 target must realize the cross-boundary fold in
-`Amoebius.Multicluster.GeoReplication`. A separately reviewed Haskell value
+`Amoebius.Multicluster.GeoReplication`. A separately authored Haskell value
 `geoReplicationExpectation` must compute the expected fold and blob-key relation without calling the
 production fold; generated records or encoded observations are materialized only beneath
 `.build/test-corpora/**`. That Haskell oracle must show duplicate/reordered records produce the same fold and

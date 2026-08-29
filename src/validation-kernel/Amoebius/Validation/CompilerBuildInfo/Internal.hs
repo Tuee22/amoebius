@@ -1336,15 +1336,15 @@ mutateProblemDetail selected problem =
 originalProblemDetail :: DiagnosticCompilerBuildInfoProblem -> Text
 originalProblemDetail problem = case problem of
   BuildInfoGeneratorBytesUnauthenticated _ ->
-    "generated build-info bytes have no authenticated generator or custody"
+    "generated build-info bytes are not bound to an exact generator and source snapshot"
   BuildInfoCompilerIdentityUnauthenticated {} ->
-    "the observed compiler identity has no independent toolchain authority"
+    "the observed compiler identity has no independently checked toolchain identity"
   BuildInfoIndependentExpectedCompilerUnavailable {} ->
     "the expected compiler is caller-constructed rather than independently acquired"
   BuildInfoMachinePathStateUnauthenticated {} ->
     "machine paths are lexical observations without authenticated filesystem identity"
   BuildInfoCompilerArgumentsUnauthenticated {} ->
-    "compiler arguments are generated observations without invocation custody"
+    "compiler arguments are generated observations without an exact invocation binding"
   BuildInfoDuplicateKeyDetectionDiagnosticOnly ->
     "duplicate-key detection is production-local and lacks an independent observer"
   BuildInfoIndependentExpectedUniverseUnavailable {} ->
@@ -1370,7 +1370,7 @@ originalProblemDetail problem = case problem of
   BuildInfoCompilerInvocationUnavailable {} ->
     "the exact compiler has not been invoked under an external observer"
   BuildInfoOracleQualificationUnavailable ->
-    "the independently reviewed oracle and mutation harness are not qualified"
+    "the separately authored oracle and mutation harness are not qualified"
   _ -> Text.pack (show problem)
 
 expectationObservations

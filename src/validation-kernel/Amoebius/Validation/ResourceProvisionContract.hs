@@ -39,16 +39,10 @@ data ResourceGapId = ResourceGapId Int ResourceField
 data ResourceDraft = ResourceDraft Int ResourceField
   deriving (Eq, Ord, Show)
 
-data ResourceReviewMissing = ResourceReviewMissing
-  deriving (Eq, Ord, Show)
-
-data ResourceReviewCustody = ResourceReviewCustody Text
-  deriving (Eq, Ord, Show)
-
 data ResourceSlot a
   = ResourceContractGap ResourceGapId
-  | ResourceDrafted a ResourceReviewMissing
-  | ResourceReviewed a ResourceReviewCustody
+  | ResourceDrafted a
+  | ResourceGateReady a
   deriving (Eq, Ord, Show)
 
 data ResourceProvisionContract = ResourceProvisionContract
@@ -113,7 +107,7 @@ resourceProvisionContractDiagnostic =
         , observation "resource.slot-count" (showText (length allSlots))
         , observation "resource.gap-count" (showText (length resourceGaps))
         , observation "resource.draft-count" (showText (length resourceDrafts))
-        , observation "resource.reviewed-count" (showText (length resourceReviews))
+        , observation "resource.gate-ready-count" (showText (length resourceGateReady))
         ]
           <> [ observation
                  "resource.phase"
@@ -133,15 +127,15 @@ resourceProvisionContractDiagnostic =
  where
   allSlots = concatMap resourceSlots canonicalResourceContracts
   resourceGaps = [gapIdentifier | ResourceContractGap gapIdentifier <- allSlots]
-  resourceDrafts = [draftIdentifier | ResourceDrafted draftIdentifier ResourceReviewMissing <- allSlots]
-  resourceReviews = [custody | ResourceReviewed _ custody <- allSlots]
+  resourceDrafts = [draftIdentifier | ResourceDrafted draftIdentifier <- allSlots]
+  resourceGateReady = [draftIdentifier | ResourceGateReady draftIdentifier <- allSlots]
 
 resourcePermanentRefusal :: Finding
 resourcePermanentRefusal =
   finding
     "PLAN-RESOURCE-DIAGNOSTIC-ONLY"
     "DEVELOPMENT_PLAN/"
-    "all 55 phase-specific resource-provision contracts are unresolved; no live mutation is authorized"
+    "all 55 phase-specific resource-provision contracts are unresolved; no live mutation may begin"
 
 resourceIntegrityFindings :: [Finding]
 resourceIntegrityFindings =
@@ -170,14 +164,14 @@ resourceIntegrityFindings =
         "the unresolved reset must retain exactly 385 resource ContractGap slots"
     , integrityFinding
         (all isGap allSlots)
-        "no resource slot may be Drafted or Reviewed while every resource section is UNRESOLVED"
+        "no resource slot may be Drafted or GateReady while every resource section is UNRESOLVED"
     ]
  where
   allSlots = concatMap resourceSlots canonicalResourceContracts
   isGap slot = case slot of
     ResourceContractGap _ -> True
-    ResourceDrafted _ _ -> False
-    ResourceReviewed _ _ -> False
+    ResourceDrafted _ -> False
+    ResourceGateReady _ -> False
 
 identityIntegrityFindings :: [Finding]
 identityIntegrityFindings =
@@ -206,17 +200,17 @@ resourceSlotFindings contract = concatMap findingFor (resourceSlots contract)
           (phaseSubject (resourcePhaseOrdinal contract))
           ("gap=" <> renderResourceGapId gapIdentifier)
       ]
-    ResourceDrafted draftIdentifier ResourceReviewMissing ->
+    ResourceDrafted draftIdentifier ->
       [ finding
-          "PLAN-RESOURCE-REVIEW-MISSING"
+          "PLAN-RESOURCE-GATE-EVIDENCE-MISSING"
           (phaseSubject (resourcePhaseOrdinal contract))
-          ("draft=" <> renderResourceDraft draftIdentifier <> " review=missing")
+          ("draft=" <> renderResourceDraft draftIdentifier <> " gate-evidence=missing")
       ]
-    ResourceReviewed _ (ResourceReviewCustody custody) ->
+    ResourceGateReady draftIdentifier ->
       [ finding
-          "PLAN-RESOURCE-REVIEW-CUSTODY-UNAVAILABLE"
+          "PLAN-RESOURCE-GATE-READY-UNAVAILABLE"
           (phaseSubject (resourcePhaseOrdinal contract))
-          ("a reviewed resource slot is inadmissible in the reset registry: " <> custody)
+          ("a gate-ready resource slot is inadmissible in the reset registry: " <> renderResourceDraft draftIdentifier)
       ]
 
 -- Each projection is ordinal, exact heading (or ABSENT), and whether the

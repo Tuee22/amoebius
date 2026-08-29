@@ -21,7 +21,7 @@ import Data.Text qualified as Text
 
 -- This is a package-internal identity universe.  It owns only closed,
 -- machine-decidable phase identity and resource-section selection; it carries
--- no gate semantics, evidence, review state, or promotion authority.
+-- no gate semantics, evidence, review state, or gate-pass result.
 
 data ResourceProvisionRequirement
   = ResourceProvisionAbsent

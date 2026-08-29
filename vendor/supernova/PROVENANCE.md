@@ -8,7 +8,7 @@ This file is reader-facing migration inventory only. It is not an authoritative 
 oracle, permission to retain top-level vendored source, or validation evidence. The canonical target is
 [`repository_layout_doctrine.md` §4.1](../../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-fixed-source-not-a-patch-against-a-moving-head):
 maintained Haskell is re-derived beneath `src/vendor/**/*.hs`; upstream foreign inputs are acquired at an
-immutable identity beneath `.build/vendor/**`; provenance and transformations are reviewed Haskell values.
+immutable identity beneath `.build/vendor/**`; provenance and transformations are authored Haskell values.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -29,11 +29,11 @@ not select a revision or drive a build. The Proto path is accounted under `LTD-S
 
 ## Required Phase-1 transition
 
-Phase 1 must remove this file and every other `vendor/**` path. Maintained client behavior moves to reviewed
+Phase 1 must remove this file and every other `vendor/**` path. Maintained client behavior moves to tested
 Haskell modules beneath `src/vendor/**`. The immutable upstream acquisition, Proto schema, generated bindings,
 package descriptions, transformations, and diagnostic provenance are materialized only beneath a fresh
 `.build/vendor/**` run root. Mutable-ref, top-level-vendor, tracked-Proto, foreign-package, and patch-program
-reintroductions must each fail at their exact locus before an authorized reviewer may close `LTD-SRC-009`.
+reintroductions must each fail at their exact locus before the complete owning gate may close `LTD-SRC-009`.
 
 ## Related Documents
 

@@ -3,7 +3,6 @@
 
 module Amoebius.Validation.Dispatch.Internal
   ( dispatchDiagnostic
-  , checkExternallyAnchoredPhaseZeroHandles
   , checkPhaseZeroSnapshot
   , discoverRepositoryRoot
   , phaseZeroReadinessBlockers
@@ -16,12 +15,6 @@ import Amoebius.Validation.CompilerSourceGraph.Internal
   , acquiredCompilerSourceCheck
   , analyzeAcquiredCompilerSourceGraph
   )
-import Amoebius.Validation.SourceAcquisition.Internal
-  ( AnchoredSourceAcquisitionSession
-  )
-import Amoebius.Validation.SourceAcquisitionDispatch.Internal
-  ( runSourceAcquisitionDispatch
-  )
 import Amoebius.Validation.Documentation.Internal (checkDocuments)
 import Amoebius.Validation.Legacy.Internal (legacyCheck, legacyCheckAcquired)
 import Amoebius.Validation.PhaseContract.Internal (checkPhaseContracts)
@@ -31,7 +24,7 @@ import Amoebius.Validation.SourceClosure.Internal
   , IndexEntry (indexPath)
   , SnapshotProblem (..)
   , SourceClosure
-  , SourceSnapshot (snapshotEntries)
+  , SourceSnapshot (snapshotEntries, snapshotIdentity)
   , TrackedEntry (trackedBytes, trackedIndex)
   , acquiredSourceSnapshot
   , classifySnapshot
@@ -71,9 +64,8 @@ import System.Directory
   , getCurrentDirectory
   )
 import System.Environment (getExecutablePath)
-import System.Exit (ExitCode (ExitFailure))
+import System.Exit (ExitCode (ExitFailure, ExitSuccess))
 import System.FilePath ((</>), isAbsolute, takeDirectory, takeExtension)
-import System.IO (Handle)
 import Text.Read (readMaybe)
 
 maximumDispatchPhaseBytes, maximumDispatchComponents :: Int
@@ -109,7 +101,7 @@ data DispatchRawProblem
 
 -- | Bounded refusal-only diagnostic over caller-claimed dispatch component
 -- identities.  A coherent wire remains incapable of establishing source
--- custody, predecessor approval, component execution, or harness
+-- binding, predecessor gate pass, component execution, or harness
 -- qualification.  No Git, filesystem, process, pb, network, hardware, or
 -- container action occurs here.
 dispatchDiagnostic :: Text -> [(Text, Text)] -> CheckResult
@@ -152,7 +144,7 @@ dispatchDiagnostic requestedPhase claimedComponents =
     ]
   mandatoryFindings =
     dispatchDiagnosticOnlyFindings analysis
-      <> dispatchSourceCustodyFindings analysis
+      <> dispatchSourceBindingFindings analysis
       <> dispatchPredecessorFindings analysis
       <> dispatchQualificationFindings analysis
   problemFindings = map (dispatchRawProblemFinding analysis) problems
@@ -308,15 +300,15 @@ dispatchDiagnosticOnlyFindings analysis =
   ]
 #endif
 
-dispatchSourceCustodyFindings :: DispatchRawAnalysis -> [Finding]
-#if defined(VALIDATION_DISPATCH_SOURCE_CUSTODY_RESIDUE_DROP_MUTANT)
-dispatchSourceCustodyFindings _ = []
+dispatchSourceBindingFindings :: DispatchRawAnalysis -> [Finding]
+#if defined(VALIDATION_DISPATCH_SOURCE_BINDING_RESIDUE_DROP_MUTANT)
+dispatchSourceBindingFindings _ = []
 #else
-dispatchSourceCustodyFindings analysis =
+dispatchSourceBindingFindings analysis =
   [ finding
-      "DISPATCH-SOURCE-CUSTODY-UNAVAILABLE"
+      "DISPATCH-SOURCE-BINDING-UNAVAILABLE"
       "<caller-supplied-dispatch-input>"
-      ("no authenticated atomic source acquisition is attached" <> dispatchCommitmentDetail analysis)
+      ("no exact local source snapshot is attached" <> dispatchCommitmentDetail analysis)
   ]
 #endif
 
@@ -326,9 +318,9 @@ dispatchPredecessorFindings _ = []
 #else
 dispatchPredecessorFindings analysis =
   [ finding
-      "DISPATCH-PREDECESSOR-APPROVAL-UNAVAILABLE"
+      "DISPATCH-PREDECESSOR-PASS-UNAVAILABLE"
       "phase-order"
-      ("no externally authenticated predecessor approval is attached" <> dispatchCommitmentDetail analysis)
+      ("no predecessor gate pass result is attached" <> dispatchCommitmentDetail analysis)
   ]
 #endif
 
@@ -352,7 +344,7 @@ dispatchPhaseRouteFindings analysis = case dispatchProblems analysis of
         [ finding
             "DISPATCH-PHASE-BLOCKED"
             ("phase-" <> Text.unpack (dispatchSafePhase analysis))
-            ("every later phase requires its immediate predecessor's external reviewer approval" <> dispatchCommitmentDetail analysis)
+            ("every later phase requires its immediate predecessor's gate pass" <> dispatchCommitmentDetail analysis)
         ]
     | otherwise -> []
   _ -> []
@@ -614,18 +606,15 @@ dispatchUnknownRejected canonical value = value `notElem` canonical
 dispatchOrdinalSubject :: Int -> FilePath
 dispatchOrdinalSubject ordinal = "<component-" <> show ordinal <> ">"
 
--- | Run the public validation argv. No current path owns authenticated source
--- custody, so every result is diagnostic and exits with a refusal. A future
--- candidate entry point must replace this rule only together with an external,
--- atomic acquisition authority.
+-- | Run the public validation argv against an exact local source capture.
 runValidateCommand :: [String] -> IO ExitCode
 runValidateCommand arguments =
   case arguments of
     ["phase", ordinal]
       | Just phase <- parseOrdinal ordinal -> do
-          acquisition <- acquireRepository
-          case acquisition of
-            Left detail -> emitResult (acquisitionFailure detail)
+          capture <- acquireRepository
+          case capture of
+            Left detail -> emitResult (captureFailure detail)
             Right (git, root) -> validatePhase git root phase >>= emitResult
     _ ->
       emitResult
@@ -640,10 +629,8 @@ runValidateCommand arguments =
               ]
           }
 
--- | Diagnostic acquisition seam. Git and the repository root are explicit so
--- a test or caller cannot silently substitute PATH lookup or the current
--- working directory, but caller selection authenticates neither value and can
--- never mint candidate authority.
+-- | Git and the repository root are explicit so a test or caller cannot
+-- silently substitute PATH lookup or the current working directory.
 validatePhase :: FilePath -> FilePath -> Int -> IO CheckResult
 validatePhase gitPath root phase
   | phase < policyDomainLower || phase > policyDomainUpper =
@@ -667,7 +654,7 @@ validatePhase gitPath root phase
               [ finding
                   "DISPATCH-PHASE-BLOCKED"
                   ("phase-" <> Text.unpack (formatOrdinal phase))
-                  "only Phase 0 is active; every later phase requires its immediate predecessor's external reviewer approval"
+                  "only Phase 0 is active; every later phase requires its immediate predecessor's gate pass"
               ]
           }
   | otherwise =
@@ -677,11 +664,14 @@ validatePhase gitPath root phase
           snapshotResult <- loadGitSnapshot git root
           case snapshotResult of
             Left problems -> pure (snapshotFailure problems)
-            Right acquired -> checkAcquiredPhaseZeroSnapshot acquired
+            Right acquired -> do
+              result <- checkAcquiredPhaseZeroSnapshot acquired
+              finalSnapshot <- loadGitSnapshot git root
+              pure (bindFinalSourceSnapshot acquired finalSnapshot result)
 
 -- | Pure diagnostic seam. A caller-constructed snapshot can exercise
 -- composition, but always carries an explicit refusal and can never represent
--- candidate acquisition authority.
+-- candidate local-capture evidence.
 checkPhaseZeroSnapshot :: SourceSnapshot -> CheckResult
 checkPhaseZeroSnapshot snapshot =
   mergeChecks
@@ -690,24 +680,41 @@ checkPhaseZeroSnapshot snapshot =
     , syntheticSnapshotRefusal
     ]
 
--- | The sole production route from an externally anchored, bounded streaming
--- acquisition into the real acquired Phase-0 dispatcher. The external
--- supervisor owns session construction and handle custody; this package-hidden
--- wrapper fixes the success callback to the real checker.
-checkExternallyAnchoredPhaseZeroHandles
-  :: AnchoredSourceAcquisitionSession
-  -> Text
-  -> Handle
-  -> Handle
-  -> Handle
-  -> IO CheckResult
-checkExternallyAnchoredPhaseZeroHandles =
-  runSourceAcquisitionDispatch checkAcquiredPhaseZeroSnapshot
-
 checkAcquiredPhaseZeroSnapshot :: AcquiredSourceSnapshot -> IO CheckResult
 checkAcquiredPhaseZeroSnapshot acquired = do
   compilerEvidence <- analyzeAcquiredCompilerSourceGraph acquired
   pure (checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence)
+
+bindFinalSourceSnapshot
+  :: AcquiredSourceSnapshot
+  -> Either [SnapshotProblem] AcquiredSourceSnapshot
+  -> CheckResult
+  -> CheckResult
+bindFinalSourceSnapshot initial final result = case final of
+  Left problems ->
+    result
+      { checkFindings =
+          checkFindings result
+            <> map snapshotProblemFinding problems
+      }
+  Right observed
+    | snapshotIdentity (acquiredSourceSnapshot initial)
+        == snapshotIdentity (acquiredSourceSnapshot observed) ->
+        result
+          { checkObservations =
+              checkObservations result
+                <> [observation "source.snapshot.final" (snapshotIdentity (acquiredSourceSnapshot observed))]
+          }
+    | otherwise ->
+        result
+          { checkFindings =
+              checkFindings result
+                <> [ finding
+                       "SOURCE-SNAPSHOT-CHANGED-DURING-GATE"
+                       "<local-source-snapshot>"
+                       "the authored source bytes changed between the opening and closing gate captures"
+                   ]
+          }
 
 checkAcquiredPhaseZeroSnapshotCore
   :: AcquiredSourceSnapshot
@@ -885,25 +892,25 @@ acquiredCompilerDispatchQualificationResidue =
     { checkName = "acquired-compiler-dispatch-qualification"
     , checkObservations =
         [ observation
-            "compiler-dispatch.acquired-authority"
-            "absent; caller-selected Git cannot establish authenticated atomic custody"
+            "compiler-dispatch.local-source"
+            "captured; changed-subject qualification remains open"
         ]
     , checkFindings =
         [ finding
             "ACQUIRED-COMPILER-DISPATCH-UNQUALIFIED"
             "Amoebius.Validation.Dispatch"
-            "no authenticated atomic source authority can mint the acquired snapshot wrapper, so the acquired compiler-dispatch branch is explicit residue rather than candidate evidence"
+            "the acquired compiler-dispatch branch has not passed its changed-subject qualification matrix"
         ]
     }
 
 syntheticSnapshotRefusal :: CheckResult
 syntheticSnapshotRefusal =
   CheckResult
-    { checkName = "source-snapshot-authority"
+    { checkName = "source-snapshot-diagnostic"
     , checkObservations =
         [ observation
-            "source.snapshot-authority"
-            "caller-supplied diagnostic input; acquisition authority absent"
+            "source.snapshot.local-capture"
+            "caller-supplied diagnostic input; package-hidden local capture absent"
         ]
     , checkFindings = syntheticSnapshotFindings
     }
@@ -913,12 +920,12 @@ syntheticSnapshotFindings =
   [ finding
       "SOURCE-SNAPSHOT-DIAGNOSTIC-ONLY"
       "<caller-supplied-snapshot>"
-      "a pure SourceSnapshot has not crossed the opaque Git/index/worktree acquisition boundary and cannot be candidate evidence"
+      "a pure SourceSnapshot has not crossed the package-hidden local capture boundary and cannot be candidate evidence"
   ]
 
 -- These are deliberate, executable refusal rows.  They prevent structural
 -- component checks from being mislabeled as a qualified Phase-0 candidate.
--- Each row retires only when its separately reviewed implementation supplies
+-- Each row retires only when its separately authored implementation supplies
 -- the raw evidence named here; no caller flag can turn it green.  In
 -- particular, Gate.checkQualificationReportDiagnostic is a pure consistency check over
 -- caller-supplied values and cannot retire the execution blocker.
@@ -928,15 +935,15 @@ phaseZeroReadinessBlockers =
     { checkName = "phase-00-readiness"
     , checkObservations =
         [ observation "readiness.harness-qualification" "report consistency checker present; execution not implemented"
-        , observation "readiness.policy-contract" "typed contract is integrated; changed-subject qualification and reviewer prose-correspondence inspection are absent"
-        , observation "readiness.pb-source-grammar" "the static source-bound grammar is integrated; acquired one-file tracked-snapshot closure, changed-subject qualification, and independent review are absent"
-        , observation "readiness.phase-contract-semantics" "the closed typed registry and structural joins are integrated; all 1,728 semantic slots and 385 resource slots remain gaps, with no reviewed payload or custody"
+        , observation "readiness.policy-contract" "typed contract is integrated; changed-subject qualification and documentation correspondence check are absent"
+        , observation "readiness.pb-source-grammar" "the static source-bound grammar is integrated; changed-subject qualification and the separately authored oracle are absent"
+        , observation "readiness.phase-contract-semantics" "the closed typed registry and structural joins are integrated; all 1,728 semantic slots and 385 resource slots remain gaps, with no gate-ready payload"
         , observation "readiness.legacy-owner-analyzers" "closed typed inventory and fail-closed dispatch are integrated; LTD-SRC-000 and LTD-SRC-008 source analyzers are present but unqualified, while LTD-VAL-001 through LTD-VAL-004 owner analyzers remain unavailable"
-        , observation "readiness.independent-review" "reviewer and custody receipt absent"
+        , observation "readiness.oracle-independence" "complete gate result absent"
         , observation "readiness.cleanroom-residue" "external observer absent"
         , observation "readiness.candidate-integration" "evidence writer not connected to dispatcher"
         , observation "readiness.evidence-schema" "command, toolchain, substrate, run, and cleanup fields are not represented by a closed typed schema"
-        , observation "readiness.git-acquisition" "PATH-selected Git is not externally authenticated"
+        , observation "readiness.local-source-capture" "opening and closing exact local snapshots are integrated"
         ]
     , checkFindings =
         [ finding
@@ -946,23 +953,23 @@ phaseZeroReadinessBlockers =
         , finding
             "POLICY-CONTRACT-UNQUALIFIED"
             "Amoebius.Validation.PolicyContract"
-            "the typed cross-cutting contract is integrated, but its Registry-provider, owner-map, and pb-transport changed-subject mutants have not been qualified and no authorized reviewer has inspected prose correspondence"
+            "the typed cross-cutting contract is integrated, but its Registry-provider, owner-map, and pb-transport changed-subject mutants have not been qualified and the documentation correspondence gate has not passed"
         , finding
             "PB-GRAMMAR-UNQUALIFIED"
             "Amoebius.Validation.PbBootstrapGrammar"
-            "the versioned static AST/import/resolved-call/control-flow/potential-effect analyzer is integrated, but no acquired one-file tracked snapshot, applied changed-subject qualification, or independent review binds it; Phase 50 alone owns external runtime handoff observation"
+            "the versioned static AST/import/resolved-call/control-flow/potential-effect analyzer is integrated, but its changed-subject qualification and separately authored oracle remain open; Phase 50 alone owns external runtime handoff observation"
         , finding
-            "PHASE-CONTRACT-SEMANTICS-UNREVIEWED"
+            "PHASE-CONTRACT-SEMANTIC-GAPS"
             "Amoebius.Validation.PhaseContract"
-            "the closed typed 96-phase registry and structural joins are integrated, but all 1,728 semantic slots and 385 resource slots remain gaps, with no reviewed payload or independent reviewer custody"
+            "the closed typed 96-phase registry and structural joins are integrated, but all 1,728 semantic slots and 385 resource slots remain gaps, with no gate-ready payload"
         , finding
             "LEGACY-VALIDATION-ANALYZERS-MISSING"
             "Amoebius.Validation.Legacy"
             "the closed legacy inventory dispatches every ID and the LTD-SRC-000 and LTD-SRC-008 source analyzers are integrated but unqualified; the LTD-VAL-001 through LTD-VAL-004 owner analyzers and their independently authored reintroduction executions remain unavailable"
         , finding
-            "INDEPENDENT-REVIEW-MISSING"
+            "ORACLE-INDEPENDENCE-MISSING"
             "phase-00-oracles"
-            "component diagnostics have no independent reviewer or custody receipt"
+            "component diagnostics are not a complete qualified gate"
         , finding
             "CLEANROOM-OBSERVER-MISSING"
             "phase-00-cleanroom"
@@ -975,10 +982,6 @@ phaseZeroReadinessBlockers =
             "EVIDENCE-SCHEMA-INCOMPLETE"
             "Amoebius.Validation.Evidence"
             "the candidate schema does not yet require typed exact-command, toolchain, substrate/lane/architecture, run-identity, or cleanup observations"
-        , finding
-            "GIT-ACQUISITION-UNAUTHENTICATED"
-            "Amoebius.Validation.Dispatch"
-            "the Git executable is selected from PATH and has no externally established tool identity"
         ]
     }
 
@@ -1003,7 +1006,7 @@ snapshotDocuments snapshot =
 snapshotFailure :: [SnapshotProblem] -> CheckResult
 snapshotFailure problems =
   CheckResult
-    { checkName = "source-snapshot-acquisition"
+    { checkName = "source-snapshot-capture"
     , checkObservations = [observation "source.snapshot" "refused before classification"]
     , checkFindings = map snapshotProblemFinding problems
     }
@@ -1012,22 +1015,22 @@ snapshotProblemFinding :: SnapshotProblem -> Finding
 snapshotProblemFinding problem = case problem of
   CallerSelectedGitDiagnosticOnly _ ->
     finding
-      "GIT-ACQUISITION-UNAUTHENTICATED"
+      "GIT-CAPTURE-TOOL-INVALID"
       "Amoebius.Validation.Dispatch"
       (renderSnapshotProblem problem)
   SourceSnapshotAtomicityRequiresExternalObserver ->
     finding
-      "SOURCE-SNAPSHOT-ATOMIC-CUSTODY-MISSING"
+      "SOURCE-SNAPSHOT-LOCAL-CAPTURE-INCOMPLETE"
       "Amoebius.Validation.Dispatch"
       (renderSnapshotProblem problem)
   _ -> finding "SRC-SNAPSHOT" "<git-index>" (renderSnapshotProblem problem)
 
-acquisitionFailure :: Text -> CheckResult
-acquisitionFailure detail =
+captureFailure :: Text -> CheckResult
+captureFailure detail =
   CheckResult
-    { checkName = "validation-acquisition"
-    , checkObservations = [observation "validation.acquisition" "refused"]
-    , checkFindings = [finding "DISPATCH-ACQUISITION" "repository" detail]
+    { checkName = "validation-capture"
+    , checkObservations = [observation "validation.capture" "refused"]
+    , checkFindings = [finding "DISPATCH-CAPTURE" "repository" detail]
     }
 
 emitResult :: CheckResult -> IO ExitCode
@@ -1035,10 +1038,10 @@ emitResult result = do
   TextIO.putStrLn ("validation " <> checkName result <> ": " <> verdict)
   mapM_ emitObservation (checkObservations result)
   mapM_ (TextIO.putStrLn . ("REFUSAL\t" <>) . renderFinding) (checkFindings result)
-  TextIO.putStrLn "status\tNOT VALIDATED"
-  pure (ExitFailure 1)
+  TextIO.putStrLn ("status\t" <> if checkPassed result then "PASS" else "NOT VALIDATED")
+  pure (if checkPassed result then ExitSuccess else ExitFailure 1)
  where
-  verdict = if checkPassed result then "DIAGNOSTIC CHECKS PASSED; AUTHORITY ABSENT" else "REFUSED"
+  verdict = if checkPassed result then "PASS" else "REFUSED"
   emitObservation item =
     TextIO.putStrLn ("OBSERVATION\t" <> observationKey item <> "\t" <> observationValue item)
 

@@ -142,9 +142,9 @@ The law is not universal, and the two places it does not hold are named rather t
 
 That development-time activity has its own non-destructive memory rule. The one Markdown register is an
 active-only, non-executable reader explanation. An Active zero is admissible only in the exact owning-phase
-candidate and means ready for reviewer inspection, not retired; it refuses both before that owner and in a later phase
-whose source failed to record the promoted transition. After the independent reintroduction negative succeeds,
-predecessors are approved, and an authorized reviewer promotes the owning gate, the successor-phase source records retirement,
+candidate and means ready for the complete owning gate, not retired; it refuses both before that owner and in a
+later phase whose source failed to record the passed transition. After the independent reintroduction negative
+succeeds, predecessor gates pass, and the owning gate passes, the successor-phase source records retirement,
 the explanation is deleted, and Git history is its only prose archive. The closed Haskell universe retains the retired ID,
 stable encoding, owner, analyzer key, and qualified owner-domain reintroduction negative, so deletion of prose cannot erase the violation
 class or let a later change recreate it silently. Markdown rows, cells, IDs, owners, counts, and predicate-like
@@ -153,7 +153,7 @@ sentences remain unavailable to executable lifecycle or closure decisions.
 [Phase 0 Sprint 0.2](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-02-one-active-legacy-register-)
 owns only that closed inventory, total fail-closed analyzer dispatch, structural register check, and independent
 inventory/dispatch mutant declarations. The current lifecycle universe admits only Active, and Sprint 0.2
-retains required reintroduction-case identities rather than claiming executed guards. Reviewer prose
+retains required reintroduction-case identities rather than claiming executed guards. Reader-facing prose
 correspondence is consolidated at the Phase-0 gate and does not itself require an intermediate
 confirmation. Each owning sprint implements and qualifies its
 domain observation/closure analyzer and reintroduction negative in numerical order; an unavailable analyzer
@@ -162,7 +162,7 @@ later-owned debt rather than a deferred pass. All Phase-0-owned legacy queries m
 [Sprint-0.8 integrated candidate](../../DEVELOPMENT_PLAN/phase_00_documentation_suite.md#sprint-08-integrated-phase-0-candidate-),
 under the [gate-integrity contract](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate).
 This sequencing statement records target responsibility only; every sprint and phase remains NOT VALIDATED
-until the prescribed reviewer decision.
+until the prescribed owning gate passes.
 
 ---
 

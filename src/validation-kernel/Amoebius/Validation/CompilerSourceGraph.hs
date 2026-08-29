@@ -6,7 +6,7 @@
 -- eliminator, or success branch crosses this facade. The claimed identity and
 -- inventory are caller input. The package-hidden implementation bounds them
 -- before traversal and never treats internal consistency as compiler,
--- source-custody, or semantic evidence.
+-- source-binding, or semantic evidence.
 module Amoebius.Validation.CompilerSourceGraph
   ( compilerSourceGraphDiagnostic
   ) where

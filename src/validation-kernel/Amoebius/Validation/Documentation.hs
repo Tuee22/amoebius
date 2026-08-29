@@ -16,7 +16,7 @@ import Data.Text (Text)
 
 -- Public diagnostic facades deliberately expose only refusal-bearing
 -- CheckResults. Candidate consumers import the package-hidden implementation
--- after authenticated snapshot acquisition.
+-- after authenticated snapshot capture.
 documentationStructureDiagnostic :: [(FilePath, Text)] -> CheckResult
 documentationStructureDiagnostic = checkDocumentStructure
 

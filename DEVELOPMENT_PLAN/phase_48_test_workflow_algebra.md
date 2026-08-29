@@ -6,7 +6,7 @@
 
 This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
 command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
 status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
@@ -40,13 +40,12 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 47, its independent validation, and delegated promotion; every earlier
-promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
-completion claim, and implementation result in this document is invalidated as validation evidence, even
-where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Blocked by redesigned Phase 47, its independent validation, and gate pass; every earlier
+gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
+where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and an authorized reviewer independently inspects it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
@@ -59,7 +58,7 @@ external Dhall proposal or other serialized form is useful, Haskell generates it
 
 Phase 48 performs no substrate detection, credential probe, resource creation, fault injection, teardown,
 inventory readback, browser action, hardware observation, or cluster validation. Those effectful and
-destructive responsibilities belong to Phase 90 after the Phase-49 hardware-free DSL promotion barrier and
+destructive responsibilities belong to Phase 90 after the Phase-49 hardware-free DSL gate barrier and
 after their own numerical predecessors. The pure types may describe those later epochs, but a modeled
 inventory or capacity value is never represented here as a live observation.
 
@@ -76,28 +75,28 @@ typed teardown continuation, and `suggestTest` is a pure proposal function over 
 
 ## Gate integrity
 
-**Contract review**: REJECTED — NOT VALIDATED.
+**Contract check**: REJECTED — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Target only — a pure Haskell test-topology value carries a typed teardown continuation, and pure Haskell `suggestTest` maps supplied model values to a proposal or structured refusal. Generated external forms remain beneath `.build/**`; live execution, deletion, and observation belong to Phase 90. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — a pure Haskell test-topology value carries a typed teardown continuation, and pure Haskell `suggestTest` maps supplied model values to a proposal or structured refusal. Generated external forms remain beneath `.build/**`; live execution, deletion, and observation belong to Phase 90. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 48` is future public spelling only. Before current reviewer approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent reviewer have been accepted. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 48` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
 | `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 47; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer` — an authorized human or agent may promote after inspecting the complete qualified candidate; no gate, CI job, digest, receipt-shaped file, or generated assertion may promote by itself. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 47; candidate execution refuses an absent, stale, replayed, or different-source result. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 
 ## Doctrine adopted
 
@@ -109,7 +108,7 @@ typed teardown continuation, and `suggestTest` is a pure proposal function over 
   and leak observation.
 - [`testing_doctrine.md` §5 — `suggest-test`: detect the world, emit a representative test `.dhall`](../documents/engineering/testing_doctrine.md#5-suggest-test-detect-the-world-emit-a-representative-test-dhall)
   — `suggestTest` is pure over supplied Haskell model values here. Live detection and authority inspection are
-  Phase-90 work; any Dhall proposal is generated under `.build/test-corpora/**` for reviewer inspection.
+  Phase-90 work; any Dhall proposal is generated under `.build/test-corpora/**` for complete gate execution.
 - [`testing_doctrine.md` §6 — Flagged test credentials](../documents/engineering/testing_doctrine.md#6-flagged-test-credentials) and
   [`testing_doctrine.md` §7 — The elevated harness is the sole automated deleter of test-owned durable storage; leak-free cycles](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles)
   — flagged authority, destructive cleanup, and independent inventory are represented as closed Haskell
@@ -118,24 +117,24 @@ typed teardown continuation, and `suggestTest` is a pure proposal function over 
   — Phase 48 may compose pure capacity terms over supplied model values; it cannot establish live fit.
 - [`testing_doctrine.md` §8 — One substrate per validation](../documents/engineering/testing_doctrine.md#8-one-substrate-per-validation)
   — Phase 48 has no substrate. Phase 90 must name and observe exactly one live substrate when it eventually
-  seeks promotion.
+  seeks a gate pass.
 
 ## Sprints
 
 Every sprint below is hardware-free. Its subject, cases, expectations, and changed-production-subject mutants
 are Haskell; any serialized projection is generated lazily beneath `.build/test-corpora/**`. Phase 48 has no
 effect interpreter and cannot establish that any modeled host, authority, inventory, teardown, or failover
-event occurred. Phase 90 owns those live obligations after all numerical predecessors are reviewer-approved.
+event occurred. Phase 90 owns those live obligations after all numerical predecessors are gate-passed.
 
 ## Sprint 48.1: The test-topology type — a deployment-rules layer that always tears down ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
-**Blocked by**: [Phase 47](phase_47_tool_and_mutant_generation.md) reviewer approval
+**Blocked by**: [Phase 47](phase_47_tool_and_mutant_generation.md) gate pass
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -187,9 +186,9 @@ resource reclamation, and external confirmation that teardown occurred.
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 48.1
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -211,7 +210,7 @@ same type from live observation.
 - A symbolic delegated-failover `FaultIntent` and named authority references only. Phase 48 neither resolves
   those references nor injects the intent.
 - A deterministic Dhall or other serialized proposal generated only beneath `.build/test-corpora/**`. The
-  projection is review material, never repository source, a semantic oracle, or proof that its modeled target
+  projection is check material, never repository source, a semantic oracle, or proof that its modeled target
   exists.
 
 ### Validation
@@ -242,9 +241,9 @@ world.
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 48.2
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -260,7 +259,7 @@ they are not credentials, permissions, tags applied to resources, or proof of au
 - A pure rule requiring every modeled allocatable item in a test topology to carry `TestOwnedIntent`, while
   forbidding credential material and destructive operations from the topology language.
 - Symbolic authority references by name only, plus an explicit `AuthorityUnverified` state that Phase 48 cannot
-  promote. Secret resolution, permission checks, and application of ownership metadata belong to Phase 90.
+  classify as verified. Secret resolution, permission checks, and application of ownership metadata belong to Phase 90.
 - Haskell positives, paired negatives, and changed-production-subject mutants for constructor confusion,
   missing ownership intent, secret inlining, and an exposed deletion primitive.
 
@@ -287,9 +286,9 @@ live boundary.
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 48.3
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -337,9 +336,9 @@ confirmation that cleanup reached the external substrate or provider.
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 48.4
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -357,7 +356,7 @@ execute a topology, perform preflight, inject a fault, or observe failover.
 - A Haskell `Ledger` algebra whose applicable-move set is derived from the topology's declared
   `FaultIntentSchedule` and the closed `FaultKind`-to-invariant map, never supplied by the ledger emitter.
 - Separate evidence constructors for pure proof/model results and future authenticated Runtime observations.
-  The Phase-48 evaluator cannot construct or promote the latter; applicable runtime moves remain UNVERIFIED.
+  The Phase-48 evaluator cannot construct or verify the latter; applicable runtime moves remain UNVERIFIED.
 - A pure refusal when a required declaration, expected move, independent oracle entry, or inventory-domain
   declaration is absent. Missing input never becomes a skip or pass.
 - A separately authored Haskell expected-move declaration and changed-production-subject ledger mutants. Any
@@ -392,7 +391,7 @@ artifact.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
+**Engineering docs to update (after the complete gate passes):**
 
 - `documents/engineering/testing_doctrine.md` — record the pure teardown, suggestion, credential, and evidence
   module and leave generated/live topology, harness, sweep, and per-run evidence explicitly to Phase 90.

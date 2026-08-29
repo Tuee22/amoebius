@@ -40,12 +40,12 @@ detail of each subsystem; this overview summarizes and links, and **never restat
 vision; the plan is its binding, executable decomposition.
 
 > **Reopened implementation, read this first.** Source and tests exist, but the generated-artifact redesign
-> invalidates every prior phase seal, so the phase statuses in this document's prose would go stale the moment
-> they were written. [README.md](README.md)'s tracker is the sole authority on which phase is where
+> invalidates every prior phase result, so the phase statuses in this document's prose would go stale the moment
+> they were written. [README.md](README.md)'s tracker is the sole record of which phase is where
 > ([development_plan_standards.md §C](development_plan_standards.md#c-status-vocabulary)); read it, not a
-> summary of it. Every prescriptive sentence remains design intent until a redesigned independent acceptance
-> contract is satisfied and the authorized reviewer promotes its phase. A receipt or attestation alone is never
-> sufficient. Where this overview leans on the sibling `prodbox` project, that is cited as
+> summary of it. Every prescriptive sentence remains design intent until the redesigned complete qualified
+> phase gate passes. A partial component result alone is never sufficient. Where this overview leans on
+> the sibling `prodbox` project, that is cited as
 > *evidence* that a shape works — never as amoebius proof.
 
 ## 1. The everything-orchestrator shape: one runtime binary, three contexts
@@ -150,7 +150,7 @@ carried forward is recorded in typed Haskell migration bindings and explained in
 [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). infernix and
 jitML join as the closed **workload-extension set** linked into trusted runtime variants — never a migration
 through hostbootstrap first — with their engines jit-resolved into a bounded content-addressed cache rather than baked.
-Low-code applications remain checked release data; only an optional reviewed server adapter joins the linked set
+Low-code applications remain checked release data; only an optional gate-admitted server adapter joins the linked set
 ([`capability_extension_doctrine.md`](../documents/engineering/capability_extension_doctrine.md), [`content_addressing_determinism.md` §4.5](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 
 ## 3. The hard constraints (cross-cutting invariants)
@@ -202,7 +202,7 @@ Each phase ends in a single, checkable acceptance gate on **at most one** substr
 discipline, [development_plan_standards.md §L](development_plan_standards.md#l-one-substrate-discipline)). Each
 phase document owns its gate text; the tracker owns phase order and status. The lines below are a navigation
 index, not a second status ledger — so it names no status at all. [README.md](README.md)'s tracker is the
-sole authority on which phase is where
+sole record of which phase is where
 ([development_plan_standards.md §C](development_plan_standards.md#c-status-vocabulary)); a status restated
 here goes stale the moment a gate runs, which is what happened to the sentence this replaces.
 
@@ -214,7 +214,7 @@ opens. A bounded DSL decision/protocol tranche is model-checked in
 The **Register-2.5 deterministic-simulation activity is never a phase gate**
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)); where a
 live-band phase eventually runs it, the activity may compare built code with the independently validated
-Phase-19 model only after Phase 19 has been reviewer-promoted. Phase 19 is currently **NOT VALIDATED**.
+Phase-19 model only after Phase 19 has passed its qualified gate. Phase 19 is currently **NOT VALIDATED**.
 Front-loading a *design* model ahead of its runtime is legitimate only while correspondence and runtime
 fidelity remain explicitly unverified
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed), [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)).
@@ -299,7 +299,7 @@ fidelity remain explicitly unverified
 
 *Test-as-workflow (substrate `none`, Register 1):*
 - **Phase 48 — The test-workflow algebra** → [phase_48](phase_48_test_workflow_algebra.md).
-- **Phase 49 — No-hardware DSL promotion barrier and self-referential gate suite** → [phase_49](phase_49_self_referential_gates.md).
+- **Phase 49 — No-hardware DSL gate barrier and self-referential gate suite** → [phase_49](phase_49_self_referential_gates.md).
 
 *Pre-binary and host — the first machine (Registers 2–3):*
 - **Phase 50 — Bounded `pb` bootstrap and Haskell handoff** → [phase_50](phase_50_host_assert_cli.md).
@@ -364,7 +364,7 @@ fidelity remain explicitly unverified
   owners close them. [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) explains those
   bindings to readers and supplies no IDs, owners, predicates, counts, or verdict inputs;
   [system_components.md](system_components.md) remains target-only.
-- **Every prior seal is invalidated.** Earlier gates used repository-resident enumeration and ledgers, wrote run
+- **Every prior result is invalidated.** Earlier gates used repository-resident enumeration and ledgers, wrote run
   evidence beneath `DEVELOPMENT_PLAN/`, or depended on tracked resolver output and host-specific paths.
 - **Status posture:** Phase 0 is Active — NOT VALIDATED; Phases 1–95 are Blocked — NOT VALIDATED. The
   authoritative per-phase projection lives only in [README.md](README.md); this summary cannot promote it.
@@ -377,8 +377,8 @@ fidelity remain explicitly unverified
   Lock/freeze files, resolved paths, and hard-coded library/package SHA values are generated and untracked.
 - **Evidence posture:** a gate writes to `.build/runs/` and an external immutable evidence store. Existing
   ledgers and receipts are historical migration material, not current completion evidence.
-- **Hardware posture:** no hardware validation may begin until the hardware-free DSL promotion barrier and
-  every preceding redesigned phase are independently satisfied and reviewer-approved.
+- **Hardware posture:** no hardware validation may begin until the hardware-free DSL gate barrier and
+  every preceding redesigned phase gate pass.
 
 ---
 

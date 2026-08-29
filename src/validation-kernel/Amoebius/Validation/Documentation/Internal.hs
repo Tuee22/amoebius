@@ -114,7 +114,7 @@ data DiscoveryBudget = DiscoveryBudget
   }
   deriving (Eq, Show)
 
--- | Worktree diagnostic only. Candidate authority must call 'checkDocuments'
+-- | Worktree diagnostic only. Candidate evaluation must call 'checkDocuments'
 -- with the immutable blob corpus obtained by source-closure discovery; this
 -- convenience function reads mutable filesystem bytes and therefore cannot
 -- establish candidate provenance.
@@ -164,9 +164,9 @@ retainDocumentationPhaseContractCheck = id
 #endif
 
 -- | Mutable-worktree convenience for public diagnostics. The hidden
--- dispatcher never calls this route: it supplies authenticated snapshot bytes
+-- dispatcher never calls this route: it supplies exact local snapshot bytes
 -- directly to 'checkDocuments'. The public route retains a permanent refusal
--- even when its mutable observation happens to match the reviewed manifest.
+-- even when its mutable observation happens to match the authored manifest.
 checkCorpusDiagnostic :: FilePath -> IO CheckResult
 checkCorpusDiagnostic root = do
   result <- checkCorpus root
@@ -180,7 +180,7 @@ documentationCorpusDiagnosticRefusal =
   [ finding
       "DOC-CORPUS-DIAGNOSTIC-ONLY"
       "Amoebius.Validation.Documentation.documentationWorktreeDiagnostic"
-      "mutable worktree discovery has no authenticated source, reviewer-custody, qualification, observer, or promotion authority"
+      "mutable worktree discovery has no exact source binding, gate-evidence, qualification, observer, or gate-pass result"
   ]
 #endif
 
@@ -202,7 +202,7 @@ checkDocumentStructure supplied =
 
 -- | Canonical-inventory parser diagnostic for the component oracle. Candidate
 -- consumers use the hidden 'checkDocuments' route only after source
--- acquisition; callers of this wrapper can never obtain an authority-bearing
+-- capture; callers of this wrapper can never obtain an authority-bearing
 -- success branch.
 checkInventoryDiagnostic :: [(FilePath, Text)] -> CheckResult
 checkInventoryDiagnostic supplied =
@@ -218,7 +218,7 @@ documentationInventoryDiagnosticRefusal =
   [ finding
       "DOC-INVENTORY-DIAGNOSTIC-ONLY"
       "Amoebius.Validation.Documentation.documentationInventoryDiagnostic"
-      "caller-supplied inventory bytes have no authenticated source, reviewer-custody, qualification, observer, or promotion authority"
+      "caller-supplied inventory bytes have no exact source binding, gate-evidence, qualification, observer, or gate-pass result"
   ]
 #endif
 
@@ -230,7 +230,7 @@ documentationStructureDiagnosticRefusal =
   [ finding
       "DOC-STRUCTURE-DIAGNOSTIC-ONLY"
       "Amoebius.Validation.Documentation.documentationStructureDiagnostic"
-      "caller-authored Markdown has no acquisition, semantic, reviewer-custody, observer, or promotion authority"
+      "caller-authored Markdown has no capture, semantic, gate-evidence, observer, or gate-pass result"
   ]
 #endif
 
@@ -323,7 +323,7 @@ checkDocumentsWithinEnvelope enforceCanonicalInventory supplied =
     [ finding
         "DOC-INVENTORY-COUNT"
         "documents/"
-        ( "governed path count differs from the reviewed Haskell baseline: expected="
+        ( "governed path count differs from the authored Haskell baseline: expected="
             <> showText canonicalGovernedPathCount
             <> ", observed="
             <> showText (length governedPaths)
@@ -334,7 +334,7 @@ checkDocumentsWithinEnvelope enforceCanonicalInventory supplied =
       <> [ finding
              "DOC-INVENTORY-DIGEST"
              "documents/"
-             ( "governed path digest differs from the reviewed Haskell baseline: expected="
+             ( "governed path digest differs from the authored Haskell baseline: expected="
                  <> canonicalGovernedPathDigest
                  <> ", observed="
                  <> governedPathDigest
@@ -345,7 +345,7 @@ checkDocumentsWithinEnvelope enforceCanonicalInventory supplied =
   -- The eliminated filename is a structural alias, not a semantic policy
   -- phrase. Cross-cutting policy prose is deliberately not interpreted here:
   -- executable choices belong to PolicyContract and prose correspondence is
-  -- an external reviewer-inspection obligation.
+  -- an external documentation-correspondence obligation.
   archiveCount = sum (map archiveAliasCount governed)
 
 documentationDuplicatePathForbidden :: [value] -> Bool
@@ -748,7 +748,7 @@ retiredArtifactCorpusFindings = concatMap checkRetiredTrackedArtifactSyntax
 -- | Reject the old repository-path spelling that made serialized fixtures,
 -- goldens, or materialized mutants look like tracked test inputs.  This is a
 -- syntax check only: it does not infer a source role or validation meaning
--- from prose.  A reviewed Haskell test path remains admissible; generated
+-- from prose.  A authored Haskell test path remains admissible; generated
 -- transports must instead name their lazy generated-tree destination.
 checkRetiredTrackedArtifactSyntax :: Document -> [Finding]
 checkRetiredTrackedArtifactSyntax document =
@@ -1074,7 +1074,7 @@ joinPhysicalLines = Text.concat . map Text.strip . Text.lines
 
 -- These phrases asserted a version-controlled transport without necessarily
 -- naming a path.  State-machine uses such as "transaction committed" do not
--- match.  The corpus should name reviewed Haskell mutation/oracle source and
+-- match.  The corpus should name authored Haskell mutation/oracle source and
 -- its separately generated transport instead.
 retiredCommitPhrases :: Text -> [Text]
 retiredCommitPhrases source = concatMap scanClause (retiredPhraseClauses (Text.toCaseFold source))
@@ -1217,7 +1217,7 @@ normalizedWords = Text.words . Text.map normalize
     | otherwise = ' '
 
 -- | Structural owner-map seam. It verifies only exact paths, anchors, and
--- headings. An authorized reviewer, never this parser, owns semantic prose correspondence.
+-- headings. The documentation gate, never this parser, checks semantic prose correspondence.
 checkPolicyOwnerReferences :: [(FilePath, Text)] -> CheckResult
 checkPolicyOwnerReferences =
   checkPolicyOwnerReferencesFor canonicalRawPolicyOwners
@@ -1249,7 +1249,7 @@ documentationPolicyOwnerDiagnosticRefusal =
   [ finding
       "DOC-POLICY-OWNER-DIAGNOSTIC-ONLY"
       "Amoebius.Validation.Documentation.documentationPolicyOwnerDiagnostic"
-      "caller-supplied owner documents have no authenticated source, reviewer-custody, qualification, observer, or promotion authority"
+      "caller-supplied owner documents have no exact source binding, gate-evidence, qualification, observer, or gate-pass result"
   ]
 #endif
 

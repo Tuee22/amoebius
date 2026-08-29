@@ -59,7 +59,7 @@ document explains the generated side of that boundary.
 | Pulumi programs and provider inputs | Haskell infrastructure declarations | `.build/pulumi/**` |
 | PureScript/JavaScript client runtime, codecs, CSS/HTML/assets, and bundle | Haskell client-runtime and public-contract declarations | `.build/ui/**` |
 | Objective-C/C Metal bridge and Metal shader source | Haskell host-worker ABI and shader declarations | `.build/metal/**` |
-| Test enumeration and encoded fixtures/oracles | Haskell declarations and separately reviewed Haskell expectations | `.build/test-surfaces/**`, `.build/test-corpora/**` |
+| Test enumeration and encoded fixtures/oracles | Haskell declarations and separately authored Haskell expectations | `.build/test-surfaces/**`, `.build/test-corpora/**` |
 | Python outside `pb/**`, shell, and other external-language check helpers | Haskell checker/workflow declarations | `.build/tools/**` |
 | Mutated source and negative corpora | Haskell mutation operators and positive Haskell seeds | `.build/test-corpora/**` |
 | Rendered plans, reports, ledgers, receipts, and traces | Haskell execution and observation values | `.build/runs/**`, `.build/docs/**` |
@@ -74,8 +74,8 @@ copy such a value into its run root, but that copy remains untracked input or ru
 2. Materialization occurs only when a typed workflow reaches a consumer that needs the artifact.
 3. Output is written beneath the owning `.build/**` subtree and never into a tracked root.
 4. A clean materialization is deterministic for the same declared and resolved inputs.
-5. An emitted external-language program has no authority to decide its own validation result.
-6. A separately reviewed Haskell oracle judges semantic properties of the output.
+5. An emitted external-language program cannot decide its own validation result.
+6. A separately authored Haskell oracle judges semantic properties of the output.
 7. A serializer or compiler round trip is a consistency check, not an independent oracle.
 8. The run records resolved compilers, dependencies, paths, and integrity observations without committing them.
 9. Materialized output is reaped at the end of its artifact region unless a typed retention grant transfers it.
@@ -111,7 +111,7 @@ The committed behavioral sources are Haskell only:
 - product and runtime modules;
 - typed DSL, protocol, model, renderer, and client-runtime declarations;
 - test topology declarations and positive values;
-- independently reviewed oracle predicates and expected semantic values;
+- separately authored oracle predicates and expected semantic values;
 - mutation operators and their expected failure identities; and
 - Haskell harnesses that observe the subject and external boundaries.
 
@@ -137,7 +137,7 @@ tool may emit a candidate beside the run's external-input staging area, but the 
 accept and store it outside Git.
 
 Repository tests for schema evolution use Haskell values that render old and new Dhall inputs under
-`.build/test-corpora/**`. The expected compatibility classification is an independently reviewed Haskell
+`.build/test-corpora/**`. The expected compatibility classification is an separately authored Haskell
 value, not a committed `.dhall` corpus.
 
 ## 6. Planning ownership

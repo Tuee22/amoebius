@@ -101,11 +101,11 @@ and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-
 
 ## 2. The typed manifest model: `renderAll` is the sole public pure function to objects
 
-The pure renderer gate must compare the production Haskell projection with independently reviewed Haskell
+The pure renderer gate must compare the production Haskell projection with separately authored Haskell
 semantic expectations for capability, shape, source-domain, namespace/API, and output safety. JSON/YAML
 renderings are generated beneath `.build/**` and cannot serve as their own oracle. Live reconcile, scheduler,
 and service enforcement are later correspondence checks, never evidence for the pure renderer. They may not
-begin until an authorized reviewer accepts the hardware-free DSL/generator barrier and its source-boundary audit.
+begin until the hardware-free DSL/generator barrier and its source-boundary audit pass.
 
 The core is a per-projection renderer closed by one whole-deployment pure function:
 
@@ -597,7 +597,7 @@ live readiness gate; this doctrine consumes those fields without redeclaring the
   stand up the new schema/table, run the migration and *verify it behind a readiness gate*, and only then
   retire the old — never an in-place mutation. The ordering is enforced by the reconciler's readiness gate at
   runtime, **runtime-checked**: the list is data, and the "no retire-old before verified-migrate" property holds
-  because the engine will not authorize phase *n+1* until phase *n* is live-ready — it is not a type-level
+  because the engine will not advance to phase *n+1* until phase *n* is live-ready — it is not a type-level
   impossibility.
 - **Canary and cutover.** A canary phase is a **Gateway-API `HTTPRoute` `backendRefs` weight shift** on the
   Envoy edge amoebius already renders — the traffic-split mechanism owned by

@@ -113,12 +113,12 @@ and refresh tokens are absent.
 
 [Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) must eventually validate the pure paired-plan
 and finite-demand compiler that owns this envelope's generated location. Its controls and five-calculus
-projection require reconstruction as independently reviewed Haskell evidence. It cannot execute WebSockets,
+projection require reconstruction as separately authored Haskell evidence. It cannot execute WebSockets,
 Redis routing, resume, or cross-pod dispatch. Phase 40 is **NOT VALIDATED**.
 
 [Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) is limited to hardware-free Haskell
 browser-interpreter semantics and lazy projection. It must not start a browser, fake server, network service,
-or OS-policy observer before the Phase-49 promotion barrier. Live same-origin WebSocket behavior belongs to a
+or OS-policy observer before the Phase-49 gate barrier. Live same-origin WebSocket behavior belongs to a
 later phase. Phase 42 is **NOT VALIDATED**.
 
 [Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) is limited to a Haskell server-boundary model

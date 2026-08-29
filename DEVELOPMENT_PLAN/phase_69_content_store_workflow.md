@@ -8,7 +8,7 @@
 
 This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
 command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
 status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
@@ -42,20 +42,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 68, its independent validation, and delegated promotion; every earlier
-promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
-completion claim, and implementation result in this document is invalidated as validation evidence, even
-where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Blocked by redesigned Phase 68, its independent validation, and gate pass; every earlier
+gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
+where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
-satisfied and reviewer-approved.
+Hardware validation is also prohibited until the hardware-free DSL gate barrier is independently
+satisfied and gate-passed.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and an authorized reviewer independently inspects it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
-This phase's target is the durable-artifact and workflow core that every later ML-workflow phase may consume only after reviewer approval, in two
+This phase's target is the durable-artifact and workflow core that every later ML-workflow phase may consume only after gate pass, in two
 composed pieces on one substrate. First, the **three-tier content-addressed MinIO store** — write-once
 self-naming `blobs/<sha256>` and canonical-CBOR `manifests/<sha256>` under `If-None-Match: *` (with `412
 Precondition Failed` treated as success), and the only mutable objects, `pointers/*`, advanced by an
@@ -70,7 +69,7 @@ derived topic; worker daemons attached over a Pulsar **Failover** subscription h
 consumer and the rest as name-ordered hot standbys; the active worker writes a content-addressed artifact and
 produces an `event` carrying the manifest SHA the orchestrator fetches back by that SHA.
 
-This phase's gate must also close the Job-terminal live-proof boundary deliberately left open in Phase 58. Reviewer-approved Phase 58
+This phase's gate must also close the Job-terminal live-proof boundary deliberately left open in Phase 58. Gate-passed Phase 58
 must supply the closed success/failure completion state machine but has no MinIO or sole content
 mutation gateway, so its live terminal Pod remains retained and charged. Here the predecessor-provisioned
 collector/verification Job is driven through the full live sequence: terminal outcome → exact
@@ -104,32 +103,32 @@ future bounded live validation of the otherwise substrate-agnostic CAS protocol 
 
 ## Gate integrity
 
-**Contract review**: REJECTED — NOT VALIDATED.
+**Contract check**: REJECTED — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: one cohesive claim — *an artifact is fetched by its manifest hash, and a failed worker's successor resumes without bespoke coordination*. Failover is the broker's, not amoebius's. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: one cohesive claim — *an artifact is fetched by its manifest hash, and a failed worker's successor resumes without bespoke coordination*. Failover is the broker's, not amoebius's. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 69` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent reviewer have been accepted. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 69` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
 | `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 68; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer` — an authorized human or agent may promote after inspecting the complete qualified candidate; no gate, CI job, digest, receipt-shaped file, or generated assertion may promote by itself. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 68; candidate execution refuses an absent, stale, replayed, or different-source result. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 
 ## Resource provision — UNRESOLVED
 
-> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
+> **UNRESOLVED — blocks validation.** No live mutation may begin. Before check this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The detailed material retained below is capability inventory only and cannot supply or substitute for that contract.
 
 The representative runtime's provisioned steady epoch contains exactly four resource-bearing Pods: one
 orchestrator and three workers. A pure `WorkflowRuntimeDemand` contains the exact identity-keyed runnable
@@ -274,19 +273,19 @@ sprints cite the same sections where they must build on them.
 
 ## Sprints
 
-> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and an authorized-reviewer tracker change.
+> **Permanent sprint reset.** Every pre-reset sprint result below is historical context. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor gate pass, owned legacy closure, and a complete gate pass.
 >
-> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
+> **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in checked Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
 ## Sprint 69.1: Three-tier content-addressed MinIO store ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
-**Blocked by**: [Phase 68](phase_68_user_tenant_isolation_live.md) reviewer approval
+**Blocked by**: [Phase 68](phase_68_user_tenant_isolation_live.md) gate pass
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -327,9 +326,9 @@ store is a single one-object atomic pointer flip.
 - Store keys taken under a caller-supplied `experiment-hash` namespace string within the app's ObjectStore
   bucket; this sprint does **not** build `deriveExperimentHash`, the `ContentAddress` typeclass, or SplitMix
   seed derivation (Phase 80 kernel work).
-- **Independent canonicalization apparatus:** one reviewed Haskell logical manifest, the canonical-CBOR
+- **Independent canonicalization apparatus:** one checked Haskell logical manifest, the canonical-CBOR
   convention, and a separately implemented Haskell canonicalizer generate the reference bytes and SHA under
-  the run bundle. No CBOR or SHA transport is repository source. A reviewed Haskell mutation definition emits
+  the run bundle. No CBOR or SHA transport is repository source. A checked Haskell mutation definition emits
   the same logical manifest in
   non-sorted component order under `.build/test-corpora/`; its expected failure is a byte mismatch at the first
   component-ordering offset and a different key. The applied Haskell `insertion-order-encoder` changed-subject
@@ -386,7 +385,7 @@ store is a single one-object atomic pointer flip.
 
 ### Remaining Work
 
-Replace the pre-reset transport inventory with reviewed Haskell logical inputs, canonicalization expectations,
+Replace the pre-reset transport inventory with checked Haskell logical inputs, canonicalization expectations,
 and write-budget declarations. Generate reference and mutated bytes lazily beneath `.build/**` during the run.
 
 ## Sprint 69.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA ⏸️
@@ -395,7 +394,7 @@ and write-budget declarations. Generate reference and mutated bytes lazily benea
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 69.1
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -431,10 +430,10 @@ artifact reference a content address.
 2. Assert a retried produce and a redelivered consume are collapsed by the Phase-67 broker-side dedup so
    downstream idempotent state observes each exactly once.
 3. Assert no orchestrator/worker code path performs a leadership election or holds cluster-wide authority, by a
-   **two-part mechanism** (not code review): (a) a **static dependency/import audit** of the
+   **two-part mechanism** (not code check): (a) a **static dependency/import audit** of the
    `amoebius-runtime` build plan asserting no leader-election or distributed-lock dependency is linked
    (no `etcd`/Raft lease client, no k8s `Lease`/`coordination.k8s.io` client, no ZooKeeper/consensus library)
-   — the forbidden-package expectation is a separately reviewed Haskell value; and (b) an **OS-boundary runtime trace** (`strace`/network capture at the pod boundary, not a self-emitted compliance log) over a full
+   — the forbidden-package expectation is a separately authored Haskell value; and (b) an **OS-boundary runtime trace** (`strace`/network capture at the pod boundary, not a self-emitted compliance log) over a full
    round-trip asserting zero calls to a k8s `Lease`/`coordination.k8s.io` endpoint or any external lock API.
    The applied Haskell `lease-election` changed-subject operator adds a worker that acquires a k8s
    `Lease` before consuming; both checks MUST turn it **red**.
@@ -447,8 +446,8 @@ artifact reference a content address.
 ### Remaining Work
 
 The pre-reset record said `None` and claimed delivery/validation by the old Phase-69 gate; both statements are
-permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row,
-predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row,
+predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 69.3: Pulsar Failover standby takeover + leak-free teardown (gate) ⏸️
 
@@ -456,7 +455,7 @@ predecessor approval, owned legacy closure, and phase-specific obligation in the
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 69.2
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -509,7 +508,7 @@ bespoke amoebius election — and assemble the phase gate.
    SHA and matches. **Land the kill inside the critical window** — after the active worker's store write and
    before its `event` ack, the window verified from broker/consumer state — and assert live that (a) the
    **lexically next-in-name-order** standby (read from the Pulsar admin `subscription/{sub}/consumers` API and
-   matched against the independently reviewed Haskell promoted-consumer expectation, so the assertion names the specific
+   matched against the separately authored Haskell promoted-consumer expectation, so the assertion names the specific
    expected consumer and not merely "some standby") is promoted; (b) the un-acked command is redelivered with
    **none lost and none double-applied** — an **external Pulsar consumer** (OS-boundary, not the runtime) sees
    it **exactly once**; and (c) the resulting `pointers/latest` HEAD is byte-identical to the fresh no-fault
@@ -546,7 +545,7 @@ bespoke amoebius election — and assemble the phase gate.
 
 ### Remaining Work
 
-Replace the pre-reset no-fault HEAD and failover-rank transport inventory with reviewed Haskell declarations;
+Replace the pre-reset no-fault HEAD and failover-rank transport inventory with checked Haskell declarations;
 generate comparison material at gate time beneath `.build/**` and rerun under universal artifact hygiene.
 
 ## Sprint 69.4: Register-2.5 workflow failover takeover under simulated fault ⏸️
@@ -555,7 +554,7 @@ generate comparison material at gate time beneath `.build/**` and rerun under un
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 69.3
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -584,7 +583,7 @@ adversarial schedules instead of a single live wall-clock trace.
   no-double-application properties discharged, feeding the same proven/tested/assumed ledger
   ([`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed))
   as the Sprint-64.3 live gate.
-- **Reviewed Haskell changed-subject operators the simulation must turn red:**
+- **GateReady Haskell changed-subject operators the simulation must turn red:**
   `double-apply-on-redelivery` (dropped dedup — the runtime applies the redelivered command a
   second time, so the pointer HEAD diverges on the fault-firing schedules) and
   `orphan-consumer-on-promotion` (leaked effect — the old active worker's consumer handle
@@ -613,12 +612,12 @@ adversarial schedules instead of a single live wall-clock trace.
 ### Remaining Work
 
 The pre-reset record said `None` and claimed delivery/validation by the old Phase-69 gate; both statements are
-permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row,
-predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate.
+cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row,
+predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
+**Engineering docs to update (after the complete gate passes):**
 
 - `documents/engineering/content_addressing_doctrine.md` — record that §2 (the three-tier store + the two write
   protocols) is realized in `amoebius-store`, namespaced under an opaque `experiment-hash` prefix, with the §3

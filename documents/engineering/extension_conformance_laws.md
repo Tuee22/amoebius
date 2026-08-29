@@ -157,14 +157,14 @@ red. No serialized compile input or expected diagnostic is tracked.
 
 **Discharge.** The gate requires a Haskell fixture/oracle reference per claim, lazily renders and runs each
 compile-fail case and requires failure *for its pinned reason* rather than any failure, and requires each
-reviewed `.hs` mutant operator to redden a named assertion. This is the [`testing_doctrine.md`](./testing_doctrine.md) evidence discipline applied per
+authored `.hs` mutant operator to redden a named assertion. This is the [`testing_doctrine.md`](./testing_doctrine.md) evidence discipline applied per
 extension.
 
 ### Target discharge boundary — NOT VALIDATED
 
 The Phase-21 evaluator must make each L-law a separate typed verdict. Before deciding a verdict, it must require the
 observed operation, artifact, budget, flow, or claim names to cover the corresponding sets derived from the
-Phase-20 declaration. The executable case inventory and expected outcomes are a separately reviewed Haskell
+Phase-20 declaration. The executable case inventory and expected outcomes are a separately authored Haskell
 `NonEmpty LawVerdictCase`; neither this list nor an encoded table supplies a verdict. Each case carries its
 subject, expected per-law verdict vector, required negative control, and stable identity. The evaluator joins
 actual results to that Haskell inventory by identity and refuses missing, duplicate, or extra cases. Any
@@ -183,7 +183,7 @@ executable corpus is deliberately finite:
   for a claim with its fixture argument omitted.
 
 The Haskell `LawVerdictCase` inventory must project a 7-by-5 reader-facing verdict table with two all-green
-controls and five subjects that each fail exactly one law. Reviewer inspection of a Markdown or serialized table
+controls and five subjects that each fail exactly one law. Inspection of a Markdown or serialized table
 cannot add or alter a case. Those target verdicts can establish the evaluator's behavior only over this corpus; they are not extension conformance seals
 and make no claim about the namesake `infernix` or `jitml` runtimes.
 
@@ -309,8 +309,8 @@ Phase-20 declarations:
 - C2 compares both empty-composite identities by value; C3 compares both groupings after declaration-key
   normalization.
 - C4 restricts the composite operation, artifact, budget, and flow observations to each part and compares them
-  with its isolated observations. A reviewed Haskell fixture value is scanned for a finite set of
-  shared-authority primitives; a separately reviewed `.hs` mutation operator introduces a real process-global
+  with its isolated observations. A authored Haskell fixture value is scanned for a finite set of
+  shared-authority primitives; a separately authored `.hs` mutation operator introduces a real process-global
   `IORef` through `unsafePerformIO`. Any rendered diagnostic or compiler transcript is emitted lazily beneath
   `.build/**` and remains untracked.
 - C5 compares the observed composite resource vector with the exact natural-number sum of its operands.

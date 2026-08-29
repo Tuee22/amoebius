@@ -395,7 +395,7 @@ phase = OraclePhase
 
 oraclePhases :: [OraclePhase]
 oraclePhases =
-  [ phase 0 "documentation_suite" "Documentation, source policy, and validation trust root" "none" "none" "—"
+  [ phase 0 "documentation_suite" "Documentation, source policy, and validation baseline" "none" "none" "—"
   , phase 1 "toolchain_spike" "Haskell toolchain and probe-source closure" "none" "none" "1"
   , phase 2 "repository_layout_conformance" "Repository layout conformance and de-phased naming" "none" "none" "1"
   , phase 3 "artifact_calculus" "The artifact calculus" "none" "none" "1"
@@ -444,7 +444,7 @@ oraclePhases =
   , phase 46 "ui_contract_generation" "Haskell-generated browser contracts and bundle" "none" "none" "1"
   , phase 47 "tool_and_mutant_generation" "Foreign-source generator closure, checking tools, and mutants" "none" "none" "1"
   , phase 48 "test_workflow_algebra" "The test-workflow algebra" "none" "none" "1"
-  , phase 49 "self_referential_gates" "No-hardware DSL promotion barrier + self-referential gate suite" "none" "none" "2"
+  , phase 49 "self_referential_gates" "No-hardware DSL gate barrier + self-referential gate suite" "none" "none" "2"
   , phase 50 "host_assert_cli" "Validate the bounded `pb` → Haskell handoff" "none" "none" "2"
   , phase 51 "host_ensure_kernel" "The host-ensure kernel" "none" "none" "2"
   , phase 52 "linux_engine_bringup" "Linux: sudoless Docker and the native image" "linux-cpu" "linux-cpu/amd64" "3"
@@ -511,7 +511,7 @@ oraclePhaseFor ordinal = Map.findWithDefault invalidOraclePhase ordinal oraclePh
 
 -- This is an intentionally repetitive, independent 96-row contract vector.
 -- Do not replace any column with an ordinal range or stage/resource branch:
--- each row is a reviewable expectation that must move explicitly.
+-- each row is a checkable expectation that must move explicitly.
 phaseVector :: Int -> Text -> Text -> Text -> Text -> OraclePhaseVector
 phaseVector = OraclePhaseVector
 
@@ -567,52 +567,52 @@ oraclePhaseVectors =
   , phaseVector 47 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
   , phaseVector 48 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
   , phaseVector 49 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase49:requires=all-source-migration-queries-zero,all-owners-at-or-before-49-zero"
-  , phaseVector 50 "PbChildUnderDirectHaskellSupervisor" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase50:requires=no-source-migration-ownership,approved-phase49-source-snapshot,direct-haskell-supervisor-with-pb-child,identity-argv-exec-handoff,public-target-not-self-supervising"
-  , phaseVector 51 "ApprovalBoundHaskellFakeBoundary" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase51:requires=hardware-free-execution,haskell-fake-boundaries-only"
-  , phaseVector 52 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase52:requires=first-hardware-validation"
-  , phaseVector 53 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 54 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 55 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 56 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase56:provider=DistributionRegistry2;image=registry:2;requires=distribution-registry2-only"
-  , phaseVector 57 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 58 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 59 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 60 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 61 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 62 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 63 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 64 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 65 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 66 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 67 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 68 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 69 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 70 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 71 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 72 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 73 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 74 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 75 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 76 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 77 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 78 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 79 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 80 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 81 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 82 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 83 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 84 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 85 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 86 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 87 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 88 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 89 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 90 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 91 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 92 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 93 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 94 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
-  , phaseVector 95 "ApprovalBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 50 "PbChildUnderDirectHaskellSupervisor" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase50:requires=no-source-migration-ownership,phase49-gate-pass-source-snapshot,direct-haskell-supervisor-with-pb-child,identity-argv-exec-handoff,public-target-not-self-supervising"
+  , phaseVector 51 "GatePassBoundHaskellFakeBoundary" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase51:requires=hardware-free-execution,haskell-fake-boundaries-only"
+  , phaseVector 52 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase52:requires=first-hardware-validation"
+  , phaseVector 53 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 54 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 55 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 56 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase56:provider=DistributionRegistry2;image=registry:2;requires=distribution-registry2-only"
+  , phaseVector 57 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 58 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 59 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 60 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 61 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 62 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 63 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 64 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 65 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 66 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 67 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 68 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 69 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 70 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 71 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 72 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 73 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 74 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 75 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 76 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 77 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 78 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 79 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 80 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 81 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 82 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 83 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 84 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 85 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 86 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 87 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 88 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 89 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 90 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 91 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 92 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 93 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 94 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
+  , phaseVector 95 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
   ]
 
 oraclePhaseVectorMap :: Map.Map Int OraclePhaseVector
@@ -653,7 +653,7 @@ gateCategories =
   , "Legacy closure"
   , "Predecessor"
   , "Residue"
-  , "Promotion authority"
+  , "Pass criterion"
   ]
 
 resourceFields :: [Text]
@@ -687,7 +687,7 @@ expectedSemanticObservations =
   , ("semantic.slot-count", "1728")
   , ("semantic.gap-count", "1728")
   , ("semantic.draft-count", "0")
-  , ("semantic.reviewed-count", "0")
+  , ("semantic.gate-ready-count", "0")
   , ("semantic.legacy-count", "25")
   ]
     <> [("semantic.phase", localPhaseProjection row) | row <- oraclePhases]
@@ -698,7 +698,7 @@ expectedSemanticFindings =
     <> [ ExpectedFinding
            "PLAN-SEMANTIC-DIAGNOSTIC-ONLY"
            planRoot
-           "all 1,728 semantic slots are ContractGap; no reviewed value or reviewer custody exists, and these observations cannot promote a phase"
+           "all 1,728 semantic slots are ContractGap; no gate-ready value exists, and these observations cannot pass a phase"
        ]
 
 localSlotFindings :: OraclePhase -> [ExpectedFinding]
@@ -722,7 +722,7 @@ localSlotFindings row = zipWith findingFor gateCategories slotMarkers
           )
     | marker == 'D' =
         ExpectedFinding
-          "PLAN-SEMANTIC-REVIEW-MISSING"
+          "PLAN-SEMANTIC-GATE-EVIDENCE-MISSING"
           (oraclePath row)
           ( "phase="
               <> renderOrdinal ordinal
@@ -732,7 +732,7 @@ localSlotFindings row = zipWith findingFor gateCategories slotMarkers
               <> renderOrdinal ordinal
               <> "-"
               <> categorySlug category
-              <> " review=missing"
+              <> " gate-evidence=missing"
           )
     | otherwise =
         ExpectedFinding
@@ -790,7 +790,7 @@ expectedResourceObservations =
   , ("resource.slot-count", "385")
   , ("resource.gap-count", "385")
   , ("resource.draft-count", "0")
-  , ("resource.reviewed-count", "0")
+  , ("resource.gate-ready-count", "0")
   ]
     <> [ ( "resource.phase"
          , renderOrdinal ordinal
@@ -812,7 +812,7 @@ expectedResourceFindings =
     <> [ ExpectedFinding
            "PLAN-RESOURCE-DIAGNOSTIC-ONLY"
            planRoot
-           "all 55 phase-specific resource-provision contracts are unresolved; no live mutation is authorized"
+           "all 55 phase-specific resource-provision contracts are unresolved; no live mutation may begin"
        ]
 
 canonicalCorpus :: [(FilePath, Text)]
@@ -890,7 +890,7 @@ semanticJoinRefusal =
   ExpectedFinding
     "PLAN-SEMANTIC-JOIN-DIAGNOSTIC-ONLY"
     planRoot
-    "caller-supplied structural projections cannot populate, review, or promote a semantic contract slot"
+    "caller-supplied structural projections cannot populate or pass a semantic contract slot"
 resourceJoinRefusal =
   ExpectedFinding
     "PLAN-RESOURCE-JOIN-DIAGNOSTIC-ONLY"
@@ -946,7 +946,7 @@ resourceSection ordinal
   | ordinal `elem` resourceRequiredOrdinals =
       [ ""
       , "## Resource provision — UNRESOLVED"
-      , "> **UNRESOLVED — blocks validation.** No live mutation is authorized. Fixture-only inventory."
+      , "> **UNRESOLVED — blocks validation.** No live mutation may begin. Fixture-only inventory."
       ]
   | otherwise = []
 
@@ -1541,7 +1541,7 @@ phase1SubjectGateRow, resourceBlockerLine :: Text
 phase1SubjectGateRow =
   "| `Subject` | UNRESOLVED — blocks validation: independent subject missing. |"
 resourceBlockerLine =
-  "> **UNRESOLVED — blocks validation.** No live mutation is authorized. Fixture-only inventory."
+  "> **UNRESOLVED — blocks validation.** No live mutation may begin. Fixture-only inventory."
 
 phase0, phase1, phase34, phase43, phase50, phase52, phase84, phase95 :: OraclePhase
 phase0 = oraclePhaseFor 0
@@ -1949,7 +1949,7 @@ inputBoundaryCases =
           "supplied-entry-count"
           384
           385
-          "the structural join refuses before parsing when the supplied document corpus exceeds its reviewed entry bound"
+          "the structural join refuses before parsing when the supplied document corpus exceeds its configured entry bound"
       , markdownJoinRefusal
       ]
       (phaseSemanticJoinDiagnostic entryOneOverCorpus)
@@ -1967,7 +1967,7 @@ inputBoundaryCases =
           "supplied-path-characters"
           256
           257
-          "the supplied path exceeds the reviewed character-length bound"
+          "the supplied path exceeds the configured character-length bound"
       , markdownJoinRefusal
       ]
       (phaseSemanticJoinDiagnostic pathLengthOneOverCorpus)
@@ -1985,7 +1985,7 @@ inputBoundaryCases =
           "document-utf8-bytes"
           524288
           524289
-          "the supplied document exceeds the reviewed UTF-8 byte bound"
+          "the supplied document exceeds the configured UTF-8 byte bound"
       , markdownJoinRefusal
       ]
       (phaseSemanticJoinDiagnostic documentByteOneOverCorpus)
@@ -2003,7 +2003,7 @@ inputBoundaryCases =
           "supplied-total-utf8-bytes"
           16777216
           16777217
-          "the structural join refuses before parsing when aggregate supplied UTF-8 bytes exceed the reviewed bound"
+          "the structural join refuses before parsing when aggregate supplied UTF-8 bytes exceed the configured bound"
       , markdownJoinRefusal
       ]
       (phaseSemanticJoinDiagnostic totalByteOneOverCorpus)
@@ -2021,7 +2021,7 @@ inputBoundaryCases =
           "document-lines"
           8192
           8193
-          "the supplied document exceeds the reviewed physical-line bound"
+          "the supplied document exceeds the configured physical-line bound"
       , markdownJoinRefusal
       ]
       (phaseSemanticJoinDiagnostic documentLineOneOverCorpus)
@@ -2039,7 +2039,7 @@ inputBoundaryCases =
           "tracker-raw-candidate-rows"
           128
           129
-          "the tracker exceeds its reviewed pre-parse raw candidate-row bound"
+          "the tracker exceeds its configured pre-parse raw candidate-row bound"
       , markdownJoinRefusal
       ]
       (phaseSemanticJoinDiagnostic trackerRawOneOverCorpus)
@@ -2052,7 +2052,7 @@ inputBoundaryCases =
           "tracker-raw-candidate-rows"
           128
           129
-          "the tracker exceeds its reviewed pre-parse raw candidate-row bound"
+          "the tracker exceeds its configured pre-parse raw candidate-row bound"
       , markdownJoinRefusal
       ]
       (phaseSemanticJoinDiagnostic repeatedTrackerHeaderCorpus)
@@ -2070,7 +2070,7 @@ inputBoundaryCases =
           "phase-visible-pipe-rows"
           32
           33
-          "the phase-like document exceeds its reviewed pre-parse visible table-row bound"
+          "the phase-like document exceeds its configured pre-parse visible table-row bound"
       , markdownJoinRefusal
       ]
       (phaseSemanticJoinDiagnostic phaseRowOneOverCorpus)
@@ -2122,15 +2122,15 @@ documentByteBoundaryCorpus, documentByteOneOverCorpus :: [(FilePath, Text)]
 documentByteBoundaryCorpus = canonicalCorpus <> [(documentBytePath, Text.replicate 524288 "x")]
 documentByteOneOverCorpus = canonicalCorpus <> [(documentBytePath, Text.replicate 524289 "x")]
 
-reviewedTotalDocumentBytes, totalPaddingChunkBytes :: Integer
-reviewedTotalDocumentBytes = 16777216
+configuredTotalDocumentBytes, totalPaddingChunkBytes :: Integer
+configuredTotalDocumentBytes = 16777216
 totalPaddingChunkBytes = 524287
 
 totalByteBoundaryCorpus, totalByteOneOverCorpus :: [(FilePath, Text)]
 totalByteBoundaryCorpus =
   canonicalCorpus
     <> totalBytePaddingDocuments
-      (reviewedTotalDocumentBytes - corpusUtf8Bytes canonicalCorpus)
+      (configuredTotalDocumentBytes - corpusUtf8Bytes canonicalCorpus)
 totalByteOneOverCorpus = incrementLastDocument totalByteBoundaryCorpus
 
 totalBytePaddingDocuments :: Integer -> [(FilePath, Text)]
@@ -2288,8 +2288,8 @@ oracleLiteralProblems =
            /= Map.fromList
              [ ("DirectSourceBoundHaskell", 50)
              , ("PbChildUnderDirectHaskellSupervisor", 1)
-             , ("ApprovalBoundHaskellFakeBoundary", 1)
-             , ("ApprovalBoundHardware", 44)
+             , ("GatePassBoundHaskellFakeBoundary", 1)
+             , ("GatePassBoundHardware", 44)
              ]
        ]
     <> [ "the explicit oracle critical-guard vector must retain only the five frozen guarded rows"
@@ -2298,7 +2298,7 @@ oracleLiteralProblems =
           , not (Text.null (vectorCriticalGuard row))
           ]
            /= [ (49, "phase49:requires=all-source-migration-queries-zero,all-owners-at-or-before-49-zero")
-              , (50, "phase50:requires=no-source-migration-ownership,approved-phase49-source-snapshot,direct-haskell-supervisor-with-pb-child,identity-argv-exec-handoff,public-target-not-self-supervising")
+              , (50, "phase50:requires=no-source-migration-ownership,phase49-gate-pass-source-snapshot,direct-haskell-supervisor-with-pb-child,identity-argv-exec-handoff,public-target-not-self-supervising")
               , (51, "phase51:requires=hardware-free-execution,haskell-fake-boundaries-only")
               , (52, "phase52:requires=first-hardware-validation")
               , (56, "phase56:provider=DistributionRegistry2;image=registry:2;requires=distribution-registry2-only")
@@ -2456,7 +2456,7 @@ finishDiagnostics name problems = do
   unless (null problems) (fail (unlines (name : problems)))
   putStrLn
     ( name
-        <> ": diagnostic expectations met; no review, qualification, validation, or promotion claim is implied."
+        <> ": diagnostic expectations met; no complete-gate or validation claim is implied."
     )
 
 showText :: Show value => value -> Text

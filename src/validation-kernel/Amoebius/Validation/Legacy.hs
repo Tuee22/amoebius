@@ -100,7 +100,7 @@ maximumLegacyJoinTargetBytes = 12
 #if defined(VALIDATION_LEGACY_BOUND_AGGREGATE_BYTES_MUTANT)
 maximumLegacyAggregateBytes = 2714
 #else
-maximumLegacyAggregateBytes = 2728
+maximumLegacyAggregateBytes = 2706
 #endif
 
 data LegacyPrefix value
@@ -152,7 +152,7 @@ data LegacyAnalysis = LegacyAnalysis
 -- rule, closure rule, and reintroduction-case identifiers.  The final pairs
 -- claim the source-debt identifier to Legacy-ID join.
 --
--- This pure function always refuses candidate authority.  It performs no Git,
+-- This pure function always refuses candidate evidence.  It performs no Git,
 -- filesystem, process, pb, network, hardware, or container action.
 legacyDiagnostic
   :: Text
@@ -1225,20 +1225,20 @@ firstUnknown predicate expected values = case filter (predicate expected) values
 legacyMandatoryFindings :: LegacyAnalysis -> [Finding]
 #if defined(VALIDATION_LEGACY_MANDATORY_FINDING_ORDER_MUTANT)
 legacyMandatoryFindings analysis =
-  legacySourceCustodyFindings analysis
+  legacySourceBindingFindings analysis
     <> legacyDiagnosticOnlyFindings analysis
     <> legacyAnalyzerEvidenceFindings analysis
     <> legacyReintroductionExecutionFindings analysis
     <> legacyQualificationFindings analysis
-    <> legacyReviewerInspectionFindings analysis
+    <> legacyDocumentationCorrespondenceFindings analysis
 #else
 legacyMandatoryFindings analysis =
   legacyDiagnosticOnlyFindings analysis
-    <> legacySourceCustodyFindings analysis
+    <> legacySourceBindingFindings analysis
     <> legacyAnalyzerEvidenceFindings analysis
     <> legacyReintroductionExecutionFindings analysis
     <> legacyQualificationFindings analysis
-    <> legacyReviewerInspectionFindings analysis
+    <> legacyDocumentationCorrespondenceFindings analysis
 #endif
 
 legacyDiagnosticOnlyFindings :: LegacyAnalysis -> [Finding]
@@ -1248,11 +1248,11 @@ legacyDiagnosticOnlyFindings _ = []
 legacyDiagnosticOnlyFindings analysis = [legacyMandatoryFinding analysis LegacyMandatoryDiagnosticOnly]
 #endif
 
-legacySourceCustodyFindings :: LegacyAnalysis -> [Finding]
-#if defined(VALIDATION_LEGACY_RAW_SOURCE_CUSTODY_DROP_MUTANT)
-legacySourceCustodyFindings _ = []
+legacySourceBindingFindings :: LegacyAnalysis -> [Finding]
+#if defined(VALIDATION_LEGACY_RAW_SOURCE_BINDING_DROP_MUTANT)
+legacySourceBindingFindings _ = []
 #else
-legacySourceCustodyFindings analysis = [legacyMandatoryFinding analysis LegacyMandatorySourceCustody]
+legacySourceBindingFindings analysis = [legacyMandatoryFinding analysis LegacyMandatorySourceBinding]
 #endif
 
 legacyAnalyzerEvidenceFindings :: LegacyAnalysis -> [Finding]
@@ -1276,20 +1276,20 @@ legacyQualificationFindings _ = []
 legacyQualificationFindings analysis = [legacyMandatoryFinding analysis LegacyMandatoryQualification]
 #endif
 
-legacyReviewerInspectionFindings :: LegacyAnalysis -> [Finding]
-#if defined(VALIDATION_LEGACY_RAW_REVIEWER_INSPECTION_DROP_MUTANT)
-legacyReviewerInspectionFindings _ = []
+legacyDocumentationCorrespondenceFindings :: LegacyAnalysis -> [Finding]
+#if defined(VALIDATION_LEGACY_RAW_DOCUMENTATION_CORRESPONDENCE_DROP_MUTANT)
+legacyDocumentationCorrespondenceFindings _ = []
 #else
-legacyReviewerInspectionFindings analysis = [legacyMandatoryFinding analysis LegacyMandatoryReviewerInspection]
+legacyDocumentationCorrespondenceFindings analysis = [legacyMandatoryFinding analysis LegacyMandatoryDocumentationCorrespondence]
 #endif
 
 data LegacyMandatoryKind
   = LegacyMandatoryDiagnosticOnly
-  | LegacyMandatorySourceCustody
+  | LegacyMandatorySourceBinding
   | LegacyMandatoryAnalyzerEvidence
   | LegacyMandatoryReintroductionExecution
   | LegacyMandatoryQualification
-  | LegacyMandatoryReviewerInspection
+  | LegacyMandatoryDocumentationCorrespondence
 
 legacyMandatoryFinding :: LegacyAnalysis -> LegacyMandatoryKind -> Finding
 #if defined(VALIDATION_LEGACY_MANDATORY_FINDING_COMPOSITION_MUTANT)
@@ -1314,11 +1314,11 @@ legacyMandatoryCode kind = case kind of
 #else
     "LEGACY-DIAGNOSTIC-ONLY"
 #endif
-  LegacyMandatorySourceCustody ->
-#if defined(VALIDATION_LEGACY_MANDATORY_SOURCE_CUSTODY_CODE_MUTANT)
+  LegacyMandatorySourceBinding ->
+#if defined(VALIDATION_LEGACY_MANDATORY_SOURCE_BINDING_CODE_MUTANT)
     "LEGACY-MUTATED"
 #else
-    "LEGACY-SOURCE-CUSTODY-UNAVAILABLE"
+    "LEGACY-SOURCE-BINDING-UNAVAILABLE"
 #endif
   LegacyMandatoryAnalyzerEvidence ->
 #if defined(VALIDATION_LEGACY_MANDATORY_ANALYZER_EVIDENCE_CODE_MUTANT)
@@ -1338,11 +1338,11 @@ legacyMandatoryCode kind = case kind of
 #else
     "LEGACY-QUALIFICATION-UNAVAILABLE"
 #endif
-  LegacyMandatoryReviewerInspection ->
-#if defined(VALIDATION_LEGACY_MANDATORY_REVIEWER_INSPECTION_CODE_MUTANT)
+  LegacyMandatoryDocumentationCorrespondence ->
+#if defined(VALIDATION_LEGACY_MANDATORY_DOCUMENTATION_CORRESPONDENCE_CODE_MUTANT)
     "LEGACY-MUTATED"
 #else
-    "LEGACY-REVIEWER-INSPECTION-UNAVAILABLE"
+    "LEGACY-DOCUMENTATION-CORRESPONDENCE-UNAVAILABLE"
 #endif
 
 legacyMandatorySubject :: LegacyMandatoryKind -> FilePath
@@ -1353,8 +1353,8 @@ legacyMandatorySubject kind = case kind of
 #else
     "Amoebius.Validation.Legacy.legacyDiagnostic"
 #endif
-  LegacyMandatorySourceCustody ->
-#if defined(VALIDATION_LEGACY_MANDATORY_SOURCE_CUSTODY_SUBJECT_MUTANT)
+  LegacyMandatorySourceBinding ->
+#if defined(VALIDATION_LEGACY_MANDATORY_SOURCE_BINDING_SUBJECT_MUTANT)
     "<mutated>"
 #else
     "<caller-supplied-legacy-input>"
@@ -1377,8 +1377,8 @@ legacyMandatorySubject kind = case kind of
 #else
     "legacy-changed-subject-matrix"
 #endif
-  LegacyMandatoryReviewerInspection ->
-#if defined(VALIDATION_LEGACY_MANDATORY_REVIEWER_INSPECTION_SUBJECT_MUTANT)
+  LegacyMandatoryDocumentationCorrespondence ->
+#if defined(VALIDATION_LEGACY_MANDATORY_DOCUMENTATION_CORRESPONDENCE_SUBJECT_MUTANT)
     "<mutated>"
 #else
     "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
@@ -1392,11 +1392,11 @@ legacyMandatoryDetail kind = case kind of
 #else
     "caller-declared legacy wire cannot mint candidate evidence"
 #endif
-  LegacyMandatorySourceCustody ->
-#if defined(VALIDATION_LEGACY_MANDATORY_SOURCE_CUSTODY_DETAIL_MUTANT)
+  LegacyMandatorySourceBinding ->
+#if defined(VALIDATION_LEGACY_MANDATORY_SOURCE_BINDING_DETAIL_MUTANT)
     "mutated"
 #else
-    "no authenticated atomic source acquisition is attached"
+    "no exact local source snapshot is attached"
 #endif
   LegacyMandatoryAnalyzerEvidence ->
 #if defined(VALIDATION_LEGACY_MANDATORY_ANALYZER_EVIDENCE_DETAIL_MUTANT)
@@ -1416,11 +1416,11 @@ legacyMandatoryDetail kind = case kind of
 #else
     "the fixed changed-production corpus has not executed against this exact subject"
 #endif
-  LegacyMandatoryReviewerInspection ->
-#if defined(VALIDATION_LEGACY_MANDATORY_REVIEWER_INSPECTION_DETAIL_MUTANT)
+  LegacyMandatoryDocumentationCorrespondence ->
+#if defined(VALIDATION_LEGACY_MANDATORY_DOCUMENTATION_CORRESPONDENCE_DETAIL_MUTANT)
     "mutated"
 #else
-    "reader-facing prose correspondence has not received independent reviewer inspection"
+    "reader-facing prose correspondence has not received independent documentation correspondence check"
 #endif
 
 legacyPhaseRouteFindings :: LegacyAnalysis -> [Finding]
@@ -1480,7 +1480,7 @@ legacyPhaseBlockedDetail :: Text
 #if defined(VALIDATION_LEGACY_PHASE_BLOCKED_DETAIL_MUTANT)
 legacyPhaseBlockedDetail = "mutated"
 #else
-legacyPhaseBlockedDetail = "every later phase requires its predecessor's external reviewer approval"
+legacyPhaseBlockedDetail = "every later phase requires its predecessor's gate pass"
 #endif
 
 legacyLaterPhaseBlocked :: Bool

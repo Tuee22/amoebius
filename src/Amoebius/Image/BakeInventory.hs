@@ -97,7 +97,7 @@ data OciCopy = OciCopy
 
 -- | Rung 1. The distribution ships the binary for both architectures, so the
 -- acquisition is a package name and an exact version, and the archive suite is
--- recorded so a reviewer can check the same claim the author checked.
+-- recorded so an independent check can exercise the same claim.
 data AptPackaged = AptPackaged
   { name :: Text
   , package :: Text

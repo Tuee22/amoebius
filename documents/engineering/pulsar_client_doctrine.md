@@ -247,7 +247,7 @@ Forking — rather than depending on the published package — is the honest cho
 `vendor/supernova/**` from the tracked tree. Any Haskell code amoebius elects to maintain is re-derived under
 `src/vendor/**/*.hs`; required upstream non-Haskell source, Cabal descriptions, generated bindings, and other
 build inputs are acquired at a recorded immutable identity beneath `.build/vendor/**`. Provenance and
-transformations are declared in reviewed Haskell values and rendered only as reader-facing diagnostics. This is
+transformations are declared in authored Haskell values and rendered only as reader-facing diagnostics. This is
 the fixed-source rule in
 [`repository_layout_doctrine.md` §4.1](./repository_layout_doctrine.md#41-a-compatibility-edit-is-fixed-source-not-a-patch-against-a-moving-head),
 owned by

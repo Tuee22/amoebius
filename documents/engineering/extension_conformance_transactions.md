@@ -110,7 +110,7 @@ the whole space of un-scoped statements, and the composition proof cannot reason
 a statement, no way to pass one, and no escape hatch for "just this once". If a transaction you need does not
 exist, add the arm.
 
-**Discharge.** The exported surface is asserted as exact set equality against the separately reviewed Haskell
+**Discharge.** The exported surface is asserted as exact set equality against the separately authored Haskell
 `transactionExportExpectation :: Set ExportedSymbol`, which does not inspect or call the production export
 enumerator. Haskell negative declarations lazily materialize attempts to pass statement text and build a
 predicate beneath `.build/test-corpora/**`, then require their exact GHC refusals; no fixture module or encoded
@@ -140,7 +140,7 @@ The column types, the `NOT NULL` constraints, the composite foreign key back to 
 indexes all follow from the row type, and anything you would have added by hand is either derivable or a
 finding.
 
-**Discharge.** The emitted DDL is checked by the separately reviewed Haskell
+**Discharge.** The emitted DDL is checked by the separately authored Haskell
 `rowSchemaExpectation :: RowDeclaration -> Set SchemaConstraint`, implemented without calling the DDL
 emitter. A Haskell live-catalog observer enumerates every scope-bearing table and compares its typed
 observations with that expectation, requiring the constraint and composite key on each. SQL and encoded
@@ -188,7 +188,7 @@ mutation union has none
 A retired column is unreferenced by the new generation and its bytes stay.
 
 **Discharge.** The generation transition is total over the declared row types, and the no-orphan fold requires
-every retained coordinate in the old generation to be reachable from the new one. The separately reviewed
+every retained coordinate in the old generation to be reachable from the new one. The separately authored
 Haskell `migrationExpectation` derives the allowed transition relation without calling the production
 migration emitter and checks its typed projection. Any emitted SQL or serialized comparison is materialized
 only beneath `.build/test-corpora/**`. Foreclosed states:

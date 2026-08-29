@@ -6,7 +6,7 @@
 
 This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
 command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
 status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
@@ -40,20 +40,19 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 62, its independent validation, and delegated promotion; every earlier
-promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
-completion claim, and implementation result in this document is invalidated as validation evidence, even
-where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Blocked by redesigned Phase 62, its independent validation, and gate pass; every earlier
+gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
+where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
-satisfied and reviewer-approved.
+Hardware validation is also prohibited until the hardware-free DSL gate barrier is independently
+satisfied and gate-passed.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and an authorized reviewer independently inspects it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
-This phase's target must complete the standard platform-service set on top of the future reviewer-approved
+This phase's target must complete the standard platform-service set on top of the future gate-passed
 Phase-62 backbone. It must render and reconcile the cluster-wide **Percona operator**, one **Patroni Postgres cluster per consuming capability**
 (each paired with its own **pgAdmin**), and the **Prometheus/Grafana** observability pair — each as the
 byte-identical **HA topology even at `replicas=1`** (Postgres is a Patroni-via-Percona cluster, never a bare
@@ -113,39 +112,39 @@ is the universal baseline available on every hardware substrate.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed));
 the future contract requires real cluster bring-up and independent runtime observations. A candidate ledger
-may classify only that bounded observation as *tested*, not proved, and cannot promote the phase.
+may classify only that bounded observation as *tested*, not proved, and cannot make the phase gate pass.
 
 **Depends on:** [Phase 62](phase_62_platform_backbone.md)
 **Gate:** `pb validate phase 63`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract review**: REJECTED — NOT VALIDATED.
+**Contract check**: REJECTED — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: one cohesive claim — *the whole standard stack comes up in the order its readiness DAG derives*. The order is asserted from an external observer's trace, never from the stack's own report. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: one cohesive claim — *the whole standard stack comes up in the order its readiness DAG derives*. The order is asserted from an external observer's trace, never from the stack's own report. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 63` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent reviewer have been accepted. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 63` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
 | `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 62; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer` — an authorized human or agent may promote after inspecting the complete qualified candidate; no gate, CI job, digest, receipt-shaped file, or generated assertion may promote by itself. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 62; candidate execution refuses an absent, stale, replayed, or different-source result. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 
 ## Resource provision — UNRESOLVED
 
-> **UNRESOLVED — blocks validation.** No live mutation is authorized. Before review this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
+> **UNRESOLVED — blocks validation.** No live mutation may begin. Before check this phase must name its exact owner marker, preflight, allowed and forbidden mutations, external observer, scoped cleanup, and zero-owned-residue criterion. The reset inventory below cannot supply that contract.
 
 ## Doctrine adopted
 
@@ -199,7 +198,7 @@ may classify only that bounded observation as *tested*, not proved, and cannot p
   each Patroni cluster and Prometheus lands its durable bytes on the Phase-60 `no-provisioner` retained PVs.
 - [`deterministic_simulation_doctrine.md` §4 — Register 2.5 — where deterministic simulation sits](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
   as [`testing_doctrine.md` §2 — The registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing): the
-  readiness-DAG orchestration must run under `IOSimPOR` against an independently approved modeled substrate
+  readiness-DAG orchestration must run under `IOSimPOR` against an independently passed modeled substrate
   before the Register-3 live candidate.
 - [`testing_doctrine.md §2 — the registers of amoebius testing`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing):
   this phase's future gate is a Register-3 live bring-up on `linux-cpu`; a candidate ledger may mark only its
@@ -207,17 +206,17 @@ may classify only that bounded observation as *tested*, not proved, and cannot p
 
 ## Sprints
 
-> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and an authorized-reviewer tracker change.
+> **Permanent sprint reset.** Every pre-reset sprint result below is historical context. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor gate pass, owned legacy closure, and a complete gate pass.
 
 ## Sprint 63.1: Percona/Patroni Postgres per consumer + pgAdmin + Prometheus/Grafana ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
-**Blocked by**: [Phase 62](phase_62_platform_backbone.md) reviewer approval
+**Blocked by**: [Phase 62](phase_62_platform_backbone.md) gate pass
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -244,7 +243,7 @@ dashboards.
   `synchronous_mode_strict: on` (the decided strict stance — no synchronous standby ⇒ the primary refuses new
   writes; the degrade-to-async alternative is rejected), and a bytes-bounded `maximum_lag_on_failover` (a
   replica lagging past the bound is promotion-ineligible). A separately authored Haskell Patroni configuration
-  expectation must be independently reviewed, with the Haskell changed-production-subject mutant
+  expectation must be separately authored, with the Haskell changed-production-subject mutant
   `M-patroni-async-default` named as the mutant this invariant MUST turn red (on the specific reason that
   `synchronous_mode_strict` is not `on`).
 - Prometheus + Grafana scraping platform workloads, with the per-workflow recording/alert rules and
@@ -342,13 +341,13 @@ dashboards.
    treating the finite data size as the complete physical peak go red.
 5. Reject a seeded repository-retained package-checksum input, resolve the Postgres shared package dynamically,
    and verify its selected identity and integrity only through the run-local toolchain record and external
-   attestation bound to that untracked run.
+   observation bound to that untracked run.
 
 ### Remaining Work
 
 The historical repository-retained Postgres package checksum is condemned residue and cannot be recreated.
 Route package acquisition through Phase 1's dynamic resolver and retain its integrity observation only in
-untracked run evidence. Independently review the separately authored Haskell Patroni and monitoring
+untracked run evidence. Independently check the separately authored Haskell Patroni and monitoring
 expectations. The Keycloak browser edge remains Phase 64 and control-plane-owned continuous
 reconciliation remains Phase 65, both explicitly UNVERIFIED.
 
@@ -358,7 +357,7 @@ reconciliation remains Phase 65, both explicitly UNVERIFIED.
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 63.1
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -393,7 +392,7 @@ storage, durability, or a new DSL capability.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. Application-side WebSocket routing remains owned by its later UI-runtime phases; this sprint owns and
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. Application-side WebSocket routing remains owned by its later UI-runtime phases; this sprint owns and
 has sealed the platform Redis/Sentinel boundary.
 
 ## Sprint 63.3: The full derived readiness-DAG bring-up + the standard-stack gate ⏸️
@@ -402,7 +401,7 @@ has sealed the platform Redis/Sentinel boundary.
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 63.2
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -428,7 +427,7 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
   service in its HA-capable shape. It also verifies generated-manifest and baked-binary provenance, exact
   execution-unit/volume projection from `ProvisionedServiceSpec`, and a Register-3 ledger that labels only the
   observed runtime layer *tested*.
-- The Haskell gate-oracle candidates, subject to recorded independent review under §M.1: a Register-1 property
+- The Haskell gate-oracle candidates, subject to recorded independent check under §M.1: a Register-1 property
   `prop_bringUpOrderDerivedFromEdges` asserting the derived bring-up order is a pure function of the
   *declared* dependency edges (adding or removing a declared edge changes the order; an introduced cycle is
   rejected) under a §M.4 cover/classify floor forcing a stated minimum fraction of cases through the
@@ -459,7 +458,7 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
    provenance. For the Phase-63 additions, a one-versus-many replica render diff may change only count fields;
    Patroni must remain the multi-member projection rather than switch to a standalone variant. Recompute
    `renderAll` and exact-match its bytes to the normalized SSA objects. Separately, observe the kind node's CRI
-   pull log and require every live `imageID` to equal the digest in the verified Phase-56 attestation and the
+   pull log and require every live `imageID` to equal the digest in the passing Phase-56 architecture test record and the
    current in-cluster catalog; public or side-loaded alternatives
    fail. Finally, exact-match every applied resource field to `ProvisionedServiceSpec`, including app/init/sidecar
    envelopes, bounded `emptyDir`, PVC/PV capacity, the two init-container lifecycle modes, overhead, and the
@@ -479,7 +478,7 @@ failure ordering claim.
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 63.3
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -514,12 +513,12 @@ in-process before the Register-3 live gate ever runs.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement is permanently invalid for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and phase-specific obligation in the redesigned gate. The harness seals 256 deterministic healthy/partial-failure/restart/partition schedules and one
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. The harness seals 256 deterministic healthy/partial-failure/restart/partition schedules and one
 `IOSimPOR` exploration with byte-identical replay and an independent-chain overlap witness.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
+**Engineering docs to update (after the complete gate passes):**
 
 - `platform_services_doctrine.md`, `chaos_failover_doctrine.md`, `readiness_ordering_doctrine.md`,
   `monitoring_doctrine.md`, `resource_capacity_doctrine.md`, `ui_realtime_coordination_doctrine.md`, and

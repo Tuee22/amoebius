@@ -16684,13 +16684,13 @@ fixtureIntegrityProblems =
     , expectEqual "the result-byte boundary source-directory length"
         4096 (length resultByteSourceDirectory)
     , expectEqual "the result-byte boundary Haskell source-directory length"
-        2499 (length resultByteBoundarySourceDirectory)
+        2471 (length resultByteBoundarySourceDirectory)
     , expectEqual "the result-byte one-over Haskell source-directory length"
-        2500 (length resultByteOverSourceDirectory)
+        2472 (length resultByteOverSourceDirectory)
     , expectEqual "the result-byte boundary input size"
-        676412 (ByteString.length resultByteBoundaryBytes)
+        676384 (ByteString.length resultByteBoundaryBytes)
     , expectEqual "the result-byte one-over input size"
-        676413 (ByteString.length resultByteOverBytes)
+        676385 (ByteString.length resultByteOverBytes)
     , expectEqual "the exact result payload envelope fixture byte count"
         2097152
         (resultPayloadBytes resultByteBoundaryProjection expectedPermanentFindings)
@@ -17130,15 +17130,15 @@ expectedPermanentFindings :: [Finding]
 expectedPermanentFindings =
   diagnosticOnlyFinding
     : [ permanentFinding "COMPILER-BUILDINFO-GENERATOR-BYTES-UNAUTHENTICATED"
-          "generated build-info bytes have no authenticated generator or custody"
+          "generated build-info bytes are not bound to an exact generator and source snapshot"
       , permanentFinding "COMPILER-BUILDINFO-COMPILER-UNAUTHENTICATED"
-          "the observed compiler identity has no independent toolchain authority"
+          "the observed compiler identity has no independently checked toolchain identity"
       , permanentFinding "COMPILER-BUILDINFO-INDEPENDENT-COMPILER-UNAVAILABLE"
           "the expected compiler is caller-constructed rather than independently acquired"
       , permanentFinding "COMPILER-BUILDINFO-MACHINE-PATHS-UNAUTHENTICATED"
           "machine paths are lexical observations without authenticated filesystem identity"
       , permanentFinding "COMPILER-BUILDINFO-ARGUMENTS-UNAUTHENTICATED"
-          "compiler arguments are generated observations without invocation custody"
+          "compiler arguments are generated observations without an exact invocation binding"
       , permanentFinding "COMPILER-BUILDINFO-DUPLICATE-DETECTION-DIAGNOSTIC"
           "duplicate-key detection is production-local and lacks an independent observer"
       , permanentFinding "COMPILER-BUILDINFO-INDEPENDENT-UNIVERSE-UNAVAILABLE"
@@ -17164,7 +17164,7 @@ expectedPermanentFindings =
       , permanentFinding "COMPILER-BUILDINFO-COMPILER-INVOCATION-UNAVAILABLE"
           "the exact compiler has not been invoked under an external observer"
       , permanentFinding "COMPILER-BUILDINFO-ORACLE-QUALIFICATION-UNAVAILABLE"
-          "the independently reviewed oracle and mutation harness are not qualified"
+          "the separately authored oracle and mutation harness are not qualified"
       ]
 
 diagnosticOnlyFinding :: Finding
@@ -17622,11 +17622,11 @@ resultByteBoundarySourceDirectory, resultByteOverSourceDirectory :: FilePath
 resultByteBoundarySourceDirectory =
   Text.unpack
     (Text.intercalate "/"
-      (replicate 9 (Text.replicate 255 "b") <> [Text.replicate 195 "b"]))
+      (replicate 9 (Text.replicate 255 "b") <> [Text.replicate 167 "b"]))
 resultByteOverSourceDirectory =
   Text.unpack
     (Text.intercalate "/"
-      (replicate 9 (Text.replicate 255 "b") <> [Text.replicate 196 "b"]))
+      (replicate 9 (Text.replicate 255 "b") <> [Text.replicate 168 "b"]))
 
 moduleArrayBytes :: Int -> Bool -> ByteString
 moduleArrayBytes count valid =

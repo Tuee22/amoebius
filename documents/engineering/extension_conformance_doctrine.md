@@ -46,7 +46,7 @@ the point, and it is also the danger: the central claim is that *arbitrary compo
 these domains are well defined at run time*, and an open set of extensions is an open set of ways to break it.
 
 A closed DSL gets that claim cheaply. Every constructor is known, so every composition is known, and a
-reviewer can in principle check them all. An open core cannot enumerate its compositions, so it has to earn
+reader can in principle check them all. An open core cannot enumerate its compositions, so it has to earn
 the claim a different way: by fixing an algebra, requiring every extension to be a **lawful instance** of it,
 and proving once that lawful instances compose. What this doctrine owns is the contract that makes an
 extension lawful, and the mechanism that decides whether a given extension satisfies it.
@@ -318,7 +318,7 @@ Stated plainly, because a conformance verdict is exactly the kind of artifact th
 
 This document is normative only. Which phase delivers the obligation surface, the law families, the generated
 gate, and the verdict seal is owned by [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Normative
-shapes are design intent. Only a phase-specific, independently reviewed candidate plus external reviewer approval
+shapes are design intent. Only a complete phase-specific qualified gate pass with separately authored oracles
 could establish an amoebius result; every current phase is NOT VALIDATED.
 
 ---

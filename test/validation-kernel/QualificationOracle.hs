@@ -4,8 +4,8 @@ module QualificationOracle
   ( runQualificationOracle
   ) where
 
--- Component diagnostic only. This module is not independent reviewer inspection,
--- harness qualification, phase validation, or promotion evidence.
+-- Component diagnostic only. This module is not independent documentation correspondence check,
+-- harness qualification, phase validation, or complete phase-gate evidence.
 
 import Amoebius.Validation.Gate
 import Amoebius.Validation.Types

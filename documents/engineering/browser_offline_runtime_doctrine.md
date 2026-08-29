@@ -348,11 +348,11 @@ not equivalent to server-side Vault custody. Encryption at rest does not protect
 compromised same-origin runtime code, browser extensions, or a compromised device; CSP, dependency integrity,
 the bounded generated client, and local unlock reduce that exposure but do not remove it.
 
-Only after an authorized reviewer accepts the hardware-free UI/DSL/generator barrier may the local browser gate
+Only after the hardware-free UI/DSL/generator barrier passes may the local browser gate
 compile freshly generated PureScript with the closed offline facilities. Separate
 browser processes must preserve and recover a fresh encrypted canary, enforce partitioning and fenced
 ownership, observe handoff, retain only the generated immutable asset set, and report quota refusal. Haskell
-oracles and Haskell-declared production-source mutants must be reviewed independently; browser/container
+oracles and Haskell-declared production-source mutants must be checked independently; browser/container
 success cannot retroactively qualify their generator or expectations, and status remains solely in the
 [Development Plan](../../DEVELOPMENT_PLAN/README.md).
 

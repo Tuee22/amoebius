@@ -7,7 +7,7 @@ module Amoebius.Validation.Evidence
   , candidateBytes
   , candidateDigest
   , candidateFromChecks
-  , evidenceAuthority
+  , evidenceGateResult
   , evidenceContractDigest
   , evidenceHarnessDigest
   , evidenceObserverDigest
@@ -72,7 +72,7 @@ data CandidateEvidence = CandidateEvidence
   , evidencePredecessorDigest :: Text
   , evidenceRows :: [EvidenceRow]
   , evidenceResidue :: [Text]
-  , evidenceAuthority :: Text
+  , evidenceGateResult :: Text
   }
   deriving (Eq, Show)
 
@@ -113,16 +113,16 @@ instance ToJSON CandidateEvidence where
       , "predecessorDigest" .= evidencePredecessorDigest evidence
       , "rows" .= evidenceRows evidence
       , "residue" .= evidenceResidue evidence
-      , "authority" .= evidenceAuthority evidence
+      , "gateResult" .= evidenceGateResult evidence
       ]
 
 candidateFromChecks :: CandidateProvenance -> [Text] -> [CheckResult] -> Either [Finding] CandidateEvidence
 candidateFromChecks provenance residue checks =
   -- Caller-constructed checks and digest-shaped strings are not acquired
   -- evidence. Until Dispatch owns execution, hashing, input closure, observer
-  -- custody, and the fixed row inventory, this seam must be incapable of
+  -- binding, and the fixed row inventory, this seam must be incapable of
   -- constructing even a candidate-shaped value.
-  case acquisitionFindings <> structuralFindings <> concatMap checkFindings checks of
+  case captureFindings <> structuralFindings <> concatMap checkFindings checks of
     [] ->
       Right
         CandidateEvidence
@@ -138,15 +138,15 @@ candidateFromChecks provenance residue checks =
           , evidencePredecessorDigest = provenancePredecessorDigest provenance
           , evidenceRows = fmap row checks
           , evidenceResidue = residue
-          , evidenceAuthority = "qualified candidate; authorized reviewer approval required"
+          , evidenceGateResult = "candidate-only; complete qualified gate required"
           }
     blockers -> Left blockers
  where
   names = fmap checkName checks
   suppliedNames = Set.fromList names
-  acquisitionFindings =
+  captureFindings =
     [ finding
-        "EVIDENCE-ACQUISITION-UNINTEGRATED"
+        "EVIDENCE-CAPTURE-UNINTEGRATED"
         "Amoebius.Validation.Dispatch"
         "caller-supplied provenance and CheckResult values are not execution-derived evidence"
     ]

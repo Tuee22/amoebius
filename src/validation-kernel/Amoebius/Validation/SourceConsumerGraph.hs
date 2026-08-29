@@ -28,7 +28,7 @@ import Data.Text qualified as Text
 -- Effect fields are @(module path, module name, binding name, target tag,
 -- target value, use tag)@.  The only target tags are @exact@, @dynamic@, and
 -- @unresolved@.  Supplying effects is negative evidence only; neither an empty
--- list nor an apparently safe list can remove source-custody or compiler
+-- list nor an apparently safe list can remove source-binding or compiler
 -- residue.
 sourceConsumerGraphDiagnostic
   :: Text
@@ -445,7 +445,7 @@ data DiagnosticProblemKind
   | DirectBehaviourProblem
   | UnauthorizedEffectProblem
   | DiagnosticOnlyProblem
-  | SourceCustodyProblem
+  | SourceBindingProblem
   | CompilerResidueProblem
   | ResourceProblem
   deriving (Eq, Ord, Show)
@@ -3164,7 +3164,7 @@ permanentFindings :: [Finding]
 permanentFindings =
   orderedPermanentFindings
     ( diagnosticOnlyFindings
-        <> sourceCustodyFindings
+        <> sourceBindingFindings
         <> map compilerResidueFinding requiredCompilerFacts
     )
 
@@ -3188,14 +3188,14 @@ diagnosticOnlyFindings =
   ]
 #endif
 
-sourceCustodyFindings :: [Finding]
-#if defined(VALIDATION_SOURCE_CONSUMER_CUSTODY_RESIDUE_BYPASS_MUTANT)
-sourceCustodyFindings = []
+sourceBindingFindings :: [Finding]
+#if defined(VALIDATION_SOURCE_CONSUMER_LOCAL_CAPTURE_RESIDUE_BYPASS_MUTANT)
+sourceBindingFindings = []
 #else
-sourceCustodyFindings =
+sourceBindingFindings =
   [ diagnosticFinding
-      SourceCustodyProblem
-      "SRC-CONSUMER-SOURCE-CUSTODY-RESIDUE"
+      SourceBindingProblem
+      "SRC-CONSUMER-SOURCE-BINDING-RESIDUE"
       "source-snapshot"
       "an independently authenticated immutable source snapshot is absent"
   ]
@@ -3549,10 +3549,10 @@ mutateProblemCode kind value = case kind of
 #else
   DiagnosticOnlyProblem -> value
 #endif
-#if defined(VALIDATION_SOURCE_CONSUMER_SOURCE_CUSTODY_CODE_MAPPING_MUTANT)
-  SourceCustodyProblem -> value <> "-MUTATED"
+#if defined(VALIDATION_SOURCE_CONSUMER_SOURCE_BINDING_CODE_MAPPING_MUTANT)
+  SourceBindingProblem -> value <> "-MUTATED"
 #else
-  SourceCustodyProblem -> value
+  SourceBindingProblem -> value
 #endif
 #if defined(VALIDATION_SOURCE_CONSUMER_COMPILER_RESIDUE_CODE_MAPPING_MUTANT)
   CompilerResidueProblem -> value <> "-MUTATED"
@@ -3692,10 +3692,10 @@ mutateProblemSubject kind value = case kind of
 #else
   DiagnosticOnlyProblem -> value
 #endif
-#if defined(VALIDATION_SOURCE_CONSUMER_SOURCE_CUSTODY_SUBJECT_MAPPING_MUTANT)
-  SourceCustodyProblem -> value <> "<"
+#if defined(VALIDATION_SOURCE_CONSUMER_SOURCE_BINDING_SUBJECT_MAPPING_MUTANT)
+  SourceBindingProblem -> value <> "<"
 #else
-  SourceCustodyProblem -> value
+  SourceBindingProblem -> value
 #endif
 #if defined(VALIDATION_SOURCE_CONSUMER_COMPILER_RESIDUE_SUBJECT_MAPPING_MUTANT)
   CompilerResidueProblem -> value <> "<"
@@ -3835,10 +3835,10 @@ mutateProblemDetail kind value = case kind of
 #else
   DiagnosticOnlyProblem -> value
 #endif
-#if defined(VALIDATION_SOURCE_CONSUMER_SOURCE_CUSTODY_DETAIL_MAPPING_MUTANT)
-  SourceCustodyProblem -> value <> "<"
+#if defined(VALIDATION_SOURCE_CONSUMER_SOURCE_BINDING_DETAIL_MAPPING_MUTANT)
+  SourceBindingProblem -> value <> "<"
 #else
-  SourceCustodyProblem -> value
+  SourceBindingProblem -> value
 #endif
 #if defined(VALIDATION_SOURCE_CONSUMER_COMPILER_RESIDUE_DETAIL_MAPPING_MUTANT)
   CompilerResidueProblem -> value <> "<"

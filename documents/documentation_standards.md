@@ -55,7 +55,7 @@ it. SSoT ownership, bidirectional links, and non-duplication are mandatory for a
 
 ### Development-plan authority
 [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) is the single source of truth for phase order,
-status, and remaining work. Each phase document owns its reviewer-owned validation contract. Documents under
+status, and remaining work. Each phase document owns its validation contract and gate result. Documents under
 `documents/` explain architecture, doctrine, and verification boundaries and link back to the plan rather
 than maintaining competing status ledgers.
 
@@ -76,13 +76,13 @@ generator, fixture, oracle, mutant, or generated source must classify it unambig
 An external-language value must never be called merely "authored" when that wording could imply it is
 tracked. Name it **external/untracked** or **generated beneath `.build/**`**. A serialized fixture, oracle,
 expected output, or mutant is a transport artifact rather than an independently maintained source of truth;
-the semantic expectation and mutation intent are separately reviewed Haskell.
+the semantic expectation and mutation intent are separately authored Haskell.
 
 The old repository-path form that places fixture, golden, oracle, negative, or mutant material beneath a
 `test` artifact-family directory is retired. A governed document may use such a path only when it names one
 exact `.hs` file. A directory, wildcard, serialized file, script, patch, or foreign-language file in that
 shape is a documentation defect even when a reset banner elsewhere says the instruction is non-operative.
-Name the reviewed Haskell declaration and its separate lazy `.build/**` materialization instead. The
+Name the source-bound Haskell declaration and its separate lazy `.build/**` materialization instead. The
 documentation checker enforces this path-and-extension syntax over raw document bytes: fences, HTML comments,
 and line wrapping cannot suppress it. It does not infer behavioral meaning from the prose around it.
 
@@ -100,9 +100,9 @@ occurrence.
 
 The production structural checker freezes the complete governed path set by exact count and SHA-256 manifest
 digest; a separate component oracle restates both values and observes the production corpus. A missing, extra,
-renamed, or newly exempted governed document therefore refuses until a reviewer inspects the manifest change, and
+renamed, or newly exempted governed document therefore refuses until the documentation gate validates the manifest change, and
 an isolated changed-production baseline mutant must make only that oracle red. This same-workstream restatement
-is a diagnostic control, not independent custody or validation. Current phase, sprint, and Gate-summary status
+is a diagnostic control, not independent validation. Current phase, sprint, and Gate-summary status
 fields use exact raw one-line forms; a second marker, dual-status phrase, fence, comment, or physical wrap cannot
 supply the required reset syntax.
 
@@ -113,8 +113,8 @@ field, status, Gate row, or tracker row by trimming its prefix. A governed table
 physically contiguous header/delimiter/body frame; global row search, `mapMaybe`-style malformed-row deletion,
 fragment stitching, permissive extra cells, and prefix-normalized tracker values are structural defects.
 
-Cross-cutting executable decisions live in a reviewed Haskell `PolicyContract`; subsystem decisions live in
-their named reviewed Haskell declarations and independently authored Haskell oracles. A reviewer owns
+Cross-cutting executable decisions live in a source-bound Haskell `PolicyContract`; subsystem decisions live in
+their named Haskell declarations and independently authored Haskell oracles. The documentation gate owns
 the correspondence between those values and their prose explanation. A keyword-only prose decoy must never
 change a behavioral verdict, and any machine-oriented table projection is generated lazily beneath
 `.build/docs/**`.
@@ -267,9 +267,8 @@ about existing code or a prior run is permitted only when it is labelled **Obser
 [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md). File presence establishes only an observed
 footprint. A historical pass remains diagnostic after reopening and cannot be phrased as current validation.
 Historical text is permanently invalidated: it must not contain a condition such as “unless the phase is
-Done” that could reactivate it. Doctrine never records a current pass, seal, attestation, completion hash,
-green count, or validation ledger. Those belong to retrievable run evidence and the reviewer-controlled plan
-status projection.
+Done” that could reactivate it. Doctrine never records a current pass, green count, or validation ledger.
+Those belong to retrievable run evidence and the plan's mechanical status projection.
 Every discovered mismatch between doctrine, plan, tests, and code receives a typed Haskell identity, owner,
 observation, closure predicate, and reintroduction negative. Its reader-facing explanation is updated in
 [`legacy_tracking_for_deletion.md`](../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) under the reconciliation
@@ -277,7 +276,7 @@ policy in
 [`development_plan_standards.md` §T](../DEVELOPMENT_PLAN/development_plan_standards.md#t-plan-to-implementation-reconciliation).
 
 **A claim of unrepresentability cites the Haskell declaration that proves it.** A document may state *in the
-indicative* that some illegal state has no inhabitant only where it names the separately reviewed `.hs`
+indicative* that some illegal state has no inhabitant only where it names the separately authored `.hs`
 fixture/oracle declaration that generates and checks the compile-fail case; any serialized compiler input or
 expected diagnostic is a lazy `.build/**` product, not a tracked fixture.
 Without one the sentence records an intention rather than a result: the type may have admitted the state from
@@ -293,10 +292,11 @@ everywhere the indicative is not. What remains forbidden in every mood is the un
 does not compile", "there is no back door" — about machinery no gate has run against, because a reader cannot
 tell it from a result.
 
-Only an authorized reviewer may promote a phase or sprint to Done or Validated. The reviewer may be the human
-user or a delegated agent. Documentation may describe a target contract, candidate evidence, or an observed
-footprint, but prose alone cannot turn any of them into validation status. The development-plan standards own
-the promotion procedure; this rule prevents doctrine prose from bypassing it.
+Every required row of the qualified phase gate must pass before a phase or sprint becomes Done or Validated.
+A human, agent, or CI job may then record that result as a mechanical status-only projection. Documentation may
+describe a target contract, candidate evidence, or an observed footprint, but prose alone cannot turn any of
+them into validation status. The development-plan standards own
+the gate-pass procedure; this rule prevents doctrine prose from bypassing it.
 
 ---
 
@@ -739,7 +739,7 @@ illegal set extensionally, by being itself, so the claim reduces to the list agr
 
 1. **The taxonomy is specified** in `illegal_state/README.md` as a product of named axes, each a closed set —
    the foreclosure layer, the validation locus, and whichever structural axes the doctrine owning them fixes.
-   The product of the axes is the cell set. The executable representation is a separately reviewed Haskell
+   The product of the axes is the cell set. The executable representation is a separately authored Haskell
    declaration; no checker or generator may parse Markdown into a behavioral value.
 2. **Every cell is occupied, inadmissible, or justified.** A cell holds at least one catalogue entry, is
    ruled out by a declared relation between two axes, or carries a one-line statement of why no illegal state
@@ -753,7 +753,7 @@ illegal set extensionally, by being itself, so the claim reduces to the list agr
    only the corresponding Haskell declaration, checked against a separately authored Haskell expectation.
 4. **The grid is generated; the semantic inputs and expectations are Haskell.** The cell set
    follows from the axes, so widening an axis reports its own new empty cells rather than waiting to be
-   noticed. Taxonomy, pairings, relations, and justifications are reviewed Haskell values, and the oracle is
+   noticed. Taxonomy, pairings, relations, and justifications are checked Haskell values, and the oracle is
    separately authored rather than derived from the subject; deriving one from the thing it checks would turn
    a test into a description
    ([§6](#6-honesty-the-proventestedassumed-discipline)). Generated views go to `.build/docs/` under

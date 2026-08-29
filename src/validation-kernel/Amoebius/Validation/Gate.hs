@@ -81,7 +81,7 @@ sabotageName item = case item of
 -- | Check the internal consistency of a caller-supplied qualification report.
 --
 -- This pure function does not execute a sabotage, read or hash a production
--- subject, attest the runner that produced a report, verify custody, or supply
+-- subject, bind the runner that produced a report, observe resource ownership, or supply
 -- an independent observer.  Consequently, a passing result means only that
 -- the supplied report is structurally self-consistent.  It cannot retire the
 -- dispatcher's @QUALIFICATION-NOT-EXECUTED@ readiness blocker and must never

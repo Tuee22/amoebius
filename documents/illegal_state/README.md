@@ -68,7 +68,7 @@ fixes. This router owns the declaration. The taxonomy is the product of three cl
   The members are listed here rather than described, because an axis defined as "whatever the entries happen to
   use" cannot make an empty cell a defect — a family nothing declares would produce no cells to be empty, so
   the covering could never report a missing domain. This list is the reader-facing specification of the axis.
-  A separately reviewed Haskell declaration must encode exactly these values; the Haskell covering-grid
+  A separately authored Haskell declaration must encode exactly these values; the Haskell covering-grid
   generator consumes that declaration, never this Markdown, and may materialize views only beneath
   `.build/**`. The existing Python/Markdown/TSV mechanisms are condemned migration footprints observed by
   typed Haskell legacy bindings and explained to readers in
@@ -80,7 +80,7 @@ fixes. This router owns the declaration. The taxonomy is the product of three cl
 A **cell** is one triple, and an entry specifies the cells it occupies on its own **`Cells:`** line — one
 `` `layer`×`locus` `` pair per foreclosure the entry makes, so a reader can inspect the intended pairing.
 The line is doctrine, not a serialized registry: no generator, checker, or oracle may parse it. The executable
-pairing is a separately reviewed Haskell value, and a separate Haskell oracle checks it. Every cell either
+pairing is a separately authored Haskell value, and a separate Haskell oracle checks it. Every cell either
 holds at least one catalog entry, is inadmissible under the relation below, or
 carries a one-line statement of why no illegal state lives there; an unjustified empty cell is a defect. A
 justification may cover a whole row or column where the reason is structural rather than particular. The grid
@@ -104,7 +104,7 @@ They classify different questions, but their product is not inhabited: a locus *
 that forecloses a state never sees that state, because the value did not survive to reach it, and a locus
 **upstream** of the effect a residue is about cannot settle it, because the effect has not happened yet. Seven
 of the eighteen pairs are inhabitable and the other eleven are empty for that reason rather than for want of
-an entry. A reviewed Haskell relation must encode this rule, a separately authored Haskell oracle must check
+an entry. A authored Haskell relation must encode this rule, a separately authored Haskell oracle must check
 it, and any tabular view is emitted only beneath `.build/**`; neither may parse this explanatory table.
 
 | layer | loci that can observe it | why not the others |
@@ -124,13 +124,13 @@ each entry's `Cells:` line specifies for the reader and its Haskell counterpart 
 
 In these rows `*` reads as "every member of that axis". They apply only to **admissible** cells: the eleven
 inadmissible pairs are already foreclosed by the relation above and need no row. This table records doctrine
-for reviewer inspection only. The target grid at `.build/docs/covering.tsv` resolves each cell against independently
-reviewed Haskell occupancy, relation, and justification values; it never reads this table.
+for documentation-gate inspection only. The target grid at `.build/docs/covering.tsv` resolves each cell against separately
+authored Haskell occupancy, relation, and justification values; it never reads this table.
 
 | cell | why no illegal state lives there |
 |---|---|
 | `*` × `extension-astcheck` × `*` | The extension AST checker judges linked extension **source**, not a decoded spec value. Only a family whose illegal states are reachable from linked source can occupy this locus, which today is `lifecycle` alone ([§3.78](./illegal_state_lifecycle.md#378-extension-source-that-reaches-outside-the-sanctioned-api)). |
-| `*` × `*` × `cache` | A cache is a substrate, not a subject. Every way a cache can be wrong is already some other family's state seen through it: a cache **key** that admits two scopes is a `security` state ([§3.95](./illegal_state_tenancy.md#395-a-replay-key-that-does-not-name-its-scope)), a cache that grows without a ceiling is a `capacity` state, and a cache holding a stale build output is an `ml-asset` or `image` state. Nothing is illegal *because* it is cached, so no cell in this column has an occupant that is not double-counted from another column. The family stays declared because a reviewer looks for it, and an axis member with a stated reason is more useful than a member quietly absent. |
+| `*` × `*` × `cache` | A cache is a substrate, not a subject. Every way a cache can be wrong is already some other family's state seen through it: a cache **key** that admits two scopes is a `security` state ([§3.95](./illegal_state_tenancy.md#395-a-replay-key-that-does-not-name-its-scope)), a cache that grows without a ceiling is a `capacity` state, and a cache holding a stale build output is an `ml-asset` or `image` state. Nothing is illegal *because* it is cached, so no cell in this column has an occupant that is not double-counted from another column. The family stays declared so the gap remains visible, and an axis member with a stated reason is more useful than a member quietly absent. |
 | `*` × `gadt-decode` × `accelerator` | Both accelerator states are capacity arithmetic over a node's declared devices — an ownership index and a memory envelope. Arithmetic is decided by the capacity fold at the seal, not by decoding a value's shape. |
 | `type-foreclosed` × `gadt-decode` × `capacity` | Capacity is a *value*, not a type index, and Dhall has no dependent arithmetic to make `Σ ≤ cap` a statement about inhabitance ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)). So no capacity state is uninhabitable at the decoder: the family's type-foreclosures are *shapes* — closed controller-policy arms, mandatory fields, the absent `Exempt` arm — and every one of those is refused at `dhall-typecheck`, while what reaches the decoder is a checked rejection. |
 | `type-foreclosed` × `gadt-decode` × `image` | An image state is settled by the schema: the closed `ImageIdentity` union, the required `process` field, and the closed build-content union each give the illegal shape no arm to write, so all three fail `dhall type`. What is left for the decoder is a *relation between names* — a worker naming an extension its binary does not link ([§3.77](./illegal_state_lifecycle.md#377-a-worker-naming-an-extension-its-own-binary-does-not-link)) — and a cross-field relation is a fold, never an absent inhabitant. |
@@ -158,8 +158,8 @@ following counts are target expectations, not a current tool result:
 | admissible, empty, and justified | 34 |
 | **admissible, empty, and still owing a reason** | **0** |
 
-The obligation is not discharged until Phase 27 has a reviewed Haskell subject, an independent Haskell
-oracle, a qualified harness, and delegated promotion. The target occupancy uses declared pairings rather than an
+The obligation is not discharged until Phase 27 has a authored Haskell subject, an independent Haskell
+oracle and a complete qualified gate pass. The target occupancy uses declared pairings rather than an
 upper bound over prose. Historical analysis reduced an earlier estimate from 143 to 64 and exposed defects,
 but that analysis is rationale, not current validation evidence — an
 `image` state was recorded as having no runtime residue when [§3.77](./illegal_state_lifecycle.md#377-a-worker-naming-an-extension-its-own-binary-does-not-link)
@@ -176,7 +176,7 @@ lying along an axis nobody declared stays outside the claim, which is the residu
 [`illegal_state_techniques.md` §6.2](./illegal_state_techniques.md#62-the-covering-obligation--exhaustive-relative-to-a-declared-taxonomy)
 carries. The covering also says nothing about whether an occupied cell's entry is *right*; that each entry's
 foreclosure actually rejects its fixture at the locus it names is the Phase-27 corpus obligation, keyed to the
-same pairing through separately reviewed Haskell declarations. Any serialized registry is lazily generated
+same pairing through separately authored Haskell declarations. Any serialized registry is lazily generated
 beneath `.build/**` and has no verdict authority.
 
 ## Related Documents

@@ -11,7 +11,7 @@ module PolicyContractOracle
 -- Hardware-free component diagnostics only.  The selector registry, exact
 -- ordered result, and serialized wire below are oracle-owned literals.  This
 -- module imports only the refusal-only public facade.  It performs no ambient
--- I/O and cannot validate or promote a phase.
+-- I/O and cannot pass or validate a phase.
 
 import Amoebius.Validation.PolicyContract (policyContractDiagnostic)
 import Amoebius.Validation.Types (CheckResult (..), Finding (..), Observation (..))
@@ -43,8 +43,8 @@ policyContractSelectorIntents =
     , "exact PolicyContract component comparison: pb"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_CONTRACT_PROMOTION_FIELD_MUTANT"
-    , "exact PolicyContract component comparison: promotion"
+  , ( "VALIDATION_POLICY_CONTRACT_GATE_COMPLETION_FIELD_MUTANT"
+    , "exact PolicyContract component comparison: gate completion"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_CONTRACT_REGISTER_FIELD_MUTANT"
@@ -123,8 +123,8 @@ policyContractSelectorIntents =
     , "public diagnostic observation retention: phase zero status"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_OBSERVATION_PROMOTION_AUTHORITY_DROP_MUTANT"
-    , "public diagnostic observation retention: promotion authority"
+  , ( "VALIDATION_POLICY_OBSERVATION_GATE_PASS_RULE_DROP_MUTANT"
+    , "public diagnostic observation retention: gate-pass result"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_OBSERVATION_REGISTRY_PROVIDER_DROP_MUTANT"
@@ -255,36 +255,36 @@ policyContractSelectorIntents =
     , "canonical owner binding: pb bootstrap section"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_ANCHOR_MUTANT"
-    , "canonical owner binding: prehardware promotion barrier anchor"
+  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_GATE_BARRIER_ANCHOR_MUTANT"
+    , "canonical owner binding: prehardware gate barrier anchor"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_MATCH_MUTANT"
-    , "canonical owner binding: prehardware promotion barrier match"
+  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_GATE_BARRIER_MATCH_MUTANT"
+    , "canonical owner binding: prehardware gate barrier match"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_PATH_MUTANT"
-    , "canonical owner binding: prehardware promotion barrier path"
+  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_GATE_BARRIER_PATH_MUTANT"
+    , "canonical owner binding: prehardware gate barrier path"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_SECTION_MUTANT"
-    , "canonical owner binding: prehardware promotion barrier section"
+  , ( "VALIDATION_POLICY_OWNER_PREHARDWARE_GATE_BARRIER_SECTION_MUTANT"
+    , "canonical owner binding: prehardware gate barrier section"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_ANCHOR_MUTANT"
-    , "canonical owner binding: promotion authority anchor"
+  , ( "VALIDATION_POLICY_OWNER_GATE_PASS_RULE_ANCHOR_MUTANT"
+    , "canonical owner binding: gate-pass result anchor"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_MATCH_MUTANT"
-    , "canonical owner binding: promotion authority match"
+  , ( "VALIDATION_POLICY_OWNER_GATE_PASS_RULE_MATCH_MUTANT"
+    , "canonical owner binding: gate-pass result match"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_PATH_MUTANT"
-    , "canonical owner binding: promotion authority path"
+  , ( "VALIDATION_POLICY_OWNER_GATE_PASS_RULE_PATH_MUTANT"
+    , "canonical owner binding: gate-pass result path"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_SECTION_MUTANT"
-    , "canonical owner binding: promotion authority section"
+  , ( "VALIDATION_POLICY_OWNER_GATE_PASS_RULE_SECTION_MUTANT"
+    , "canonical owner binding: gate-pass result section"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_OWNER_TRACKED_SOURCE_ANCHOR_MUTANT"
@@ -351,20 +351,20 @@ policyContractSelectorIntents =
     , "permanent refusal residue: diagnostic only subject"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_CODE_MUTANT"
-    , "permanent refusal residue: reviewer inspection code"
+  , ( "VALIDATION_POLICY_RESIDUE_DOCUMENTATION_CORRESPONDENCE_CODE_MUTANT"
+    , "permanent refusal residue: documentation correspondence check code"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_DETAIL_MUTANT"
-    , "permanent refusal residue: reviewer inspection detail"
+  , ( "VALIDATION_POLICY_RESIDUE_DOCUMENTATION_CORRESPONDENCE_DETAIL_MUTANT"
+    , "permanent refusal residue: documentation correspondence check detail"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_DROP_MUTANT"
-    , "permanent refusal residue: reviewer inspection drop"
+  , ( "VALIDATION_POLICY_RESIDUE_DOCUMENTATION_CORRESPONDENCE_DROP_MUTANT"
+    , "permanent refusal residue: documentation correspondence check drop"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_SUBJECT_MUTANT"
-    , "permanent refusal residue: reviewer inspection subject"
+  , ( "VALIDATION_POLICY_RESIDUE_DOCUMENTATION_CORRESPONDENCE_SUBJECT_MUTANT"
+    , "permanent refusal residue: documentation correspondence check subject"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_RESIDUE_QUALIFICATION_CODE_MUTANT"
@@ -383,20 +383,20 @@ policyContractSelectorIntents =
     , "permanent refusal residue: qualification subject"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_CODE_MUTANT"
-    , "permanent refusal residue: source custody code"
+  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_BINDING_CODE_MUTANT"
+    , "permanent refusal residue: source binding code"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_DETAIL_MUTANT"
-    , "permanent refusal residue: source custody detail"
+  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_BINDING_DETAIL_MUTANT"
+    , "permanent refusal residue: source binding detail"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_DROP_MUTANT"
-    , "permanent refusal residue: source custody drop"
+  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_BINDING_DROP_MUTANT"
+    , "permanent refusal residue: source binding drop"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_SUBJECT_MUTANT"
-    , "permanent refusal residue: source custody subject"
+  , ( "VALIDATION_POLICY_RESIDUE_SOURCE_BINDING_SUBJECT_MUTANT"
+    , "permanent refusal residue: source binding subject"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_RESULT_NAME_MUTANT"
@@ -503,12 +503,12 @@ policyContractSelectorIntents =
     , "serialized policy wire: owner pb bootstrap drop"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_PREHARDWARE_PROMOTION_BARRIER_DROP_MUTANT"
-    , "serialized policy wire: owner prehardware promotion barrier drop"
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_PREHARDWARE_GATE_BARRIER_DROP_MUTANT"
+    , "serialized policy wire: owner prehardware gate barrier drop"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_PROMOTION_AUTHORITY_DROP_MUTANT"
-    , "serialized policy wire: owner promotion authority drop"
+  , ( "VALIDATION_POLICY_SERIALIZER_OWNER_GATE_PASS_RULE_DROP_MUTANT"
+    , "serialized policy wire: owner gate-pass result drop"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_SERIALIZER_OWNER_TRACKED_SOURCE_DROP_MUTANT"
@@ -535,16 +535,16 @@ policyContractSelectorIntents =
     , "serialized policy wire: pb source language drop"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_SERIALIZER_PROMOTION_AUTHORITY_DROP_MUTANT"
-    , "serialized policy wire: promotion authority drop"
+  , ( "VALIDATION_POLICY_SERIALIZER_GATE_PASS_RULE_DROP_MUTANT"
+    , "serialized policy wire: gate-pass result drop"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_SERIALIZER_PROMOTION_AUTOMATION_ROLE_DROP_MUTANT"
-    , "serialized policy wire: promotion automation role drop"
+  , ( "VALIDATION_POLICY_SERIALIZER_GATE_COMPLETION_AUTOMATION_ROLE_DROP_MUTANT"
+    , "serialized policy wire: gate-completion automation role drop"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_SERIALIZER_PROMOTION_STATUS_MUTATION_DROP_MUTANT"
-    , "serialized policy wire: promotion status mutation drop"
+  , ( "VALIDATION_POLICY_SERIALIZER_GATE_COMPLETION_STATUS_TRANSITION_DROP_MUTANT"
+    , "serialized policy wire: gate-completion status transition drop"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_SERIALIZER_REGISTRY_PLACEMENT_DROP_MUTANT"
@@ -651,8 +651,8 @@ policyContractSelectorIntents =
     , "serialized policy wire: universe prehardware rule drop"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PROMOTION_AUTHORITY_DROP_MUTANT"
-    , "serialized policy wire: universe promotion authority drop"
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_GATE_PASS_RULE_DROP_MUTANT"
+    , "serialized policy wire: universe gate-pass result drop"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_PUBLIC_BEHAVIOR_AUTHORITY_DROP_MUTANT"
@@ -691,8 +691,8 @@ policyContractSelectorIntents =
     , "serialized policy wire: universe sprint reset rule drop"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_STATUS_MUTATION_AUTHORITY_DROP_MUTANT"
-    , "serialized policy wire: universe status mutation authority drop"
+  , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_STATUS_TRANSITION_RULE_DROP_MUTANT"
+    , "serialized policy wire: universe status transition rule drop"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_SERIALIZER_UNIVERSE_TRACKED_GENERATED_ARTIFACT_DROP_MUTANT"
@@ -759,8 +759,8 @@ policyContractSelectorIntents =
     , "closed constructor universe: prehardware rule"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_UNIVERSE_PROMOTION_AUTHORITY_MUTANT"
-    , "closed constructor universe: promotion authority"
+  , ( "VALIDATION_POLICY_UNIVERSE_GATE_PASS_RULE_MUTANT"
+    , "closed constructor universe: gate-pass result"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_UNIVERSE_PUBLIC_BEHAVIOR_AUTHORITY_MUTANT"
@@ -795,8 +795,8 @@ policyContractSelectorIntents =
     , "closed constructor universe: sprint reset rule"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_UNIVERSE_STATUS_MUTATION_AUTHORITY_MUTANT"
-    , "closed constructor universe: status mutation authority"
+  , ( "VALIDATION_POLICY_UNIVERSE_STATUS_TRANSITION_RULE_MUTANT"
+    , "closed constructor universe: status transition rule"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_UNIVERSE_TRACKED_GENERATED_ARTIFACT_MUTANT"
@@ -872,8 +872,8 @@ expectedPolicyResult =
         , Observation "policy.phase-zero-status" "active-not-validated"
         , Observation "policy.phase-roles" "hardware-free-dsl-barrier=49,bounded-pb-handoff-validation=50,haskell-host-ensure=51,first-hardware-validation=52"
         , Observation "policy.dsl-barrier-source-closure" "all-ltd-src-queries-zero-before-phase-49"
-        , Observation "policy.pb-transport" "direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
-        , Observation "policy.promotion-authority" "authorized-delegated-reviewer"
+        , Observation "policy.pb-transport" "direct-haskell-through-49;observed-pb-at-50;phase-50-gate-pass-bound-pb-after-50"
+        , Observation "policy.gate-pass-rule" "qualified-gate-pass"
         , Observation "policy.owner-count" "11"
         , Observation "policy.contract-sha256" expectedPolicyDigest
         , Observation "policy.diagnostic-status" "refused"
@@ -882,27 +882,27 @@ expectedPolicyResult =
         [ Finding "POLICY-DIAGNOSTIC-ONLY"
             "Amoebius.Validation.PolicyContract.policyContractDiagnostic"
             ("the public standard-value facade cannot mint candidate evidence" <> commitmentDetail)
-        , Finding "POLICY-SOURCE-CUSTODY-UNAVAILABLE"
+        , Finding "POLICY-SOURCE-BINDING-UNAVAILABLE"
             "Amoebius.Validation.PolicyContract.Internal"
-            ("the canonical policy value is not authenticated source acquisition evidence" <> commitmentDetail)
+            ("the canonical policy value is not exact source binding capture evidence" <> commitmentDetail)
         , Finding "POLICY-QUALIFICATION-UNAVAILABLE"
             "policy-contract-changed-subject-matrix"
             ("component diagnostics cannot qualify a complete atomic changed-production corpus for this exact subject" <> commitmentDetail)
-        , Finding "POLICY-REVIEWER-INSPECTION-UNAVAILABLE"
+        , Finding "POLICY-DOCUMENTATION-CORRESPONDENCE-UNAVAILABLE"
             "DEVELOPMENT_PLAN/phase_00_documentation_suite.md"
-            ("policy-to-prose correspondence requires independent reviewer inspection" <> commitmentDetail)
+            ("policy-to-prose correspondence requires the documentation gate" <> commitmentDetail)
         ]
     }
  where
   commitmentDetail = "; policy-contract-sha256=" <> expectedPolicyDigest
 
 expectedPolicyDigest :: Text
-expectedPolicyDigest = "daf13d14ec88090015e708e66f75d1f2cc610082bfdcc1356070c6a4fe98c611"
+expectedPolicyDigest = "c53ae80762bc0aa9fc5ee4f0193c4bd68d2ff3405a58870c77db4f4a30feb244"
 
 literalPolicyLines :: [Text]
 literalPolicyLines =
   [ "amoebius-policy-contract-v4"
-  , "universe.policy-id=tracked-source-boundary,pb-bootstrap-boundary,lazy-build-generation,cluster-registry-provider,cluster-registry-placement,active-legacy-register,validation-status-reset,numeric-phase-order,dsl-barrier-source-closure,prehardware-promotion-barrier,promotion-authority"
+  , "universe.policy-id=tracked-source-boundary,pb-bootstrap-boundary,lazy-build-generation,cluster-registry-provider,cluster-registry-placement,active-legacy-register,validation-status-reset,numeric-phase-order,dsl-barrier-source-closure,prehardware-gate-barrier,gate-pass-rule"
   , "universe.behavioral-language=haskell-.hs-only"
   , "universe.source-classification=semantic-closed-world"
   , "universe.public-behavior-authority=haskell-binary-only"
@@ -926,10 +926,10 @@ literalPolicyLines =
   , "universe.phase50-migration-rule=no-source-migration"
   , "universe.dsl-barrier-source-closure=all-ltd-src-queries-zero-before-phase-49"
   , "universe.prehardware-rule=no-hardware-through-phase-51"
-  , "universe.pb-transport-rule=direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
-  , "universe.promotion-authority=authorized-delegated-reviewer"
-  , "universe.automation-role=candidate-evidence-and-qualified-promotion"
-  , "universe.status-mutation-authority=authorized-reviewer"
+  , "universe.pb-transport-rule=direct-haskell-through-49;observed-pb-at-50;phase-50-gate-pass-bound-pb-after-50"
+  , "universe.gate-pass-rule=qualified-gate-pass"
+  , "universe.automation-role=candidate-evidence-and-gate-pass"
+  , "universe.status-transition-rule=passing-gate"
   , "source.behavioral-language=haskell-.hs-only"
   , "source.classification=semantic-closed-world"
   , "source.public-behavior-authority=haskell-binary-only"
@@ -958,10 +958,10 @@ literalPolicyLines =
   , "ordering.phase50-migration=no-source-migration"
   , "ordering.dsl-barrier-source-closure=all-ltd-src-queries-zero-before-phase-49"
   , "ordering.prehardware=no-hardware-through-phase-51"
-  , "ordering.pb-transport=direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
-  , "promotion.authority=authorized-delegated-reviewer"
-  , "promotion.automation-role=candidate-evidence-and-qualified-promotion"
-  , "promotion.status-mutation=authorized-reviewer"
+  , "ordering.pb-transport=direct-haskell-through-49;observed-pb-at-50;phase-50-gate-pass-bound-pb-after-50"
+  , "gate-completion.rule=qualified-gate-pass"
+  , "gate-completion.automation-role=candidate-evidence-and-gate-pass"
+  , "gate-completion.status-transition=passing-gate"
   , "owner.tracked-source-boundary=documents/engineering/repository_layout_doctrine.md#1-classification-rule|1. Classification rule"
   , "owner.pb-bootstrap-boundary=documents/engineering/substrate_doctrine.md#6-the-pre-binary-handoff-contract|6. The pre-binary handoff contract"
   , "owner.lazy-build-generation=documents/engineering/generated_artifacts_doctrine.md#3-the-rule|3. The rule"
@@ -971,8 +971,8 @@ literalPolicyLines =
   , "owner.validation-status-reset=DEVELOPMENT_PLAN/phase_00_documentation_suite.md#phase-status|Phase Status"
   , "owner.numeric-phase-order=DEVELOPMENT_PLAN/development_plan_phase_model.md#e-one-canonical-phase-model|E. One canonical phase model"
   , "owner.dsl-barrier-source-closure=DEVELOPMENT_PLAN/development_plan_phase_model.md#e-one-canonical-phase-model|E. One canonical phase model"
-  , "owner.prehardware-promotion-barrier=DEVELOPMENT_PLAN/development_plan_phase_model.md#l-one-substrate-discipline|L. One-substrate discipline"
-  , "owner.promotion-authority=DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-delegated-promotion|M.6 Candidate evidence and delegated promotion"
+  , "owner.prehardware-gate-barrier=DEVELOPMENT_PLAN/development_plan_phase_model.md#l-one-substrate-discipline|L. One-substrate discipline"
+  , "owner.gate-pass-rule=DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass|M.6 Candidate evidence and gate pass"
   ]
 
 literalPolicyWire :: ByteString

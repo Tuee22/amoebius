@@ -2,9 +2,9 @@
 
 > **Purpose**: Define the non-spoofable phase-gate contract, the universal source and artifact postconditions,
 > the typed divergence inventory plus its one reader-facing register, and the final-tree rule every phase inherits.
-> **Read this if**: a phase gate is being written, reviewed, run, or proposed as evidence for a status change.
+> **Read this if**: a phase gate is being written, checked, run, or proposed as evidence for a status change.
 
-This slice is authoritative for gate integrity. The phase model and status authority live in
+This slice is authoritative for gate integrity. The phase model and status transition live in
 [`development_plan_phase_model.md`](development_plan_phase_model.md); the hub that preserves the rulebook's
 section lettering lives in [`development_plan_standards.md`](development_plan_standards.md).
 
@@ -20,7 +20,7 @@ section lettering lives in [`development_plan_standards.md`](development_plan_st
 
 ## Contents
 
-- [M. Gate integrity (a gate cannot authorize itself)](#m-gate-integrity-a-gate-cannot-authorize-itself)
+- [M. Gate integrity (a gate cannot be passed by a stub)](#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
 - [S. Universal source and artifact hygiene gate](#s-universal-source-and-artifact-hygiene-gate)
 - [T. Plan-to-implementation reconciliation](#t-plan-to-implementation-reconciliation)
 - [U. The final repository layout](#u-the-final-repository-layout)
@@ -30,77 +30,68 @@ section lettering lives in [`development_plan_standards.md`](development_plan_st
 
 <a id="m-gate-integrity-a-gate-cannot-be-passed-by-a-stub"></a>
 
-## M. Gate integrity (a gate cannot authorize itself)
+## M. Gate integrity (a gate cannot be passed by a stub)
 
-A phase gate is an attempt to falsify one bounded claim. It is not a script exit code, an evidence bundle, a
-hash, a self-reported ledger, or a count of tests. Those are observations a reviewer may use. None can promote
-a phase by itself.
+A phase gate is an attempt to falsify one bounded claim. A complete qualified pass is sufficient for the
+phase's status-only transition. A smaller script exit code, isolated check, evidence bundle, hash, self-reported
+ledger, or test count is not the complete phase gate.
 
-Three responsibilities are deliberately distinct:
+Two test responsibilities remain deliberately distinct:
 
-1. the **subject** implements the claimed behaviour;
-2. the **oracle and harness** attempt to falsify that behaviour without importing its decision logic; and
-3. the **authorized promotion reviewer** reviews the contract and raw observations and applies the status-only promotion.
+1. the **subject** implements the claimed behaviour; and
+2. the **oracle and harness** attempt to falsify that behaviour without importing its decision logic.
 
-The subject, harness, generated evidence, an agent, or CI may produce a **validation candidate**. Only an
-authorized reviewer may write ✅ Done. The reviewer may be the human user or an agent explicitly delegated to
-complete development-plan work. A candidate remains **NOT VALIDATED** until that decision. The approval record
-is bound to the source snapshot, phase-contract digest, qualified-harness digest, raw-observation digest, and
-exact status projection. Reviewer authorization comes from outside the candidate verdict: user delegation,
-repository policy, or a configured signing root. A path, hash-looking string, self-reported success bit, or
-unsigned Markdown assertion is not approval by itself.
+The gate remains **NOT VALIDATED** until every required row passes in one qualified run. That complete pass may
+be recorded as ✅ Done by a human, agent, or CI job. The gate result binds the source snapshot, phase-contract digest, qualified-harness digest,
+raw-observation digest, and exact status projection.
 
-That receipt binds both the qualified pre-promotion source identity and an exact status-only post-promotion
-projection identity. The projection's closed diff may touch only the tracker, phase, and sprint status fields
-named in the record. An authorized reviewer applies it; unattended gate logic cannot. Any other
-source, contract, oracle, or documentation change requires a new candidate rather than borrowing approval for
-the pre-edit snapshot.
+The projection's closed diff may touch only the tracker, phase, and sprint status fields named in the passing
+result. Any other source, contract, oracle, or documentation change requires a new gate run rather than
+borrowing the result for the pre-edit snapshot.
 
-This responsibility split is intentional. Source in one repository can always be changed so that subject and
-test collude; no success bit in that same trust domain proves the absence of collusion. Independent oracle
-expectations, changed-subject qualification, raw observations, and an explicit reviewer action close the
-authorization gap that a self-reported gate cannot close. A delegated agent may perform that reviewer action
-after inspecting the complete candidate; it may then continue with the next phase in numeric order.
+Independent oracle expectations, changed-subject qualification, and raw observations keep the test meaningful.
+They are test requirements. After recording a pass, execution may continue
+with the next phase in numeric order.
 
 ### M.1 The fixed gate contract
 
 Every numbered phase contains a `## Gate integrity` section with exactly one table using the following keys.
-Free prose cannot substitute for a missing row, `N/A` carries the required reason and reviewer, and generated
+Free prose cannot substitute for a missing row, `N/A` carries the required reason, and generated
 evidence cannot populate authored contract fields.
 
 | Key | Required content |
 |---|---|
 | `Claim` | One falsifiable capability statement and its explicit exclusions. |
 | `Subject` | The production `.hs` module and entry point exercised; a wrapper, manifest, or gate runner alone is not a subject. |
-| `Command` | Future public target: `pb validate phase NN`. Before Phase 50 has current reviewer approval, the executable candidate command is the exact absolute source-bound Haskell binary built directly from an authenticated, network-independent toolchain input; invoking `pb` is inadmissible evidence. Phase 50 starts that exact Haskell OS supervisor directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 approval. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
-| `Oracle` | A separately authored `.hs` oracle module, its independence boundary, provenance, and reviewer. |
+| `Command` | Future public target: `pb validate phase NN`. Before the Phase-50 gate passes, the executable candidate command is the exact absolute source-bound Haskell binary built directly from a pinned, network-independent toolchain input; invoking `pb` is inadmissible evidence. Phase 50 starts that exact Haskell OS supervisor directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 gate pass. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
+| `Oracle` | A separately authored `.hs` oracle module, its independence boundary, and provenance. |
 | `Positive controls` | A closed named corpus and the exact observations expected for each member. |
 | `Paired negatives` | For every foreclosed dimension, a minimally different positive/negative pair and the exact rejection locus and reason. |
 | `Mutants` | An independently literal oracle-owned selector-to-exact-case registry, exact two-way identity reconciliation against production and build mappings, and, for each mutant, its atomic requirement predicate, operator, production locus, applied-change witness, assigned exact red observation, named rejection locus, and same-harness controls that must remain green. |
 | `Discovery` | The authoritative expected surface, runtime-discovered surface, two-way equality rule, and explicit refusal of empty discovery. |
-| `Challenge` | A post-start nonce/canary for effectful claims, or a reviewed reason that a pure claim uses an independent predicate instead. |
+| `Challenge` | A post-start nonce/canary for effectful claims, or a stated reason that a pure claim uses an independent predicate instead. |
 | `Observer` | The observer outside the subject, raw observation it reads, authenticity check, and fail-closed rule. |
-| `Authority/bypass` | Paired least-privilege success/foreign-scope denial and alternate-path probes, or reviewed non-applicability. |
+| `Authority/bypass` | Paired least-privilege success/foreign-scope denial and alternate-path probes, or tested non-applicability. |
 | `Freshness` | How stale state, cached output, prior evidence, and replayed responses are made unable to pass. |
 | `Qualification` | Sabotage cases that qualify the harness before the clean candidate run. |
 | `Cleanroom` | Proof that the gate starts without generated products or condemned legacy copies and derives everything required lazily. |
 | `Legacy closure` | Reader-facing references to the typed Haskell IDs due in this phase; the compiled lifecycle/owner/required-analyzer dispatch and the owning analyzer's independent oracle supply the zero-finding decision. An unavailable analyzer for a due or retired ID refuses; before its owner an active unavailable analyzer is explicit later-owned debt and cannot claim closure. Cell text supplies no executable value. |
-| `Predecessor` | The immediately preceding phase's reviewer approval record, or `genesis` for Phase 0. |
-| `Residue` | Untested layers and assumptions, stated as `UNVERIFIED`; an empty residue requires reviewer justification. |
-| `Promotion authority` | Required approval class; always `delegated-reviewer`, meaning an authorized human or agent inspects the qualified candidate and applies the status projection. Never satisfied by a tool-generated assertion alone. |
+| `Predecessor` | The immediately preceding phase's current gate-pass result, or `genesis` for Phase 0. |
+| `Residue` | Untested layers and assumptions, stated as `UNVERIFIED`; an empty residue requires an explicit test rationale. |
+| `Pass criterion` | Always `qualified-gate-pass`: every required row succeeds in one qualified run for the exact current source. That result is sufficient for the status-only transition. |
 
 The `**Gate:**` summary line contains only the future public command and a link to this table. A
 phase-specific command may be an argument selected by the Haskell dispatcher, but Python, shell, a data file,
 or a generated program may not decide or wrap the verdict. The public spelling is not admissible evidence for
 Phase 0 through Phase 49: those candidates invoke the exact absolute source-built Haskell executable directly.
-Phase 50 validates the `pb` transport itself under an external observer; only its current reviewer approval makes
+Phase 50 validates the `pb` transport itself under an external observer; only its current gate pass makes
 that transport eligible for Phase 51 onward. Presence of the target spelling in a phase document is never a
 claim that it exists, ran, or passed.
 
 The structural documentation checker may parse governed inventory, metadata, headings, links, anchors,
 backlinks, status syntax, phase dependencies, and this fixed table shape. It may not infer any row's semantic
 adequacy or any cross-cutting product/source/provider decision from natural-language wording or token counts.
-Those executable decisions live in reviewed Haskell declarations; prose correspondence is a separate reviewer
+Those executable decisions live in tested Haskell declarations; prose correspondence is a documentation-gate
 obligation. A policy-looking prose decoy must be behaviorally inert.
 
 <a id="gate-integrity-delegation"></a>
@@ -115,16 +106,16 @@ An oracle is independent only when all of the following are true:
   types and literals rather than production record constructors, encoders, constants, or shared value lists;
 - every accepted boundary asserts the complete expected projection, and every one-over input asserts one exact
   refusal reason and locus rather than accepting any failure;
-- its reviewer is not the sole author of the subject behaviour under review;
-- its provenance predates the candidate implementation or has an explicit independent-review receipt; and
-- changing it is reviewed as a contract change and invalidates affected evidence.
+- it is separately authored from the subject behaviour it checks;
+- its provenance is recorded with the candidate; and
+- changing it is a contract change that invalidates affected evidence.
 
 Independent expectations are Haskell source. A second-language copy or repository-retained serialized
 expectation in TSV, JSON, YAML, Dhall, or any other transport format is not stronger independence; it is
 additional behavioural source that the Haskell-only rule forbids. Byte output is compared by a separately
 authored Haskell semantic predicate or by bytes derived at run time from that predicate under `.build/**`.
 
-An adapter below a missing acquisition, observer, or qualification boundary exposes no success-shaped decoded
+An adapter below a missing capture, observer, or qualification boundary exposes no success-shaped decoded
 value. Raw parsers, integrity-consistent records, constructors, selectors, and general eliminators are private;
 the public diagnostic front door is an always-refusing `CheckResult` with exact non-empty permanent residue. An
 `Either` right branch, optional finding list, arbitrary-result fold, or detachable getter is non-conforming even
@@ -160,7 +151,7 @@ challenge is supplemental rather than a substitute.
 
 ### M.4 Harness qualification precedes every candidate
 
-The harness is qualified against a fixed, reviewed sabotage corpus before it judges a candidate. Qualification
+The harness is qualified against a fixed, separately authored sabotage corpus before it judges a candidate. Qualification
 must show that it rejects, at minimum:
 
 1. a constant-success verdict;
@@ -180,7 +171,7 @@ must show that it rejects, at minimum:
 
 Qualification and the clean run are separate invocations over the same harness digest. A candidate produced
 by an unqualified harness is rejected regardless of its own result. The qualification corpus is Haskell
-source reviewed independently of the harness implementation; its raw observations are generated lazily and
+source authored independently of the harness implementation; its raw observations are generated lazily and
 never committed.
 
 ### M.5 Effectful and pure claims
@@ -190,11 +181,11 @@ observer outside the subject. Missing, incomplete, unauthenticated, challenge-mi
 observations fail closed. Security claims pair an own-scope success with a foreign-scope denial and observe
 zero forbidden effect; route claims probe the intended route and every direct bypass.
 
-A pure claim cannot use a live nonce meaningfully. It instead uses a separately reviewed predicate, branch
+A pure claim cannot use a live nonce meaningfully. It instead uses a separately authored predicate, branch
 coverage obligations, boundary generators, explicit positive/negative pairs, and changed-subject mutants.
 Property sampling reports only the explored sample and its coverage; it never upgrades to universal proof.
 
-### M.6 Candidate evidence and delegated promotion
+### M.6 Candidate evidence and gate pass
 
 The Haskell gate writes raw observations and a schema-checked candidate bundle beneath `.build/runs/**`. Its
 digest binds provenance; it does not make the contents true. The candidate must contain explicit per-row
@@ -203,16 +194,15 @@ or a top-level success bit without row evidence fail schema validation.
 
 An authored `ContractGap` and an observed `EvidenceAbsent` are different typed refusals. A gate-table slot is
 `Bound specification` or `ContractGap`; it never embeds the current presence of a receipt, live host, or run
-artifact. Candidate execution separately records whether each specified input was acquired. In particular,
-`Predecessor` specifies `ImmediatePredecessorApproval Phase N`; a missing or stale receipt is an acquired-run
+artifact. Candidate execution separately records whether each specified input was available. In particular,
+`Predecessor` specifies `ImmediatePredecessorPass Phase N`; a missing or stale result is an earlier-run
 finding, not a reason to leave the contract itself as generic `MISSING`. Reader-facing Markdown cannot convert
 either refusal to a satisfied state.
 
-The authorized reviewer compares the contract, qualification observations, clean observations, source diff,
-unverified residue, predecessor approval, and exact proposed status-only projection. The reviewer may then
-issue the bound approval record and apply that projection. A delegated agent explicitly tasked with plan work
-is an authorized reviewer and may repeat this validate-and-promote sequence across multiple consecutive phases.
-The gate, harness, candidate bundle, or digest cannot perform or imply the reviewer action on its own.
+The gate compares the contract, qualification observations, clean observations, source diff, unverified
+residue, predecessor result, and exact proposed status-only projection. When every required row is green and
+every required refusal was observed, the gate passes and that result is sufficient to apply the projection. A
+human, agent, or CI job may repeat this validate-and-record sequence across consecutive phases.
 
 ---
 
@@ -222,7 +212,7 @@ The gate, harness, candidate bundle, or digest cannot perform or imply the revie
 
 The final invariant is absolute, but numerical migration needs a fail-closed transition rule. Before the final
 source migration closes, a phase candidate may contain only source-boundary findings joined in both directions
-to an active ID in the closed Haskell legacy universe whose typed owner is a strictly later phase. The reviewed
+to an active ID in the closed Haskell legacy universe whose typed owner is a strictly later phase. The tested
 Haskell inventory owns each identity, stable encoding, lifecycle state, owner, required-analyzer key, and total
 dispatch. Dispatch to an absent, mismatched, or unfinished analyzer produces a typed unavailable state;
 inventory setup cannot stand in for that analyzer's observations, closure predicate, or independently authored
@@ -236,9 +226,9 @@ The current Sprint-0.2 disposition universe is Active-only. Retirement is a futu
 deletion of executable memory. Sprint 0.2 retains a required reintroduction-case identity, not an executed
 guard. An Active zero is admissible only in the owning phase's integrated candidate after the owner analyzer
 implements and passes its independently authored negative; it is candidate readiness, not a status or
-lifecycle transition. After predecessor evidence is present and the authorized reviewer promotes that owning gate, the next
+lifecycle transition. After predecessor evidence is present and that owning gate passes, the next
 phase's source records the `Retired` transition. An Active zero before its owner refuses as a stale/missing
-finding, and an Active zero after its owner refuses as an unrecorded post-promotion transition. The retired
+finding, and an Active zero after its owner refuses as an unrecorded post-pass transition. The retired
 constructor, owner, analyzer key, and qualified Haskell reintroduction negative remain compiled. The
 reader-facing Markdown register contributes no identity, owner, lifecycle state, predicate, count, or join
 operand to that decision. It is active-only, so the accepted retired explanation is removed and Git history is
@@ -301,13 +291,13 @@ Every phase inherits the following postconditions. They are part of the gate, no
 15. **Complete discovery.** Expected and discovered test/capability/resource surfaces agree in both
     directions, are non-empty where the claim requires behaviour, and contain no implicit “tested” defaults.
 16. **Active legacy closure.** Every divergence has one stable typed identity, one owner, one required-analyzer
-    key, and one total fail-closed dispatch route in reviewed Haskell. The owning sprint supplies the domain
+    key, and one total fail-closed dispatch route in tested Haskell. The owning sprint supplies the domain
     observation/closure analyzer and independent reintroduction negative; until then, `AnalyzerUnavailable`
     cannot be represented as closure and refuses once the binding is due or retired. Before its owner it is
     explicit later-owned debt only. The owning phase reaches zero matching findings before it
     may be a validation candidate. Earlier phases account exactly for later-owned findings against those active
-    bindings; findings may not be deferred out of, reassigned by, or survive their owning phase. After promoted
-    retirement, the Haskell ID and qualified owner-domain reintroduction negative remain even though the active explanation is removed.
+    bindings; findings may not be deferred out of, reassigned by, or survive their owning phase. After retirement
+    is recorded, the Haskell ID and qualified owner-domain reintroduction negative remain even though the active explanation is removed.
     The single [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) file explains the inventory to
     readers. The legacy structural seam enforces that this exact canonical file exists once as a regular
     non-executable UTF-8 file, that its exact basename occurs nowhere else, and that the exact forbidden archive
@@ -317,19 +307,19 @@ Every phase inherits the following postconditions. They are part of the gate, no
     forbidden-archive-basename content diagnostic. Those documentation findings do not supply legacy semantics.
     Neither seam may interpret a row, table cell, ID
     spelling, owner phrase, predicate-shaped string, or row count as legacy semantics or use it to alter a
-    closure verdict. Reviewer inspection owns correspondence between the Haskell bindings and that explanation.
-17. **Predecessor closure.** Except Phase 0, the immediately preceding phase has a valid reviewer approval receipt
-    for the exact current contract. Hardware-specific work cannot run as a phase gate before the no-hardware
-    DSL promotion barrier is reviewer-approved.
-18. **Evidence is not authority.** Run bundles are generated diagnostics. No path, digest, attestation, test
-    count, or tool-emitted “pass” authorizes ✅ Done.
+    closure verdict. The documentation gate owns correspondence between the Haskell bindings and that explanation.
+17. **Predecessor closure.** Except Phase 0, the immediately preceding phase has a valid gate-pass result for
+    the exact current contract. Hardware-specific work cannot run as a phase gate before the no-hardware DSL
+    gate barrier passes.
+18. **Complete gate pass.** Run bundles record the test. An isolated or partial check is insufficient, while
+    the complete qualified phase-gate pass is sufficient for
+    ✅ Done.
 
 <a id="s-commit-timing"></a>
 
 The source-snapshot digest records what ran; commit timing is not an input. A later source or contract change
 invalidates only evidence it changes, but every phase in the present reset is explicitly **NOT VALIDATED** and
-has no reusable approval. No pre-reset seal, attestation, hash, status sentence, or scoped result may be
-promoted into current evidence.
+has no reusable gate pass. No pre-reset result may be carried into the current gate.
 
 ---
 
@@ -349,30 +339,30 @@ Every reconciliation follows these rules:
 4. Put every current mismatch in the closed Haskell legacy universe, with a typed stable ID, `Active` lifecycle
    state, owner phase, required-analyzer key, and total dispatch route whose unavailable state refuses. Then
    update the corresponding reader-facing explanation in
-   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). Reviewer inspection, not a parser, owns the
+   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). The documentation gate, not a parser, owns the
    correspondence between those two surfaces. The owning sprint implements the exact observation/closure
    analyzer and independent domain reintroduction negative; registering the obligation does not execute later
    work or make the mismatch eligible to close.
-5. Keep that reader-facing register active-only. Closed or superseded explanations are deleted after an authorized reviewer
-   promotes the corresponding owning gate; the retired constructor, owner, analyzer key, and qualified
+5. Keep that reader-facing register active-only. Closed or superseded explanations are deleted after the
+   corresponding owning gate passes; the retired constructor, owner, analyzer key, and qualified
    owner-domain reintroduction negative remain compiled, while Git history is the prose archive. No archive file, archive slice,
    “closed” appendix, or second deletion list is permitted. The legacy structural seam checks exact canonical
    file cardinality, UTF-8 readability, and archive absence; the general documentation checker may still
    enforce ordinary orientation metadata, headings, links, and anchors plus its basename-substring cardinality
    and forbidden-archive-basename content diagnostics. Neither interprets a row, cell, ID,
-   owner, count, or predicate-shaped string into inventory, lifecycle, or closure authority.
+   owner, count, or predicate-shaped string into inventory, lifecycle, or a closure verdict.
 6. Resolve policy ambiguity in doctrine before changing implementation. An audit does not choose product
    policy implicitly.
 7. Update the doctrine owner, phase contract, tracker, component/substrate inventory, Haskell legacy binding,
    and reader-facing legacy explanation together when a decision changes their shared boundary. The consolidated
-   phase-gate reviewer correspondence inspection is required even though the Markdown explanation cannot change a
+   phase documentation gate must check correspondence even though the Markdown explanation cannot change a
    legacy binding or closure verdict.
 8. Re-run source closure from an empty generated tree. A local ignored file, pre-existing tool, cache, or
    compatibility copy cannot satisfy a prerequisite silently.
-9. Audit revision history separately. Historical blobs may require an authorized reviewer decision, but they never become a
-   second live work register.
+9. Audit revision history separately. Historical blobs may inform debugging, but they never become a second
+   live work register.
 10. Preserve numerical order. A later phase may not validate an earlier phase by proxy, and hardware evidence
-    may not substitute for the pre-hardware DSL promotion barrier.
+    may not substitute for the pre-hardware DSL gate barrier.
 
 ---
 
@@ -399,7 +389,7 @@ silently consuming a condemned source language, a pre-generated artifact, or a l
 ## Related Documents
 
 - [Development-plan standards](development_plan_standards.md) — the family hub and phase-document schema
-- [Phase model](development_plan_phase_model.md) — status, sequence, and delegated-reviewer promotion
+- [Phase model](development_plan_phase_model.md) — status, sequence, and gate pass
 - [Development-plan tracker](README.md) — the sole current phase-status source
 - [Reader-facing legacy register](legacy_tracking_for_deletion.md) — current divergence explanation only;
   Haskell owns executable identity, lifecycle, ownership, dispatch, and required reintroduction-case identities;

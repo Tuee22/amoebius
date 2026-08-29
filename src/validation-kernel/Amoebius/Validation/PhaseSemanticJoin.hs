@@ -92,7 +92,7 @@ data TrackerParse = TrackerParse
   }
   deriving (Eq, Show)
 
--- Reviewed parser-work bounds.  Every value is a literal so a source review
+-- Fixed parser-work bounds. Every value is a literal so a source check
 -- can see the admitted corpus without trusting derived repository statistics.
 maximumSuppliedEntryCount :: Integer
 maximumSuppliedEntryCount = 384
@@ -230,7 +230,7 @@ basicInputLimitFindings supplied =
     "supplied-entry-count"
     maximumSuppliedEntryCount
     suppliedCount
-    "the structural join refuses before parsing when the supplied document corpus exceeds its reviewed entry bound"
+    "the structural join refuses before parsing when the supplied document corpus exceeds its configured entry bound"
     <> concatMap perEntry supplied
     <> limitFinding
       "PLAN-SEMANTIC-INPUT-TOTAL-BYTE-LIMIT"
@@ -238,7 +238,7 @@ basicInputLimitFindings supplied =
       "supplied-total-utf8-bytes"
       maximumTotalDocumentBytes
       totalBytes
-      "the structural join refuses before parsing when aggregate supplied UTF-8 bytes exceed the reviewed bound"
+      "the structural join refuses before parsing when aggregate supplied UTF-8 bytes exceed the configured bound"
  where
   suppliedCount = toInteger (length supplied)
   totalBytes = sum [utf8ByteCount contents | (_, contents) <- supplied]
@@ -249,21 +249,21 @@ basicInputLimitFindings supplied =
       "supplied-path-characters"
       maximumSuppliedPathLength
       (toInteger (length path))
-      "the supplied path exceeds the reviewed character-length bound"
+      "the supplied path exceeds the configured character-length bound"
       <> limitFinding
         "PLAN-SEMANTIC-INPUT-DOCUMENT-BYTE-LIMIT"
         path
         "document-utf8-bytes"
         maximumDocumentBytes
         (utf8ByteCount contents)
-        "the supplied document exceeds the reviewed UTF-8 byte bound"
+        "the supplied document exceeds the configured UTF-8 byte bound"
       <> limitFinding
         "PLAN-SEMANTIC-INPUT-DOCUMENT-LINE-LIMIT"
         path
         "document-lines"
         maximumDocumentLines
         (toInteger (length (Text.lines contents)))
-        "the supplied document exceeds the reviewed physical-line bound"
+        "the supplied document exceeds the configured physical-line bound"
 
 rowLimitFindings :: [(FilePath, Text)] -> [Finding]
 rowLimitFindings supplied = concatMap perRelevantEntry supplied
@@ -276,7 +276,7 @@ rowLimitFindings supplied = concatMap perRelevantEntry supplied
           "tracker-raw-candidate-rows"
           maximumTrackerRows
           (trackerRawCandidatePreflightCount contents)
-          "the tracker exceeds its reviewed pre-parse raw candidate-row bound"
+          "the tracker exceeds its configured pre-parse raw candidate-row bound"
     | isPhaseLikePath path =
         limitFinding
           "PLAN-SEMANTIC-PHASE-ROW-LIMIT"
@@ -284,7 +284,7 @@ rowLimitFindings supplied = concatMap perRelevantEntry supplied
           "phase-visible-pipe-rows"
           maximumPhaseRows
           (visiblePipeRowCount contents)
-          "the phase-like document exceeds its reviewed pre-parse visible table-row bound"
+          "the phase-like document exceeds its configured pre-parse visible table-row bound"
     | otherwise = []
 
 visiblePipeRowCount :: Text -> Integer
@@ -582,7 +582,7 @@ parsePhaseDocument path contents = do
             , ">" `Text.isPrefixOf` Text.strip line
             ] of
           firstBlockquote : _ ->
-            "> **UNRESOLVED — blocks validation.** No live mutation is authorized."
+            "> **UNRESOLVED — blocks validation.** No live mutation may begin."
               `Text.isPrefixOf` firstBlockquote
           [] -> False
   pure

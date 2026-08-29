@@ -101,7 +101,7 @@ either succeeds or fails fast.
 **Permanently invalidated Phase-67 run report.** realized. The exported producer surface accepts only typed `Serialise` values, the
 `CborPayload` constructor is private, and a fixture importing `produceRaw` fails for the pinned missing-export
 reason. This historical statement supplies no current evidence. The replacement contract requires a
-separately reviewed Haskell API expectation and `.hs` re-added-raw-arm mutation operator; any compiler input,
+separately authored Haskell API expectation and `.hs` re-added-raw-arm mutation operator; any compiler input,
 diagnostic, or transport bytes are generated lazily beneath `.build/**`. A malformed received body returning
 `Left` and two live namespaces round-tripping typed CBOR remain unverified target observations.
 

@@ -104,7 +104,7 @@ foreign-architecture artifact under emulation, and none builds one through a cro
 an architecture is produced and executed on a host whose natural architecture is that one.
 
 **What it forecloses.** No single host produces a two-architecture image. A multi-architecture artifact
-becomes a pair of natively built children joined by attestation, which costs a second physical machine
+becomes a pair of natively built children joined by passing architecture test records, which costs a second physical machine
 ([image_build_doctrine.md §3](./image_build_doctrine.md#3-multi-architecture-images--one-natively-built-child-per-architecture)).
 The two axes stay orthogonal and both still matter: the **OS** chooses the package manager and the VM-provider
 strategy ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)), while the
@@ -203,8 +203,8 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 > **Permanently invalidated history.** Former detector, mapping, tool-boundary, Python-coordinator, Incus-run,
 > and `DEVELOPMENT_PLAN/evidence/phase_19` statements are not current validation evidence. The Python
 > coordinator is condemned legacy rather than an accepted implementation. Every substrate claim is **NOT
-> VALIDATED** until its numerical phase has a reviewed Haskell subject and independent oracle, completes the
-> required gate, and is reviewer-promoted in
+> VALIDATED** until its numerical phase has an authored Haskell subject and independent oracle and passes its
+> complete qualified gate in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -283,7 +283,7 @@ names and the remedy that clears it, so the whole floor is decidable for a subst
 host is not — which is what lets an apple host check that its plan for windows is well-formed.
 
 **The tables above are reader-facing specification, never resolver input.** Each prerequisite id,
-dependency relation, probe, and remedy is declared as a reviewed Haskell `HostFloor` value; an independently
+dependency relation, probe, and remedy is declared as a authored Haskell `HostFloor` value; an independently
 authored Haskell oracle states the expected closed set. The resolver reads only those compiled values. Editing
 this Markdown cannot add, remove, or alter a prerequisite. The floor is evaluated *before* any requirement is
 resolved, so a host that cannot support the run is told which prerequisite is missing and what clears it rather

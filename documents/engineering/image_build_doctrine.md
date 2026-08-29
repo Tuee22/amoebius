@@ -123,7 +123,7 @@ Playwright test image is never published at all
   in-cluster pull. This reverses prodbox's mirror-into-registry model (`local_registry_pipeline.md` [§5](#5-what-the-image-identity-is-given-that-the-tag-is-an-address)).
 - **The ladder is a typed arm set, not a preference anyone has to remember.** The bake catalog's step union
   carries one arm per rung — an `apt` package, an official artifact with a publisher-resolved checksum, an
-  amoebius-built product — so choosing a rung is a modelling decision a reviewer can see in the diff. A
+  amoebius-built product — so choosing a rung is a modelling decision visible in the diff. A
   scavenge-from-image arm may exist as an explicit last resort, and every remaining use records why the rungs
   above it did not apply. Without the upper arms in the type there is only one way in, and the ladder becomes
   advice: the catalog says "copy from a public image" because that is the only sentence it can say.
@@ -220,12 +220,12 @@ Concretely:
   everywhere else — an engine offering and a generated test topology both carry their architecture — applied
   to images.
 - **There is no join, and that is the point.** An OCI manifest list would be an artifact **no single host
-  ever attested**: whichever machine assembled it would be advertising a child it could not execute, which is
+  ever tested completely**: whichever machine assembled it would be advertising a child it could not execute, which is
   exactly the half-proven index the 2026-08-16 natural-architecture amendment exists to remove. Removing the
   join does not weaken that amendment; it finishes it, by moving the obligation out of a join step and into
   the reference's own identity.
 - **Each architecture resolves its own toolchain graph, and the two must agree.** The compatible compiler and
-  packages are resolved per run on each host; the attestations record both observations and reject
+  packages are resolved per run on each host; the architecture test records contain both observations and reject
   per-architecture dependency drift by comparing them. No resolution file is committed.
 
 What a caller loses is the convenience of one reference that resolves everywhere; what it gains is that every
@@ -245,8 +245,8 @@ flowchart TD
 %% register: algebra
   src["amoebius source plus rendered recipe"]:::intent --> bxa[/"docker build on an amd64 host"/]:::effect
   src --> bxb[/"docker build on an arm64 host"/]:::effect
-  bxa --> ata(("amd64 image plus its native attestation")):::seal
-  bxb --> atb(("arm64 image plus its native attestation")):::seal
+  bxa --> ata(("amd64 image plus its passing native test record")):::seal
+  bxb --> atb(("arm64 image plus its passing native test record")):::seal
   ata -->|atomic push of one tag| reg["Distribution registry endpoint on this cluster: registry:2"]:::runtime
   atb -->|atomic push of one tag| reg
   reg -->|amd64 node names the amd64 tag| amd["amd64 node pull"]:::runtime
@@ -257,7 +257,7 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Design intent. Each build is an effectful seam on its own architecture's hardware and each image is sealed by the attestation of the host that executed it; the running registry and the two node pulls are runtime-checked, not proven here.*
+*Design intent. Each build is an effectful seam on its own architecture's hardware and each image is paired with the passing test record from the host that executed it; the running registry and the two node pulls are runtime-checked, not proven here.*
 
 ---
 
@@ -277,7 +277,7 @@ time. So amoebius treats each architecture's image as one indivisible artifact:
   tag is live and incomplete. The two architectures are published independently and neither waits on the
   other, which is the practical gain of dropping the join: a machine that can build only one architecture can
   still publish that one completely, instead of holding a half-index nobody can use.
-- **An unattested image is an absent image.** A tag is publishable only with the attestation produced on that
+- **An untested image is an absent image.** A tag is publishable only with the passing test record produced on that
   architecture's own hardware, recording the per-binary execution and ELF-machine observations for it. This
   is what keeps an independently built image from re-admitting the half-proven artifact an emulated build
   used to produce.
@@ -545,7 +545,7 @@ no app relink, so the control-plane daemon's `strategy: Recreate` pod
 ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon))
 is untouched. Second, when a trusted adapter really is added, the link-time merge obligations of
 [capability_extension_doctrine.md §6](./capability_extension_doctrine.md#6-the-merge-total-acyclic-anti-shadow)
-are discharged **per variant** over a small reviewed set, not globally over every UI program at once.
+are discharged **per variant** over a small tested set, not globally over every UI program at once.
 Variants share their common layers by digest
 ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
@@ -655,7 +655,7 @@ enum (absolute-path `AbsExe`, probe-first `Ensure` reconcile), so it is discover
 
 For amoebius, that sibling seam informs the implementation but does not become a second source of truth.
 Haskell `Amoebius.Image.BakeCatalog` values are authoritative and lazily emit the catalog projection and
-Dockerfile beneath `.build/**`. Redis is added to that Haskell catalog and to an independently reviewed
+Dockerfile beneath `.build/**`. Redis is added to that Haskell catalog and to an separately authored
 Haskell service-inventory oracle; tracked Dhall, a handwritten Dockerfile, or a serialized expected-service
 inventory is non-conforming.
 
@@ -703,8 +703,8 @@ which forces a concrete divergence from prodbox's mechanics:
   recorded resolution is a resolution *this run* performed. It also stops the rendered recipe changing every
   time an upstream base is republished, which is a diff nobody reads and everybody approves.
 
-  [Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md) must eventually supply independently
-  reviewed Register-1 evidence for this pure boundary: the Haskell catalog has no authored digest field,
+  [Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md) must eventually supply a complete
+  passing Register-1 gate for this pure boundary: the Haskell catalog has no authored digest field,
   `BaseChannel` excludes digest syntax, and the lazy renderer emits one base argument and one matching
   `FROM` while distinct run-local resolutions leave the recipe bytes unchanged. Phase 35 is **NOT VALIDATED**;
   registry resolution and use of an observed digest in a live build are later claims.
@@ -730,7 +730,7 @@ which forces a concrete divergence from prodbox's mechanics:
 
 The registry cannot pull the image that must exist before the registry can start.
 **A pinned preload plus one typed action dissolves this cycle.** The selected provider is the fixed
-Distribution `registry:2` image, resolved to its reviewed digest and loaded into the node's CRI before any
+Distribution `registry:2` image, resolved to its observed immutable digest and loaded into the node's CRI before any
 Registry object exists. Its binary is not copied into `amoebius-base`; there is no self-pull and no alternate
 registry mirror. Phase 56 still
 precedes the full scheduler/reconciler deployment and therefore cannot pretend a standalone service is a
@@ -774,19 +774,19 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 
 ## 10. Honesty and planning ownership
 
-> **Validation reset.** Phase 56 is NOT VALIDATED. Its former seal depended on a Python-owned verdict path,
+> **Validation reset.** Phase 56 is NOT VALIDATED. Its former result depended on a Python-owned verdict path,
 > committed generated expectations, and an emulated non-native child; none is admissible under the current
 > Haskell-only source boundary, natural-architecture rule, or spoof-resistant gate contract. Historical run
-> descriptions are diagnostic only and cannot establish acquisition, native execution, publication
+> descriptions are diagnostic only and cannot establish exact source binding, native execution, publication
 > atomicity, private-pull enforcement, mutation sensitivity, or promotion. The rewritten Phase-56 contract
-> must establish those claims independently after the hardware-free Phase-49 DSL barrier and delegated promotion.
+> must establish those claims independently after the hardware-free Phase-49 DSL gate passes.
 
 The target `linux-cpu` image and Distribution `registry:2` lane is required on every hardware substrate; that
 availability is not currently validated.
 
 All Phase-56 and later image, registry, provider-node preload, static-driver, resolver, private-pull, and
 public-egress claims remain target contracts or `UNVERIFIED` residue until their numerically ordered Haskell
-gates are qualified, independently reviewed, and reviewer-promoted. This doctrine retains no scoped run as a
+gates are qualified, checked against separately authored expectations, and passed. This doctrine retains no scoped run as a
 substitute and no result that can be reactivated by a later status change.
 
 Delivery sequencing, completion status, and validation gates live only in

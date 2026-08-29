@@ -326,7 +326,7 @@ early. This doc states the target shape and links back for status.
 > hardware substrate always supplies the `linux-cpu` lane: Linux runs it natively or in Incus, Apple in Lima,
 > and Windows in WSL2 when a pristine Linux host is required. Phase 65 owns the typed host→control-plane daemon
 > Lease handoff, the four endpoint families, and the Haskell command-mode admin-REST client. All of these claims remain
-> design intent until the tracker records delegated promotion
+> design intent until the complete qualified gate passes and the tracker records that result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---

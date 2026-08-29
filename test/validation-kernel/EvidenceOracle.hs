@@ -6,7 +6,7 @@ module EvidenceOracle
 
 -- Component diagnostic only. This module proves that the current unintegrated
 -- seam refuses caller-invented candidate material; it does not perform
--- acquisition, qualification, reviewer inspection, phase validation, or promotion.
+-- capture, qualification, a complete gate, or phase validation.
 
 import Amoebius.Validation.Evidence
 import Amoebius.Validation.Types
@@ -22,10 +22,10 @@ runEvidenceOracle =
     ( concat
         [ expectRefusalCode
             "synthetic green rows and digest-shaped strings never construct a candidate"
-            "EVIDENCE-ACQUISITION-UNINTEGRATED"
+            "EVIDENCE-CAPTURE-UNINTEGRATED"
             (candidateFromChecks baseProvenance baseResidue baseChecks)
         , expectRefusalCode
-            "a red row remains visible beside the acquisition refusal"
+            "a red row remains visible beside the capture refusal"
             "TEST-BLOCKER"
             ( candidateFromChecks
                 baseProvenance
@@ -71,7 +71,7 @@ baseProvenance =
     }
 
 baseResidue :: [Text]
-baseResidue = ["UNVERIFIED: external acquisition and reviewer inspection"]
+baseResidue = ["UNVERIFIED: integrated execution and documentation correspondence gate"]
 
 baseChecks :: [CheckResult]
 baseChecks = [documentationCheck, sourceCheck]

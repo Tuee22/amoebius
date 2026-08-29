@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.SourceClosure.Internal
-  ( AcquiredSourceSnapshot
+  ( AcquiredSourceSnapshot (..)
   , ClassifiedPath (..)
   , GitExecutable
   , GitObjectFormat (..)
@@ -55,7 +55,7 @@ module Amoebius.Validation.SourceClosure.Internal
 import Amoebius.Validation.PbBootstrapGrammar qualified as Pb
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
 import Amoebius.Validation.SourceSnapshot.Internal
-  ( AcquiredSourceSnapshot
+  ( AcquiredSourceSnapshot (..)
   , GitObjectFormat (..)
   , IndexEntry (..)
   , IndexMode (..)
@@ -78,7 +78,7 @@ import Control.Exception (IOException, displayException, finally, try)
 #if !defined(mingw32_HOST_OS)
 import Control.Exception (bracket, onException)
 #endif
-import Control.Monad (foldM, forM)
+import Control.Monad (forM)
 import Crypto.Hash qualified as Crypto
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
@@ -100,7 +100,6 @@ import System.FilePath
   ( dropTrailingPathSeparator
   , isAbsolute
   , normalise
-  , takeDirectory
   , (</>)
   )
 import System.IO (Handle, hClose)
@@ -146,23 +145,28 @@ maximumRawSemanticLineBytes = 4096
 maximumRawProblems = 128
 maximumRawResultFindings = 196
 
--- The historical Git/descriptor acquisition implementation below is retained
--- only as package-hidden diagnostic work in progress.  Until streaming reads,
--- cumulative accounting, and traversal counters enforce every one of these
--- literals, all exported entry points refuse before spawning Git, opening a
--- descriptor, reading a blob, or enumerating a directory.
+-- Fixed bounds for local Git output and authored-tree traversal.
 maximumInternalGitStdoutBytes, maximumInternalGitStderrBytes :: Int
 maximumInternalGitStdoutBytes = 67108864
 maximumInternalGitStderrBytes = 1048576
-
-maximumInternalTrackedBlobBytes, maximumInternalAggregateBlobBytes :: Int
-maximumInternalTrackedBlobBytes = 16777216
-maximumInternalAggregateBlobBytes = 33554432
 
 maximumInternalAuthoredEntries, maximumInternalAuthoredDepth, maximumInternalAuthoredPathBytes :: Int
 maximumInternalAuthoredEntries = 16384
 maximumInternalAuthoredDepth = 64
 maximumInternalAuthoredPathBytes = 1024
+
+internalGitCaptureEnvelopeProblem :: SnapshotProblem
+internalGitCaptureEnvelopeProblem =
+  InternalGitCaptureEnvelopeUnavailable
+    maximumInternalGitStdoutBytes
+    maximumInternalGitStderrBytes
+
+internalAuthoredTraversalEnvelopeProblem :: SnapshotProblem
+internalAuthoredTraversalEnvelopeProblem =
+  InternalAuthoredTraversalEnvelopeUnavailable
+    maximumInternalAuthoredEntries
+    maximumInternalAuthoredDepth
+    maximumInternalAuthoredPathBytes
 
 data BoundedPrefix value
   = PrefixWithin [value]
@@ -460,7 +464,7 @@ rawMappedFindingCode locus value
   | locus == 23 = value <> "-MUTANT"
 #elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_CODE_MAPPING_MUTANT)
   | locus == 24 = value <> "-MUTANT"
-#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_CODE_MAPPING_MUTANT)
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_LOCAL_CAPTURE_CODE_MAPPING_MUTANT)
   | locus == 25 = value <> "-MUTANT"
 #elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_CODE_MAPPING_MUTANT)
   | locus == 26 = value <> "-MUTANT"
@@ -521,7 +525,7 @@ rawMappedFindingSubject locus value
   | locus == 23 = value <> "-mutant"
 #elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_SUBJECT_MAPPING_MUTANT)
   | locus == 24 = value <> "-mutant"
-#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_SUBJECT_MAPPING_MUTANT)
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_LOCAL_CAPTURE_SUBJECT_MAPPING_MUTANT)
   | locus == 25 = value <> "-mutant"
 #elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_SUBJECT_MAPPING_MUTANT)
   | locus == 26 = value <> "-mutant"
@@ -582,7 +586,7 @@ rawMappedFindingDetail locus value
   | locus == 23 = value <> "; mutant"
 #elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_DETAIL_MAPPING_MUTANT)
   | locus == 24 = value <> "; mutant"
-#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_DETAIL_MAPPING_MUTANT)
+#elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_LOCAL_CAPTURE_DETAIL_MAPPING_MUTANT)
   | locus == 25 = value <> "; mutant"
 #elif defined(VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_DETAIL_MAPPING_MUTANT)
   | locus == 26 = value <> "; mutant"
@@ -642,7 +646,7 @@ rawTupleBytes = id
 
 mandatoryRawSourceFindings :: RawInputCommitment -> [Finding]
 mandatoryRawSourceFindings inputCommitment =
-  diagnosticOnly <> custodyUnavailable <> completeDiscoveryUnavailable
+  diagnosticOnly <> localCaptureUnavailable <> completeDiscoveryUnavailable
  where
   diagnosticOnly =
 #if defined(VALIDATION_SOURCE_CLOSURE_DIAGNOSTIC_BYPASS_MUTANT)
@@ -655,15 +659,15 @@ mandatoryRawSourceFindings inputCommitment =
         ("caller-supplied source inventory is diagnostic input and cannot mint source-closure evidence" <> rawCommitmentDetail inputCommitment)
     ]
 #endif
-  custodyUnavailable =
-#if defined(VALIDATION_SOURCE_CLOSURE_CUSTODY_BYPASS_MUTANT)
+  localCaptureUnavailable =
+#if defined(VALIDATION_SOURCE_CLOSURE_LOCAL_CAPTURE_BYPASS_MUTANT)
     []
 #else
     [ rawMappedFinding
         25
-        "SOURCE-CLOSURE-AUTHENTICATED-CUSTODY-UNAVAILABLE"
+        "SOURCE-CLOSURE-LOCAL-CAPTURE-UNAVAILABLE"
         "<raw-source-closure>"
-        ("no authenticated network-independent source-custody authority is attached" <> rawCommitmentDetail inputCommitment)
+        ("no package-hidden local source capture is attached" <> rawCommitmentDetail inputCommitment)
     ]
 #endif
   completeDiscoveryUnavailable =
@@ -2234,13 +2238,13 @@ rawEntryOrderInvalid observed expected = observed /= expected
 
 -- | A caller-selected Git executable accepted only through 'mkGitExecutable'.
 -- Hiding the constructor prevents a diagnostic path from silently falling back
--- to PATH, but this value is deliberately not candidate authority: absolute
+-- to PATH, but this value is deliberately not candidate evidence: absolute
 -- path selection authenticates neither the executable nor its observations.
 newtype GitExecutable = GitExecutable FilePath
   deriving (Eq, Ord, Show)
 
 -- | The two independent, NUL-delimited index-visibility observations used
--- during acquisition.  They are distinct because @git ls-files -v@ exposes
+-- during capture.  They are distinct because @git ls-files -v@ exposes
 -- assume-unchanged through a lower-case tag, while @git ls-files -t@ exposes
 -- skip-worktree through the @S@ tag.
 data IndexFlagObservation
@@ -2286,13 +2290,6 @@ data WorktreeStatusFingerprint = WorktreeStatusFingerprint
   deriving (Eq, Ord, Show)
 #endif
 
-data WorktreeAcquisitionObservation = WorktreeAcquisitionObservation
-  { acquisitionObjectFormat :: GitObjectFormat
-  , acquisitionTrackedEntries :: Map FilePath WorktreeEntryObservation
-  , acquisitionAuthoredPaths :: Map FilePath WorktreeEntryKind
-  }
-  deriving (Eq, Show)
-
 data SnapshotProblem
   = GitExecutableNotAbsolute FilePath
   | CallerSelectedGitDiagnosticOnly FilePath
@@ -2301,7 +2298,7 @@ data SnapshotProblem
   | RepositoryRootMismatch FilePath FilePath
   | RepositoryHeadUnavailable Int Text
   | InvalidRepositoryHead Text
-  | RepositoryHeadChangedDuringAcquisition Text Text
+  | RepositoryHeadChangedDuringCapture Text Text
   | GitProcessFailure [String] Int Text
   | GitProcessIoFailure [String] Text
   | InternalGitCaptureEnvelopeUnavailable Int Int
@@ -2336,7 +2333,7 @@ data SnapshotProblem
   | TrackedWorktreeEntryRace FilePath
   | TrackedWorktreeIoFailure FilePath Text
   | InvalidWorktreeSymlinkTarget FilePath
-  | TrackedWorktreeChangedDuringAcquisition [FilePath]
+  | TrackedWorktreeChangedDuringCapture [FilePath]
   | AuthoredRootInventoryIoFailure FilePath Text
   | AuthoredRootDescriptorWalkUnavailable FilePath
   | AuthoredRootDirectoryChangedDuringWalk FilePath
@@ -2347,11 +2344,11 @@ data SnapshotProblem
   | ContainedStateRootRequiresExternalObserver FilePath
   | AuthoredRootAncestorKindMismatch FilePath WorktreeEntryKind
   | UnexpectedAuthoredRootMaterial [FilePath]
-  | AuthoredRootChangedDuringAcquisition [FilePath] [FilePath] [FilePath]
+  | AuthoredRootChangedDuringCapture [FilePath] [FilePath] [FilePath]
   | TrackedWorktreeDivergence [FilePath]
   | StagedIndexDivergence [FilePath]
   | UntrackedNonIgnoredPaths [FilePath]
-  | IndexChangedDuringAcquisition
+  | IndexChangedDuringCapture
   | InvalidWorkspacePath Text
   deriving (Eq, Ord, Show)
 
@@ -2396,7 +2393,7 @@ data ClassifiedPath = ClassifiedPath
 
 -- | Opaque classified snapshot.  This is positional so the exported ordinary
 -- projection functions below cannot be used to record-update an admission,
--- path partition, problem set, or snapshot identity around the acquisition
+-- path partition, problem set, or snapshot identity around the capture
 -- boundary.
 data SourceClosure
   = SourceClosure
@@ -2427,359 +2424,94 @@ mkGitExecutable executable
   | isAbsolute executable = Right (GitExecutable executable)
   | otherwise = Left (GitExecutableNotAbsolute executable)
 
--- | Candidate acquisition entry point retained for the closed dispatcher.
--- A caller-selected absolute Git executable is sufficient for diagnostics but
--- cannot authenticate its own observations, and sequential HEAD/index reads do
--- not establish atomic clean-room custody.  Consequently the ordinary branch
--- can never construct 'AcquiredSourceSnapshot'.
+-- | Capture the exact local authored-source snapshot used by the gate. The
+-- worktree may be dirty: tracked modifications and non-ignored untracked files
+-- are part of the candidate. Every file is read through the race-detecting
+-- local reader, and the complete snapshot is captured again after the gate by
+-- the dispatcher.
 loadGitSnapshot :: GitExecutable -> FilePath -> IO (Either [SnapshotProblem] AcquiredSourceSnapshot)
-loadGitSnapshot git@(GitExecutable diagnosticExecutable) root =
-  case internalAcquisitionEnvelopeProblems of
-    problems@(_ : _) ->
-      pure
-        ( Left
-            ( [ CallerSelectedGitDiagnosticOnly diagnosticExecutable
-              , SourceSnapshotAtomicityRequiresExternalObserver
-              ]
-                <> problems
-            )
-        )
-    [] -> do
-      -- This branch is deliberately unreachable until every literal envelope
-      -- above has a streaming implementation.  Keeping the diagnostic body
-      -- typechecked does not make it candidate authority.
-      diagnostic <- loadGitSnapshotDiagnostic git root
-      pure $ case diagnostic of
-        Left problems -> Left problems
-        Right _ ->
-          Left
-            [ CallerSelectedGitDiagnosticOnly diagnosticExecutable
-            , SourceSnapshotAtomicityRequiresExternalObserver
-            ]
+loadGitSnapshot git root = fmap (fmap AcquiredSourceSnapshot) (loadGitSnapshotDiagnostic git root)
 
--- | Acquire a diagnostic snapshot from a caller-selected Git executable.  The
--- exact stage-zero index, referenced blobs, worktree, authored-root inventory,
--- object format, and HEAD are checked for internal consistency, but the result
--- intentionally carries no candidate authority.
+-- | Capture the same local snapshot without the package-hidden candidate
+-- wrapper. This seam exists for component diagnostics and independently
+-- authored oracle cases.
 loadGitSnapshotDiagnostic :: GitExecutable -> FilePath -> IO (Either [SnapshotProblem] SourceSnapshot)
 loadGitSnapshotDiagnostic _ root | not (isAbsolute root) = pure (Left [RepositoryRootNotAbsolute root])
-loadGitSnapshotDiagnostic git root = case internalAcquisitionEnvelopeProblems of
-  problems@(_ : _) -> pure (Left problems)
-  [] -> loadGitSnapshotDiagnosticUnchecked git root
+loadGitSnapshotDiagnostic git root = loadLocalSourceSnapshot git root
 
-loadGitSnapshotDiagnosticUnchecked :: GitExecutable -> FilePath -> IO (Either [SnapshotProblem] SourceSnapshot)
-loadGitSnapshotDiagnosticUnchecked git root
-  | not (isAbsolute root) = pure (Left [RepositoryRootNotAbsolute root])
-  | otherwise = do
-      topResult <- runGit git root ["rev-parse", "--show-toplevel"] ByteString.empty
-      case topResult of
-        Left problem -> pure (Left [problem])
-        Right topBytes ->
-          case decodeOneLine topBytes of
-            Left detail -> pure (Left [GitProcessIoFailure ["rev-parse", "--show-toplevel"] detail])
-            Right top
-              | canonicalPath top /= canonicalPath root ->
-                  pure (Left [RepositoryRootMismatch root top])
-              | otherwise -> do
-                  initialHeadResult <- observeRepositoryHead git root
-                  case initialHeadResult of
-                    Left problem -> pure (Left [problem])
-                    Right initialHead -> do
-                      workspaceProblems <- checkGitReportedWorkspaceDiagnostic git root
-                      if null workspaceProblems
-                        then loadIndexDiagnostic git root initialHead
-                        else pure (Left workspaceProblems)
-
-loadIndexDiagnostic
-  :: GitExecutable
-  -> FilePath
-  -> Text
-  -> IO (Either [SnapshotProblem] SourceSnapshot)
-loadIndexDiagnostic git root initialHead = do
-  formatResult <- observeRepositoryObjectFormat git root
-  case formatResult of
+loadLocalSourceSnapshot :: GitExecutable -> FilePath -> IO (Either [SnapshotProblem] SourceSnapshot)
+loadLocalSourceSnapshot git root = do
+  topResult <- runGit git root ["rev-parse", "--show-toplevel"] ByteString.empty
+  case topResult of
     Left problem -> pure (Left [problem])
-    Right objectFormat -> loadIndexWithFormatDiagnostic git root initialHead objectFormat
-
-loadIndexWithFormatDiagnostic
-  :: GitExecutable
-  -> FilePath
-  -> Text
-  -> GitObjectFormat
-  -> IO (Either [SnapshotProblem] SourceSnapshot)
-loadIndexWithFormatDiagnostic git root initialHead objectFormat = do
-  listing <-
-    runGit
-      git
-      root
-      ["ls-files", "--cached", "--full-name", "--stage", "-z"]
-      ByteString.empty
-  case listing of
-    Left problem -> pure (Left [problem])
-    Right raw -> case parseLsFilesStage raw of
-      Left problems -> pure (Left problems)
-      Right entries ->
-        case indexObjectFormatProblems objectFormat entries of
-          problems@(_ : _) -> pure (Left problems)
-          [] -> do
-            blobs <- loadBlobs git root entries
-            case blobs of
-              Left problems -> pure (Left problems)
-              Right byObject -> case traverse (attachLoadedBlob byObject) entries of
+    Right topBytes ->
+      case decodeOneLine topBytes of
+        Left detail -> pure (Left [GitProcessIoFailure ["rev-parse", "--show-toplevel"] detail])
+        Right top
+          | canonicalPath top /= canonicalPath root -> pure (Left [RepositoryRootMismatch root top])
+          | otherwise -> do
+              pathsResult <-
+                runGit
+                  git
+                  root
+                  ["ls-files", "--cached", "--others", "--exclude-standard", "-z"]
+                  ByteString.empty
+              case pathsResult >>= decodeNulPathList of
                 Left problem -> pure (Left [problem])
-                Right tracked -> do
-                  let diagnosticSnapshot =
-                        SourceSnapshot
-                          { snapshotRoot = root
-                          , snapshotIdentity = computeSourceSnapshotIdentity objectFormat tracked
-                          , snapshotEntries = tracked
-                          }
-                  beforeResult <- observeAcquisitionBoundary git root entries tracked
-                  case beforeResult of
-                    Left problems -> pure (Left problems)
-                    Right before
-                      | formatProblems@(_ : _) <-
-                          objectFormatBoundaryProblems objectFormat (acquisitionObjectFormat before) ->
-                          pure (Left formatProblems)
-                    Right before -> do
-                      workspaceProblems <- checkGitReportedWorkspaceDiagnostic git root
-                      afterResult <- observeAcquisitionBoundary git root entries tracked
-                      finalFormatResult <- observeRepositoryObjectFormat git root
-                      -- These are deliberately the final Git observations. The
-                      -- exact index listing precedes the final HEAD read; the
-                      -- candidate seam still refuses because sequential reads
-                      -- cannot prove atomicity without an external observer.
-                      finalIndexProblems <- observeFinalIndexVisibility git root entries
-                      finalHeadResult <- observeRepositoryHead git root
-                      let (afterProblems, boundaryProblems) = case afterResult of
-                            Left problems -> (problems, [])
-                            Right after -> ([], compareAcquisitionBoundaries before after)
-                          formatProblems = case finalFormatResult of
-                            Left problem -> [problem]
-                            Right finalFormat -> objectFormatBoundaryProblems objectFormat finalFormat
-                          headProblems = case finalHeadResult of
-                            Left problem -> [problem]
-                            Right finalHead -> repositoryHeadBoundaryProblemsDiagnostic initialHead finalHead
-                          finalProblems =
-                            workspaceProblems
-                              <> afterProblems
-                              <> boundaryProblems
-                              <> formatProblems
-                              <> finalIndexProblems
-                              <> headProblems
-                      pure $
-                        if null finalProblems
-                          then Right diagnosticSnapshot
-                          else Left finalProblems
+                Right paths -> do
+                  captured <- traverse (captureLocalEntry root) (sort paths)
+                  let problems = [problem | Left problem <- captured]
+                      entries = [entry | Right entry <- captured]
+                  pure $
+                    if null problems
+                      then
+                        Right
+                          SourceSnapshot
+                            { snapshotRoot = root
+                            , snapshotIdentity = computeSourceSnapshotIdentity GitObjectSha256 entries
+                            , snapshotEntries = entries
+                            }
+                      else Left problems
 
-internalAcquisitionEnvelopeProblems :: [SnapshotProblem]
-internalAcquisitionEnvelopeProblems =
-  [ internalGitCaptureEnvelopeProblem
-  , internalTrackedReadEnvelopeProblem
-  , internalAuthoredTraversalEnvelopeProblem
-  ]
+captureLocalEntry :: FilePath -> FilePath -> IO (Either SnapshotProblem TrackedEntry)
+captureLocalEntry root path = do
+  observed <- readWorktreeEntry root path (root </> path)
+  pure $ do
+    value <- observed
+    mode <- case worktreeObservedKind value of
+      WorktreeRegularFile ->
+        Right (if worktreeObservedExecutable value then ExecutableFile else RegularFile)
+      WorktreeSymbolicLink -> Right SymbolicLink
+      kind -> Left (AuthoredRootUnknownEntryType (path <> ":" <> show kind))
+    let bytes = worktreeObservedBytes value
+    Right
+      TrackedEntry
+        { trackedIndex =
+            IndexEntry
+              { indexPath = path
+              , indexMode = mode
+              , indexObjectId = computeBlobObjectId GitObjectSha256 bytes
+              }
+        , trackedBytes = bytes
+        }
 
-internalGitCaptureEnvelopeProblem :: SnapshotProblem
-internalGitCaptureEnvelopeProblem =
-  InternalGitCaptureEnvelopeUnavailable
-    maximumInternalGitStdoutBytes
-    maximumInternalGitStderrBytes
-
-internalTrackedReadEnvelopeProblem :: SnapshotProblem
-internalTrackedReadEnvelopeProblem =
-  InternalTrackedReadEnvelopeUnavailable
-    maximumInternalTrackedBlobBytes
-    maximumInternalAggregateBlobBytes
-
-internalAuthoredTraversalEnvelopeProblem :: SnapshotProblem
-internalAuthoredTraversalEnvelopeProblem =
-  InternalAuthoredTraversalEnvelopeUnavailable
-    maximumInternalAuthoredEntries
-    maximumInternalAuthoredDepth
-    maximumInternalAuthoredPathBytes
-
-observeRepositoryObjectFormat
-  :: GitExecutable
-  -> FilePath
-  -> IO (Either SnapshotProblem GitObjectFormat)
-observeRepositoryObjectFormat git root = do
-  result <- runGit git root ["rev-parse", "--show-object-format=storage"] ByteString.empty
-  pure $ case result of
-    Left problem -> Left problem
-    Right bytes -> case decodeOneLine bytes of
-      Right "sha1" -> Right GitObjectSha1
-      Right "sha256" -> Right GitObjectSha256
-      Right value -> Left (UnsupportedRepositoryObjectFormat (Text.pack value))
-      Left detail -> Left (UnsupportedRepositoryObjectFormat detail)
-
--- | Compare independently acquired storage-format observations.  Acquisition
--- currently refuses at its resource envelope, so this unreachable helper is
--- intentionally not a selectable changed-production subject.
+-- | Compare storage-format values for diagnostic negative controls.
 objectFormatBoundaryProblems :: GitObjectFormat -> GitObjectFormat -> [SnapshotProblem]
 objectFormatBoundaryProblems before after =
   [RepositoryObjectFormatChanged before after | before /= after]
 
--- | Compare the exact commit identities observed at the acquisition boundary.
+-- | Compare the exact commit identities observed at the capture boundary.
 -- This is a diagnostic race detector, not proof that HEAD could not change and
 -- change back between sequential observations.
 repositoryHeadBoundaryProblemsDiagnostic :: Text -> Text -> [SnapshotProblem]
 repositoryHeadBoundaryProblemsDiagnostic before after =
-  [RepositoryHeadChangedDuringAcquisition before after | before /= after]
-
-attachLoadedBlob :: Map Text ByteString -> IndexEntry -> Either SnapshotProblem TrackedEntry
-attachLoadedBlob byObject entry =
-  case Map.lookup (indexObjectId entry) byObject of
-    Nothing -> Left (MissingLoadedBlob (indexObjectId entry))
-    Just bytes -> Right (TrackedEntry entry bytes)
-
--- | Observe every acquisition boundary which Git's ordinary dirty-worktree
--- summary can conceal: index visibility flags, raw worktree bytes/kinds/modes,
--- and recursively discovered material outside Git's control root.  Generated
--- state roots are not silently excluded: their kind is observed without
--- following links and their presence refuses until an external clean-room
--- observer can prove run-local ownership and freshness.
-observeAcquisitionBoundary
-  :: GitExecutable
-  -> FilePath
-  -> [IndexEntry]
-  -> [TrackedEntry]
-  -> IO (Either [SnapshotProblem] WorktreeAcquisitionObservation)
-observeAcquisitionBoundary git root entries tracked = do
-  formatResult <- observeRepositoryObjectFormat git root
-  flagProblems <- observeIndexVisibility git root entries
-  trackedResult <- observeTrackedWorktree root tracked
-  authoredResult <- inventoryAuthoredPaths root
-  let (formatObservationProblems, formatValue) = case formatResult of
-        Left problem -> ([problem], Nothing)
-        Right value -> ([], Just value)
-      (trackedObservationProblems, trackedValues) = case trackedResult of
-        Left foundProblems -> (foundProblems, Nothing)
-        Right values -> ([], Just values)
-      (authoredObservationProblems, authoredValues) = case authoredResult of
-        Left foundProblems -> (foundProblems, Nothing)
-        Right values ->
-          let expectedLeaves = Set.fromList (map indexPath entries)
-              expectedAncestors = Set.fromList (concatMap (trackedPathParents . indexPath) entries)
-              expectedPaths = expectedLeaves `Set.union` expectedAncestors
-              unexpected = Set.toAscList (Map.keysSet values `Set.difference` expectedPaths)
-              wrongAncestors =
-                [ AuthoredRootAncestorKindMismatch path observedKind
-                | path <- Set.toAscList expectedAncestors
-                , Just observedKind <- [Map.lookup path values]
-                , observedKind /= WorktreeDirectory
-                ]
-              foundProblems =
-                wrongAncestors
-                  <> [UnexpectedAuthoredRootMaterial unexpected | not (null unexpected)]
-           in (foundProblems, Just values)
-      allProblems =
-        formatObservationProblems
-          <> flagProblems
-          <> trackedObservationProblems
-          <> authoredObservationProblems
-  pure $ case (allProblems, formatValue, trackedValues, authoredValues) of
-    ([], Just objectFormat, Just trackedObservation, Just authoredObservation) ->
-      Right
-        WorktreeAcquisitionObservation
-          { acquisitionObjectFormat = objectFormat
-          , acquisitionTrackedEntries = trackedObservation
-          , acquisitionAuthoredPaths = authoredObservation
-          }
-    _ -> Left allProblems
-
-compareAcquisitionBoundaries
-  :: WorktreeAcquisitionObservation
-  -> WorktreeAcquisitionObservation
-  -> [SnapshotProblem]
-compareAcquisitionBoundaries before after = formatProblems <> trackedProblems <> authoredProblems
- where
-  formatProblems =
-    objectFormatBoundaryProblems
-      (acquisitionObjectFormat before)
-      (acquisitionObjectFormat after)
-  beforeTracked = acquisitionTrackedEntries before
-  afterTracked = acquisitionTrackedEntries after
-  changedTracked =
-    Set.toAscList
-      ( Set.fromList
-          [ path
-          | path <- Set.toAscList (Map.keysSet beforeTracked `Set.union` Map.keysSet afterTracked)
-          , Map.lookup path beforeTracked /= Map.lookup path afterTracked
-          ]
-      )
-  trackedProblems = [TrackedWorktreeChangedDuringAcquisition changedTracked | not (null changedTracked)]
-  beforeAuthored = acquisitionAuthoredPaths before
-  afterAuthored = acquisitionAuthoredPaths after
-  commonAuthored = Map.keysSet beforeAuthored `Set.intersection` Map.keysSet afterAuthored
-  added = Set.toAscList (Map.keysSet afterAuthored `Set.difference` Map.keysSet beforeAuthored)
-  removed = Set.toAscList (Map.keysSet beforeAuthored `Set.difference` Map.keysSet afterAuthored)
-  changed =
-    [ path
-    | path <- Set.toAscList commonAuthored
-    , Map.lookup path beforeAuthored /= Map.lookup path afterAuthored
-    ]
-  authoredProblems =
-    [ AuthoredRootChangedDuringAcquisition added removed changed
-    | not (null added) || not (null removed) || not (null changed)
-    ]
-
-observeIndexVisibility :: GitExecutable -> FilePath -> [IndexEntry] -> IO [SnapshotProblem]
-observeIndexVisibility git root entries = do
-  assumeResult <-
-    runGit
-      git
-      root
-      ["ls-files", "--cached", "--full-name", "-v", "-z"]
-      ByteString.empty
-  skipResult <-
-    runGit
-      git
-      root
-      ["ls-files", "--cached", "--full-name", "-t", "-z"]
-      ByteString.empty
-  let expected = sort (map indexPath entries)
-  pure
-    ( taggedObservationProblems AssumeUnchangedObservation expected isAssumeUnchanged assumeResult
-        <> taggedObservationProblems SkipWorktreeObservation expected isSkipWorktree skipResult
-    )
-
--- | Make the final index observation one tagged stage listing.  The @-v@ tag
--- retains @S@ for skip-worktree and lower-cases every assume-unchanged tag, so
--- this one NUL-delimited stream binds both visibility flags to the exact mode,
--- object id, stage, and path inventory observed at the end of acquisition.
-observeFinalIndexVisibility :: GitExecutable -> FilePath -> [IndexEntry] -> IO [SnapshotProblem]
-observeFinalIndexVisibility git root expected = do
-  result <-
-    runGit
-      git
-      root
-      ["ls-files", "--cached", "--full-name", "--stage", "-v", "-z"]
-      ByteString.empty
-  pure $ case result of
-    Left problem -> [problem]
-    Right raw -> case parseLsFilesTaggedStage raw of
-      Left problems -> problems
-      Right tagged ->
-        let actual = map snd tagged
-            expectedPaths = sort (map indexPath expected)
-            actualPaths = sort (map indexPath actual)
-            inventoryProblems =
-              [ IndexFlagInventoryMismatch AssumeUnchangedObservation expectedPaths actualPaths
-              | expectedPaths /= actualPaths
-              ]
-            indexProblems = finalIndexBoundaryProblemsDiagnostic expected actual
-            assumeUnchanged = sort [indexPath entry | (tag, entry) <- tagged, isAssumeUnchanged tag]
-            skipWorktree = sort [indexPath entry | (tag, entry) <- tagged, isSkipWorktree tag]
-            flagProblems =
-              [AssumeUnchangedTrackedPaths assumeUnchanged | not (null assumeUnchanged)]
-                <> [SkipWorktreeTrackedPaths skipWorktree | not (null skipWorktree)]
-         in inventoryProblems <> indexProblems <> flagProblems
+  [RepositoryHeadChangedDuringCapture before after | before /= after]
 
 -- | Compare complete canonical stage-zero entries.  In particular, retaining
 -- the same path while changing only its object id or mode is a boundary change.
 finalIndexBoundaryProblemsDiagnostic :: [IndexEntry] -> [IndexEntry] -> [SnapshotProblem]
 finalIndexBoundaryProblemsDiagnostic expected actual =
-  [ IndexChangedDuringAcquisition
+  [ IndexChangedDuringCapture
   | finalIndexCountChanged expected actual
       || finalIndexPathInventoryChanged expected actual
       || finalIndexOrderChanged expected actual
@@ -2809,60 +2541,6 @@ finalIndexObjectChanged :: [IndexEntry] -> [IndexEntry] -> Bool
 finalIndexObjectChanged expected actual =
   map indexPath expected == map indexPath actual
     && map indexObjectId expected /= map indexObjectId actual
-
-taggedObservationProblems
-  :: IndexFlagObservation
-  -> [FilePath]
-  -> (Char -> Bool)
-  -> Either SnapshotProblem ByteString
-  -> [SnapshotProblem]
-taggedObservationProblems _ _ _ (Left problem) = [problem]
-taggedObservationProblems observationKind expected isFlagged (Right bytes) =
-  case parseLsFilesTaggedPaths observationKind bytes of
-    Left problems -> problems
-    Right tagged ->
-      let actual = sort (map snd tagged)
-          inventoryProblems =
-            [IndexFlagInventoryMismatch observationKind expected actual | expected /= actual]
-          flagged = sort [path | (tag, path) <- tagged, isFlagged tag]
-          flagProblems = case observationKind of
-            AssumeUnchangedObservation -> [AssumeUnchangedTrackedPaths flagged | not (null flagged)]
-            SkipWorktreeObservation -> [SkipWorktreeTrackedPaths flagged | not (null flagged)]
-       in inventoryProblems <> flagProblems
-
-isAssumeUnchanged :: Char -> Bool
-isAssumeUnchanged tag = tag >= 'a' && tag <= 'z'
-
-isSkipWorktree :: Char -> Bool
-isSkipWorktree tag = tag == 'S' || tag == 's'
-
-observeTrackedWorktree
-  :: FilePath
-  -> [TrackedEntry]
-  -> IO (Either [SnapshotProblem] (Map FilePath WorktreeEntryObservation))
-observeTrackedWorktree root entries = do
-  results <- forM entries (observeTrackedEntry root)
-  let problems = concat [items | Left items <- results]
-      observations = [item | Right item <- results]
-  pure $
-    if null problems
-      then Right (Map.fromList observations)
-      else Left problems
-
-observeTrackedEntry
-  :: FilePath
-  -> TrackedEntry
-  -> IO (Either [SnapshotProblem] (FilePath, WorktreeEntryObservation))
-observeTrackedEntry root entry = do
-  let indexed = trackedIndex entry
-      path = indexPath indexed
-      absolute = root </> path
-  result <- readWorktreeEntry root path absolute
-  pure $ case result of
-    Left problem -> Left [problem]
-    Right observed ->
-      let comparisonProblems = compareTrackedEntry entry observed
-       in if null comparisonProblems then Right (path, observed) else Left comparisonProblems
 
 readWorktreeEntry :: FilePath -> FilePath -> FilePath -> IO (Either SnapshotProblem WorktreeEntryObservation)
 #if defined(mingw32_HOST_OS)
@@ -3049,7 +2727,7 @@ rawExecutable status =
 #endif
 
 -- | Partial pure diagnostic for the raw executable-bit fold used by POSIX
--- acquisition. It carries no path, bytes, or acquisition authority.
+-- capture. It carries no path, bytes, or capture authority.
 combineRawExecutableBitsDiagnostic :: Bool -> Bool -> Bool -> Bool
 combineRawExecutableBitsDiagnostic owner groupBit other =
   owner || groupBit || other
@@ -3069,30 +2747,6 @@ statusFingerprint status =
 renderStatusField :: Show value => value -> Text
 renderStatusField = Text.pack . show
 #endif
-
-compareTrackedEntry :: TrackedEntry -> WorktreeEntryObservation -> [SnapshotProblem]
-compareTrackedEntry entry observed = kindProblems <> executableProblems <> byteProblems
- where
-  indexed = trackedIndex entry
-  path = indexPath indexed
-  expectedMode = indexMode indexed
-  expectedKind = case expectedMode of
-    RegularFile -> WorktreeRegularFile
-    ExecutableFile -> WorktreeRegularFile
-    SymbolicLink -> WorktreeSymbolicLink
-  expectedExecutable = expectedMode == ExecutableFile
-  actualKind = worktreeObservedKind observed
-  kindProblems = [TrackedWorktreeKindMismatch path expectedMode actualKind | actualKind /= expectedKind]
-  executableProblems =
-    [ TrackedWorktreeExecutableMismatch path expectedExecutable (worktreeObservedExecutable observed)
-    | actualKind == WorktreeRegularFile
-    , worktreeObservedExecutable observed /= expectedExecutable
-    ]
-  byteProblems =
-    [ TrackedWorktreeBytesMismatch path
-    | actualKind `elem` [WorktreeRegularFile, WorktreeSymbolicLink]
-    , worktreeObservedBytes observed /= trackedBytes entry
-    ]
 
 inventoryAuthoredPaths :: FilePath -> IO (Either [SnapshotProblem] (Map FilePath WorktreeEntryKind))
 inventoryAuthoredPaths root = case internalAuthoredTraversalEnvelopeProblem of
@@ -3366,13 +3020,6 @@ containedStateRootProblems path entryType
   kindProblems kind = [ContainedStateRootKindMismatch path kind]
 #endif
 
-trackedPathParents :: FilePath -> [FilePath]
-trackedPathParents path = go (takeDirectory path)
- where
-  go parent
-    | null parent || parent == "." || parent == path = []
-    | otherwise = parent : go (takeDirectory parent)
-
 validFilesystemPath :: FilePath -> Bool
 validFilesystemPath path =
   safeTrackedPath path
@@ -3397,7 +3044,7 @@ surrogateCodePoint character = character >= '\xD800' && character <= '\xDFFF'
 
 -- | Partial Git-reported workspace diagnostic. This observes tracked, staged,
 -- and non-ignored-untracked summaries only; it is not discovery completeness
--- and cannot be candidate authority. Full acquisition additionally performs
+-- and cannot be candidate evidence. Full capture additionally performs
 -- descriptor-relative no-follow authored-root and contained-state observation.
 checkGitReportedWorkspaceDiagnostic :: GitExecutable -> FilePath -> IO [SnapshotProblem]
 checkGitReportedWorkspaceDiagnostic _ root | not (isAbsolute root) = pure [RepositoryRootNotAbsolute root]
@@ -3466,24 +3113,6 @@ observeRepositoryHead git root = do
       Right value
         | validObjectId (Text.pack value) -> Right (Text.pack value)
         | otherwise -> Left (InvalidRepositoryHead (Text.pack value))
-
-loadBlobs
-  :: GitExecutable
-  -> FilePath
-  -> [IndexEntry]
-  -> IO (Either [SnapshotProblem] (Map Text ByteString))
-loadBlobs git root entries =
-  foldM loadOne (Right Map.empty) (Set.toAscList objectIds)
-  where
-    objectIds = Set.fromList (map indexObjectId entries)
-    loadOne (Left problems) _ = pure (Left problems)
-    loadOne (Right loaded) objectId = do
-      bytes <- runGit git root ["cat-file", "blob", Text.unpack objectId] ByteString.empty
-      pure $ case bytes of
-        Left problem -> Left [problem]
-        Right value -> case verifyBlobObjectId objectId value of
-          Left problem -> Left [problem]
-          Right () -> Right (Map.insert objectId value loaded)
 
 -- | Independently bind bytes returned by Git to the object name from the
 -- index.  Git object IDs hash the framed object, not the payload alone.  The
@@ -3801,20 +3430,6 @@ mixedObjectIdProblems entries =
     [_] -> []
     lengths -> [MixedObjectIdFormats lengths]
 
-indexObjectFormatProblems :: GitObjectFormat -> [IndexEntry] -> [SnapshotProblem]
-indexObjectFormatProblems objectFormat entries =
-  [ IndexObjectFormatMismatch objectFormat mismatches
-  | let expectedWidth = case objectFormat of
-          GitObjectSha1 -> 40
-          GitObjectSha256 -> 64
-        mismatches =
-          [ (indexPath entry, indexObjectId entry)
-          | entry <- entries
-          , Text.length (indexObjectId entry) /= expectedWidth
-          ]
-  , not (null mismatches)
-  ]
-
 safeTrackedPath :: FilePath -> Bool
 safeTrackedPath path =
   not (null path)
@@ -3840,9 +3455,9 @@ classifySnapshot snapshot =
       , under canonicalPbRoot (pathOf entry)
       ]
     pbAdmission = Pb.pbBootstrapGrammarDiagnostic pbEntries
-    -- A caller-supplied refusal diagnostic is not source-custody authority.
+    -- A caller-supplied refusal diagnostic is not source-binding authority.
     -- The bounded pb exception remains registered migration debt until a
-    -- separately authenticated opaque acquisition boundary can consume it.
+    -- package-hidden local snapshot boundary can consume it.
     paths = initiallyClassified
     duplicateProblems = map DuplicateTrackedPath (duplicates (map pathOf (snapshotEntries snapshot)))
     pathOf = indexPath . trackedIndex
@@ -4109,11 +3724,10 @@ admittedDocumentationPath :: FilePath -> Bool
 admittedDocumentationPath path =
   path `Set.member` canonicalGovernedDocumentationPaths
 
--- | Closed, reviewed path-to-role inventory for non-behavioural Markdown.
+-- | Closed, separately authored path-to-role inventory for non-behavioural Markdown.
 -- A newly named file is unregistered until this Haskell declaration and the
 -- independent documentation-corpus manifest are both updated. Bytes still
--- require structural checking, compiler-resolved consumer closure, and reviewer
--- semantic custody; this path list never claims that prose is non-behavioural.
+-- require structural checking, compiler-resolved consumer closure, and documentation-gate semantic checks; this path list never claims that prose is non-behavioural.
 rawGovernedDocumentationPath :: Int -> FilePath -> FilePath
 rawGovernedDocumentationPath ordinal path
 #if defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_001_RETENTION_MUTANT)
@@ -4933,7 +4547,7 @@ retainedNoncodeForeignSignatureRefusal = any isForeignSignatureFacet
 
 primaryReasons :: SourceClass -> FilePath -> ByteString -> [Text]
 primaryReasons (RegisteredLegacy SourcePb) _path _bytes =
-  [rawPrimaryReason 1 "pb authorization requires the complete exact snapshot-level grammar"]
+  [rawPrimaryReason 1 "pb admission requires the complete exact snapshot-level grammar"]
 primaryReasons UnregisteredBehavioralSource _ _ = [rawPrimaryReason 2 "no closed-grammar class matched"]
 primaryReasons _ _ _ = []
 
@@ -4955,7 +4569,7 @@ sourceClosureDiagnosticFindings =
   [ finding
       "SOURCE-CLOSURE-DIAGNOSTIC-ONLY"
       "<caller-supplied-source-closure>"
-      "caller-supplied source closure is diagnostic input, not candidate acquisition authority"
+      "caller-supplied source closure is diagnostic input, not candidate capture authority"
   ]
 
 sourceClosureCheckCore :: SourceClosure -> CheckResult
@@ -5023,7 +4637,7 @@ registeredSourceIds = Map.keysSet . closureRegisteredDebt
 -- | Bind one registered migration family to exact paths, modes, verified Git
 -- object identities, and independent SHA-256 payload commitments observed in
 -- the immutable source snapshot. This is an inventory fingerprint, not
--- correctness evidence. Legacy compares it with a separately reviewed Haskell
+-- correctness evidence. Legacy compares it with a separately authored Haskell
 -- baseline so a new or modified file cannot ride an already-open family row.
 sourceDebtFingerprint :: SourceDebtId -> SourceClosure -> Text
 sourceDebtFingerprint identifier closure =
@@ -5171,7 +4785,7 @@ renderSnapshotProblem :: SnapshotProblem -> Text
 renderSnapshotProblem problem = case problem of
   GitExecutableNotAbsolute path -> "Git executable is not absolute: " <> Text.pack path
   CallerSelectedGitDiagnosticOnly path ->
-    "caller-selected Git is diagnostic-only and cannot mint candidate authority: " <> Text.pack path
+    "caller-selected Git is diagnostic-only and cannot mint candidate evidence: " <> Text.pack path
   SourceSnapshotAtomicityRequiresExternalObserver ->
     "sequential source-snapshot observations require an external atomic clean-room observer"
   RepositoryRootNotAbsolute path -> "repository root is not absolute: " <> Text.pack path
@@ -5183,8 +4797,8 @@ renderSnapshotProblem problem = case problem of
       <> "): "
       <> detail
   InvalidRepositoryHead detail -> "repository HEAD commit identity is invalid: " <> detail
-  RepositoryHeadChangedDuringAcquisition before after ->
-    "repository HEAD changed during acquisition: " <> before <> " -> " <> after
+  RepositoryHeadChangedDuringCapture before after ->
+    "repository HEAD changed during capture: " <> before <> " -> " <> after
   GitProcessFailure arguments status stderrText ->
     "Git failed (" <> Text.pack (show status) <> ") for " <> Text.pack (unwords arguments) <> ": " <> stderrText
   GitProcessIoFailure arguments detail ->
@@ -5224,7 +4838,7 @@ renderSnapshotProblem problem = case problem of
       <> ": "
       <> Text.pack (show entries)
   RepositoryObjectFormatChanged before after ->
-    "Git repository storage object format changed during acquisition: before="
+    "Git repository storage object format changed during capture: before="
       <> renderGitObjectFormat before
       <> ", after="
       <> renderGitObjectFormat after
@@ -5284,8 +4898,8 @@ renderSnapshotProblem problem = case problem of
     "tracked worktree observation failed at " <> Text.pack path <> ": " <> detail
   InvalidWorktreeSymlinkTarget path ->
     "tracked worktree symlink target is not valid UTF-8 at: " <> Text.pack path
-  TrackedWorktreeChangedDuringAcquisition paths ->
-    "tracked worktree observation changed during acquisition: " <> renderPaths paths
+  TrackedWorktreeChangedDuringCapture paths ->
+    "tracked worktree observation changed during capture: " <> renderPaths paths
   AuthoredRootInventoryIoFailure path detail ->
     "authored-root recursive inventory failed at " <> Text.pack path <> ": " <> detail
   AuthoredRootDescriptorWalkUnavailable path ->
@@ -5318,8 +4932,8 @@ renderSnapshotProblem problem = case problem of
       <> renderWorktreeEntryKind actual
   UnexpectedAuthoredRootMaterial paths ->
     "untracked or ignored material exists beneath authored roots: " <> renderPaths paths
-  AuthoredRootChangedDuringAcquisition added removed changed ->
-    "authored-root inventory changed during acquisition: added="
+  AuthoredRootChangedDuringCapture added removed changed ->
+    "authored-root inventory changed during capture: added="
       <> renderPaths added
       <> ", removed="
       <> renderPaths removed
@@ -5331,7 +4945,7 @@ renderSnapshotProblem problem = case problem of
     "staged index/HEAD divergence: " <> renderPaths paths
   UntrackedNonIgnoredPaths paths ->
     "untracked non-ignored paths: " <> renderPaths paths
-  IndexChangedDuringAcquisition -> "Git index changed during snapshot acquisition"
+  IndexChangedDuringCapture -> "Git index changed during snapshot capture"
   InvalidWorkspacePath detail -> "invalid workspace path observation: " <> detail
   where
     recordDetail number detail = "index record " <> Text.pack (show number) <> ": " <> detail

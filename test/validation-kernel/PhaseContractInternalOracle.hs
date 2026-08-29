@@ -131,7 +131,7 @@ exactCaseProblems exactCase = case exactCase of
       <> expectObservation "semantic slot count" "semantic.slot-count" "1728" cleanResult
       <> expectObservation "semantic gap count" "semantic.gap-count" "1728" cleanResult
       <> expectObservation "semantic draft count" "semantic.draft-count" "0" cleanResult
-      <> expectObservation "semantic reviewed count" "semantic.reviewed-count" "0" cleanResult
+      <> expectObservation "semantic gate-ready count" "semantic.gate-ready-count" "0" cleanResult
       <> expectObservation "semantic legacy count" "semantic.legacy-count" "25" cleanResult
       <> expectFindingCount "semantic gap findings" "PLAN-SEMANTIC-CONTRACT-GAP" 1728 cleanResult
       <> expectFindingCount "semantic diagnostic refusal" "PLAN-SEMANTIC-DIAGNOSTIC-ONLY" 1 cleanResult
@@ -141,7 +141,7 @@ exactCaseProblems exactCase = case exactCase of
       <> expectObservation "resource slot count" "resource.slot-count" "385" cleanResult
       <> expectObservation "resource gap count" "resource.gap-count" "385" cleanResult
       <> expectObservation "resource draft count" "resource.draft-count" "0" cleanResult
-      <> expectObservation "resource reviewed count" "resource.reviewed-count" "0" cleanResult
+      <> expectObservation "resource gate-ready count" "resource.gate-ready-count" "0" cleanResult
       <> expectFindingCount "resource gap findings" "PLAN-RESOURCE-CONTRACT-GAP" 385 cleanResult
       <> expectFindingCount "resource diagnostic refusal" "PLAN-RESOURCE-DIAGNOSTIC-ONLY" 1 cleanResult
   "phase-semantic-join-route" ->
@@ -154,12 +154,12 @@ exactCaseProblems exactCase = case exactCase of
       <> expectFindingCount "semantic path unknown findings" "PLAN-SEMANTIC-PHASE-PATH-UNKNOWN" 96 cleanResult
       <> expectFindingCount "semantic Markdown refusal" "PLAN-SEMANTIC-MARKDOWN-DIAGNOSTIC-ONLY" 1 cleanResult
   "sprint-inventory-finding" ->
-    expectFindingCount "reviewed canonical sprint inventory" "PLAN-SPRINT-INVENTORY" 58 cleanResult
+    expectFindingCount "recorded canonical sprint inventory" "PLAN-SPRINT-INVENTORY" 58 cleanResult
       <> expectExactFinding
-        "Phase 0 reviewed sprint inventory"
+        "Phase 0 recorded sprint inventory"
         "PLAN-SPRINT-INVENTORY"
         "DEVELOPMENT_PLAN/phase_00_synthetic_capability.md"
-        "sprint identities must be the reviewed contiguous inventory [1,2,3,4,5,6,7,8]; observed [Just 1]"
+        "sprint identities must be the recorded contiguous inventory [1,2,3,4,5,6,7,8]; observed [Just 1]"
         cleanResult
   "phase-duplicate-selection" ->
     expectNoFinding

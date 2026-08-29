@@ -620,7 +620,7 @@ while replacing its Helm-specific realization with typed object generation. The 
    "the managed target needs a different Envoy" remains inexpressible. What this clause admits is narrower by
    construction rather than by promise. The bake catalog is **one tracked Haskell value**, and each image is a
    *projection* of it — the same steps, the same pinned package versions, the same release values, read once
-   per architecture and lane. A per-target component version is therefore not something a reviewer must
+   per architecture and lane. A per-target component version is therefore not something a reader must
    refrain from writing; it is something the projection has no field for. The only values indexed are the
    parent image and the architecture-qualified tag, drawn from closed sets and selected by detected hardware,
    never selected by an external/untracked cluster `.dhall` value.
@@ -640,7 +640,7 @@ invoked by full path — there is no `PATH`-based discovery anywhere in the brin
 > **Validation reset.** Where this section generalizes sibling behaviour, that remains sibling evidence only.
 > Phases 56, 61, 62, 63, 64, and 77 are all NOT VALIDATED. The subsections below preserve pre-reset
 > observations solely as diagnostic context; none is a current pass, seal, proof, tested result, or promotion
-> input. Only a rewritten phase contract and delegated promotion can establish current status.
+> input. Only a rewritten phase contract and complete qualified gate pass can establish current status.
 
 ---
 

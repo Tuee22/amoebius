@@ -1,7 +1,7 @@
 # Evidence Calculus Doctrine
 
 > **Purpose**: Define claim-to-fixture bindings, the evidence strength each fixture kind permits, oracle
-> independence, and the reviewer authorization boundary.
+> independence, and the complete qualified gate boundary.
 > **Read this if**: an extension or phase makes a claim that must be falsifiable rather than merely asserted.
 
 This document owns the evidence calculus. Execution registers and harness topology belong to
@@ -57,8 +57,8 @@ Three rules make the pair well formed:
 3. **The claim cannot be stronger than its fixture kind, register, corpus, observer, or substrate.** Missing
    layers remain `UNVERIFIED`.
 
-The declaration also names the subject entry point, oracle module, reviewer, required changed-subject mutant,
-and current residue. Those bindings are Haskell values. Serialized views, fixtures, or reports are generated
+The declaration also names the subject entry point, oracle module, required changed-subject mutant, and current
+residue. Those bindings are Haskell values. Serialized views, fixtures, or reports are generated
 only beneath `.build/**` and cannot become an alternate evidence registry.
 
 ---
@@ -71,7 +71,7 @@ The kinds are closed:
 |---|---|---|
 | **Compile-fail** | The named expression is rejected for the pinned reason and locus | That no other expression can inhabit the state |
 | **Property** | The explored sample found no counterexample and met its coverage obligations | Universal truth outside that sample |
-| **Oracle** | The observed output satisfied a separately reviewed predicate | That the predicate fully captures the requirement |
+| **Oracle** | The observed output satisfied a separately authored predicate | That the predicate fully captures the requirement |
 | **Live probe** | A fresh effect was externally observed once on the named substrate | Repeatability, another substrate, or uncompromised infrastructure |
 
 A fixture that fails for an unrelated reason does not discharge its claim. A live probe without a post-start
@@ -87,9 +87,8 @@ therefore requires all of the following:
 
 - the expectation is authored from the requirement;
 - the oracle does not import, call, copy, or mechanically translate subject decision logic;
-- the oracle is separately reviewed, and its reviewer is not the subject's sole author;
-- subject and expectation chronology is known, or an explicit independent review supplies the missing
-  provenance; and
+- the oracle is separately authored from the subject's decision logic;
+- subject and expectation provenance is visible in the source snapshot; and
 - amending the expectation invalidates affected evidence and re-runs its mutants.
 
 Independent oracle logic is `.hs`. A Dhall/JSON/YAML/TSV/golden copy is not made independent by being written
@@ -98,10 +97,11 @@ are required at an interface, Haskell derives them lazily beneath `.build/**`, w
 semantic predicate states the expectation.
 
 Self-referential gates do not receive a special exemption. Their workflow representation may exercise the
-same calculus, but it cannot authorize its own verdict. The independently reviewed oracle/harness must first
-reject the fixed sabotage corpus, every mutant must demonstrate a changed production locus, raw observations
-must be retained, and an authorized-reviewer external signature is the only promotion authority. Mutation sensitivity
-is one falsification technique within that boundary, not a cure for shared authorship.
+same calculus, but its clean result is insufficient without qualification. The separately authored
+oracle/harness must first reject the fixed sabotage corpus, every mutant must demonstrate a changed production
+locus, and raw observations must be retained. Once every required row passes in the qualified run, that test
+result is sufficient for the status transition. Mutation sensitivity is one falsification technique within
+that boundary, not a cure for shared authorship.
 
 ---
 
@@ -115,7 +115,7 @@ substrate. The definitions live in
 
 A claim inherits the weakest required observation. Supporting lower-register checks cannot promote a live
 claim, and hardware success cannot compensate for an unvalidated decode, binding, planning, or rendering
-claim. The development plan therefore places a complete no-hardware DSL promotion barrier before host and
+claim. The development plan therefore places a complete no-hardware DSL gate barrier before host and
 hardware gates.
 
 ---
@@ -126,8 +126,9 @@ The calculus makes claims reviewable and falsifiable; it does not make them true
 
 - It does not prove that an independently authored oracle is correct.
 - It does not turn finite sampling into universal proof.
-- It does not prove the compiler, kernel, observer, authority, provider, hardware, or reviewer uncompromised.
-- It does not let a generated bundle, digest, attestation, or exit code authorize status.
+- It does not prove the compiler, kernel, observer, authority, provider, or hardware uncompromised.
+- It does not let a component self-report or isolated exit code substitute for the
+  complete qualified gate.
 - It does not let prior evidence survive a changed contract, subject, oracle, source boundary, or predecessor.
 
 Every result names these limits as assumptions or `UNVERIFIED` residue. The present reset marks every numbered
@@ -138,8 +139,8 @@ phase NOT VALIDATED, so this doctrine carries no current implementation-result i
 ## 7. Planning ownership
 
 This doctrine is normative design intent. Phase order, current status, the fixed gate table, qualification,
-and delegated promotion live in `DEVELOPMENT_PLAN/`. A phase adopts this calculus by naming its bounded claim,
-Haskell subject, independently reviewed Haskell oracle, qualifying controls, changed-subject mutant, register,
+and the qualified gate-pass rule live in `DEVELOPMENT_PLAN/`. A phase adopts this calculus by naming its bounded
+claim, Haskell subject, separately authored Haskell oracle, qualifying controls, changed-subject mutant, register,
 and residue.
 
 ---

@@ -287,7 +287,7 @@ rawCompilerComponentPlanDiagnostic claimedIdentity tuples =
     projectMandatoryFindingsContribution
       ( projectMandatoryFindingOrder
           ( diagnosticOnlyFinding
-              <> sourceCustodyFinding
+              <> sourceBindingFinding
               <> cabalElaborationFinding
               <> compilerExecutionFinding
           )
@@ -305,17 +305,17 @@ rawCompilerComponentPlanDiagnostic claimedIdentity tuples =
         diagnosticOnlyFindingDetail
     ]
 #endif
-  sourceCustodyFinding =
-#if defined(VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_BYPASS_MUTANT)
-    sourceCustodyFindingCode
-      `seq` sourceCustodyFindingSubject
-      `seq` sourceCustodyFindingDetail
+  sourceBindingFinding =
+#if defined(VALIDATION_COMPILER_PLAN_SOURCE_BINDING_BYPASS_MUTANT)
+    sourceBindingFindingCode
+      `seq` sourceBindingFindingSubject
+      `seq` sourceBindingFindingDetail
       `seq` []
 #else
     [ finding
-        sourceCustodyFindingCode
-        sourceCustodyFindingSubject
-        sourceCustodyFindingDetail
+        sourceBindingFindingCode
+        sourceBindingFindingSubject
+        sourceBindingFindingDetail
     ]
 #endif
   cabalElaborationFinding =
@@ -443,22 +443,22 @@ diagnosticOnlyFindingDetail = "mutated diagnostic-only detail"
 diagnosticOnlyFindingDetail = "raw caller input can produce diagnostics only; it cannot mint component-plan evidence"
 #endif
 
-sourceCustodyFindingCode, sourceCustodyFindingDetail :: Text
-sourceCustodyFindingSubject :: FilePath
-#if defined(VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_CODE_MUTANT)
-sourceCustodyFindingCode = "MUTATED-SOURCE-CUSTODY"
+sourceBindingFindingCode, sourceBindingFindingDetail :: Text
+sourceBindingFindingSubject :: FilePath
+#if defined(VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_CODE_MUTANT)
+sourceBindingFindingCode = "MUTATED-SOURCE-BINDING"
 #else
-sourceCustodyFindingCode = "COMPONENT-PLAN-SOURCE-CUSTODY-UNAVAILABLE"
+sourceBindingFindingCode = "COMPONENT-PLAN-SOURCE-BINDING-UNAVAILABLE"
 #endif
-#if defined(VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_SUBJECT_MUTANT)
-sourceCustodyFindingSubject = "mutated-custody-subject"
+#if defined(VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_SUBJECT_MUTANT)
+sourceBindingFindingSubject = "mutated-source-binding-subject"
 #else
-sourceCustodyFindingSubject = "compiler-component-plan"
+sourceBindingFindingSubject = "compiler-component-plan"
 #endif
-#if defined(VALIDATION_COMPILER_PLAN_SOURCE_CUSTODY_FINDING_DETAIL_MUTANT)
-sourceCustodyFindingDetail = "mutated source-custody detail"
+#if defined(VALIDATION_COMPILER_PLAN_SOURCE_BINDING_FINDING_DETAIL_MUTANT)
+sourceBindingFindingDetail = "mutated source-binding detail"
 #else
-sourceCustodyFindingDetail = "an authenticated network-independent source-custody observation is not attached"
+sourceBindingFindingDetail = "an authenticated network-independent source-binding observation is not attached"
 #endif
 
 cabalElaborationFindingCode, cabalElaborationFindingDetail :: Text

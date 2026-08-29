@@ -123,7 +123,7 @@ sourceClosureSelectorIntentsInitial =
   , ("VALIDATION_SOURCE_CLOSURE_BLOB_SHA1_MATCH_BYPASS_MUTANT", "blob object identity recomputes ObjectSha1")
   , ("VALIDATION_SOURCE_CLOSURE_BLOB_SHA256_MATCH_BYPASS_MUTANT", "blob object identity recomputes ObjectSha256")
   , ("VALIDATION_SOURCE_CLOSURE_CASE_COLLISION_BYPASS_MUTANT", "portable case collision refuses exactly")
-  , ("VALIDATION_SOURCE_CLOSURE_CUSTODY_BYPASS_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_LOCAL_CAPTURE_BYPASS_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
   , ("VALIDATION_SOURCE_CLOSURE_DHALL_ROOT_REMOVAL_MUTANT", "closed primary-class and project identifier catalog")
   , ("VALIDATION_SOURCE_CLOSURE_DHALL_SUFFIX_REMOVAL_MUTANT", "closed primary-class and project identifier catalog")
   , ("VALIDATION_SOURCE_CLOSURE_DIAGNOSTIC_BYPASS_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
@@ -369,9 +369,9 @@ sourceClosureSelectorIntentsFindingMappings =
   , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_CODE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
   , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_SUBJECT_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
   , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DIAGNOSTIC_DETAIL_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
-  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_CODE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
-  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_SUBJECT_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
-  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_CUSTODY_DETAIL_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_LOCAL_CAPTURE_CODE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_LOCAL_CAPTURE_SUBJECT_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
+  , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_LOCAL_CAPTURE_DETAIL_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
   , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_CODE_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
   , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_SUBJECT_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
   , ("VALIDATION_SOURCE_CLOSURE_FINDING_MANDATORY_DISCOVERY_DETAIL_MAPPING_MUTANT", "canonical SHA-1 pb refusal retains the entire ordered residue")
@@ -1058,9 +1058,9 @@ mandatoryExpectedFindings commitment =
       "<raw-source-closure>"
       ("caller-supplied source inventory is diagnostic input and cannot mint source-closure evidence" <> commitmentDetail commitment)
   , Finding
-      "SOURCE-CLOSURE-AUTHENTICATED-CUSTODY-UNAVAILABLE"
+      "SOURCE-CLOSURE-LOCAL-CAPTURE-UNAVAILABLE"
       "<raw-source-closure>"
-      ("no authenticated network-independent source-custody authority is attached" <> commitmentDetail commitment)
+      ("no package-hidden local source capture is attached" <> commitmentDetail commitment)
   , Finding
       "SOURCE-CLOSURE-ATOMIC-COMPLETE-DISCOVERY-UNAVAILABLE"
       "<raw-source-closure>"
@@ -2172,7 +2172,7 @@ expectedSignatureReasons sourceClass bytes facets
 
 expectedPrimaryReasons :: ExpectedClass -> [Text]
 expectedPrimaryReasons (ExpectedLegacy "LTD-SRC-008") =
-  ["pb authorization requires the complete exact snapshot-level grammar"]
+  ["pb admission requires the complete exact snapshot-level grammar"]
 expectedPrimaryReasons ExpectedUnregistered = ["no closed-grammar class matched"]
 expectedPrimaryReasons _ = []
 
@@ -2290,7 +2290,7 @@ canonicalPbFindings =
   Finding
     "PB-GRAMMAR-DIAGNOSTIC-ONLY"
     "Amoebius.Validation.PbBootstrapGrammar.pbBootstrapGrammarDiagnostic"
-    "caller-supplied pb bytes are diagnostic input and cannot establish source custody or Phase-50 runtime truth"
+    "caller-supplied pb bytes are diagnostic input and cannot establish source binding or Phase-50 runtime truth"
     : [ Finding
           "PB-GRAMMAR-PHASE50-RUNTIME-RESIDUE"
           (Text.unpack residue)

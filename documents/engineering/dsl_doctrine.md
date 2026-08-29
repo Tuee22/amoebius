@@ -108,7 +108,7 @@ complete boundary is owned by
 [low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans).
 
 The owning phase must validate this specialization without a tracked Dhall corpus: Haskell fixtures render
-the closed UI wire beneath `.build/**`, and a separately reviewed Haskell oracle constrains
+the closed UI wire beneath `.build/**`, and a separately authored Haskell oracle constrains
 tenant/module/node/link meaning rather than copying normalized bytes.
 
 That split is load-bearing in three ways:
@@ -491,7 +491,7 @@ ingress" gives the author no syntax to request insecure ingress; a record that r
 every PVC gives no way to omit it. The schema is the boundary, and the boundary is mechanical.
 
 The dhall-typecheck gate must generate every positive and negative Dhall value from Haskell into `.build/**`.
-Its oracle is an independently reviewed Haskell classification of the required closed unions, fields, nested
+Its oracle is an separately authored Haskell classification of the required closed unions, fields, nested
 types, and diagnostics. Missing generated cases, a no-op typecheck, or a retained tracked `.dhall` copy must
 make the gate fail.
 
@@ -512,7 +512,7 @@ things happen here:
   can reject constructible values. gadt-decode produces only decoded, unprovisioned declarations. It does not
   decide whole-deployment placement, storage peaks, live target compatibility, or inventory sufficiency.
 
-The gadt-decode gate must exercise the production decoder against separately reviewed Haskell positives,
+The gadt-decode gate must exercise the production decoder against separately authored Haskell positives,
 negative classifications, and compile-fail pairs. It must prove that each negative reaches the intended
 constructor after a valid generated Dhall precondition, and that no normalized byte snapshot or legacy
 Python gate decides the result.
@@ -522,7 +522,7 @@ Python gate decides the result.
 Gates 1 and 2 prove things about a *value*. Neither says anything about the Haskell linked beside it: an
 `ExtensionSpec`'s `extChain` carries a `stepRun :: cfg -> IO ()`, and `IO ()` is a type, not a bound. Before
 trusted app-specific workflow or effect adapters were admitted, that gap was covered by closing the set
-was closed at two reviewed ML libraries ([§4](#4-total-composability)) — and review is not a mechanism. extension-astcheck
+was closed at two admitted ML libraries ([§4](#4-total-composability)) — and review is not a mechanism. extension-astcheck
 replaces the review with a check.
 
 **Extension source is admitted by a custom AST checker against a closed sanctioned API.** The checker runs at
@@ -648,7 +648,7 @@ flowchart TD
 **Where the contract must be discharged.** The first tier is hardware-free: Dhall typechecking over a
 Haskell-rendered schema, Haskell decoding and binding, pure infrastructure-plan construction, modeled
 materialization, whole-deployment provisioning, and the opaque `ProvisionedSpec -> renderAll` boundary. Its
-expectations and negative controls are independently reviewed Haskell, and its generated Dhall/manifests live
+expectations and negative controls are separately authored Haskell, and its generated Dhall/manifests live
 only beneath `.build/**`. This tier must be accepted before any live container, cluster, provider, browser, or
 accelerator replay begins; pure browser semantics and lazy projection remain inside this tier.
 
@@ -693,7 +693,7 @@ its building phase, not yet built.
 > plus provision-seal mechanism; it does **not** claim every illegal state is excluded by type inhabitance —
 > each catalog entry states whether its foreclosure is type-, decode-, provision-, or runtime-checked. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
-> tested or proven result. The pure contract belongs to the hardware-free promotion barrier. Runtime
+> tested or proven result. The pure contract belongs to the hardware-free gate barrier. Runtime
 > enforcement — that one running target enforces what the spec composed — is later, scoped evidence and may
 > neither precede nor stand in for that barrier.
 
@@ -822,7 +822,7 @@ hardware-free validation must cover Dhall generation/typecheck, decode, bind/exp
 and dry-run planning before any hardware or container-engine phase can begin. Live enaction and provider
 readback are later correspondence checks and cannot validate the earlier DSL semantics.
 
-Every DSL gate consumes Haskell subjects and independently reviewed Haskell expectations. Non-Haskell inputs
+Every DSL gate consumes Haskell subjects and separately authored Haskell expectations. Non-Haskell inputs
 are materialized into a fresh `.build/**` tree during the gate. This document records no current validation
 result; sibling implementations remain design evidence only.
 

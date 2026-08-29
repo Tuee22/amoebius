@@ -28,7 +28,7 @@ import Text.Read (readMaybe)
 -- This diagnostic vocabulary is intentionally restated in the oracle.  It is
 -- decoded from the public CheckResult's text, not imported from the production
 -- parser, so a changed constructor, field order, or omitted subject changes the
--- observed wire and must be reviewed here explicitly.
+-- observed wire and must be listed here explicitly.
 data DiagnosticElaboratedUnitOrigin
   = PreExistingUnit
   | RemoteUnit
@@ -5704,5 +5704,5 @@ finishDiagnostics name problems = do
   unless (null problems) (fail (unlines (name : problems)))
   putStrLn
     ( name
-        <> ": diagnostic refusal expectations matched; independent duplicate observation, component/dependency semantics, configuration/CPP branch closure, lexical/filesystem source-root identity, component source-path ownership, authenticated bytes, candidate qualification, and authorized promotion remain absent."
+        <> ": diagnostic refusal expectations matched; independent duplicate observation, component/dependency semantics, configuration/CPP branch closure, lexical/filesystem source-root identity, component source-path ownership, exact source bytes, candidate qualification, and phase-gate completion remain absent."
     )

@@ -24,8 +24,8 @@ module Amoebius.Validation.PolicyContract.Internal
   , PolicyOwnerReference (..)
   , PredecessorRule (..)
   , PrehardwareRule (..)
-  , PromotionAuthority (..)
-  , PromotionContract (..)
+  , GatePassRule (..)
+  , GateCompletionContract (..)
   , PublicBehaviorAuthority (..)
   , ResetPhaseStatus (..)
   , RegisterContract (..)
@@ -39,7 +39,7 @@ module Amoebius.Validation.PolicyContract.Internal
   , SourceContract (..)
   , SprintResetRule (..)
   , StatusResetContract (..)
-  , StatusMutationAuthority (..)
+  , StatusTransitionRule (..)
   , TrackedGeneratedArtifact (..)
   , canonicalPolicyContract
   , canonicalActiveRegisterPath
@@ -53,7 +53,7 @@ module Amoebius.Validation.PolicyContract.Internal
   , policyContractDigest
   , policyContractDiagnostic
   , policyOwnerReference
-  , promotionAuthorityMarker
+  , gatePassMarker
   , registryImageReference
   , renderPolicyContract
   , resetPhaseStatusText
@@ -79,8 +79,9 @@ import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import Data.Word (Word8)
 
--- This module is executable policy. Markdown owns explanation and reviewer
--- correspondence review, never these values or their verdict.
+-- This module is executable policy. Markdown owns explanation; the
+-- documentation gate checks correspondence but never supplies these values or
+-- their verdict.
 
 data PolicyId
   = TrackedSourceBoundary
@@ -92,8 +93,8 @@ data PolicyId
   | ValidationStatusReset
   | NumericPhaseOrder
   | DslBarrierSourceClosurePolicy
-  | PrehardwarePromotionBarrier
-  | PromotionAuthorityPolicy
+  | PrehardwareGateBarrier
+  | GatePassPolicy
 #ifdef VALIDATION_POLICY_UNIVERSE_POLICY_ID_MUTANT
   | MutationOnlyPolicyId
 #endif
@@ -346,7 +347,7 @@ data PrehardwareRule
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data PbTransportRule
-  = DirectHaskellThrough49ObservedPbAt50ApprovalBoundAfter50
+  = DirectHaskellThrough49ObservedPbAt50GatePassBoundAfter50
 #ifdef VALIDATION_POLICY_PB_TRANSPORT_MUTANT
   | PbAdmittedBeforePhase50
 #endif
@@ -375,31 +376,31 @@ phaseRoleOrdinal ordering role
   | role == FirstHardwareValidation = firstHardwareValidationPhase ordering
   | otherwise = phaseDomainLower ordering
 
-data PromotionAuthority
-  = AuthorizedDelegatedReviewer
-#ifdef VALIDATION_POLICY_UNIVERSE_PROMOTION_AUTHORITY_MUTANT
-  | MutationOnlyPromotionAuthority
+data GatePassRule
+  = QualifiedGatePass
+#ifdef VALIDATION_POLICY_UNIVERSE_GATE_PASS_RULE_MUTANT
+  | MutationOnlyGatePassRule
 #endif
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data AutomationRole
-  = CandidateEvidenceAndQualifiedPromotion
+  = CandidateEvidenceAndGatePass
 #ifdef VALIDATION_POLICY_UNIVERSE_AUTOMATION_ROLE_MUTANT
   | MutationOnlyAutomationRole
 #endif
   deriving (Bounded, Enum, Eq, Ord, Show)
 
-data StatusMutationAuthority
-  = AuthorizedReviewer
-#ifdef VALIDATION_POLICY_UNIVERSE_STATUS_MUTATION_AUTHORITY_MUTANT
-  | MutationOnlyStatusMutationAuthority
+data StatusTransitionRule
+  = PassingGate
+#ifdef VALIDATION_POLICY_UNIVERSE_STATUS_TRANSITION_RULE_MUTANT
+  | MutationOnlyStatusTransitionRule
 #endif
   deriving (Bounded, Enum, Eq, Ord, Show)
 
-data PromotionContract = PromotionContract
-  { promotionAuthority :: PromotionAuthority
+data GateCompletionContract = GateCompletionContract
+  { gatePassRule :: GatePassRule
   , automationRole :: AutomationRole
-  , statusMutationAuthority :: StatusMutationAuthority
+  , statusTransitionRule :: StatusTransitionRule
   }
   deriving (Eq, Ord, Show)
 
@@ -412,7 +413,7 @@ data PolicyContract = PolicyContract
   , registerContract :: RegisterContract
   , statusResetContract :: StatusResetContract
   , orderingContract :: OrderingContract
-  , promotionContract :: PromotionContract
+  , gateCompletionContract :: GateCompletionContract
   }
   deriving (Eq, Show)
 
@@ -427,8 +428,8 @@ expectedPolicyIdUniverse =
   , ValidationStatusReset
   , NumericPhaseOrder
   , DslBarrierSourceClosurePolicy
-  , PrehardwarePromotionBarrier
-  , PromotionAuthorityPolicy
+  , PrehardwareGateBarrier
+  , GatePassPolicy
   ]
 
 expectedBehavioralLanguageUniverse :: [BehavioralLanguage]
@@ -511,16 +512,16 @@ expectedPrehardwareRuleUniverse :: [PrehardwareRule]
 expectedPrehardwareRuleUniverse = [NoHardwareThroughPhase51]
 
 expectedPbTransportRuleUniverse :: [PbTransportRule]
-expectedPbTransportRuleUniverse = [DirectHaskellThrough49ObservedPbAt50ApprovalBoundAfter50]
+expectedPbTransportRuleUniverse = [DirectHaskellThrough49ObservedPbAt50GatePassBoundAfter50]
 
-expectedPromotionAuthorityUniverse :: [PromotionAuthority]
-expectedPromotionAuthorityUniverse = [AuthorizedDelegatedReviewer]
+expectedGatePassRuleUniverse :: [GatePassRule]
+expectedGatePassRuleUniverse = [QualifiedGatePass]
 
 expectedAutomationRoleUniverse :: [AutomationRole]
-expectedAutomationRoleUniverse = [CandidateEvidenceAndQualifiedPromotion]
+expectedAutomationRoleUniverse = [CandidateEvidenceAndGatePass]
 
-expectedStatusMutationAuthorityUniverse :: [StatusMutationAuthority]
-expectedStatusMutationAuthorityUniverse = [AuthorizedReviewer]
+expectedStatusTransitionRuleUniverse :: [StatusTransitionRule]
+expectedStatusTransitionRuleUniverse = [PassingGate]
 
 canonicalPolicyContract :: PolicyContract
 canonicalPolicyContract =
@@ -533,7 +534,7 @@ canonicalPolicyContract =
     , registerContract = expectedRegisterContract
     , statusResetContract = expectedStatusResetContract
     , orderingContract = expectedOrderingContract
-    , promotionContract = expectedPromotionContract
+    , gateCompletionContract = expectedGateCompletionContract
     }
 
 canonicalOwners :: Map PolicyId PolicyOwnerReference
@@ -559,8 +560,8 @@ expectedOwners =
     , (ValidationStatusReset, validationStatusResetOwner)
     , (NumericPhaseOrder, numericPhaseOrderOwner)
     , (DslBarrierSourceClosurePolicy, dslBarrierSourceClosureOwner)
-    , (PrehardwarePromotionBarrier, prehardwarePromotionBarrierOwner)
-    , (PromotionAuthorityPolicy, promotionAuthorityOwner)
+    , (PrehardwareGateBarrier, prehardwareGateBarrierOwner)
+    , (GatePassPolicy, gatePassRuleOwner)
     ]
 
 trackedSourceOwner :: PolicyOwnerReference
@@ -734,42 +735,42 @@ dslBarrierSourceClosureOwner =
     "E. One canonical phase model"
 #endif
 
-prehardwarePromotionBarrierOwner :: PolicyOwnerReference
-prehardwarePromotionBarrierOwner =
+prehardwareGateBarrierOwner :: PolicyOwnerReference
+prehardwareGateBarrierOwner =
   PolicyOwnerReference
-#if defined(VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_PATH_MUTANT)
+#if defined(VALIDATION_POLICY_OWNER_PREHARDWARE_GATE_BARRIER_PATH_MUTANT)
     "DEVELOPMENT_PLAN/development_plan_phase_model.md.mutated"
 #else
     "DEVELOPMENT_PLAN/development_plan_phase_model.md"
 #endif
-#if defined(VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_ANCHOR_MUTANT)
+#if defined(VALIDATION_POLICY_OWNER_PREHARDWARE_GATE_BARRIER_ANCHOR_MUTANT)
     "l-one-substrate-discipline-mutated"
 #else
     "l-one-substrate-discipline"
 #endif
-#if defined(VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_SECTION_MUTANT)
+#if defined(VALIDATION_POLICY_OWNER_PREHARDWARE_GATE_BARRIER_SECTION_MUTANT)
     "L. One-substrate discipline (mutated)"
 #else
     "L. One-substrate discipline"
 #endif
 
-promotionAuthorityOwner :: PolicyOwnerReference
-promotionAuthorityOwner =
+gatePassRuleOwner :: PolicyOwnerReference
+gatePassRuleOwner =
   PolicyOwnerReference
-#if defined(VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_PATH_MUTANT)
+#if defined(VALIDATION_POLICY_OWNER_GATE_PASS_RULE_PATH_MUTANT)
     "DEVELOPMENT_PLAN/development_plan_gate_integrity.md.mutated"
 #else
     "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
 #endif
-#if defined(VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_ANCHOR_MUTANT)
-    "m6-candidate-evidence-and-delegated-promotion-mutated"
+#if defined(VALIDATION_POLICY_OWNER_GATE_PASS_RULE_ANCHOR_MUTANT)
+    "m6-candidate-evidence-and-gate-pass-mutated"
 #else
-    "m6-candidate-evidence-and-delegated-promotion"
+    "m6-candidate-evidence-and-gate-pass"
 #endif
-#if defined(VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_SECTION_MUTANT)
-    "M.6 Candidate evidence and delegated promotion (mutated)"
+#if defined(VALIDATION_POLICY_OWNER_GATE_PASS_RULE_SECTION_MUTANT)
+    "M.6 Candidate evidence and gate pass (mutated)"
 #else
-    "M.6 Candidate evidence and delegated promotion"
+    "M.6 Candidate evidence and gate pass"
 #endif
 
 policyOwnerReference :: PolicyContract -> PolicyId -> Maybe PolicyOwnerReference
@@ -791,9 +792,9 @@ generationRootPath root
   | root == IgnoredDotBuild = ".build"
   | otherwise = ".mutation-only"
 
-promotionAuthorityMarker :: PromotionAuthority -> Text
-promotionAuthorityMarker authority
-  | authority == AuthorizedDelegatedReviewer = "reviewer"
+gatePassMarker :: GatePassRule -> Text
+gatePassMarker rule
+  | rule == QualifiedGatePass = "qualified-gate-pass"
   | otherwise = "mutation-only"
 
 expectedSourceContract :: SourceContract
@@ -854,15 +855,15 @@ expectedOrderingContract =
     , phase50MigrationRule = NoSourceMigration
     , dslBarrierSourceClosure = AllLtdSrcQueriesZeroBeforePhase49
     , prehardwareRule = NoHardwareThroughPhase51
-    , pbTransportRule = DirectHaskellThrough49ObservedPbAt50ApprovalBoundAfter50
+    , pbTransportRule = DirectHaskellThrough49ObservedPbAt50GatePassBoundAfter50
     }
 
-expectedPromotionContract :: PromotionContract
-expectedPromotionContract =
-  PromotionContract
-    { promotionAuthority = AuthorizedDelegatedReviewer
-    , automationRole = CandidateEvidenceAndQualifiedPromotion
-    , statusMutationAuthority = AuthorizedReviewer
+expectedGateCompletionContract :: GateCompletionContract
+expectedGateCompletionContract =
+  GateCompletionContract
+    { gatePassRule = QualifiedGatePass
+    , automationRole = CandidateEvidenceAndGatePass
+    , statusTransitionRule = PassingGate
     }
 
 checkPolicyContract :: PolicyContract -> CheckResult
@@ -881,7 +882,7 @@ checkPolicyContract contract =
         , observation "policy.phase-roles" (renderPhaseRoles (orderingContract contract))
         , observation "policy.dsl-barrier-source-closure" (renderDslBarrierSourceClosure (dslBarrierSourceClosure (orderingContract contract)))
         , observation "policy.pb-transport" (renderPbTransportRule (pbTransportRule (orderingContract contract)))
-        , observation "policy.promotion-authority" (renderPromotionAuthority (promotionAuthority (promotionContract contract)))
+        , observation "policy.gate-pass-rule" (renderGatePassRule (gatePassRule (gateCompletionContract contract)))
         , observation "policy.owner-count" (showText (Map.size (contractOwners contract)))
         , observation "policy.contract-sha256" (policyContractDigest contract)
         ]
@@ -894,7 +895,7 @@ checkPolicyContract contract =
           <> registerFindings
           <> statusResetFindings
           <> orderingFindings
-          <> promotionFindings
+          <> gateCompletionFindings
           <> ownerFindings
     }
  where
@@ -924,9 +925,9 @@ checkPolicyContract contract =
       <> universeMismatch "POLICY-CLOSED-UNIVERSE" "policy.universe.dsl-barrier-source-closure" expectedDslBarrierSourceClosureUniverse ([minBound .. maxBound] :: [DslBarrierSourceClosure])
       <> universeMismatch "POLICY-CLOSED-UNIVERSE" "policy.universe.prehardware-rule" expectedPrehardwareRuleUniverse ([minBound .. maxBound] :: [PrehardwareRule])
       <> universeMismatch "POLICY-CLOSED-UNIVERSE" "policy.universe.pb-transport-rule" expectedPbTransportRuleUniverse ([minBound .. maxBound] :: [PbTransportRule])
-      <> universeMismatch "POLICY-CLOSED-UNIVERSE" "policy.universe.promotion-authority" expectedPromotionAuthorityUniverse ([minBound .. maxBound] :: [PromotionAuthority])
+      <> universeMismatch "POLICY-CLOSED-UNIVERSE" "policy.universe.gate-pass-rule" expectedGatePassRuleUniverse ([minBound .. maxBound] :: [GatePassRule])
       <> universeMismatch "POLICY-CLOSED-UNIVERSE" "policy.universe.automation-role" expectedAutomationRoleUniverse ([minBound .. maxBound] :: [AutomationRole])
-      <> universeMismatch "POLICY-CLOSED-UNIVERSE" "policy.universe.status-mutation-authority" expectedStatusMutationAuthorityUniverse ([minBound .. maxBound] :: [StatusMutationAuthority])
+      <> universeMismatch "POLICY-CLOSED-UNIVERSE" "policy.universe.status-transition-rule" expectedStatusTransitionRuleUniverse ([minBound .. maxBound] :: [StatusTransitionRule])
   registryUniverseFindings =
     universeMismatch
       "POLICY-REGISTRY-UNIVERSE"
@@ -957,8 +958,8 @@ checkPolicyContract contract =
     mismatchWith policyStatusResetContractMatches "POLICY-STATUS-RESET" "policy.status-reset" expectedStatusResetContract (statusResetContract contract)
   orderingFindings =
     mismatchWith policyOrderingContractMatches "POLICY-ORDERING" "policy.phase-order" expectedOrderingContract (orderingContract contract)
-  promotionFindings =
-    mismatchWith policyPromotionContractMatches "POLICY-PROMOTION" "policy.promotion" expectedPromotionContract (promotionContract contract)
+  gateCompletionFindings =
+    mismatchWith policyGateCompletionContractMatches "POLICY-GATE-COMPLETION" "policy.gate-completion" expectedGateCompletionContract (gateCompletionContract contract)
   owners = contractOwners contract
   policyIdUniverse = Set.fromList ([minBound .. maxBound] :: [PolicyId])
   ownerFindings =
@@ -1040,14 +1041,14 @@ policyOwnerMatches identifier expected observed
 #else
       observed == Just expected
 #endif
-  | identifier == PrehardwarePromotionBarrier =
-#if defined(VALIDATION_POLICY_OWNER_PREHARDWARE_PROMOTION_BARRIER_MATCH_MUTANT)
+  | identifier == PrehardwareGateBarrier =
+#if defined(VALIDATION_POLICY_OWNER_PREHARDWARE_GATE_BARRIER_MATCH_MUTANT)
       False
 #else
       observed == Just expected
 #endif
-  | identifier == PromotionAuthorityPolicy =
-#if defined(VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_MATCH_MUTANT)
+  | identifier == GatePassPolicy =
+#if defined(VALIDATION_POLICY_OWNER_GATE_PASS_RULE_MATCH_MUTANT)
       False
 #else
       observed == Just expected
@@ -1173,8 +1174,8 @@ policyDiagnosticObservationRetained item = case observationKey item of
 #else
     True
 #endif
-  "policy.promotion-authority" ->
-#if defined(VALIDATION_POLICY_OBSERVATION_PROMOTION_AUTHORITY_DROP_MUTANT)
+  "policy.gate-pass-rule" ->
+#if defined(VALIDATION_POLICY_OBSERVATION_GATE_PASS_RULE_DROP_MUTANT)
     False
 #else
     True
@@ -1201,9 +1202,9 @@ policyDiagnosticObservationRetained item = case observationKey item of
 
 data PolicyMandatoryFinding
   = PolicyMandatoryDiagnosticOnly
-  | PolicyMandatorySourceCustody
+  | PolicyMandatorySourceBinding
   | PolicyMandatoryQualification
-  | PolicyMandatoryReviewerInspection
+  | PolicyDocumentationCorrespondence
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 policyMandatoryFindingRetained :: PolicyMandatoryFinding -> Bool
@@ -1214,8 +1215,8 @@ policyMandatoryFindingRetained kind = case kind of
 #else
     True
 #endif
-  PolicyMandatorySourceCustody ->
-#if defined(VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_DROP_MUTANT)
+  PolicyMandatorySourceBinding ->
+#if defined(VALIDATION_POLICY_RESIDUE_SOURCE_BINDING_DROP_MUTANT)
     False
 #else
     True
@@ -1226,8 +1227,8 @@ policyMandatoryFindingRetained kind = case kind of
 #else
     True
 #endif
-  PolicyMandatoryReviewerInspection ->
-#if defined(VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_DROP_MUTANT)
+  PolicyDocumentationCorrespondence ->
+#if defined(VALIDATION_POLICY_RESIDUE_DOCUMENTATION_CORRESPONDENCE_DROP_MUTANT)
     False
 #else
     True
@@ -1248,11 +1249,11 @@ policyMandatoryFindingCode kind = case kind of
 #else
     "POLICY-DIAGNOSTIC-ONLY"
 #endif
-  PolicyMandatorySourceCustody ->
-#if defined(VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_CODE_MUTANT)
+  PolicyMandatorySourceBinding ->
+#if defined(VALIDATION_POLICY_RESIDUE_SOURCE_BINDING_CODE_MUTANT)
     "POLICY-MUTATED"
 #else
-    "POLICY-SOURCE-CUSTODY-UNAVAILABLE"
+    "POLICY-SOURCE-BINDING-UNAVAILABLE"
 #endif
   PolicyMandatoryQualification ->
 #if defined(VALIDATION_POLICY_RESIDUE_QUALIFICATION_CODE_MUTANT)
@@ -1260,11 +1261,11 @@ policyMandatoryFindingCode kind = case kind of
 #else
     "POLICY-QUALIFICATION-UNAVAILABLE"
 #endif
-  PolicyMandatoryReviewerInspection ->
-#if defined(VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_CODE_MUTANT)
+  PolicyDocumentationCorrespondence ->
+#if defined(VALIDATION_POLICY_RESIDUE_DOCUMENTATION_CORRESPONDENCE_CODE_MUTANT)
     "POLICY-MUTATED"
 #else
-    "POLICY-REVIEWER-INSPECTION-UNAVAILABLE"
+    "POLICY-DOCUMENTATION-CORRESPONDENCE-UNAVAILABLE"
 #endif
 
 policyMandatoryFindingSubject :: PolicyMandatoryFinding -> FilePath
@@ -1275,8 +1276,8 @@ policyMandatoryFindingSubject kind = case kind of
 #else
     "Amoebius.Validation.PolicyContract.policyContractDiagnostic"
 #endif
-  PolicyMandatorySourceCustody ->
-#if defined(VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_SUBJECT_MUTANT)
+  PolicyMandatorySourceBinding ->
+#if defined(VALIDATION_POLICY_RESIDUE_SOURCE_BINDING_SUBJECT_MUTANT)
     "<mutated>"
 #else
     "Amoebius.Validation.PolicyContract.Internal"
@@ -1287,8 +1288,8 @@ policyMandatoryFindingSubject kind = case kind of
 #else
     "policy-contract-changed-subject-matrix"
 #endif
-  PolicyMandatoryReviewerInspection ->
-#if defined(VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_SUBJECT_MUTANT)
+  PolicyDocumentationCorrespondence ->
+#if defined(VALIDATION_POLICY_RESIDUE_DOCUMENTATION_CORRESPONDENCE_SUBJECT_MUTANT)
     "<mutated>"
 #else
     "DEVELOPMENT_PLAN/phase_00_documentation_suite.md"
@@ -1302,11 +1303,11 @@ policyMandatoryFindingDetail kind = case kind of
 #else
     "the public standard-value facade cannot mint candidate evidence"
 #endif
-  PolicyMandatorySourceCustody ->
-#if defined(VALIDATION_POLICY_RESIDUE_SOURCE_CUSTODY_DETAIL_MUTANT)
-    "the canonical policy value is not authenticated source acquisition evidence (mutated)"
+  PolicyMandatorySourceBinding ->
+#if defined(VALIDATION_POLICY_RESIDUE_SOURCE_BINDING_DETAIL_MUTANT)
+    "the canonical policy value is not exact source binding capture evidence (mutated)"
 #else
-    "the canonical policy value is not authenticated source acquisition evidence"
+    "the canonical policy value is not exact source binding capture evidence"
 #endif
   PolicyMandatoryQualification ->
 #if defined(VALIDATION_POLICY_RESIDUE_QUALIFICATION_DETAIL_MUTANT)
@@ -1314,11 +1315,11 @@ policyMandatoryFindingDetail kind = case kind of
 #else
     "component diagnostics cannot qualify a complete atomic changed-production corpus for this exact subject"
 #endif
-  PolicyMandatoryReviewerInspection ->
-#if defined(VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_DETAIL_MUTANT)
-    "policy-to-prose correspondence requires independent reviewer inspection (mutated)"
+  PolicyDocumentationCorrespondence ->
+#if defined(VALIDATION_POLICY_RESIDUE_DOCUMENTATION_CORRESPONDENCE_DETAIL_MUTANT)
+    "policy-to-prose correspondence requires the documentation gate (mutated)"
 #else
-    "policy-to-prose correspondence requires independent reviewer inspection"
+    "policy-to-prose correspondence requires the documentation gate"
 #endif
 
 mismatchWith :: Show value => (value -> value -> Bool) -> Text -> FilePath -> value -> value -> [Finding]
@@ -1376,11 +1377,11 @@ policyOrderingContractMatches _ _ = False
 policyOrderingContractMatches = (==)
 #endif
 
-policyPromotionContractMatches :: PromotionContract -> PromotionContract -> Bool
-#if defined(VALIDATION_POLICY_CONTRACT_PROMOTION_FIELD_MUTANT)
-policyPromotionContractMatches _ _ = False
+policyGateCompletionContractMatches :: GateCompletionContract -> GateCompletionContract -> Bool
+#if defined(VALIDATION_POLICY_CONTRACT_GATE_COMPLETION_FIELD_MUTANT)
+policyGateCompletionContractMatches _ _ = False
 #else
-policyPromotionContractMatches = (==)
+policyGateCompletionContractMatches = (==)
 #endif
 
 policyRegistrySelectionAccepted :: RegistryProvider -> Bool
@@ -1441,9 +1442,9 @@ renderPolicyContract contract =
           , "universe.dsl-barrier-source-closure=" <> renderUniverse renderDslBarrierSourceClosure ([minBound .. maxBound] :: [DslBarrierSourceClosure])
           , "universe.prehardware-rule=" <> renderUniverse renderPrehardwareRule ([minBound .. maxBound] :: [PrehardwareRule])
           , "universe.pb-transport-rule=" <> renderUniverse renderPbTransportRule ([minBound .. maxBound] :: [PbTransportRule])
-          , "universe.promotion-authority=" <> renderUniverse renderPromotionAuthority ([minBound .. maxBound] :: [PromotionAuthority])
+          , "universe.gate-pass-rule=" <> renderUniverse renderGatePassRule ([minBound .. maxBound] :: [GatePassRule])
           , "universe.automation-role=" <> renderUniverse renderAutomationRole ([minBound .. maxBound] :: [AutomationRole])
-          , "universe.status-mutation-authority=" <> renderUniverse renderStatusMutationAuthority ([minBound .. maxBound] :: [StatusMutationAuthority])
+          , "universe.status-transition-rule=" <> renderUniverse renderStatusTransitionRule ([minBound .. maxBound] :: [StatusTransitionRule])
           , "source.behavioral-language=" <> renderBehavioralLanguage (sourceBehavioralLanguage source)
           , "source.classification=" <> renderSourceClassification (sourceClassification source)
           , "source.public-behavior-authority=" <> renderPublicBehaviorAuthority (sourcePublicBehaviorAuthority source)
@@ -1473,9 +1474,9 @@ renderPolicyContract contract =
           , "ordering.dsl-barrier-source-closure=" <> renderDslBarrierSourceClosure (dslBarrierSourceClosure ordering)
           , "ordering.prehardware=" <> renderPrehardwareRule (prehardwareRule ordering)
           , "ordering.pb-transport=" <> renderPbTransportRule (pbTransportRule ordering)
-          , "promotion.authority=" <> renderPromotionAuthority (promotionAuthority promotion)
-          , "promotion.automation-role=" <> renderAutomationRole (automationRole promotion)
-          , "promotion.status-mutation=" <> renderStatusMutationAuthority (statusMutationAuthority promotion)
+          , "gate-completion.rule=" <> renderGatePassRule (gatePassRule gateCompletion)
+          , "gate-completion.automation-role=" <> renderAutomationRole (automationRole gateCompletion)
+          , "gate-completion.status-transition=" <> renderStatusTransitionRule (statusTransitionRule gateCompletion)
           ]
             <> [ "owner." <> policySlug identifier <> "=" <> renderOwner reference
                | (identifier, reference) <- Map.toAscList (contractOwners contract)
@@ -1491,7 +1492,7 @@ renderPolicyContract contract =
   register = registerContract contract
   statusReset = statusResetContract contract
   ordering = orderingContract contract
-  promotion = promotionContract contract
+  gateCompletion = gateCompletionContract contract
 
 data PolicySerializationKey
   = PolicySerializationHeader
@@ -1520,9 +1521,9 @@ data PolicySerializationKey
   | PolicySerializationUniverseDslBarrierSourceClosure
   | PolicySerializationUniversePrehardwareRule
   | PolicySerializationUniversePbTransportRule
-  | PolicySerializationUniversePromotionAuthority
+  | PolicySerializationUniverseGatePassRule
   | PolicySerializationUniverseAutomationRole
-  | PolicySerializationUniverseStatusMutationAuthority
+  | PolicySerializationUniverseStatusTransitionRule
   | PolicySerializationSourceBehavioralLanguage
   | PolicySerializationSourceClassification
   | PolicySerializationSourcePublicBehaviorAuthority
@@ -1552,9 +1553,9 @@ data PolicySerializationKey
   | PolicySerializationOrderingDslBarrierSourceClosure
   | PolicySerializationOrderingPrehardware
   | PolicySerializationOrderingPbTransport
-  | PolicySerializationPromotionAuthority
-  | PolicySerializationPromotionAutomationRole
-  | PolicySerializationPromotionStatusMutation
+  | PolicySerializationGatePassRule
+  | PolicySerializationGateCompletionAutomationRole
+  | PolicySerializationGateCompletionStatusMutation
   | PolicySerializationOwnerTrackedSource
   | PolicySerializationOwnerPbBootstrap
   | PolicySerializationOwnerLazyBuildGeneration
@@ -1564,8 +1565,8 @@ data PolicySerializationKey
   | PolicySerializationOwnerValidationStatusReset
   | PolicySerializationOwnerNumericPhaseOrder
   | PolicySerializationOwnerDslBarrierSourceClosure
-  | PolicySerializationOwnerPrehardwarePromotionBarrier
-  | PolicySerializationOwnerPromotionAuthority
+  | PolicySerializationOwnerPrehardwareGateBarrier
+  | PolicySerializationOwnerGatePassRule
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 policySerializationKeys :: [PolicySerializationKey]
@@ -1737,8 +1738,8 @@ policySerializationLineRetained key = case key of
 #else
     True
 #endif
-  PolicySerializationUniversePromotionAuthority ->
-#if defined(VALIDATION_POLICY_SERIALIZER_UNIVERSE_PROMOTION_AUTHORITY_DROP_MUTANT)
+  PolicySerializationUniverseGatePassRule ->
+#if defined(VALIDATION_POLICY_SERIALIZER_UNIVERSE_GATE_PASS_RULE_DROP_MUTANT)
     False
 #else
     True
@@ -1749,8 +1750,8 @@ policySerializationLineRetained key = case key of
 #else
     True
 #endif
-  PolicySerializationUniverseStatusMutationAuthority ->
-#if defined(VALIDATION_POLICY_SERIALIZER_UNIVERSE_STATUS_MUTATION_AUTHORITY_DROP_MUTANT)
+  PolicySerializationUniverseStatusTransitionRule ->
+#if defined(VALIDATION_POLICY_SERIALIZER_UNIVERSE_STATUS_TRANSITION_RULE_DROP_MUTANT)
     False
 #else
     True
@@ -1929,20 +1930,20 @@ policySerializationLineRetained key = case key of
 #else
     True
 #endif
-  PolicySerializationPromotionAuthority ->
-#if defined(VALIDATION_POLICY_SERIALIZER_PROMOTION_AUTHORITY_DROP_MUTANT)
+  PolicySerializationGatePassRule ->
+#if defined(VALIDATION_POLICY_SERIALIZER_GATE_PASS_RULE_DROP_MUTANT)
     False
 #else
     True
 #endif
-  PolicySerializationPromotionAutomationRole ->
-#if defined(VALIDATION_POLICY_SERIALIZER_PROMOTION_AUTOMATION_ROLE_DROP_MUTANT)
+  PolicySerializationGateCompletionAutomationRole ->
+#if defined(VALIDATION_POLICY_SERIALIZER_GATE_COMPLETION_AUTOMATION_ROLE_DROP_MUTANT)
     False
 #else
     True
 #endif
-  PolicySerializationPromotionStatusMutation ->
-#if defined(VALIDATION_POLICY_SERIALIZER_PROMOTION_STATUS_MUTATION_DROP_MUTANT)
+  PolicySerializationGateCompletionStatusMutation ->
+#if defined(VALIDATION_POLICY_SERIALIZER_GATE_COMPLETION_STATUS_TRANSITION_DROP_MUTANT)
     False
 #else
     True
@@ -2001,14 +2002,14 @@ policySerializationLineRetained key = case key of
 #else
     True
 #endif
-  PolicySerializationOwnerPrehardwarePromotionBarrier ->
-#if defined(VALIDATION_POLICY_SERIALIZER_OWNER_PREHARDWARE_PROMOTION_BARRIER_DROP_MUTANT)
+  PolicySerializationOwnerPrehardwareGateBarrier ->
+#if defined(VALIDATION_POLICY_SERIALIZER_OWNER_PREHARDWARE_GATE_BARRIER_DROP_MUTANT)
     False
 #else
     True
 #endif
-  PolicySerializationOwnerPromotionAuthority ->
-#if defined(VALIDATION_POLICY_SERIALIZER_OWNER_PROMOTION_AUTHORITY_DROP_MUTANT)
+  PolicySerializationOwnerGatePassRule ->
+#if defined(VALIDATION_POLICY_SERIALIZER_OWNER_GATE_PASS_RULE_DROP_MUTANT)
     False
 #else
     True
@@ -2177,24 +2178,24 @@ renderPrehardwareRule value
 
 renderPbTransportRule :: PbTransportRule -> Text
 renderPbTransportRule rule
-  | rule == DirectHaskellThrough49ObservedPbAt50ApprovalBoundAfter50 =
-      "direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
+  | rule == DirectHaskellThrough49ObservedPbAt50GatePassBoundAfter50 =
+      "direct-haskell-through-49;observed-pb-at-50;phase-50-gate-pass-bound-pb-after-50"
   | otherwise = "mutation-only-pb-admitted-before-phase-50"
 
-renderPromotionAuthority :: PromotionAuthority -> Text
-renderPromotionAuthority value
-  | value == AuthorizedDelegatedReviewer = "authorized-delegated-reviewer"
-  | otherwise = "mutation-only-promotion-authority"
+renderGatePassRule :: GatePassRule -> Text
+renderGatePassRule value
+  | value == QualifiedGatePass = "qualified-gate-pass"
+  | otherwise = "mutation-only-gate-pass-rule"
 
 renderAutomationRole :: AutomationRole -> Text
 renderAutomationRole value
-  | value == CandidateEvidenceAndQualifiedPromotion = "candidate-evidence-and-qualified-promotion"
+  | value == CandidateEvidenceAndGatePass = "candidate-evidence-and-gate-pass"
   | otherwise = "mutation-only-automation-role"
 
-renderStatusMutationAuthority :: StatusMutationAuthority -> Text
-renderStatusMutationAuthority value
-  | value == AuthorizedReviewer = "authorized-reviewer"
-  | otherwise = "mutation-only-status-mutation-authority"
+renderStatusTransitionRule :: StatusTransitionRule -> Text
+renderStatusTransitionRule value
+  | value == PassingGate = "passing-gate"
+  | otherwise = "mutation-only-status-transition-rule"
 
 renderOwner :: PolicyOwnerReference -> Text
 renderOwner reference =
@@ -2215,8 +2216,8 @@ policySlug identifier
   | identifier == ValidationStatusReset = "validation-status-reset"
   | identifier == NumericPhaseOrder = "numeric-phase-order"
   | identifier == DslBarrierSourceClosurePolicy = "dsl-barrier-source-closure"
-  | identifier == PrehardwarePromotionBarrier = "prehardware-promotion-barrier"
-  | identifier == PromotionAuthorityPolicy = "promotion-authority"
+  | identifier == PrehardwareGateBarrier = "prehardware-gate-barrier"
+  | identifier == GatePassPolicy = "gate-pass-rule"
   | otherwise = "mutation-only-policy-id"
 
 showText :: Show value => value -> Text

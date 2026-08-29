@@ -413,7 +413,7 @@ rules.
 
 The checker derives the complete enumeration of reachable event constructors, routes, ports, transitions,
 and scoped actions from `CheckedUiProgram`. That enumeration is generated at gate time and never committed.
-The expected observation and the interaction that produces it are separately reviewed, version-controlled
+The expected observation and the interaction that produces it are separately authored, version-controlled
 Haskell (`.hs`) semantic values; any serialized interaction or observation is lazily projected beneath
 `.build/**`. Deriving either semantic expectation from the subject would create a self-agreeing oracle. An
 enumerated surface with no independent Haskell expectation remains explicitly UNVERIFIED. This is the derivation boundary owned by

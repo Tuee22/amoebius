@@ -97,9 +97,9 @@ delegates their storage, reconciliation, evidence, and provider mechanisms as fo
 | The bounded UI language, plan envelope, browser/server ABI, and compatibility witness | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 
 > **Target instance — NOT VALIDATED.** Phase 71 must bind all four delivery values through independently
-> reviewed Haskell oracles and the exact live boundary its contract names. Every former run/result statement
+> authored Haskell oracles and the exact live boundary its contract names. Every former run/result statement
 > is permanently invalidated and omitted; Gateway-API canary shifting, Pulsar consumer-group cutover, and
-> cross-cluster/geo promotion remain `UNVERIFIED` until their owning numeric phases are reviewer-promoted.
+> cross-cluster/geo promotion remain `UNVERIFIED` until their owning numeric phases pass their qualified gates.
 
 ---
 
@@ -311,7 +311,7 @@ amoebius's live wiring and is currently **NOT VALIDATED**.
 ## 5. `RolloutPlan` / `RolloutPhase`: the readiness-gated apply
 
 Once a pointer advances, the target change is enacted as an **ordered, readiness-gated plan** on the
-reviewer-approved predecessor reconciler — it introduces **no new reconciler**:
+gate-passed predecessor reconciler — it introduces **no new reconciler**:
 
 ```haskell
 newtype RolloutPlan = RolloutPlan [RolloutPhase]   -- ordered; each phase gates the next on readiness

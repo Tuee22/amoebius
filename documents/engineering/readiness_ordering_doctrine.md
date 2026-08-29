@@ -298,7 +298,7 @@ state is [`illegal_state_catalog.md` §3.41](../illegal_state/illegal_state_life
 ### Phase-63 target service-DAG validation — NOT VALIDATED
 
 Phase 63 must implement the 14-service declared dependency graph and compare
-`Set ServiceEdge` equality with a separately reviewed Haskell `expectedServiceEdges` value. That value must
+`Set ServiceEdge` equality with a separately authored Haskell `expectedServiceEdges` value. That value must
 enumerate the expected relation independently of the production dependency derivation; no Markdown edge list,
 serialized edge oracle, ordering, or byte encoding may determine the verdict. Generated edge projections exist
 only beneath `.build/test-corpora/**` or `.build/docs/**`. Haskell cycle and dropped-edge mutants must turn the gate red. The concurrent

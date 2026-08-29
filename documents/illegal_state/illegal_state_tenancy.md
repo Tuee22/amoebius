@@ -133,7 +133,7 @@ statement has no inhabitant; `runtime-checked` residue — that the database enf
 the role the application connects as. The emitted statement and its row policy are `decode-foreclosed`, compared by a total predicate over rendered output.
 **Validation-locus:** `gadt-decode` (a transaction value missing its scope does not typecheck) +
 `rendered-artifact-oracle` (the emitted statement text and its row-level security policy both carry the scope
-predicate, compared against the separately reviewed Haskell `scopedTransactionExpectation`, implemented
+predicate, compared against the separately authored Haskell `scopedTransactionExpectation`, implemented
 without calling the statement/policy emitter) + `live-effect` residue (that the database
 enforces the emitted row policy for the role the application connects as).
 
@@ -289,7 +289,7 @@ no out-of-band migration has relaxed it. The emitted DDL the oracle compares is 
 **Validation-locus:** `gadt-decode` (a row type whose scope column is optional is a different
 type, and no transaction is defined over it) +
 `rendered-artifact-oracle` (the emitted DDL carries `NOT NULL` and the composite key for
-every scope-bearing table, compared against the separately reviewed Haskell
+every scope-bearing table, compared against the separately authored Haskell
 `schemaConstraintExpectation`, implemented without calling the DDL emitter) + `live-effect` residue (an
 insert of a scope-less row is rejected by the live database, and the deployed schema matches what was emitted).
 
@@ -330,7 +330,7 @@ constructor; `decode-foreclosed` for a stored key that does not parse back to it
 `runtime-checked` residue — that no pre-existing key in a live store predates the renderer.
 **Validation-locus:** `gadt-decode` (a key cannot be constructed by concatenation, and the round-trip property
 holds for every generated component pair) + `rendered-artifact-oracle` (the emitted prefixes, topic names, and
-policies all use the one rendering, compared against the separately reviewed Haskell
+policies all use the one rendering, compared against the separately authored Haskell
 `scopedKeyExpectation`, implemented independently of the production renderer) + `live-effect`
 residue (that no pre-existing key in a live store predates the renderer).
 

@@ -473,7 +473,7 @@ analyzeAcquiredSourceDebt acquired =
   SourceDebtAnalysis result states = analyzeSourceDebt closure
 
 -- | Extract the candidate CheckResult only while rejoining the evidence to the
--- exact opaque acquisition. A value analyzed from another snapshot refuses.
+-- exact opaque capture. A value analyzed from another snapshot refuses.
 sourceDebtEvidenceCheck
   :: AcquiredSourceSnapshot
   -> SourceDebtEvidence
@@ -842,7 +842,7 @@ sourceDebtDiagnosticFindings =
 #if defined(VALIDATION_SOURCE_DEBT_DIAGNOSTIC_FINDING_DETAIL_MUTANT)
       "mutant"
 #else
-      "caller-supplied source-debt observations are diagnostic input, not candidate acquisition authority"
+      "caller-supplied source-debt observations are diagnostic input, not candidate capture authority"
 #endif
   ]
 #endif

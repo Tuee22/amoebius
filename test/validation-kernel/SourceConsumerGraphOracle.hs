@@ -214,7 +214,7 @@ sourceConsumerGraphSelectorIntents =
   , ("VALIDATION_SOURCE_CONSUMER_CONTROL_FLOW_FACT_RENDER_MAPPING_MUTANT", "canonical complete diagnostic")
   , ("VALIDATION_SOURCE_CONSUMER_COPYING_STEM_ALTERNATIVE_DROP_MUTANT", "COPYING stem refusal")
   , ("VALIDATION_SOURCE_CONSUMER_CPP_FACT_DROP_MUTANT", "canonical complete diagnostic")
-  , ("VALIDATION_SOURCE_CONSUMER_CUSTODY_RESIDUE_BYPASS_MUTANT", "canonical complete diagnostic")
+  , ("VALIDATION_SOURCE_CONSUMER_LOCAL_CAPTURE_RESIDUE_BYPASS_MUTANT", "canonical complete diagnostic")
   , ("VALIDATION_SOURCE_CONSUMER_DECIMAL_SERIALIZER_MAPPING_MUTANT", "canonical complete diagnostic")
   , ("VALIDATION_SOURCE_CONSUMER_DIAGNOSTIC_ONLY_BYPASS_MUTANT", "canonical complete diagnostic")
   , ("VALIDATION_SOURCE_CONSUMER_DIAGNOSTIC_ONLY_CODE_MAPPING_MUTANT", "canonical complete diagnostic")
@@ -550,9 +550,9 @@ sourceConsumerGraphSelectorIntents =
   , ("VALIDATION_SOURCE_CONSUMER_SNAPSHOT_WIDTH_BYPASS_MUTANT", "short snapshot exact refusal")
   , ("VALIDATION_SOURCE_CONSUMER_SOURCE_BOUNDARY_CHECKER_CONSUMER_RENDER_MAPPING_MUTANT", "exact source-boundary effect")
   , ("VALIDATION_SOURCE_CONSUMER_SOURCE_BOUNDARY_USE_USE_RENDER_MAPPING_MUTANT", "wrong source reader path")
-  , ("VALIDATION_SOURCE_CONSUMER_SOURCE_CUSTODY_CODE_MAPPING_MUTANT", "canonical complete diagnostic")
-  , ("VALIDATION_SOURCE_CONSUMER_SOURCE_CUSTODY_DETAIL_MAPPING_MUTANT", "canonical complete diagnostic")
-  , ("VALIDATION_SOURCE_CONSUMER_SOURCE_CUSTODY_SUBJECT_MAPPING_MUTANT", "canonical complete diagnostic")
+  , ("VALIDATION_SOURCE_CONSUMER_SOURCE_BINDING_CODE_MAPPING_MUTANT", "canonical complete diagnostic")
+  , ("VALIDATION_SOURCE_CONSUMER_SOURCE_BINDING_DETAIL_MAPPING_MUTANT", "canonical complete diagnostic")
+  , ("VALIDATION_SOURCE_CONSUMER_SOURCE_BINDING_SUBJECT_MAPPING_MUTANT", "canonical complete diagnostic")
   , ("VALIDATION_SOURCE_CONSUMER_SOURCE_READER_BINDING_CONJUNCT_BYPASS_MUTANT", "wrong source reader binding")
   , ("VALIDATION_SOURCE_CONSUMER_SOURCE_READER_MODULE_CONJUNCT_BYPASS_MUTANT", "wrong source reader module")
   , ("VALIDATION_SOURCE_CONSUMER_SOURCE_READER_PATH_CONJUNCT_BYPASS_MUTANT", "wrong source reader path")
@@ -2374,7 +2374,7 @@ permanentFindings =
       "Amoebius.Validation.SourceConsumerGraph.sourceConsumerGraphDiagnostic"
       "caller-supplied inventory and effect rows cannot establish source-consumer closure"
   , localFinding
-      "SRC-CONSUMER-SOURCE-CUSTODY-RESIDUE"
+      "SRC-CONSUMER-SOURCE-BINDING-RESIDUE"
       "source-snapshot"
       "an independently authenticated immutable source snapshot is absent"
   ]

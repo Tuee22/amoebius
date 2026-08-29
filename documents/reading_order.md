@@ -38,8 +38,8 @@ prior knowledge, but every stop presumes the stops above it.
 ## Before starting
 
 > **Doctrine describes the target; it is not implementation or validation evidence.** Candidate gate output
-> cannot promote itself. Only an authorized reviewer records phase status, after independent expectations,
-> sabotage controls, predecessor order, and the applicable hardware-free barrier have been reviewed.
+> cannot pass by reporting success alone. A complete qualified gate pass is sufficient for phase status after
+> independent expectations, sabotage controls, predecessor order, and the applicable hardware-free barrier pass.
 
 - [`glossary.md`](./glossary.md) — open in a second tab and leave it open; every stop below assumes it.
 
@@ -117,7 +117,7 @@ what makes the rest of it readable at face value.
 - [`formal_model_doctrine.md` §6](./engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not) — the boundary between what the model establishes and what the code must still earn.
 - [`gateway_migration_doctrine.md` §5](./engineering/gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine) — the one place that obligation concentrates, drawn as a state machine.
 
-The first promotion barrier is hardware-free: the DSL parser/typechecker/decoder, pure semantics, generation
+The first gate barrier is hardware-free: the DSL parser/typechecker/decoder, pure semantics, generation
 determinism, independent Haskell expectations, negative controls, and source-boundary audit must be accepted
 before live container, cluster, browser, provider, accelerator, or other hardware-specific replay can count as
 downstream evidence. Later replay checks portability; it cannot stand in for the language result it consumes.
@@ -127,7 +127,7 @@ downstream evidence. Later replay checks portability; it cannot stand in for the
 - [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — the tracker; the only place phase order, status, and gates live.
 - [`development_plan_standards.md` §M](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the fixed eighteen-row contract that stops a gate from being passable by a stub.
 - [`development_plan_standards.md` §K](../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed) — how stop 5's discipline binds a phase before it may be marked done.
-- [`development_plan_standards.md` §C](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — status is an authorized reviewer decision; a delegated agent may inspect, promote, and continue qualified phases, while a command, script, generated report, or gate cannot promote by itself.
+- [`development_plan_standards.md` §C](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — a complete qualified gate pass is sufficient for status; a human, agent, or CI job may record the narrow status projection while a component self-report cannot pass by itself.
 - [`development_plan_standards.md` §L](../DEVELOPMENT_PLAN/development_plan_standards.md#l-one-substrate-discipline) — later hardware evidence stays scoped to the one natural substrate actually exercised and cannot be generalized to an untested substrate.
 
 Work proceeds in numerical phase order. A later hardware-dependent gate does not compensate for an open or

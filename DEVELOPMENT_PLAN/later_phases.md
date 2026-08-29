@@ -44,7 +44,7 @@ the suite:
 
 - **Frozen behind the numbered plan.** Phase 0 is Active — NOT VALIDATED and Phases 1–95 are Blocked — NOT
   VALIDATED. No candidate may be promoted, implemented, or hardware-validated until Phase 95 and every
-  predecessor have satisfied redesigned independent acceptance and been promoted by the authorized reviewer.
+  predecessor have passed their redesigned complete qualified gates.
 - **Haskell source boundary.** A promoted candidate may add only Haskell behavioral source. Python beneath
   `pb/**` remains the sole bootstrap exception; every foreign-language artifact or serialized oracle is
   generated lazily from Haskell beneath `.build/**`.
@@ -124,7 +124,7 @@ JIT (replacing jitML) producing the bit-deterministic result its determinism con
 **This candidate is split from its trusted-adapter checker target.** It formerly read "Haskell extension DSL
 + custom AST checker + native JIT." The intended low-code path needs neither an arbitrary container nor linked
 app code: it is checked `UiSource` interpreted by the generic runtime. `extension-astcheck` remains a target
-only for a reviewed trusted Haskell adapter that the closed handler catalog cannot supply. The **constrained
+only for a gate-admitted trusted Haskell adapter that the closed handler catalog cannot supply. The **constrained
 adapter surface and its custom AST checker** are specified in
 [`dsl_doctrine.md` §5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
 and [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits),

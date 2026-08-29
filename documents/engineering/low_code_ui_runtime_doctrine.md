@@ -71,7 +71,7 @@ effect. Haskell owns checking, binding, server semantics, and the client-runtime
 
 This choice forecloses arbitrary browser code and arbitrary web-platform access. A SPA is general only within
 the versioned UI type, component, expression, and effect algebras. A capability that those algebras cannot
-express requires a reviewed extension to the trusted Haskell and PureScript runtimes; it never requires a raw
+express requires a gate-admitted extension to the trusted Haskell and PureScript runtimes; it never requires a raw
 escape arm in application Dhall.
 
 ---
@@ -149,7 +149,7 @@ The client projection cannot contain provider coordinates, internal resource ide
 role-binding rules, raw policy, or handler implementation details. The server projection cannot trust a client
 claim merely because the matching client plan would normally emit it.
 
-The projection gate must compare the private Haskell value with independently reviewed Haskell semantic
+The projection gate must compare the private Haskell value with separately authored Haskell semantic
 projections. JSON plans and manifests are generated under `.build/**`, never used as their own oracle, and
 removed for a clean-room rerun. The browser gate must compile freshly generated PureScript and compare its
 transitions and observations with a distinct Haskell reference semantics plus required red controls.
@@ -347,7 +347,7 @@ possible only from the sealed Haskell value, validates its plan envelope and dig
 closed instruction set defensively.
 
 The checked-graph gate must exercise private `CheckedUiProgram` construction and total identity, reference,
-cycle, bound, port, event, and public-projection checks. Independently reviewed Haskell program semantics and
+cycle, bound, port, event, and public-projection checks. Separately authored Haskell program semantics and
 graph expectations constrain meaning; normalized-wire bytes are generated observations, never an oracle.
 
 ---
@@ -486,7 +486,7 @@ request identifier, session epoch, and encoded public input. The authenticated e
 trusted subject, tenant scope, grants, authorization-policy version, and trace/audit context. A field duplicated
 inside the public input has no authority and is rejected when the contract forbids it.
 
-The pure binding gate must exact-join every closed effect arm to independently reviewed Haskell handler, codec,
+The pure binding gate must exact-join every closed effect arm to separately authored Haskell handler, codec,
 scope, capability, retry, and audit expectations. It must reject provider coordinates and effect-transport
 links before `BoundUiProgram` exists, and every paired production mutant must turn the intended check red.
 
@@ -602,7 +602,7 @@ and a server-issued result carrying the new label. There is no general declassif
 
 The standalone pure scope gate must exercise fresh request indices, owner joins, swaps, flow decisions, graph
 diagnostics, compiler-negative pairs, generated reject classes, and production-source mutants. Its expected
-relations are Haskell values reviewed independently of the implementation.
+relations are Haskell values checked independently of the implementation.
 
 Browser input and model output begin with untrusted integrity. They cannot flow to an authority-bearing sink,
 policy decision, provider coordinate, executable action identity, ownership field, or release decision until a
@@ -854,14 +854,14 @@ fully type-foreclosed.
 ## 17. Verification obligations
 
 The target requires evidence at the repository's established verification registers. The first four items
-form a hardware-free UI/DSL/generator barrier and must be accepted by an authorized reviewer before items 5–8 begin:
+form a hardware-free UI/DSL/generator barrier and must all pass before items 5–8 begin:
 
 1. Haskell semantic expectations and properties cover Dhall normalization, dhall-typecheck decoding, gadt-decode checking, module merge,
    referential integrity, type equality, exhaustive decisions, bounds, transitive information-flow checking,
    action-registry projection parity, and deterministic plan generation.
 2. Haskell negative-case declarations cover every row in the preceding table; any rejected Dhall, serialized
    request, fixture, or mutant is rendered only beneath `.build/**` and never becomes its own oracle.
-3. A separately reviewed Haskell reference interpreter and the Haskell-declared production client generated
+3. A separately authored Haskell reference interpreter and the Haskell-declared production client generated
    as PureScript execute Haskell-generated event traces and must produce identical visible state, effect
    requests, cancellation behavior, and route transitions. The generator and generated client cannot supply
    the reference expectation.
@@ -918,8 +918,8 @@ traces; they do not prove agreement for every implementation state unless a sepa
 
 The HA shape is an architectural requirement. Availability is observed and tested under declared failure
 conditions; it is not inferred from a replica count. No security, isolation, correctness, or availability
-claim is reported as implemented, tested, or proven until an authorized reviewer accepts independently observed
-evidence and records the corresponding development-plan status.
+claim is reported as implemented, tested, or proven until the complete qualified gate passes against
+independently observed evidence and the corresponding development-plan status is recorded.
 
 ---
 

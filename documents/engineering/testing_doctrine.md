@@ -46,16 +46,16 @@ nor the phase gates that consume its registers, owned by
 flowchart LR
 %% register: orientation
   spec["Haskell test declaration"] --> gate{{"register gate"}}
-  oracle["separately reviewed Haskell expectation"] --> gate
+  oracle["separately authored Haskell expectation"] --> gate
   observer["independent fresh observer"] --> gate
   gate --> evidence[("candidate .build run bundle")]
-  evidence --> review{{"reviewer inspection"}}
-  review --> ledger(("admitted ledger"))
+  evidence --> pass{{"complete qualified gate"}}
+  pass --> ledger(("admitted ledger"))
   gate --> teardown["mandatory teardown"]
 ```
 
 *Orientation: a Haskell topology drives the run, but its expectation and observer remain independent and only
-reviewer inspection can admit the candidate ledger. Teardown is owned by [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).*
+the complete qualified gate can admit the candidate ledger. Teardown is owned by [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).*
 
 ## 1. A test is an amoebius spec
 
@@ -239,14 +239,14 @@ The ledger schema records these independent axes:
 - `register` and `substrate` identify the validation boundary that actually ran.
 - `checks`, `mutants`, and `cleanup` record concrete outcomes, not aggregate success claims.
 
-A Haskell bundle checker verifies structure before the bundle is offered for review. It requires the register
+A Haskell bundle checker verifies structure before the bundle is evaluated by the gate. It requires the register
 and substrate declared by the phase contract, rejects unknown or duplicate enumerated surfaces, and requires
 every layer outside the reached register to remain `UNVERIFIED`. A substrate-`none` gate can report only the
 hardware-free layer it actually exercised. This checker establishes bundle well-formedness, not the truth of
 any semantic result recorded inside it.
 
 Each claimed obligation must point to fresh raw observation captured after the run started. A pure gate must
-invoke the production entry point from the recorded source snapshot and compare it with a separately reviewed
+invoke the production entry point from the recorded source snapshot and compare it with a separately authored
 Haskell expectation; it cannot accept a success marker supplied by the subject. A boundary or live gate must
 add an independent observer of the relevant process, filesystem, API, provider, or hardware effect. Every
 required positive has a clean control, every required negative has a targeted Haskell mutation plus locus
@@ -261,19 +261,18 @@ was independent. Git contains no ledger, receipt, enumeration, log, trace, repor
 or copied envelope. Placement and retention are owned by
 [repository_layout_doctrine.md §5](./repository_layout_doctrine.md#5-run-evidence-and-phase-status).
 
-Only an authorized reviewer may move a sprint or phase to Done or Validated. The reviewer may be the human
-user or a delegated agent. Before doing so, the reviewer inspects the recorded command against the phase
-contract, the subject/oracle separation, fresh observations, clean and
+Only a complete qualified gate may move a sprint or phase to Done or Validated. Before that pass, the gate
+checks the recorded command against the phase contract, the subject/oracle separation, fresh observations, clean and
 mutated controls, predecessor chain, source-boundary audit, owned legacy closures, and the fact that the gate
 left the tracked tree unchanged. A script, LLM, bundle checker, digest, receipt, or generated document may
-produce candidate evidence but may never edit or authorize status.
+produce candidate evidence but may never edit status; only the complete gate result controls that transition.
 
 Skipping an applicable move records `UNVERIFIED`; it never produces a green substitute. The same rule applies
 to an enumerated surface lacking an independent Haskell expectation, a missing observer, a skipped mutant, incomplete
 cleanup, and an unavailable specialized substrate. A baseline `linux-cpu` route remains available on every
 hardware substrate, but it cannot stand in for an Apple or Linux-CUDA claim.
 
-After authorized reviewer acceptance, an admitted ledger may become typed evidence consumed by a product `PromotionGate`.
+After the development gate passes, an admitted ledger may become typed evidence consumed by a product `PromotionGate`.
 That runtime release transition is distinct from development-plan status and cannot promote a sprint or
 phase. Production promotion requires the Runtime/chaos layer at `tested`; a design-only or
 Runtime-`UNVERIFIED` record cannot construct that transition. The promotion type and environment-strength mapping are owned by
@@ -281,9 +280,9 @@ Runtime-`UNVERIFIED` record cannot construct that transition. The promotion type
 
 The methodology and strength vocabulary remain owned by
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). This section owns the per-run artifact boundary:
-generate the raw candidate bundle beneath `.build/runs/**`; only after independent review may a
-content-addressed receipt be installed beneath `.build/evidence-store/**`. Neither location is committed or
-self-authorizing.
+generate the raw candidate bundle beneath `.build/runs/**`; a complete qualified gate pass may install its
+content-addressed receipt beneath `.build/evidence-store/**`. Neither location is committed, and no partial
+bundle can stand in for that pass.
 
 ---
 
@@ -464,7 +463,7 @@ selectable on every detected hardware substrate — at that host's natural archi
 **An instrument is part of the substrate claim.** A hardware-free gate must use in-process Haskell
 observation or a generated subprocess interposer whose availability is established without a container
 engine. Requiring a kernel tracer, container image, virtual machine, cluster, or specialized device changes
-the gate into a hardware or live gate and is prohibited before the DSL promotion barrier.
+the gate into a hardware or live gate and is prohibited before the DSL gate barrier.
 
 Container replay may later test portability of an already accepted Haskell/DSL result. It cannot supply the
 semantic oracle for that result or make a hardware-dependent command count as substrate `none`.
@@ -525,12 +524,12 @@ already forbids — an equivalence check defines its reference side independentl
 | Half | Content | Requirement | Disposition |
 |---|---|---|---|
 | **Enumeration** — which surfaces exist | declared components, admissible fault targets, capability arms, illegal-state entries, contract constructors | never lags the spec | generated from Haskell, never committed |
-| **Expectation** — what must hold | Haskell assertions, semantic predicates, expected values and error identities | independent of the code under test | separately reviewed Haskell source |
+| **Expectation** — what must hold | Haskell assertions, semantic predicates, expected values and error identities | independent of the code under test | separately authored Haskell source |
 
 The boundary applies uniformly:
 
 - security and authorization arms are enumerated from production Haskell declarations and joined to a
-  separately reviewed Haskell relation;
+  separately authored Haskell relation;
 - browser observations are compared with a distinct Haskell reference semantics and Haskell-authored expected
   accessibility, focus, transport, and denial values; and
 - every external-language fixture, client program, browser interaction script, or encoded oracle is generated
@@ -541,10 +540,10 @@ diagnostic identity may be committed only as Haskell. Materialized negative copi
 are generated under `.build/test-corpora/` or `.build/tmp/`. The gate joins each case to its Haskell
 expectation by stable mutation identity; it does not retain a second source tree of copies.
 
-Git chronology is evidence, not an assumption. A fixture introduced in the same commit as its subject has no
-repository-established before-implementation provenance and is treated as a regression fixture. It becomes an
-independent expectation only through recorded independent review or replacement; until then, the phase cannot
-claim the stronger oracle status from that fixture alone.
+Git chronology is provenance evidence only. A separately authored
+Haskell expectation qualifies as independent when the complete gate proves the subject/oracle separation,
+exact projection, paired negatives, and changed-subject sabotage required here. A same-change fixture may be
+a regression fixture; chronology alone neither qualifies nor disqualifies it.
 
 Enumeration is a pure projection of a committed typed value, so it is a generated artifact in the ordinary
 sense and inherits the ordinary treatment of
@@ -572,12 +571,12 @@ flowchart TD
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Design intent: the generated enumeration accumulates with independently reviewed Haskell expectations by
+*Design intent: the generated enumeration accumulates with separately authored Haskell expectations by
 identity; every bound surface yields a candidate layer observation and every unbound surface falls closed to
 an UNVERIFIED ledger row.*
 
 This introduces no new honesty vocabulary. UNVERIFIED already denotes an applicable move a run did not
-perform, already blocks promotion to prod, and must be checked through independent observation and reviewer inspection
+perform, already blocks promotion to prod, and must be checked through independent observation and the complete gate
 ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)). The extension is to the *set* of things
 recordable as UNVERIFIED — from skipped moves to uncovered surfaces — so absent coverage becomes a claim the
 ledger states rather than a gap no artifact represents. Because the enumeration is regenerated at gate time
@@ -586,7 +585,7 @@ and never committed, a surface cannot be removed from the required set by editin
 What this forecloses: a hand-curated inventory of what a suite covers, which is the artifact that goes
 stale; and generated assertions, with them the appearance of coverage a generated suite produces at no
 evidential cost. Haskell expectations can still be weak or wrong; the gate's Haskell mutant operators and
-reviewer independence inspection must expose that failure.
+oracle-independence checks must expose that failure.
 
 The analysis this rule was drawn from — including the alternatives rejected, the recommendations not
 adopted, and the corpus defects repaired alongside it — is recorded in
@@ -621,8 +620,8 @@ To keep the SSoT boundaries crisp:
 
 This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates,
 and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This
-document states no current validation result. Every gate remains a candidate until an authorized reviewer inspects its
-independence, sabotage controls, predecessor chain, and owned legacy closures.
+document states no current validation result. Every gate remains a candidate until its qualification and clean
+runs pass all required independence, sabotage-control, predecessor-chain, and owned-legacy-closure checks.
 
 ---
 

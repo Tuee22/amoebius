@@ -133,7 +133,7 @@ acquiredCompilerSourceCheck (AcquiredCompilerSourceGraph _ result) =
   result
 #endif
 
--- | Acquired source custody alone is insufficient. This path deliberately does
+-- | Acquired source binding alone is insufficient. This path deliberately does
 -- not invoke GHC until opaque authenticated elaboration, toolchain, subject-role
 -- and supervisor inputs exist.
 analyzeAcquiredCompilerSourceGraph
@@ -832,8 +832,8 @@ rawMandatoryFindings =
       []
 #endif
     ,
-#if !defined(VALIDATION_COMPILER_GRAPH_RAW_SOURCE_CUSTODY_RESIDUE_DROP_MUTANT)
-      [rawMandatoryFinding 2 "COMPILER-GRAPH-SOURCE-CUSTODY-UNAVAILABLE" "compiler-source-graph" "the raw inventory has no authenticated immutable source-custody token"]
+#if !defined(VALIDATION_COMPILER_GRAPH_RAW_SOURCE_BINDING_RESIDUE_DROP_MUTANT)
+      [rawMandatoryFinding 2 "COMPILER-GRAPH-SOURCE-BINDING-UNAVAILABLE" "compiler-source-graph" "the raw inventory has no authenticated immutable source-binding token"]
 #else
       []
 #endif
@@ -845,19 +845,19 @@ rawMandatoryFindings =
 #endif
     ,
 #if !defined(VALIDATION_COMPILER_GRAPH_RAW_ELABORATION_RESIDUE_DROP_MUTANT)
-      [rawMandatoryFinding 4 "COMPILER-GRAPH-ELABORATION-CUSTODY-UNAVAILABLE" "compiler-source-graph" "no authenticated elaborated multi-component configuration-run plan is attached"]
+      [rawMandatoryFinding 4 "COMPILER-GRAPH-ELABORATION-BINDING-UNAVAILABLE" "compiler-source-graph" "no exact elaborated multi-component configuration-run plan is attached"]
 #else
       []
 #endif
     ,
 #if !defined(VALIDATION_COMPILER_GRAPH_RAW_TOOLCHAIN_RESIDUE_DROP_MUTANT)
-      [rawMandatoryFinding 5 "COMPILER-GRAPH-TOOLCHAIN-CUSTODY-UNAVAILABLE" "compiler-source-graph" "no authenticated compiler, libdir, package-database, dependency, or build-info identity is attached"]
+      [rawMandatoryFinding 5 "COMPILER-GRAPH-TOOLCHAIN-BINDING-UNAVAILABLE" "compiler-source-graph" "no exactly observed compiler, libdir, package-database, dependency, or build-info identity is attached"]
 #else
       []
 #endif
     ,
 #if !defined(VALIDATION_COMPILER_GRAPH_RAW_EXECUTION_RESIDUE_DROP_MUTANT)
-      [rawMandatoryFinding 6 "COMPILER-GRAPH-EXECUTION-SUPERVISION-UNAVAILABLE" "compiler-source-graph" "the compiler was not invoked by a challenged source-bound Haskell supervisor with closed resource and filesystem custody"]
+      [rawMandatoryFinding 6 "COMPILER-GRAPH-EXECUTION-SUPERVISION-UNAVAILABLE" "compiler-source-graph" "the compiler was not invoked by a challenged source-bound Haskell supervisor with closed resource and filesystem observation"]
 #else
       []
 #endif
@@ -887,7 +887,7 @@ mapRawMandatoryCode ordinal value =
   ordinal `seq`
 #if defined(VALIDATION_COMPILER_GRAPH_RAW_DIAGNOSTIC_RESIDUE_CODE_MUTANT)
   if ordinal == 1 then value <> "-MUTANT" else value
-#elif defined(VALIDATION_COMPILER_GRAPH_RAW_SOURCE_CUSTODY_RESIDUE_CODE_MUTANT)
+#elif defined(VALIDATION_COMPILER_GRAPH_RAW_SOURCE_BINDING_RESIDUE_CODE_MUTANT)
   if ordinal == 2 then value <> "-MUTANT" else value
 #elif defined(VALIDATION_COMPILER_GRAPH_RAW_SUBJECT_REGISTRY_RESIDUE_CODE_MUTANT)
   if ordinal == 3 then value <> "-MUTANT" else value
@@ -910,7 +910,7 @@ mapRawMandatorySubject ordinal value =
   ordinal `seq`
 #if defined(VALIDATION_COMPILER_GRAPH_RAW_DIAGNOSTIC_RESIDUE_SUBJECT_MUTANT)
   if ordinal == 1 then value <> "-mutant" else value
-#elif defined(VALIDATION_COMPILER_GRAPH_RAW_SOURCE_CUSTODY_RESIDUE_SUBJECT_MUTANT)
+#elif defined(VALIDATION_COMPILER_GRAPH_RAW_SOURCE_BINDING_RESIDUE_SUBJECT_MUTANT)
   if ordinal == 2 then value <> "-mutant" else value
 #elif defined(VALIDATION_COMPILER_GRAPH_RAW_SUBJECT_REGISTRY_RESIDUE_SUBJECT_MUTANT)
   if ordinal == 3 then value <> "-mutant" else value
@@ -933,7 +933,7 @@ mapRawMandatoryDetail ordinal value =
   ordinal `seq`
 #if defined(VALIDATION_COMPILER_GRAPH_RAW_DIAGNOSTIC_RESIDUE_DETAIL_MUTANT)
   if ordinal == 1 then value <> " (mutant)" else value
-#elif defined(VALIDATION_COMPILER_GRAPH_RAW_SOURCE_CUSTODY_RESIDUE_DETAIL_MUTANT)
+#elif defined(VALIDATION_COMPILER_GRAPH_RAW_SOURCE_BINDING_RESIDUE_DETAIL_MUTANT)
   if ordinal == 2 then value <> " (mutant)" else value
 #elif defined(VALIDATION_COMPILER_GRAPH_RAW_SUBJECT_REGISTRY_RESIDUE_DETAIL_MUTANT)
   if ordinal == 3 then value <> " (mutant)" else value

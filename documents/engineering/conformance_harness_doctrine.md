@@ -5,8 +5,8 @@
 > **Read this if**: a language, generator, planner, renderer, or dry-run claim must be validated without using
 > later infrastructure as a proxy.
 
-This document owns the pre-hardware spine and its promotion barrier. Register definitions belong to
-[`testing_doctrine.md`](./testing_doctrine.md); gate qualification and delegated promotion belong to the
+This document owns the pre-hardware spine and its gate barrier. Register definitions belong to
+[`testing_doctrine.md`](./testing_doctrine.md); gate qualification and gate pass belong to the
 [development-plan gate standard](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md).
 
 <details>
@@ -25,7 +25,7 @@ This document owns the pre-hardware spine and its promotion barrier. Register de
 - [2. The registers, as amoebius uses them for pre-cluster validation](#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
 - [3. The load-bearing invariant: rendering never touches live infrastructure](#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
 - [4. The spine: decode → legality → bind/expand → plan/resolve → provision → renderAll → plan → dry-run → fake apply](#4-the-spine-decode--legality--bindexpand--planresolve--provision--renderall--plan--dry-run--fake-apply)
-- [5. The pre-hardware promotion barrier](#5-the-pre-hardware-promotion-barrier)
+- [5. The pre-hardware gate barrier](#5-the-pre-hardware-gate-barrier)
 - [6. Honesty: what the harness does and does not establish](#6-honesty-what-the-harness-does-and-does-not-establish)
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
@@ -54,7 +54,7 @@ when consumed beneath `.build/**`. Operator-authored runtime input is external d
 
 The conformance harness uses two final registers and one supporting activity:
 
-- **Register 1** runs the real Haskell value pipeline with separately reviewed Haskell semantic oracles. It
+- **Register 1** runs the real Haskell value pipeline with separately authored Haskell semantic oracles. It
   uses no live service, container, registry, cluster, credential, or hardware-specific tool.
 - **Register 2** runs the real Haskell binary against fake effect boundaries observed outside the subject. The
   fakes record argv, request bytes, ordering, and cleanup; they do not decide the expected behaviour.
@@ -62,7 +62,7 @@ The conformance harness uses two final registers and one supporting activity:
   supporting activity, never a phase's final register and never evidence of real-provider fidelity.
 
 Register 3 is deliberately absent. Live infrastructure is the residue tested by later phases only after the
-pre-hardware promotion barrier is reviewer-approved.
+pre-hardware gate barrier passes.
 
 A compiler or model checker invoked as a deterministic tool does not by itself make a run Register 2. What
 matters is the claim: a fake standing in for an effect boundary is Register 2; a pure semantic check remains
@@ -83,7 +83,7 @@ Every ambient fact is either:
 3. an effect deferred to the apply interpreter and marked `UNVERIFIED` by the pre-hardware result.
 
 No render path probes credentials or availability. The live apply consumes the same rendered value that
-dry-run exposes. A later image replay may confirm environmental parity, but it cannot change or authorize the
+dry-run exposes. A later image replay may confirm environmental parity, but it cannot change the
 language semantics established here.
 
 ---
@@ -111,7 +111,7 @@ One cleanroom run exercises every stage, in order, through production entry poin
    provisioned specification. Missing, stale, mismatched, over-capacity, or foreign observations are paired
    negatives.
 6. **`renderAll`.** The sole public renderer maps the complete provisioned specification to semantic objects.
-   Independently reviewed predicates check identity, kind, activation, reconcile mode, safety fields, routes,
+   Separately authored predicates check identity, kind, activation, reconcile mode, safety fields, routes,
    storage, isolation, and completeness. Serialized manifests are lazy `.build/**` outputs only.
 7. **Plan.** The production planner consumes the provisioned value and produces the complete ordered effect
    program. A separate Haskell oracle checks operations, dependencies, absolute-tool requirements, and
@@ -129,7 +129,7 @@ whose named oracle row turns red while unrelated controls stay green.
 
 ---
 
-## 5. The pre-hardware promotion barrier
+## 5. The pre-hardware gate barrier
 
 [Phase 49](../../DEVELOPMENT_PLAN/phase_49_self_referential_gates.md) owns the integrated no-hardware barrier.
 Its candidate is admissible only when one qualified Haskell harness run demonstrates all nine stages from an
@@ -139,17 +139,17 @@ The barrier additionally requires:
 
 - qualification against constant-success, no-op, wrong-output, empty-discovery, missing-oracle, skipped/no-op
   mutant, stale-evidence, self-observer, bypass, and residue sabotage;
-- separately reviewed Haskell oracles for every stage and recorded reviewer provenance;
+- separately authored Haskell oracles for every stage with recorded provenance;
 - a subject-change witness and intended red locus for every required mutant;
 - explicit `UNVERIFIED` live/runtime residue;
 - zero active legacy findings owned by Phases 0–49; and
-- an external reviewer approval bound to the source, contract, harness, and raw observations.
+- one complete qualified pass bound to the source, contract, harness, and raw observations.
 
-The self-referential workflow representation is itself a subject of this barrier, not its authority. It must
-agree with the independently reviewed runner under clean and sabotaged cases, and neither representation may
-promote status.
+The self-referential workflow representation is itself a subject of this barrier. It must agree with the
+independently authored runner under clean and sabotaged cases; only the complete qualified barrier result may
+set Done status.
 
-Phase 50 and all later work remain blocked until the reviewer approval exists. A successful container build,
+Phase 50 and all later work remain blocked until the barrier gate passes. A successful container build,
 registry push/pull, host setup, accelerator calculation, kind cluster, or live deployment cannot substitute
 for or backfill this barrier.
 
@@ -157,7 +157,7 @@ for or backfill this barrier.
 
 ## 6. Honesty: what the harness does and does not establish
 
-A reviewer-approved barrier establishes that, for the reviewed corpus and source snapshot, the complete Haskell
+A passing barrier establishes that, for the tested corpus and source snapshot, the complete Haskell
 pipeline produced the independently expected semantic values and boundary requests, caught its specified
 mutants, refused its sabotage cases, and left no observed residue.
 
@@ -165,9 +165,9 @@ It does not establish:
 
 - that a live API admits or enforces the generated requests;
 - that a provider, cluster, network, storage system, browser, or accelerator behaves as modeled;
-- correctness beyond the reviewed oracle and corpus;
+- correctness beyond the tested oracle and corpus;
 - future repeatability or another architecture; or
-- that compiler, kernel, reviewer, or reviewer approval key is uncompromised.
+- that the compiler, kernel, or test environment is uncompromised.
 
 Those layers remain explicit assumptions or `UNVERIFIED` and are discharged only by their later numerical
 owners. Hardware work adds fidelity evidence; it never upgrades an omitted language claim.

@@ -506,7 +506,7 @@ retainedGraphProblems value = value
 #endif
 
 -- | Package-hidden construction seam for the independent direct-source
--- diagnostic oracle.  It cannot create candidate authority: the public
+-- diagnostic oracle.  It cannot create candidate evidence: the public
 -- facade exports neither this constructor nor any Internal module name.
 makeCompilerGraphResidueDiagnostic
   :: Text
@@ -624,7 +624,7 @@ retainedDuplicateProblems value = value
 
 -- This is deliberately a literal closed enumeration.  Adding, removing, or
 -- reordering a compiler obligation requires a production and independent
--- oracle review; deriving the list from Enum/Bounded would let a constructor
+-- oracle comparison; deriving the list from Enum/Bounded would let a constructor
 -- change silently rewrite the claimed completeness universe.
 requiredCompilerFacts :: [RequiredCompilerFact]
 requiredCompilerFacts =

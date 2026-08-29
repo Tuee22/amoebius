@@ -1,10 +1,10 @@
 -- | Package-hidden source snapshot representation.
 --
 -- The public and exposed validation modules re-export only the diagnostic
--- snapshot shapes they need.  The acquired wrapper constructor is available
--- solely inside this package so the signed acquisition verifier can mint it
--- after independently checking the immutable bundle.  Production use of the
--- constructor is kept to that verifier and audited as a closed call graph.
+-- snapshot shapes they need. The acquired wrapper constructor is available
+-- solely inside this package so the local snapshot loader can mint it after
+-- capturing the exact candidate bytes. Production use of the constructor is
+-- kept to that loader and audited as a closed call graph.
 module Amoebius.Validation.SourceSnapshot.Internal
   ( AcquiredSourceSnapshot (..)
   , GitObjectFormat (..)
@@ -42,11 +42,9 @@ data TrackedEntry = TrackedEntry
   }
   deriving (Eq, Ord, Show)
 
--- | The identity is a domain-separated SHA-256 digest of the independently
--- observed Git storage format and a canonical manifest containing mode, Git
--- object id, an independent SHA-256 commitment to the exact blob bytes, and
--- path for every stage-zero entry. Classification never consults mutable
--- worktree bytes.
+-- | The identity is a domain-separated SHA-256 digest of a canonical manifest
+-- containing each locally captured path, mode, Git-style object id, and exact
+-- byte commitment. A second capture must match before a gate result is kept.
 data SourceSnapshot = SourceSnapshot
   { snapshotRoot :: FilePath
   , snapshotIdentity :: Text
@@ -54,8 +52,7 @@ data SourceSnapshot = SourceSnapshot
   }
   deriving (Eq, Show)
 
--- | Reserved candidate authority. The constructor is package-hidden and has
--- one ordinary production caller: the signed immutable-bundle verifier.
+-- | Package-hidden marker for a locally captured candidate snapshot.
 newtype AcquiredSourceSnapshot = AcquiredSourceSnapshot SourceSnapshot
   deriving (Eq, Show)
 

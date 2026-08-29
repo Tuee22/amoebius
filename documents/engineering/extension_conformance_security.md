@@ -72,7 +72,7 @@ over the L and C families. **It does not carry this family across a seam.** Two 
 and L1–L5, and the composite can leak a distinguishing timing or error channel that neither part had, with no
 C-law violated. Nothing in this corpus closes that; a compositional S-law is owed work.
 
-The family also exists for a reason about people. A security reviewer must be able to read the guarantee
+The family also exists for a reason about people. A security audit must be able to read the guarantee
 without first reading the algebra: "the composite's sink set admits no path from a narrower source" is correct
 and unreadable at the moment it matters, where "an unauthenticated caller cannot name a tenant" is checkable by
 someone who has never opened this corpus. And these are the laws where a `runtime-checked` residue is least

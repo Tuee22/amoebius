@@ -148,7 +148,7 @@ diagnosticOnlySubject = diagnosticSubject
 #if defined(VALIDATION_PB_GRAMMAR_DIAGNOSTIC_ONLY_DETAIL_MAPPING_MUTANT)
 diagnosticOnlyDetail = "mutated diagnostic-only detail"
 #else
-diagnosticOnlyDetail = "caller-supplied pb bytes are diagnostic input and cannot establish source custody or Phase-50 runtime truth"
+diagnosticOnlyDetail = "caller-supplied pb bytes are diagnostic input and cannot establish source binding or Phase-50 runtime truth"
 #endif
 
 data PbTrackedMode
@@ -3968,7 +3968,7 @@ mutateEnsureProblems =
 #if defined(VALIDATION_PB_GRAMMAR_ENSURE_METHOD_ABSENT_REFUSAL_BYPASS_MUTANT)
   filter (/= PbGhcupEnsureProblem "BootstrapAdapter.ensure_ghcup is absent")
 #elif defined(VALIDATION_PB_GRAMMAR_ENSURE_BODY_REFUSAL_BYPASS_MUTANT)
-  filter (/= PbGhcupEnsureProblem "ensure_ghcup must return a matching existing artifact, fail closed on mismatch, and verify absence acquisition before write")
+  filter (/= PbGhcupEnsureProblem "ensure_ghcup must return a matching existing artifact, fail closed on mismatch, and verify absence capture before write")
 #else
   id
 #endif
@@ -4640,7 +4640,7 @@ exactModuleString name (BootstrapAst statements) =
 proveGhcupEnsure :: BootstrapAst -> Either PbProblem GhcupEnsureProof
 proveGhcupEnsure ast = do
   body <- maybe (Left (PbGhcupEnsureProblem "BootstrapAdapter.ensure_ghcup is absent")) Right (methodBody "BootstrapAdapter" "ensure_ghcup" ast)
-  unless (exactEnsureBody body) (Left (PbGhcupEnsureProblem "ensure_ghcup must return a matching existing artifact, fail closed on mismatch, and verify absence acquisition before write"))
+  unless (exactEnsureBody body) (Left (PbGhcupEnsureProblem "ensure_ghcup must return a matching existing artifact, fail closed on mismatch, and verify absence capture before write"))
   pure
     GhcupEnsureProof
       { ensureMatchingExistingReturnsBeforeMutation = True

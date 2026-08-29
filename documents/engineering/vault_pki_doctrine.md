@@ -730,7 +730,7 @@ the verification surface owned by [chaos_failover_doctrine.md](./chaos_failover_
 ### Phase-61 target root boundary — NOT VALIDATED
 
 Phase 61 must eventually validate the root-only portion of this doctrine on its declared `linux-cpu` lane. Its
-reviewed contract must cover one-time initialization, retained-backing recovery without re-initialization,
+tested contract must cover one-time initialization, retained-backing recovery without re-initialization,
 password non-persistence, stable cluster and PKI identity, fresh Kubernetes-auth canary access, denial after
 role deletion, sealed issuance refusal, bounded Raft/audit storage, and changed-production-subject mutants.
 No former run, evidence directory, or result narrative is current validation evidence. Parent/child unseal,

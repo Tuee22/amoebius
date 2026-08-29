@@ -64,7 +64,7 @@ The surrounding framing is owned elsewhere and is **referenced, not restated** h
 Each entry below keeps its existing `**Layer:**` foreclosure tag and adds a new `**Validation-locus:**` line —
 the orthogonal axis defined in [`illegal_state_techniques.md`](./illegal_state_techniques.md) — naming *where*
 the illegal state is caught (at the Dhall editor, in the total decoder, at the post-bind provision seal, by a
-separately reviewed Haskell semantic predicate over a lazily rendered `.build/**` projection, or only as
+separately authored Haskell semantic predicate over a lazily rendered `.build/**` projection, or only as
 runtime residue). As throughout the catalog, everything here is **design intent**: a
 type-check proves the specification composes into something internally coherent, not that the running
 deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md) [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)).

@@ -6,7 +6,7 @@
 
 This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
 command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
 status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
@@ -40,13 +40,12 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 24, its independent validation, and delegated promotion; every earlier
-promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
-completion claim, and implementation result in this document is invalidated as validation evidence, even
-where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Blocked by redesigned Phase 24, its independent validation, and gate pass; every earlier
+gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
+where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and an authorized reviewer independently inspects it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
@@ -54,7 +53,7 @@ Known partial** only.
 cluster, application, and deployment-rules surfaces. A total Haskell generator is to materialize their Dhall
 projection, positive cases, and minimally different negative cases only beneath `.build/dhall/**`; none of
 those rendered files is tracked source or an oracle. The Haskell validator is to run the Dhall typechecker over
-that run-local projection and compare its observations with separately reviewed Haskell expectations. This
+that run-local projection and compare its observations with separately authored Haskell expectations. This
 layer can foreclose only structural syntax; binding- and index-shaped refusals remain Phase-26 obligations.
 
 **Phase scope:** one target claim — the Haskell-defined structural language projects to Dhall with no syntax
@@ -73,32 +72,32 @@ the generated typechecker observations.
 
 ## Gate integrity
 
-**Contract review**: REJECTED — NOT VALIDATED.
+**Contract check**: REJECTED — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Target only — Haskell declarations generate the Dhall structural language and Haskell-owned cases beneath `.build/dhall/**`; the generated projection has no syntax for the named illegal shapes. Binding, effects, hardware, and runtime enforcement remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — Haskell declarations generate the Dhall structural language and Haskell-owned cases beneath `.build/dhall/**`; the generated projection has no syntax for the named illegal shapes. Binding, effects, hardware, and runtime enforcement remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 25` is future public spelling only. Before current reviewer approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent reviewer have been accepted. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 25` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
 | `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: Phase-25-owned `LTD-SRC-002` remains active. Its exact whole-family zero-finding check (278 `.dhall` paths plus `dhall/examples/locus_registry.tsv`), reintroduction negatives, independently reviewed Haskell binding, and sprint-level owner assignment have not been accepted. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 24; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer` — an authorized human or agent may promote after inspecting the complete qualified candidate; no gate, CI job, digest, receipt-shaped file, or generated assertion may promote by itself. |
+| `Legacy closure` | UNRESOLVED — blocks validation: Phase-25-owned `LTD-SRC-002` remains active. Its exact whole-family zero-finding check (278 `.dhall` paths plus `dhall/examples/locus_registry.tsv`), reintroduction negatives, separately authored Haskell binding, and sprint-level owner assignment have not yet been demonstrated by a passing gate. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 24; candidate execution refuses an absent, stale, replayed, or different-source result. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 
 ## Resource provision — UNRESOLVED
 
-> **UNRESOLVED — blocks validation.** No live mutation is authorized. The owner marker, preflight, complete
+> **UNRESOLVED — blocks validation.** No live mutation may begin. The owner marker, preflight, complete
 > allowed/forbidden mutations, external observer, scoped cleanup, and zero-owned-residue contract are absent.
 
 ## Doctrine adopted
@@ -135,21 +134,20 @@ the generated typechecker observations.
 
 ## Sprints
 
-> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-> **Permanently invalidated history.** Every completion, seal, reseal, transcript, evidence, and
-> closure statement in the sprint bodies below is rejected as current validation. The material is retained
-> only as a target-capability inventory and cannot support status, promotion, or a validation claim.
+> **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
+> only as a target-capability inventory and is not a current gate result.
 
 ## Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
-**Blocked by**: [Phase 24](phase_24_conformance_gate_generator.md) reviewer approval
+**Blocked by**: [Phase 24](phase_24_conformance_gate_generator.md) gate pass
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -414,8 +412,7 @@ cache/registry/Vault storage cannot pass.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement and its schema/mutant results are permanently invalid for
-promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+The pre-reset record said `None`; that statement and its schema/mutant results cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 25.2: dhall-typecheck positive corpus ⏸️
@@ -424,9 +421,9 @@ owned legacy closure, and phase-specific obligation in the redesigned gate.
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 25.1
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -467,13 +464,12 @@ the authoring-time demonstration that the schema *admits* every intended world.
 1. Every positive fixture type-checks; the harness is red if any positive fixture fails `dhall type`.
 2. Each Haskell-declared positive instantiates every required foreclosing field named by the independent
    Haskell surface-field and resource-field oracles. The harness compares the run-local Dhall projections with
-   those reviewed `.hs` expectations, so the positives exercise the Sprint-17.1 foreclosures rather than a toy
+   those checked `.hs` expectations, so the positives exercise the Sprint-17.1 foreclosures rather than a toy
    `{ name : Text }` skeleton or a CPU/memory-only envelope.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement and its positive-corpus result are permanently invalid for
-promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+The pre-reset record said `None`; that statement and its positive-corpus result cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ⏸️
@@ -482,9 +478,9 @@ owned legacy closure, and phase-specific obligation in the redesigned gate.
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 25.2
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -497,7 +493,7 @@ at gadt-decode.
 
 ### Deliverables
 
-- The eight canonical dhall-typecheck negatives named in the **Gate** representative set are reviewed Haskell
+- The eight canonical dhall-typecheck negatives named in the **Gate** representative set are checked Haskell
   case declarations. Each lazily generates one `illegal_*.dhall` beneath `.build/test-corpora/**` and MUST fail
   `dhall type`: product-named capability ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)), insecure/backdoor ingress
   arm ([§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)), a missing complete resource envelope on an execution unit ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)), unbounded storage backing
@@ -538,13 +534,12 @@ at gadt-decode.
    — fully no-arm/required-field, versus the residue owned by Phase 26's gadt-decode — records the
    malformed-received-body
    [§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)
-   subcase as deferred rather than counted green, passes its schema, and is externally attested; the gate is
+   subcase as deferred rather than counted green, passes its schema, and is externally observed; the gate is
    incomplete without it.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement and its negative/mutant/ledger results are permanently invalid
-for promotion. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor approval,
+The pre-reset record said `None`; that statement and its negative/mutant/ledger results cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
 owned legacy closure, and phase-specific obligation in the redesigned gate.
 
 ## Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ⏸️
@@ -553,9 +548,9 @@ owned legacy closure, and phase-specific obligation in the redesigned gate.
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 25.3
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, its provenance, and its reviewer have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been reviewed for this sprint.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
 
@@ -565,14 +560,14 @@ production config cannot express a secret value.
 
 ### Deliverables
 
-- A reviewed Haskell declaration that lazily projects `.build/dhall/amoebius/SecretRef.dhall`: the closed
+- A checked Haskell declaration that lazily projects `.build/dhall/amoebius/SecretRef.dhall`: the closed
   union with `Vault`, `TransitKey`, and `Prompt` arms, no inline-value arm, smart constructors, and the
   `Sensitive` record that types a sensitive field.
 - A row in the arm-inventory oracle pinning those three arms, and one in the surface-field oracle pinning
   `Sensitive`.
 - A Haskell-declared positive and one-place negative with a separately authored Haskell error-class/locus
   expectation. Any rendered case, raw diagnostic, or metric projection exists only beneath `.build/**`.
-- The `schema-modules` oracle amended from intent to 18 with its reviewed inventory extended.
+- The `schema-modules` oracle amended from intent to 18 with its checked inventory extended.
 
 ### Validation
 
@@ -585,13 +580,13 @@ production config cannot express a secret value.
 ### Remaining Work
 
 The pre-reset `None` claim is permanently invalid. Current remaining work includes every
-`UNRESOLVED`/`MISSING` contract row, predecessor approval, owned legacy closure, and the Haskell case/oracle/
+`UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and the Haskell case/oracle/
 mutation obligations above. Decoder rejection remains [Phase 26](phase_26_gadt_decode_ir.md)'s target; live
 presence remains [Phase 61](phase_61_vault_pki.md)'s target.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
+**Engineering docs to update (after the complete gate passes):**
 
 - `documents/engineering/dsl_doctrine.md` — backlink §5's dhall-typecheck to this in-process Phase-25 proof; keep gadt-decode
   (the typed decoder) as the companion boundary owned by Phase 26, and runtime enforcement as the deferred
@@ -602,7 +597,7 @@ presence remains [Phase 61](phase_61_vault_pki.md)'s target.
 
 **Cross-references to add:**
 
-- `DEVELOPMENT_PLAN/README.md` — only the promotion authority may change Phase 25 after reviewing a qualified
+- `DEVELOPMENT_PLAN/README.md` — only the pass criterion may change Phase 25 after checking a qualified
   candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-25 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register the Phase-25 Haskell declaration/generator/oracle modules;

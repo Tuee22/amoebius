@@ -127,7 +127,7 @@ or resource handle. The UI-specific port and request-context contract is owned b
 consumer; it is **NOT VALIDATED**. The contract must bind every closed fixture port exactly once through
 independently checked handler/codec/scope/retry/audit tuples and must reject an absent capability and raw
 provider coordinate at distinct loci. All controls, generated classes, paired mutants, metrics, and
-five-calculus projections require reconstruction as Haskell-owned, independently reviewed evidence. Handler
+five-calculus projections require reconstruction as Haskell-owned, separately authored evidence. Handler
 behavior and provider state remain outside this pure target.
 
 ---
@@ -294,7 +294,7 @@ cache ([content_addressing_determinism.md §4.5](./content_addressing_determinis
 | Engine family (the `InferenceBinding.family` union, a named identity) | `llama.cpp` · `whisper.cpp` · `ONNX` · `vLLM` · `pytorch` · `diffusers` · `transformers` · `Audiveris` |
 
 This table is explanatory only. Its rows must be checked against the Haskell constructor inventory for
-documentation drift; reviewer inspection of a new row cannot admit a provider, family, recipe, or behavioral
+documentation drift; inspection of a new row cannot admit a provider, family, recipe, or behavioral
 expectation without the corresponding Haskell constructor, total mapping, independent Haskell expectation,
 and owning phase evidence.
 

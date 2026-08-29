@@ -8,7 +8,7 @@ module DocumentationRetiredOracle
 
 -- Independently literal component cases only. This module does not discover
 -- production selectors, generate expectations, qualify a harness, or confer
--- validation authority.
+-- a phase-gate pass.
 
 import Amoebius.Validation.Documentation (documentationStructureDiagnostic)
 import Amoebius.Validation.Types (CheckResult (..), Finding (..))

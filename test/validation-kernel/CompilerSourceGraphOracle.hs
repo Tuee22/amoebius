@@ -35,7 +35,7 @@ runCompilerSourceGraphOracle = do
   let failures = intentFailures <> opacityInventoryFailures <> caseFailures
   unless (null failures) (fail (unlines ("CompilerSourceGraphOracle" : failures)))
   putStrLn
-    "CompilerSourceGraphOracle: literal refusal diagnostics match; authenticated source/toolchain/elaboration/execution, semantic closure, qualification, and authorized promotion remain absent."
+    "CompilerSourceGraphOracle: literal refusal diagnostics match; exact source binding/toolchain/elaboration/execution, semantic closure, qualification, and phase-gate completion remain absent."
 
 runCompilerSourceGraphSelectorOracle :: String -> IO ()
 runCompilerSourceGraphSelectorOracle selector =
@@ -131,7 +131,7 @@ mutationIntent =
   , ("VALIDATION_COMPILER_GRAPH_RAW_QUALIFICATION_RESIDUE_DROP_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
   , ("VALIDATION_COMPILER_GRAPH_RAW_SEGMENT_LIMIT_WIDEN_MUTANT", "path segment byte maximum plus one")
   , ("VALIDATION_COMPILER_GRAPH_RAW_SEMANTIC_RESIDUE_DROP_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
-  , ("VALIDATION_COMPILER_GRAPH_RAW_SOURCE_CUSTODY_RESIDUE_DROP_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
+  , ("VALIDATION_COMPILER_GRAPH_RAW_SOURCE_BINDING_RESIDUE_DROP_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
   , ("VALIDATION_COMPILER_GRAPH_RAW_SUBJECT_REGISTRY_RESIDUE_DROP_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
   , ("VALIDATION_COMPILER_GRAPH_RAW_TOOLCHAIN_RESIDUE_DROP_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
   , ("VALIDATION_COMPILER_GRAPH_RAW_AGGREGATE_BLOB_LIMIT_FINDING_CODE_MUTANT", "aggregate blob byte maximum plus one")
@@ -248,9 +248,9 @@ mutationIntent =
   , ("VALIDATION_COMPILER_GRAPH_RAW_SERIALIZATION_PATH_DROP_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
   , ("VALIDATION_COMPILER_GRAPH_RAW_SHA1_BLOB_MAPPING_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
   , ("VALIDATION_COMPILER_GRAPH_RAW_SHA256_BLOB_MAPPING_MUTANT", "object identity exact maximum reaches grammar")
-  , ("VALIDATION_COMPILER_GRAPH_RAW_SOURCE_CUSTODY_RESIDUE_CODE_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
-  , ("VALIDATION_COMPILER_GRAPH_RAW_SOURCE_CUSTODY_RESIDUE_DETAIL_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
-  , ("VALIDATION_COMPILER_GRAPH_RAW_SOURCE_CUSTODY_RESIDUE_SUBJECT_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
+  , ("VALIDATION_COMPILER_GRAPH_RAW_SOURCE_BINDING_RESIDUE_CODE_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
+  , ("VALIDATION_COMPILER_GRAPH_RAW_SOURCE_BINDING_RESIDUE_DETAIL_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
+  , ("VALIDATION_COMPILER_GRAPH_RAW_SOURCE_BINDING_RESIDUE_SUBJECT_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
   , ("VALIDATION_COMPILER_GRAPH_RAW_STATUS_OBSERVATION_DROP_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
   , ("VALIDATION_COMPILER_GRAPH_RAW_STATUS_OBSERVATION_NAME_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
   , ("VALIDATION_COMPILER_GRAPH_RAW_STATUS_OBSERVATION_VALUE_MUTANT", "internally consistent raw inventory at identity and mode maxima remains refusal-only")
@@ -826,11 +826,11 @@ expectedResult entryCount aggregate identity haskellCount cabalCount problem =
 mandatoryFindings :: [Finding]
 mandatoryFindings =
   [ finding "COMPILER-GRAPH-DIAGNOSTIC-ONLY" "compiler-source-graph" "raw caller input can produce diagnostics only; it cannot mint compiler-source-graph evidence"
-  , finding "COMPILER-GRAPH-SOURCE-CUSTODY-UNAVAILABLE" "compiler-source-graph" "the raw inventory has no authenticated immutable source-custody token"
+  , finding "COMPILER-GRAPH-SOURCE-BINDING-UNAVAILABLE" "compiler-source-graph" "the raw inventory has no authenticated immutable source-binding token"
   , finding "COMPILER-GRAPH-SUBJECT-OUTCOME-REGISTRY-UNAVAILABLE" "compiler-source-graph" "no closed Haskell SubjectRole/ExpectedCompilerOutcome registry is attached"
-  , finding "COMPILER-GRAPH-ELABORATION-CUSTODY-UNAVAILABLE" "compiler-source-graph" "no authenticated elaborated multi-component configuration-run plan is attached"
-  , finding "COMPILER-GRAPH-TOOLCHAIN-CUSTODY-UNAVAILABLE" "compiler-source-graph" "no authenticated compiler, libdir, package-database, dependency, or build-info identity is attached"
-  , finding "COMPILER-GRAPH-EXECUTION-SUPERVISION-UNAVAILABLE" "compiler-source-graph" "the compiler was not invoked by a challenged source-bound Haskell supervisor with closed resource and filesystem custody"
+  , finding "COMPILER-GRAPH-ELABORATION-BINDING-UNAVAILABLE" "compiler-source-graph" "no exact elaborated multi-component configuration-run plan is attached"
+  , finding "COMPILER-GRAPH-TOOLCHAIN-BINDING-UNAVAILABLE" "compiler-source-graph" "no exactly observed compiler, libdir, package-database, dependency, or build-info identity is attached"
+  , finding "COMPILER-GRAPH-EXECUTION-SUPERVISION-UNAVAILABLE" "compiler-source-graph" "the compiler was not invoked by a challenged source-bound Haskell supervisor with closed resource and filesystem observation"
   , finding "COMPILER-GRAPH-SEMANTIC-CLOSURE-UNAVAILABLE" "compiler-source-graph" "complete calls, control flow, effect, provenance, sink, and dynamic-loading facts are absent"
   , finding "COMPILER-GRAPH-ORACLE-QUALIFICATION-UNAVAILABLE" "compiler-source-graph" "the component diagnostic is not an independently qualified phase-gate observation"
   ]

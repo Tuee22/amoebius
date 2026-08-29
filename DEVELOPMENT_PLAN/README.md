@@ -60,16 +60,16 @@ behaviours rather than separate products.
 6. Register 1 is pure/semantic-oracle, Register 2 is boundary-with-fakes, and Register 3 is live. Register 2.5 is a
    deterministic-simulation activity, never a phase-gate register.
 7. Missing prerequisites fail; they never skip to green. Unreached applicable layers remain UNVERIFIED.
-8. Phase 49 is the complete no-hardware DSL promotion barrier and requires every `LTD-SRC-*` query,
+8. Phase 49 is the complete no-hardware DSL gate barrier and requires every `LTD-SRC-*` query,
    including the Phase-0-owned `LTD-SRC-008` boundary, to be zero. Phase 50 owns no migration and validates
    only the runtime behavior of that already-bounded handoff. Phase 0 through Phase 49 invoke the exact
-   source-built Haskell validator directly from an authenticated offline toolchain input; `pb` is unavailable
+   source-built Haskell validator directly from a pinned offline toolchain input; `pb` is unavailable
    as validation transport until Phase 50 proves it. Phase 51 remains a hardware-free Haskell host-ensure
    kernel. Phase 52 is the first hardware-bearing gate. No host, image, registry, cluster, accelerator, or
-   cloud validation work may begin before the Phase-49 approval and the intervening numerical predecessor
-   approvals exist.
-9. A gate, CI job, agent, evidence reader, digest, or attestation may produce a Validation candidate only. The
-   authorized reviewer alone may sign approval and personally change a phase or sprint to Done.
+   cloud validation work may begin before the Phase-49 gate and every intervening numerical predecessor gate
+   pass.
+9. A complete qualified phase-gate pass is sufficient for Done. A human, agent, or CI job may record the
+   narrow status-only transition.
 
 ## Repository and evidence discipline
 
@@ -83,8 +83,9 @@ reports, screenshots, and other executable or behavioral artifacts are generated
 
 All amoebius-owned state stays under the physical checkout. `.build/**` owns reproducible, transient, and
 evidentiary output; `.data/**` owns production runtime and durable state; `.test_data/**` owns exclusively
-harness-created test state. Raw candidate evidence lives in `.build/runs/**`; a content-addressed receipt may
-be installed beneath `.build/evidence-store/**`. Neither has status authority. The complete
+harness-created test state. Raw candidate evidence lives in `.build/runs/**`; a content-addressed result may
+be installed beneath `.build/evidence-store/**`. Only a complete qualified result for the exact current source
+is a gate pass. The complete
 repository tree, output inventory, lifecycle rules, and normative `.gitignore`/`.dockerignore` patterns
 are owned by
 [repository_layout_doctrine.md](../documents/engineering/repository_layout_doctrine.md).
@@ -112,7 +113,7 @@ substitution.
 | [overview.md](overview.md) | Target architecture and cross-cutting invariants |
 | [system_components.md](system_components.md) | Target-only Haskell component-to-doctrine/phase map; never a present-tree or status ledger |
 | [substrates.md](substrates.md) | Hardware/substrate registry and pristine-host routing |
-| [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) | The sole reader-facing explanation of active typed Haskell divergence bindings; never executable authority |
+| [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) | The sole reader-facing explanation of active typed Haskell divergence bindings; never executable contract |
 | [Repository Layout and Artifact Provenance](../documents/engineering/repository_layout_doctrine.md) | Complete authored/generated tree, dynamic resolution, and ignore/context contract |
 | [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) | Validation registers and boundary discipline |
 | [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) | Register-2.5 scheduling and replay discipline |
@@ -123,25 +124,25 @@ substitution.
 ## Status vocabulary
 
 The validation reset uses only two current phase states: **🔄 Active — NOT VALIDATED** for Phase 0 and
-**⏸️ Blocked — NOT VALIDATED** for Phases 1–95. `Validated` and `Done` are reserved for a future authorized-reviewer
-promotion after the redesigned, independently qualified acceptance contract is satisfied; neither is a
-current status. Historical status words and symbols cannot reactivate themselves.
+**⏸️ Blocked — NOT VALIDATED** for Phases 1–95. `Validated` and `Done` require the redesigned complete
+qualified phase gate to pass; neither is a current status. Historical status words and symbols cannot
+reactivate themselves.
 
 ## Implementation-progress vocabulary
 
 Until revalidation, the only permitted implementation classifications are **Observed footprint** and
 **Known partial**. They report that files or prior run material exist; they do not establish correctness,
-source-policy conformance, gate integrity, or phase completion. No digest, seal, receipt, attestation, or
-previous command result promotes either classification.
+source-policy conformance, gate integrity, or phase completion. No previous command result changes either
+classification.
 
 ## Definition of Done
 
 A phase is Done only after all of the following occur in order:
 
 1. Its fixed eighteen-row Gate-integrity contract has no `UNRESOLVED`, `MISSING`, skipped, implicit, or empty
-   required field and has received independent oracle/reviewer acceptance.
+   required field and every independently authored oracle is part of the qualified run.
 2. Phase 0 satisfies the explicit genesis-predecessor contract declared in its phase document; every later
-   phase has a valid external reviewer approval for its exact immediate-predecessor contract.
+   phase binds the exact current gate-pass result of its immediate predecessor.
 3. The semantic source scan accounts for every tracked path and admits behavioural source only as `.hs`, with
    the bounded `pb/**` minimal-platform-discrimination, contained-toolchain-establishment,
    source-bound-build, and opaque-exec exception.
@@ -153,16 +154,14 @@ A phase is Done only after all of the following occur in order:
    produce their explicit expected observations.
 7. Every typed Haskell legacy binding owned by the phase returns zero findings and its independently authored
    reintroduction negative turns red; Markdown row content is not an input.
-8. The candidate bundle contains raw per-row observations and explicit `UNVERIFIED` residue. Its digest binds
-   provenance only and cannot authorize status.
-9. An authorized reviewer inspects the source diff, contract, oracle custody, harness qualification, raw
-   observations, residue, predecessor, and legacy closure; signs the external approval; and applies the narrow
-   tracker and phase/sprint status change to Done. The reviewer may be the human user or a delegated agent.
+8. The candidate bundle contains raw per-row observations and explicit `UNVERIFIED` residue. The complete
+   qualified bundle passes only when every required row succeeds for the exact current source.
+9. The gate verifies the narrow proposed tracker and phase/sprint status projection. After the gate passes, a
+   human, agent, or CI job may apply that projection.
 
-Markdown never embeds or manufactures generated evidence, an approval, a hash, a transcript, or dependency
-resolution. A delegated agent may inspect, approve, and promote a qualified candidate; a gate, script, digest,
-or undelegated automation may not claim or apply that decision by itself. A prior seal or pre-reset result can
-never satisfy Done. Commit timing is not a gate input
+Markdown never embeds or manufactures generated evidence, a hash, a transcript, or dependency resolution. A
+complete qualified gate pass is sufficient; a partial script, digest, component diagnostic, or pre-reset result
+cannot satisfy Done. Commit timing is not a gate input
 ([development_plan_standards.md §S](development_plan_standards.md#s-universal-artifact-hygiene-gate)).
 
 ## Reopened numeric sequence
@@ -170,17 +169,16 @@ never satisfy Done. Commit timing is not a gate input
 **Validation reset — 2026-08-22.** Every prior phase and sprint validation claim is invalidated. Phase 0 is
 **🔄 Active — NOT VALIDATED** solely for the documentation, validation, and tracked-source-boundary
 redesign. Phases 1–95 are **⏸️ Blocked — NOT VALIDATED** and may advance only after their immediate
-numerical predecessor has been independently validated and promoted by the authorized reviewer.
+numerical predecessor's complete gate passes.
 
 Existing source and historical results are retained only as **Observed footprint / Known partial** migration
 input. They cannot satisfy an acceptance condition, and historical prose cannot become current through a
 status change. Phase 0 now has a Haskell dispatcher whose explicit readiness findings force refusal; later
-phase-specific gate commands remain planned contracts pending the comprehensive anti-spoof review. This reset
+phase-specific gate commands remain planned contracts pending comprehensive anti-spoof gate tests. This reset
 makes no claim that any gate has run or passed.
 
-Hardware validation is frozen. No phase at or above Phase 52 may run for promotion until the hardware-free
-DSL promotion barrier and every preceding redesigned phase have been independently satisfied and
-reviewer-approved.
+Hardware validation is frozen. No phase at or above Phase 52 may run as phase-gate evidence until the hardware-free
+DSL gate barrier and every preceding redesigned phase gate have passed.
 
 ## Current implementation audit
 
@@ -188,8 +186,8 @@ The current audit makes no validation attribution.
 
 | Phase(s) | Current classification | Meaning |
 |---|---|---|
-| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and nineteen component oracles exist. The typed policy contract, closed 25-ID legacy lifecycle/analyzer dispatch, descriptor-pinned source observer, v2 byte-bound debt observer, one-file static `pb` grammar, compiler/consumer adapters, and typed phase/resource registries are present. PhaseContract's current 134-selector structural bracket completed all 17,956 exact cross-impact classifications from frozen inputs on 2026-08-28; a new eight-selector internal full-mode bracket completed its 64 semantic-carrier, sprint-inventory, and duplicate-path classifications. Both remain diagnostic-only, and the package-built internal boundary remains unestablished. Adversarial reviews rejected candidate integration and exposed remaining trust, completeness, and oracle-independence gaps. Source acquisition remains permanently diagnostic without authenticated atomic external authority; the compiler route establishes only four restricted-session facts and cannot reach the repository graph. The tracked tree now has exactly one `pb/__main__.py` blob at 4,770 bytes with SHA-256 `e210494d3ad4bcaad716daed5bb89cb5611107547e83eb018a6369e134cd5418`; static admission and qualification remain open. The `LTD-SRC-000` and `LTD-SRC-008` analyzers are integrated but unqualified, while `LTD-VAL-001` through `LTD-VAL-004` owner analyzers are absent. Independent reviewer inspection/key custody, clean-room observation, evidence integration, contract resolution, legacy closure, and delegated promotion remain absent. |
-| 1–95 | **Observed footprint / Known partial — NOT VALIDATED** | Existing files and historical run material are migration input only; each phase is blocked behind numerical predecessor validation and delegated promotion. |
+| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and component oracles exist. The typed policy contract, closed legacy lifecycle/analyzer dispatch, exact local snapshot capture/recheck, one-file static `pb` grammar, compiler/consumer adapters, gate-pass decision, and typed phase/resource registries are present. The structural and component brackets remain diagnostic-only; qualification, clean-room execution, evidence integration, contract resolution, legacy closure, and the complete integrated gate run remain open. |
+| 1–95 | **Observed footprint / Known partial — NOT VALIDATED** | Existing files and historical run material are migration input only; each phase is blocked behind its numerical predecessor's gate pass. |
 
 The 2026-08-23 inspection reran `cabal build lib:validation-kernel test:validation-kernel-component` and the
 clean `cabal test validation-kernel-component` aggregate after connecting the source-debt, source-consumer,
@@ -200,35 +198,44 @@ after the documentation-header repair. Earlier policy and
 legacy changed-production runs are stale wherever their production/oracle subjects changed; the current
 clean-plus-twenty legacy matrix and the integrated source/compiler/bootstrap/semantic mutant matrix must be
 rerun before candidate preparation. Supporting
-focused mutant observations are compilation and component diagnostics only, never validation or independent
-reviewer custody. The current agent-authored dirty worktree is ineligible for clean snapshot acquisition, and
-the dispatcher also carries explicit fail-closed findings for unexecuted qualification,
-missing independent reviewer inspection/key custody, missing external clean-room observation, and missing evidence
+focused mutant observations are compilation and component diagnostics only, never validation or a complete
+gate result. A dirty worktree is admissible only when the gate captures and tests its exact bytes and rejects
+any mid-run change; the dispatcher now provides that local capture/recheck path, but it has only component-level
+coverage rather than an integrated qualified gate run. The dispatcher also carries explicit fail-closed findings for unexecuted qualification,
+missing complete gate execution, missing external clean-room observation, and missing evidence
 integration. The evidence schema also lacks closed typed command, toolchain, substrate, run, and cleanup
-fields, and no reviewed binding connects Git object-format identity to its required SHA-256 provenance. In
-addition, all 96 phase contracts contain 1,728 exact-prefix `UNRESOLVED` gate cells. The former 92 generic `MISSING`
-predecessor cells now specify typed `ImmediatePredecessorApproval` inputs and leave receipt availability to
-candidate observation; this specification correction supplies no approval or validation. All 270 sprint
+fields. In addition, all 96 phase contracts contain 1,728 exact-prefix `UNRESOLVED` gate cells. The former 92 generic `MISSING`
+predecessor cells now specify typed `ImmediatePredecessorPass` inputs and leave result availability to
+candidate observation; this specification correction supplies no gate pass or validation. All 270 sprint
 sections now carry the exact ordered reset schema and immediate blocker edge. Unknown implementation, oracle,
 validation, legacy, and documentation bindings remain explicit `UNRESOLVED` values, and no structural rewrite
 claims their semantics are complete. The compiled phase-semantic/resource registry and its independent oracle
-are under adversarial integration review; every remaining gap and missing reviewer-custody value keeps the
+are under adversarial integration testing; every remaining gap and missing complete gate result keeps the
 Phase-0 gate refusing.
 
 The 2026-08-26 serialized diagnostic restored the two exact pinned source-repository inputs beneath ignored
 `.build/**`, built `lib:validation-kernel` and `test:validation-kernel-component` with one Cabal job, repaired
 six absent documentation-header finding projections, and reran the aggregate component suite. All eighteen
 named component oracles executed and reported their bounded diagnostic expectations met after the semantic
-oracle was aligned with the exact opaque-table rule and the mutable-worktree prose count was refrozen at 1,601.
-The restored inputs were fetched during development and remain unauthenticated candidate inputs; the green
-aggregate is neither qualification, clean-room evidence, independent custody, validation, nor promotion.
+oracle was aligned with the exact opaque-table rule and the mutable-worktree prose count was refrozen at 1,591.
+The restored inputs were fetched during development and are not part of an exact current candidate; the green
+aggregate is neither qualification, clean-room evidence, source snapshot integrity, nor validation.
+
+The 2026-08-29 serialized development diagnostic established a fresh current-code baseline without widening
+compiler concurrency. The authored monolithic package spent nearly ten minutes in dependency solving before
+any compiler invocation, so a development-only package projection beneath ignored `.build/**` isolated the
+current `validation-kernel` library and aggregate component test. Its task-local store was populated one
+package at a time, the 34-module projected library and 20-module test runner compiled, and all eighteen component oracles
+again reported their bounded diagnostic expectations met. The projection, cached inputs, compile, and green
+aggregate are not a complete clean-room run, the authored package boundary, qualification, candidate evidence,
+or the complete gate. A later same-day serialized rerun after the gate-pass policy rewrite again passed all
+eighteen oracles, including local source capture/recheck and `GatePass`; no current status changed.
 
 Capability-by-capability target ownership remains in the linked phase contracts and the target-only
 [system_components.md](system_components.md). Current divergence identity, ownership, and closure are typed
 Haskell bindings; the single
 [legacy register](legacy_tracking_for_deletion.md) is their reader-facing explanation, with correspondence
-owned by reviewer inspection. No historical digest, receipt, attestation, pass statement, supporting diagnostic, or
-component result is a current validation result.
+owned by the documentation gate. No historical or partial component result is a current validation result.
 
 ## Phase overview
 
@@ -238,7 +245,7 @@ inherits the universal postcondition above.
 
 | Phase | Name | Substrate | Lane | Register | Status | Validation contract |
 |---|---|---|---|---|---|---|
-| 0 | Documentation, source policy, and validation trust root | none | `none` | — | 🔄 Active — NOT VALIDATED | [Contract](phase_00_documentation_suite.md) |
+| 0 | Documentation, source policy, and validation baseline | none | `none` | — | 🔄 Active — NOT VALIDATED | [Contract](phase_00_documentation_suite.md) |
 | 1 | Haskell toolchain and probe-source closure | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_01_toolchain_spike.md) |
 | 2 | Repository layout conformance and de-phased naming | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_02_repository_layout_conformance.md) |
 | 3 | The artifact calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_03_artifact_calculus.md) |
@@ -287,7 +294,7 @@ inherits the universal postcondition above.
 | 46 | Haskell-generated browser contracts and bundle | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_46_ui_contract_generation.md) |
 | 47 | Foreign-source generator closure, checking tools, and mutants | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_47_tool_and_mutant_generation.md) |
 | 48 | The test-workflow algebra | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_48_test_workflow_algebra.md) |
-| 49 | No-hardware DSL promotion barrier + self-referential gate suite | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_49_self_referential_gates.md) |
+| 49 | No-hardware DSL gate barrier + self-referential gate suite | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_49_self_referential_gates.md) |
 | 50 | Validate the bounded `pb` → Haskell handoff | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_50_host_assert_cli.md) |
 | 51 | The host-ensure kernel | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_51_host_ensure_kernel.md) |
 | 52 | Linux: sudoless Docker and the native image | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_52_linux_engine_bringup.md) |
@@ -336,7 +343,7 @@ inherits the universal postcondition above.
 | 95 | The multi-tenant web application re-derived | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_95_webapp_rederivation.md) |
 
 Unnumbered future work remains in [later_phases.md](later_phases.md). It is not a numbered phase, tracker row,
-predecessor, or validation state until a reviewed standards change assigns it an exact ordinal and contract.
+predecessor, or validation state until a standards change assigns it an exact ordinal and contract.
 
 ## Related Documents
 

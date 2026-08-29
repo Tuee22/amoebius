@@ -68,7 +68,7 @@ The **same-binary policy** is generalized directly from the prodbox sibling
 policy"). This is structural, not stylistic:
 
 - **One distribution artifact, one dependency closure**, built once through the bounded pre-binary handoff
-  against the current dynamically resolved compatible graph. The repository-local attestation records that graph;
+  against the current dynamically resolved compatible graph. The repository-local run record captures that graph;
   the repository stores no lock/freeze or permanent compiler/package pin
   ([DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md)).
 - **One config loader, one logger, one error type, one set of types.** A daemon and a CLI command share

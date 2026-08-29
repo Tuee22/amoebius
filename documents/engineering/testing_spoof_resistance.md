@@ -1,11 +1,11 @@
 # Testing spoof resistance
 
-> **Purpose**: Define the threat model and trust separation that prevent a subject, runner, fixture, stale
+> **Purpose**: Define the threat model and test separation that prevent a subject, runner, fixture, stale
 > artifact, or generated report from manufacturing validation.
 > **Read this if**: a gate reports success and you need to determine whether its evidence could have been
 > produced without the claimed behaviour.
 
-This document owns spoof-resistant evidence. It does not own phase status or promotion, which belong to the
+This document owns spoof-resistant evidence. It does not own phase status or its mechanical transition, which belong to the
 development plan, or register definitions, which belong to
 [`testing_doctrine.md`](./testing_doctrine.md).
 
@@ -23,12 +23,12 @@ development plan, or register definitions, which belong to
 
 - [12. Spoof-resistant evidence](#12-spoof-resistant-evidence)
 - [12.1 Threat model](#121-threat-model)
-- [12.2 Trust split](#122-trust-split)
+- [12.2 Test split](#122-test-split)
 - [12.3 Harness qualification](#123-harness-qualification)
 - [12.4 Subject-change witnesses](#124-subject-change-witnesses)
 - [12.5 Fresh external observation](#125-fresh-external-observation)
 - [12.6 Pure claims](#126-pure-claims)
-- [12.7 Candidate evidence is not authority](#127-candidate-evidence-is-not-authority)
+- [12.7 Complete candidate evidence is the gate result](#127-complete-candidate-evidence-is-the-gate-result)
 - [12.8 Source and cleanroom boundary](#128-source-and-cleanroom-boundary)
 - [12.9 Residue and limits](#129-residue-and-limits)
 - [Related Documents](#related-documents)
@@ -44,10 +44,9 @@ observations themselves.
 
 The governing rule is:
 
-> A phase candidate requires a qualified harness, a changed production subject, an independently reviewed
-> oracle, a fresh external observation where effects are claimed, and explicit residue. A validation decision
-> additionally requires an authorized reviewer's separate status promotion. That reviewer may be the human
-> user or a delegated agent.
+> A phase passes when one qualified harness run exercises the changed production subject, a separately authored
+> oracle, fresh external observation where effects are claimed, and explicit residue. That complete pass is
+> sufficient for the status-only transition.
 
 Omitting any noun changes the claim, rather than weakening an optional defence.
 
@@ -64,28 +63,23 @@ Assume each of the following can be wrong, stale, empty, bypassed, or adversaria
 - fake tools, live observers, credentials, and cleanup code; and
 - documentation or automation that converts a result into status.
 
-Also assume subject and gate source in one repository can collude. Mutation sensitivity reduces accidental
-self-agreement; it cannot prove that the shared trust domain is honest. Therefore technical evidence is never
-the final status authority.
+Also assume subject and gate source in one repository can accidentally agree on the same defect. Mutation
+sensitivity and separately authored expectations reduce that risk. The project accepts the residual shared-
+repository risk and treats a complete qualified gate pass as sufficient.
 
-### 12.2 Trust split
+### 12.2 Test split
 
-The validation boundary has three distinct roles:
+The validation boundary has two distinct roles:
 
 | Role | May do | May not do |
 |---|---|---|
-| **Subject** | Implement the capability and emit ordinary outputs | Define its own expected result or validation status |
-| **Oracle/harness** | Attempt to falsify the claim and preserve raw observations | Import subject decision logic or promote the phase |
-| **Authorized reviewer** | Review the contract, qualification, observations, residue, and source diff; sign and apply promotion | Delegate promotion to a pass bit, agent, or generated receipt |
+| **Subject** | Implement the capability and emit ordinary outputs | Define its own expected result |
+| **Oracle/harness** | Attempt to falsify the claim, preserve raw observations, and produce the complete gate result | Import subject decision logic or omit required gate rows |
 
-The oracle is separately authored Haskell source. It is reviewed by someone other than the subject's sole
-author, is based on the requirement rather than captured output, and does not mechanically translate or call
-the subject's decision function. A second implementation produced by the same derivation is not independent.
-
-The reviewer approval is externally authenticated and binds the source snapshot, current phase contract,
-qualified-harness digest, and raw-observation digest. The trust root is reviewer-controlled and cannot be changed
-and used by the candidate in one promotion. An unsigned field, a hash-like token, or a generated attestation
-does not satisfy this boundary.
+The oracle is separately authored Haskell source, is based on the requirement rather than captured output, and
+does not mechanically translate or call the subject's decision function. A second implementation produced by
+the same derivation is not independent. The gate records the exact source snapshot, current phase contract,
+qualified-harness digest, and raw-observation digest so a later edit cannot reuse an earlier pass.
 
 An integrity adapter that has not crossed its required acquisition, observer, or qualification boundary is a
 diagnostic refusal, not a smaller success type. Its raw decoder, integrity-consistent records, constructors,
@@ -93,7 +87,7 @@ selectors, and eliminators remain private. Its sole public executable front door
 exact non-empty permanent refusal and can never make `checkPassed` true. A conventional `Either ... Right value`,
 `Maybe value`, optional residue list, success constructor, general result-producing fold, or getter that detaches
 observations from mandatory residue is forbidden even when names and comments say “Diagnostic”. Future candidate
-composition consumes a separately authenticated opaque value; it never promotes the diagnostic record.
+composition consumes a package-hidden verified value; it never promotes the diagnostic record.
 
 The oracle describes wire fixtures, expected identities, limits, projections, and semantic variants with its own
 Haskell types and independent literals. It may invoke the one public subject front door, but it does not construct
@@ -111,7 +105,7 @@ private import failed first.
 
 ### 12.3 Harness qualification
 
-Before each clean candidate, the exact harness build is challenged with a reviewed sabotage corpus. It must
+Before each clean candidate, the exact harness build is challenged with a fixed sabotage corpus. It must
 reject all of these:
 
 1. constant success;
@@ -152,7 +146,7 @@ the harness must observe:
 A missing target, no-op transform, alternate dead implementation, compilation failure unrelated to the claim,
 or blanket red result fails mutation qualification. Mutant count alone carries no evidentiary weight.
 
-Mutation discovery is not its own authority. Each component oracle owns a literal, closed registry mapping
+Mutation discovery is not itself a pass. Each component oracle owns a literal, closed registry mapping
 every expected production selector to the exact independently authored case and rejection locus it is intended
 to change. That registry is not generated from CPP declarations, build flags, Cabal mappings, production
 constructors, or a previous run. Before any matrix executes, the harness rejects duplicate selector identities,
@@ -187,7 +181,7 @@ direct bypass. A positive path without its paired negative is incomplete.
 
 A pure calculation has no meaningful external effect challenge. It uses:
 
-- a separately reviewed Haskell reference predicate;
+- a separately authored Haskell reference predicate;
 - a closed, non-empty positive corpus;
 - minimally different negatives with pinned rejection reason and locus;
 - boundary-focused generators with explicit coverage floors; and
@@ -197,18 +191,15 @@ A property run says only that its explored sample found no counterexample. A com
 the named expression failed for the pinned reason. A byte comparison says only that two bytestrings agree.
 None becomes a universal proof through wording.
 
-### 12.7 Candidate evidence is not authority
+### 12.7 Complete candidate evidence is the gate result
 
 The Haskell harness emits a candidate bundle with explicit row states: `green`, `red`, `refused`, or
 `UNVERIFIED`. The schema rejects missing rows, empty required arrays, implicit “tested” defaults, skipped work,
 and a top-level pass with no raw observations. A digest binds provenance but does not make a claim true.
 
-CI, an LLM, the subject, the harness, and an evidence reader may report a **Validation candidate**. They may
-not mark or describe a phase as Done. Only the authorized reviewer may sign the external approval and
-personally change the plan status.
-
-This is the control that prevents a repository-local runner from certifying its own correctness. It is also
-why old evidence cannot be “re-verified” into a new status after the contract changes.
+CI, an agent, or a human may mark a phase Done when the exact current candidate has every required row and the
+qualified gate passes. Recording the status is mechanical. Partial evidence, a digest without execution, or an
+old result from a different contract remains insufficient.
 
 ### 12.8 Source and cleanroom boundary
 
@@ -229,12 +220,12 @@ because the worktree retained an ignored input is a refusal, not a pass.
 
 ### 12.9 Residue and limits
 
-Spoof resistance does not prove that the reviewer, compiler, kernel, identity authority, provider,
+Spoof resistance does not prove that the compiler, kernel, identity authority, provider,
 observer, hardware, or cryptography is uncompromised. Those are named assumptions. Nor does one live run prove
 future behaviour or another substrate.
 
-Every candidate states its untested layers as `UNVERIFIED`. An empty residue requires explicit reviewer inspection;
-it is never inferred from a full test count. The current repository reset treats every earlier phase result as
+Every candidate states its untested layers as `UNVERIFIED`. An empty residue requires an explicit test
+rationale; it is never inferred from a full test count. The current repository reset treats every earlier phase result as
 invalidated evidence, so this doctrine contains no current per-phase success instances.
 
 ---
@@ -244,5 +235,5 @@ invalidated evidence, so this doctrine contains no current per-phase success ins
 - [Testing doctrine](./testing_doctrine.md) — register definitions and test topology
 - [Evidence calculus](./evidence_calculus_doctrine.md) — claim-to-fixture binding
 - [No-cluster conformance harness](./conformance_harness_doctrine.md) — the pre-hardware pipeline
-- [Development-plan gate integrity](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md) — fixed phase contract and delegated promotion
+- [Development-plan gate integrity](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md) — fixed phase contract and gate pass
 - [Development-plan tracker](../../DEVELOPMENT_PLAN/README.md) — sole current phase status

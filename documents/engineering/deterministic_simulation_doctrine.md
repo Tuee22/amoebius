@@ -90,7 +90,7 @@ construct the actual Phase-10 artifact/budget/lift/workflow/evidence `Compositio
 and exact resource fold, and feed those names to the same reference reconciler under `IOSim`. An independently
 authored Haskell semantic oracle must check that projection; the adapter may not invent a parallel calculus
 vocabulary. Later phases must run their own production reconcilers on this interface; neither this target nor
-its later users have current validation authority.
+its later users have a current complete gate pass.
 
 [Phase 19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md) owns the first amoebius pre-cluster
 subject rather than another substrate demonstration. Its standalone pure planner must run one
@@ -275,7 +275,7 @@ live-band phase adds its Register-2.5 validation sprint before its Register-3 ga
 [phase_80](../../DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md) kernel's. Phase order, status, and gates live
 only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Phases 58 and 59 own the target
 production-code adoptions for the generic reconciler and capacity scheduler respectively; all prescriptive
-claims remain design intent unless the tracker records delegated promotion.
+claims remain design intent unless the complete qualified gate passes and the tracker records that result.
 
 ---
 

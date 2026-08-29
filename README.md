@@ -9,8 +9,8 @@
 This page states what amoebius is and routes into the corpus; it owns no doctrine and no schedule. The design
 is owned by the doctrine set under [`documents/`](./documents/README.md), phase order and status by
 [`DEVELOPMENT_PLAN/README.md`](./DEVELOPMENT_PLAN/README.md), and the sequence in which to read either by
-[`documents/reading_order.md`](./documents/reading_order.md). The phase tracker is the authority for what is
-built and validated; this page describes the target architecture and does not promote planned surfaces to
+[`documents/reading_order.md`](./documents/reading_order.md). The phase tracker records what is built and
+validated; this page describes the target architecture and does not promote planned surfaces to
 tested results.
 
 <details>
@@ -58,13 +58,13 @@ budget, and reaped when its region ends. Operator values remain external or untr
 tree does not yet conform**: every observed foreign-source family has a typed Haskell migration binding whose
 reader-facing explanation is in the
 [single legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). That Markdown table supplies no
-executable ID, owner, count, predicate, or closure result; a reviewer owns its correspondence with the
+executable ID, owner, count, predicate, or closure result; the documentation gate owns its correspondence with the
 Haskell inventory. Phase 0 owns the binding explained as `LTD-SRC-008` and must reduce `pb/**` to the exact
 single `pb/__main__.py` inventory whose closed supported authored syntax/import/resolved-direct-call/control-flow/effect
 graph statically fits the toolchain-establish/build/opaque-argv-exec role. Interpreter startup,
 standard-library/native/transitive behavior, concrete adapter effects, unchanged argv, process replacement,
 and exit propagation remain Phase-50 runtime observations. Every source-migration binding, including that one, must be
-zero before the Phase-49 hardware-free promotion barrier may emit a candidate. Phase 49 builds and invokes the
+zero before the Phase-49 hardware-free gate barrier may emit a candidate. Phase 49 builds and invokes the
 Haskell barrier directly; it does not use `pb` as transport. Phase 50 alone validates the runtime behavior of
 the already source-bounded handoff and owns no source-migration binding: the exact source-built Haskell
 supervisor starts directly and invokes `pb` as its observed child subject. Phase 51 onward retains the same
@@ -166,7 +166,7 @@ and reattaches retained backing
   amoebius term and acronym to the section that owns it. It defines nothing; it routes.
 - **The plan:** [`DEVELOPMENT_PLAN/README.md`](./DEVELOPMENT_PLAN/README.md) — the single, authoritative,
   numerically ordered phased plan that delivers the vision. Phase 0 owns the documentation suite; its status,
-  like every phase's, is reviewer-controlled and is not implied here.
+  like every phase's, changes only after its complete qualified gate passes and is not implied here.
 - **The doctrine:** [`documents/README.md`](./documents/README.md) — the top-level index of all doctrine:
   the engineering family (the DSL, platform services, storage, secrets, runtime, verification) and the
   illegal-state catalog family.
@@ -175,10 +175,9 @@ and reattaches retained backing
   — a test *is* an amoebius deployment: a spec composed with a chaos schedule, a typed expectation surface,
   and a mandatory teardown. Validation runs in three phase-gate registers (1 pure with independent Haskell
   expectations · 2 boundary-with-fakes · 3 live), plus a non-gating deterministic-simulation activity.
-  A gate emits only a candidate `.build/**` evidence bundle; a receipt or digest proves provenance, not
-  correctness, and only an authorized reviewer may promote plan status. A reviewer may be the human user or a
-  delegated agent completing plan work. The hardware-free DSL/generator barrier must
-  be accepted before any live container, cluster, browser, provider, or accelerator gate begins; pure browser
+  A gate emits a `.build/**` evidence bundle; a partial receipt or digest proves provenance, while a complete
+  qualified gate pass is sufficient to set plan status to Done. The hardware-free
+  DSL/generator barrier must pass before any live container, cluster, browser, provider, or accelerator gate begins; pure browser
   semantics and lazy UI generation remain part of the pre-barrier DSL proof.
 - **How the repository is laid out:**
   [`documents/engineering/repository_layout_doctrine.md`](./documents/engineering/repository_layout_doctrine.md)

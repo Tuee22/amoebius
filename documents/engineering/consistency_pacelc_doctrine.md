@@ -32,13 +32,13 @@ in [chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentra
 2010/2012: under a **P**artition choose **A**vailability or **C**onsistency; **E**lse, in the healthy case,
 choose **L**atency or **C**onsistency), but the choices are scattered across five doctrines that never meet.
 No single document states whether, under partition, amoebius chooses availability or consistency, or where;
-an author or reviewer must reconstruct it from R7/R8/R9 ([`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need), [§18](./chaos_failover_second_axis.md#18-the-rules-scale-to-the-boundary)), the `<Planned | Failover>` taxonomy
+a reader must reconstruct it from R7/R8/R9 ([`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need), [§18](./chaos_failover_second_axis.md#18-the-rules-scale-to-the-boundary)), the `<Planned | Failover>` taxonomy
 ([`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md)), the consistency-boundary invariant
 ([`single_logical_data_plane_doctrine.md` §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)),
 fail-closed Vault ([`vault_pki_doctrine.md`](./vault_pki_doctrine.md)), and the odd-quorum union
 ([`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md)). No document states which leg is fixed and
 which is an operator magnitude. The defect surfaces at author time (a spec author reaches for a knob that does
-not exist, e.g. an in-cluster "eventual" consistency level) and at review time (a reviewer cannot tell whether
+not exist, e.g. an in-cluster "eventual" consistency level) and at review time (a reader cannot tell whether
 a proposed knob would re-admit a CAP-impossible state). `chaos_failover_doctrine.md` records "PACELC: async
 posture chosen" in its cross-boundary ledger, but the whole-stance statement has no home.
 

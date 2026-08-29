@@ -149,14 +149,14 @@ inspectable values: what a gate does is derivable from its declaration, which is
 
 The risk of self-reference is equally real and is named here rather than left implied: a calculus that validates
 itself can be consistently wrong. An independent oracle and a few mutants do not close that shared-trust gap.
-The gate representation is therefore only a subject. The separately reviewed Haskell validation kernel first
+The gate representation is therefore only a subject. The separately authored Haskell validation kernel first
 rejects the fixed qualification sabotage corpus, observes every applied production mutation, and then compares
-clean workflow execution with raw external observations. Neither representation can authorize status; the
-authorized reviewer alone may approve the candidate
+clean workflow execution with raw external observations. The complete qualified gate pass is sufficient to
+record the candidate as Done
 ([`testing_spoof_resistance.md`](./testing_spoof_resistance.md)).
 
 [Phase 49](../../DEVELOPMENT_PLAN/phase_49_self_referential_gates.md) is the target integrated instance. It
-routes the complete hardware-free DSL pipeline through the workflow value after the independently reviewed
+routes the complete hardware-free DSL pipeline through the workflow value after the separately authored
 kernel freezes the claim. It does not execute a retained Python command, wrap a supplied exit code, consume a
 checked-in command inventory, or seal its own verdict. All serialized declarations, observations, and mutation
 worktrees are generated lazily beneath `.build/**`.
@@ -179,9 +179,9 @@ worktrees are generated lazily beneath `.build/**`.
   *before* the provider call and reconciled after a restart, which is the reconciler's shape rather than the
   calculus's ([`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md)). Until a phase delivers it,
   crash-orphaned resources are a `live-effect` residue that this calculus does not reduce.
-- **It does not make a gate self-authenticating.** A workflow value, typed teardown, routed consumer,
-  qualification run, and evidence bundle remain candidate observations. Reviewer approval is a separate trust
-  boundary; status lives in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+- **It does not make a clean run sufficient by itself.** A workflow value, typed teardown, routed consumer,
+  qualification run, and evidence bundle remain candidate observations until every required qualified-gate row
+  passes; status lives in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

@@ -563,12 +563,12 @@ makes to the one locus that observes it.
 inhabitable, because a locus downstream of the check that forecloses a state never sees that state and a
 locus upstream of an effect cannot settle a residue about it. The relation's human-facing doctrine is stated
 once in [the catalog router](./README.md#which-locus-can-observe-which-layer). The covering generator never
-parses that Markdown: a separately reviewed Haskell declaration encodes the executable relation and an
+parses that Markdown: a separately authored Haskell declaration encodes the executable relation and an
 independently authored Haskell oracle checks it. Its consequence is worth naming here, where both axes are
 defined: the layer is a **function of the
 locus** at five of the six loci, and only `gadt-decode` admits both foreclosure layers — which is the
 dhall-typecheck-vs-gadt-decode caveat above, seen from the covering's side. That is why an entry's `Cells:`
-line specifies the pairing for a reader while its reviewed Haskell counterpart carries the executable bit the
+line specifies the pairing for a reader while its authored Haskell counterpart carries the executable bit the
 locus does not; no `Cells:` line is a generator, checker, or oracle input.
 
 The six loci:

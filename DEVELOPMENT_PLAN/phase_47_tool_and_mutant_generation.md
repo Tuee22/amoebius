@@ -7,7 +7,7 @@
 
 This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
 command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot regain authority through a status edit. Current
+non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
 status is owned by [the tracker](README.md) and the Phase Status block below.
 
 <details>
@@ -39,17 +39,16 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 46, its independent validation, and delegated promotion; every earlier
-promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
-completion claim, and implementation result in this document is invalidated as validation evidence, even
-where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
+Blocked by redesigned Phase 46, its independent validation, and gate pass; every earlier
+gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
+where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and an authorized reviewer independently inspects it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
-**Target capability — NOT VALIDATED.** Haskell declarations and separately reviewed Haskell semantic
+**Target capability — NOT VALIDATED.** Haskell declarations and separately authored Haskell semantic
 expectations are to own the closed checking-tool, fixture, oracle, mutation, and provider-program metadata
 corpora. Total Haskell materializers must create every runnable or serialized byte lazily beneath
 `.build/tools/**`, `.build/test-corpora/**`, or `.build/pulumi/**`. That includes every Pulumi YAML or equivalent
@@ -68,28 +67,28 @@ later provider phases validate provider semantics and live execution, not source
 
 ## Gate integrity
 
-**Contract review**: REJECTED — NOT VALIDATED.
+**Contract check**: REJECTED — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Target only — Haskell declarations and Haskell expectations own all non-`pb` behavioral and support material; every runnable or serialized tool, fixture, oracle, mutant, and provider-program metadata byte is generated beneath `.build/**`. Legacy tracked checking-tool programs, tracked Pulumi YAML, and other tracked non-Haskell test/provider mechanisms are absent. Phase-49 qualification and later provider semantics/live execution remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — Haskell declarations and Haskell expectations own all non-`pb` behavioral and support material; every runnable or serialized tool, fixture, oracle, mutant, and provider-program metadata byte is generated beneath `.build/**`. Legacy tracked checking-tool programs, tracked Pulumi YAML, and other tracked non-Haskell test/provider mechanisms are absent. Phase-49 qualification and later provider semantics/live execution remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 47` is future public spelling only. Before current reviewer approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent reviewer have been accepted. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 47` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not been accepted. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a reviewed pure-claim independent predicate has been accepted. |
+| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
+| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
+| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
+| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
 | `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or reviewed non-applicability have not been accepted. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
 | `Legacy closure` | UNRESOLVED — blocks validation: Phase 47 owns `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, and `LTD-VAL-006`; their exact zero-finding predicates, including the absence of tracked Pulumi YAML and every other non-`pb` non-Haskell source, have not been independently reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 46; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer` — an authorized human or agent may promote after inspecting the complete qualified candidate; no gate, CI job, digest, receipt-shaped file, or generated assertion may promote by itself. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 46; candidate execution refuses an absent, stale, replayed, or different-source result. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 
 ## Doctrine adopted
 
@@ -98,15 +97,15 @@ later provider phases validate provider semantics and live execution, not source
 
 ## Sprints
 
-> **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
+> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
 ## Sprint 47.1: Generated repository support material ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Generation/Tools.hs`, `src/Amoebius/Generation/TestCorpus.hs`
-**Blocked by**: [Phase 46](phase_46_ui_contract_generation.md) reviewer approval
+**Blocked by**: [Phase 46](phase_46_ui_contract_generation.md) gate pass
 **Independent Validation**: A separately authored Haskell oracle joins every declared tool/case/mutant to a lazily materialized `.build/**` artifact in both directions, proves changed-subject witnesses, and rejects empty discovery, copied tracked bytes, stale roots, and writes beneath authored roots.
-**Oracle**: planned `test/Amoebius/Generation/ToolsOracle.hs`; independent author and reviewer unresolved
+**Oracle**: planned `test/Amoebius/Generation/ToolsOracle.hs`; independent authorship unresolved
 **Legacy IDs**: `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, `LTD-VAL-006`
 **Docs to update**: `documents/engineering/jit_artifact_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
@@ -126,7 +125,7 @@ consumer needs.
 
 ### Validation
 
-After the predecessor is reviewer-approved, the qualified Haskell harness must start without the legacy tracked
+After the predecessor is gate-passed, the qualified Haskell harness must start without the legacy tracked
 checking-tool family or
 tracked serialized corpora, derive every required artifact, execute the semantic controls, and reject omitted
 declarations, copied legacy bytes, no-op mutations, stale roots, empty discovery, and authored-tree writes at
@@ -136,13 +135,13 @@ their distinct loci. This criterion has not run and is not a current candidate.
 
 Remove the legacy tracked checking-tool, non-Haskell test-artifact, and tracked provider-program YAML families;
 implement and
-independently review the Haskell subject/oracle; qualify the harness; close all four typed legacy bindings; and obtain
-delegated promotion. Phase 49
+independently check the Haskell subject/oracle; qualify the harness; close all four typed legacy bindings; and obtain
+gate pass. Phase 49
 then consumes this generated surface; it does not close Phase 47's debt retroactively.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
+**Engineering docs to update (after the complete gate passes):**
 
 - [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md)
 

@@ -182,7 +182,7 @@ retention) + `gadt-decode` (the decoder-local zero-progress rolling smart constr
 finite-limit/physical-peak, named-pool, nested-host/build/engine, and monitoring-work folds return
 `Left Overcommit`/`Left StoragePoolOvercommit` before a `ProvisionedSpec` exists) + `live-effect` (residue —
 observed allocatable/backing is cross-checked before mutation, and the running system stays within enforced
-boundaries: no `Pending`, eviction, OOM, or full disk). The reviewed Haskell case declaration named
+boundaries: no `Pending`, eviction, OOM, or full disk). The authored Haskell case declaration named
 `illegal_hard_ceiling_overcommit` retains its stable historical name but exercises this
 finite-limit/physical-peak relation; any serialized transport is emitted lazily beneath `.build/**`, and the
 name does not assert synchronous ephemeral quota enforcement.
@@ -208,7 +208,7 @@ field at all — a toleration is not a spellable input but a projection from a d
 Haskell render layer, so a free-text toleration is unwritable at authoring) + `gadt-decode` (the
 `Toleration` handle's constructor opacity is Haskell module-opacity, which Dhall cannot provide — Dhall has no
 opaque types ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)) — so the projection-only discipline's full teeth land
-at the GADT decoder) + `rendered-artifact-oracle` (a separately reviewed Haskell predicate requires the
+at the GADT decoder) + `rendered-artifact-oracle` (a separately authored Haskell predicate requires the
 derived toleration in the emitted pod spec, using the same independent semantic discipline as the derived
 NetworkPolicy [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)).
 No expected pod-spec bytes are tracked; serialized projections exist only beneath `.build/test-corpora/**`.

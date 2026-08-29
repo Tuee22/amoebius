@@ -400,7 +400,7 @@ provisionEtcdLogical(desiredObjects, observedSurvivors, old/new/apply overlap, c
 ProvisionedEtcdLogicalDemand.derivedPeak <= etcd.backendQuotaBytes
 ```
 
-The pure object serializer used for this demand is checked against a separately reviewed Haskell byte-model
+The pure object serializer used for this demand is checked against a separately authored Haskell byte-model
 expectation; neither expected bytes nor a serialized golden are tracked. Any materialized comparison inputs
 exist only beneath `.build/test-corpora/**`. ConfigMap/Secret/projected sources also feed
 `KubeletMappedFileDemand`. The versioned MVCC model adds retained revisions,

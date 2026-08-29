@@ -8,7 +8,7 @@ This file is reader-facing migration inventory only. It is not an authoritative 
 oracle, permission to retain top-level vendored source, or validation evidence. The canonical target is
 [`repository_layout_doctrine.md` §4.1](../../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-fixed-source-not-a-patch-against-a-moving-head):
 maintained Haskell is re-derived beneath `src/vendor/**/*.hs`; upstream foreign inputs are acquired at an
-immutable identity beneath `.build/vendor/**`; provenance and transformations are reviewed Haskell values.
+immutable identity beneath `.build/vendor/**`; provenance and transformations are authored Haskell values.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -29,10 +29,10 @@ cannot hide behind the open family.
 
 ## Required Phase-1 transition
 
-Phase 1 must remove this file and every other `vendor/**` path. Any maintained behavior moves to reviewed
+Phase 1 must remove this file and every other `vendor/**` path. Any maintained behavior moves to tested
 Haskell modules beneath `src/vendor/**`; required upstream bytes and generated package descriptions exist only
 beneath a fresh `.build/vendor/**` run root. Mutable-ref, top-level-vendor, foreign-package, and patch-program
-reintroductions must fail independently before an authorized reviewer may close the legacy row.
+reintroductions must fail independently before the complete owning gate may close the legacy row.
 
 ## Related Documents
 
