@@ -70,14 +70,14 @@ values, while their serialized encodings are generated. The repository-layout do
 grammar. The completed audit must join that grammar to a complete semantic consumer/effect graph, traverse
 every authored root through a descriptor-relative no-follow walk, authenticate immutable source blobs and the
 network-independent toolchain input, and qualify the `pb/**` argv/`exec` effects under an observer outside the
-bootstrap. Metadata and documentation receive only structural checks and human review, which can never admit a
+bootstrap. Metadata and documentation receive only structural checks and reviewer inspection, which can never admit a
 behavioral artifact.
 
 **Observed footprint / Known partial — NOT VALIDATED.** The current Haskell source-closure components are
 partial diagnostics recorded in the tracker’s
 [current implementation audit](../../DEVELOPMENT_PLAN/README.md#current-implementation-audit). They do not yet
 establish the complete semantic consumer/effect graph, the descriptor-relative no-follow authored-root walk,
-authenticated blob/tool acquisition, changed-production qualification, or independent human review. Their
+authenticated blob/tool acquisition, changed-production qualification, or independent reviewer inspection. Their
 presence therefore establishes neither a completed source/effect audit nor a qualified `pb/**` exception.
 
 | Exception | Why it must exist first |
@@ -95,7 +95,7 @@ not a source exception.
 Checking mechanisms and expectations are separately reviewed Haskell source. A checker may lazily emit an
 external-language helper or encoded corpus, but that emitted half never decides its own verdict. The
 expectation remains independent because it is authored from the requirement in a distinct Haskell module and
-subject to human review, not because a serialized file is tracked.
+subject to reviewer inspection, not because a serialized file is tracked.
 
 **What this forecloses.** A second home for a class of artifact. Once the tracked copy is gone there is no
 place for drift to hide, which is the guarantee
@@ -223,8 +223,8 @@ output, so it stays red when the generator is wrong, which is the whole job
   no-follow authored-root, authenticated blob/tool, changed-production qualification, and independent-review
   gaps stated in [§2](#2-the-rule-and-the-closed-exception-list). The current partial footprint does not do so.
   Prose and filename conventions cannot widen the target classification. Repository/build metadata and
-  documentation receive structural checks and human review only. No product behavior, test expectation,
-  oracle, mutant, fixture, recipe, or generated source is admitted merely because a human reviewed a
+  documentation receive structural checks and reviewer inspection only. No product behavior, test expectation,
+  oracle, mutant, fixture, recipe, or generated source is admitted merely because a reviewer inspected a
   non-Haskell artifact: those declarations remain Haskell, and every serialized projection is materialized
   lazily beneath `.build/**`.
 - **It does not establish delivery status.** Which recipes exist and which gates have been independently
@@ -238,7 +238,7 @@ output, so it stays red when the generator is wrong, which is the whole job
 This document is normative only. Which phase delivers the target set, the recipes for each artifact class, the
 addressing scheme, and the region is owned by [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 Normative shapes are design intent. Candidate evidence becomes accepted phase status only through the plan's
-human-controlled promotion procedure; this doctrine records no tested instance.
+reviewer-controlled promotion procedure; this doctrine records no tested instance.
 
 ---
 

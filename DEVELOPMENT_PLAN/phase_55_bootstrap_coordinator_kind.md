@@ -8,7 +8,7 @@
 This phase never expands `pb`: `pb validate phase 55` only ensures, builds, and replaces itself with the
 Haskell binary. Substrate detection, planning, tool resolution, effects, observation, and candidate verdict
 are Haskell responsibilities. The live gate remains forbidden until Phase 49 and every intervening phase have
-separate human approvals.
+separate reviewer approvals.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -41,7 +41,7 @@ separate human approvals.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by the current Phase 54 contract, independent validation, and human approval, plus the exact approval
+Blocked by the current Phase 54 contract, independent validation, and reviewer approval, plus the exact approval
 chain from Phase 0 through Phase 54. In particular, Phase 49's no-hardware DSL promotion receipt is mandatory
 before this live gate may start. All earlier Phase-55 pass, seal, evidence, or implementation claims are
 permanently invalid for promotion; existing code is an **Observed footprint / Known partial** only.
@@ -49,7 +49,7 @@ permanently invalid for promotion; existing code is an **Observed footprint / Kn
 ## Phase Summary
 
 The target Haskell coordinator must consume only the host and tool capabilities supplied by future
-human-approved predecessor phases. It must classify one real `linux-cpu/amd64` substrate from raw observations,
+reviewer-approved predecessor phases. It must classify one real `linux-cpu/amd64` substrate from raw observations,
 compare declared kind-engine and node demand with observed capacity, render a run-local configuration beneath
 `.build/**`, and reconcile one empty
 kind cluster. A repeat run must observe an empty diff, while deliberately damaged but repairable state must
@@ -66,7 +66,7 @@ service, secret service, GPU claim, or provider deployment is in scope.
 ## Gate integrity
 
 **Contract review**: REJECTED — NOT VALIDATED. The criteria below are the required replacement contract;
-production entry points, independent oracle custody, live observer, and human reviewer remain unresolved, so
+production entry points, independent oracle custody, live observer, and reviewer remain unresolved, so
 the command cannot produce an admissible candidate.
 
 | Key | Contract |
@@ -74,7 +74,7 @@ the command cannot produce an admissible candidate.
 | `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: On one natural `linux-cpu/amd64` host, the Haskell subject rejects incompatible declarations before mutation, reconciles exactly one empty single-node kind cluster, repairs named partial states, repeats with an empty diff, and tears down without owned residue. No later platform behavior is claimed. |
 | `Subject` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Planned Haskell entry points `Amoebius.Substrate.observe`, `Amoebius.Cluster.Kind.preflight`, `plan`, and `reconcile`; exact production call graph remains `UNRESOLVED` and blocks validation. |
 | `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 55`; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged. The Haskell binary owns discovery, plan, effects, observation, cleanup, and verdict. |
-| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: A separately authored Haskell capacity/reconcile oracle plus an outside process/resource observer. Module, author, custody boundary, and independent human reviewer are `UNRESOLVED` and block validation. |
+| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: A separately authored Haskell capacity/reconcile oracle plus an outside process/resource observer. Module, author, custody boundary, and independent reviewer are `UNRESOLVED` and block validation. |
 | `Positive controls` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Closed Haskell values for one fitting declaration, already-converged state, stopped-node repair, and missing-context repair, with exact plans and observations independently pinned. Live success requires one Ready node and no platform workload. |
 | `Paired negatives` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Minimally different declarations cover CPU, memory, node storage, engine reserve, backing identity, architecture, and forbidden accelerator mismatch; each must refuse at its named preflight locus with zero cluster mutation. |
 | `Mutants` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Changed-subject operators skip preflight, use a bare executable name, turn reconcile into create-only, ignore a damaged node, suppress a diff, or skip teardown. Applied Haskell-source witnesses and unaffected controls are mandatory. |
@@ -88,13 +88,13 @@ the command cannot produce an admissible candidate.
 | `Legacy closure` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The typed Haskell binding explained to readers as `LTD-RUN-001` must have zero findings and its second-executable/obsolete-identity reintroduction negatives must fail. The source classifier must also report exact accounting and zero due bindings owned by Phase 55 or earlier. Markdown row content is not an input. |
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 54, whose verified chain includes Phase 49; candidate execution separately refuses an absent, stale, replayed, or broken-chain receipt. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `UNVERIFIED`: all Phase-55 behavior until the contract is implemented and reviewed; every registry, image publication, platform service, storage service, workload, GPU, multi-node, provider, and second-substrate claim remains outside scope. |
-| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only`: automation and LLMs may emit a candidate bundle but may not start premature hardware validation, create approval, or mark this sprint/phase Done. |
+| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer`: an authorized human or delegated agent may inspect the complete qualified candidate, create the bound approval, promote this sprint/phase, and continue numerically; gates and undelegated automation cannot promote by themselves or start premature hardware validation. |
 
 ## Resource provision — UNRESOLVED
 
 > **UNRESOLVED — blocks validation.** No live mutation is authorized. The seven-label draft below is
 > non-operative capability inventory until its Haskell `ResourceProvisionContract`, interpreter, independent
-> observer, custody boundary, and human review exist.
+> observer, custody boundary, and reviewer inspection exist.
 
 - **Owner marker:** a run-local Haskell value binds the cluster name, container runtime endpoint, kubeconfig,
   source snapshot, predecessor receipt, and run identifier.
@@ -116,7 +116,7 @@ the command cannot produce an admissible candidate.
 - [`cluster_lifecycle_doctrine.md` §2 — bring-up and bootstrap](../documents/engineering/cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap) supplies reconcile, re-observe, and idempotence semantics.
 - [`cluster_lifecycle_doctrine.md` §9 — How bring-up and teardown are implemented: the reconciler, not a state machine](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) supplies discovery, diff, enactment, and bounded repair.
 - [`resource_capacity_doctrine.md` §8 — Where the numbers come from: declared in pure input, provisioned before render, cross-checked at runtime](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime) supplies the pre-mutation capacity comparison.
-- [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) supplies harness qualification, changed-subject proof, outside observation, and human-only promotion.
+- [`testing_spoof_resistance.md` §12 — Spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) supplies harness qualification, changed-subject proof, outside observation, and delegated-reviewer promotion.
 
 ## Sprints
 
@@ -124,10 +124,10 @@ the command cannot produce an admissible candidate.
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Substrate/Observe.hs`, `src/Amoebius/Substrate/Classify.hs`
-**Blocked by**: [Phase 54](phase_54_windows_engine_bringup.md) human approval
+**Blocked by**: [Phase 54](phase_54_windows_engine_bringup.md) reviewer approval
 **Requires**: `natural-linux-cpu-amd64-host`
 **Independent Validation**: A separately authored Haskell decision table checks every closed OS/architecture/accelerator cell; paired reason-specific negatives and a changed-classifier mutant must fail without cluster effects.
-**Oracle**: planned `test/Amoebius/Substrate/ClassifyOracle.hs`; separate author and human reviewer unresolved
+**Oracle**: planned `test/Amoebius/Substrate/ClassifyOracle.hs`; separate author and reviewer unresolved
 **Legacy IDs**: `LTD-RUN-001`
 **Docs to update**: `documents/engineering/substrate_doctrine.md`
 
@@ -148,7 +148,7 @@ intended branch and reddened its oracle row, and prove the observer saw zero clu
 
 ### Remaining Work
 
-Implement the subject and oracle, assign independent custody, and obtain human review. No live run is allowed.
+Implement the subject and oracle, assign independent custody, and obtain reviewer inspection. No live run is allowed.
 
 ## Sprint 55.2: Pure kind preflight and reconcile plan ⏸️
 
@@ -238,12 +238,12 @@ challenge, observed cleanup, and changed-subject/observer mutants before a candi
 
 ### Remaining Work
 
-Implement and independently review the observer and teardown seam; obtain the human decision for the complete
+Implement and independently review the observer and teardown seam; obtain the authorized reviewer decision for the complete
 Phase-55 candidate. Until then this phase remains NOT VALIDATED.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the human promotes the gate, never before):**
+**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
 
 - `documents/engineering/substrate_doctrine.md` — reconcile raw observation and Haskell classification.
 - `documents/engineering/cluster_lifecycle_doctrine.md` — reconcile kind ownership, replay, repair, and teardown.
@@ -253,7 +253,7 @@ Phase-55 candidate. Until then this phase remains NOT VALIDATED.
 
 - [README.md](README.md) — keep the Phase 55 title, blockers, and status synchronized.
 - [substrates.md](substrates.md) — retain the one `linux-cpu/amd64` Register-3 lane.
-- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — close `LTD-RUN-001` only after its Haskell predicate and reintroduction negatives pass and the human approves.
+- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — close `LTD-RUN-001` only after its Haskell predicate and reintroduction negatives pass and the authorized reviewer approves.
 
 ## Related Documents
 

@@ -39,13 +39,13 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 46, its independent validation, and human promotion; every earlier
+Blocked by redesigned Phase 46, its independent validation, and delegated promotion; every earlier
 promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
 completion claim, and implementation result in this document is invalidated as validation evidence, even
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and an authorized reviewer independently inspects it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -74,8 +74,8 @@ later provider phases validate provider semantics and live execution, not source
 |---|---|
 | `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Target only — Haskell declarations and Haskell expectations own all non-`pb` behavioral and support material; every runnable or serialized tool, fixture, oracle, mutant, and provider-program metadata byte is generated beneath `.build/**`. Legacy tracked checking-tool programs, tracked Pulumi YAML, and other tracked non-Haskell test/provider mechanisms are absent. Phase-49 qualification and later provider semantics/live execution remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 47` is future public spelling only. Before current human approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 47` is future public spelling only. Before current reviewer approval of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
 | `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
@@ -89,7 +89,7 @@ later provider phases validate provider semantics and live execution, not source
 | `Legacy closure` | UNRESOLVED — blocks validation: Phase 47 owns `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, and `LTD-VAL-006`; their exact zero-finding predicates, including the absence of tracked Pulumi YAML and every other non-`pb` non-Haskell source, have not been independently reconciled. |
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 46; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
+| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer` — an authorized human or agent may promote after inspecting the complete qualified candidate; no gate, CI job, digest, receipt-shaped file, or generated assertion may promote by itself. |
 
 ## Doctrine adopted
 
@@ -104,9 +104,9 @@ later provider phases validate provider semantics and live execution, not source
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Generation/Tools.hs`, `src/Amoebius/Generation/TestCorpus.hs`
-**Blocked by**: [Phase 46](phase_46_ui_contract_generation.md) human approval
+**Blocked by**: [Phase 46](phase_46_ui_contract_generation.md) reviewer approval
 **Independent Validation**: A separately authored Haskell oracle joins every declared tool/case/mutant to a lazily materialized `.build/**` artifact in both directions, proves changed-subject witnesses, and rejects empty discovery, copied tracked bytes, stale roots, and writes beneath authored roots.
-**Oracle**: planned `test/Amoebius/Generation/ToolsOracle.hs`; independent author and human reviewer unresolved
+**Oracle**: planned `test/Amoebius/Generation/ToolsOracle.hs`; independent author and reviewer unresolved
 **Legacy IDs**: `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, `LTD-VAL-006`
 **Docs to update**: `documents/engineering/jit_artifact_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
@@ -126,7 +126,7 @@ consumer needs.
 
 ### Validation
 
-After the predecessor is human-approved, the qualified Haskell harness must start without the legacy tracked
+After the predecessor is reviewer-approved, the qualified Haskell harness must start without the legacy tracked
 checking-tool family or
 tracked serialized corpora, derive every required artifact, execute the semantic controls, and reject omitted
 declarations, copied legacy bytes, no-op mutations, stale roots, empty discovery, and authored-tree writes at
@@ -137,12 +137,12 @@ their distinct loci. This criterion has not run and is not a current candidate.
 Remove the legacy tracked checking-tool, non-Haskell test-artifact, and tracked provider-program YAML families;
 implement and
 independently review the Haskell subject/oracle; qualify the harness; close all four typed legacy bindings; and obtain
-human promotion. Phase 49
+delegated promotion. Phase 49
 then consumes this generated surface; it does not close Phase 47's debt retroactively.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the human promotes the gate, never before):**
+**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
 
 - [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md)
 

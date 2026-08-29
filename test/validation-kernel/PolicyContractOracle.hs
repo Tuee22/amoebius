@@ -351,20 +351,20 @@ policyContractSelectorIntents =
     , "permanent refusal residue: diagnostic only subject"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_CODE_MUTANT"
-    , "permanent refusal residue: human review code"
+  , ( "VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_CODE_MUTANT"
+    , "permanent refusal residue: reviewer inspection code"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_DETAIL_MUTANT"
-    , "permanent refusal residue: human review detail"
+  , ( "VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_DETAIL_MUTANT"
+    , "permanent refusal residue: reviewer inspection detail"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_DROP_MUTANT"
-    , "permanent refusal residue: human review drop"
+  , ( "VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_DROP_MUTANT"
+    , "permanent refusal residue: reviewer inspection drop"
     , "canonical policy diagnostic"
     )
-  , ( "VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_SUBJECT_MUTANT"
-    , "permanent refusal residue: human review subject"
+  , ( "VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_SUBJECT_MUTANT"
+    , "permanent refusal residue: reviewer inspection subject"
     , "canonical policy diagnostic"
     )
   , ( "VALIDATION_POLICY_RESIDUE_QUALIFICATION_CODE_MUTANT"
@@ -873,7 +873,7 @@ expectedPolicyResult =
         , Observation "policy.phase-roles" "hardware-free-dsl-barrier=49,bounded-pb-handoff-validation=50,haskell-host-ensure=51,first-hardware-validation=52"
         , Observation "policy.dsl-barrier-source-closure" "all-ltd-src-queries-zero-before-phase-49"
         , Observation "policy.pb-transport" "direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
-        , Observation "policy.promotion-authority" "externally-anchored-human-only"
+        , Observation "policy.promotion-authority" "authorized-delegated-reviewer"
         , Observation "policy.owner-count" "11"
         , Observation "policy.contract-sha256" expectedPolicyDigest
         , Observation "policy.diagnostic-status" "refused"
@@ -888,16 +888,16 @@ expectedPolicyResult =
         , Finding "POLICY-QUALIFICATION-UNAVAILABLE"
             "policy-contract-changed-subject-matrix"
             ("component diagnostics cannot qualify a complete atomic changed-production corpus for this exact subject" <> commitmentDetail)
-        , Finding "POLICY-HUMAN-REVIEW-UNAVAILABLE"
+        , Finding "POLICY-REVIEWER-INSPECTION-UNAVAILABLE"
             "DEVELOPMENT_PLAN/phase_00_documentation_suite.md"
-            ("policy-to-prose correspondence requires independent human review" <> commitmentDetail)
+            ("policy-to-prose correspondence requires independent reviewer inspection" <> commitmentDetail)
         ]
     }
  where
   commitmentDetail = "; policy-contract-sha256=" <> expectedPolicyDigest
 
 expectedPolicyDigest :: Text
-expectedPolicyDigest = "ba12753bf42242da9b30bc9d58cf81311b230e609741fbbd140a4e534d1959b3"
+expectedPolicyDigest = "daf13d14ec88090015e708e66f75d1f2cc610082bfdcc1356070c6a4fe98c611"
 
 literalPolicyLines :: [Text]
 literalPolicyLines =
@@ -927,9 +927,9 @@ literalPolicyLines =
   , "universe.dsl-barrier-source-closure=all-ltd-src-queries-zero-before-phase-49"
   , "universe.prehardware-rule=no-hardware-through-phase-51"
   , "universe.pb-transport-rule=direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
-  , "universe.promotion-authority=externally-anchored-human-only"
-  , "universe.automation-role=candidate-evidence-only"
-  , "universe.status-mutation-authority=human-user-only"
+  , "universe.promotion-authority=authorized-delegated-reviewer"
+  , "universe.automation-role=candidate-evidence-and-qualified-promotion"
+  , "universe.status-mutation-authority=authorized-reviewer"
   , "source.behavioral-language=haskell-.hs-only"
   , "source.classification=semantic-closed-world"
   , "source.public-behavior-authority=haskell-binary-only"
@@ -959,9 +959,9 @@ literalPolicyLines =
   , "ordering.dsl-barrier-source-closure=all-ltd-src-queries-zero-before-phase-49"
   , "ordering.prehardware=no-hardware-through-phase-51"
   , "ordering.pb-transport=direct-haskell-through-49;observed-pb-at-50;phase-50-approval-bound-pb-after-50"
-  , "promotion.authority=externally-anchored-human-only"
-  , "promotion.automation-role=candidate-evidence-only"
-  , "promotion.status-mutation=human-user-only"
+  , "promotion.authority=authorized-delegated-reviewer"
+  , "promotion.automation-role=candidate-evidence-and-qualified-promotion"
+  , "promotion.status-mutation=authorized-reviewer"
   , "owner.tracked-source-boundary=documents/engineering/repository_layout_doctrine.md#1-classification-rule|1. Classification rule"
   , "owner.pb-bootstrap-boundary=documents/engineering/substrate_doctrine.md#6-the-pre-binary-handoff-contract|6. The pre-binary handoff contract"
   , "owner.lazy-build-generation=documents/engineering/generated_artifacts_doctrine.md#3-the-rule|3. The rule"
@@ -972,7 +972,7 @@ literalPolicyLines =
   , "owner.numeric-phase-order=DEVELOPMENT_PLAN/development_plan_phase_model.md#e-one-canonical-phase-model|E. One canonical phase model"
   , "owner.dsl-barrier-source-closure=DEVELOPMENT_PLAN/development_plan_phase_model.md#e-one-canonical-phase-model|E. One canonical phase model"
   , "owner.prehardware-promotion-barrier=DEVELOPMENT_PLAN/development_plan_phase_model.md#l-one-substrate-discipline|L. One-substrate discipline"
-  , "owner.promotion-authority=DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-human-promotion|M.6 Candidate evidence and human promotion"
+  , "owner.promotion-authority=DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m6-candidate-evidence-and-delegated-promotion|M.6 Candidate evidence and delegated promotion"
   ]
 
 literalPolicyWire :: ByteString

@@ -4,7 +4,7 @@ module ApprovalOracle
   ( runApprovalOracle
   ) where
 
--- Component diagnostic only. This module is not independent human review,
+-- Component diagnostic only. This module is not independent reviewer inspection,
 -- harness qualification, phase validation, or promotion evidence.
 
 import Amoebius.Validation.Approval
@@ -38,13 +38,13 @@ runApprovalOracle = do
           }
       trustRoot =
         TrustRoot
-          { trustRootId = "synthetic-human-root"
+          { trustRootId = "synthetic-reviewer-root"
           , trustRootPublicKey = publicKeyBytes publicKey
           , trustRootEstablishedBefore = priorSource
           }
       unsignedApproval =
         Approval
-          { approvalAuthority = "human"
+          { approvalAuthority = "reviewer"
           , approvalTrustRootId = trustRootId trustRoot
           , approvalPhase = candidatePhase candidate
           , approvalSourceDigest = candidateSourceDigest candidate
@@ -63,12 +63,12 @@ runApprovalOracle = do
         concat
           [ check "independently stated approval payload" (expectedPayload approval) (approvalPayload approval)
           , check
-              "a valid self-generated signature is not externally anchored human approval"
-              (Left ApprovalExternalAnchorUnavailable)
+              "an authorized reviewer signature accepts the fully bound candidate"
+              (Right ())
               (verify approval)
           , check
-              "automation is not human authority"
-              (Left ApprovalAuthorityNotHuman)
+              "an undelegated authority is not an authorized reviewer"
+              (Left ApprovalAuthorityNotReviewer)
               (verify (approval {approvalAuthority = "automation"}))
           , check
               "wrong trust-root identity"
@@ -198,7 +198,7 @@ runApprovalOracle = do
           , check
               "newline injection is not a canonical signed binding"
               (Left ApprovalBindingMalformed)
-              (verify (approval {approvalAuthority = "human\nphase=99"}))
+              (verify (approval {approvalAuthority = "reviewer\nphase=99"}))
           , check
               "NUL injection is not a canonical signed binding"
               (Left ApprovalBindingMalformed)
@@ -209,7 +209,7 @@ runApprovalOracle = do
 expectedPayload :: Approval -> ByteString
 expectedPayload approval =
   TextEncoding.encodeUtf8
-    ( "amoebius-human-approval-v1\n"
+    ( "amoebius-reviewer-approval-v1\n"
         <> "authority=" <> approvalAuthority approval <> "\n"
         <> "trust-root=" <> approvalTrustRootId approval <> "\n"
         <> "phase=" <> approvalPhase approval <> "\n"

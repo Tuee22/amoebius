@@ -6,7 +6,7 @@ module EvidenceOracle
 
 -- Component diagnostic only. This module proves that the current unintegrated
 -- seam refuses caller-invented candidate material; it does not perform
--- acquisition, qualification, human review, phase validation, or promotion.
+-- acquisition, qualification, reviewer inspection, phase validation, or promotion.
 
 import Amoebius.Validation.Evidence
 import Amoebius.Validation.Types
@@ -71,7 +71,7 @@ baseProvenance =
     }
 
 baseResidue :: [Text]
-baseResidue = ["UNVERIFIED: external acquisition and human review"]
+baseResidue = ["UNVERIFIED: external acquisition and reviewer inspection"]
 
 baseChecks :: [CheckResult]
 baseChecks = [documentationCheck, sourceCheck]

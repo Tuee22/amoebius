@@ -275,7 +275,7 @@ live-band phase adds its Register-2.5 validation sprint before its Register-3 ga
 [phase_80](../../DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md) kernel's. Phase order, status, and gates live
 only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Phases 58 and 59 own the target
 production-code adoptions for the generic reconciler and capacity scheduler respectively; all prescriptive
-claims remain design intent unless the tracker records human promotion.
+claims remain design intent unless the tracker records delegated promotion.
 
 ---
 

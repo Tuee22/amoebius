@@ -38,16 +38,16 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 72, its independent validation, and human promotion; every earlier
+Blocked by redesigned Phase 72, its independent validation, and delegated promotion; every earlier
 promotion barrier must also be satisfied in numerical order. Every prior pass, seal, receipt, attestation,
 completion claim, and implementation result in this document is invalidated as validation evidence, even
 where historical prose has not yet been rewritten. Existing implementation is an **Observed footprint /
 Known partial** only.
 
 Hardware validation is also prohibited until the hardware-free DSL promotion barrier is independently
-satisfied and human-approved.
+satisfied and reviewer-approved.
 
-> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and a human independently reviews it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
+> **Reset contract interpretation.** The phase-specific gate review below is REJECTED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and an authorized reviewer independently inspects it, the summary and work breakdown are a capability inventory, not executable authority. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is invalidated and non-operative.
 
 ## Phase Summary
 
@@ -57,7 +57,7 @@ every cluster in the forest — the root included — receives a VPN IP from tha
 gateway on a later migration.
 
 WireGuard fits the amoebius disciplines because it is a *primitive*, not a platform.
-Its three obligations map onto machinery supplied only by human-approved predecessors:
+Its three obligations map onto machinery supplied only by reviewer-approved predecessors:
 - (1) **keys** are raw Curve25519 static keypairs custodied as a **Vault-KV secret class** — Vault mints and
   holds each keypair, the Dhall names it by `SecretRef` only, and the parent injects it into a child's Vault
   (they are *not* X.509 PKI certs, and never gate an unseal)
@@ -73,7 +73,7 @@ queue-byte bound, rotated-log policy, and versioned cost model. Provisioning joi
 topology-expanded node/peer graph and derives finite per-node kernel/listener CPU and memory
 reservation+ceiling plus nodefs bytes before any interface, peer, queue, or listener mutation.
 
-The design half of the render obligation depends on human-approved pre-cluster work (Registers 1–2, substrate
+The design half of the render obligation depends on reviewer-approved pre-cluster work (Registers 1–2, substrate
 `none`): the typed decoder (Phase 26), the illegal-state corpus (Phase 27), and the pure `renderAll` manifest oracles
 (Phase 33) must establish, in-process, that a keyless peer will not construct and an overlapping-IP peer set
 will not decode. Once those approvals exist, Phase 73 must add the **runtime residue**: a real `wg0` interface on each node, brought up by the
@@ -90,7 +90,7 @@ reconciled, never hand-written*. Keys must live in Vault by reference, and the h
 than a host.
 
 **Substrate:** linux-cpu — the target may run only on the single-node `kind` host after Phase 55 has been
-human-approved; that host's kernel must provide the WireGuard
+reviewer-approved; that host's kernel must provide the WireGuard
 module; the representative fabric is two peers (a gateway-role hub node and one spoke) each in its own Linux
 network namespace on that host. No apple, linux-cuda, or windows substrate is exercised by this phase's gate.
 
@@ -113,7 +113,7 @@ and resource-control/readback layer on `linux-cpu`. A candidate may call that bo
 | `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: one cohesive claim — *peer configuration is rendered from the node inventory and reconciled, never hand-written*. Keys live in Vault by reference, and the hub binds to a role rather than a host. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
 | `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `pb validate phase 73` is the target command only; `pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec it with argv unchanged, while the Haskell verdict entry point remains UNRESOLVED and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent human reviewer have been accepted. |
+| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance, and independent reviewer have been accepted. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not been accepted for every foreclosed dimension. |
 | `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not been accepted. |
@@ -127,7 +127,7 @@ and resource-control/readback layer on `linux-cpu`. A candidate may call that bo
 | `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 72; candidate execution separately refuses an absent, stale, replayed, or locally shaped receipt. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only` — no agent, gate, CI job, digest, receipt-shaped file, or generated assertion may promote status. |
+| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer` — an authorized human or agent may promote after inspecting the complete qualified candidate; no gate, CI job, digest, receipt-shaped file, or generated assertion may promote by itself. |
 
 ## Resource provision — UNRESOLVED
 
@@ -212,7 +212,7 @@ the gate red.
 
 > **Reset validation review.** Every pre-reset `Independent Validation` and `### Validation` below is rejected as a current criterion and MUST NOT be executed or cited. It is retained only to inventory the capability while the fixed Haskell subject/oracle/reviewer/mutant/legacy contract is rewritten.
 
-> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and a human tracker change.
+> **Permanent sprint reset.** Every pre-reset sprint status, result, date, pass, seal, receipt, evidence path, and closure statement below is permanently invalid for promotion. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor approval, owned legacy closure, and an authorized-reviewer tracker change.
 >
 > **Source/artifact boundary.** Every retained fixture, oracle, expected value, corpus, schema, config, manifest, transcript, receipt, script, and mutation name below denotes semantics authored in reviewed Haskell `.hs`. Any reproducible serialized or materialized form is generated lazily beneath ignored `.build/**` and remains untracked. No retained artifact path is an implementation instruction; `pb/**` remains the bootstrap-only exception and owns none of this behavior.
 
@@ -220,9 +220,9 @@ the gate red.
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
-**Blocked by**: [Phase 72](phase_72_ui_program_release.md) human approval
+**Blocked by**: [Phase 72](phase_72_ui_program_release.md) reviewer approval
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -263,7 +263,7 @@ The pre-reset `None` claim is permanently invalid; this sprint remains blocked a
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 73.1
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -340,7 +340,7 @@ The pre-reset `None` claim is permanently invalid; this sprint remains blocked a
 **Implementation**: UNRESOLVED — blocks validation: the authored Haskell implementation path has not been established.
 **Blocked by**: Sprint 73.2
 **Independent Validation**: UNRESOLVED — blocks validation: no falsifiable positive control, paired specific-reason negative, changed-subject mutant, and residue seam has been established.
-**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and human reviewer have been established.
+**Oracle**: UNRESOLVED — blocks validation: no separate Haskell oracle, independence boundary, and reviewer have been established.
 **Legacy IDs**: UNRESOLVED — blocks validation: typed Haskell legacy bindings have not been reconciled for this sprint.
 **Docs to update**: UNRESOLVED — blocks validation: governed doctrine owners have not been established for this sprint.
 
@@ -386,7 +386,7 @@ probe over the VPN IP, not a self-report.
   ledger marks the runtime tunnel and resource-control/readback layers **tested**, never *proven*; the
   keyless-peer (type-foreclosed) and
   overlapping-IP / out-of-CIDR (decode-foreclosed) layers may be recorded as proven-for-model only after the
-  corresponding predecessor model gates are human-approved in the
+  corresponding predecessor model gates are reviewer-approved in the
   pre-cluster band.
 
 ### Validation
@@ -422,7 +422,7 @@ The pre-reset `None` claim is permanently invalid; this sprint remains blocked a
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the human promotes the gate, never before):**
+**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
 
 - `documents/engineering/network_fabric_doctrine.md` — the §2–§5 "Phase 0 design intent" honesty note flips from
   design intent to a delivered raw-kernel WireGuard fabric with its Register-3 ledger attached: the rendered

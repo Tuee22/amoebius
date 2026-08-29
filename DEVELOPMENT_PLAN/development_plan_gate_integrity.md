@@ -36,28 +36,31 @@ A phase gate is an attempt to falsify one bounded claim. It is not a script exit
 hash, a self-reported ledger, or a count of tests. Those are observations a reviewer may use. None can promote
 a phase by itself.
 
-Three parties are deliberately distinct:
+Three responsibilities are deliberately distinct:
 
 1. the **subject** implements the claimed behaviour;
 2. the **oracle and harness** attempt to falsify that behaviour without importing its decision logic; and
-3. the **human validation authority** reviews the contract and raw observations and alone may promote status.
+3. the **authorized promotion reviewer** reviews the contract and raw observations and applies the status-only promotion.
 
-The subject, harness, generated evidence, an LLM, or CI may produce a **validation candidate**. Only the human
-authority may write ✅ Done. A candidate remains **NOT VALIDATED** until that decision. The approval is an
-external, cryptographically authenticated receipt bound to the source snapshot, phase-contract digest,
-qualified-harness digest, and raw-observation digest. It verifies against a human-controlled trust root that
-the candidate change cannot amend and use in the same promotion. A path, hash-looking string, or unsigned
-Markdown assertion is not approval.
+The subject, harness, generated evidence, an agent, or CI may produce a **validation candidate**. Only an
+authorized reviewer may write ✅ Done. The reviewer may be the human user or an agent explicitly delegated to
+complete development-plan work. A candidate remains **NOT VALIDATED** until that decision. The approval record
+is bound to the source snapshot, phase-contract digest, qualified-harness digest, raw-observation digest, and
+exact status projection. Reviewer authorization comes from outside the candidate verdict: user delegation,
+repository policy, or a configured signing root. A path, hash-looking string, self-reported success bit, or
+unsigned Markdown assertion is not approval by itself.
 
 That receipt binds both the qualified pre-promotion source identity and an exact status-only post-promotion
 projection identity. The projection's closed diff may touch only the tracker, phase, and sprint status fields
-named in the receipt. The human applies it personally; automation may verify but cannot apply it. Any other
+named in the record. An authorized reviewer applies it; unattended gate logic cannot. Any other
 source, contract, oracle, or documentation change requires a new candidate rather than borrowing approval for
 the pre-edit snapshot.
 
-This trust split is intentional. Source in one repository can always be changed so that subject and test
-collude; no program in that same trust domain can prove the absence of such collusion. Independent review and
-human-held signing authority close the authorization gap that mutation testing alone cannot close.
+This responsibility split is intentional. Source in one repository can always be changed so that subject and
+test collude; no success bit in that same trust domain proves the absence of collusion. Independent oracle
+expectations, changed-subject qualification, raw observations, and an explicit reviewer action close the
+authorization gap that a self-reported gate cannot close. A delegated agent may perform that reviewer action
+after inspecting the complete candidate; it may then continue with the next phase in numeric order.
 
 ### M.1 The fixed gate contract
 
@@ -69,8 +72,8 @@ evidence cannot populate authored contract fields.
 |---|---|
 | `Claim` | One falsifiable capability statement and its explicit exclusions. |
 | `Subject` | The production `.hs` module and entry point exercised; a wrapper, manifest, or gate runner alone is not a subject. |
-| `Command` | Future public target: `pb validate phase NN`. Before Phase 50 has current human approval, the executable candidate command is the exact absolute source-bound Haskell binary built directly from an authenticated, network-independent toolchain input; invoking `pb` is inadmissible evidence. Phase 50 starts that exact Haskell OS supervisor directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 approval. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
-| `Oracle` | A separately authored `.hs` oracle module, its independence boundary, provenance, and human reviewer. |
+| `Command` | Future public target: `pb validate phase NN`. Before Phase 50 has current reviewer approval, the executable candidate command is the exact absolute source-bound Haskell binary built directly from an authenticated, network-independent toolchain input; invoking `pb` is inadmissible evidence. Phase 50 starts that exact Haskell OS supervisor directly and has it invoke `pb` as the externally observed child subject; the public spelling cannot supervise its own handoff. Phase 51 onward may use `pb` only while binding the current Phase-50 approval. Python always treats argv as opaque; the Haskell binary owns host-floor policy, command dispatch, and every verdict. |
+| `Oracle` | A separately authored `.hs` oracle module, its independence boundary, provenance, and reviewer. |
 | `Positive controls` | A closed named corpus and the exact observations expected for each member. |
 | `Paired negatives` | For every foreclosed dimension, a minimally different positive/negative pair and the exact rejection locus and reason. |
 | `Mutants` | An independently literal oracle-owned selector-to-exact-case registry, exact two-way identity reconciliation against production and build mappings, and, for each mutant, its atomic requirement predicate, operator, production locus, applied-change witness, assigned exact red observation, named rejection locus, and same-harness controls that must remain green. |
@@ -82,23 +85,23 @@ evidence cannot populate authored contract fields.
 | `Qualification` | Sabotage cases that qualify the harness before the clean candidate run. |
 | `Cleanroom` | Proof that the gate starts without generated products or condemned legacy copies and derives everything required lazily. |
 | `Legacy closure` | Reader-facing references to the typed Haskell IDs due in this phase; the compiled lifecycle/owner/required-analyzer dispatch and the owning analyzer's independent oracle supply the zero-finding decision. An unavailable analyzer for a due or retired ID refuses; before its owner an active unavailable analyzer is explicit later-owned debt and cannot claim closure. Cell text supplies no executable value. |
-| `Predecessor` | The immediately preceding phase's human approval receipt, or `genesis` for Phase 0. |
+| `Predecessor` | The immediately preceding phase's reviewer approval record, or `genesis` for Phase 0. |
 | `Residue` | Untested layers and assumptions, stated as `UNVERIFIED`; an empty residue requires reviewer justification. |
-| `Human authority` | Required external approval class; always `human-only`, never a tool-generated assertion. |
+| `Promotion authority` | Required approval class; always `delegated-reviewer`, meaning an authorized human or agent inspects the qualified candidate and applies the status projection. Never satisfied by a tool-generated assertion alone. |
 
 The `**Gate:**` summary line contains only the future public command and a link to this table. A
 phase-specific command may be an argument selected by the Haskell dispatcher, but Python, shell, a data file,
 or a generated program may not decide or wrap the verdict. The public spelling is not admissible evidence for
 Phase 0 through Phase 49: those candidates invoke the exact absolute source-built Haskell executable directly.
-Phase 50 validates the `pb` transport itself under an external observer; only its current human approval makes
+Phase 50 validates the `pb` transport itself under an external observer; only its current reviewer approval makes
 that transport eligible for Phase 51 onward. Presence of the target spelling in a phase document is never a
 claim that it exists, ran, or passed.
 
 The structural documentation checker may parse governed inventory, metadata, headings, links, anchors,
 backlinks, status syntax, phase dependencies, and this fixed table shape. It may not infer any row's semantic
 adequacy or any cross-cutting product/source/provider decision from natural-language wording or token counts.
-Those executable decisions live in reviewed Haskell declarations; prose correspondence is a separate human
-review obligation. A policy-looking prose decoy must be behaviorally inert.
+Those executable decisions live in reviewed Haskell declarations; prose correspondence is a separate reviewer
+obligation. A policy-looking prose decoy must be behaviorally inert.
 
 <a id="gate-integrity-delegation"></a>
 
@@ -191,7 +194,7 @@ A pure claim cannot use a live nonce meaningfully. It instead uses a separately 
 coverage obligations, boundary generators, explicit positive/negative pairs, and changed-subject mutants.
 Property sampling reports only the explored sample and its coverage; it never upgrades to universal proof.
 
-### M.6 Candidate evidence and human promotion
+### M.6 Candidate evidence and delegated promotion
 
 The Haskell gate writes raw observations and a schema-checked candidate bundle beneath `.build/runs/**`. Its
 digest binds provenance; it does not make the contents true. The candidate must contain explicit per-row
@@ -205,10 +208,11 @@ artifact. Candidate execution separately records whether each specified input wa
 finding, not a reason to leave the contract itself as generic `MISSING`. Reader-facing Markdown cannot convert
 either refusal to a satisfied state.
 
-The human reviewer compares the contract, qualification observations, clean observations, source diff,
+The authorized reviewer compares the contract, qualification observations, clean observations, source diff,
 unverified residue, predecessor approval, and exact proposed status-only projection. The reviewer may then
-issue the external approval receipt and personally apply that projection. Automation and LLMs are prohibited
-from creating, copying, inferring, claiming, or applying that approval.
+issue the bound approval record and apply that projection. A delegated agent explicitly tasked with plan work
+is an authorized reviewer and may repeat this validate-and-promote sequence across multiple consecutive phases.
+The gate, harness, candidate bundle, or digest cannot perform or imply the reviewer action on its own.
 
 ---
 
@@ -232,7 +236,7 @@ The current Sprint-0.2 disposition universe is Active-only. Retirement is a futu
 deletion of executable memory. Sprint 0.2 retains a required reintroduction-case identity, not an executed
 guard. An Active zero is admissible only in the owning phase's integrated candidate after the owner analyzer
 implements and passes its independently authored negative; it is candidate readiness, not a status or
-lifecycle transition. After predecessor evidence is present and the human promotes that owning gate, the next
+lifecycle transition. After predecessor evidence is present and the authorized reviewer promotes that owning gate, the next
 phase's source records the `Retired` transition. An Active zero before its owner refuses as a stale/missing
 finding, and an Active zero after its owner refuses as an unrecorded post-promotion transition. The retired
 constructor, owner, analyzer key, and qualified Haskell reintroduction negative remain compiled. The
@@ -313,10 +317,10 @@ Every phase inherits the following postconditions. They are part of the gate, no
     forbidden-archive-basename content diagnostic. Those documentation findings do not supply legacy semantics.
     Neither seam may interpret a row, table cell, ID
     spelling, owner phrase, predicate-shaped string, or row count as legacy semantics or use it to alter a
-    closure verdict. Human review owns correspondence between the Haskell bindings and that explanation.
-17. **Predecessor closure.** Except Phase 0, the immediately preceding phase has a valid human approval receipt
+    closure verdict. Reviewer inspection owns correspondence between the Haskell bindings and that explanation.
+17. **Predecessor closure.** Except Phase 0, the immediately preceding phase has a valid reviewer approval receipt
     for the exact current contract. Hardware-specific work cannot run as a phase gate before the no-hardware
-    DSL promotion barrier is human-approved.
+    DSL promotion barrier is reviewer-approved.
 18. **Evidence is not authority.** Run bundles are generated diagnostics. No path, digest, attestation, test
     count, or tool-emitted “pass” authorizes ✅ Done.
 
@@ -345,11 +349,11 @@ Every reconciliation follows these rules:
 4. Put every current mismatch in the closed Haskell legacy universe, with a typed stable ID, `Active` lifecycle
    state, owner phase, required-analyzer key, and total dispatch route whose unavailable state refuses. Then
    update the corresponding reader-facing explanation in
-   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). Human review, not a parser, owns the
+   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). Reviewer inspection, not a parser, owns the
    correspondence between those two surfaces. The owning sprint implements the exact observation/closure
    analyzer and independent domain reintroduction negative; registering the obligation does not execute later
    work or make the mismatch eligible to close.
-5. Keep that reader-facing register active-only. Closed or superseded explanations are deleted after the human
+5. Keep that reader-facing register active-only. Closed or superseded explanations are deleted after an authorized reviewer
    promotes the corresponding owning gate; the retired constructor, owner, analyzer key, and qualified
    owner-domain reintroduction negative remain compiled, while Git history is the prose archive. No archive file, archive slice,
    “closed” appendix, or second deletion list is permitted. The legacy structural seam checks exact canonical
@@ -361,11 +365,11 @@ Every reconciliation follows these rules:
    policy implicitly.
 7. Update the doctrine owner, phase contract, tracker, component/substrate inventory, Haskell legacy binding,
    and reader-facing legacy explanation together when a decision changes their shared boundary. The consolidated
-   phase-gate human correspondence review is required even though the Markdown explanation cannot change a
+   phase-gate reviewer correspondence inspection is required even though the Markdown explanation cannot change a
    legacy binding or closure verdict.
 8. Re-run source closure from an empty generated tree. A local ignored file, pre-existing tool, cache, or
    compatibility copy cannot satisfy a prerequisite silently.
-9. Audit revision history separately. Historical blobs may require a human decision, but they never become a
+9. Audit revision history separately. Historical blobs may require an authorized reviewer decision, but they never become a
    second live work register.
 10. Preserve numerical order. A later phase may not validate an earlier phase by proxy, and hardware evidence
     may not substitute for the pre-hardware DSL promotion barrier.
@@ -395,7 +399,7 @@ silently consuming a condemned source language, a pre-generated artifact, or a l
 ## Related Documents
 
 - [Development-plan standards](development_plan_standards.md) — the family hub and phase-document schema
-- [Phase model](development_plan_phase_model.md) — status, sequence, and human-only promotion
+- [Phase model](development_plan_phase_model.md) — status, sequence, and delegated-reviewer promotion
 - [Development-plan tracker](README.md) — the sole current phase-status source
 - [Reader-facing legacy register](legacy_tracking_for_deletion.md) — current divergence explanation only;
   Haskell owns executable identity, lifecycle, ownership, dispatch, and required reintroduction-case identities;

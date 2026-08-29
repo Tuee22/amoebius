@@ -138,7 +138,7 @@ candidateFromChecks provenance residue checks =
           , evidencePredecessorDigest = provenancePredecessorDigest provenance
           , evidenceRows = fmap row checks
           , evidenceResidue = residue
-          , evidenceAuthority = "candidate-only; human approval required"
+          , evidenceAuthority = "qualified candidate; authorized reviewer approval required"
           }
     blockers -> Left blockers
  where

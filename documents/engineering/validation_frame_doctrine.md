@@ -93,7 +93,7 @@ bounded `pb` runtime handoff; it cannot retroactively strengthen an earlier sema
 
 Pure and fake-boundary gates therefore remain Register 1 or 2 and `Substrate: none`. They record the compiler
 and source snapshot used for provenance, but no toolchain version or host identity strengthens the semantic
-claim. Hardware-specific phases begin only after the complete no-hardware DSL barrier receives human
+claim. Hardware-specific phases begin only after the complete no-hardware DSL barrier receives authorized-reviewer
 approval.
 
 ---
@@ -117,7 +117,7 @@ the same `.build/**` containment boundary.
 
 ## 5. Container execution is later parity evidence
 
-After host and image phases are human-approved, the same Haskell validation command may be replayed inside the
+After host and image phases are reviewer-approved, the same Haskell validation command may be replayed inside the
 published runtime image. That replay can test toolchain packaging, architecture, library availability, and
 host/image parity. It cannot:
 

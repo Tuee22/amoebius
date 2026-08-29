@@ -38,7 +38,7 @@ prior knowledge, but every stop presumes the stops above it.
 ## Before starting
 
 > **Doctrine describes the target; it is not implementation or validation evidence.** Candidate gate output
-> cannot promote itself. Only the human-controlled plan records phase status, after independent expectations,
+> cannot promote itself. Only an authorized reviewer records phase status, after independent expectations,
 > sabotage controls, predecessor order, and the applicable hardware-free barrier have been reviewed.
 
 - [`glossary.md`](./glossary.md) — open in a second tab and leave it open; every stop below assumes it.
@@ -127,7 +127,7 @@ downstream evidence. Later replay checks portability; it cannot stand in for the
 - [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) — the tracker; the only place phase order, status, and gates live.
 - [`development_plan_standards.md` §M](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the fixed eighteen-row contract that stops a gate from being passable by a stub.
 - [`development_plan_standards.md` §K](../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed) — how stop 5's discipline binds a phase before it may be marked done.
-- [`development_plan_standards.md` §C](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — status is a human decision; a command, script, generated report, or agent may produce candidate evidence but may not mark a sprint or phase Done or Validated.
+- [`development_plan_standards.md` §C](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — status is an authorized reviewer decision; a delegated agent may inspect, promote, and continue qualified phases, while a command, script, generated report, or gate cannot promote by itself.
 - [`development_plan_standards.md` §L](../DEVELOPMENT_PLAN/development_plan_standards.md#l-one-substrate-discipline) — later hardware evidence stays scoped to the one natural substrate actually exercised and cannot be generalized to an untested substrate.
 
 Work proceeds in numerical phase order. A later hardware-dependent gate does not compensate for an open or

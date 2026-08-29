@@ -1,7 +1,7 @@
 # Evidence Calculus Doctrine
 
 > **Purpose**: Define claim-to-fixture bindings, the evidence strength each fixture kind permits, oracle
-> independence, and the human authorization boundary.
+> independence, and the reviewer authorization boundary.
 > **Read this if**: an extension or phase makes a claim that must be falsifiable rather than merely asserted.
 
 This document owns the evidence calculus. Execution registers and harness topology belong to
@@ -100,7 +100,7 @@ semantic predicate states the expectation.
 Self-referential gates do not receive a special exemption. Their workflow representation may exercise the
 same calculus, but it cannot authorize its own verdict. The independently reviewed oracle/harness must first
 reject the fixed sabotage corpus, every mutant must demonstrate a changed production locus, raw observations
-must be retained, and a human-held external signature is the only promotion authority. Mutation sensitivity
+must be retained, and an authorized-reviewer external signature is the only promotion authority. Mutation sensitivity
 is one falsification technique within that boundary, not a cure for shared authorship.
 
 ---
@@ -124,7 +124,7 @@ hardware gates.
 
 The calculus makes claims reviewable and falsifiable; it does not make them true.
 
-- It does not prove that a human-authored oracle is correct.
+- It does not prove that an independently authored oracle is correct.
 - It does not turn finite sampling into universal proof.
 - It does not prove the compiler, kernel, observer, authority, provider, hardware, or reviewer uncompromised.
 - It does not let a generated bundle, digest, attestation, or exit code authorize status.
@@ -138,7 +138,7 @@ phase NOT VALIDATED, so this doctrine carries no current implementation-result i
 ## 7. Planning ownership
 
 This doctrine is normative design intent. Phase order, current status, the fixed gate table, qualification,
-and human promotion live in `DEVELOPMENT_PLAN/`. A phase adopts this calculus by naming its bounded claim,
+and delegated promotion live in `DEVELOPMENT_PLAN/`. A phase adopts this calculus by naming its bounded claim,
 Haskell subject, independently reviewed Haskell oracle, qualifying controls, changed-subject mutant, register,
 and residue.
 

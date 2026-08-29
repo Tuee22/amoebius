@@ -77,7 +77,7 @@ reject the forbidden archive path or an alias. The general documentation checker
 ordinary orientation metadata, headings, links, and anchors. Neither seam may derive a legacy identity,
 owner, observation, closure, source-finding join, predicate, or count from row content. Changing any row,
 cell, ID spelling, owner phrase, predicate-shaped string, order, or row count cannot change a source-closure
-verdict. A human reviewer owns correspondence with the closed Haskell legacy inventory and its independently
+verdict. A reviewer owns correspondence with the closed Haskell legacy inventory and its independently
 authored oracle.
 
 Operator-supplied values are neither generated source nor repository source. They enter through an explicit
@@ -281,10 +281,10 @@ A gate emits candidate evidence beneath `.build/runs/**` and may install a conte
 `.build/evidence-store/**`. Git contains neither. A digest establishes provenance only; it does not establish
 correctness or authorize a status change.
 
-Only the human user may promote a phase or sprint to Done or Validated. The plan records that decision after
-the gate, oracle-independence review, sabotage controls, predecessor chain, typed Haskell legacy closures, and
-human review of their reader-facing correspondence have all been inspected. Doctrine does not record current
-validation results.
+Only an authorized reviewer may promote a phase or sprint to Done or Validated. The reviewer may be the human
+user or a delegated agent. The plan records that decision after the gate, oracle-independence review, sabotage
+controls, predecessor chain, typed Haskell legacy closures, and reader-facing correspondence have all been
+inspected. Doctrine does not record current validation results.
 
 ## 6. `.gitignore` contract
 
@@ -331,7 +331,7 @@ The audit must include no-op, constant-success, extension-renaming, shebang-with
 empty-discovery, missing-oracle, skipped-mutant, stale-evidence, and tracked-copy-present sabotage cases. Each
 applicable sabotage must make the audit red for the intended reason before a clean run can be considered.
 
-Hardware discovery and live infrastructure are prohibited until the human user accepts the hardware-free DSL
+Hardware discovery and live infrastructure are prohibited until an authorized reviewer accepts the hardware-free DSL
 promotion barrier and every predecessor. A container cannot establish the semantics of the DSL that generates
 its own recipe or runtime inputs.
 
@@ -340,13 +340,13 @@ its own recipe or runtime inputs.
 The target grammar above does not assert that the current tree conforms. Every current non-Haskell source
 family outside `pb/**`, every serialized behavioral input, and every obsolete source root is an active
 divergence until its typed Haskell closure binding reaches zero, its independent Haskell reintroduction case
-fails at the intended locus, and the human accepts the evidence. The corresponding row in
+fails at the intended locus, and an authorized reviewer accepts the evidence. The corresponding row in
 [`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) is then reconciled
 or removed as a reader-facing change; editing or deleting it cannot close the executable binding.
 
 Documentation adoption, a passing legacy command, or the presence of Haskell wrappers supplies no migration
 evidence. A phase may close only after its old source is absent and its clean-room Haskell materialization is
-independently reviewed. Human review also confirms that the one reader-facing register still corresponds to
+independently reviewed. Reviewer inspection also confirms that the one reader-facing register still corresponds to
 the compiled inventory. Git history is the archive; no second legacy-register file is admitted.
 
 ## Related Documents

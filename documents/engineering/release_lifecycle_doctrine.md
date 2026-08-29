@@ -99,7 +99,7 @@ delegates their storage, reconciliation, evidence, and provider mechanisms as fo
 > **Target instance — NOT VALIDATED.** Phase 71 must bind all four delivery values through independently
 > reviewed Haskell oracles and the exact live boundary its contract names. Every former run/result statement
 > is permanently invalidated and omitted; Gateway-API canary shifting, Pulsar consumer-group cutover, and
-> cross-cluster/geo promotion remain `UNVERIFIED` until their owning numeric phases are human-promoted.
+> cross-cluster/geo promotion remain `UNVERIFIED` until their owning numeric phases are reviewer-promoted.
 
 ---
 
@@ -311,7 +311,7 @@ amoebius's live wiring and is currently **NOT VALIDATED**.
 ## 5. `RolloutPlan` / `RolloutPhase`: the readiness-gated apply
 
 Once a pointer advances, the target change is enacted as an **ordered, readiness-gated plan** on the
-human-approved predecessor reconciler — it introduces **no new reconciler**:
+reviewer-approved predecessor reconciler — it introduces **no new reconciler**:
 
 ```haskell
 newtype RolloutPlan = RolloutPlan [RolloutPhase]   -- ordered; each phase gates the next on readiness

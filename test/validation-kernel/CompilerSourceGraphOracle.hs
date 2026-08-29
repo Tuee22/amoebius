@@ -35,7 +35,7 @@ runCompilerSourceGraphOracle = do
   let failures = intentFailures <> opacityInventoryFailures <> caseFailures
   unless (null failures) (fail (unlines ("CompilerSourceGraphOracle" : failures)))
   putStrLn
-    "CompilerSourceGraphOracle: literal refusal diagnostics match; authenticated source/toolchain/elaboration/execution, semantic closure, qualification, and human promotion remain absent."
+    "CompilerSourceGraphOracle: literal refusal diagnostics match; authenticated source/toolchain/elaboration/execution, semantic closure, qualification, and authorized promotion remain absent."
 
 runCompilerSourceGraphSelectorOracle :: String -> IO ()
 runCompilerSourceGraphSelectorOracle selector =

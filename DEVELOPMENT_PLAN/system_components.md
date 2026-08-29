@@ -9,7 +9,7 @@ claim. Architecture belongs to the linked doctrine, phase status belongs only to
 executable source/layout-divergence accounting belongs to typed Haskell bindings in
 `Amoebius.Validation.Legacy`. The single
 [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) file explains those bindings to readers;
-human review owns the correspondence.
+reviewer inspection owns the correspondence.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -111,7 +111,7 @@ Dhall schema/prelude/projection used by tooling is lazily generated beneath `.bu
 | Haskell generator/gate/mutant/test-workflow layer | `src/**/{Generate,Validate,Test}/*.hs`; `test/**/*.hs` | [Testing Doctrine](../documents/engineering/testing_doctrine.md) | [47–49](phase_47_tool_and_mutant_generation.md) |
 
 No live host, live browser, container, cluster, provider, or hardware validation may start until Phase 49 itself
-has been independently validated and human-promoted after every predecessor. Pure browser semantics, lazy UI
+has been independently validated and reviewer-promoted after every predecessor. Pure browser semantics, lazy UI
 generation, and fake boundaries remain part of the pre-barrier Haskell proof.
 
 ## 3. Manifests — typed renderer + the SSA reconciler
@@ -238,10 +238,10 @@ Provider/cluster state and drill records are live or `.build/**` products.
 
 Phases 1–49 establish the Haskell language, semantics, generators, independent oracles, mutation qualification,
 cleanroom derivation, and full hardware-free pipeline before any live/hardware work. Their shared future public
-spelling is `pb validate phase NN`, but `pb` is inadmissible evidence until Phase 50 is human-approved. Each
+spelling is `pb validate phase NN`, but `pb` is inadmissible evidence until Phase 50 is reviewer-approved. Each
 Phase 1–49 candidate therefore builds and invokes the exact source-bound Haskell binary directly from an
 authenticated, network-independent toolchain input. Each phase's 18-key table must be resolved, independently
-reviewed, run fresh, and human-promoted in strict numerical order.
+reviewed, run fresh, and reviewer-promoted in strict numerical order.
 
 Phase 49 is the final promotion barrier and must exercise:
 

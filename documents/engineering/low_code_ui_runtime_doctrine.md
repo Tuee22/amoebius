@@ -854,7 +854,7 @@ fully type-foreclosed.
 ## 17. Verification obligations
 
 The target requires evidence at the repository's established verification registers. The first four items
-form a hardware-free UI/DSL/generator barrier and must be accepted by the human user before items 5–8 begin:
+form a hardware-free UI/DSL/generator barrier and must be accepted by an authorized reviewer before items 5–8 begin:
 
 1. Haskell semantic expectations and properties cover Dhall normalization, dhall-typecheck decoding, gadt-decode checking, module merge,
    referential integrity, type equality, exhaustive decisions, bounds, transitive information-flow checking,
@@ -918,7 +918,7 @@ traces; they do not prove agreement for every implementation state unless a sepa
 
 The HA shape is an architectural requirement. Availability is observed and tested under declared failure
 conditions; it is not inferred from a replica count. No security, isolation, correctness, or availability
-claim is reported as implemented, tested, or proven until the human user accepts independently observed
+claim is reported as implemented, tested, or proven until an authorized reviewer accepts independently observed
 evidence and records the corresponding development-plan status.
 
 ---

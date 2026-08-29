@@ -33,7 +33,7 @@ Phase 1 must remove this file and every other `vendor/**` path. Maintained clien
 Haskell modules beneath `src/vendor/**`. The immutable upstream acquisition, Proto schema, generated bindings,
 package descriptions, transformations, and diagnostic provenance are materialized only beneath a fresh
 `.build/vendor/**` run root. Mutable-ref, top-level-vendor, tracked-Proto, foreign-package, and patch-program
-reintroductions must each fail at their exact locus before the human may close `LTD-SRC-009`.
+reintroductions must each fail at their exact locus before an authorized reviewer may close `LTD-SRC-009`.
 
 ## Related Documents
 

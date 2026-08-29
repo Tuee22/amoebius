@@ -294,7 +294,7 @@ cache ([content_addressing_determinism.md §4.5](./content_addressing_determinis
 | Engine family (the `InferenceBinding.family` union, a named identity) | `llama.cpp` · `whisper.cpp` · `ONNX` · `vLLM` · `pytorch` · `diffusers` · `transformers` · `Audiveris` |
 
 This table is explanatory only. Its rows must be checked against the Haskell constructor inventory for
-documentation drift; human review of a new row cannot admit a provider, family, recipe, or behavioral
+documentation drift; reviewer inspection of a new row cannot admit a provider, family, recipe, or behavioral
 expectation without the corresponding Haskell constructor, total mapping, independent Haskell expectation,
 and owning phase evidence.
 

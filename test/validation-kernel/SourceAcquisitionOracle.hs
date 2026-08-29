@@ -2392,7 +2392,7 @@ expectedDiagnosticResidue =
   , Finding
       "SOURCE-ACQUISITION-ORACLE-QUALIFICATION-ABSENT"
       "SourceAcquisitionOracle"
-      "pinned Ed25519 and envelope vectors do not supply changed-production-subject mutation qualification, external observer execution, or independent human review"
+      "pinned Ed25519 and envelope vectors do not supply changed-production-subject mutation qualification, external observer execution, or independent reviewer inspection"
   ]
 
 problemFinding :: Text -> FilePath -> Text -> Finding

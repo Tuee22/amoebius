@@ -11,7 +11,7 @@ module DocumentationOracle
   , runDocumentationUnaffectedControl
   ) where
 
--- Component diagnostics only.  This oracle does not perform human review,
+-- Component diagnostics only.  This oracle does not perform reviewer inspection,
 -- qualify the documentation harness, validate a phase, or promote status.
 
 import Amoebius.Validation.Documentation
@@ -769,7 +769,7 @@ productionCorpusProblems = do
             <> expectObservation
               "independent production paragraph-spanning over-target count"
               "prose-budget.sentence-over-target-count"
-              "1601"
+              "1623"
               result
             <> expectObservation
               "independent production severe-sentence count"
@@ -784,7 +784,7 @@ productionCorpusProblems = do
             <> expectObservation
               "independent production over-target paragraph count"
               "prose-budget.paragraph-over-target-count"
-              "657"
+              "660"
               result
             <> findingManifestProblems
               expectedProductionFindingCounts
@@ -822,7 +822,7 @@ expectedProductionFindingCounts =
   ]
 
 expectedProductionFindingManifestSha256 :: Text
-expectedProductionFindingManifestSha256 = "2e2676c36c6a69cfd809f8d19fb7d2d5f86cf650e51d221e3c3f8a24388ba5be"
+expectedProductionFindingManifestSha256 = "9d86382ee1b7c5e3340bdefadf31c9d4abcc37169074de36f0d9e1f8707bae69"
 
 findingManifestProblems :: [(Text, Int)] -> Text -> [Finding] -> [String]
 findingManifestProblems expectedCounts expectedDigest findings =
@@ -1648,7 +1648,7 @@ policyOwnerCorpus =
       "## E. One canonical phase model\n\n## L. One-substrate discipline"
   , ownerDocument
       "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
-      "### M.6 Candidate evidence and human promotion"
+      "### M.6 Candidate evidence and delegated promotion"
   ]
 
 ownerDocument :: FilePath -> Text -> (FilePath, Text)
@@ -1666,7 +1666,7 @@ oracleOwnerContract =
   , owner "NumericPhaseOrder" "DEVELOPMENT_PLAN/development_plan_phase_model.md" "e-one-canonical-phase-model" "E. One canonical phase model"
   , owner "DslBarrierSourceClosurePolicy" "DEVELOPMENT_PLAN/development_plan_phase_model.md" "e-one-canonical-phase-model" "E. One canonical phase model"
   , owner "PrehardwarePromotionBarrier" "DEVELOPMENT_PLAN/development_plan_phase_model.md" "l-one-substrate-discipline" "L. One-substrate discipline"
-  , owner "PromotionAuthorityPolicy" "DEVELOPMENT_PLAN/development_plan_gate_integrity.md" "m6-candidate-evidence-and-human-promotion" "M.6 Candidate evidence and human promotion"
+  , owner "PromotionAuthorityPolicy" "DEVELOPMENT_PLAN/development_plan_gate_integrity.md" "m6-candidate-evidence-and-delegated-promotion" "M.6 Candidate evidence and delegated promotion"
   ]
  where
   owner identifier path anchor section =

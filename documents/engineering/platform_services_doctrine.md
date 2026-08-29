@@ -640,7 +640,7 @@ invoked by full path — there is no `PATH`-based discovery anywhere in the brin
 > **Validation reset.** Where this section generalizes sibling behaviour, that remains sibling evidence only.
 > Phases 56, 61, 62, 63, 64, and 77 are all NOT VALIDATED. The subsections below preserve pre-reset
 > observations solely as diagnostic context; none is a current pass, seal, proof, tested result, or promotion
-> input. Only a rewritten phase contract and human promotion can establish current status.
+> input. Only a rewritten phase contract and delegated promotion can establish current status.
 
 ---
 

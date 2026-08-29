@@ -294,7 +294,7 @@ ingress); the Linkerd half collapses to the written verdict in [§6](#6-the-serv
 > Keyless, overlapping, and out-of-CIDR foreclosure also remains unvalidated in the pre-cluster band. Broker
 > geo-replication, gateway migration/repoint, stretched control-plane peering, and arbitrary WAN failure
 > behavior remain outside the bounded claim until their numerical owners are independently validated and
-> human-promoted.
+> reviewer-promoted.
 
 ---
 

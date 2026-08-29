@@ -136,7 +136,7 @@ data LegacyAnalyzer
   | AnalyzeValidationProtocol
   | AnalyzePhaseContracts
   | AnalyzeStatusEvidence
-  | AnalyzeHumanPromotion
+  | AnalyzeDelegatedPromotion
   | AnalyzeHardwareFreeDsl
   | AnalyzeRunInputClosure
   | AnalyzeBehavioralDocumentConsumers
@@ -164,7 +164,7 @@ data LegacyObservationRule
   | ObserveValidationAuthorityGraph
   | ObserveTypedPhaseContractCustody
   | ObserveStatusEvidenceProjection
-  | ObservePromotionTrustRoot
+  | ObservePromotionAuthorization
   | ObserveHardwareFreeDslTrace
   | ObserveRunInputProvenance
   | ObserveDocumentConsumerGraph
@@ -192,7 +192,7 @@ data LegacyClosureRule
   | CloseValidationProtocol
   | ClosePhaseContracts
   | CloseStatusEvidence
-  | CloseHumanPromotion
+  | CloseDelegatedPromotion
   | CloseHardwareFreeDsl
   | CloseRunInputClosure
   | CloseBehavioralDocumentConsumers
@@ -222,7 +222,7 @@ data LegacyReintroductionCase
   | RejectNonHaskellValidationAuthority
   | RejectUnboundPhaseContract
   | RejectForgedStatusEvidence
-  | RejectAutomatedPromotion
+  | RejectUnqualifiedPromotion
   | RejectHardwareBeforeDslPromotion
   | RejectAmbientOrStaleRunInput
   | RejectBehavioralMarkdownConsumer
@@ -264,7 +264,7 @@ data LegacyObservedState
 -- it. This value is input, not authority: the evaluator rejects a key that
 -- differs from the canonical binding. An Active zero is admissible only at
 -- the owning phase, where it is candidate readiness rather than retirement;
--- the human promotion must precede the compiled Retired transition used by a
+-- delegated promotion must precede the compiled Retired transition used by a
 -- later phase.
 data LegacyObservation = LegacyObservation
   { legacyObservationAnalyzer :: LegacyAnalyzer
@@ -1148,7 +1148,7 @@ legacyIdAnalyzer LtdVal004 =
 #if defined(VALIDATION_LEGACY_LTD_VAL004_ANALYZER_MUTANT)
   AnalyzeCompleteSourceGrammar
 #else
-  AnalyzeHumanPromotion
+  AnalyzeDelegatedPromotion
 #endif
 legacyIdAnalyzer LtdVal005 =
 #if defined(VALIDATION_LEGACY_LTD_VAL005_ANALYZER_MUTANT)
@@ -1300,7 +1300,7 @@ legacyIdObservationRule LtdVal004 =
 #if defined(VALIDATION_LEGACY_LTD_VAL004_OBSERVATION_MUTANT)
   ObserveCompleteSourceSnapshot
 #else
-  ObservePromotionTrustRoot
+  ObservePromotionAuthorization
 #endif
 legacyIdObservationRule LtdVal005 =
 #if defined(VALIDATION_LEGACY_LTD_VAL005_OBSERVATION_MUTANT)
@@ -1452,7 +1452,7 @@ legacyIdClosureRule LtdVal004 =
 #if defined(VALIDATION_LEGACY_LTD_VAL004_CLOSURE_MUTANT)
   CloseCompleteSourceGrammar
 #else
-  CloseHumanPromotion
+  CloseDelegatedPromotion
 #endif
 legacyIdClosureRule LtdVal005 =
 #if defined(VALIDATION_LEGACY_LTD_VAL005_CLOSURE_MUTANT)
@@ -1604,7 +1604,7 @@ legacyIdReintroductionCases LtdVal004 =
 #if defined(VALIDATION_LEGACY_LTD_VAL004_REINTRODUCTION_MUTANT)
   RejectDisguisedOrConcealedSource :| []
 #else
-  RejectAutomatedPromotion :| []
+  RejectUnqualifiedPromotion :| []
 #endif
 legacyIdReintroductionCases LtdVal005 =
 #if defined(VALIDATION_LEGACY_LTD_VAL005_REINTRODUCTION_MUTANT)
@@ -2136,11 +2136,11 @@ renderLegacyAnalyzer value = case value of
 #else
     "status-evidence"
 #endif
-  AnalyzeHumanPromotion ->
+  AnalyzeDelegatedPromotion ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL004_ANALYZER_MUTANT)
-    "human-promotionx"
+    "delegated-promotionx"
 #else
-    "human-promotion"
+    "delegated-promotion"
 #endif
   AnalyzeHardwareFreeDsl ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL005_ANALYZER_MUTANT)
@@ -2289,11 +2289,11 @@ renderLegacyObservationRule value = case value of
 #else
     "status-evidence-projection"
 #endif
-  ObservePromotionTrustRoot ->
+  ObservePromotionAuthorization ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL004_OBSERVATION_MUTANT)
-    "promotion-trust-rootx"
+    "promotion-authorizationx"
 #else
-    "promotion-trust-root"
+    "promotion-authorization"
 #endif
   ObserveHardwareFreeDslTrace ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL005_OBSERVATION_MUTANT)
@@ -2442,11 +2442,11 @@ renderLegacyClosureRule value = case value of
 #else
     "status-evidence"
 #endif
-  CloseHumanPromotion ->
+  CloseDelegatedPromotion ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL004_CLOSURE_MUTANT)
-    "human-promotionx"
+    "delegated-promotionx"
 #else
-    "human-promotion"
+    "delegated-promotion"
 #endif
   CloseHardwareFreeDsl ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL005_CLOSURE_MUTANT)
@@ -2595,11 +2595,11 @@ renderLegacyReintroductionCase value = case value of
 #else
     "reject-forged-status-evidence"
 #endif
-  RejectAutomatedPromotion ->
+  RejectUnqualifiedPromotion ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL004_REINTRODUCTION_MUTANT)
-    "reject-automated-promotionx"
+    "reject-unqualified-promotionx"
 #else
-    "reject-automated-promotion"
+    "reject-unqualified-promotion"
 #endif
   RejectHardwareBeforeDslPromotion ->
 #if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_VAL005_REINTRODUCTION_MUTANT)

@@ -152,7 +152,7 @@ itself can be consistently wrong. An independent oracle and a few mutants do not
 The gate representation is therefore only a subject. The separately reviewed Haskell validation kernel first
 rejects the fixed qualification sabotage corpus, observes every applied production mutation, and then compares
 clean workflow execution with raw external observations. Neither representation can authorize status; the
-human validation authority alone may approve the candidate
+authorized reviewer alone may approve the candidate
 ([`testing_spoof_resistance.md`](./testing_spoof_resistance.md)).
 
 [Phase 49](../../DEVELOPMENT_PLAN/phase_49_self_referential_gates.md) is the target integrated instance. It
@@ -180,7 +180,7 @@ worktrees are generated lazily beneath `.build/**`.
   calculus's ([`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md)). Until a phase delivers it,
   crash-orphaned resources are a `live-effect` residue that this calculus does not reduce.
 - **It does not make a gate self-authenticating.** A workflow value, typed teardown, routed consumer,
-  qualification run, and evidence bundle remain candidate observations. Human approval is a separate trust
+  qualification run, and evidence bundle remain candidate observations. Reviewer approval is a separate trust
   boundary; status lives in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---

@@ -653,7 +653,7 @@ gateCategories =
   , "Legacy closure"
   , "Predecessor"
   , "Residue"
-  , "Human authority"
+  , "Promotion authority"
   ]
 
 resourceFields :: [Text]

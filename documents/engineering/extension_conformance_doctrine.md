@@ -318,7 +318,7 @@ Stated plainly, because a conformance verdict is exactly the kind of artifact th
 
 This document is normative only. Which phase delivers the obligation surface, the law families, the generated
 gate, and the verdict seal is owned by [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Normative
-shapes are design intent. Only a phase-specific, independently reviewed candidate plus external human approval
+shapes are design intent. Only a phase-specific, independently reviewed candidate plus external reviewer approval
 could establish an amoebius result; every current phase is NOT VALIDATED.
 
 ---

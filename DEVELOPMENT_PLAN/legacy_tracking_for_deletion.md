@@ -36,7 +36,7 @@ remain Haskell; design belongs to doctrine and phase status belongs to [README.m
 
 Exactly one reader-facing legacy register is permitted, at this path. A second current, historical,
 superseded, archived, or completed-row ledger is prohibited. A closed explanation is deleted only after its
-reviewed Haskell transition and human promotion of the owning gate; Git history is the only record of its former
+reviewed Haskell transition and delegated promotion of the owning gate; Git history is the only record of its former
 existence. The legacy structural seam enforces that this exact canonical file occurs once as a regular
 non-executable UTF-8 file, that its exact basename occurs nowhere else, and that the exact forbidden archive
 basename is absent. It does not infer arbitrary semantic aliases from prose or unrelated filenames. The general
@@ -62,7 +62,7 @@ text in the closure column is explanatory notation, not a predicate consumed by 
 duplicating, reordering, or changing any row, ID, owner, count, or closure sentence cannot add, remove,
 reassign, or satisfy a compiled binding.
 
-Human correspondence review at the integrated owning-phase gate owns agreement between the compiled Haskell
+Reviewer correspondence inspection at the integrated owning-phase gate owns agreement between the compiled Haskell
 surface and these explanations. A mismatch is a documentation defect that blocks promotion, but it cannot
 manufacture a legacy semantic binding or closure pass or failure and does not require a separate
 implementation-sprint confirmation. Ordinary documentation and the separately disclosed filename/content
@@ -85,7 +85,7 @@ admissible only when all of these conditions hold:
    expected locus; a no-op checker, constant-success checker, empty enumeration, and skipped negative also
    fail.
 5. The typed owner has no open predecessor or other due binding.
-6. At the integrated owning-phase gate, a human reviewer confirms the binding, raw observations, negative,
+6. At the integrated owning-phase gate, a reviewer confirms the binding, raw observations, negative,
    evidence, and prose correspondence before promoting the transition and removing the explanatory row.
 
 **Observed footprint / Known partial.** `Amoebius.Validation.Legacy` now owns a closed 25-constructor ID
@@ -97,16 +97,16 @@ and maps remain constructible only through a permanent diagnostic refusal. The e
 not yet executed. An active binding whose owner-domain
 observer is unavailable cannot report closure; at or after its owner it emits a typed
 `LEGACY-ANALYZER-UNAVAILABLE` refusal. An Active zero is accepted only at the exact owning-phase candidate,
-where it records readiness for human review rather than retirement; the same zero refuses before the owner as
+where it records readiness for reviewer inspection rather than retirement; the same zero refuses before the owner as
 a stale/missing finding and after the owner as an unrecorded post-promotion transition. The current lifecycle
 type admits only `Active`; a future successor-phase source change records retirement only after the owning
-sprint qualifies the required negative and the human promotes the integrated owning gate. This
+sprint qualifies the required negative and the authorized reviewer promotes the integrated owning gate. This
 is an unqualified component footprint, not evidence that any owner-domain analyzer ran or any binding closed.
 The earlier 2026-08-23 clean-plus-thirteen result is invalidated by the Sprint-0.3 correction to the
 Active-zero owner boundary and the later discovery of the caller-forged-zero route. A fresh clean-plus-eighteen
 isolated matrix is pending. Both the
 superseded result and any replacement are same-workstream diagnostics with no external reviewer authorship or
-custody, parent-harness qualification, or human correspondence decision. The dispatcher therefore
+custody, parent-harness qualification, or reviewer correspondence decision. The dispatcher therefore
 continues to refuse Phase-0 readiness. The table
 cannot fill any of those gaps. No deletion, textual assertion, hash-shaped string, Python exit code,
 implementation-authored component check, or LLM-produced completion claim can close a binding.
@@ -142,10 +142,10 @@ rendered recipes are generated lazily from Haskell into `.build/**`.
 | ID explained for readers | Current observation | Owner/replacement explanation for readers | Closure behavior explained for readers |
 |---|---|---|---|
 | `LTD-VAL-001` | All 96 phase contracts name the future `pb validate phase NN` spelling. The tracked one-file bootstrap forwards all arguments to a source-built Haskell binary rather than parsing public verbs, but Phase 0 still has only a refusal-bearing Haskell dispatcher and no qualified acquired-source path. No bootstrap execution is admissible before Phase 50; the universal Haskell qualification protocol remains active work and NOT VALIDATED. | **Phase 0.** Complete and independently qualify the universal Haskell-owned subject/oracle/negative/evidence protocol and statically admit the bounded opaque handoff source. No phase command outside that future handoff may name Python or an authored generated tool. | `allPhaseGatesHaskell contracts` and `verdictAuthorityGraph contracts == Right haskellOnly`; replacing a subject with no-op, replacing a checker with constant success, passing a forged exit code, or omitting discovery makes gate qualification fail. |
-| `LTD-VAL-002` | All 96 phase documents expose the fixed gate-contract table, and all 1,728 cells now begin with the exact `UNRESOLVED — blocks validation:` marker. Retained prose records prior intent but is not a typed semantic draft and has no reviewer custody. The former 92 generic `MISSING` predecessor cells now specify typed `ImmediatePredecessorApproval` inputs; no runtime receipt or validation is implied. All 270 sprint sections now have the exact ordered reset schema and immediate blocker edge, while unknown implementation/oracle/validation/legacy/documentation meanings remain explicit `UNRESOLVED` values. The compiled registry therefore treats all 1,728 semantic slots as gaps. All 385 resource slots also remain gaps, and no slot is reviewed. Implementation-authored component checks are not independent review, clean-room qualification, or human reviewer custody. | **Phase 0.** Rewrite all 96 validation contracts and all sprint bodies with frozen typed claims, separately reviewed Haskell oracles, explicit dependency boundaries, production-locus mutations, unaffected controls, and human reviewer custody. | `validationContractAudit contracts == Right ()`; it rejects missing sprint fields, phase-role swaps, shared subject/oracle derivation, same-change unreviewed custody, byte-copy equivalence as semantics, a mutant outside production behavior, an unaffected claimed check, and every unexplained `N/A`. |
-| `LTD-VAL-003` | Every phase and sprint status has been reset to NOT VALIDATED, so prior completion text and hash-shaped seals no longer authorize later work. Candidate-evidence and receipt-verification components exist, but no qualified candidate has been accepted into a retrievable evidence store and no human promotion has occurred. The row remains active. | **Phase 0.** Keep every phase NOT VALIDATED until a retrievable evidence receipt is bound to source, contract, subject, oracle, negatives, observer, and predecessor receipt and is then accepted by the human authority. | `statusProjection tracker evidence == allNotValidated` for this refactor; a later promotion succeeds only when `verifyReceipt` resolves every digest and the human approval signature. Typed hashes, missing records, stale source, stale contracts, and replayed predecessor receipts fail. |
-| `LTD-VAL-004` | The current Phase-0 dispatcher does not mutate plan status, and a Haskell approval verifier binds candidate fields to an Ed25519 signature. There is still no externally held trust root or key-custody workflow, independently supplied human approval, or qualified human-only promotion path. The row remains active and NOT VALIDATED. | **Phase 0.** Complete and independently qualify a promotion boundary that reserves sprint and phase promotion to the human user. Automation and LLMs may emit candidate evidence only. | `promotionAuthority policy == HumanOnly`; synthetic automation-authored, LLM-authored, absent, and mismatched approvals all fail before tracker mutation. |
-| `LTD-VAL-005` | The validation-frame sequence makes a downstream base image part of validating the earlier DSL, allowing hardware/image availability to precede semantic confidence. | **Phase 49.** Establish an independently reviewed, hardware-free promotion barrier over the real Haskell path: decode → legality → bind/expand → plan/resolve infrastructure → provision → renderAll → plan → dry-run → fake apply. Hardware, containers, clusters, VMs, and published images are forbidden inputs to this barrier. | `dslPromotionBarrier source == Passed receipt` using only the source snapshot and Haskell-resolved tools; every Phase 50+ gate refuses without that exact human-approved receipt, and network/container/hardware-use mutants fail the barrier. |
+| `LTD-VAL-002` | All 96 phase documents expose the fixed gate-contract table, and all 1,728 cells now begin with the exact `UNRESOLVED — blocks validation:` marker. Retained prose records prior intent but is not a typed semantic draft and has no reviewer custody. The former 92 generic `MISSING` predecessor cells now specify typed `ImmediatePredecessorApproval` inputs; no runtime receipt or validation is implied. All 270 sprint sections now have the exact ordered reset schema and immediate blocker edge, while unknown implementation/oracle/validation/legacy/documentation meanings remain explicit `UNRESOLVED` values. The compiled registry therefore treats all 1,728 semantic slots as gaps. All 385 resource slots also remain gaps, and no slot is reviewed. Implementation-authored component checks are not independent review, clean-room qualification, or reviewer custody. | **Phase 0.** Rewrite all 96 validation contracts and all sprint bodies with frozen typed claims, separately reviewed Haskell oracles, explicit dependency boundaries, production-locus mutations, unaffected controls, and reviewer custody. | `validationContractAudit contracts == Right ()`; it rejects missing sprint fields, phase-role swaps, shared subject/oracle derivation, same-change unreviewed custody, byte-copy equivalence as semantics, a mutant outside production behavior, an unaffected claimed check, and every unexplained `N/A`. |
+| `LTD-VAL-003` | Every phase and sprint status has been reset to NOT VALIDATED, so prior completion text and hash-shaped seals no longer authorize later work. Candidate-evidence and receipt-verification components exist, but no qualified candidate has been accepted into a retrievable evidence store and no delegated promotion has occurred. The row remains active. | **Phase 0.** Keep every phase NOT VALIDATED until a retrievable evidence receipt is bound to source, contract, subject, oracle, negatives, observer, and predecessor receipt and is then accepted by the promotion authority. | `statusProjection tracker evidence == allNotValidated` for this refactor; a later promotion succeeds only when `verifyReceipt` resolves every digest and the reviewer approval signature. Typed hashes, missing records, stale source, stale contracts, and replayed predecessor receipts fail. |
+| `LTD-VAL-004` | The current Phase-0 dispatcher does not mutate plan status, and a Haskell approval verifier accepts an authorized reviewer's Ed25519 signature only when it binds the exact candidate fields, prior trust-root provenance, and unused nonce. There is still no dispatcher-integrated status-only projection or qualified delegated-reviewer promotion path. The row remains active and NOT VALIDATED. | **Phase 0.** Complete and independently qualify a promotion boundary in which an authorized human or delegated agent may inspect, approve, and promote a complete qualified candidate, then continue numerically. Gates and undelegated automation remain candidate-only. | `promotionAuthority policy == AuthorizedDelegatedReviewer`; an authorized reviewer positive succeeds, while synthetic undelegated, absent, replayed, and mismatched approvals fail before tracker mutation. |
+| `LTD-VAL-005` | The validation-frame sequence makes a downstream base image part of validating the earlier DSL, allowing hardware/image availability to precede semantic confidence. | **Phase 49.** Establish an independently reviewed, hardware-free promotion barrier over the real Haskell path: decode → legality → bind/expand → plan/resolve infrastructure → provision → renderAll → plan → dry-run → fake apply. Hardware, containers, clusters, VMs, and published images are forbidden inputs to this barrier. | `dslPromotionBarrier source == Passed receipt` using only the source snapshot and Haskell-resolved tools; every Phase 50+ gate refuses without that exact reviewer-approved receipt, and network/container/hardware-use mutants fail the barrier. |
 | `LTD-VAL-006` | Authored gates and tests still contain hundreds of references to generated evidence roots, enumerations, ambient temporary roots, and retained observations; a stale worktree can therefore influence a verdict. | **Phase 47.** Generate all transient cases and evidence under a fresh run root in `.build/**`, bind reads to that root, and refuse any input from an earlier run or authored output root. | `runInputClosure run snapshot == Right () && externalWrites run == []`; stale-run, ignored-input, authored-output, ambient-temp, replay, and empty-discovery mutants each fail at distinct loci. |
 | `LTD-DOC-001` | `tools/covering_grid.py`, `tools/locus_registry_lint.py`, and `tools/illegal_state_corpus_gate.py` still parse reader-facing `Cells:` Markdown and an authored TSV registry into behavioural coverage values. The reset doctrine forbids that authority path, but the implementation remains tracked and the replacement has not been qualified. | **Phase 27.** Replace every behavioural Markdown/TSV consumer with reviewed Haskell catalogue, relation, pairing, and justification declarations plus a separately authored Haskell oracle. Generate fixtures and diagnostic views lazily beneath `.build/**`; Markdown remains explanation only. | `behavioralMarkdownConsumers snapshot == [] && coveringSemanticInputs snapshot == HaskellOnly`; a production mutant that reads governed Markdown or a serialized registry fails input-closure before generation, while changing only reader-facing prose cannot make the behavioural covering pass. |
 
@@ -169,7 +169,7 @@ rendered recipes are generated lazily from Haskell into `.build/**`.
 
 Compiled legacy bindings close only in their typed owner-phase order. Within one phase, source-boundary and
 validation-framework bindings close before a capability binding that relies on them. The sequence below is a
-reader-facing explanation; human correspondence review compares it with the compiled owner map, and no list
+reader-facing explanation; reviewer correspondence inspection compares it with the compiled owner map, and no list
 item changes execution. In particular:
 
 1. Phase 0 resets status, closes `LTD-SRC-008`, and installs the Haskell source/contract/promotion authority
@@ -181,13 +181,13 @@ item changes execution. In particular:
 6. Phase 49 requires every source-migration Haskell binding to be zero and passes the hardware-free DSL
    promotion barrier.
 7. Only then may Phase 50 validate the already-bounded `pb` handoff. Phase 51 must next validate the Haskell
-   host-ensure kernel against fake boundaries with no hardware. Only after both receive their own human
+   host-ensure kernel against fake boundaries with no hardware. Only after both receive their own authorized-reviewer
    approvals may Phase 52 begin the first hardware-bearing candidate; image, cluster, and live-provider bands
    remain numerically downstream.
 
 No binding is considered closed merely because its path is absent in one worktree or its explanatory row was
 edited or deleted. Its typed Haskell closure, independently authored reintroduction negative, predecessor
-chain, retrievable evidence, and human approval must all agree. The human then reconciles or removes the
+chain, retrievable evidence, and reviewer approval must all agree. The authorized reviewer then reconciles or removes the
 reader-facing explanation.
 
 ---

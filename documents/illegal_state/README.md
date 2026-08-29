@@ -124,7 +124,7 @@ each entry's `Cells:` line specifies for the reader and its Haskell counterpart 
 
 In these rows `*` reads as "every member of that axis". They apply only to **admissible** cells: the eleven
 inadmissible pairs are already foreclosed by the relation above and need no row. This table records doctrine
-for human review only. The target grid at `.build/docs/covering.tsv` resolves each cell against independently
+for reviewer inspection only. The target grid at `.build/docs/covering.tsv` resolves each cell against independently
 reviewed Haskell occupancy, relation, and justification values; it never reads this table.
 
 | cell | why no illegal state lives there |
@@ -159,7 +159,7 @@ following counts are target expectations, not a current tool result:
 | **admissible, empty, and still owing a reason** | **0** |
 
 The obligation is not discharged until Phase 27 has a reviewed Haskell subject, an independent Haskell
-oracle, a qualified harness, and human promotion. The target occupancy uses declared pairings rather than an
+oracle, a qualified harness, and delegated promotion. The target occupancy uses declared pairings rather than an
 upper bound over prose. Historical analysis reduced an earlier estimate from 143 to 64 and exposed defects,
 but that analysis is rationale, not current validation evidence — an
 `image` state was recorded as having no runtime residue when [§3.77](./illegal_state_lifecycle.md#377-a-worker-naming-an-extension-its-own-binary-does-not-link)

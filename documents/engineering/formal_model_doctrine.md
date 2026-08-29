@@ -509,7 +509,7 @@ live forest). The concrete obligation for the one model is owned by
 This document remains the normative formal-model doctrine. Phase order, validation status, gate ownership,
 and remaining work live only in
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This doctrine records no current validation
-result. Hardware-free model, DSL, and generator checks must pass the human-approved promotion barrier before
+result. Hardware-free model, DSL, and generator checks must pass the reviewer-approved promotion barrier before
 any live runtime correspondence check begins.
 
 ---

@@ -42,7 +42,7 @@ that map honest against the plan.
 
 No gate, generator, or runtime parses these Markdown tables. The executable closed vocabulary and mapping are
 the reviewed Haskell `PhaseLane` declaration and its phase relation; a separately authored Haskell oracle
-checks that relation from structured plan metadata. Human review owns the correspondence between those values
+checks that relation from structured plan metadata. Reviewer inspection owns the correspondence between those values
 and this reader-facing explanation. Any tabular machine projection is generated beneath `.build/docs/**`.
 
 The governing rule is the one-substrate discipline from
@@ -312,106 +312,106 @@ The fourth column records planned lane assignment only. It contains no result, d
 attestation, or validation status. The tracker in [README.md](README.md) is the sole status owner. Phase 0 is
 active but not validated; Phases 1–95 are blocked and not validated. Hardware execution for promotion is
 prohibited until the hardware-free DSL barrier and every preceding redesigned contract are independently
-satisfied and human-approved.
+satisfied and reviewer-approved.
 
 | Phase | Name | Substrate | Lane | Substrate rationale; any outcome is historical and invalidated |
 |-------|------|-----------|------|--------------------|
 | 0 | Documentation suite (whole DSL) | `none` | `none` | Planned lane only — NOT VALIDATED. Phase 0 is active for documentation, validation, and source-boundary redesign |
-| 1 | Haskell toolchain and probe-source closure | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 0 |
-| 2 | Repository layout conformance and de-phased naming | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 1 |
-| 3 | The artifact calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 2 |
-| 4 | The budget calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 3 |
-| 5 | The lift calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 4 |
-| 6 | The workflow calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 5 |
-| 7 | The evidence calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 6 |
-| 8 | Scoped identity kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 7 |
-| 9 | Capacity core fold + topology relation | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 8 |
-| 10 | Composition across the five calculi | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 9 |
-| 11 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 10 |
-| 12 | The amoebius explicit-state checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 11 |
-| 13 | The amoebius symbolic checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 12 |
-| 14 | The amoebius refinement checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 13 |
-| 15 | The compile-fail fixture harness | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 14 |
-| 16 | Deterministic-simulation substrate | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 15 |
-| 17 | Gateway-migration model (both branches) | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 16 |
-| 18 | DSL formal model | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 17 |
-| 19 | Reconcile decision core under deterministic simulation | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 18 |
-| 20 | The extension declaration | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 19 |
-| 21 | The per-extension laws L1-L5 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 20 |
-| 22 | The compositional laws C1-C7 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 21 |
-| 23 | The security laws S1-S6 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 22 |
-| 24 | The generated conformance gate | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 23 |
-| 25 | Haskell-derived Dhall projection and smart-constructor prelude | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 24 |
-| 26 | Haskell protocol declarations, GADT-indexed IR, and total decoder | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 25 |
-| 27 | Illegal-state corpus + validation-locus ledger | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 26 |
-| 28 | Logical→physical storage geometry folds | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 27 |
-| 29 | Execution-epoch + scheduler + accelerator + provider-root folds | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 28 |
-| 30 | Capability union + representational bind | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 29 |
-| 31 | Whole-deployment provision seal + expansion | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 30 |
-| 32 | InferenceEngine capability + accelerator provision | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 31 |
-| 33 | Pure `renderAll` + rendered-artifact oracles | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 32 |
-| 34 | chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 33 |
-| 35 | The amoebius image recipe | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 34 |
-| 36 | The closed transaction vocabulary | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 35 |
-| 37 | Bounded UI-program schema | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 36 |
-| 38 | UI authorization kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 37 |
-| 39 | UI effect binding | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 38 |
-| 40 | UI plan compiler | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 39 |
-| 41 | Offline language and paired plans | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 40 |
-| 42 | Haskell browser-interpreter semantics and projection | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 41 |
-| 43 | Haskell UI-server boundary | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 42 |
-| 44 | Hardware-free Haskell UI composition | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 43 |
-| 45 | Haskell offline-state semantics and runtime projection | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 44 |
-| 46 | Haskell-generated browser contracts and bundle | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 45 |
-| 47 | Foreign-source generator closure, checking tools, and mutants | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 46 |
-| 48 | The test-workflow algebra | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 47 |
-| 49 | No-hardware DSL promotion barrier and self-referential gate suite | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 48 |
-| 50 | Bounded `pb` bootstrap and Haskell handoff | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 49 |
-| 51 | The host-ensure kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and human promotion of redesigned Phase 50 |
-| 52 | Linux: sudoless Docker and the native image | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 51, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 53 | Apple: Homebrew, Colima, and the native image | `apple` | `linux-cpu/arm64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 52, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 54 | Windows: WSL2 and the lifted Linux engine | `windows` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 53, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 55 | Haskell substrate coordinator and single kind cluster | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 54, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 56 | The base image, the jit-build resolver, and the in-cluster registry | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 55, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 57 | The complementary-architecture base image | `apple` | `linux-cpu/arm64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 56, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 58 | Typed renderer + object reconciler | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 57, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 59 | amoebius-capacity scheduler + bootstrap cutover | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 58, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 60 | No-provisioner retained storage + lossless rebind | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 59, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 61 | Root Vault + PKI + built-in Haskell Vault client | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 60, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 62 | Platform backbone (MetalLB + MinIO + Pulsar HA) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 61, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 63 | Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 62, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 64 | Keycloak-owned ingress | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 63, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 65 | Live DSL deploy via the replicas=1 control-plane daemon | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 64, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 66 | Tenant/provider provisioning | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 65, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 67 | Native Pulsar client (CBOR) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 66, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 68 | Live subject/tenant isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 67, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 69 | Content store + workflow runtime (Pulsar-Failover single-writer) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 68, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 70 | Owner-scoped UI projection runtime | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 69, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 71 | Release lifecycle | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 70, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 72 | Atomic immutable UI-program release | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 71, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 73 | WireGuard network fabric | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 72, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 74 | Multi-cluster spawn + geo-replication | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 73, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 75 | Gateway-migration drills + model-correspondence | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 74, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 76 | Haskell-derived provider Pulumi program and enveloped checkpoint | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 75, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 77 | Hostless provider child + convergence + Lease handoff | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 76, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 78 | Per-PV EBS decoupling + create-vs-delete credential | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 77, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 79 | Dynamic node provisioning by signal + leak-free provider gate | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 78, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 80 | Determinism kernel + jit-build CacheBudget cache | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 79, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 81 | Single-tenant low-code UI live path | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 80, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 82 | Multi-tenant low-code UI isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 81, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 83 | UI rollout, projection catch-up, and reconnect | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 82, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 84 | Initial online UI multi-zone high availability | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 83, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 85 | Offline replay and durable receipts | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 84, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 86 | Offline blobs and partition isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 85, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 87 | Offline release and schema evolution | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 86, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 88 | Offline multi-zone continuity | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 87, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 89 | Apple-Metal host compute daemon | `apple` | `metal` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 88, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 90 | The live test topology and elevated harness | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 89, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 91 | The infernix inference core, re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 90, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 92 | The infernix workflow and artifact contracts, re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 91, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 93 | The jitML numerical core, re-derived | `linux-cuda` | `cuda` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 92, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 94 | The jitML training and checkpoint contracts, re-derived | `linux-cuda` | `cuda` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 93, human promotion, and the independently satisfied hardware-free DSL barrier |
-| 95 | The multi-tenant web application re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 94, human promotion, and the independently satisfied hardware-free DSL barrier |
+| 1 | Haskell toolchain and probe-source closure | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 0 |
+| 2 | Repository layout conformance and de-phased naming | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 1 |
+| 3 | The artifact calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 2 |
+| 4 | The budget calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 3 |
+| 5 | The lift calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 4 |
+| 6 | The workflow calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 5 |
+| 7 | The evidence calculus | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 6 |
+| 8 | Scoped identity kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 7 |
+| 9 | Capacity core fold + topology relation | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 8 |
+| 10 | Composition across the five calculi | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 9 |
+| 11 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 10 |
+| 12 | The amoebius explicit-state checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 11 |
+| 13 | The amoebius symbolic checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 12 |
+| 14 | The amoebius refinement checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 13 |
+| 15 | The compile-fail fixture harness | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 14 |
+| 16 | Deterministic-simulation substrate | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 15 |
+| 17 | Gateway-migration model (both branches) | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 16 |
+| 18 | DSL formal model | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 17 |
+| 19 | Reconcile decision core under deterministic simulation | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 18 |
+| 20 | The extension declaration | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 19 |
+| 21 | The per-extension laws L1-L5 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 20 |
+| 22 | The compositional laws C1-C7 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 21 |
+| 23 | The security laws S1-S6 | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 22 |
+| 24 | The generated conformance gate | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 23 |
+| 25 | Haskell-derived Dhall projection and smart-constructor prelude | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 24 |
+| 26 | Haskell protocol declarations, GADT-indexed IR, and total decoder | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 25 |
+| 27 | Illegal-state corpus + validation-locus ledger | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 26 |
+| 28 | Logical→physical storage geometry folds | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 27 |
+| 29 | Execution-epoch + scheduler + accelerator + provider-root folds | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 28 |
+| 30 | Capability union + representational bind | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 29 |
+| 31 | Whole-deployment provision seal + expansion | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 30 |
+| 32 | InferenceEngine capability + accelerator provision | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 31 |
+| 33 | Pure `renderAll` + rendered-artifact oracles | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 32 |
+| 34 | chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 33 |
+| 35 | The amoebius image recipe | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 34 |
+| 36 | The closed transaction vocabulary | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 35 |
+| 37 | Bounded UI-program schema | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 36 |
+| 38 | UI authorization kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 37 |
+| 39 | UI effect binding | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 38 |
+| 40 | UI plan compiler | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 39 |
+| 41 | Offline language and paired plans | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 40 |
+| 42 | Haskell browser-interpreter semantics and projection | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 41 |
+| 43 | Haskell UI-server boundary | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 42 |
+| 44 | Hardware-free Haskell UI composition | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 43 |
+| 45 | Haskell offline-state semantics and runtime projection | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 44 |
+| 46 | Haskell-generated browser contracts and bundle | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 45 |
+| 47 | Foreign-source generator closure, checking tools, and mutants | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 46 |
+| 48 | The test-workflow algebra | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 47 |
+| 49 | No-hardware DSL promotion barrier and self-referential gate suite | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 48 |
+| 50 | Bounded `pb` bootstrap and Haskell handoff | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 49 |
+| 51 | The host-ensure kernel | `none` | `none` | Planned lane only — NOT VALIDATED. Blocked by independent validation and delegated promotion of redesigned Phase 50 |
+| 52 | Linux: sudoless Docker and the native image | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 51, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 53 | Apple: Homebrew, Colima, and the native image | `apple` | `linux-cpu/arm64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 52, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 54 | Windows: WSL2 and the lifted Linux engine | `windows` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 53, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 55 | Haskell substrate coordinator and single kind cluster | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 54, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 56 | The base image, the jit-build resolver, and the in-cluster registry | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 55, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 57 | The complementary-architecture base image | `apple` | `linux-cpu/arm64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 56, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 58 | Typed renderer + object reconciler | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 57, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 59 | amoebius-capacity scheduler + bootstrap cutover | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 58, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 60 | No-provisioner retained storage + lossless rebind | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 59, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 61 | Root Vault + PKI + built-in Haskell Vault client | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 60, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 62 | Platform backbone (MetalLB + MinIO + Pulsar HA) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 61, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 63 | Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 62, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 64 | Keycloak-owned ingress | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 63, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 65 | Live DSL deploy via the replicas=1 control-plane daemon | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 64, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 66 | Tenant/provider provisioning | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 65, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 67 | Native Pulsar client (CBOR) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 66, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 68 | Live subject/tenant isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 67, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 69 | Content store + workflow runtime (Pulsar-Failover single-writer) | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 68, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 70 | Owner-scoped UI projection runtime | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 69, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 71 | Release lifecycle | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 70, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 72 | Atomic immutable UI-program release | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 71, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 73 | WireGuard network fabric | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 72, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 74 | Multi-cluster spawn + geo-replication | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 73, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 75 | Gateway-migration drills + model-correspondence | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 74, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 76 | Haskell-derived provider Pulumi program and enveloped checkpoint | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 75, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 77 | Hostless provider child + convergence + Lease handoff | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 76, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 78 | Per-PV EBS decoupling + create-vs-delete credential | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 77, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 79 | Dynamic node provisioning by signal + leak-free provider gate | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 78, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 80 | Determinism kernel + jit-build CacheBudget cache | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 79, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 81 | Single-tenant low-code UI live path | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 80, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 82 | Multi-tenant low-code UI isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 81, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 83 | UI rollout, projection catch-up, and reconnect | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 82, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 84 | Initial online UI multi-zone high availability | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 83, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 85 | Offline replay and durable receipts | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 84, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 86 | Offline blobs and partition isolation | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 85, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 87 | Offline release and schema evolution | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 86, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 88 | Offline multi-zone continuity | `linux-cpu` | `provider` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 87, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 89 | Apple-Metal host compute daemon | `apple` | `metal` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 88, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 90 | The live test topology and elevated harness | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 89, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 91 | The infernix inference core, re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 90, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 92 | The infernix workflow and artifact contracts, re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 91, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 93 | The jitML numerical core, re-derived | `linux-cuda` | `cuda` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 92, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 94 | The jitML training and checkpoint contracts, re-derived | `linux-cuda` | `cuda` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 93, delegated promotion, and the independently satisfied hardware-free DSL barrier |
+| 95 | The multi-tenant web application re-derived | `linux-cpu` | `linux-cpu/amd64` | Planned lane only — NOT VALIDATED. Blocked by redesigned Phase 94, delegated promotion, and the independently satisfied hardware-free DSL barrier |
 
 The provider/host-side details under three of these rows are owned elsewhere: the cloud-LB and provider-cluster
 provisioning behind Phases 76–79, 84, 88 by the Pulumi IaC doctrine; the host-worker wire behind Phase 89 by the

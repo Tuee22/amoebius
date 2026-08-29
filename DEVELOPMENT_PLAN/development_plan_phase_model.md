@@ -36,24 +36,25 @@ The marker and phrase in the tracker, phase status block, and each sprint must a
 
 | Marker | Meaning |
 |---|---|
-| ✅ **Done** | A human validation authority accepted a qualified candidate for the exact current contract and personally promoted the status. |
+| ✅ **Done** | An authorized reviewer accepted a qualified candidate for the exact current contract and applied its status-only promotion. The reviewer may be the human user or a delegated agent. |
 | 🔄 **Active — NOT VALIDATED** | Work is in progress. No current validation claim is permitted. |
 | 📋 **Planned — NOT VALIDATED** | The contract is specified but work has not begun. |
 | ⏸️ **Blocked — NOT VALIDATED** | Work is held shut by a named predecessor or external prerequisite. |
-| 🧪 **Live-proof pending — NOT VALIDATED** | Candidate code exists, but the required live claim has not been human-accepted. |
+| 🧪 **Live-proof pending — NOT VALIDATED** | Candidate code exists, but the required live claim has not been accepted by an authorized reviewer. |
 
 The literal `NOT VALIDATED` is mandatory on every non-Done current status. It is deliberately redundant: a
 reader must not have to infer that Active or Blocked invalidates historical completion language elsewhere in
 a large phase document.
 
-Only a human user may change a phase or sprint to ✅ Done. An LLM, automation, CI job, gate, evidence reader,
-or generated document may not make, recommend as already decided, or apply that transition. The required
-external signed approval is defined by
-[`development_plan_gate_integrity.md` §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-human-promotion).
+An authorized reviewer may change a phase or sprint to ✅ Done. The reviewer may be the human user or an agent
+explicitly delegated to complete development-plan work. A gate, evidence reader, digest, CI job, or generated
+document cannot promote by itself; a delegated agent must inspect the complete qualified candidate and apply
+the narrow status projection as a reviewer action. The approval contract is defined by
+[`development_plan_gate_integrity.md` §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-delegated-promotion).
 
 The approval binds two explicit source identities: the qualified pre-promotion candidate and one exact
 status-only post-promotion projection. The projection may change only the tracker plus the named phase and
-sprint status fields, and only the human may apply it. This avoids asking a receipt for the old snapshot to
+sprint status fields, and only an authorized reviewer may apply it. This avoids asking a receipt for the old snapshot to
 authorize an unconstrained edit that silently creates a different snapshot. The compiled status checker derives
 the admitted current form from the externally approved projection state; it is not permanently hard-coded to
 the reset markers, and an unsigned Markdown status can never select that state.
@@ -65,7 +66,7 @@ Status and implementation progress are separate axes. A dated inspection uses on
 | **No footprint observed** | No attributable implementation was found inside the stated audit boundary. |
 | **Observed footprint** | Attributable source, tests, or prior machinery exists; correctness and completeness are unknown. |
 | **Known partial** | The inspection names a missing seam, source-policy violation, observer, target, or validation layer. |
-| **Validation candidate** | A qualified Haskell gate produced complete candidate evidence; human review and promotion have not occurred. The phase remains NOT VALIDATED. |
+| **Validation candidate** | A qualified Haskell gate produced complete candidate evidence; authorized review and promotion have not occurred. The phase remains NOT VALIDATED. |
 
 There is no machine-assigned progress term compatible with Done. A source path, compilation, test count,
 green command, digest, evidence bundle, attestation, or earlier status is only an observation.
@@ -77,7 +78,7 @@ green command, digest, evidence bundle, attestation, or earlier status is only a
 - The current numbered plan is the closed contiguous domain `0..95`; fractional identifiers, gaps, and
   identifiers above 95 are prohibited until one coherent plan change deliberately extends the domain.
 - The gates are considered strictly in numerical order. Except Phase 0, each candidate binds the immediately
-  preceding phase's current human approval receipt. A phase may rely on additional earlier capabilities, but
+  preceding phase's current reviewer approval receipt. A phase may rely on additional earlier capabilities, but
   those belong in its typed contract or explanatory prose; the structural `Depends on` field contains only the
   exact immediate predecessor and may not skip or append another dependency.
 - A sprint belongs to exactly one phase and names only earlier-or-same-phase blockers.
@@ -106,7 +107,7 @@ Haskell source closure
 
 Phase 49 is not satisfied by replaying earlier top-level exit codes. It re-exercises, from an empty generated
 tree, the complete Haskell-owned pipeline and its independent oracles. Phase 50 and every later phase remain
-blocked until the human authority approves that barrier. This ordering prevents a working container engine,
+blocked until an authorized reviewer approves that barrier. This ordering prevents a working container engine,
 GPU, cluster, or cloud resource from being used as proxy evidence that the DSL itself is sound.
 
 “Haskell source closure” is literal at the cut. Phase 49 requires every `LTD-SRC-*` query, including
@@ -155,7 +156,7 @@ candidate. Every phase must satisfy its rewritten gate in numerical order.
 
 A gate writes a generated candidate ledger beneath `.build/runs/**`. The ledger records source, contract,
 harness qualification, observations, and residue. It is evidence provenance, not a status authority. The
-tracker records only the human status decision and the external approval reference; it never embeds or
+tracker records only the reviewer status decision and the approval reference; it never embeds or
 manufactures a run transcript.
 
 ---
@@ -163,7 +164,7 @@ manufactures a run transcript.
 ## L. One-substrate discipline
 
 `Substrate: none` means the claim is decidable without hardware-specific or live infrastructure. It does not
-mean “validated inside a container.” Before Phase 50 is human-approved, a pure candidate builds and invokes
+mean “validated inside a container.” Before Phase 50 is reviewer-approved, a pure candidate builds and invokes
 the exact source-bound Haskell binary directly from an authenticated, network-independent toolchain input;
 it does not trust `pb` as transport. The Phase-50 candidate likewise starts the exact Haskell OS supervisor
 directly; the supervisor invokes `pb` as its observed child, so the public target cannot validate itself. After
@@ -184,7 +185,7 @@ The sequencing rules are strict:
 1. Phase 0 declares no behavioural register; Phases 1 through 51 use Register 1 or 2 and `Substrate: none`.
    No phase through Phase 51 may perform hardware-specific or live validation. Phase 52 is the first phase
    permitted to do so.
-2. The full DSL pipeline is human-approved before the Phase-51 fake-host takeover or Phase-52 hardware
+2. The full DSL pipeline is reviewer-approved before the Phase-51 fake-host takeover or Phase-52 hardware
    bring-up can be validation work.
 3. Hardware-specific checks begin only in their numerically owned phase after all predecessors are approved.
 4. A live phase may run supporting pure, fake, or simulated checks, but its final claim remains Register 3 on
@@ -209,7 +210,7 @@ changes. Reopening preserves one coherent numerical story:
 4. invalidate the prior approval and evidence explicitly;
 5. add every current implementation mismatch to the typed Haskell legacy inventory and update its explanation
    in the one reader-facing legacy register; and
-6. re-run from that phase forward in numerical order after the human approves each predecessor.
+6. re-run from that phase forward in numerical order after an authorized reviewer approves each predecessor.
 
 An `Invalidated historical record` block may preserve minimal audit context inside `## Phase Status`. It ends
 at the next `##` heading and is always non-normative. It may state what an earlier run claimed, but it may not
@@ -243,9 +244,10 @@ Every sprint has:
 
 Same-phase implementation readiness and sprint promotion are separate. As defined by
 [`development_plan_standards.md` §F](development_plan_standards.md#f-the-sprint-block-format), observed
-deliverables and component diagnostics may unblock the next implementation seam without any human act. They
-change no status and cannot substitute for the complete candidate run, parent-gate qualification, or human
-promotion.
+deliverables and component diagnostics may unblock the next implementation seam without a promotion act. They
+change no status and cannot substitute for the complete candidate run, parent-gate qualification, or authorized
+reviewer promotion. Once a complete phase candidate qualifies, a delegated agent may promote it and continue
+through additional numerically ordered phases without pausing for user confirmation.
 
 A large file is not automatically a large phase, and many files are not automatically several phases. The
 unit is the falsifiable seam and its final register.
@@ -256,12 +258,12 @@ unit is the falsifiable seam and its final register.
 
 | Invariant | Single source of truth |
 |---|---|
-| Executable cross-cutting policy values and their decision-to-owner map | `Amoebius.Validation.PolicyContract`; human review owns correspondence with the linked prose sections |
+| Executable cross-cutting policy values and their decision-to-owner map | `Amoebius.Validation.PolicyContract`; reviewer inspection owns correspondence with the linked prose sections |
 | Current phase and sprint status | [`README.md`](README.md) and the matching phase status blocks |
 | Prose definition of status vocabulary, numerical order, pre-hardware barrier, and substrate honesty | This document |
-| Fixed gate schema, qualification, source/artifact closure, human promotion | [`development_plan_gate_integrity.md`](development_plan_gate_integrity.md) |
+| Fixed gate schema, qualification, source/artifact closure, delegated promotion | [`development_plan_gate_integrity.md`](development_plan_gate_integrity.md) |
 | Phase-document shape | [`development_plan_standards.md`](development_plan_standards.md) |
-| Active implementation divergence | Typed inventory, owner, observation, and closure bindings in `Amoebius.Validation.Legacy`; [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) is the human-reviewed reader explanation only |
+| Active implementation divergence | Typed inventory, owner, observation, and closure bindings in `Amoebius.Validation.Legacy`; [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) is the reviewer-inspected reader explanation only |
 | Complete repository tree and file classification | [`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md) |
 | Test registers and runtime test topology | [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) |
 | Spoof-resistance threat model | [`testing_spoof_resistance.md`](../documents/engineering/testing_spoof_resistance.md) |

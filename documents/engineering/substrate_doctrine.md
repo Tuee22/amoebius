@@ -204,7 +204,7 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 > and `DEVELOPMENT_PLAN/evidence/phase_19` statements are not current validation evidence. The Python
 > coordinator is condemned legacy rather than an accepted implementation. Every substrate claim is **NOT
 > VALIDATED** until its numerical phase has a reviewed Haskell subject and independent oracle, completes the
-> required gate, and is human-promoted in
+> required gate, and is reviewer-promoted in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---

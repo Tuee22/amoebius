@@ -105,7 +105,7 @@ The pure renderer gate must compare the production Haskell projection with indep
 semantic expectations for capability, shape, source-domain, namespace/API, and output safety. JSON/YAML
 renderings are generated beneath `.build/**` and cannot serve as their own oracle. Live reconcile, scheduler,
 and service enforcement are later correspondence checks, never evidence for the pure renderer. They may not
-begin until the human user accepts the hardware-free DSL/generator barrier and its source-boundary audit.
+begin until an authorized reviewer accepts the hardware-free DSL/generator barrier and its source-boundary audit.
 
 The core is a per-projection renderer closed by one whole-deployment pure function:
 

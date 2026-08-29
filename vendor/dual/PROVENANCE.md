@@ -32,7 +32,7 @@ cannot hide behind the open family.
 Phase 1 must remove this file and every other `vendor/**` path. Any maintained behavior moves to reviewed
 Haskell modules beneath `src/vendor/**`; required upstream bytes and generated package descriptions exist only
 beneath a fresh `.build/vendor/**` run root. Mutable-ref, top-level-vendor, foreign-package, and patch-program
-reintroductions must fail independently before the human may close the legacy row.
+reintroductions must fail independently before an authorized reviewer may close the legacy row.
 
 ## Related Documents
 

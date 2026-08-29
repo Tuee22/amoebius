@@ -125,7 +125,7 @@ checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
   CheckResult
     { checkName = phaseContractCheckName
     , checkObservations = structuralResultObservations
-          <> concatMap checkObservations semanticDiagnostics
+          <> semanticResultObservations
     , checkFindings =
         phaseDomainResultFindings
           <> phaseStructureResultFindings
@@ -136,13 +136,13 @@ checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
           <> trackerJoinResultFindings
           <> projectionVocabularyResultFindings
           <> structuralDiagnosticRefusal requireSemanticAudit
-          <> concatMap checkFindings semanticDiagnostics
+          <> semanticResultFindings
     }
  where
   normalized = [(normalizePath path, contents) | (path, contents) <- supplied]
   parsed = mapMaybe (uncurry parsePhaseDocument) normalized
   grouped = Map.fromListWith (<>) [(phaseNumber phase, [phase]) | phase <- parsed]
-  phases = Map.mapMaybe (listToMaybe . sortOnPath) grouped
+  phases = Map.mapMaybe selectPhaseDocument grouped
   structuralResultObservations =
     guardedStructuralResultObservations
 #if defined(VALIDATION_PHASE_CONTRACT_OBSERVATION_RESULT_COMPOSITION_BYPASS_MUTANT)
@@ -205,6 +205,18 @@ checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
       `seq` []
 #endif
   guardedProjectionVocabularyResultFindings = checkProjectionVocabulary phases trackerRows
+  semanticResultObservations =
+    guardedSemanticResultObservations
+#if defined(VALIDATION_PHASE_CONTRACT_SEMANTIC_OBSERVATION_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedSemanticResultObservations = concatMap checkObservations semanticDiagnostics
+  semanticResultFindings =
+    guardedSemanticResultFindings
+#if defined(VALIDATION_PHASE_CONTRACT_SEMANTIC_FINDING_COMPOSITION_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedSemanticResultFindings = concatMap checkFindings semanticDiagnostics
   duplicatePhaseFindings =
     guardedDuplicatePhaseFindings
 #if defined(VALIDATION_PHASE_CONTRACT_PHASE_DUPLICATE_FINDING_BYPASS_MUTANT)
@@ -276,11 +288,32 @@ checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
   semanticDiagnostics =
     if requireSemanticAudit
       then
-        [ phaseSemanticContractDiagnostic
-        , resourceProvisionContractDiagnostic
-        , phaseSemanticJoinDiagnostic supplied
+        [ retainPhaseSemanticContractDiagnostic phaseSemanticContractDiagnostic
+        , retainResourceProvisionContractDiagnostic resourceProvisionContractDiagnostic
+        , retainPhaseSemanticJoinDiagnostic (phaseSemanticJoinDiagnostic supplied)
         ]
       else []
+
+retainPhaseSemanticContractDiagnostic :: CheckResult -> CheckResult
+#if defined(VALIDATION_PHASE_CONTRACT_SEMANTIC_CONTRACT_ROUTE_DROP_MUTANT)
+retainPhaseSemanticContractDiagnostic result = result `seq` CheckResult "phase-semantic-contract-dropped" [] []
+#else
+retainPhaseSemanticContractDiagnostic = id
+#endif
+
+retainResourceProvisionContractDiagnostic :: CheckResult -> CheckResult
+#if defined(VALIDATION_PHASE_CONTRACT_RESOURCE_CONTRACT_ROUTE_DROP_MUTANT)
+retainResourceProvisionContractDiagnostic result = result `seq` CheckResult "resource-contract-dropped" [] []
+#else
+retainResourceProvisionContractDiagnostic = id
+#endif
+
+retainPhaseSemanticJoinDiagnostic :: CheckResult -> CheckResult
+#if defined(VALIDATION_PHASE_CONTRACT_SEMANTIC_JOIN_ROUTE_DROP_MUTANT)
+retainPhaseSemanticJoinDiagnostic result = result `seq` CheckResult "phase-semantic-join-dropped" [] []
+#else
+retainPhaseSemanticJoinDiagnostic = id
+#endif
 
 trackerFrameFindings :: TrackerFrame -> [Finding]
 trackerFrameFindings frame =
@@ -1405,7 +1438,7 @@ gateKeys =
   , "Legacy closure"
   , "Predecessor"
   , "Residue"
-  , "Human authority"
+  , "Promotion authority"
   ]
 
 checkSprintContracts :: Map Int PhaseDocument -> Bool -> PhaseDocument -> [Finding]
@@ -1416,6 +1449,11 @@ checkSprintContracts phases enforceCanonicalInventory phase =
   parsedOrdinals = map (parseSprintOrdinal (phaseNumber phase) . fst) sprintSections
   expectedOrdinals = [1 .. Map.findWithDefault 0 (phaseNumber phase) canonicalSprintCounts]
   inventoryFindings =
+    guardedInventoryFindings
+#if defined(VALIDATION_PHASE_CONTRACT_SPRINT_INVENTORY_FINDING_BYPASS_MUTANT)
+      `seq` []
+#endif
+  guardedInventoryFindings =
     [ finding
         "PLAN-SPRINT-INVENTORY"
         (phasePath phase)
@@ -1700,7 +1738,7 @@ sprintBlockerFindings phases phase heading body =
                   ( "[Phase "
                       <> showText predecessor
                       <> "](" <> Text.pack (takeFileName (phasePath predecessorPhase))
-                      <> ") human approval"
+                      <> ") reviewer approval"
                   )
            in sprintPredecessorBlockerValid value linkedEdge
     (Just sprintOrdinal, [value]) ->
@@ -2866,8 +2904,19 @@ sortOnPath = sortByPath
       <> [first]
       <> sortByPath [value | value <- rest, phasePath value > phasePath first]
 
+selectPhaseDocument :: [PhaseDocument] -> Maybe PhaseDocument
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_DUPLICATE_SELECTION_MUTANT)
+selectPhaseDocument = listToMaybe . reverse . sortOnPath
+#else
+selectPhaseDocument = listToMaybe . sortOnPath
+#endif
+
 renderPaths :: [PhaseDocument] -> Text
+#if defined(VALIDATION_PHASE_CONTRACT_PHASE_DUPLICATE_RENDER_ORDER_MUTANT)
+renderPaths = Text.intercalate ", " . map (Text.pack . phasePath) . reverse . sortOnPath
+#else
 renderPaths = Text.intercalate ", " . map (Text.pack . phasePath) . sortOnPath
+#endif
 
 formatPhase :: Int -> Text
 formatPhase number

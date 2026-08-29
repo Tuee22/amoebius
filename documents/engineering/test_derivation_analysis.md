@@ -42,7 +42,7 @@ counts as correct.
 The sound split is between two Haskell values:
 
 - the production declaration generates the set of surfaces requiring coverage; and
-- a separately authored and human-reviewed Haskell module states the expected relation over those surfaces.
+- a separately authored and reviewer-inspected Haskell module states the expected relation over those surfaces.
 
 Any Dhall, JSON, TSV, YAML, browser script, golden, expected diagnostic, or mutation body needed by a consumer
 is a serialization of those Haskell values. It is generated beneath `.build/**` and never committed.
@@ -83,7 +83,7 @@ The boundary has four rules:
 
 Independent means more than a separate filename. The expectation must not import the production decision,
 renderer, expected-output projection, or a shared constant that already contains the answer. Same-change
-authorship has no independent provenance until a human reviewer explicitly accepts the oracle boundary.
+authorship has no independent provenance until a reviewer explicitly accepts the oracle boundary.
 
 An expectation can reuse public domain types and stable identifiers. It cannot reuse the function under test,
 copy the generated output, or accept a checksum as semantic truth. Determinism and hashes are useful change
@@ -161,7 +161,7 @@ participants, and observer surfaces. Independent Haskell invariants state what m
 produces traces and provider readback beneath `.build/runs/**`.
 
 Live evidence adds correspondence; it does not repair a missing pure oracle. Hardware execution is prohibited
-until the hardware-free DSL promotion barrier and every predecessor have human approval. A cluster or image
+until the hardware-free DSL promotion barrier and every predecessor have reviewer approval. A cluster or image
 built from the DSL cannot be used to establish the earlier DSL's semantics.
 
 <a id="6-defects-found-in-the-current-corpus"></a>
@@ -170,7 +170,7 @@ built from the DSL cannot be used to establish the earlier DSL's semantics.
 This analysis does not maintain a live defect ledger. Typed Haskell declarations own every stable migration
 ID, numerical owner, observation, and closure predicate. The single
 [`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) file explains that
-active inventory to readers; editing or removing its rows cannot alter a verdict. Human review owns prose
+active inventory to readers; editing or removing its rows cannot alter a verdict. Reviewer inspection owns prose
 correspondence, and Git history is the only archive.
 
 The anti-patterns that must remain represented in gate sabotage suites are:
@@ -180,7 +180,7 @@ The anti-patterns that must remain represented in gate sabotage suites are:
 - a no-op or constant-success production implementation;
 - a missing or empty discovery set;
 - a skipped mutant or a mutant that changed no production source;
-- a same-change oracle without human independence review;
+- a same-change oracle without reviewer independence inspection;
 - a stale receipt or manually typed hash;
 - a tracked non-Haskell fixture hidden behind an allowed path or renamed extension; and
 - a live/container result used to promote an earlier hardware-free claim.
@@ -213,7 +213,7 @@ The normative testing doctrine adopts:
 - explicit uncovered obligations;
 - Haskell-authored browser interactions and mutation operators;
 - lazy `.build/**` serialization for every external language and fixture format; and
-- human review before any expectation is treated as independent.
+- reviewer inspection before any expectation is treated as independent.
 
 This adoption is a documentation decision only. It does not mark an implementation phase validated.
 
@@ -224,5 +224,5 @@ This adoption is a documentation decision only. It does not mark an implementati
 - [Generated Artifacts](./generated_artifacts_doctrine.md) — lazy materialization and no-commit rule
 - [Evidence Calculus](./evidence_calculus_doctrine.md) — claim-to-expectation strength
 - [Chaos and Failover](./chaos_failover_doctrine.md) — temporal expectations and live observers
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase contracts and human-controlled status
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase contracts and reviewer-controlled status
 - [Legacy Tracking](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) — sole reader-facing explanation of active typed Haskell divergence bindings

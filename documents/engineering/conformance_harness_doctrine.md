@@ -6,7 +6,7 @@
 > later infrastructure as a proxy.
 
 This document owns the pre-hardware spine and its promotion barrier. Register definitions belong to
-[`testing_doctrine.md`](./testing_doctrine.md); gate qualification and human promotion belong to the
+[`testing_doctrine.md`](./testing_doctrine.md); gate qualification and delegated promotion belong to the
 [development-plan gate standard](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md).
 
 <details>
@@ -62,7 +62,7 @@ The conformance harness uses two final registers and one supporting activity:
   supporting activity, never a phase's final register and never evidence of real-provider fidelity.
 
 Register 3 is deliberately absent. Live infrastructure is the residue tested by later phases only after the
-pre-hardware promotion barrier is human-approved.
+pre-hardware promotion barrier is reviewer-approved.
 
 A compiler or model checker invoked as a deterministic tool does not by itself make a run Register 2. What
 matters is the claim: a fake standing in for an effect boundary is Register 2; a pure semantic check remains
@@ -143,13 +143,13 @@ The barrier additionally requires:
 - a subject-change witness and intended red locus for every required mutant;
 - explicit `UNVERIFIED` live/runtime residue;
 - zero active legacy findings owned by Phases 0–49; and
-- an external human approval bound to the source, contract, harness, and raw observations.
+- an external reviewer approval bound to the source, contract, harness, and raw observations.
 
 The self-referential workflow representation is itself a subject of this barrier, not its authority. It must
 agree with the independently reviewed runner under clean and sabotaged cases, and neither representation may
 promote status.
 
-Phase 50 and all later work remain blocked until the human approval exists. A successful container build,
+Phase 50 and all later work remain blocked until the reviewer approval exists. A successful container build,
 registry push/pull, host setup, accelerator calculation, kind cluster, or live deployment cannot substitute
 for or backfill this barrier.
 
@@ -157,7 +157,7 @@ for or backfill this barrier.
 
 ## 6. Honesty: what the harness does and does not establish
 
-A human-approved barrier establishes that, for the reviewed corpus and source snapshot, the complete Haskell
+A reviewer-approved barrier establishes that, for the reviewed corpus and source snapshot, the complete Haskell
 pipeline produced the independently expected semantic values and boundary requests, caught its specified
 mutants, refused its sabotage cases, and left no observed residue.
 
@@ -167,7 +167,7 @@ It does not establish:
 - that a provider, cluster, network, storage system, browser, or accelerator behaves as modeled;
 - correctness beyond the reviewed oracle and corpus;
 - future repeatability or another architecture; or
-- that compiler, kernel, reviewer, or human approval key is uncompromised.
+- that compiler, kernel, reviewer, or reviewer approval key is uncompromised.
 
 Those layers remain explicit assumptions or `UNVERIFIED` and are discharged only by their later numerical
 owners. Hardware work adds fidelity evidence; it never upgrades an omitted language claim.

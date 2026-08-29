@@ -1,6 +1,6 @@
 module Main (main) where
 
--- Component diagnostics only. A successful process is not independent human
+-- Component diagnostics only. A successful process is not independent reviewer
 -- review, harness qualification, phase validation, or promotion evidence.
 
 import ApprovalOracle (runApprovalOracle)
@@ -30,11 +30,11 @@ main = do
   outcomes <- forM componentOracles runComponentOracle
   case [failure | Just failure <- outcomes] of
     [] ->
-      putStrLn "Component diagnostics completed; no validation or human-review claim is implied."
+      putStrLn "Component diagnostics completed; no validation or reviewer-inspection claim is implied."
     failures ->
       fail
         ( unlines
-            ( "Component diagnostics reported failures after every named oracle executed; no validation or human-review claim is implied."
+            ( "Component diagnostics reported failures after every named oracle executed; no validation or reviewer-inspection claim is implied."
                 : concatMap renderFailure failures
             )
         )

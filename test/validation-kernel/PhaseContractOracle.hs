@@ -2,6 +2,7 @@
 
 module PhaseContractOracle
   ( phaseContractExactCaseNames
+  , phaseContractValidCorpus
   , phaseContractSelectorMatrixRows
   , phaseContractSelectorNames
   , runPhaseContractExactCase
@@ -10,7 +11,7 @@ module PhaseContractOracle
   , runPhaseContractUnaffectedControl
   ) where
 
--- Component diagnostics only.  This oracle does not perform human review,
+-- Component diagnostics only.  This oracle does not perform reviewer inspection,
 -- qualify the phase-contract harness, validate a phase, or promote status.
 
 import Amoebius.Validation.PhaseContract (phaseContractDiagnostic)
@@ -590,6 +591,11 @@ phaseContractExactCaseNames =
   , "unresolved-marker-count-observation"
   ]
 
+-- Direct-source full-mode diagnostics reuse the same independently literal
+-- structural corpus without exposing any production parser constructor.
+phaseContractValidCorpus :: [(FilePath, Text)]
+phaseContractValidCorpus = validCorpus
+
 phaseContractSelectorIntegrityProblems :: [String]
 phaseContractSelectorIntegrityProblems =
   [ "phase-contract selector registry must contain exactly 134 distinct selectors"
@@ -937,7 +943,7 @@ runPhaseContractOracle =
             "gate row outside the one framed table is refused"
             "PLAN-GATE-TABLE-FRAME"
             (phasePath 7)
-            (replaceIn (phasePath 7) (gateRow "Human authority" "Promotion authority is human-only.") (gateRow "Human authority" "Promotion authority is human-only." <> "\n\n" <> gateRow "Decoy" "outside") validCorpus)
+            (replaceIn (phasePath 7) (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.") (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\n\n" <> gateRow "Decoy" "outside") validCorpus)
         , expectFinding
             "an arity-mutated gate row outside the exact frame is refused"
             "PLAN-GATE-TABLE-FRAME"
@@ -1193,7 +1199,7 @@ runPhaseContractOracle =
             "a first sprint cannot replace the canonical predecessor link with unlinked prose"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9)) (sprintFieldLine "Blocked by" "Phase 9 human approval") validCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" (phaseApprovalBlocker 9)) (sprintFieldLine "Blocked by" "Phase 9 reviewer approval") validCorpus)
         , expectFinding
             "the genesis sprint blocker uses the one exact raw reset value"
             "PLAN-SPRINT-BLOCKER"
@@ -1218,10 +1224,10 @@ runPhaseContractOracle =
             (phasePath 10)
             (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" ("Sprint 10.1; " <> phaseApprovalBlocker 9)) twoSprintCorpus)
         , expectFinding
-            "a downstream sprint cannot append candidate or human-review prose after its immediate sprint edge"
+            "a downstream sprint cannot append candidate or reviewer-inspection prose after its immediate sprint edge"
             "PLAN-SPRINT-BLOCKER"
             (phasePath 10)
-            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" "Sprint 10.1 candidate and human sprint review") twoSprintCorpus)
+            (replaceIn (phasePath 10) (sprintFieldLine "Blocked by" "Sprint 10.1") (sprintFieldLine "Blocked by" "Sprint 10.1 candidate and reviewer sprint inspection") twoSprintCorpus)
         , expectFinding
             "a first sprint cannot append another earlier phase after its immediate predecessor"
             "PLAN-SPRINT-BLOCKER"
@@ -1276,7 +1282,7 @@ dependencyLinkProseCorpus =
   replaceIn
     (phasePath 10)
     (summaryLine "Depends on" (dependencyValue 10))
-    (summaryLine "Depends on" (dependencyValue 10 <> " human approval"))
+    (summaryLine "Depends on" (dependencyValue 10 <> " reviewer approval"))
     validCorpus
 
 dependencyPathAliasCorpus :: [(FilePath, Text)]
@@ -1531,14 +1537,14 @@ gateThreeCellOutsideCorpus, gateMalformedOutsideCorpus, gateExtraDelimiterCorpus
 gateThreeCellOutsideCorpus =
   replaceIn
     (phasePath 7)
-    (gateRow "Human authority" "Promotion authority is human-only.")
-    (gateRow "Human authority" "Promotion authority is human-only." <> "\n\n| decoy | outside | extra |")
+    (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.")
+    (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\n\n| decoy | outside | extra |")
     validCorpus
 gateMalformedOutsideCorpus =
   replaceIn
     (phasePath 7)
-    (gateRow "Human authority" "Promotion authority is human-only.")
-    (gateRow "Human authority" "Promotion authority is human-only." <> "\n\n| malformed gate candidate")
+    (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.")
+    (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\n\n| malformed gate candidate")
     validCorpus
 gateExtraDelimiterCorpus =
   replaceIn
@@ -1629,8 +1635,8 @@ gateSemanticProseDecoyCorpus :: [(FilePath, Text)]
 gateSemanticProseDecoyCorpus =
   replaceIn
     (phasePath 10)
-    (gateRow "Human authority" "Promotion authority is human-only.")
-    (gateRow "Human authority" "This reader-facing explanation carries no executable policy value.")
+    (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.")
+    (gateRow "Promotion authority" "This reader-facing explanation carries no executable policy value.")
     ( replaceIn
         (phasePath 10)
         (gateRow "Residue" "Later layers remain UNVERIFIED.")
@@ -1774,7 +1780,7 @@ gateValues number =
   , "Active owner-phase rows must reach zero."
   , if number == 0 then "genesis" else "Phase " <> formatPhase (number - 1)
   , "Later layers remain UNVERIFIED."
-  , "Promotion authority is human-only."
+  , "Promotion authority requires an authorized reviewer."
   ]
 
 expectedGateKeys :: [Text]
@@ -1796,7 +1802,7 @@ expectedGateKeys =
   , "Legacy closure"
   , "Predecessor"
   , "Residue"
-  , "Human authority"
+  , "Promotion authority"
   ]
 
 expectedGateHeader :: Text
@@ -1860,7 +1866,7 @@ phaseApprovalBlocker predecessor =
     <> showText predecessor
     <> "](phase_"
     <> formatPhase predecessor
-    <> "_synthetic_capability.md) human approval"
+    <> "_synthetic_capability.md) reviewer approval"
 
 dependencyValue :: Int -> Text
 dependencyValue 0 = "genesis"
@@ -1922,7 +1928,7 @@ syntheticValidation :: Text
 syntheticValidation = "Independent positive, paired negative, changed-subject mutant, and residue observation."
 
 syntheticOracle :: Text
-syntheticOracle = "test/SyntheticOracle.hs, independent literal expectation, human reviewer."
+syntheticOracle = "test/SyntheticOracle.hs, independent literal expectation, authorized reviewer."
 
 syntheticDocs :: Text
 syntheticDocs = "documents/engineering/synthetic_doctrine.md"
@@ -2120,8 +2126,8 @@ phaseContractExactCaseProblems exactCase =
         (phasePath 7)
         ( replaceIn
             (phasePath 7)
-            (gateRow "Human authority" "Promotion authority is human-only.")
-            (gateRow "Human authority" "Promotion authority is human-only." <> "\ntrailing gate content")
+            (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.")
+            (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\ntrailing gate content")
             validCorpus
         )
     "gate-header-wildcard" ->
@@ -2135,7 +2141,7 @@ phaseContractExactCaseProblems exactCase =
         (phasePath 7)
         ( replaceIn
             (phasePath 7)
-            (gateRow "Human authority" "Promotion authority is human-only." <> "\n\n## Doctrine adopted")
+            (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\n\n## Doctrine adopted")
             "## Doctrine adopted"
             validCorpus
         )
@@ -2165,8 +2171,8 @@ phaseContractExactCaseProblems exactCase =
         (phasePath 7)
         ( replaceIn
             (phasePath 7)
-            (gateRow "Human authority" "Promotion authority is human-only.")
-            (gateRow "Human authority" "Promotion authority is human-only." <> "\n\n" <> gateRow "Decoy" "outside")
+            (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer.")
+            (gateRow "Promotion authority" "Promotion authority requires an authorized reviewer." <> "\n\n" <> gateRow "Decoy" "outside")
             validCorpus
         )
     "gate-result-composition" ->
@@ -3045,7 +3051,7 @@ mutantFixtureProblems =
     [ ( "dependency closed-link bypass"
       , phasePath 10
       , dependencyLinkProseCorpus
-      , [summaryLine "Depends on" (dependencyValue 10 <> " human approval")]
+      , [summaryLine "Depends on" (dependencyValue 10 <> " reviewer approval")]
       , []
       )
     , ( "fence-boundary bypass"

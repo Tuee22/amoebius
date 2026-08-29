@@ -8,7 +8,7 @@
 > **Read this if**: a validation has to be designed, or an existing claim has to be read for what it actually establishes.
 
 This document owns how amoebius validates itself: the registers of evidence, the test-topology contract, and
-the rule that a specification generates the coverage enumeration while a human authors the expectation. It
+the rule that a specification generates the coverage enumeration while an independent author owns the expectation. It
 does not own the honesty vocabulary those claims are phrased in, owned by
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 nor the phase gates that consume its registers, owned by
@@ -49,13 +49,13 @@ flowchart LR
   oracle["separately reviewed Haskell expectation"] --> gate
   observer["independent fresh observer"] --> gate
   gate --> evidence[("candidate .build run bundle")]
-  evidence --> review{{"human review"}}
+  evidence --> review{{"reviewer inspection"}}
   review --> ledger(("admitted ledger"))
   gate --> teardown["mandatory teardown"]
 ```
 
 *Orientation: a Haskell topology drives the run, but its expectation and observer remain independent and only
-human review can admit the candidate ledger. Teardown is owned by [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).*
+reviewer inspection can admit the candidate ledger. Teardown is owned by [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).*
 
 ## 1. A test is an amoebius spec
 
@@ -261,8 +261,9 @@ was independent. Git contains no ledger, receipt, enumeration, log, trace, repor
 or copied envelope. Placement and retention are owned by
 [repository_layout_doctrine.md §5](./repository_layout_doctrine.md#5-run-evidence-and-phase-status).
 
-Only the human user may move a sprint or phase to Done or Validated. Before doing so, the human reviews the
-recorded command against the phase contract, the subject/oracle separation, fresh observations, clean and
+Only an authorized reviewer may move a sprint or phase to Done or Validated. The reviewer may be the human
+user or a delegated agent. Before doing so, the reviewer inspects the recorded command against the phase
+contract, the subject/oracle separation, fresh observations, clean and
 mutated controls, predecessor chain, source-boundary audit, owned legacy closures, and the fact that the gate
 left the tracked tree unchanged. A script, LLM, bundle checker, digest, receipt, or generated document may
 produce candidate evidence but may never edit or authorize status.
@@ -272,7 +273,7 @@ to an enumerated surface lacking an independent Haskell expectation, a missing o
 cleanup, and an unavailable specialized substrate. A baseline `linux-cpu` route remains available on every
 hardware substrate, but it cannot stand in for an Apple or Linux-CUDA claim.
 
-After human acceptance, an admitted ledger may become typed evidence consumed by a product `PromotionGate`.
+After authorized reviewer acceptance, an admitted ledger may become typed evidence consumed by a product `PromotionGate`.
 That runtime release transition is distinct from development-plan status and cannot promote a sprint or
 phase. Production promotion requires the Runtime/chaos layer at `tested`; a design-only or
 Runtime-`UNVERIFIED` record cannot construct that transition. The promotion type and environment-strength mapping are owned by
@@ -576,7 +577,7 @@ identity; every bound surface yields a candidate layer observation and every unb
 an UNVERIFIED ledger row.*
 
 This introduces no new honesty vocabulary. UNVERIFIED already denotes an applicable move a run did not
-perform, already blocks promotion to prod, and must be checked through independent observation and human review
+perform, already blocks promotion to prod, and must be checked through independent observation and reviewer inspection
 ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)). The extension is to the *set* of things
 recordable as UNVERIFIED — from skipped moves to uncovered surfaces — so absent coverage becomes a claim the
 ledger states rather than a gap no artifact represents. Because the enumeration is regenerated at gate time
@@ -585,7 +586,7 @@ and never committed, a surface cannot be removed from the required set by editin
 What this forecloses: a hand-curated inventory of what a suite covers, which is the artifact that goes
 stale; and generated assertions, with them the appearance of coverage a generated suite produces at no
 evidential cost. Haskell expectations can still be weak or wrong; the gate's Haskell mutant operators and
-human independence review must expose that failure.
+reviewer independence inspection must expose that failure.
 
 The analysis this rule was drawn from — including the alternatives rejected, the recommendations not
 adopted, and the corpus defects repaired alongside it — is recorded in
@@ -620,7 +621,7 @@ To keep the SSoT boundaries crisp:
 
 This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates,
 and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This
-document states no current validation result. Every gate remains a candidate until the human user reviews its
+document states no current validation result. Every gate remains a candidate until an authorized reviewer inspects its
 independence, sabotage controls, predecessor chain, and owned legacy closures.
 
 ---

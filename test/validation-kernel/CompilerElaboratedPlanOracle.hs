@@ -5704,5 +5704,5 @@ finishDiagnostics name problems = do
   unless (null problems) (fail (unlines (name : problems)))
   putStrLn
     ( name
-        <> ": diagnostic refusal expectations matched; independent duplicate observation, component/dependency semantics, configuration/CPP branch closure, lexical/filesystem source-root identity, component source-path ownership, authenticated bytes, candidate qualification, and human promotion remain absent."
+        <> ": diagnostic refusal expectations matched; independent duplicate observation, component/dependency semantics, configuration/CPP branch closure, lexical/filesystem source-root identity, component source-path ownership, authenticated bytes, candidate qualification, and authorized promotion remain absent."
     )

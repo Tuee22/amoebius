@@ -44,7 +44,7 @@ the suite:
 
 - **Frozen behind the numbered plan.** Phase 0 is Active — NOT VALIDATED and Phases 1–95 are Blocked — NOT
   VALIDATED. No candidate may be promoted, implemented, or hardware-validated until Phase 95 and every
-  predecessor have satisfied redesigned independent acceptance and been promoted by the human maintainer.
+  predecessor have satisfied redesigned independent acceptance and been promoted by the authorized reviewer.
 - **Haskell source boundary.** A promoted candidate may add only Haskell behavioral source. Python beneath
   `pb/**` remains the sole bootstrap exception; every foreign-language artifact or serialized oracle is
   generated lazily from Haskell beneath `.build/**`.

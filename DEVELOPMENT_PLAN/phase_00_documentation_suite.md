@@ -1,7 +1,7 @@
 # Phase 0: Documentation, source policy, and validation trust root
 
 > **Purpose**: Establish one coherent documentation corpus, the closed Haskell source boundary, the qualified
-> Haskell gate kernel, and human-only validation promotion before any product phase opens.
+> Haskell gate kernel, and delegated-reviewer validation promotion before any product phase opens.
 > **Read this if**: Phase 0 is active, a cross-cutting rule changes, or later work needs to know what its trust
 > root must establish first.
 
@@ -31,7 +31,7 @@ trusting Python wrappers, tracked generated fixtures, self-reported evidence, or
 - [Sprint 0.3: Haskell source-closure classifier ⏸️](#sprint-03-haskell-source-closure-classifier-)
 - [Sprint 0.4: Haskell documentation and plan-contract checker ⏸️](#sprint-04-haskell-documentation-and-plan-contract-checker-)
 - [Sprint 0.5: Gate-kernel qualification and spoof corpus ⏸️](#sprint-05-gate-kernel-qualification-and-spoof-corpus-)
-- [Sprint 0.6: Candidate evidence and human approval boundary ⏸️](#sprint-06-candidate-evidence-and-human-approval-boundary-)
+- [Sprint 0.6: Candidate evidence and reviewer approval boundary ⏸️](#sprint-06-candidate-evidence-and-reviewer-approval-boundary-)
 - [Sprint 0.7: Review all numbered phase contracts ⏸️](#sprint-07-review-all-numbered-phase-contracts-)
 - [Sprint 0.8: Integrated Phase-0 candidate ⏸️](#sprint-08-integrated-phase-0-candidate-)
 - [Documentation Requirements](#documentation-requirements)
@@ -48,7 +48,7 @@ VALIDATED; and every sprint in every phase is NOT VALIDATED. Every prior pass, D
 attestation, hash, completion statement, or implementation result is permanently invalid as current
 validation evidence. Existing machinery is an **Observed footprint / Known partial**. This phase is active
 only for the documentation, tracked-source, and validation-authority reset. No later implementation or
-promotion gate may open until a qualified Phase-0 candidate is reviewed and the human validation authority
+promotion gate may open until a qualified Phase-0 candidate is reviewed and the authorized reviewer
 personally promotes this phase.
 
 ---
@@ -59,7 +59,7 @@ Phase 0 makes the repository say one thing in one place and installs the mechani
 drift. The reset fixes these target decisions without claiming they are validated: behavioural source is Haskell; `pb/**` is the only non-Haskell
 source exception and only bootstraps/execs Haskell; every reproducible non-Haskell artifact is generated lazily
 beneath `.build/**`; the in-cluster OCI service is exclusively Distribution `registry:2`; one
-active legacy register replaces every archive; and every phase is NOT VALIDATED until human promotion in
+active legacy register replaces every archive; and every phase is NOT VALIDATED until delegated promotion in
 strict numerical order.
 
 An **Observed footprint / Known partial** of the target Haskell validation kernel now exists beneath
@@ -97,10 +97,10 @@ repair. This is neither qualification nor candidate evidence. In each earlier se
 that widened the compiled Registry-provider universe, redirected the compiled owner map, or admitted `pb` as
 transport before Phase 50, the runner executed all nine named component oracles; only `PolicyContractOracle`
 failed. The other eight oracles stayed green. Those observations establish only
-compilation and component behaviour; they are not harness qualification, independent human review, clean-room
+compilation and component behaviour; they are not harness qualification, independent reviewer inspection, clean-room
 observation, a Phase-0 candidate, or validation. The dispatcher intentionally refuses a
-candidate because the fixed sabotage corpus has not been executed against its exact build, independent human
-review and key custody are absent, no external clean-room observer is connected, and the evidence writer is
+candidate because the fixed sabotage corpus has not been executed against its exact build, independent reviewer
+inspection and key custody are absent, no external clean-room observer is connected, and the evidence writer is
 not integrated. Its candidate schema also lacks closed typed command, toolchain, substrate, run-identity, and
 cleanup fields, and no reviewed binding connects the repository's Git object-format identity to the required
 SHA-256 evidence provenance. The current worktree is also dirty, so clean source-snapshot acquisition must refuse. In the
@@ -136,28 +136,28 @@ join input. It splits if product or live-infrastructure behaviour is required.
 ## Gate integrity
 
 **Contract review**: REWRITTEN — NOT VALIDATED; an implementation footprint exists, but qualification,
-clean-room observation, evidence integration, independent human review, and key custody remain open.
+clean-room observation, evidence integration, independent reviewer inspection, and key custody remain open.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The governed corpus has one structural owner/link surface; all current statuses are explicitly NOT VALIDATED; the executable cross-cutting decisions live in one typed Haskell `PolicyContract` awaiting independent human review; every tracked path is classified exactly once; and every present source-boundary violation joins in both directions to one strictly-later typed Haskell legacy binding. No Phase-0-owned source-policy or validation-integrity violation may remain, and the qualified Haskell kernel must refuse every specified spoof. The Markdown register is reader-facing only: its rows, cells, IDs, owners, predicates, and counts cannot affect the join or closure verdict. Natural-language correspondence is a human-review obligation, never a machine-parsed verdict. Phase 0 does not claim that later-owned source migrations, DSL semantics, or runtime behaviour are complete. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The governed corpus has one structural owner/link surface; all current statuses are explicitly NOT VALIDATED; the executable cross-cutting decisions live in one typed Haskell `PolicyContract` awaiting independent reviewer inspection; every tracked path is classified exactly once; and every present source-boundary violation joins in both directions to one strictly-later typed Haskell legacy binding. No Phase-0-owned source-policy or validation-integrity violation may remain, and the qualified Haskell kernel must refuse every specified spoof. The Markdown register is reader-facing only: its rows, cells, IDs, owners, predicates, and counts cannot affect the join or closure verdict. Natural-language correspondence is a reviewer-inspection obligation, never a machine-parsed verdict. Phase 0 does not claim that later-owned source migrations, DSL semantics, or runtime behaviour are complete. |
 | `Subject` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Candidate-facing production entry points beneath `src/validation-kernel/Amoebius/Validation/**`: the future externally anchored immutable-bundle verifier that alone may construct `AcquiredSourceSnapshot`; `Dispatch.checkAcquiredPhaseZeroSnapshot`; `SourceClosure.sourceClosureCheckAcquired`; `CompilerSourceGraph.analyzeAcquiredCompilerSourceGraph`; `Legacy.legacyCheckAcquired`; `PolicyContract.checkPolicyContract`; `Documentation.checkCorpus`; `PhaseContract.checkPhaseContracts`; the future qualification executor rather than the caller-authored `Gate.checkQualificationReportDiagnostic` consistency seam; the integrated evidence writer; and `Approval.verifyApproval`. Raw `SourceSnapshot`, `classifySnapshot`, `legacyCheck`, and caller-selected Git entry points remain permanently diagnostic and are not candidate subjects. The typed contract feeds dispatch bounds, status syntax, owner-anchor checks, structural register-path/archive checks, source classification, Phase-49 source closure, phase ordering, and promotion authority. `Amoebius.Validation.Legacy` must own a closed 25-constructor legacy-ID universe, total owner/lifecycle/required-analyzer bindings, and total dispatch that returns a typed unavailable state whenever the selected analyzer is absent. Every current disposition is Active: unavailable evidence refuses at or beyond its owner and is explicit later-owned debt before then. A Retired constructor is inadmissible until the owning analyzer implements and qualifies the required reintroduction negative. Sprint 0.2 owns the inventory and delegation seam only; observation/closure analyzers and their domain negatives belong to their owning sprints. Fields for later unimplemented behavior remain typed requirements rather than claims that a consumer exists. This footprint is unqualified; evidence and approval remain refusal-only; all current `pb/**` is Phase-0 debt, not a validation subject. |
 | `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Future public target: `pb validate phase 00`; it is not currently an admissible validation transport. The Phase-0 candidate must build and invoke the exact absolute source-bound Haskell executable directly from an authenticated, network-independent toolchain input. Phase 50 alone may validate the already source-bounded `pb` ensure/build/unchanged-argv/exec runtime handoff. The Haskell binary owns discovery, observations, schema checks, and the candidate verdict. |
-| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Separate component modules exist under `test/validation-kernel/`, including `PolicyContractOracle.hs`. It separately restates every closed enum universe, the exact selected values and owner map, canonical bytes and digest, and code/subject/detail expectations for focused negatives. The component runner executes every named oracle before aggregating failure, but neither independent authorship nor custody, harness qualification, or human prose-correspondence review is established. Reviewer assignment and custody remain absent and block validation. |
-| `Positive controls` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The complete governed path/link/metadata graph and tracked source snapshot, plus structural parser corpora that are explicitly incapable of becoming candidates. Production and oracle modules separately state every closed policy universe, the typed provider choice, decision-owner map, canonical policy bytes, source partition, and frozen later-owned source fingerprints. No independent human review is claimed. A human must separately compare the prose diff with the typed `PolicyContract`. |
-| `Paired negatives` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Minimally different input pairs cover missing or unexpected governed paths, malformed metadata, broken links, an omitted legacy-ID inventory projection, duplicate stable-ID encoding, missing or wrong owner/required-analyzer bindings, a skipped analyzer route, accepted unavailable evidence, a non-canonical parser alias, missing required reintroduction-case identity, changed paths inside an open source family, non-Haskell behavioural source, disguised executables, widened `pb` behavior, missing `NOT VALIDATED`, malformed gate rows, forward dependencies, empty discovery, and generated output in an authored root. Acquisition pairs cover an unknown or self-selected key, altered signature or signed field, absent/stale/wrong/replayed challenge, noncanonical/duplicate/reordered/empty bundle entries, byte/Git-OID/blob-SHA-256/snapshot-identity mismatch, wrong observer/tool-closure identity, mutable or sequential custody substituted for an externally frozen bundle, and source/compiler/build identity swaps. Policy value negatives remove one `pb` operation, redirect or omit one owner, select or rename the eliminated archive path, swap two phase roles, or admit hardware at Phase 51; each pins finding code, subject, and a distinguishing detail. Editing any legacy-register row, ID spelling, owner cell, predicate string, or count must leave the legacy binding/closure verdict unchanged; human review at the integrated phase gate must still report a prose-correspondence defect. The Registry provider has no runtime alternate-input constructor; widening that closed production type is a changed-subject mutant, not a fabricated paired input. |
+| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Separate component modules exist under `test/validation-kernel/`, including `PolicyContractOracle.hs`. It separately restates every closed enum universe, the exact selected values and owner map, canonical bytes and digest, and code/subject/detail expectations for focused negatives. The component runner executes every named oracle before aggregating failure, but neither independent authorship nor custody, harness qualification, or reviewer prose-correspondence review is established. Reviewer assignment and custody remain absent and block validation. |
+| `Positive controls` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The complete governed path/link/metadata graph and tracked source snapshot, plus structural parser corpora that are explicitly incapable of becoming candidates. Production and oracle modules separately state every closed policy universe, the typed provider choice, decision-owner map, canonical policy bytes, source partition, and frozen later-owned source fingerprints. No independent reviewer inspection is claimed. An authorized reviewer must separately compare the prose diff with the typed `PolicyContract`. |
+| `Paired negatives` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Minimally different input pairs cover missing or unexpected governed paths, malformed metadata, broken links, an omitted legacy-ID inventory projection, duplicate stable-ID encoding, missing or wrong owner/required-analyzer bindings, a skipped analyzer route, accepted unavailable evidence, a non-canonical parser alias, missing required reintroduction-case identity, changed paths inside an open source family, non-Haskell behavioural source, disguised executables, widened `pb` behavior, missing `NOT VALIDATED`, malformed gate rows, forward dependencies, empty discovery, and generated output in an authored root. Acquisition pairs cover an unknown or self-selected key, altered signature or signed field, absent/stale/wrong/replayed challenge, noncanonical/duplicate/reordered/empty bundle entries, byte/Git-OID/blob-SHA-256/snapshot-identity mismatch, wrong observer/tool-closure identity, mutable or sequential custody substituted for an externally frozen bundle, and source/compiler/build identity swaps. Policy value negatives remove one `pb` operation, redirect or omit one owner, select or rename the eliminated archive path, swap two phase roles, or admit hardware at Phase 51; each pins finding code, subject, and a distinguishing detail. Editing any legacy-register row, ID spelling, owner cell, predicate string, or count must leave the legacy binding/closure verdict unchanged; reviewer inspection at the integrated phase gate must still report a prose-correspondence defect. The Registry provider has no runtime alternate-input constructor; widening that closed production type is a changed-subject mutant, not a fabricated paired input. |
 | `Mutants` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Required changed-production-subject operators weaken source classification, skip one governed document, accept an empty gate table, treat evidence as approval, ignore one compiled Haskell legacy binding, accept a second registry, or bypass exactly one acquisition signature, fresh-challenge, immutable-bundle digest, observer/tool identity, or frozen-custody check. Each records the applied Haskell-source change and must redden its named oracle row for the named reason. A separate oracle that intentionally asserts composition through the mutated seam may also turn red; every unrelated control must stay green. A Markdown register edit is a prose-correspondence case, never this mutation operator. |
 | `Discovery` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The Haskell kernel enumerates all tracked paths and all governed Markdown at run time and joins each in both directions to independently derived expectations. Zero files, a missing root, an unclassified path, a duplicate path, or an unexpected governed file refuses the run. |
-| `Challenge` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The policy/document/source classification claim is pure and uses run-local sabotage selection rather than pretending a nonce strengthens semantics. Input custody separately requires an external fresh unpredictable challenge, a durable replay identity, and a signed immutable source bundle issued only after that challenge; missing, stale, wrong, or replayed custody evidence refuses acquisition. The human reviewer must approve both mechanisms. |
+| `Challenge` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The policy/document/source classification claim is pure and uses run-local sabotage selection rather than pretending a nonce strengthens semantics. Input custody separately requires an external fresh unpredictable challenge, a durable replay identity, and a signed immutable source bundle issued only after that challenge; missing, stale, wrong, or replayed custody evidence refuses acquisition. The reviewer must approve both mechanisms. |
 | `Observer` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Component oracles separately inspect the raw snapshot bytes, modes, shebangs, path inventory, metadata fields, headings, links, anchors, dependencies, status fields, and fixed gate-table shape made available at their seams rather than accepting a compliance summary emitted by the classifier. Candidate acquisition additionally requires an external, pre-anchored observer to originate or freeze an immutable source bundle and sign its complete canonical envelope; sequential mutable-worktree reads and a candidate-selected observer/key are inadmissible. Haskell independently recomputes every Git object ID, blob SHA-256, manifest identity, and signature before constructing the opaque token. Independent custody is presently absent. The checks never interpret natural-language policy as a verdict, and a missing or partial seam read fails closed. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Source-policy bypass probes cover extensionless files, misleading extensions, executable bits, shebangs, symlinks, ignored inputs, generated copies, widened `pb` behavior, and a policy-looking prose decoy that must have no effect on the typed policy or legacy semantic verdict. Acquisition bypass probes cover malicious-tool/root substitution, self-generated or same-change keys, signature and bundle-field alteration, challenge replay, mutable-custody substitution, HEAD/index/worktree ABA, observer/tool replacement, raw `SourceSnapshot` record updates, acquired-wrapper construction/rewrapping attempts, and source/compiler/build identity swaps. Documentation diagnostics may still react to document structure, filename stems, or the forbidden archive basename. Only the typed Haskell contract and structured source/config observations govern behavior. Acquisition authority may mint input custody only and remains distinct from human promotion authority. Human approval verification rejects absent, automation-authored, wrong-key, wrong-source, stale-contract, and replayed receipts. |
+| `Authority/bypass` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Source-policy bypass probes cover extensionless files, misleading extensions, executable bits, shebangs, symlinks, ignored inputs, generated copies, widened `pb` behavior, and a policy-looking prose decoy that must have no effect on the typed policy or legacy semantic verdict. Acquisition bypass probes cover malicious-tool/root substitution, self-generated or same-change keys, signature and bundle-field alteration, challenge replay, mutable-custody substitution, HEAD/index/worktree ABA, observer/tool replacement, raw `SourceSnapshot` record updates, acquired-wrapper construction/rewrapping attempts, and source/compiler/build identity swaps. Documentation diagnostics may still react to document structure, filename stems, or the forbidden archive basename. Only the typed Haskell contract and structured source/config observations govern behavior. Acquisition authority may mint input custody only and remains distinct from delegated promotion authority. Reviewer approval verification rejects absent, automation-authored, wrong-key, wrong-source, stale-contract, and replayed receipts. |
 | `Freshness` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The candidate uses a newly challenged externally frozen immutable source bundle and a fresh run root with all generated/state roots absent. The signed envelope binds its durable replay identity, complete source manifest, observer/tool closure, custody method, and exact snapshot identity; Haskell rejects replay or recomputation mismatch. Prior evidence, cached discovery, ignored inputs, copied status, and mutable Git/worktree rereads are unusable. Source and contract digests are provenance only. |
 | `Qualification` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Before the clean run, the same Haskell harness must reject constant success, no-op subject, wrong output, empty discovery, missing subject/oracle, skipped/no-op mutant, wrong-locus failure, stale evidence, self-observer, authority bypass, residue, and smuggled generated/legacy input. |
 | `Cleanroom` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Run from the tracked snapshot with `.build/**`, `.data/**`, `.test_data/**`, source-adjacent caches, and condemned legacy copies absent. All compiler output, synthetic corpora, observations, and raw candidate evidence are generated beneath one `.build/runs/phase-00/**` run root; the tracked tree remains unchanged. The current dirty worktree is ineligible. |
-| `Legacy closure` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Sprint 0.2 separately pins the closed 25-ID Haskell inventory, total owner/lifecycle/required-analyzer bindings, and total fail-closed dispatch; independent reviewer custody remains absent. Every canonical disposition is currently Active, and this sprint does not make an owner-domain query zero or claim an executed reintroduction guard. The owning sprint supplies each typed observation/closure analyzer and domain reintroduction negative; an absent analyzer, missing negative, or open due query refuses. Sprint 0.8 is the first point at which all Phase-0-owned queries—`LTD-SRC-000`, `LTD-SRC-008`, and `LTD-VAL-001` through `LTD-VAL-004`—must jointly be zero, alongside the complete source partition, frozen later-owned source fingerprints, and an exact non-empty static `PbBootstrapGrammar` AST/import/resolved-call/control-flow/potential-effect proof. Runtime effect, executable-identity, unchanged-argv, and exec-replacement evidence is explicitly excluded and remains Phase-50 residue. An Active zero is accepted only at the exact owning-phase candidate; it refuses before that owner as stale/missing debt and after it as a missing promoted transition. Human promotion precedes the successor-phase source transition to Retired, and the qualified negative remains compiled. The structural seam requires one canonical regular non-executable UTF-8 register, no second exact canonical basename, and no exact forbidden archive basename; it does not infer arbitrary semantic aliases. The general documentation checker may enforce ordinary structure plus its basename-substring cardinality and forbidden-archive-basename content diagnostics. Neither may interpret Markdown row content as a binding or verdict. Human review owns correspondence at the integrated phase gate. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `genesis`; there is no prior numbered phase. The human approval trust root predates and is outside the candidate. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `UNVERIFIED`: qualification of all three `PolicyContract` changed-subject mutants and human prose-correspondence review; the dispatcher omission matrix and composition-bypass mutant; complete document-shape enforcement assigned to Sprint 0.4; the `LTD-SRC-008` Python-boundary closure; a real multi-package/multi-component compiler parser/consumer/effect graph that detects disguised behavioral content in otherwise admitted non-source files; changed-subject qualification and external clean-room observation of the implemented descriptor-relative no-follow authored-root walk, independent Git-blob hashing, concealment, byte/mode, authored-root, and final index-binding checks; the externally anchored signed immutable-source-bundle verifier and its challenge/signature/digest/tool/custody mutants; all product/DSL/runtime semantics; semantic phase-contract joins; every owner-sprint analyzer and domain reintroduction negative behind the total legacy dispatcher; execution of the fixed qualification corpus against the exact integrated harness; independent reviewer and separate acquisition/promotion key custody; authenticated toolchain acquisition; candidate-evidence integration; a closed typed evidence schema for exact command, toolchain, substrate/lane/architecture, run identity, cleanup, and the signed status-only projection; a reviewed binding between Git object-format identity and SHA-256 evidence provenance; all 1,728 typed semantic slots remain exact-prefix `UNRESOLVED` gaps even where retained prose records prior intent; 385 unresolved resource fields; unresolved sprint field meanings despite structurally complete envelopes; absent runtime predecessor evidence where applicable; the sentence-budget backlog; external approval operation; and every tracked-source migration owned by a later phase. |
-| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only`: automation and LLMs may report a candidate but may not create approval, mark a sprint/phase Done, or describe approval as already decided. |
+| `Legacy closure` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Sprint 0.2 separately pins the closed 25-ID Haskell inventory, total owner/lifecycle/required-analyzer bindings, and total fail-closed dispatch; independent reviewer custody remains absent. Every canonical disposition is currently Active, and this sprint does not make an owner-domain query zero or claim an executed reintroduction guard. The owning sprint supplies each typed observation/closure analyzer and domain reintroduction negative; an absent analyzer, missing negative, or open due query refuses. Sprint 0.8 is the first point at which all Phase-0-owned queries—`LTD-SRC-000`, `LTD-SRC-008`, and `LTD-VAL-001` through `LTD-VAL-004`—must jointly be zero, alongside the complete source partition, frozen later-owned source fingerprints, and an exact non-empty static `PbBootstrapGrammar` AST/import/resolved-call/control-flow/potential-effect proof. Runtime effect, executable-identity, unchanged-argv, and exec-replacement evidence is explicitly excluded and remains Phase-50 residue. An Active zero is accepted only at the exact owning-phase candidate; it refuses before that owner as stale/missing debt and after it as a missing promoted transition. Delegated promotion precedes the successor-phase source transition to Retired, and the qualified negative remains compiled. The structural seam requires one canonical regular non-executable UTF-8 register, no second exact canonical basename, and no exact forbidden archive basename; it does not infer arbitrary semantic aliases. The general documentation checker may enforce ordinary structure plus its basename-substring cardinality and forbidden-archive-basename content diagnostics. Neither may interpret Markdown row content as a binding or verdict. Reviewer inspection owns correspondence at the integrated phase gate. |
+| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `genesis`; there is no prior numbered phase. The reviewer approval trust root predates and is outside the candidate. |
+| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `UNVERIFIED`: qualification of all three `PolicyContract` changed-subject mutants and reviewer prose-correspondence review; the dispatcher omission matrix and composition-bypass mutant; complete document-shape enforcement assigned to Sprint 0.4; the `LTD-SRC-008` Python-boundary closure; a real multi-package/multi-component compiler parser/consumer/effect graph that detects disguised behavioral content in otherwise admitted non-source files; changed-subject qualification and external clean-room observation of the implemented descriptor-relative no-follow authored-root walk, independent Git-blob hashing, concealment, byte/mode, authored-root, and final index-binding checks; the externally anchored signed immutable-source-bundle verifier and its challenge/signature/digest/tool/custody mutants; all product/DSL/runtime semantics; semantic phase-contract joins; every owner-sprint analyzer and domain reintroduction negative behind the total legacy dispatcher; execution of the fixed qualification corpus against the exact integrated harness; independent reviewer and separate acquisition/promotion key custody; authenticated toolchain acquisition; candidate-evidence integration; a closed typed evidence schema for exact command, toolchain, substrate/lane/architecture, run identity, cleanup, and the signed status-only projection; a reviewed binding between Git object-format identity and SHA-256 evidence provenance; all 1,728 typed semantic slots remain exact-prefix `UNRESOLVED` gaps even where retained prose records prior intent; 385 unresolved resource fields; unresolved sprint field meanings despite structurally complete envelopes; absent runtime predecessor evidence where applicable; the sentence-budget backlog; external approval operation; and every tracked-source migration owned by a later phase. |
+| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer`: automation and LLMs may report a candidate but may not create approval, mark a sprint/phase Done, or describe approval as already decided. |
 
 ## Doctrine adopted
 
@@ -166,7 +166,7 @@ clean-room observation, evidence integration, independent human review, and key 
 - [`repository_layout_doctrine.md` §2 — complete repository structure](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure) — the closed
   Haskell source tree, bounded `pb/**`, and lazy `.build/**` generation.
 - [`testing_spoof_resistance.md` §12 — spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) — qualification,
-  changed-subject witnesses, external observation, residue, and human authorization.
+  changed-subject witnesses, external observation, residue, and reviewer authorization.
 - [`conformance_harness_doctrine.md` §5 — the pre-hardware promotion barrier](../documents/engineering/conformance_harness_doctrine.md#5-the-pre-hardware-promotion-barrier) — the later
   no-hardware DSL barrier Phase 0 makes possible but does not claim.
 - [`service_capability_doctrine.md` §3 — canonical providers](../documents/engineering/service_capability_doctrine.md#3-canonical-providers-extension-is-capability-specific) — Distribution
@@ -181,7 +181,7 @@ clean-room observation, evidence integration, independent human review, and key 
 **Status**: Active — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/PolicyContract.hs`, `AGENTS.md`, `CLAUDE.md`, `README.md`, `documents/**/*.md`, and `DEVELOPMENT_PLAN/**/*.md`
 **Blocked by**: `genesis`
-**Independent Validation**: Separately restated closed constructor universes, typed values, bytes, digest, and owner headings pin the component positive control. Constructible negatives cover `pb`, status reset, owners, register/archive, and ordering at code, subject, and detail. In full aggregate runs, the Registry-universe, owner-map, and `pb`-transport production mutants each red only `PolicyContractOracle` while all eight unrelated named oracles execute green. Prose correspondence remains human residue.
+**Independent Validation**: Separately restated closed constructor universes, typed values, bytes, digest, and owner headings pin the component positive control. Constructible negatives cover `pb`, status reset, owners, register/archive, and ordering at code, subject, and detail. In full aggregate runs, the Registry-universe, owner-map, and `pb`-transport production mutants each red only `PolicyContractOracle` while all eight unrelated named oracles execute green. Prose correspondence remains reviewer-inspection residue.
 **Oracle**: `test/validation-kernel/PolicyContractOracle.hs`; integrated component diagnostic, not qualified-harness evidence or validation. Its independent review is consolidated into the Phase-0 gate; no sprint-level confirmation is requested.
 **Legacy IDs**: none — zero-query policy-surface sprint; `LTD-VAL-002` through `LTD-VAL-004` remain owned by their later Phase-0 seams
 **Docs to update**: all governed documentation owners touched by the reset
@@ -190,7 +190,7 @@ clean-room observation, evidence integration, independent human review, and key 
 
 Make the Haskell-only source boundary, `pb` exception, lazy generation, sole `registry:2` provider, separately
 pinned/preloaded Registry-image placement, single active legacy register, validation reset, strict numerical
-order, pre-hardware barrier, and human-only promotion agree everywhere.
+order, pre-hardware barrier, and delegated-reviewer promotion agree everywhere.
 
 ### Deliverables
 
@@ -202,7 +202,7 @@ order, pre-hardware barrier, and human-only promotion agree everywhere.
 - Zero governed prose links or references treating the eliminated archive as a document; its exact path exists
   only as a typed forbidden target and in rejection diagnostics/negatives.
 - One closed Haskell registry-provider constructor selecting Distribution `registry:2`, plus a distinct
-  placement decision for its separately pinned/preloaded bootstrap image; human review confirms both exact
+  placement decision for its separately pinned/preloaded bootstrap image; reviewer inspection confirms both exact
   doctrine owners and that the service-capability prose rejects every alternate provider.
 - Phase 0 Active — NOT VALIDATED; Phases 1–95 Blocked — NOT VALIDATED.
 
@@ -220,7 +220,7 @@ cabal --offline --store-dir=.build/cabal-store test validation-kernel-component 
 cabal --offline --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-policy-pb-transport-mutant -fvalidation-policy-pb-transport-mutant --test-show-details=direct
 ```
 
-During the consolidated Phase-0 gate review, the human reviewer compares every typed value and owner anchor with
+During the consolidated Phase-0 gate review, the reviewer compares every typed value and owner anchor with
 the prose diff and confirms that no Markdown keyword or machine-oriented projection can affect a behavioral
 verdict. This is not a Sprint-0.1 confirmation point. Full corpus-shape validation remains owned by Sprint 0.4,
 so Sprint 0.1 does not depend on a later sprint.
@@ -229,9 +229,9 @@ so Sprint 0.1 does not depend on a later sprint.
 
 The unmutated, Registry-universe-mutant, owner-map-mutant, and `pb`-transport-mutant component diagnostics are
 recorded and reproduce on 2026-08-23. They establish implementation readiness for Sprint 0.2 but are not the
-qualified parent harness: applied-change and changed-binary witnesses remain Sprint-0.5 residue. Human
-prose-correspondence review of every typed value and owner heading stays phase-gate residue. Sprint 0.1 remains
-NOT VALIDATED until the qualified parent gate retains this seam and the human authority promotes it.
+qualified parent harness: applied-change and changed-binary witnesses remain Sprint-0.5 residue. Authorized reviewer
+prose-correspondence inspection of every typed value and owner heading stays phase-gate residue. Sprint 0.1 remains
+NOT VALIDATED until the qualified parent gate retains this seam and the promotion authority promotes it.
 All Phase-0 oracle fields now state the same consolidated-review boundary: component diagnostics make the next
 sprint implementation-ready, while one Phase-0 gate review covers the completed seam set. No intermediate
 sprint confirmation is a blocker or status transition. This wording repair is not validation.
@@ -272,7 +272,7 @@ resolution failed, and the source hashes remained stable. All fifty-five actual-
 fail at the intended missing export, the public-facade control still passes, and all nine production consumers
 plus the independently raw-owned Documentation oracle compile against the repaired boundary. A final
 atomic/opacity audit found no omitted production selector or reopened representation. Qualification,
-independent custody, human prose-correspondence review, and the integrated Phase-0 candidate remain open.
+independent custody, reviewer prose-correspondence review, and the integrated Phase-0 candidate remain open.
 These are component diagnostics only and do not validate or promote Sprint 0.1.
 
 ## Sprint 0.2: One active legacy register ⏸️
@@ -304,7 +304,7 @@ creating a second historical register.
 - A required typed Haskell reintroduction-case identity for every ID. The owning analyzer must implement and
   qualify that negative before retirement; Sprint 0.2 does not claim executable guard coverage.
 - Separately stated Haskell expectations and changed-production mutants for the inventory/dispatch surface, plus a
-  human correspondence-review obligation. Owner-domain analyzers and their semantic negatives remain work of
+  reviewer correspondence-review obligation. Owner-domain analyzers and their semantic negatives remain work of
   the owning sprints.
 
 ### Validation
@@ -324,9 +324,9 @@ for dispatch coverage: all 25 constructors must reach their separately expected 
 unavailable states. Changing, adding, deleting, or duplicating a Markdown row, ID, owner cell,
 predicate-shaped string, or count leaves legacy binding and closure outcomes unchanged. Documentation findings
 may still change because that checker applies ordinary document rules, a basename-substring cardinality check,
-and a forbidden-archive-basename content check. The consolidated Phase-0 human review separately rejects correspondence mismatch.
+and a forbidden-archive-basename content check. The consolidated Phase-0 reviewer inspection separately rejects correspondence mismatch.
 These are component diagnostics, not full harness qualification, owner-domain closure, phase validation, or
-per-sprint human acceptance.
+per-sprint reviewer acceptance.
 
 ```text
 cabal --offline --store-dir=.build/cabal-store test validation-kernel-component --builddir=.build/dist-newstyle/phase-00-legacy-diagnostic --test-show-details=direct
@@ -355,7 +355,7 @@ cabal --offline --store-dir=.build/cabal-store test validation-kernel-component 
 ### Remaining Work
 
 Sprint 0.3 corrected the Active-zero lifecycle boundary after finding that the prior evaluator made an owning
-phase candidate impossible: it demanded the post-promotion transition before the candidate that a human could
+phase candidate impossible: it demanded the post-promotion transition before the candidate that an authorized reviewer could
 promote. The correction accepts zero only at the exact owner, rejects it before and after that point for distinct
 reasons, and expands the separately stated oracle accordingly. An adversarial Sprint-0.3 review then found that
 the exported model evaluator still let a caller fabricate an analyzer-tagged zero and that the source-family
@@ -364,7 +364,7 @@ from opaque snapshot/analyzer-bound candidate evidence, adds a total nine-family
 route-omission and analyzer-zero-substitution mutants. This invalidates the earlier clean-plus-thirteen byte and
 execution observations; the replacement clean-plus-twenty direct diagnostic matrix now reds every named mutant,
 but has no applied source/binary witness or qualified parent harness. Sprint 0.2 remains Blocked — NOT VALIDATED
-until the integrated qualified parent candidate receives human review and promotion. External reviewer
+until the integrated qualified parent candidate receives reviewer inspection and promotion. External reviewer
 authorship/custody, parent-harness qualification, and correspondence review remain Phase-0 gate residue.
 Source-family measurement, classification, and baselines remain Sprint 0.3 work.
 Owning sprints then implement the actual observation/closure analyzers and execute their domain reintroduction
@@ -396,7 +396,7 @@ package boundary, all 36 one-symbol/Internal-module clients failed for the exact
 reason and the refusal-only public control compiled; its result table has SHA-256
 `8f18d163465be173511b9be41eed4db830fba86c088521a3e99e86d49dcbac82`. This establishes component
 implementation readiness for Sprint 0.3, not validation: parent-harness qualification, authenticated inputs,
-external custody, human correspondence review, and the integrated Phase-0 candidate remain open. Sprint 0.2
+external custody, reviewer correspondence inspection, and the integrated Phase-0 candidate remain open. Sprint 0.2
 therefore remains Blocked — NOT VALIDATED.
 
 ## Sprint 0.3: Haskell source-closure classifier ⏸️
@@ -447,7 +447,7 @@ descriptor-relative `O_NOFOLLOW` walk pins directory device/inode identity, sees
 material, and refuses symlinks, special files, and replacement. Fixed vectors and generated-repository paired
 cases are green as component diagnostics on 2026-08-23; the object-format-boundary changed-subject mutant is red
 at its exact oracle. These observations have not qualified the parent harness, authenticated the Git/toolchain
-input, or received independent human review.
+input, or received independent reviewer inspection.
 
 A 2026-08-23 acquisition-boundary audit confirmed that the ordinary build cannot mint
 `AcquiredSourceSnapshot`: caller-selected Git always stops with separate authentication and atomic-custody
@@ -503,8 +503,8 @@ custody, bundle identity, tree identity, Git tree ordering, permanent diagnostic
 mapping; every changed build reddened a named exact oracle row. Their Cabal registrations now replace the three
 rejected multi-locus flags. A Cabal-selected signature-bypass build also reached the oracle and red rather than
 failing to select the mutation. These direct and component runs still lack applied source/binary witnesses,
-same-harness unaffected controls, external trust/custody, durable replay consumption, qualification, and human
-review, so they are diagnostics rather than acquisition or promotion evidence.
+same-harness unaffected controls, external trust/custody, durable replay consumption, qualification, and reviewer
+inspection, so they are diagnostics rather than acquisition or promotion evidence.
 
 The exact later-owned source families now have separately declared Haskell path-count, exact path-inventory,
 and path/mode/object/blob-byte baselines. An independent Haskell Git-index/blob observer freezes the live values;
@@ -588,7 +588,7 @@ projections; the CFG truthfully records handoff requests as may-return until Pha
 walk includes nested adapter invocations. Focused clean diagnostics and isolated adapter-effect-omission,
 child-call-omission, and handoff-may-return mutants behaved as intended. The integrated component runner reached
 all seventeen then-current oracles and the bootstrap row was green, while the independently stale documentation-residue
-manifest kept the aggregate red. Dispatcher qualification and human review still block removal of the static
+manifest kept the aggregate red. Dispatcher qualification and reviewer inspection still block removal of the static
 readiness refusal; `LTD-SRC-008` stays Active, and the bootstrap is not executed. The tracked tree now contains
 the exact one-file footprint, but no authenticated acquired snapshot, qualification, or source-admission
 candidate exists.
@@ -618,7 +618,7 @@ including selectors with collateral failures. All sixty-two one-symbol clients f
 that names their actually present private production symbol as not exported, while the sole public-facade
 control compiles. The complete per-selector failure logs are retained beneath ignored `.build/**`;
 Cabal-selected execution, acquired tracked inventory, same-harness unaffected controls, qualification, and
-human review remain pending. These observations are component diagnostics only.
+reviewer inspection remain pending. These observations are component diagnostics only.
 
 A subsequent exact-locus audit has invalidated the claimed fifty-eight-row completeness. The single
 `VALIDATION_PB_GRAMMAR_PHASE50_RESIDUE_BYPASS_MUTANT` removes all twenty-one independent Phase-50 runtime
@@ -631,7 +631,7 @@ name. A warning-clean direct clean build exits zero; all twenty-one new changed-
 different digest from that clean executable and redden only the canonical full-result case. These focused runs
 used the exact source-bound Haskell modules directly, never executed `pb`, and remain component diagnostics.
 The old combined selector and its retained result are rejected; the complete seventy-eight-row matrix,
-Cabal-selection witnesses, same-harness unaffected controls, integrated qualification, and human review remain
+Cabal-selection witnesses, same-harness unaffected controls, integrated qualification, and reviewer inspection remain
 pending, and this repair cannot establish any Phase-50 runtime fact.
 
 A current isolated direct Haskell rebuild has again compiled the Pb grammar subject and its independent oracle
@@ -640,7 +640,7 @@ under `-Wall -Wcompat -Werror`, and the exact clean oracle exits zero. The run d
 selector-to-exact-case registry now required by the gate-integrity standard, so production-derived enumeration
 cannot establish completeness or assigned-locus rejection. Registry integrity, the complete registry-driven
 matrix, package opacity and public controls, Cabal-selected witnesses, same-harness unaffected controls,
-tracked one-file source acquisition, qualification, and human review remain open. This is a component
+tracked one-file source acquisition, qualification, and reviewer inspection remain open. This is a component
 diagnostic only.
 
 The independent Pb atomic-completeness audit has rejected seventy-eight before constructing a literal registry.
@@ -660,7 +660,7 @@ collapse. A strict direct `-Wall -Wcompat -Werror` rebuild of the Haskell subjec
 resulting oracle exited zero without invoking Python or `pb`. This closes the first-only expectation defect only;
 it does not close the atomic-completeness rejection above. The literal selector registry, split observation and
 claim projections, problem-code and proof-contribution selectors, assigned-locus matrix, package-opacity controls,
-Cabal-selection witnesses, integrated qualification, and human review remain open. The result is a component
+Cabal-selection witnesses, integrated qualification, and reviewer inspection remain open. The result is a component
 diagnostic and no sprint or phase status changes.
 
 The consumer seam assigns closed non-behavioural roles and exact authorized consumers, rejects lexical
@@ -698,7 +698,7 @@ exited zero. The clean result is not a matrix result: the oracle still contains 
 selector identities and therefore cannot independently declare the mutation inventory or bind a changed
 subject to its assigned exact case. Its literal registry, two-way source/oracle/Cabal reconciliation,
 registry-driven 91-row matrix, package opacity/public controls, Internal acquired composition, same-harness
-unaffected controls, qualification, authenticated inputs, and human review remain open. This is a component
+unaffected controls, qualification, authenticated inputs, and reviewer inspection remain open. This is a component
 diagnostic only and does not advance Sprint 0.3.
 
 A further 2026-08-23 adversarial audit established that this remains synthetic-only. The Git index has five
@@ -765,7 +765,7 @@ oracle exited zero. Each of the two new changed subjects compiled warning-free a
 case. Static source/Cabal identity reconciliation is now 83/83 with no duplicate or delta. This remains partial
 diagnostic work: the oracle still has no independently literal 83-row selector registry, and the complete
 registry matrix, package opacity/public controls, same-harness unaffected controls, integration, qualification,
-authenticated inputs, and human review remain open. ComponentPlan is NOT VALIDATED.
+authenticated inputs, and reviewer inspection remain open. ComponentPlan is NOT VALIDATED.
 
 The ComponentPlan oracle now owns a literal eighty-three-row selector-to-exact-case registry rather than
 discovering its inventory from production or Cabal. Its integrity check fixes the cardinality, rejects
@@ -782,7 +782,7 @@ literal supported-projection case it actually changes. A fresh clean build and e
 focused rerun of the nine repaired subjects plus the language subject finds ten changed preprocessed subjects,
 ten changed executables, ten warning-clean compiles, and ten assigned-row and aggregate reds. A fresh complete
 eighty-three-row sweep, same-harness unaffected controls, package opacity, independent atomic-predicate review,
-integration, qualification, authenticated inputs, and human review remain open. The discarded 74/83 sweep and
+integration, qualification, authenticated inputs, and reviewer inspection remain open. The discarded 74/83 sweep and
 the focused repair run are diagnostics only and do not advance Sprint 0.3.
 
 The fresh complete ComponentPlan rerun then froze the exact production tree and oracle beneath the diagnostic
@@ -794,7 +794,7 @@ changed-executable hashes. Current production, oracle, Cabal macro, manual-flag,
 flag-to-macro inventories contain the same eighty-three identities once each with zero pair or set delta. This
 result closes the defects exposed by the discarded first sweep, but it is still a direct component diagnostic.
 The independent atomic-predicate audit, package opacity/public controls, Cabal-selected witness, integrated
-unaffected controls, qualification, authenticated toolchain/source custody, and human review remain open, so
+unaffected controls, qualification, authenticated toolchain/source custody, and reviewer inspection remain open, so
 ComponentPlan and Sprint 0.3 remain NOT VALIDATED.
 
 The promised independent atomic-predicate audit has now rejected eighty-three as a completeness total. The
@@ -865,7 +865,7 @@ duplicate-key guard, one resource ceiling, sum/product distinction, accepted-fie
 guard, mandatory diagnostic residue, source-identity guard, component-shape distinction, semantic grammar, or
 path grammar; each reddened its exact named row, with separately recorded expected collateral where a mutation
 changed multiple fixture outcomes. Those direct runs lack an applied source/binary witness, same-harness clean
-control, independent acquisition/custody, aggregate Cabal execution, qualification, and human review, so they are
+control, independent acquisition/custody, aggregate Cabal execution, qualification, and reviewer inspection, so they are
 component diagnostics rather than promotion evidence.
 The broader refusal-only audit has now superseded that twelve-selector sample. The current production surface
 still exports only `checkCompilerElaboratedPlanDiagnostic`; its exact inventory is ninety-one one-locus
@@ -879,7 +879,7 @@ public client compiled and ran. The retained ignored receipt and logs record one
 defect: an initial `pipefail` path treated a zero-warning search as failure, so that attempt was discarded and all
 six boundary clients were rerun. These are current component diagnostics only; no Cabal build, applied
 source/binary witness, authenticated plan/toolchain acquisition, same-integrated-harness controls, qualification,
-independent custody, or human review follows from them.
+independent custody, or reviewer inspection follows from them.
 A 2026-08-24 fail-closed re-audit has invalidated that ninety-one-selector result as a complete matrix. When a
 valid observed plan produces more than the semantic problem ceiling, `boundedProblemList` replaces the entire
 problem list with one `PlanResourceLimitExceeded` row. That drops the input-authentication, plan-generation,
@@ -942,7 +942,7 @@ ignored receipts have input-manifest SHA-256
 `5c21853f487e9795454657e770febd7aa80e79acd0d5f6067b95dc78a0c50caa` and results SHA-256
 `67b1513c429a1f689958f5b62221d36d0fc47c23d4805db2c0eeb3db049512c3`. This is a component matrix, not
 validation: a fresh post-matrix predicate audit, package-opacity rerun on current bytes, integrated acquisition,
-qualification, authenticated source/toolchain custody, and human review remain open.
+qualification, authenticated source/toolchain custody, and reviewer inspection remain open.
 
 The ensuing post-matrix source audit rejects implementation-readiness. The 114 selectors do not yet isolate the
 JSON token-constructor and decode/root routes; generic required/optional missing, empty, and type predicates;
@@ -962,7 +962,7 @@ client failed for the exact hidden-module boundary, and the paired public client
 validation-kernel oracle suite remains open because `DispatchOracle`, `LegacyOracle`, and `PolicyContractOracle`
 still import the package-hidden `SourceClosure.Internal` module. None of these focused diagnostics supplies an
 applied source/binary witness, authenticated plan/toolchain acquisition, qualification, independent custody,
-human review, or validation of Sprint 0.3.
+reviewer inspection, or validation of Sprint 0.3.
 
 A 2026-08-27 expansion supersedes the 114-row checkpoint without promoting it to implementation readiness.
 One hundred thirty-one reachable selectors now split the previously named JSON token/decode routes, generic
@@ -1135,7 +1135,7 @@ replacements—compiled independently and reddened the exact full-result oracle;
 compiled, and each of the twenty-one one-symbol private-import clients failed at its sole missing export. These
 direct invocations do not prove Cabal selected the intended flags, retain applied source/binary witnesses or
 same-harness unaffected controls, join Dispatch, authenticate source/compiler custody, qualify the harness, or
-supply human review. This is corrected component implementation and diagnostic behavior only, not compiler
+supply reviewer inspection. This is corrected component implementation and diagnostic behavior only, not compiler
 evidence or validation.
 
 A 2026-08-24 selector-to-predicate audit has superseded that twenty-eight-row completeness claim. The observed
@@ -1176,7 +1176,7 @@ changed BuildInfo subject but was interrupted during final package registration 
 `Legacy.Internal` Cabal/source changes; it is not recorded as a Cabal-selection witness. These results remain
 component diagnostics only: the complete Cabal-selected matrix, applied source/binary identity, authenticated
 elaborated-plan/toolchain acquisition, external compiler execution, independent custody and qualification,
-integrated Dispatch retention, human review, and human promotion remain absent. Sprint 0.3 is NOT VALIDATED.
+integrated Dispatch retention, reviewer inspection, and delegated promotion remain absent. Sprint 0.3 is NOT VALIDATED.
 
 A 2026-08-27 full-oracle isolation rerun rejects the prior 220-row completeness statement. All 220
 preprocessed subjects changed and were pairwise distinct, but two rows failed strict compilation: the
@@ -1356,7 +1356,7 @@ joins are separate production loci. The oracle now covers every reachable proble
 types and exact full results. Manifest and verifier opacity are separate one-symbol compile negatives. Six new
 single-locus mutants for these repairs compiled and reddened the focused oracle, and both privacy clients failed
 only at their intended missing export. External trust, immutable transport, durable replay consumption,
-independent intent/manifest acquisition, qualification, and human review remain explicit permanent findings.
+independent intent/manifest acquisition, qualification, and reviewer inspection remain explicit permanent findings.
 These runs are component diagnostics, not acquired-source or validation evidence.
 
 A final static SourceAcquisition review found that selective exports of four other private values could evade
@@ -1560,7 +1560,7 @@ one-symbol public-facade attacks fail at their exact missing export, the package
 a hidden module, and the sole-facade public control builds and runs. One Cabal-selected identity-alphabet mutant
 built and reddened its exact malformed-identity row; the restored default library build and clean focused oracle
 then exited zero. The other forty changed-subject executions, same-harness unaffected controls, integrated
-dispatcher run, authenticated acquired inputs, qualified external observer, and independent human review remain
+dispatcher run, authenticated acquired inputs, qualified external observer, and independent reviewer inspection remain
 absent. These are bounded component diagnostics only, not compiler execution, qualification, or validation.
 
 The acquired-path follow-up closes that mutation-inventory gap without widening the one-function package facade.
@@ -1578,7 +1578,7 @@ Cabal-built package matched the raw focused oracle; all six one-symbol public-fa
 exact missing exports, the Internal attack failed for the hidden-module boundary, and the public client compiled.
 These remain component diagnostics. The parent Dispatch gate still must exercise the genuine package-hidden
 acquired token, and authenticated source custody, subject/outcome registry, multi-run elaboration, toolchain,
-supervised compiler execution, semantic closure, qualification, independent custody, and human review remain
+supervised compiler execution, semantic closure, qualification, independent custody, and reviewer inspection remain
 absent. CompilerSourceGraph is NOT VALIDATED.
 
 A fresh SourceAcquisition post-matrix line audit superseded any completeness reading of its 231-row
@@ -1903,7 +1903,7 @@ The tracked tree now names exactly one `pb/__main__.py` blob, at 4,770 bytes wit
 index/worktree mismatch. A production literal fed back into both Pb and SourceClosure oracles still cannot
 substitute for binding independently acquired tracked bytes, and the current agent-authored dirty worktree is
 ineligible for candidate acquisition. Authenticated acquisition, the complete selector/control matrix,
-qualification, and human review remain explicit integration residue.
+qualification, and reviewer inspection remain explicit integration residue.
 
 CompilerSourceGraph's bounded refusal rewrite has now expanded from 47 to 237 independently registered
 changed-production subjects: 167 raw diagnostic selectors and 70 package-hidden acquired-wrapper selectors.
@@ -2043,7 +2043,7 @@ or Sprint-0.3 readiness. No qualified external supervisor yet constructs the anc
 key and expected intent are not bound to a reviewed trust root; challenge issuance and replay reservation are
 not observed as durable atomic operations; authored-root and frozen-custody claims lack an authenticated
 external observation; and no production supervisor invokes the anchored handle route. The supervisor protocol,
-CLI composition, qualification, and independent human custody/review remain open. Sprint 0.3 and Phase 0 remain
+CLI composition, qualification, and independent reviewer custody remain open. Sprint 0.3 and Phase 0 remain
 NOT VALIDATED.
 
 The strict-ingress residue is now narrowed by a package-hidden bounded streaming adapter. It consumes the
@@ -2101,8 +2101,8 @@ refusing caller-selected Git path.
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/Documentation.hs`, `src/validation-kernel/Amoebius/Validation/PhaseContract.hs`, internal `src/validation-kernel/Amoebius/Validation/PhaseIdentity.hs`, `src/validation-kernel/Amoebius/Validation/PhaseSemanticContract.hs`, `src/validation-kernel/Amoebius/Validation/PhaseSemanticJoin.hs`, and `src/validation-kernel/Amoebius/Validation/ResourceProvisionContract.hs`
 **Blocked by**: Sprint 0.3
-**Independent Validation**: Complete structural component corpora are accepted and minimally different dependency, inventory, raw-status, retired-path, wildcard, fence, comment, and line-wrap defects are refused at exact loci. The Haskell prose-budget oracle independently states an exact 50-word sentence in single-line and hard-wrapped forms, a seven-sentence paragraph, and table/fence exemptions. Physical-line and measurement-omission production mutants must red those exact controls. The current documentation selector registry has a complete nine-row changed-subject component bracket. PhaseContract has a complete bounded literal 119-selector and 119-case changed-subject bracket plus the package-built component/public-control and four-client opacity bracket from those exact bytes. Its current source, oracle, and Cabal description instead reconcile at 134 reachable selectors and cases; the first fresh 134-row run was deliberately stopped after 62 complete matching rows at the user-requested pause and is not a receipt. The 119-row package boundary is consequently stale, while the remaining atomic inventory, qualification, and semantic policy/prose correspondence remain open.
-**Oracle**: `test/validation-kernel/DocumentationOracle.hs`, `test/validation-kernel/PhaseContractOracle.hs`, and `test/validation-kernel/PhaseSemanticContractOracle.hs`; separately authored component diagnostics whose independent review is consolidated into the Phase-0 gate, not requested per sprint.
+**Independent Validation**: Complete structural component corpora are accepted and minimally different dependency, inventory, raw-status, retired-path, wildcard, fence, comment, and line-wrap defects are refused at exact loci. The Haskell prose-budget oracle independently states an exact 50-word sentence in single-line and hard-wrapped forms, a seven-sentence paragraph, and table/fence exemptions. Physical-line and measurement-omission production mutants must red those exact controls. The current documentation selector registry has a complete nine-row changed-subject component bracket. PhaseContract's production source, two independently literal oracle partitions, Cabal flags, and CPP mappings reconcile at 142 reachable selectors: 134 structural selectors with 134 exact cases and eight internal full-mode selectors with eight exact cases. Fresh fixed-serial brackets from the current bytes completed all 17,956 structural and 64 internal cross-impact classifications with distinct changed preprocessing, object, and linked-executable identities, matching final clean controls, stable frozen inputs, and pairwise-unique mutant identities. The internal partition pins the semantic observation/finding carriers, three semantic routes, reviewed sprint-inventory retention, and duplicate-path selection/rendering. The earlier 119-row package boundary is stale, and attempts to build the new internal suite did not leave dependency resolution, so refreshed package evidence, the remaining atomic inventory, qualification, and semantic policy/prose correspondence remain open.
+**Oracle**: `test/validation-kernel/DocumentationOracle.hs`, `test/validation-kernel/PhaseContractOracle.hs`, `test/validation-kernel/PhaseContractInternalOracle.hs`, and `test/validation-kernel/PhaseSemanticContractOracle.hs`; separately authored component diagnostics whose independent review is consolidated into the Phase-0 gate, not requested per sprint.
 **Legacy IDs**: `LTD-VAL-001`, `LTD-VAL-002`
 **Docs to update**: `documents/documentation_standards.md`, `DEVELOPMENT_PLAN/development_plan_standards.md`
 
@@ -2110,7 +2110,7 @@ refusing caller-selected Git path.
 
 Replace Python and token-presence checks with typed structural validation whose negative corpus exercises only
 machine-decidable document structure. Executable cross-cutting policy lives in `PolicyContract`; prose
-correspondence remains human review.
+correspondence remains reviewer inspection.
 
 ### Deliverables
 
@@ -2128,7 +2128,7 @@ alter a source, registry, validation, or ordering verdict.
 
 ### Remaining Work
 
-The checkers and component oracles exist but are not qualified or independently human-reviewed. The
+The checkers and component oracles exist but are not qualified or independently reviewer-inspected. The
 documentation checker separately pins the 195-path governed inventory/count digest and rejects retired tracked
 fixture/golden/oracle/mutant syntax unless it names one exact non-wildcard lowercase-`.hs` file, plus ambiguous
 committed/checked-in artifact wording; raw, fenced, comment-split, and physically wrapped spellings cannot hide
@@ -2230,7 +2230,7 @@ diagnostic-only resource/semantic/join refusals; no other finding code was admit
 and container helpers under their selecting CPP boundaries, a direct `-Wall -Wcompat -Werror` build and the
 exact component oracle exit zero. This is a mutable-worktree component diagnostic, not qualification or corpus
 acceptance. The complete literal selector/control registries, package-opacity repair, changed-binary matrix,
-post-matrix audit, authenticated source/toolchain inputs, independent custody, and human correspondence review
+post-matrix audit, authenticated source/toolchain inputs, independent custody, and reviewer correspondence inspection
 remain open, so Sprint 0.4 remains Blocked — NOT VALIDATED.
 
 On 2026-08-24 the documentation and phase-contract implementations moved behind package-hidden
@@ -2520,7 +2520,7 @@ number/path/link grammar alternatives, canonical sprint inventory and remaining 
 conjuncts, and other reachable composition routes remain open. The package-built component and opacity receipt
 still describes the earlier seventy-three-row source and registration and must be refreshed against current
 bytes. This is a bounded parser/state checkpoint, not PhaseContract implementation readiness, Sprint-0.4
-evidence, or human validation.
+evidence, or authorized reviewer validation.
 
 The seventh PhaseContract expansion selects eleven top-level result-composition routes: the input-envelope
 finding and observation carriers; the within-envelope structural observation carrier; and the dependency, Gate,
@@ -2549,7 +2549,7 @@ retention require a direct-source full-mode oracle rather than the refusal-only 
 inventory and remaining heading/schema/blocker conjuncts, phase duplicate selection/rendering, remaining
 number/path/link grammar alternatives, and other reachable parser and result-carrier decisions remain open. This
 is a bounded result-composition checkpoint, not PhaseContract implementation readiness, Sprint-0.4 evidence, or
-human validation.
+authorized reviewer validation.
 
 The contained `.build/dist-newstyle` package was then rebuilt from the exact 119-row source and Cabal bytes with
 `--offline --jobs=1`. Both the package-built component and the admitted `phaseContractDiagnostic` public client
@@ -2688,7 +2688,7 @@ projections are now restored, and the aggregate component binary executes all ei
 the mutable worktree. The Documentation oracle still freezes the bounded live prose observation at 1,601
 over-target sentences. This is a repair and component diagnostic only. Completing the independent 153-plus
 oracle/Cabal registry, the broader parser/output audit, package-opacity matrix, qualification, authenticated
-inputs, custody, and human prose review remains open.
+inputs, custody, and reviewer prose review remains open.
 
 The next PhaseContract parser audit initially proposed eighteen additional selectors beyond the 119-row
 checkpoint: four closed-link decisions, five sprint-heading decisions, five sprint-schema conjuncts, three
@@ -2710,18 +2710,33 @@ Production, the independently literal oracle, the manual Cabal flags, and librar
 reconcile at 134 unique reachable identities and 134 exact cases. `cabal check` accepts that package description
 with only the repository's existing missing distribution-metadata warnings, and `git diff --check` is clean.
 
-A fresh fixed-serial `matrix-134-final` restart passed its clean controls and exact registry gate, then completed
-rows 1 through 62. All 8,308 observed selector/case classifications in those complete rows matched their literal
-impact declarations; every assigned case reddened, every named control stayed green, and each completed row had
-changed preprocessing, object, and linked-executable identities. At the user's requested pause, the harness was
-terminated while row 63 was incomplete. It therefore has no result table or summary, no final clean controls,
-no final frozen-input comparison, and no pairwise-uniqueness verdict across all rows. The root is diagnostic-only
-and must not be resumed or represented as a partial pass. Continuation starts a new clean 134-row root from the
-current bytes, executes all rows serially, investigates every complete-impact mismatch, and records hashes only
-if the full bracket and final controls pass. Even a complete 134-row receipt will leave the direct-source
-full-semantic result carriers, canonical sprint inventory, duplicate-phase selection/rendering, further
+The stopped `matrix-134-final` root remains inadmissible partial history. An initial complete 134-row receipt on
+2026-08-28 was then superseded when the full-mode work changed the same production module. A new Haskell-owned,
+fixed-serial bracket started from the resulting current bytes, reconciled the disjoint 134-row structural and
+eight-row internal selector partitions across production, the independently literal oracles, Cabal flags, and
+CPP mappings, and completed all structural rows without resumption. All 17,956 selector/case classifications
+matched their literal impact declarations; every assigned case reddened, every undeclared case and named control
+stayed green, and every row had changed preprocessing, object, and linked-executable identities distinct from the
+clean control and every other mutant. The final clean controls matched, all twenty frozen source inputs retained
+their starting hashes, and the retained result-table SHA-256 is
+`0be2e82f5ae5b0d8744b4ccbd341164f984147e1e5a5dd82214703a4e2e690b9`. This is a complete component
+diagnostic, not qualification or validation. The canonical sprint inventory's atomic count decisions, further
 reachable-decision audit, refreshed package-opacity bracket, parent-harness qualification, authenticated inputs,
-independent custody, and human correspondence review open. Sprint 0.4 remains Blocked — NOT VALIDATED.
+independent custody, and reviewer correspondence inspection remain open. A second fresh direct-source bracket on
+2026-08-28 exercised eight newly isolated full-mode
+decisions: semantic observation and finding composition, the phase-semantic, resource-provision, and semantic-
+join routes, sprint-inventory finding retention, and duplicate-path selection and render ordering. Its eight
+rows matched all 64 literal cross-impact classifications; preprocessing, object, and executable identities were
+changed and pairwise unique; final clean controls and nineteen frozen input hashes matched. The clean identities
+were `6bc98281969e1f024ce499d60e34f590485e311d1b718d5c853d324de51e10f9`,
+`69890936a5d888b5be34f2389e05dcf741a589d0c5f4c9751916fcbd2fcfe5fc`, and
+`d9ed8388507f3b2c1bf356bdbe9f7659beea1ea11b90ef66400cfad19a07cbab` for preprocessing, object, and executable.
+This too is a component diagnostic, not qualification or validation. The corresponding Cabal suite is declared,
+but authenticated-local package attempts either remained in dependency resolution or reached the configured
+zero-backjump refusal before any compiler ran; they are not package evidence. The canonical sprint-count literals
+still need an atomic decision audit, and the refreshed package-opacity bracket, parent-harness qualification,
+authenticated inputs, independent custody, and reviewer correspondence inspection remain open. Sprint 0.4
+therefore remains in its blocked, not-validated state.
 
 ## Sprint 0.5: Gate-kernel qualification and spoof corpus ⏸️
 
@@ -2785,13 +2800,13 @@ independent executor/report predicate an oracle-owned selector, exact assigned r
 witness, and genuinely executed unaffected control. The prior clean and diagnostic-bypass runs are rejected
 baselines, not qualification.
 
-## Sprint 0.6: Candidate evidence and human approval boundary ⏸️
+## Sprint 0.6: Candidate evidence and reviewer approval boundary ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/validation-kernel/Amoebius/Validation/Evidence.hs`, `src/validation-kernel/Amoebius/Validation/Approval.hs`
 **Blocked by**: Sprint 0.5
 **Independent Validation**: A dispatcher-acquired bundle is the positive control; caller-invented green rows and every absent, wrong-key, stale-source, stale-contract, stale-harness, replayed, automation-authored, self-generated-root, or same-change-root pair are negatives; the approval path remains UNVERIFIED until the external trust root and durable replay observer exist.
-**Oracle**: `test/validation-kernel/EvidenceOracle.hs` and `test/validation-kernel/ApprovalOracle.hs`; component diagnostics exist, but consolidated Phase-0 gate review and key custody by the human trust-root owner are absent; no sprint-level confirmation is requested.
+**Oracle**: `test/validation-kernel/EvidenceOracle.hs` and `test/validation-kernel/ApprovalOracle.hs`; component diagnostics exist, but consolidated Phase-0 gate review and key custody by the authorized reviewer trust-root owner are absent; no sprint-level confirmation is requested.
 **Legacy IDs**: `LTD-VAL-003`, `LTD-VAL-004`
 **Docs to update**: `AGENTS.md`, `documents/engineering/testing_spoof_resistance.md`, `DEVELOPMENT_PLAN/development_plan_phase_model.md`
 
@@ -2802,8 +2817,8 @@ Separate evidence production from the only authority that may change status.
 ### Deliverables
 
 - Candidate evidence schema and provenance binding.
-- External human-signature verification with predecessor-snapshot trust-root rule.
-- Human-only promotion policy consumed by plan validation.
+- External reviewer-signature verification with predecessor-snapshot trust-root rule.
+- Delegated-reviewer promotion policy consumed by plan validation.
 
 ### Validation
 
@@ -2815,13 +2830,14 @@ and no test key is accepted for real promotion.
 
 Connect the observed evidence writer to the qualified dispatcher and establish the external approval and
 key-custody mechanism without a test-key promotion path after Sprint 0.5 qualifies the harness. The current
-public evidence constructor is permanently refused and the approval verifier ends in
-`ApprovalExternalAnchorUnavailable`, so neither exposes a present promotion path. The same 2026-08-23 API
+public evidence constructor is permanently refused. The approval verifier accepts an authorized reviewer's
+fully bound signature, but the dispatcher has not yet integrated the qualified candidate, durable replay state,
+or status-only projection needed for a present promotion path. The same 2026-08-23 API
 audit found that their future schemas are still incomplete: evidence lacks closed typed command, authenticated
 toolchain, substrate/lane/architecture, run identity, cleanup, and status-projection fields; approval binds no
 exact post-promotion status-only projection digest or permitted status-field set; and the candidate writer has
 not been qualified for exclusive atomic no-follow publication and directory-replacement races. These are
-implementation blockers, not `UNVERIFIED` values that a candidate may carry. Human custody review stays
+implementation blockers, not `UNVERIFIED` values that a candidate may carry. Authorized reviewer custody stays
 phase-gate residue.
 
 The 2026-08-24 API and selector audit makes those blockers stricter. `Evidence` still publicly exports the
@@ -2846,7 +2862,7 @@ Approval diagnostic is Sprint-0.6 candidate evidence.
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `DEVELOPMENT_PLAN/phase_[0-9][0-9]_*.md`
 **Blocked by**: Sprint 0.6
-**Independent Validation**: Every phase has one fixed 18-row table, checked only for structure and explicit `UNRESOLVED` state. Separately reviewed Haskell phase contracts pin subjects, oracles, controls, mutants, observers, typed legacy bindings, predecessors, and residue. Human review owns correspondence with the table prose; no cell text supplies semantic authority. Any structural `UNRESOLVED` row or missing Haskell binding refuses Phase 0 at its own locus.
+**Independent Validation**: Every phase has one fixed 18-row table, checked only for structure and explicit `UNRESOLVED` state. Separately reviewed Haskell phase contracts pin subjects, oracles, controls, mutants, observers, typed legacy bindings, predecessors, and residue. Reviewer inspection owns correspondence with the table prose; no cell text supplies semantic authority. Any structural `UNRESOLVED` row or missing Haskell binding refuses Phase 0 at its own locus.
 **Oracle**: `test/validation-kernel/PhaseContractOracle.hs`; component diagnostic exists, and the consolidated Phase-0 gate review covers every oracle boundary without separate sprint confirmations.
 **Legacy IDs**: `LTD-VAL-002`
 **Docs to update**: all numbered phase contracts and their doctrine owners
@@ -2867,7 +2883,7 @@ Replace every pre-reset gate with a phase-specific, non-spoofable contract in nu
 The structural checker rejects missing/duplicate keys, unresolved fields, and forward or absent numerical
 dependencies. Independent Haskell contract oracles reject missing subject/oracle bindings, self-derived
 expectations, absent reviewer custody, and missing typed legacy closure bindings. Generic prose, a semantic
-keyword, or a changed `Legacy IDs` cell cannot create a pass; human review owns semantic prose correspondence.
+keyword, or a changed `Legacy IDs` cell cannot create a pass; reviewer inspection owns semantic prose correspondence.
 
 ### Remaining Work
 
@@ -2884,9 +2900,9 @@ Every affected phase remains shut meanwhile.
 **Implementation**: `src/validation-kernel/Amoebius/Validation/Dispatch.hs`, `app/amoebius/Main.hs`
 **Blocked by**: Sprint 0.7
 **Independent Validation**: From an empty generated tree, the exact absolute source-built Haskell executable is invoked directly with `validate phase 00`; it qualifies the harness, runs the clean corpus, resolves every Phase-0-owned typed Haskell legacy binding to zero for the first time, emits explicit candidate evidence, and cannot mutate status. `pb` is unavailable as validation transport. If an owning gate has retired an ID by this point, its qualified owner-domain reintroduction negative remains compiled while its explanation is absent from the active-only Markdown register. Markdown register contents are unavailable to the legacy semantic verdict.
-**Oracle**: `test/validation-kernel/Main.hs` currently composes component diagnostics only; a separate integration oracle and the single consolidated Phase-0 human validation-authority review remain absent.
+**Oracle**: `test/validation-kernel/Main.hs` currently composes component diagnostics only; a separate integration oracle and the single consolidated Phase-0 authorized-reviewer inspection remain absent.
 **Legacy IDs**: `LTD-SRC-000`, `LTD-SRC-008`, `LTD-VAL-001`, `LTD-VAL-002`, `LTD-VAL-003`, `LTD-VAL-004`
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only after the human authority decides promotion
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only after the promotion authority decides promotion
 
 ### Objective
 
@@ -2896,11 +2912,11 @@ Produce the first admissible candidate without claiming or applying validation.
 
 - One Haskell-owned phase dispatcher.
 - Qualified raw observations and schema-checked candidate bundle under `.build/runs/phase-00/candidates/**`.
-- External human-review input surface with no automatic status mutation.
+- External reviewer-inspection input surface with no automatic status mutation.
 
 ### Validation
 
-Run the full Gate-integrity table. The result is only a Validation candidate; the human reviewer independently
+Run the full Gate-integrity table. The result is only a Validation candidate; the reviewer independently
 checks it and alone decides whether to sign and promote Phase 0.
 
 ### Remaining Work
@@ -2908,11 +2924,11 @@ checks it and alone decides whether to sign and promote Phase 0.
 The dispatcher and current nonconforming `pb/**` implementation are observed footprints, not an integrated
 candidate path. The opaque `pb` handoff remains a target with no conforming implementation. Qualification
 execution, clean-room observation, evidence-writer integration, contract resolution, independent review,
-legacy closure, external key custody, and the human decision remain open.
+legacy closure, external key custody, and the authorized reviewer decision remain open.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the human promotes the gate, never before):**
+**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
 
 - `documents/documentation_standards.md` — only if the governed document mechanics change.
 - `documents/engineering/repository_layout_doctrine.md` — only if the closed source tree changes.

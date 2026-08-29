@@ -3,7 +3,7 @@
 > **Purpose**: Validate the runtime behavior of the already source-closed non-Haskell exception: make the
 > minimal platform distinction, establish the contained Haskell toolchain, build the exact binary, and exec
 > it with opaque user arguments.
-> **Read this if**: Phase 49 has been human-approved or a bare checkout's already-bounded handoff must be
+> **Read this if**: Phase 49 has been reviewer-approved or a bare checkout's already-bounded handoff must be
 > observed without giving Python command or verdict authority.
 
 Phase 0 owns source-role closure for `pb/**`, and Phase 49 requires that closure before the no-hardware DSL
@@ -42,7 +42,7 @@ version logic into Python.
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by the redesigned Phase 49 no-hardware DSL barrier and its human approval, including zero
+Blocked by the redesigned Phase 49 no-hardware DSL barrier and its reviewer approval, including zero
 `LTD-SRC-008` findings. Every prior `pb` quality
 gate, Python test result, surface inventory, seal, receipt, completion claim, or fake-host result is invalidated
 as validation evidence. Existing implementation is an **Observed footprint / Known partial** only.
@@ -83,7 +83,7 @@ satisfy this contract.
 | `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Given the already accepted `PbBootstrapGrammar`, `pb` makes only the platform distinction required to establish the contained toolchain, builds the exact source-bound Haskell executable, and execs it with every user argument unchanged. Python never interprets a public command, host-floor policy, help/version behavior, product result, evidence, or verdict. Real-host capability claims are excluded. |
 | `Subject` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The exact Phase-0-classified `pb/__main__.py` bytes and their single injected `BootstrapAdapter`, exercising toolchain establishment, build, and exec handoff. No other tracked `pb/**` path or packaging file is admitted. The Haskell validator `Amoebius.Validation.PbBoundary` and its OS supervisor are the harness, not the subject; admin/runtime/test/verdict paths are forbidden. |
 | `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The admissible candidate starts the exact absolute source-built Haskell OS supervisor directly from the Phase-49-approved authenticated, network-independent toolchain input; it does not use `pb` as outer transport. That supervisor invokes the production-declared authenticated absolute interpreter as exactly `-I`, `-S`, `-B`, the absolute repository `pb` directory, then the opaque argument tail containing `validate phase 50`, and observes the child subject through replacement and exit. The future public spelling remains `pb validate phase 50`, but it cannot supervise or validate its own handoff. |
-| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Planned `test/Amoebius/Validation/PbBoundaryOracle.hs`, separately authored from the bootstrap implementation and independently human-reviewed. It states `PbBootstrapGrammar`, the exact allowed imports/effect adapter, build identity, opaque argv handoff, and platform-specific exec observation. Reviewer is unassigned; this blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Planned `test/Amoebius/Validation/PbBoundaryOracle.hs`, separately authored from the bootstrap implementation and independently reviewer-inspected. It states `PbBootstrapGrammar`, the exact allowed imports/effect adapter, build identity, opaque argv handoff, and platform-specific exec observation. Reviewer is unassigned; this blocks validation. |
 | `Positive controls` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Haskell-described fake adapters cover the injectable `bootstrap(adapter, arguments)` seam for the minimal supported platform choices, absent/present toolchain, first build/converged rebuild, and opaque argv cases including empty, help, version, validation, unknown, and adversarial-looking values. A separate OS-observed control invokes the concrete `main` path, proves it constructs exactly one real `BootstrapAdapter`, and records its actual effects, executable replacement, argv bytes, and exit propagation. Fake-adapter observations cannot satisfy that concrete-entry control. |
 | `Paired negatives` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Minimal pairs cover unsupported platform, ambient `PATH` selection, user-home/system-temp writes, source-adjacent cache, skipped ensure, stale or non-source-built binary, direct effects outside `BootstrapAdapter`, no exec, reordered/rewritten/dropped argv, swallowed/forged exit, and every forbidden syntax/import/effect family named by `PbBootstrapGrammar`. |
 | `Mutants` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Haskell copies the indexed `pb` source into a run-owned `.build/source-snapshot/**`, applies one witnessed mutation per forbidden family and handoff invariant, builds and executes only that changed snapshot, and proves the Git index and worktree are byte-identical before and after. Mutants include skipped probe, ambient command, external write, stale binary, return instead of exec, argv rewrite, forced zero exit, and each dynamic-execution/import/reflection/hook/decorator/metaclass/monkeypatch/plugin/shell/FFI/network bypass. Each named row turns red while unrelated controls remain green. |
@@ -97,13 +97,13 @@ satisfy this contract.
 | `Legacy closure` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Phase 50 owns no typed migration binding. The exact Phase-49 approval binds a snapshot on which the Haskell source query explained to readers as `LTD-SRC-008`, and every other source-migration query, was already zero; this run refuses any mismatch or reintroduction rather than attempting to close one. Markdown row content is not an input. |
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 49; candidate execution separately refuses a missing, stale, replayed, locally shaped, or `pb`-manufactured receipt. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `UNVERIFIED`: real host package managers and permissions; the Phase-51 Haskell ensure algebra; Docker/Colima/WSL; hardware; images; registry; cluster; and all runtime behaviour after Haskell handoff. |
-| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only`: the Haskell candidate and observed `pb` exit cannot promote Phase 50 or open Phase 51. |
+| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer`: the Haskell candidate and observed `pb` exit cannot promote Phase 50 or open Phase 51. |
 
 ## Resource provision — UNRESOLVED
 
 > **UNRESOLVED — blocks validation.** No live mutation is authorized. The seven-label draft below is
 > non-operative capability inventory until its Haskell `ResourceProvisionContract`, interpreter, independent
-> observer, custody boundary, and human review exist.
+> observer, custody boundary, and reviewer inspection exist.
 
 - **Owner marker:** a run-local Haskell value binds the source snapshot, Phase-49 approval, supervisor identity,
   authenticated interpreter, contained toolchain/build root, fake executable, and run identifier.
@@ -127,7 +127,7 @@ satisfy this contract.
 - [`repository_layout_doctrine.md` §2 — complete repository structure](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure) — the sole non-Haskell source exception and its closed role.
 - [`substrate_doctrine.md` §6 — the pre-binary handoff contract](../documents/engineering/substrate_doctrine.md#6-the-pre-binary-handoff-contract) — minimal platform adapter selection, contained establishment, source-bound build, and unchanged-argv exec only.
 - [`validation_frame_doctrine.md` §2 — the bootstrap boundary](../documents/engineering/validation_frame_doctrine.md#2-the-bootstrap-boundary) — Haskell owns every validation verdict.
-- [`testing_spoof_resistance.md` §12 — spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) — external process observation and human authority.
+- [`testing_spoof_resistance.md` §12 — spoof-resistant evidence](../documents/engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence) — external process observation and promotion authority.
 
 ## Sprints
 
@@ -135,9 +135,9 @@ satisfy this contract.
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Validation/PbBoundary.hs`
-**Blocked by**: [Phase 49](phase_49_self_referential_gates.md) human approval
+**Blocked by**: [Phase 49](phase_49_self_referential_gates.md) reviewer approval
 **Independent Validation**: A valid bounded module is accepted, a one-node forbidden dynamic-execution variant is refused at the grammar locus, a changed indexed-snapshot bypass mutant reddens only its named row, and runtime/toolchain behavior remains explicit residue.
-**Oracle**: planned `test/Amoebius/Validation/PbBoundaryOracle.hs`; separate authorship, custody, and independent human review are required and currently missing.
+**Oracle**: planned `test/Amoebius/Validation/PbBoundaryOracle.hs`; separate authorship, custody, and independent reviewer inspection are required and currently missing.
 **Legacy IDs**: none — the Phase-49-bound zero-source-debt query must remain zero
 **Docs to update**: `documents/engineering/repository_layout_doctrine.md`, `documents/engineering/substrate_doctrine.md`
 
@@ -236,13 +236,13 @@ becoming Phase-50 work.
 **Implementation**: `src/Amoebius/Validation/PbBoundary.hs`, `app/amoebius/Main.hs`
 **Blocked by**: Sprint 50.3
 **Independent Validation**: One cleanroom positive exercises every adapter path, a minimally different forbidden effect refuses, a changed exec-bypass mutant reddens its named row, and real-host plus post-handoff residue remains explicit while Python cannot authorize status.
-**Oracle**: Separate authorship, custody, and independent review of the planned Phase-50 oracle are required and currently missing; final authority remains the human reviewer.
+**Oracle**: Separate authorship, custody, and independent review of the planned Phase-50 oracle are required and currently missing; final authority remains the reviewer.
 **Legacy IDs**: none — the Phase-49-bound zero-source-debt query must remain zero
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only after human promotion
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only after delegated promotion
 
 ### Objective
 
-Produce a candidate for human review without treating a successful handoff as approval.
+Produce a candidate for reviewer inspection without treating a successful handoff as approval.
 
 ### Deliverables
 
@@ -252,16 +252,16 @@ Produce a candidate for human review without treating a successful handoff as ap
 
 ### Validation
 
-The human validation authority reviews the source exception, oracle custody, qualification, raw process trace,
+The authorized reviewer inspects the source exception, oracle custody, qualification, raw process trace,
 legacy closure, and residue and alone decides whether to promote Phase 50.
 
 ### Remaining Work
 
-All implementation, qualification, independent review, legacy closure, and human decision remain open.
+All implementation, qualification, independent review, legacy closure, and authorized reviewer decision remain open.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the human promotes the gate, never before):**
+**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
 
 - `documents/engineering/substrate_doctrine.md` — only if the bounded bootstrap roles or adapter seam change.
 - `documents/engineering/repository_layout_doctrine.md` — only if the source exception changes.

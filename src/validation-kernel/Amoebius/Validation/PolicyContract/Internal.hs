@@ -79,7 +79,7 @@ import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 import Data.Word (Word8)
 
--- This module is executable policy. Markdown owns explanation and a human
+-- This module is executable policy. Markdown owns explanation and reviewer
 -- correspondence review, never these values or their verdict.
 
 data PolicyId
@@ -376,21 +376,21 @@ phaseRoleOrdinal ordering role
   | otherwise = phaseDomainLower ordering
 
 data PromotionAuthority
-  = ExternallyAnchoredHumanOnly
+  = AuthorizedDelegatedReviewer
 #ifdef VALIDATION_POLICY_UNIVERSE_PROMOTION_AUTHORITY_MUTANT
   | MutationOnlyPromotionAuthority
 #endif
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data AutomationRole
-  = CandidateEvidenceOnly
+  = CandidateEvidenceAndQualifiedPromotion
 #ifdef VALIDATION_POLICY_UNIVERSE_AUTOMATION_ROLE_MUTANT
   | MutationOnlyAutomationRole
 #endif
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data StatusMutationAuthority
-  = HumanUserOnly
+  = AuthorizedReviewer
 #ifdef VALIDATION_POLICY_UNIVERSE_STATUS_MUTATION_AUTHORITY_MUTANT
   | MutationOnlyStatusMutationAuthority
 #endif
@@ -514,13 +514,13 @@ expectedPbTransportRuleUniverse :: [PbTransportRule]
 expectedPbTransportRuleUniverse = [DirectHaskellThrough49ObservedPbAt50ApprovalBoundAfter50]
 
 expectedPromotionAuthorityUniverse :: [PromotionAuthority]
-expectedPromotionAuthorityUniverse = [ExternallyAnchoredHumanOnly]
+expectedPromotionAuthorityUniverse = [AuthorizedDelegatedReviewer]
 
 expectedAutomationRoleUniverse :: [AutomationRole]
-expectedAutomationRoleUniverse = [CandidateEvidenceOnly]
+expectedAutomationRoleUniverse = [CandidateEvidenceAndQualifiedPromotion]
 
 expectedStatusMutationAuthorityUniverse :: [StatusMutationAuthority]
-expectedStatusMutationAuthorityUniverse = [HumanUserOnly]
+expectedStatusMutationAuthorityUniverse = [AuthorizedReviewer]
 
 canonicalPolicyContract :: PolicyContract
 canonicalPolicyContract =
@@ -762,14 +762,14 @@ promotionAuthorityOwner =
     "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
 #endif
 #if defined(VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_ANCHOR_MUTANT)
-    "m6-candidate-evidence-and-human-promotion-mutated"
+    "m6-candidate-evidence-and-delegated-promotion-mutated"
 #else
-    "m6-candidate-evidence-and-human-promotion"
+    "m6-candidate-evidence-and-delegated-promotion"
 #endif
 #if defined(VALIDATION_POLICY_OWNER_PROMOTION_AUTHORITY_SECTION_MUTANT)
-    "M.6 Candidate evidence and human promotion (mutated)"
+    "M.6 Candidate evidence and delegated promotion (mutated)"
 #else
-    "M.6 Candidate evidence and human promotion"
+    "M.6 Candidate evidence and delegated promotion"
 #endif
 
 policyOwnerReference :: PolicyContract -> PolicyId -> Maybe PolicyOwnerReference
@@ -793,7 +793,7 @@ generationRootPath root
 
 promotionAuthorityMarker :: PromotionAuthority -> Text
 promotionAuthorityMarker authority
-  | authority == ExternallyAnchoredHumanOnly = "human"
+  | authority == AuthorizedDelegatedReviewer = "reviewer"
   | otherwise = "mutation-only"
 
 expectedSourceContract :: SourceContract
@@ -860,9 +860,9 @@ expectedOrderingContract =
 expectedPromotionContract :: PromotionContract
 expectedPromotionContract =
   PromotionContract
-    { promotionAuthority = ExternallyAnchoredHumanOnly
-    , automationRole = CandidateEvidenceOnly
-    , statusMutationAuthority = HumanUserOnly
+    { promotionAuthority = AuthorizedDelegatedReviewer
+    , automationRole = CandidateEvidenceAndQualifiedPromotion
+    , statusMutationAuthority = AuthorizedReviewer
     }
 
 checkPolicyContract :: PolicyContract -> CheckResult
@@ -1203,7 +1203,7 @@ data PolicyMandatoryFinding
   = PolicyMandatoryDiagnosticOnly
   | PolicyMandatorySourceCustody
   | PolicyMandatoryQualification
-  | PolicyMandatoryHumanReview
+  | PolicyMandatoryReviewerInspection
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 policyMandatoryFindingRetained :: PolicyMandatoryFinding -> Bool
@@ -1226,8 +1226,8 @@ policyMandatoryFindingRetained kind = case kind of
 #else
     True
 #endif
-  PolicyMandatoryHumanReview ->
-#if defined(VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_DROP_MUTANT)
+  PolicyMandatoryReviewerInspection ->
+#if defined(VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_DROP_MUTANT)
     False
 #else
     True
@@ -1260,11 +1260,11 @@ policyMandatoryFindingCode kind = case kind of
 #else
     "POLICY-QUALIFICATION-UNAVAILABLE"
 #endif
-  PolicyMandatoryHumanReview ->
-#if defined(VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_CODE_MUTANT)
+  PolicyMandatoryReviewerInspection ->
+#if defined(VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_CODE_MUTANT)
     "POLICY-MUTATED"
 #else
-    "POLICY-HUMAN-REVIEW-UNAVAILABLE"
+    "POLICY-REVIEWER-INSPECTION-UNAVAILABLE"
 #endif
 
 policyMandatoryFindingSubject :: PolicyMandatoryFinding -> FilePath
@@ -1287,8 +1287,8 @@ policyMandatoryFindingSubject kind = case kind of
 #else
     "policy-contract-changed-subject-matrix"
 #endif
-  PolicyMandatoryHumanReview ->
-#if defined(VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_SUBJECT_MUTANT)
+  PolicyMandatoryReviewerInspection ->
+#if defined(VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_SUBJECT_MUTANT)
     "<mutated>"
 #else
     "DEVELOPMENT_PLAN/phase_00_documentation_suite.md"
@@ -1314,11 +1314,11 @@ policyMandatoryFindingDetail kind = case kind of
 #else
     "component diagnostics cannot qualify a complete atomic changed-production corpus for this exact subject"
 #endif
-  PolicyMandatoryHumanReview ->
-#if defined(VALIDATION_POLICY_RESIDUE_HUMAN_REVIEW_DETAIL_MUTANT)
-    "policy-to-prose correspondence requires independent human review (mutated)"
+  PolicyMandatoryReviewerInspection ->
+#if defined(VALIDATION_POLICY_RESIDUE_REVIEWER_INSPECTION_DETAIL_MUTANT)
+    "policy-to-prose correspondence requires independent reviewer inspection (mutated)"
 #else
-    "policy-to-prose correspondence requires independent human review"
+    "policy-to-prose correspondence requires independent reviewer inspection"
 #endif
 
 mismatchWith :: Show value => (value -> value -> Bool) -> Text -> FilePath -> value -> value -> [Finding]
@@ -2183,17 +2183,17 @@ renderPbTransportRule rule
 
 renderPromotionAuthority :: PromotionAuthority -> Text
 renderPromotionAuthority value
-  | value == ExternallyAnchoredHumanOnly = "externally-anchored-human-only"
+  | value == AuthorizedDelegatedReviewer = "authorized-delegated-reviewer"
   | otherwise = "mutation-only-promotion-authority"
 
 renderAutomationRole :: AutomationRole -> Text
 renderAutomationRole value
-  | value == CandidateEvidenceOnly = "candidate-evidence-only"
+  | value == CandidateEvidenceAndQualifiedPromotion = "candidate-evidence-and-qualified-promotion"
   | otherwise = "mutation-only-automation-role"
 
 renderStatusMutationAuthority :: StatusMutationAuthority -> Text
 renderStatusMutationAuthority value
-  | value == HumanUserOnly = "human-user-only"
+  | value == AuthorizedReviewer = "authorized-reviewer"
   | otherwise = "mutation-only-status-mutation-authority"
 
 renderOwner :: PolicyOwnerReference -> Text

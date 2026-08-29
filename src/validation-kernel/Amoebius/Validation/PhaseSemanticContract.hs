@@ -80,7 +80,7 @@ data GateCategory
   | LegacyClosure
   | PredecessorCategory
   | Residue
-  | HumanAuthority
+  | PromotionAuthority
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data GapId = GapId Int GateCategory
@@ -272,7 +272,7 @@ registryIntegrityFindings =
         "the reset registry must not label an identity-only placeholder as a semantic draft"
     , integrityFinding
         (null reviews)
-        "no reset slot may be Reviewed before independent human custody exists"
+        "no reset slot may be Reviewed before independent reviewer custody exists"
     , identityIntegrityFindings
     , integrityFinding
         (all phaseIdentityProjectionIsExact canonicalPhaseRegistry)
@@ -915,7 +915,7 @@ renderGateCategory category = case category of
   LegacyClosure -> "Legacy closure"
   PredecessorCategory -> "Predecessor"
   Residue -> "Residue"
-  HumanAuthority -> "Human authority"
+  PromotionAuthority -> "Promotion authority"
 
 categorySlug :: GateCategory -> Text
 categorySlug = Text.map replace . Text.toLower . renderGateCategory

@@ -202,7 +202,7 @@ Stated plainly, because a budget calculus reads as stronger than it is:
 
 This document is normative only. Which phase delivers the grant type, admission, the retention grant, and the
 reaper is owned by [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Normative shapes are design
-intent. Only a phase-specific, independently reviewed candidate plus external human approval could establish
+intent. Only a phase-specific, independently reviewed candidate plus external reviewer approval could establish
 an amoebius result; every current phase is NOT VALIDATED.
 
 ---

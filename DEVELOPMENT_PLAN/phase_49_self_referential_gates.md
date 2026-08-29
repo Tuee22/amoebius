@@ -6,7 +6,7 @@
 > cloud, or a gate is represented in the workflow calculus it helps validate.
 
 This phase owns the single promotion cut between language confidence and host work. Its future gate must
-compose only the outputs of human-approved Phases 0–48; it does not treat their old exit codes as evidence and
+compose only the outputs of reviewer-approved Phases 0–48; it does not treat their old exit codes as evidence and
 does not claim live-provider fidelity.
 The target pipeline is defined by
 [`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md).
@@ -32,7 +32,7 @@ The target pipeline is defined by
 - [Sprint 49.1: Freeze the complete semantic surface ⏸️](#sprint-491-freeze-the-complete-semantic-surface-)
 - [Sprint 49.2: Compose the production pipeline ⏸️](#sprint-492-compose-the-production-pipeline-)
 - [Sprint 49.3: Qualify self-reference and fake apply ⏸️](#sprint-493-qualify-self-reference-and-fake-apply-)
-- [Sprint 49.4: Produce the human-review candidate ⏸️](#sprint-494-produce-the-human-review-candidate-)
+- [Sprint 49.4: Produce the reviewer-inspection candidate ⏸️](#sprint-494-produce-the-reviewer-inspection-candidate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -42,7 +42,7 @@ The target pipeline is defined by
 
 ⏸️ Blocked — NOT VALIDATED.
 
-Blocked by redesigned Phase 48 and every predecessor's independent validation and human promotion. Every prior
+Blocked by redesigned Phase 48 and every predecessor's independent validation and delegated promotion. Every prior
 Phase-49 pass, direct-versus-routed comparison, seal, receipt, attestation, completion claim, or implementation
 result is invalidated as evidence. Existing implementation is an **Observed footprint / Known partial** only.
 
@@ -66,7 +66,7 @@ run.
 
 The phase also expresses gates as workflow values, but that representation is a subject rather than an
 authority. It must agree with the independent gate kernel under the clean corpus and every qualification
-sabotage. Haskell may emit candidate evidence; only the human validation authority may approve the barrier.
+sabotage. Haskell may emit candidate evidence; only the authorized reviewer may approve the barrier.
 
 **Phase scope:** one cohesive claim — the complete Haskell-owned DSL/generator/planner pipeline and its self-referential workflow gate survive independent semantic oracles, changed-subject mutants, and harness qualification without hardware or pre-generated input. It splits if a claim requires Register 3 or a real substrate.
 **Substrate:** `none`
@@ -84,21 +84,21 @@ sabotage. Haskell may emit candidate evidence; only the human validation authori
 | `Claim` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: From Haskell semantic source alone, the complete decode→legality→bind/expand→plan/resolve→provision→renderAll→plan→dry-run→fake-apply path produces the independently specified semantics, rejects its paired invalid cases, and routes the same contract through a qualified workflow value. `pb` transport, live fidelity, host, network, container, registry, cluster, cloud, and hardware claims are excluded. |
 | `Subject` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Production entry points in `Amoebius.Dsl.Decode`, `Amoebius.Dsl.Foreclosure`, `Amoebius.Capability.Binding`, `Amoebius.Capacity.Provision`, `Amoebius.Manifest.RenderAll`, `Amoebius.Kernel.Chain`, `Amoebius.Kernel.Plan`, `Amoebius.Exec.Boundary`, and planned `Amoebius.Validation.DslBarrier`; `Amoebius.Gate.SelfReferential` is an additional subject, not the runner. |
 | `Command` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Future public target: `pb validate phase 49`. The admissible Phase-49 candidate directly invokes the exact absolute source-bound Haskell executable, built from an authenticated network-independent toolchain input, with `validate phase 49`. Invoking `pb` cannot evidence this phase because Phase 50 has not yet validated that transport. The Haskell dispatcher runs the qualified kernel, production pipeline, fake boundary, and candidate schema. |
-| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Planned `test/Amoebius/Validation/DslBarrierOracle.hs`, separately authored from doctrine and reviewed by humans who are not the sole authors of the stage implementations. Each stage exposes an independent predicate and dependency boundary. Reviewers are unassigned; this blocks validation. |
+| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Planned `test/Amoebius/Validation/DslBarrierOracle.hs`, separately authored from doctrine and reviewed by authorized reviewers who are not the sole authors of the stage implementations. Each stage exposes an independent predicate and dependency boundary. Reviewers are unassigned; this blocks validation. |
 | `Positive controls` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: A closed Haskell corpus covers every declared DSL constructor, legality family, capability/provider/shape arm, infrastructure-plan arm, provision fold, render activation/reconcile class, plan step, dry-run rendering, and fake effect. The oracle states expected semantic facts without using production folds. |
 | `Paired negatives` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Each foreclosed axis has a minimally different positive/negative pair with pinned code and locus, including decode shape, illegal state, unbound/ambiguous capability, unsatisfied demand, stale/foreign provision observation, missing render source, wrong plan dependency, dry-run effect, and fake-boundary protocol violation. |
 | `Mutants` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: At least one applied Haskell production mutation per stage and for self-referential routing: decoder widening, legality drop, bind arm swap, demand omission, provision identity collapse, render omission, plan reorder, dry-run execution, fake-call bypass, workflow observation skip, and teardown leak. Each changed source/binary is witnessed and reddens its named row while unrelated controls remain green. |
 | `Discovery` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The run independently derives expected surfaces from reviewed Haskell declarations and runtime surfaces from production entry points, joins them in both directions, and refuses zero/partial/duplicate discovery or an undeclared new arm. It cannot consume the old TSV/Python inventories. |
-| `Challenge` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Register-2 fake apply receives a post-start unpredictable challenge carried through the public plan and recovered from raw fake-boundary requests. Pure stages use independently reviewed predicates with human-approved non-applicability of a live challenge. |
+| `Challenge` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Register-2 fake apply receives a post-start unpredictable challenge carried through the public plan and recovered from raw fake-boundary requests. Pure stages use independently reviewed predicates with reviewer-approved non-applicability of a live challenge. |
 | `Observer` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: An external fake-boundary observer records exact absolute executable identity, argv, request bytes, order, challenge, and teardown independently of subject logs. Pure-stage oracles read returned semantic values directly. Missing, self-reported, partial, or challenge-mismatched observation fails closed. |
 | `Authority/bypass` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The corpus probes forbidden direct effect execution during decode/render/dry-run, alternate unbound providers, caller-authored identity, ambient credentials/network, cache/pre-generated fallbacks, and bypass of the workflow gate. No host or live authority is admissible. |
 | `Freshness` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `.build/**`, state roots, old fixtures, and prior evidence are absent initially. The challenge is issued after fake apply starts; independent recomputation uses a fresh content namespace and proves the production compute path ran. |
 | `Qualification` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The exact harness first rejects constant success, no-op stage, wrong well-formed value, empty discovery, missing subject/oracle, skipped/no-op mutant, wrong-locus failure, stale evidence, self-observer, bypass, teardown leak, and smuggled generated/legacy input; only then may the clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The snapshot contains zero source-boundary debt. Every behavioral tracked source path is `.hs` except Python under `pb/**` that the Phase-0 `PbBootstrapGrammar` check has positively classified into the exact minimal platform-discrimination, toolchain-establishment, build, and opaque exec-handoff roles; the typed Haskell bindings explained as `LTD-SRC-008` and every other `LTD-SRC-*` entry return zero. Every Dhall, manifest, fake request, serialized fixture, mutation worktree, report, and evidence bundle is generated lazily beneath one `.build/**` run root. Any remaining non-source finding joins exactly to a strictly-later typed Haskell legacy binding and is unavailable to the run. The reader-facing register is not a join input. Network, container, registry, cluster, GPU/Metal/CUDA, cloud, and condemned legacy paths are unavailable and observed unused. |
-| `Legacy closure` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The closed Haskell legacy inventory entries explained to readers as `LTD-VAL-005`, `LTD-SRC-008`, every other source-migration ID, and every binding owned by Phases 0–49 must return zero findings under their total compiled closure logic before this barrier may emit a candidate. The independent oracle pins the typed ID universe, owners, closures, and reintroduction cases. Editing a Markdown row, cell, ID, owner, predicate, or count cannot alter the result; human review owns prose correspondence. Reintroduction of foreign tracked source, a widened `pb` role, the image-first rule, or any hardware/network/container dependency fails the barrier. |
+| `Legacy closure` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: The closed Haskell legacy inventory entries explained to readers as `LTD-VAL-005`, `LTD-SRC-008`, every other source-migration ID, and every binding owned by Phases 0–49 must return zero findings under their total compiled closure logic before this barrier may emit a candidate. The independent oracle pins the typed ID universe, owners, closures, and reintroduction cases. Editing a Markdown row, cell, ID, owner, predicate, or count cannot alter the result; reviewer inspection owns prose correspondence. Reintroduction of foreign tracked source, a widened `pb` role, the image-first rule, or any hardware/network/container dependency fails the barrier. |
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: Exact external `ImmediatePredecessorApproval` for Phase 48, whose verified chain reaches Phase 0; candidate execution separately refuses a historical seal, local hash, generated receipt, broken chain, or absent approval. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `UNVERIFIED`: real tool/provider fidelity; image packaging; host setup; natural-architecture execution; registry operation; cluster admission/convergence; accelerator behaviour; live security authorities; and every Phase 50+ capability. |
-| `Human authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `human-only`: the reviewed candidate cannot open Phase 50 until the human authority signs the external approval and personally promotes Phase 49. |
+| `Promotion authority` | UNRESOLVED — blocks validation: typed semantic payload and reviewer custody missing; prior prose: `delegated-reviewer`: the reviewed candidate cannot open Phase 50 until the promotion authority signs the external approval and personally promotes Phase 49. |
 
 ## Resource provision — UNRESOLVED
 
@@ -119,9 +119,9 @@ sabotage. Haskell may emit candidate evidence; only the human validation authori
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `test/Amoebius/Validation/DslBarrierOracle.hs`
-**Blocked by**: [Phase 48](phase_48_test_workflow_algebra.md) human approval
+**Blocked by**: [Phase 48](phase_48_test_workflow_algebra.md) reviewer approval
 **Independent Validation**: A separate Haskell contract audit proves the oracle covers every declared stage/arm in both directions, has paired negatives and no production-logic imports, and rejects empty or duplicated inventory.
-**Oracle**: Doctrine-to-Haskell mapping requiring human review; reviewers are unassigned and the review is missing.
+**Oracle**: Doctrine-to-Haskell mapping requiring reviewer inspection; reviewers are unassigned and the review is missing.
 **Legacy IDs**: `LTD-VAL-005`
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md`, `documents/engineering/evidence_calculus_doctrine.md`
 
@@ -196,25 +196,25 @@ Make the self-referential suite exercise the calculus without becoming its own v
 ### Validation
 
 The workflow route cannot accept any case the independent kernel refuses, and neither can create status or a
-human approval receipt.
+reviewer approval receipt.
 
 ### Remaining Work
 
 Implement, qualify, and independently review self-reference and fake apply.
 
-## Sprint 49.4: Produce the human-review candidate ⏸️
+## Sprint 49.4: Produce the reviewer-inspection candidate ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: `src/Amoebius/Validation/DslBarrier.hs`, `app/amoebius/Main.hs`
 **Blocked by**: Sprint 49.3
 **Independent Validation**: From an empty generated tree, a positive complete-pipeline control reaches fake apply, a minimally different forbidden-stage case is refused at its named locus, an applied production mutant reddens its named row, every source-debt query is zero, live-fidelity residue remains explicit, and the run cannot perform promotion.
-**Oracle**: Independent review of the stage and qualification oracles is required and currently pending; final authority remains the human reviewer.
+**Oracle**: Independent review of the stage and qualification oracles is required and currently pending; final authority remains the reviewer.
 **Legacy IDs**: `LTD-VAL-005`
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` only after the human decision
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` only after the authorized reviewer decision
 
 ### Objective
 
-Produce the last no-hardware candidate and hand it to the human validation authority.
+Produce the last no-hardware candidate and hand it to the authorized reviewer.
 
 ### Deliverables
 
@@ -224,16 +224,16 @@ Produce the last no-hardware candidate and hand it to the human validation autho
 
 ### Validation
 
-The human reviewer checks the source diff, oracle custody, qualification refusals, clean observations, legacy
-closure, and residue; only that human may sign and promote the barrier.
+The reviewer checks the source diff, oracle custody, qualification refusals, clean observations, legacy
+closure, and residue; only that authorized reviewer may sign and promote the barrier.
 
 ### Remaining Work
 
-All implementation, independent review, qualification, legacy closure, and human decision remain open.
+All implementation, independent review, qualification, legacy closure, and authorized reviewer decision remain open.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the human promotes the gate, never before):**
+**Engineering docs to update (when an authorized reviewer promotes the gate, never before):**
 
 - `documents/engineering/conformance_harness_doctrine.md` — only if the complete spine changes.
 - `documents/engineering/workflow_calculus_doctrine.md` — only if self-referential representation changes.

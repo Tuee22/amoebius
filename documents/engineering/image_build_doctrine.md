@@ -779,14 +779,14 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 > Haskell-only source boundary, natural-architecture rule, or spoof-resistant gate contract. Historical run
 > descriptions are diagnostic only and cannot establish acquisition, native execution, publication
 > atomicity, private-pull enforcement, mutation sensitivity, or promotion. The rewritten Phase-56 contract
-> must establish those claims independently after the hardware-free Phase-49 DSL barrier and human promotion.
+> must establish those claims independently after the hardware-free Phase-49 DSL barrier and delegated promotion.
 
 The target `linux-cpu` image and Distribution `registry:2` lane is required on every hardware substrate; that
 availability is not currently validated.
 
 All Phase-56 and later image, registry, provider-node preload, static-driver, resolver, private-pull, and
 public-egress claims remain target contracts or `UNVERIFIED` residue until their numerically ordered Haskell
-gates are qualified, independently reviewed, and human-promoted. This doctrine retains no scoped run as a
+gates are qualified, independently reviewed, and reviewer-promoted. This doctrine retains no scoped run as a
 substitute and no result that can be reactivated by a later status change.
 
 Delivery sequencing, completion status, and validation gates live only in

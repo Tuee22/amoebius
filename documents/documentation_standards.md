@@ -55,7 +55,7 @@ it. SSoT ownership, bidirectional links, and non-duplication are mandatory for a
 
 ### Development-plan authority
 [`DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md) is the single source of truth for phase order,
-status, and remaining work. Each phase document owns its human-authored validation contract. Documents under
+status, and remaining work. Each phase document owns its reviewer-owned validation contract. Documents under
 `documents/` explain architecture, doctrine, and verification boundaries and link back to the plan rather
 than maintaining competing status ledgers.
 
@@ -100,7 +100,7 @@ occurrence.
 
 The production structural checker freezes the complete governed path set by exact count and SHA-256 manifest
 digest; a separate component oracle restates both values and observes the production corpus. A missing, extra,
-renamed, or newly exempted governed document therefore refuses until a human reviews the manifest change, and
+renamed, or newly exempted governed document therefore refuses until a reviewer inspects the manifest change, and
 an isolated changed-production baseline mutant must make only that oracle red. This same-workstream restatement
 is a diagnostic control, not independent custody or validation. Current phase, sprint, and Gate-summary status
 fields use exact raw one-line forms; a second marker, dual-status phrase, fence, comment, or physical wrap cannot
@@ -114,7 +114,7 @@ physically contiguous header/delimiter/body frame; global row search, `mapMaybe`
 fragment stitching, permissive extra cells, and prefix-normalized tracker values are structural defects.
 
 Cross-cutting executable decisions live in a reviewed Haskell `PolicyContract`; subsystem decisions live in
-their named reviewed Haskell declarations and independently authored Haskell oracles. A human reviewer owns
+their named reviewed Haskell declarations and independently authored Haskell oracles. A reviewer owns
 the correspondence between those values and their prose explanation. A keyword-only prose decoy must never
 change a behavioral verdict, and any machine-oriented table projection is generated lazily beneath
 `.build/docs/**`.
@@ -268,7 +268,7 @@ about existing code or a prior run is permitted only when it is labelled **Obser
 footprint. A historical pass remains diagnostic after reopening and cannot be phrased as current validation.
 Historical text is permanently invalidated: it must not contain a condition such as “unless the phase is
 Done” that could reactivate it. Doctrine never records a current pass, seal, attestation, completion hash,
-green count, or validation ledger. Those belong to retrievable run evidence and the human-controlled plan
+green count, or validation ledger. Those belong to retrievable run evidence and the reviewer-controlled plan
 status projection.
 Every discovered mismatch between doctrine, plan, tests, and code receives a typed Haskell identity, owner,
 observation, closure predicate, and reintroduction negative. Its reader-facing explanation is updated in
@@ -293,10 +293,10 @@ everywhere the indicative is not. What remains forbidden in every mood is the un
 does not compile", "there is no back door" — about machinery no gate has run against, because a reader cannot
 tell it from a result.
 
-Only the human user may promote a phase or sprint to Done or Validated. Documentation authored by an LLM may
-describe a target contract, candidate evidence, or an observed footprint, but it cannot turn any of them into
-validation status. The development-plan standards own the promotion procedure; this rule prevents doctrine
-prose from bypassing it.
+Only an authorized reviewer may promote a phase or sprint to Done or Validated. The reviewer may be the human
+user or a delegated agent. Documentation may describe a target contract, candidate evidence, or an observed
+footprint, but prose alone cannot turn any of them into validation status. The development-plan standards own
+the promotion procedure; this rule prevents doctrine prose from bypassing it.
 
 ---
 

@@ -100,7 +100,7 @@ maximumLegacyJoinTargetBytes = 12
 #if defined(VALIDATION_LEGACY_BOUND_AGGREGATE_BYTES_MUTANT)
 maximumLegacyAggregateBytes = 2714
 #else
-maximumLegacyAggregateBytes = 2715
+maximumLegacyAggregateBytes = 2728
 #endif
 
 data LegacyPrefix value
@@ -1230,7 +1230,7 @@ legacyMandatoryFindings analysis =
     <> legacyAnalyzerEvidenceFindings analysis
     <> legacyReintroductionExecutionFindings analysis
     <> legacyQualificationFindings analysis
-    <> legacyHumanReviewFindings analysis
+    <> legacyReviewerInspectionFindings analysis
 #else
 legacyMandatoryFindings analysis =
   legacyDiagnosticOnlyFindings analysis
@@ -1238,7 +1238,7 @@ legacyMandatoryFindings analysis =
     <> legacyAnalyzerEvidenceFindings analysis
     <> legacyReintroductionExecutionFindings analysis
     <> legacyQualificationFindings analysis
-    <> legacyHumanReviewFindings analysis
+    <> legacyReviewerInspectionFindings analysis
 #endif
 
 legacyDiagnosticOnlyFindings :: LegacyAnalysis -> [Finding]
@@ -1276,11 +1276,11 @@ legacyQualificationFindings _ = []
 legacyQualificationFindings analysis = [legacyMandatoryFinding analysis LegacyMandatoryQualification]
 #endif
 
-legacyHumanReviewFindings :: LegacyAnalysis -> [Finding]
-#if defined(VALIDATION_LEGACY_RAW_HUMAN_REVIEW_DROP_MUTANT)
-legacyHumanReviewFindings _ = []
+legacyReviewerInspectionFindings :: LegacyAnalysis -> [Finding]
+#if defined(VALIDATION_LEGACY_RAW_REVIEWER_INSPECTION_DROP_MUTANT)
+legacyReviewerInspectionFindings _ = []
 #else
-legacyHumanReviewFindings analysis = [legacyMandatoryFinding analysis LegacyMandatoryHumanReview]
+legacyReviewerInspectionFindings analysis = [legacyMandatoryFinding analysis LegacyMandatoryReviewerInspection]
 #endif
 
 data LegacyMandatoryKind
@@ -1289,7 +1289,7 @@ data LegacyMandatoryKind
   | LegacyMandatoryAnalyzerEvidence
   | LegacyMandatoryReintroductionExecution
   | LegacyMandatoryQualification
-  | LegacyMandatoryHumanReview
+  | LegacyMandatoryReviewerInspection
 
 legacyMandatoryFinding :: LegacyAnalysis -> LegacyMandatoryKind -> Finding
 #if defined(VALIDATION_LEGACY_MANDATORY_FINDING_COMPOSITION_MUTANT)
@@ -1338,11 +1338,11 @@ legacyMandatoryCode kind = case kind of
 #else
     "LEGACY-QUALIFICATION-UNAVAILABLE"
 #endif
-  LegacyMandatoryHumanReview ->
-#if defined(VALIDATION_LEGACY_MANDATORY_HUMAN_REVIEW_CODE_MUTANT)
+  LegacyMandatoryReviewerInspection ->
+#if defined(VALIDATION_LEGACY_MANDATORY_REVIEWER_INSPECTION_CODE_MUTANT)
     "LEGACY-MUTATED"
 #else
-    "LEGACY-HUMAN-REVIEW-UNAVAILABLE"
+    "LEGACY-REVIEWER-INSPECTION-UNAVAILABLE"
 #endif
 
 legacyMandatorySubject :: LegacyMandatoryKind -> FilePath
@@ -1377,8 +1377,8 @@ legacyMandatorySubject kind = case kind of
 #else
     "legacy-changed-subject-matrix"
 #endif
-  LegacyMandatoryHumanReview ->
-#if defined(VALIDATION_LEGACY_MANDATORY_HUMAN_REVIEW_SUBJECT_MUTANT)
+  LegacyMandatoryReviewerInspection ->
+#if defined(VALIDATION_LEGACY_MANDATORY_REVIEWER_INSPECTION_SUBJECT_MUTANT)
     "<mutated>"
 #else
     "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
@@ -1416,11 +1416,11 @@ legacyMandatoryDetail kind = case kind of
 #else
     "the fixed changed-production corpus has not executed against this exact subject"
 #endif
-  LegacyMandatoryHumanReview ->
-#if defined(VALIDATION_LEGACY_MANDATORY_HUMAN_REVIEW_DETAIL_MUTANT)
+  LegacyMandatoryReviewerInspection ->
+#if defined(VALIDATION_LEGACY_MANDATORY_REVIEWER_INSPECTION_DETAIL_MUTANT)
     "mutated"
 #else
-    "reader-facing prose correspondence has not received independent human review"
+    "reader-facing prose correspondence has not received independent reviewer inspection"
 #endif
 
 legacyPhaseRouteFindings :: LegacyAnalysis -> [Finding]
@@ -1480,7 +1480,7 @@ legacyPhaseBlockedDetail :: Text
 #if defined(VALIDATION_LEGACY_PHASE_BLOCKED_DETAIL_MUTANT)
 legacyPhaseBlockedDetail = "mutated"
 #else
-legacyPhaseBlockedDetail = "every later phase requires its predecessor's external human approval"
+legacyPhaseBlockedDetail = "every later phase requires its predecessor's external reviewer approval"
 #endif
 
 legacyLaterPhaseBlocked :: Bool

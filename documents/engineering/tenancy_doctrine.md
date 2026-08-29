@@ -414,7 +414,7 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
 there are no currently validated phase slices. The service-native target shapes are the identity realm,
 per-tenant secret-store policy, message-bus tenant namespace, object-store bucket policy, Kubernetes access
 control and network policy, and SQL roles and grants. Sibling precedents are context only and cannot become an
-amoebius result; only a numerically ordered, independently reviewed gate followed by human promotion may do so.
+amoebius result; only a numerically ordered, independently reviewed gate followed by delegated promotion may do so.
 
 ---
 

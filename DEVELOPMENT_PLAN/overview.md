@@ -44,7 +44,7 @@ vision; the plan is its binding, executable decomposition.
 > they were written. [README.md](README.md)'s tracker is the sole authority on which phase is where
 > ([development_plan_standards.md §C](development_plan_standards.md#c-status-vocabulary)); read it, not a
 > summary of it. Every prescriptive sentence remains design intent until a redesigned independent acceptance
-> contract is satisfied and the human maintainer promotes its phase. A receipt or attestation alone is never
+> contract is satisfied and the authorized reviewer promotes its phase. A receipt or attestation alone is never
 > sufficient. Where this overview leans on the sibling `prodbox` project, that is cited as
 > *evidence* that a shape works — never as amoebius proof.
 
@@ -214,7 +214,7 @@ opens. A bounded DSL decision/protocol tranche is model-checked in
 The **Register-2.5 deterministic-simulation activity is never a phase gate**
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)); where a
 live-band phase eventually runs it, the activity may compare built code with the independently validated
-Phase-19 model only after Phase 19 has been human-promoted. Phase 19 is currently **NOT VALIDATED**.
+Phase-19 model only after Phase 19 has been reviewer-promoted. Phase 19 is currently **NOT VALIDATED**.
 Front-loading a *design* model ahead of its runtime is legitimate only while correspondence and runtime
 fidelity remain explicitly unverified
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed), [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)).
@@ -378,7 +378,7 @@ fidelity remain explicitly unverified
 - **Evidence posture:** a gate writes to `.build/runs/` and an external immutable evidence store. Existing
   ledgers and receipts are historical migration material, not current completion evidence.
 - **Hardware posture:** no hardware validation may begin until the hardware-free DSL promotion barrier and
-  every preceding redesigned phase are independently satisfied and human-approved.
+  every preceding redesigned phase are independently satisfied and reviewer-approved.
 
 ---
 

@@ -183,7 +183,7 @@ executable corpus is deliberately finite:
   for a claim with its fixture argument omitted.
 
 The Haskell `LawVerdictCase` inventory must project a 7-by-5 reader-facing verdict table with two all-green
-controls and five subjects that each fail exactly one law. Human review of a Markdown or serialized table
+controls and five subjects that each fail exactly one law. Reviewer inspection of a Markdown or serialized table
 cannot add or alter a case. Those target verdicts can establish the evaluator's behavior only over this corpus; they are not extension conformance seals
 and make no claim about the namesake `infernix` or `jitml` runtimes.
 

@@ -4112,7 +4112,7 @@ admittedDocumentationPath path =
 -- | Closed, reviewed path-to-role inventory for non-behavioural Markdown.
 -- A newly named file is unregistered until this Haskell declaration and the
 -- independent documentation-corpus manifest are both updated. Bytes still
--- require structural checking, compiler-resolved consumer closure, and human
+-- require structural checking, compiler-resolved consumer closure, and reviewer
 -- semantic custody; this path list never claims that prose is non-behavioural.
 rawGovernedDocumentationPath :: Int -> FilePath -> FilePath
 rawGovernedDocumentationPath ordinal path

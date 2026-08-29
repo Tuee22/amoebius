@@ -46,7 +46,8 @@ The governing rule is:
 
 > A phase candidate requires a qualified harness, a changed production subject, an independently reviewed
 > oracle, a fresh external observation where effects are claimed, and explicit residue. A validation decision
-> additionally requires external human authorization and the human's separate status promotion.
+> additionally requires an authorized reviewer's separate status promotion. That reviewer may be the human
+> user or a delegated agent.
 
 Omitting any noun changes the claim, rather than weakening an optional defence.
 
@@ -75,14 +76,14 @@ The validation boundary has three distinct roles:
 |---|---|---|
 | **Subject** | Implement the capability and emit ordinary outputs | Define its own expected result or validation status |
 | **Oracle/harness** | Attempt to falsify the claim and preserve raw observations | Import subject decision logic or promote the phase |
-| **Human validation authority** | Review the contract, qualification, observations, residue, and source diff; sign and apply promotion | Delegate promotion to a pass bit, agent, or generated receipt |
+| **Authorized reviewer** | Review the contract, qualification, observations, residue, and source diff; sign and apply promotion | Delegate promotion to a pass bit, agent, or generated receipt |
 
 The oracle is separately authored Haskell source. It is reviewed by someone other than the subject's sole
 author, is based on the requirement rather than captured output, and does not mechanically translate or call
 the subject's decision function. A second implementation produced by the same derivation is not independent.
 
-The human approval is externally authenticated and binds the source snapshot, current phase contract,
-qualified-harness digest, and raw-observation digest. The trust root is human-controlled and cannot be changed
+The reviewer approval is externally authenticated and binds the source snapshot, current phase contract,
+qualified-harness digest, and raw-observation digest. The trust root is reviewer-controlled and cannot be changed
 and used by the candidate in one promotion. An unsigned field, a hash-like token, or a generated attestation
 does not satisfy this boundary.
 
@@ -203,7 +204,7 @@ The Haskell harness emits a candidate bundle with explicit row states: `green`, 
 and a top-level pass with no raw observations. A digest binds provenance but does not make a claim true.
 
 CI, an LLM, the subject, the harness, and an evidence reader may report a **Validation candidate**. They may
-not mark or describe a phase as Done. Only the human validation authority may sign the external approval and
+not mark or describe a phase as Done. Only the authorized reviewer may sign the external approval and
 personally change the plan status.
 
 This is the control that prevents a repository-local runner from certifying its own correctness. It is also
@@ -228,11 +229,11 @@ because the worktree retained an ignored input is a refusal, not a pass.
 
 ### 12.9 Residue and limits
 
-Spoof resistance does not prove that the human reviewer, compiler, kernel, identity authority, provider,
+Spoof resistance does not prove that the reviewer, compiler, kernel, identity authority, provider,
 observer, hardware, or cryptography is uncompromised. Those are named assumptions. Nor does one live run prove
 future behaviour or another substrate.
 
-Every candidate states its untested layers as `UNVERIFIED`. An empty residue requires explicit human review;
+Every candidate states its untested layers as `UNVERIFIED`. An empty residue requires explicit reviewer inspection;
 it is never inferred from a full test count. The current repository reset treats every earlier phase result as
 invalidated evidence, so this doctrine contains no current per-phase success instances.
 
@@ -243,5 +244,5 @@ invalidated evidence, so this doctrine contains no current per-phase success ins
 - [Testing doctrine](./testing_doctrine.md) — register definitions and test topology
 - [Evidence calculus](./evidence_calculus_doctrine.md) — claim-to-fixture binding
 - [No-cluster conformance harness](./conformance_harness_doctrine.md) — the pre-hardware pipeline
-- [Development-plan gate integrity](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md) — fixed phase contract and human promotion
+- [Development-plan gate integrity](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md) — fixed phase contract and delegated promotion
 - [Development-plan tracker](../../DEVELOPMENT_PLAN/README.md) — sole current phase status

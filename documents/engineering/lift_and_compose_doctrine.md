@@ -251,7 +251,7 @@ This document is normative only. Which phase re-derives which structure is owned
 removal inventory and audit map, while
 [legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) explains them to
 readers. Normative shapes are
-design intent. Only a phase-specific, independently reviewed candidate plus external human approval could
+design intent. Only a phase-specific, independently reviewed candidate plus external reviewer approval could
 establish an amoebius result; every current phase is NOT VALIDATED.
 
 ---

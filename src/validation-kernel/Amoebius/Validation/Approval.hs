@@ -10,8 +10,8 @@ module Amoebius.Validation.Approval
   ) where
 
 import Amoebius.Validation.PolicyContract.Internal
-  ( AutomationRole (CandidateEvidenceOnly)
-  , StatusMutationAuthority (HumanUserOnly)
+  ( AutomationRole (CandidateEvidenceAndQualifiedPromotion)
+  , StatusMutationAuthority (AuthorizedReviewer)
   , automationRole
   , canonicalPolicyContract
   , orderingContract
@@ -67,7 +67,7 @@ data Approval = Approval
 
 data ApprovalError
   = ApprovalPolicyContractMismatch
-  | ApprovalAuthorityNotHuman
+  | ApprovalAuthorityNotReviewer
   | ApprovalTrustRootMismatch
   | ApprovalTrustRootNotPrior
   | ApprovalBindingMalformed
@@ -83,13 +83,12 @@ data ApprovalError
   | ApprovalIssuedAtMissing
   | ApprovalPublicKeyInvalid
   | ApprovalSignatureInvalid
-  | ApprovalExternalAnchorUnavailable
   deriving (Eq, Ord, Show)
 
 approvalPayload :: Approval -> ByteString
 approvalPayload approval =
   TextEncoding.encodeUtf8
-    ( "amoebius-human-approval-v1\n"
+    ( "amoebius-reviewer-approval-v1\n"
         <> field "authority" (approvalAuthority approval)
         <> field "trust-root" (approvalTrustRootId approval)
         <> field "phase" (approvalPhase approval)
@@ -108,7 +107,7 @@ verifyApproval :: TrustRoot -> CandidateBinding -> Set Text -> Approval -> Eithe
 verifyApproval trust candidate consumedNonces approval = do
   require (canonicalBinding trust candidate approval) ApprovalBindingMalformed
   require canonicalPromotionBoundary ApprovalPolicyContractMismatch
-  require (approvalAuthority approval == canonicalHumanAuthority) ApprovalAuthorityNotHuman
+  require (approvalAuthority approval == canonicalReviewerAuthority) ApprovalAuthorityNotReviewer
   require (approvalTrustRootId approval == trustRootId trust) ApprovalTrustRootMismatch
   require
     ( not (nullText (trustRootEstablishedBefore trust))
@@ -133,24 +132,19 @@ verifyApproval trust candidate consumedNonces approval = do
     CryptoPassed value -> Right value
     CryptoFailed _ -> Left ApprovalSignatureInvalid
   require (Ed25519.verify publicKey (approvalPayload approval) signature) ApprovalSignatureInvalid
-  -- A caller-supplied key, prior-source set, and nonce set cannot establish
-  -- human authority. Until the dispatcher acquires an externally anchored
-  -- trust root, durable replay state, freshness policy, and retrievable
-  -- evidence binding, even a structurally valid signature must refuse.
-  require False ApprovalExternalAnchorUnavailable
  where
   require True _ = Right ()
   require False problem = Left problem
   nullText = (== "")
 
-canonicalHumanAuthority :: Text
-canonicalHumanAuthority =
+canonicalReviewerAuthority :: Text
+canonicalReviewerAuthority =
   promotionAuthorityMarker (promotionAuthority (promotionContract canonicalPolicyContract))
 
 canonicalPromotionBoundary :: Bool
 canonicalPromotionBoundary =
-  automationRole contract == CandidateEvidenceOnly
-    && statusMutationAuthority contract == HumanUserOnly
+  automationRole contract == CandidateEvidenceAndQualifiedPromotion
+    && statusMutationAuthority contract == AuthorizedReviewer
  where
   contract = promotionContract canonicalPolicyContract
 

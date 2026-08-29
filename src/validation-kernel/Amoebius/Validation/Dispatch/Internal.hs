@@ -352,7 +352,7 @@ dispatchPhaseRouteFindings analysis = case dispatchProblems analysis of
         [ finding
             "DISPATCH-PHASE-BLOCKED"
             ("phase-" <> Text.unpack (dispatchSafePhase analysis))
-            ("every later phase requires its immediate predecessor's external human approval" <> dispatchCommitmentDetail analysis)
+            ("every later phase requires its immediate predecessor's external reviewer approval" <> dispatchCommitmentDetail analysis)
         ]
     | otherwise -> []
   _ -> []
@@ -667,7 +667,7 @@ validatePhase gitPath root phase
               [ finding
                   "DISPATCH-PHASE-BLOCKED"
                   ("phase-" <> Text.unpack (formatOrdinal phase))
-                  "only Phase 0 is active; every later phase requires its immediate predecessor's external human approval"
+                  "only Phase 0 is active; every later phase requires its immediate predecessor's external reviewer approval"
               ]
           }
   | otherwise =
@@ -928,7 +928,7 @@ phaseZeroReadinessBlockers =
     { checkName = "phase-00-readiness"
     , checkObservations =
         [ observation "readiness.harness-qualification" "report consistency checker present; execution not implemented"
-        , observation "readiness.policy-contract" "typed contract is integrated; changed-subject qualification and human prose-correspondence review are absent"
+        , observation "readiness.policy-contract" "typed contract is integrated; changed-subject qualification and reviewer prose-correspondence inspection are absent"
         , observation "readiness.pb-source-grammar" "the static source-bound grammar is integrated; acquired one-file tracked-snapshot closure, changed-subject qualification, and independent review are absent"
         , observation "readiness.phase-contract-semantics" "the closed typed registry and structural joins are integrated; all 1,728 semantic slots and 385 resource slots remain gaps, with no reviewed payload or custody"
         , observation "readiness.legacy-owner-analyzers" "closed typed inventory and fail-closed dispatch are integrated; LTD-SRC-000 and LTD-SRC-008 source analyzers are present but unqualified, while LTD-VAL-001 through LTD-VAL-004 owner analyzers remain unavailable"
@@ -946,7 +946,7 @@ phaseZeroReadinessBlockers =
         , finding
             "POLICY-CONTRACT-UNQUALIFIED"
             "Amoebius.Validation.PolicyContract"
-            "the typed cross-cutting contract is integrated, but its Registry-provider, owner-map, and pb-transport changed-subject mutants have not been qualified and no human has reviewed prose correspondence"
+            "the typed cross-cutting contract is integrated, but its Registry-provider, owner-map, and pb-transport changed-subject mutants have not been qualified and no authorized reviewer has inspected prose correspondence"
         , finding
             "PB-GRAMMAR-UNQUALIFIED"
             "Amoebius.Validation.PbBootstrapGrammar"
@@ -954,7 +954,7 @@ phaseZeroReadinessBlockers =
         , finding
             "PHASE-CONTRACT-SEMANTICS-UNREVIEWED"
             "Amoebius.Validation.PhaseContract"
-            "the closed typed 96-phase registry and structural joins are integrated, but all 1,728 semantic slots and 385 resource slots remain gaps, with no reviewed payload or independent human custody"
+            "the closed typed 96-phase registry and structural joins are integrated, but all 1,728 semantic slots and 385 resource slots remain gaps, with no reviewed payload or independent reviewer custody"
         , finding
             "LEGACY-VALIDATION-ANALYZERS-MISSING"
             "Amoebius.Validation.Legacy"
@@ -962,7 +962,7 @@ phaseZeroReadinessBlockers =
         , finding
             "INDEPENDENT-REVIEW-MISSING"
             "phase-00-oracles"
-            "component diagnostics have no independent human reviewer or custody receipt"
+            "component diagnostics have no independent reviewer or custody receipt"
         , finding
             "CLEANROOM-OBSERVER-MISSING"
             "phase-00-cleanroom"

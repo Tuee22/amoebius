@@ -345,7 +345,7 @@ checkDocumentsWithinEnvelope enforceCanonicalInventory supplied =
   -- The eliminated filename is a structural alias, not a semantic policy
   -- phrase. Cross-cutting policy prose is deliberately not interpreted here:
   -- executable choices belong to PolicyContract and prose correspondence is
-  -- an external human-review obligation.
+  -- an external reviewer-inspection obligation.
   archiveCount = sum (map archiveAliasCount governed)
 
 documentationDuplicatePathForbidden :: [value] -> Bool
@@ -1217,7 +1217,7 @@ normalizedWords = Text.words . Text.map normalize
     | otherwise = ' '
 
 -- | Structural owner-map seam. It verifies only exact paths, anchors, and
--- headings. A human, never this parser, owns semantic prose correspondence.
+-- headings. An authorized reviewer, never this parser, owns semantic prose correspondence.
 checkPolicyOwnerReferences :: [(FilePath, Text)] -> CheckResult
 checkPolicyOwnerReferences =
   checkPolicyOwnerReferencesFor canonicalRawPolicyOwners

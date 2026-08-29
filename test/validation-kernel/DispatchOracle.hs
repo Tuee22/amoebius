@@ -380,7 +380,7 @@ literalExpectedResult phase components safePhase safeCount commitment selectedRo
           <> [ Finding
                  "DISPATCH-PHASE-BLOCKED"
                  ("phase-" <> Text.unpack safePhase)
-                 ("every later phase requires its immediate predecessor's external human approval" <> commitmentDetail)
+                 ("every later phase requires its immediate predecessor's external reviewer approval" <> commitmentDetail)
              | phaseBlocked
              ]
     }
