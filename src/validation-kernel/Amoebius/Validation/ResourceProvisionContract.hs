@@ -102,7 +102,7 @@ resourceProvisionContractDiagnostic =
   CheckResult
     { checkName = "resource-provision-contract-diagnostic"
     , checkObservations =
-        [ observation "resource.phase-domain-count" "96"
+        [ observation "resource.phase-domain-count" (showText (length PhaseIdentity.allPhaseIdentities))
         , observation "resource.required-phase-count" (showText (Set.size resourceRequiredPhases))
         , observation "resource.slot-count" (showText (length allSlots))
         , observation "resource.gap-count" (showText (length resourceGaps))

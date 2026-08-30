@@ -7,16 +7,20 @@ import CompilerSourceGraphAcquiredOracle
   , runCompilerSourceGraphAcquiredSelectorOracle
   , runCompilerSourceGraphAcquiredSelectorProductControlOracle
   )
-import System.Environment (getArgs)
+import SelectorCli
+  ( SelectorSuite (..)
+  , runSelectorCli
+  , selectorSuite
+  )
 
 main :: IO ()
-main = do
-  arguments <- getArgs
-  case arguments of
-    [] -> runCompilerSourceGraphAcquiredOracle
-    ["--all"] -> runCompilerSourceGraphAcquiredOracle
-    ["--impacted", selector] -> runCompilerSourceGraphAcquiredSelectorImpactOracle selector
-    ["--unaffected", selector] -> runCompilerSourceGraphAcquiredSelectorIsolationOracle selector
-    ["--control", selector] -> runCompilerSourceGraphAcquiredSelectorProductControlOracle selector
-    [selector] -> runCompilerSourceGraphAcquiredSelectorOracle selector
-    _ -> fail "CompilerSourceGraphAcquiredOracle requires no argument, --all, one selector, or --impacted/--unaffected/--control SELECTOR"
+main =
+  runSelectorCli
+    (selectorSuite
+      "CompilerSourceGraphAcquiredOracle"
+      runCompilerSourceGraphAcquiredOracle
+      runCompilerSourceGraphAcquiredSelectorOracle)
+      { suiteRunImpacted = Just runCompilerSourceGraphAcquiredSelectorImpactOracle
+      , suiteRunUnaffected = Just runCompilerSourceGraphAcquiredSelectorIsolationOracle
+      , suiteRunControl = Just runCompilerSourceGraphAcquiredSelectorProductControlOracle
+      }

@@ -5,11 +5,12 @@ module Amoebius.Validation.PhaseContract.Internal
   ( checkPhaseAndTracker
   , checkPhaseContractStructure
   , checkPhaseContracts
+  , checkPhaseContractsForPhase
   ) where
 
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
 import Amoebius.Validation.PhaseSemanticContract
-  ( phaseSemanticContractDiagnostic
+  ( phaseSemanticContractCheck
   )
 import Amoebius.Validation.PhaseSemanticJoin
   ( phaseSemanticJoinDiagnostic
@@ -101,27 +102,47 @@ data TrackerScan = TrackerScan
 -- the caller controls every byte, which lets independent oracle tests construct
 -- minimal positive and paired-negative corpora without filesystem effects.
 checkPhaseContracts :: [(FilePath, Text)] -> CheckResult
-checkPhaseContracts = checkPhaseContractsWithSemanticBarrier True
+checkPhaseContracts = checkPhaseContractsForPhase phaseDomainLowerNumber
+
+-- | The gate-path entry, scoped to the phase under validation.  A semantic
+-- contract gap at a strictly later phase is that phase's obligation, not this
+-- one's, so it is observed rather than fatal
+-- (development_plan_gate_integrity.md section M.6).
+checkPhaseContractsForPhase :: Int -> [(FilePath, Text)] -> CheckResult
+checkPhaseContractsForPhase = checkPhaseContractsWithSemanticBarrier . GateScope
 
 -- | Structural parser seam for small oracle corpora. It always carries an
 -- exact diagnostic-only refusal: caller-authored Markdown bytes cannot become
 -- a candidate-shaped green 'CheckResult'.
 checkPhaseContractStructure :: [(FilePath, Text)] -> CheckResult
-checkPhaseContractStructure = checkPhaseContractsWithSemanticBarrier False
+checkPhaseContractStructure = checkPhaseContractsWithSemanticBarrier StructuralOnly
 
-checkPhaseContractsWithSemanticBarrier :: Bool -> [(FilePath, Text)] -> CheckResult
-checkPhaseContractsWithSemanticBarrier requireSemanticAudit supplied =
+-- | Which register this parse is serving.  'StructuralOnly' is the pure
+-- caller-supplied seam and keeps its exact permanent refusal; 'GateScope'
+-- names the phase under validation.
+data SemanticScope
+  = StructuralOnly
+  | GateScope Int
+  deriving (Eq, Show)
+
+semanticAuditRequired :: SemanticScope -> Bool
+semanticAuditRequired scope = case scope of
+  StructuralOnly -> False
+  GateScope _ -> True
+
+checkPhaseContractsWithSemanticBarrier :: SemanticScope -> [(FilePath, Text)] -> CheckResult
+checkPhaseContractsWithSemanticBarrier scope supplied =
   case phaseContractInputEnvelopeFindings supplied of
-    [] -> checkPhaseContractsWithinEnvelope requireSemanticAudit supplied
+    [] -> checkPhaseContractsWithinEnvelope scope supplied
     envelopeFindings ->
       CheckResult
         { checkName = phaseContractCheckName
         , checkObservations = phaseContractInputEnvelopeObservations
-        , checkFindings = structuralDiagnosticRefusal requireSemanticAudit <> phaseContractInputEnvelopeResultFindings envelopeFindings
+        , checkFindings = structuralDiagnosticRefusal (semanticAuditRequired scope) <> phaseContractInputEnvelopeResultFindings envelopeFindings
         }
 
-checkPhaseContractsWithinEnvelope :: Bool -> [(FilePath, Text)] -> CheckResult
-checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
+checkPhaseContractsWithinEnvelope :: SemanticScope -> [(FilePath, Text)] -> CheckResult
+checkPhaseContractsWithinEnvelope scope supplied =
   CheckResult
     { checkName = phaseContractCheckName
     , checkObservations = structuralResultObservations
@@ -135,7 +156,7 @@ checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
           <> trackerResultFindings
           <> trackerJoinResultFindings
           <> projectionVocabularyResultFindings
-          <> structuralDiagnosticRefusal requireSemanticAudit
+          <> structuralDiagnosticRefusal (semanticAuditRequired scope)
           <> semanticResultFindings
     }
  where
@@ -186,7 +207,7 @@ checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
 #if defined(VALIDATION_PHASE_CONTRACT_SPRINT_RESULT_COMPOSITION_BYPASS_MUTANT)
       `seq` []
 #endif
-  guardedSprintResultFindings = concatMap (checkSprintContracts phases requireSemanticAudit) (Map.elems phases)
+  guardedSprintResultFindings = concatMap (checkSprintContracts phases (semanticAuditRequired scope)) (Map.elems phases)
   trackerResultFindings =
     guardedTrackerResultFindings
 #if defined(VALIDATION_PHASE_CONTRACT_TRACKER_RESULT_COMPOSITION_BYPASS_MUTANT)
@@ -285,14 +306,13 @@ checkPhaseContractsWithinEnvelope requireSemanticAudit supplied =
   unresolvedMarkerCount = length (filter containsUnresolvedMarker gateCellValues)
   missingMarkerCount = length (filter containsMissingMarker gateCellValues)
   refusalMarkerCount = length (filter containsRefusalMarker gateCellValues)
-  semanticDiagnostics =
-    if requireSemanticAudit
-      then
-        [ retainPhaseSemanticContractDiagnostic phaseSemanticContractDiagnostic
-        , retainResourceProvisionContractDiagnostic resourceProvisionContractDiagnostic
-        , retainPhaseSemanticJoinDiagnostic (phaseSemanticJoinDiagnostic supplied)
-        ]
-      else []
+  semanticDiagnostics = case scope of
+    StructuralOnly -> []
+    GateScope phaseUnderValidation ->
+      [ retainPhaseSemanticContractDiagnostic (phaseSemanticContractCheck phaseUnderValidation)
+      , retainResourceProvisionContractDiagnostic resourceProvisionContractDiagnostic
+      , retainPhaseSemanticJoinDiagnostic (phaseSemanticJoinDiagnostic supplied)
+      ]
 
 retainPhaseSemanticContractDiagnostic :: CheckResult -> CheckResult
 #if defined(VALIDATION_PHASE_CONTRACT_SEMANTIC_CONTRACT_ROUTE_DROP_MUTANT)
@@ -1985,7 +2005,7 @@ rejectTrackerTrailingContent scanned lineNumber =
   addTrackerProblem
     ( "line "
         <> showText lineNumber
-        <> ": the 96-row tracker table must end at a physical blank line or end of file"
+        <> ": the " <> showText (phaseDomainUpperNumber - phaseDomainLowerNumber + 1) <> "-row tracker table must end at a physical blank line or end of file"
     )
     (scanned {trackerScanStage = TrackerBroken})
 #endif
@@ -2098,7 +2118,7 @@ finishIncompleteTrackerRows scanned expectedNumber =
   addTrackerProblem
     ( "the tracker table ended before canonical Phase "
         <> showText expectedNumber
-        <> "; exact ordered rows 0..95 are required"
+        <> "; exact ordered rows " <> phaseDomainLabel <> " are required"
     )
     scanned
 #endif
@@ -2209,7 +2229,7 @@ trackerRowOrdinal _ supplied =
       | parsed >= phaseDomainLowerNumber
       , parsed <= phaseDomainUpperNumber
       , supplied == showText parsed -> Right parsed
-    _ -> Left "the ordinal must be one canonical unsigned value in the closed 0..95 domain"
+    _ -> Left ("the ordinal must be one canonical unsigned value in the closed " <> phaseDomainLabel <> " domain")
 #elif defined(VALIDATION_PHASE_CONTRACT_TRACKER_ORDINAL_CANONICAL_BYPASS_MUTANT)
 trackerRowOrdinal expectedNumber supplied =
   case readMaybe (Text.unpack supplied) of

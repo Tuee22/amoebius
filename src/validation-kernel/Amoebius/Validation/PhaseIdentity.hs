@@ -5,6 +5,7 @@ module Amoebius.Validation.PhaseIdentity
   ( PhaseIdentity
   , ResourceProvisionRequirement (..)
   , allPhaseIdentities
+  , lookupCapabilityOrdinal
   , lookupPhaseIdentity
   , phaseIdentityCapability
   , phaseIdentityIntegrityProblems
@@ -42,11 +43,30 @@ allPhaseIdentities = map applyIdentityMutants canonicalPhaseIdentities
 lookupPhaseIdentity :: Int -> Maybe PhaseIdentity
 lookupPhaseIdentity ordinal = Map.lookup ordinal phaseIdentityByOrdinal
 
+-- | The reverse projection: a phase capability to the ordinal it currently
+-- occupies.
+--
+-- Capability is the stable identity; the ordinal is a coordinate of the plan's
+-- present order. A consumer that names a capability keeps naming the right
+-- phase after a reorder, which an ordinal literal does not.
+lookupCapabilityOrdinal :: Text -> Maybe Int
+lookupCapabilityOrdinal capability = Map.lookup capability phaseOrdinalByCapability
+
+phaseOrdinalByCapability :: Map.Map Text Int
+phaseOrdinalByCapability =
+  Map.fromList
+    [ (phaseIdentityCapability identityRow, phaseIdentityOrdinal identityRow)
+    | identityRow <- allPhaseIdentities
+    ]
+
 phaseIdentityIntegrityProblems :: [Text]
 phaseIdentityIntegrityProblems =
   [ "phase identity cardinality must be exactly 96"
   | length allPhaseIdentities /= 96
   ]
+    <> [ "resource-required capability is not provided by any phase: " <> capability
+       | capability <- unresolvedResourceRequiredCapabilities
+       ]
     <> [ "phase identity ordinals must be exactly 0 through 95 in order"
        | map phaseIdentityOrdinal allPhaseIdentities /= [0 .. 95]
        ]
@@ -114,63 +134,84 @@ expectedResourceRequiredOrdinals :: Set.Set Int
 expectedResourceRequiredOrdinals =
   Set.fromList expectedResourceRequiredOrdinalLiterals
 
+-- | The phases that must declare a resource-provision contract, named by
+-- capability rather than by ordinal.
+--
+-- Membership is a property of what a phase does, not of where it sits, so a
+-- reorder must not silently move the requirement onto a different phase. The
+-- ordinal set below is derived; an unknown capability is reported by
+-- 'phaseIdentityIntegrityProblems' rather than dropped.
+expectedResourceRequiredCapabilities :: [Text]
+expectedResourceRequiredCapabilities =
+  [ "toolchain_spike",
+    "symbolic_checker",
+    "refinement_checker",
+    "compile_fail_harness",
+    "dhall_schema_generation",
+    "illegal_state_covering",
+    "chain_kernel_boundary",
+    "ui_server_boundary",
+    "self_referential_gates",
+    "host_assert_cli",
+    "host_ensure_kernel",
+    "linux_engine_bringup",
+    "apple_engine_bringup",
+    "windows_engine_bringup",
+    "bootstrap_coordinator_kind",
+    "base_image_registry",
+    "complementary_arch_child",
+    "object_reconciler",
+    "capacity_scheduler",
+    "retained_storage",
+    "vault_pki",
+    "platform_backbone",
+    "platform_services_2",
+    "keycloak_ingress",
+    "live_dsl_deploy",
+    "app_tenancy",
+    "pulsar_client",
+    "user_tenant_isolation_live",
+    "content_store_workflow",
+    "ui_projection_runtime",
+    "release_lifecycle",
+    "ui_program_release",
+    "network_fabric_wireguard",
+    "multicluster_spawn_georepl",
+    "gateway_migration_drills",
+    "provider_deploy_checkpoint",
+    "provider_child_bringup",
+    "provider_ebs_credential",
+    "provider_dynamic_nodes",
+    "determinism_jitcache",
+    "ui_single_tenant_live",
+    "ui_multi_tenant_live",
+    "ui_rollout_reconnect",
+    "ui_ha_multizone",
+    "offline_replay_receipts",
+    "offline_blobs_isolation",
+    "offline_release_evolution",
+    "offline_multizone_continuity",
+    "apple_metal_host_daemon",
+    "test_topology_live",
+    "infernix_rederivation",
+    "infernix_ui_rederivation",
+    "jitml_rederivation",
+    "jitml_ui_rederivation",
+    "webapp_rederivation"
+  ]
+
 expectedResourceRequiredOrdinalLiterals :: [Int]
 expectedResourceRequiredOrdinalLiterals =
-  [ 1
-    , 13
-    , 14
-    , 15
-    , 25
-    , 27
-    , 34
-    , 43
-    , 49
-    , 50
-    , 51
-    , 52
-    , 53
-    , 54
-    , 55
-    , 56
-    , 57
-    , 58
-    , 59
-    , 60
-    , 61
-    , 62
-    , 63
-    , 64
-    , 65
-    , 66
-    , 67
-    , 68
-    , 69
-    , 70
-    , 71
-    , 72
-    , 73
-    , 74
-    , 75
-    , 76
-    , 77
-    , 78
-    , 79
-    , 80
-    , 81
-    , 82
-    , 83
-    , 84
-    , 85
-    , 86
-    , 87
-    , 88
-    , 89
-    , 90
-    , 91
-    , 92
-    , 93
-    , 94
-    , 95
+  [ ordinal
+  | capability <- expectedResourceRequiredCapabilities
+  , Just ordinal <- [lookupCapabilityOrdinal capability]
+  ]
+
+unresolvedResourceRequiredCapabilities :: [Text]
+unresolvedResourceRequiredCapabilities =
+  [ capability
+  | capability <- expectedResourceRequiredCapabilities
+  , lookupCapabilityOrdinal capability == Nothing
   ]
 
 canonicalPhaseIdentities :: [PhaseIdentity]

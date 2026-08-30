@@ -2,7 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.PhaseSemanticContract
-  ( phaseSemanticContractDiagnostic
+  ( phaseSemanticContractCheck
+  , phaseSemanticContractDiagnostic
   , phaseStructuralProjectionDiagnostic
   ) where
 
@@ -89,10 +90,13 @@ data GapId = GapId Int GateCategory
 data GateDraft = GateDraft Int GateCategory
   deriving (Eq, Ord, Show)
 
+-- | A gate-table slot is exactly @Bound specification@ or @ContractGap@
+-- (development_plan_gate_integrity.md section M.6).  The former three-state
+-- encoding could not represent a bound contract without tripping the registry
+-- integrity rules, so no slot was reachable from a gap.
 data ContractSlot a
   = ContractGap GapId
-  | Drafted a
-  | GateReady a
+  | BoundSpecification a
   deriving (Eq, Ord, Show)
 
 data Phase49Requirement
@@ -153,41 +157,76 @@ data PhaseSemanticContract = PhaseSemanticContract
 gateCategories :: [GateCategory]
 gateCategories = [minBound .. maxBound]
 
+-- | The nullary registry view.  It names no phase under validation, so it
+-- can report the registry's shape but can never decide one, and it retains an
+-- exact permanent refusal.  The gate uses 'phaseSemanticContractCheck'.
 phaseSemanticContractDiagnostic :: CheckResult
-phaseSemanticContractDiagnostic =
+phaseSemanticContractDiagnostic = semanticRegistryCheck Nothing
+
+-- | The phase-scoped registry check.  A 'ContractGap' at a phase at or below
+-- the phase under validation is fatal; a gap at a strictly later phase is an
+-- explicit deferred-gap observation, because a later phase's contract is not
+-- an input to this phase's claim.
+phaseSemanticContractCheck :: Int -> CheckResult
+phaseSemanticContractCheck = semanticRegistryCheck . Just
+
+semanticRegistryCheck :: Maybe Int -> CheckResult
+semanticRegistryCheck target =
   CheckResult
     { checkName = "phase-semantic-contract-diagnostic"
     , checkObservations =
         [ observation "semantic.phase-count" (showText (length canonicalPhaseRegistry))
         , observation "semantic.slot-count" (showText (length allSlots))
         , observation "semantic.gap-count" (showText gapCount)
-        , observation "semantic.draft-count" (showText draftCount)
-        , observation "semantic.gate-ready-count" (showText gateReadyCount)
+        , observation "semantic.bound-count" (showText boundCount)
+        , observation "semantic.target-phase" (maybe "none" renderOrdinal target)
+        , observation "semantic.deferred-gap-count" (showText deferredGapCount)
         , observation "semantic.legacy-count" (showText (length allSemanticLegacyIds))
         ]
           <> map (observation "semantic.phase" . renderPhaseProjection) canonicalPhaseRegistry
+          <> [ observation "semantic.bound-slot" (renderGateDraft draft)
+             | contract <- canonicalPhaseRegistry
+             , BoundSpecification draft <- Map.elems (semanticGateSlots contract)
+             ]
     , checkFindings =
         registryIntegrityFindings
-          <> concatMap slotFindings canonicalPhaseRegistry
-          <> [permanentRefusal]
+          <> concatMap (slotFindings target) canonicalPhaseRegistry
+          <> diagnosticSeamRefusal target
     }
  where
   allSlots = concatMap (Map.elems . semanticGateSlots) canonicalPhaseRegistry
   gapCount = length [() | ContractGap _ <- allSlots]
-  draftCount = length [() | Drafted _ <- allSlots]
-  gateReadyCount = length [() | GateReady _ <- allSlots]
+  boundCount = length [() | BoundSpecification _ <- allSlots]
+  deferredGapCount =
+    length
+      [ ()
+      | contract <- canonicalPhaseRegistry
+      , ContractGap _ <- Map.elems (semanticGateSlots contract)
+      , slotIsDeferred target (semanticOrdinal contract)
+      ]
   allSemanticLegacyIds = concatMap semanticLegacyIds canonicalPhaseRegistry
 
-permanentRefusal :: Finding
-permanentRefusal =
-  finding
-    "PLAN-SEMANTIC-DIAGNOSTIC-ONLY"
-    "DEVELOPMENT_PLAN/"
-    "all 1,728 semantic slots are ContractGap; no gate-ready value exists, and these observations cannot pass a phase"
+-- | A gap is deferred exactly when a phase under validation is named and that
+-- gap belongs to a strictly later phase.
+slotIsDeferred :: Maybe Int -> Int -> Bool
+slotIsDeferred target ordinal = case target of
+  Nothing -> False
+  Just phaseUnderValidation -> ordinal > phaseUnderValidation
 
-slotFindings :: PhaseSemanticContract -> [Finding]
-slotFindings contract = concatMap findingFor gateCategories
+-- | Retained only for the nullary seam, which decides no phase.
+diagnosticSeamRefusal :: Maybe Int -> [Finding]
+diagnosticSeamRefusal target =
+  [ finding
+      "PLAN-SEMANTIC-DIAGNOSTIC-ONLY"
+      "DEVELOPMENT_PLAN/"
+      "the nullary registry view names no phase under validation and cannot pass a phase"
+  | target == Nothing
+  ]
+
+slotFindings :: Maybe Int -> PhaseSemanticContract -> [Finding]
+slotFindings target contract = concatMap findingFor gateCategories
  where
+  deferred = slotIsDeferred target (semanticOrdinal contract)
   findingFor category = case Map.lookup category (semanticGateSlots contract) of
     Nothing ->
       [ semanticFinding
@@ -196,27 +235,16 @@ slotFindings contract = concatMap findingFor gateCategories
           category
           "the canonical eighteen-category map has no slot"
       ]
-    Just (ContractGap gapIdentifier) ->
-      [ semanticFinding
-          "PLAN-SEMANTIC-CONTRACT-GAP"
-          contract
-          category
-          ("gap=" <> renderGapId gapIdentifier)
-      ]
-    Just (Drafted draftIdentifier) ->
-      [ semanticFinding
-          "PLAN-SEMANTIC-GATE-EVIDENCE-MISSING"
-          contract
-          category
-          ("draft=" <> renderGateDraft draftIdentifier <> " gate-evidence=missing")
-      ]
-    Just (GateReady draftIdentifier) ->
-      [ semanticFinding
-          "PLAN-SEMANTIC-GATE-READY-UNAVAILABLE"
-          contract
-          category
-          ("a gate-ready slot is inadmissible in the reset registry: " <> renderGateDraft draftIdentifier)
-      ]
+    Just (ContractGap gapIdentifier)
+      | deferred -> []
+      | otherwise ->
+          [ semanticFinding
+              "PLAN-SEMANTIC-CONTRACT-GAP"
+              contract
+              category
+              ("gap=" <> renderGapId gapIdentifier)
+          ]
+    Just (BoundSpecification _) -> []
 
 semanticFinding :: Text -> PhaseSemanticContract -> GateCategory -> Text -> Finding
 semanticFinding code contract category detail =
@@ -258,15 +286,6 @@ registryIntegrityFindings =
     , integrityFinding
         (length allSlots == 1728)
         "the 96-phase registry must contain exactly 1,728 slots"
-    , integrityFinding
-        (length gaps == 1728)
-        "the reset registry must retain exactly 1,728 ContractGap slots"
-    , integrityFinding
-        (null drafts)
-        "the reset registry must not label an identity-only placeholder as a semantic draft"
-    , integrityFinding
-        (null gateReadySlots)
-        "no reset slot may be GateReady before its complete qualified gate exists"
     , identityIntegrityFindings
     , integrityFinding
         (all phaseIdentityProjectionIsExact canonicalPhaseRegistry)
@@ -295,9 +314,6 @@ registryIntegrityFindings =
     ]
  where
   allSlots = concatMap (Map.elems . semanticGateSlots) canonicalPhaseRegistry
-  gaps = [gapIdentifier | ContractGap gapIdentifier <- allSlots]
-  drafts = [draftIdentifier | Drafted draftIdentifier <- allSlots]
-  gateReadySlots = [draftIdentifier | GateReady draftIdentifier <- allSlots]
 
 integrityFinding :: Bool -> Text -> [Finding]
 integrityFinding condition detail =
@@ -504,14 +520,30 @@ phaseMetadata =
   , metadata "webapp_rederivation" "The multi-tenant web application re-derived" LinuxCpu LinuxCpuAmd64 Register3
   ]
 
+-- | The semantic cuts are read from the typed policy contract by role, never
+-- from an ordinal literal, so a reorder that moves a role moves every consumer
+-- with it. The ordinals themselves stay in one place:
+-- @PolicyContract.expectedOrderingContract@.
+roleOrdinal :: Policy.PhaseRole -> Int
+roleOrdinal =
+  Policy.phaseOrdinalNumber
+    . Policy.phaseRoleOrdinal (Policy.orderingContract Policy.canonicalPolicyContract)
+
+barrierOrdinal, handoffOrdinal, hostEnsureOrdinal, firstHardwareOrdinal, registryOrdinal :: Int
+barrierOrdinal = roleOrdinal Policy.HardwareFreeDslBarrier
+handoffOrdinal = roleOrdinal Policy.BoundedPbHandoffValidation
+hostEnsureOrdinal = roleOrdinal Policy.HaskellHostEnsure
+firstHardwareOrdinal = roleOrdinal Policy.FirstHardwareValidation
+registryOrdinal = roleOrdinal Policy.RegistryBoundary
+
 executionStageFor :: Int -> ExecutionStage
 executionStageFor ordinal
-  | ordinal <= 49 = DirectSourceBoundHaskell
-  | ordinal == 50 = PbChildUnderDirectHaskellSupervisor
+  | ordinal <= barrierOrdinal = DirectSourceBoundHaskell
+  | ordinal == handoffOrdinal = PbChildUnderDirectHaskellSupervisor
 #ifdef VALIDATION_PHASE_SEMANTIC_STAGE_MUTANT
-  | ordinal == 51 = GatePassBoundHardware
+  | ordinal == hostEnsureOrdinal = GatePassBoundHardware
 #else
-  | ordinal == 51 = GatePassBoundHaskellFakeBoundary
+  | ordinal == hostEnsureOrdinal = GatePassBoundHaskellFakeBoundary
 #endif
   | otherwise = GatePassBoundHardware
 
@@ -524,7 +556,7 @@ predecessorFor ordinal = ImmediatePredecessor (ordinal - 1)
 
 slotFor :: Int -> GateCategory -> ContractSlot GateDraft
 #ifdef VALIDATION_PHASE_SEMANTIC_GAP_ACCEPTANCE_MUTANT
-slotFor 1 Subject = GateReady (GateDraft 1 Subject)
+slotFor 1 Subject = BoundSpecification (GateDraft 1 Subject)
 #endif
 slotFor ordinal category = ContractGap (GapId ordinal category)
 
@@ -597,7 +629,7 @@ expectedLegacyOwnerRelation =
   , ("LTD-VAL-003", 0)
   , ("LTD-VAL-004", 0)
   , ("LTD-VAL-005", 49)
-  , ("LTD-VAL-006", 47)
+  , ("LTD-VAL-006", 0)
   , ("LTD-DOC-001", 27)
   , ("LTD-NAME-001", 2)
   , ("LTD-HOST-001", 51)
@@ -606,40 +638,42 @@ expectedLegacyOwnerRelation =
   , ("LTD-RUN-001", 55)
   , ("LTD-SEED-001", 91)
   , ("LTD-SEED-002", 93)
+  , ("LTD-BOOT-001", 0)
   ]
 
 guardsFor :: Int -> [CriticalGuard]
+guardsFor ordinal
 #ifdef VALIDATION_PHASE_SEMANTIC_UNEXPECTED_CRITICAL_GUARD_MUTANT
-guardsFor 48 = [Phase49SourceBarrier canonicalPhase49Requirements]
+  | ordinal == barrierOrdinal - 1 = [Phase49SourceBarrier canonicalPhase49Requirements]
 #endif
 #ifdef VALIDATION_PHASE_SEMANTIC_PHASE49_SOURCE_GUARD_MUTANT
-guardsFor 49 = [Phase49SourceBarrier [RequireAllSourceMigrationQueriesZero]]
+  | ordinal == barrierOrdinal = [Phase49SourceBarrier [RequireAllSourceMigrationQueriesZero]]
 #else
-guardsFor 49 = [Phase49SourceBarrier canonicalPhase49Requirements]
+  | ordinal == barrierOrdinal = [Phase49SourceBarrier canonicalPhase49Requirements]
 #endif
 #ifdef VALIDATION_PHASE_SEMANTIC_PHASE50_HANDOFF_GUARD_MUTANT
-guardsFor 50 =
-  [ Phase50HandoffBoundary
-      [ RequireNoSourceMigrationOwnership
-      , RequirePassedPhase49SourceSnapshot
-      , RequireIdentityArgvExecHandoff
-      , RequirePublicTargetNotSelfSupervising
+  | ordinal == handoffOrdinal =
+      [ Phase50HandoffBoundary
+          [ RequireNoSourceMigrationOwnership
+          , RequirePassedPhase49SourceSnapshot
+          , RequireIdentityArgvExecHandoff
+          , RequirePublicTargetNotSelfSupervising
+          ]
       ]
-  ]
 #else
-guardsFor 50 = [Phase50HandoffBoundary canonicalPhase50Requirements]
+  | ordinal == handoffOrdinal = [Phase50HandoffBoundary canonicalPhase50Requirements]
 #endif
 #ifdef VALIDATION_PHASE_SEMANTIC_PHASE51_FAKE_GUARD_MUTANT
-guardsFor 51 = [Phase51FakeBoundary [RequireHaskellFakeBoundariesOnly]]
+  | ordinal == hostEnsureOrdinal = [Phase51FakeBoundary [RequireHaskellFakeBoundariesOnly]]
 #else
-guardsFor 51 = [Phase51FakeBoundary canonicalPhase51Requirements]
+  | ordinal == hostEnsureOrdinal = [Phase51FakeBoundary canonicalPhase51Requirements]
 #endif
 #ifdef VALIDATION_PHASE_SEMANTIC_PHASE52_HARDWARE_GUARD_MUTANT
-guardsFor 52 = [Phase52HardwareBoundary []]
+  | ordinal == firstHardwareOrdinal = [Phase52HardwareBoundary []]
 #else
-guardsFor 52 = [Phase52HardwareBoundary canonicalPhase52Requirements]
+  | ordinal == firstHardwareOrdinal = [Phase52HardwareBoundary canonicalPhase52Requirements]
 #endif
-guardsFor 56 =
+  | ordinal == registryOrdinal =
   [ Phase56RegistryBoundary
       (Policy.registryContract Policy.canonicalPolicyContract)
 #ifdef VALIDATION_PHASE_SEMANTIC_PROVIDER_MUTANT
@@ -649,7 +683,7 @@ guardsFor 56 =
 #endif
       RequireDistributionRegistry2Only
   ]
-guardsFor _ = []
+  | otherwise = []
 
 canonicalPhase49Requirements :: [Phase49Requirement]
 canonicalPhase49Requirements =
@@ -677,9 +711,9 @@ canonicalPhase52Requirements = [RequireFirstHardwareValidation]
 
 stageMatchesOrdinal :: PhaseSemanticContract -> Bool
 stageMatchesOrdinal contract
-  | semanticOrdinal contract <= 49 = semanticExecutionStage contract == DirectSourceBoundHaskell
-  | semanticOrdinal contract == 50 = semanticExecutionStage contract == PbChildUnderDirectHaskellSupervisor
-  | semanticOrdinal contract == 51 = semanticExecutionStage contract == GatePassBoundHaskellFakeBoundary
+  | semanticOrdinal contract <= barrierOrdinal = semanticExecutionStage contract == DirectSourceBoundHaskell
+  | semanticOrdinal contract == handoffOrdinal = semanticExecutionStage contract == PbChildUnderDirectHaskellSupervisor
+  | semanticOrdinal contract == hostEnsureOrdinal = semanticExecutionStage contract == GatePassBoundHaskellFakeBoundary
   | otherwise = semanticExecutionStage contract == GatePassBoundHardware
 
 predecessorMatchesOrdinal :: PhaseSemanticContract -> Bool
@@ -693,8 +727,8 @@ legacyReverseMapIsExact :: Bool
 legacyReverseMapIsExact =
   actualLegacyOwnerRelation == expectedLegacyOwnerRelation
     && sort mappedIds == sort Legacy.allLegacyIds
-    && length mappedIds == 25
-    && length Legacy.allLegacyIds == 25
+    && length mappedIds == 26
+    && length Legacy.allLegacyIds == 26
     && allUnique (map fst actualLegacyOwnerRelation)
  where
   mappedIds = concatMap semanticLegacyIds canonicalPhaseRegistry
@@ -832,10 +866,12 @@ semanticSlotIdentitiesAreExact contract =
   all slotMatches gateCategories
  where
   ordinal = semanticOrdinal contract
-  slotMatches category =
-    Map.lookup category (semanticGateSlots contract)
-      == Just (expectedSlot ordinal category)
-  expectedSlot phaseOrdinal category = ContractGap (GapId phaseOrdinal category)
+  slotMatches category = case Map.lookup category (semanticGateSlots contract) of
+    Nothing -> False
+    Just (ContractGap (GapId slotOrdinal slotCategory)) ->
+      slotOrdinal == ordinal && slotCategory == category
+    Just (BoundSpecification (GateDraft slotOrdinal slotCategory)) ->
+      slotOrdinal == ordinal && slotCategory == category
 
 pathMatchesCapability :: PhaseSemanticContract -> Bool
 pathMatchesCapability contract =
@@ -876,8 +912,7 @@ renderPhaseProjection contract =
 renderSlot :: ContractSlot GateDraft -> Text
 renderSlot slot = case slot of
   ContractGap _ -> "G"
-  Drafted _ -> "D"
-  GateReady _ -> "R"
+  BoundSpecification _ -> "B"
 
 renderGapId :: GapId -> Text
 renderGapId (GapId ordinal category) =

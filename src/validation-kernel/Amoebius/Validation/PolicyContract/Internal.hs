@@ -320,6 +320,7 @@ data PhaseRole
   | BoundedPbHandoffValidation
   | HaskellHostEnsure
   | FirstHardwareValidation
+  | RegistryBoundary
 #ifdef VALIDATION_POLICY_UNIVERSE_PHASE_ROLE_MUTANT
   | MutationOnlyPhaseRole
 #endif
@@ -361,6 +362,7 @@ data OrderingContract = OrderingContract
   , boundedPbHandoffValidationPhase :: PhaseOrdinal
   , haskellHostEnsurePhase :: PhaseOrdinal
   , firstHardwareValidationPhase :: PhaseOrdinal
+  , registryBoundaryPhase :: PhaseOrdinal
   , phase50MigrationRule :: Phase50MigrationRule
   , dslBarrierSourceClosure :: DslBarrierSourceClosure
   , prehardwareRule :: PrehardwareRule
@@ -374,6 +376,7 @@ phaseRoleOrdinal ordering role
   | role == BoundedPbHandoffValidation = boundedPbHandoffValidationPhase ordering
   | role == HaskellHostEnsure = haskellHostEnsurePhase ordering
   | role == FirstHardwareValidation = firstHardwareValidationPhase ordering
+  | role == RegistryBoundary = registryBoundaryPhase ordering
   | otherwise = phaseDomainLower ordering
 
 data GatePassRule
@@ -500,6 +503,7 @@ expectedPhaseRoleUniverse =
   , BoundedPbHandoffValidation
   , HaskellHostEnsure
   , FirstHardwareValidation
+  , RegistryBoundary
   ]
 
 expectedPhase50MigrationRuleUniverse :: [Phase50MigrationRule]
@@ -852,6 +856,7 @@ expectedOrderingContract =
     , boundedPbHandoffValidationPhase = PhaseOrdinal 50
     , haskellHostEnsurePhase = PhaseOrdinal 51
     , firstHardwareValidationPhase = PhaseOrdinal 52
+    , registryBoundaryPhase = PhaseOrdinal 56
     , phase50MigrationRule = NoSourceMigration
     , dslBarrierSourceClosure = AllLtdSrcQueriesZeroBeforePhase49
     , prehardwareRule = NoHardwareThroughPhase51
@@ -2156,6 +2161,7 @@ renderPhaseRole value
   | value == BoundedPbHandoffValidation = "bounded-pb-handoff-validation"
   | value == HaskellHostEnsure = "haskell-host-ensure"
   | value == FirstHardwareValidation = "first-hardware-validation"
+  | value == RegistryBoundary = "registry-boundary"
   | otherwise = "mutation-only-phase-role"
 
 renderPhaseOrdinal :: PhaseOrdinal -> Text

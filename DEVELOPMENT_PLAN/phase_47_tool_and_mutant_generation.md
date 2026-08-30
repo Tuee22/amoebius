@@ -85,7 +85,7 @@ later provider phases validate provider semantics and live execution, not source
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: Phase 47 owns `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, and `LTD-VAL-006`; their exact zero-finding predicates, including the absence of tracked Pulumi YAML and every other non-`pb` non-Haskell source, have not been independently reconciled. |
+| `Legacy closure` | UNRESOLVED — blocks validation: Phase 47 owns `LTD-SRC-001`, `LTD-SRC-005`, and `LTD-SRC-006`; their exact zero-finding predicates, including the absence of tracked Pulumi YAML and every other non-`pb` non-Haskell source, have not been independently reconciled. |
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 46; candidate execution refuses an absent, stale, replayed, or different-source result. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
@@ -106,7 +106,7 @@ later provider phases validate provider semantics and live execution, not source
 **Blocked by**: [Phase 46](phase_46_ui_contract_generation.md) gate pass
 **Independent Validation**: A separately authored Haskell oracle joins every declared tool/case/mutant to a lazily materialized `.build/**` artifact in both directions, proves changed-subject witnesses, and rejects empty discovery, copied tracked bytes, stale roots, and writes beneath authored roots.
 **Oracle**: planned `test/Amoebius/Generation/ToolsOracle.hs`; independent authorship unresolved
-**Legacy IDs**: `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`, `LTD-VAL-006`
+**Legacy IDs**: `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`
 **Docs to update**: `documents/engineering/jit_artifact_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective

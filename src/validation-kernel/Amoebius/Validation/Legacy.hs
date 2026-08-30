@@ -10,6 +10,7 @@ module Amoebius.Validation.Legacy
   ) where
 
 import Amoebius.Validation.Legacy.Internal qualified as Internal
+import Amoebius.Validation.PolicyContract.Internal qualified as Policy
 import Amoebius.Validation.Types (CheckResult (..), Finding, Observation, finding, observation)
 import Crypto.Hash qualified as Crypto
 import Data.ByteString (ByteString)
@@ -1683,7 +1684,7 @@ legacyRawProblemFinding analysis problem = case problem of
       ("the changed subject suppressed the bound-specific predicate; the outer preflight envelope still refused before traversal; guard=" <> label <> legacyCommitmentDetail analysis)
   LegacyPhaseWidth -> grammar LegacyFindingPhaseWidth "<candidate-phase>" "expected exactly two ASCII decimal characters"
   LegacyPhaseAlphabet -> grammar LegacyFindingPhaseAlphabet "<candidate-phase>" "expected ASCII decimal characters only"
-  LegacyPhaseRange -> grammar LegacyFindingPhaseRange "<candidate-phase>" "expected a phase in the closed range 00 through 95"
+  LegacyPhaseRange -> grammar LegacyFindingPhaseRange "<candidate-phase>" ("expected a phase in the closed range " <> legacyPhaseDomainLower <> " through " <> legacyPhaseDomainUpper)
   LegacyBindingCardinality expected actual -> grammar LegacyFindingBindingCardinality "<bindings>"
     ("expected=" <> Text.pack (show expected) <> "; observed=" <> Text.pack (show actual))
   LegacyBindingDuplicate identifier -> grammar LegacyFindingBindingDuplicate (Text.unpack identifier) "stable ID occurs more than once"
@@ -3121,6 +3122,19 @@ legacyRenderedBindingReintroduction _ = ["mutated"]
 legacyRenderedBindingReintroduction = canonicalBindingReintroduction
 #endif
 
+-- | The admitted phase span, rendered at the two-digit width the surrounding
+-- grammar already requires. Derived rather than written so a change to the
+-- phase domain cannot leave this refusal describing the old one.
+legacyPhaseDomainLower, legacyPhaseDomainUpper :: Text
+legacyPhaseDomainLower = renderPhaseBound (Policy.phaseDomainLower legacyPhaseOrdering)
+legacyPhaseDomainUpper = renderPhaseBound (Policy.phaseDomainUpper legacyPhaseOrdering)
+
+legacyPhaseOrdering :: Policy.OrderingContract
+legacyPhaseOrdering = Policy.orderingContract Policy.canonicalPolicyContract
+
+renderPhaseBound :: Policy.PhaseOrdinal -> Text
+renderPhaseBound = Text.justifyRight 2 '0' . Text.pack . show . Policy.phaseOrdinalNumber
+
 legacyPhaseWidthValid, legacyPhaseAlphabetValid, legacyPhaseRangeValid :: Text -> Bool
 #if defined(VALIDATION_LEGACY_RAW_PHASE_WIDTH_BYPASS_MUTANT)
 legacyPhaseWidthValid _ = True
@@ -3135,7 +3149,7 @@ legacyPhaseAlphabetValid = Text.all legacyPhaseCharacterValid
 #if defined(VALIDATION_LEGACY_RAW_PHASE_RANGE_BYPASS_MUTANT)
 legacyPhaseRangeValid _ = True
 #else
-legacyPhaseRangeValid value = value <= "95"
+legacyPhaseRangeValid value = value <= legacyPhaseDomainUpper
 #endif
 
 legacyPhaseCharacterValid :: Char -> Bool

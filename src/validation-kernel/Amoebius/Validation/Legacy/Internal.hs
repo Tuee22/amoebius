@@ -28,6 +28,7 @@ module Amoebius.Validation.Legacy.Internal
   , legacyIdDisposition
   , legacyIdObservationRule
   , legacyIdOwner
+  , legacyIdOwnerCapability
   , legacyIdReintroductionCases
   , parseActiveRegister
   , parseLegacyId
@@ -36,6 +37,7 @@ module Amoebius.Validation.Legacy.Internal
   , sourceDebtLegacyId
   ) where
 
+import Amoebius.Validation.PhaseIdentity qualified as PhaseIdentity
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
 import Amoebius.Validation.CompilerSourceGraph.Internal
   ( AcquiredCompilerSourceGraph
@@ -75,7 +77,7 @@ import Crypto.Hash qualified as Crypto
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
 import Data.Char (ord)
-import Data.List (nub, sortOn)
+import Data.List (isPrefixOf, nub, sortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -113,6 +115,7 @@ data LegacyId
   | LtdRun001
   | LtdSeed001
   | LtdSeed002
+  | LtdBoot001
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data LegacyDisposition
@@ -147,6 +150,7 @@ data LegacyAnalyzer
   | AnalyzeExecutableIdentity
   | AnalyzeInfernixSeedDependency
   | AnalyzeJitMlSeedDependency
+  | AnalyzeBootstrapToolchain
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data LegacyObservationRule
@@ -175,6 +179,7 @@ data LegacyObservationRule
   | ObserveCabalExecutableGraph
   | ObserveInfernixDependencyGraph
   | ObserveJitMlDependencyGraph
+  | ObserveBootstrapToolchainProvenance
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data LegacyClosureRule
@@ -203,6 +208,7 @@ data LegacyClosureRule
   | CloseExecutableIdentity
   | CloseInfernixSeedDependency
   | CloseJitMlSeedDependency
+  | CloseBootstrapToolchain
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 -- | These are stable, typed case identities. The owning analyzer must later
@@ -233,6 +239,7 @@ data LegacyReintroductionCase
   | RejectSecondExecutableIdentity
   | RejectInfernixSeedDependency
   | RejectJitMlSeedDependency
+  | RejectUnverifiedBootstrapToolchain
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data BindingSlot value
@@ -525,6 +532,12 @@ canonicalLegacyIdRetained identifier = case identifier of
 #else
     True
 #endif
+  LtdBoot001 ->
+#if defined(VALIDATION_LEGACY_INTERNAL_UNIVERSE_LTD_BOOT001_DROP_MUTANT)
+    False
+#else
+    True
+#endif
 
 renderLegacyId :: LegacyId -> Text
 renderLegacyId LtdSrc000 =
@@ -676,6 +689,12 @@ renderLegacyId LtdSeed002 =
   "LTD-SEED-00x"
 #else
   "LTD-SEED-002"
+#endif
+renderLegacyId LtdBoot001 =
+#if defined(VALIDATION_LEGACY_LTD_BOOT001_ID_MUTANT)
+  "LTD-BOOT-00x"
+#else
+  "LTD-BOOT-001"
 #endif
 
 parseLegacyId :: Text -> Maybe LegacyId
@@ -879,157 +898,205 @@ legacyDecoderTarget identifier = case identifier of
 #else
     LtdSeed002
 #endif
+  LtdBoot001 ->
+#if defined(VALIDATION_LEGACY_INTERNAL_DECODER_LTD_BOOT001_TARGET_MUTANT)
+    LtdSrc000
+#else
+    LtdBoot001
+#endif
 
+-- | The owner of a legacy binding is the phase /capability/ that must make the
+-- replacement true, never an ordinal.
+--
+-- An ordinal is a coordinate of the plan's present order, so a reorder moves
+-- it and every literal that named it goes silently wrong. A capability does not
+-- move. 'legacyIdOwner' keeps its type and its values: the ordinal is now a
+-- projection, resolved through the phase-identity table.
 legacyIdOwner :: LegacyId -> Policy.PhaseOrdinal
-legacyIdOwner LtdSrc000 =
+legacyIdOwner = ownerCapabilityOrdinal . legacyIdOwnerCapability
+
+-- | An owner capability that no phase provides cannot be resolved. It falls
+-- back to the domain lower bound so the function stays total, and
+-- 'legacyOwnerCapabilityProblems' reports it, so the unresolved name is visible
+-- rather than silently absorbed.
+ownerCapabilityOrdinal :: Text -> Policy.PhaseOrdinal
+ownerCapabilityOrdinal capability =
+  case PhaseIdentity.lookupCapabilityOrdinal capability of
+    Just ordinal -> phaseOrdinal ordinal
+    Nothing -> Policy.phaseDomainLower (Policy.orderingContract Policy.canonicalPolicyContract)
+
+-- | Every legacy owner capability must be one a phase actually provides.
+legacyOwnerCapabilityProblems :: [Text]
+legacyOwnerCapabilityProblems =
+  [ "legacy owner capability is not provided by any phase: "
+      <> renderLegacyId identifier
+      <> "="
+      <> legacyIdOwnerCapability identifier
+  | identifier <- allLegacyIds
+  , PhaseIdentity.lookupCapabilityOrdinal (legacyIdOwnerCapability identifier) == Nothing
+  ]
+
+legacyIdOwnerCapability :: LegacyId -> Text
+legacyIdOwnerCapability LtdSrc000 =
 #if defined(VALIDATION_LEGACY_LTD_SRC000_OWNER_MUTANT)
-  phaseOrdinal 1
+  "toolchain_spike"
 #else
-  phaseOrdinal 0
+  "documentation_suite"
 #endif
-legacyIdOwner LtdSrc001 =
+legacyIdOwnerCapability LtdSrc001 =
 #if defined(VALIDATION_LEGACY_LTD_SRC001_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 47
+  "tool_and_mutant_generation"
 #endif
-legacyIdOwner LtdSrc002 =
+legacyIdOwnerCapability LtdSrc002 =
 #if defined(VALIDATION_LEGACY_LTD_SRC002_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 25
+  "dhall_schema_generation"
 #endif
-legacyIdOwner LtdSrc003 =
+legacyIdOwnerCapability LtdSrc003 =
 #if defined(VALIDATION_LEGACY_LTD_SRC003_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 26
+  "gadt_decode_ir"
 #endif
-legacyIdOwner LtdSrc004 =
+legacyIdOwnerCapability LtdSrc004 =
 #if defined(VALIDATION_LEGACY_LTD_SRC004_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 46
+  "ui_contract_generation"
 #endif
-legacyIdOwner LtdSrc005 =
+legacyIdOwnerCapability LtdSrc005 =
 #if defined(VALIDATION_LEGACY_LTD_SRC005_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 47
+  "tool_and_mutant_generation"
 #endif
-legacyIdOwner LtdSrc006 =
+legacyIdOwnerCapability LtdSrc006 =
 #if defined(VALIDATION_LEGACY_LTD_SRC006_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 47
+  "tool_and_mutant_generation"
 #endif
-legacyIdOwner LtdSrc007 =
+legacyIdOwnerCapability LtdSrc007 =
 #if defined(VALIDATION_LEGACY_LTD_SRC007_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 1
+  "toolchain_spike"
 #endif
-legacyIdOwner LtdSrc008 =
+legacyIdOwnerCapability LtdSrc008 =
 #if defined(VALIDATION_LEGACY_LTD_SRC008_OWNER_MUTANT)
-  phaseOrdinal 1
+  "toolchain_spike"
 #else
-  phaseOrdinal 0
+  "documentation_suite"
 #endif
-legacyIdOwner LtdSrc009 =
+legacyIdOwnerCapability LtdSrc009 =
 #if defined(VALIDATION_LEGACY_LTD_SRC009_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 1
+  "toolchain_spike"
 #endif
-legacyIdOwner LtdMeta001 =
+legacyIdOwnerCapability LtdMeta001 =
 #if defined(VALIDATION_LEGACY_LTD_META001_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 2
+  "repository_layout_conformance"
 #endif
-legacyIdOwner LtdVal001 =
+legacyIdOwnerCapability LtdVal001 =
 #if defined(VALIDATION_LEGACY_LTD_VAL001_OWNER_MUTANT)
-  phaseOrdinal 1
+  "toolchain_spike"
 #else
-  phaseOrdinal 0
+  "documentation_suite"
 #endif
-legacyIdOwner LtdVal002 =
+legacyIdOwnerCapability LtdVal002 =
 #if defined(VALIDATION_LEGACY_LTD_VAL002_OWNER_MUTANT)
-  phaseOrdinal 1
+  "toolchain_spike"
 #else
-  phaseOrdinal 0
+  "documentation_suite"
 #endif
-legacyIdOwner LtdVal003 =
+legacyIdOwnerCapability LtdVal003 =
 #if defined(VALIDATION_LEGACY_LTD_VAL003_OWNER_MUTANT)
-  phaseOrdinal 1
+  "toolchain_spike"
 #else
-  phaseOrdinal 0
+  "documentation_suite"
 #endif
-legacyIdOwner LtdVal004 =
+legacyIdOwnerCapability LtdVal004 =
 #if defined(VALIDATION_LEGACY_LTD_VAL004_OWNER_MUTANT)
-  phaseOrdinal 1
+  "toolchain_spike"
 #else
-  phaseOrdinal 0
+  "documentation_suite"
 #endif
-legacyIdOwner LtdVal005 =
+legacyIdOwnerCapability LtdVal005 =
 #if defined(VALIDATION_LEGACY_LTD_VAL005_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 49
+  "self_referential_gates"
 #endif
-legacyIdOwner LtdVal006 =
+-- Cleanroom and freshness are properties of the run harness, not of tool
+-- generation: every phase's gate inherits both rows, so an owner later than the
+-- first phase makes every earlier phase depend on a capability it cannot have.
+legacyIdOwnerCapability LtdVal006 =
 #if defined(VALIDATION_LEGACY_LTD_VAL006_OWNER_MUTANT)
-  phaseOrdinal 0
+  "tool_and_mutant_generation"
 #else
-  phaseOrdinal 47
+  "documentation_suite"
 #endif
-legacyIdOwner LtdDoc001 =
+legacyIdOwnerCapability LtdDoc001 =
 #if defined(VALIDATION_LEGACY_LTD_DOC001_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 27
+  "illegal_state_covering"
 #endif
-legacyIdOwner LtdName001 =
+legacyIdOwnerCapability LtdName001 =
 #if defined(VALIDATION_LEGACY_LTD_NAME001_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 2
+  "repository_layout_conformance"
 #endif
-legacyIdOwner LtdHost001 =
+legacyIdOwnerCapability LtdHost001 =
 #if defined(VALIDATION_LEGACY_LTD_HOST001_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 51
+  "host_ensure_kernel"
 #endif
-legacyIdOwner LtdHost002 =
+legacyIdOwnerCapability LtdHost002 =
 #if defined(VALIDATION_LEGACY_LTD_HOST002_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 51
+  "host_ensure_kernel"
 #endif
-legacyIdOwner LtdImg001 =
+legacyIdOwnerCapability LtdImg001 =
 #if defined(VALIDATION_LEGACY_LTD_IMG001_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 56
+  "base_image_registry"
 #endif
-legacyIdOwner LtdRun001 =
+legacyIdOwnerCapability LtdRun001 =
 #if defined(VALIDATION_LEGACY_LTD_RUN001_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 55
+  "bootstrap_coordinator_kind"
 #endif
-legacyIdOwner LtdSeed001 =
+legacyIdOwnerCapability LtdSeed001 =
 #if defined(VALIDATION_LEGACY_LTD_SEED001_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 91
+  "infernix_rederivation"
 #endif
-legacyIdOwner LtdSeed002 =
+legacyIdOwnerCapability LtdSeed002 =
 #if defined(VALIDATION_LEGACY_LTD_SEED002_OWNER_MUTANT)
-  phaseOrdinal 0
+  "documentation_suite"
 #else
-  phaseOrdinal 93
+  "jitml_rederivation"
+#endif
+-- The bootstrap belongs to the first phase: the toolchain that builds the
+-- ordinal-0 candidate is the one thing that phase cannot verify with itself.
+legacyIdOwnerCapability LtdBoot001 =
+#if defined(VALIDATION_LEGACY_LTD_BOOT001_OWNER_MUTANT)
+  "toolchain_spike"
+#else
+  "documentation_suite"
 #endif
 
 legacyIdDisposition :: LegacyId -> LegacyDisposition
@@ -1058,6 +1125,7 @@ legacyIdDisposition LtdImg001 = LegacyActive
 legacyIdDisposition LtdRun001 = LegacyActive
 legacyIdDisposition LtdSeed001 = LegacyActive
 legacyIdDisposition LtdSeed002 = LegacyActive
+legacyIdDisposition LtdBoot001 = LegacyActive
 
 legacyIdAnalyzer :: LegacyId -> LegacyAnalyzer
 legacyIdAnalyzer LtdSrc000 =
@@ -1209,6 +1277,12 @@ legacyIdAnalyzer LtdSeed002 =
   AnalyzeCompleteSourceGrammar
 #else
   AnalyzeJitMlSeedDependency
+#endif
+legacyIdAnalyzer LtdBoot001 =
+#if defined(VALIDATION_LEGACY_LTD_BOOT001_ANALYZER_MUTANT)
+  AnalyzeCompleteSourceGrammar
+#else
+  AnalyzeBootstrapToolchain
 #endif
 
 legacyIdObservationRule :: LegacyId -> LegacyObservationRule
@@ -1362,6 +1436,12 @@ legacyIdObservationRule LtdSeed002 =
 #else
   ObserveJitMlDependencyGraph
 #endif
+legacyIdObservationRule LtdBoot001 =
+#if defined(VALIDATION_LEGACY_LTD_BOOT001_OBSERVATION_MUTANT)
+  ObserveCompleteSourceSnapshot
+#else
+  ObserveBootstrapToolchainProvenance
+#endif
 
 legacyIdClosureRule :: LegacyId -> LegacyClosureRule
 legacyIdClosureRule LtdSrc000 =
@@ -1514,6 +1594,12 @@ legacyIdClosureRule LtdSeed002 =
 #else
   CloseJitMlSeedDependency
 #endif
+legacyIdClosureRule LtdBoot001 =
+#if defined(VALIDATION_LEGACY_LTD_BOOT001_CLOSURE_MUTANT)
+  CloseCompleteSourceGrammar
+#else
+  CloseBootstrapToolchain
+#endif
 
 legacyIdReintroductionCases :: LegacyId -> NonEmpty LegacyReintroductionCase
 legacyIdReintroductionCases LtdSrc000 =
@@ -1665,6 +1751,12 @@ legacyIdReintroductionCases LtdSeed002 =
   RejectDisguisedOrConcealedSource :| []
 #else
   RejectJitMlSeedDependency :| []
+#endif
+legacyIdReintroductionCases LtdBoot001 =
+#if defined(VALIDATION_LEGACY_LTD_BOOT001_REINTRODUCTION_MUTANT)
+  RejectDisguisedOrConcealedSource :| []
+#else
+  RejectUnverifiedBootstrapToolchain :| []
 #endif
 
 -- | Package-hidden standard-value projection used by the permanently
@@ -2026,6 +2118,12 @@ legacyDispositionProjectionRetained identifier = case identifier of
 #else
     True
 #endif
+  LtdBoot001 ->
+#if defined(VALIDATION_LEGACY_LTD_BOOT001_DISPOSITION_MUTANT)
+    False
+#else
+    True
+#endif
 
 renderTwoDigitOwner :: Int -> Text
 renderTwoDigitOwner owner
@@ -2202,6 +2300,12 @@ renderLegacyAnalyzer value = case value of
 #else
     "jitml-seed-dependency"
 #endif
+  AnalyzeBootstrapToolchain ->
+#if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_ANALYZER_MUTANT)
+    "bootstrap-toolchainx"
+#else
+    "bootstrap-toolchain"
+#endif
 
 renderLegacyObservationRule :: LegacyObservationRule -> Text
 renderLegacyObservationRule value = case value of
@@ -2354,6 +2458,12 @@ renderLegacyObservationRule value = case value of
     "jitml-dependency-graphx"
 #else
     "jitml-dependency-graph"
+#endif
+  ObserveBootstrapToolchainProvenance ->
+#if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_OBSERVATION_MUTANT)
+    "bootstrap-toolchain-provenancex"
+#else
+    "bootstrap-toolchain-provenance"
 #endif
 
 renderLegacyClosureRule :: LegacyClosureRule -> Text
@@ -2508,6 +2618,12 @@ renderLegacyClosureRule value = case value of
 #else
     "jitml-seed-dependency"
 #endif
+  CloseBootstrapToolchain ->
+#if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_CLOSURE_MUTANT)
+    "bootstrap-toolchainx"
+#else
+    "bootstrap-toolchain"
+#endif
 
 renderLegacyReintroductionCase :: LegacyReintroductionCase -> Text
 renderLegacyReintroductionCase value = case value of
@@ -2660,6 +2776,12 @@ renderLegacyReintroductionCase value = case value of
     "reject-jitml-seed-dependencyx"
 #else
     "reject-jitml-seed-dependency"
+#endif
+  RejectUnverifiedBootstrapToolchain ->
+#if defined(VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_REINTRODUCTION_MUTANT)
+    "reject-unverified-bootstrap-toolchainx"
+#else
+    "reject-unverified-bootstrap-toolchain"
 #endif
 
 -- | A fixed, pure, standard-value projection of the genuine hidden parser,
@@ -4540,6 +4662,9 @@ universeIntegrityFindings =
         "every LegacyReintroductionCase key must be used exactly once"
         ([minBound .. maxBound] :: [LegacyReintroductionCase])
         (concatMap (toListNonEmpty . legacyIdReintroductionCases) canonicalLegacyUniverse)
+      <> [ finding "LEGACY-OWNER-CAPABILITY-UNKNOWN" legacySemanticSubject problem
+         | problem <- legacyOwnerCapabilityProblems
+         ]
 
 legacyUniverseIntegrityComposition
   :: [Finding] -> [Finding] -> [Finding] -> [Finding] -> [Finding] -> [Finding]
@@ -6236,7 +6361,7 @@ closedLegacyEvidenceRegistry snapshot acquiredDebtEvidence closureCheck debtChec
   canonicalEntries =
     legacyCompleteEvidenceEntry snapshot completeState
       <> map (sourceDebtEvidence snapshot) sourceDebtUniverse
-      <> map (unimplementedEvidence snapshot) nonSourceLegacyUniverse
+      <> map (nonSourceEvidence snapshot acquiredDebtEvidence) nonSourceLegacyUniverse
   completeFindings =
     legacyCompleteFindingOrder
       ( legacyCompleteContributionComposition
@@ -6472,6 +6597,120 @@ closedEvidenceObservationRoute _ _ = Nothing
 #else
 closedEvidenceObservationRoute analyzer state = LegacyObservation analyzer <$> state
 #endif
+
+-- | Route a non-source binding to its owner-domain analyzer.
+--
+-- Only the two seed bindings have one today; every other non-source binding
+-- still reports the typed unimplemented state. Adding an analyzer here is what
+-- retires that state for one binding, so this dispatch is the seam each future
+-- owner-domain analyzer joins.
+nonSourceEvidence
+  :: SourceSnapshot
+  -> Maybe (AcquiredSourceSnapshot, SourceDebtEvidence)
+  -> LegacyId
+  -> ClosedLegacyEvidence
+nonSourceEvidence snapshot acquiredDebtEvidence identifier
+  | seedLegacyDependencyRoot identifier == Nothing = unimplementedEvidence snapshot identifier
+  | otherwise =
+      closedEvidence
+        snapshot
+        identifier
+        Nothing
+        (Just seedState)
+ where
+  -- A caller-authored snapshot cannot observe a seed dependency, for the same
+  -- reason it cannot observe source debt: it chooses its own bytes, so an
+  -- absent @cabal.project@ would read as a closed binding. Only the captured
+  -- snapshot reaches the analyzer.
+  seedState = case acquiredDebtEvidence of
+    Nothing -> legacyCallerSnapshotSourceState
+    Just (acquired, _) ->
+      seedDependencyState (acquiredSourceSnapshot acquired) identifier
+
+-- | One observed seed-dependency locus.
+--
+-- A build input that names the seed's upstream repository, or a tracked module
+-- beneath the seed's authored namespace root. These are exactly the two
+-- conditions the owning phase must reduce to zero, and both are decided from
+-- the captured snapshot rather than from prose.
+data SeedDependencyLocus
+  = SeedProjectFetch FilePath
+  | SeedNamespaceModule FilePath
+  deriving (Eq, Ord, Show)
+
+-- | The typed closure predicate behind @CloseInfernixSeedDependency@ and
+-- @CloseJitMlSeedDependency@.
+--
+-- Before this, both closure rules were bare constructors: the register
+-- explained them to readers and no Haskell predicate decided them. A binding
+-- whose closure rule cannot be evaluated can never close, so the rule was
+-- unfalsifiable in both directions.
+seedDependencies :: SourceSnapshot -> LegacyId -> [SeedDependencyLocus]
+seedDependencies snapshot identifier = case seedLegacyDependencyRoot identifier of
+  Nothing -> []
+  Just (upstreamMarker, namespaceRoot) ->
+    [ SeedProjectFetch path
+    | (path, bytes) <- trackedProjectInputs
+    , seedUpstreamReferenced upstreamMarker bytes
+    ]
+      <> [ SeedNamespaceModule path
+         | path <- trackedSnapshotPaths
+         , seedNamespaceMember namespaceRoot path
+         ]
+ where
+  trackedSnapshotPaths = map (indexPath . trackedIndex) (snapshotEntries snapshot)
+  trackedProjectInputs =
+    [ (indexPath (trackedIndex entry), trackedBytes entry)
+    | entry <- snapshotEntries snapshot
+    , seedProjectInput (indexPath (trackedIndex entry))
+    ]
+
+-- | The closed seed universe: upstream marker and authored namespace root.
+seedLegacyDependencyRoot :: LegacyId -> Maybe (ByteString, FilePath)
+seedLegacyDependencyRoot identifier = case identifier of
+  LtdSeed001 -> Just ("Tuee22/infernix", "src/Infernix")
+  LtdSeed002 -> Just ("Tuee22/jitML", "src/JitML")
+  _ -> Nothing
+
+-- | Only a project-level build input can introduce an upstream fetch.
+seedProjectInput :: FilePath -> Bool
+seedProjectInput path = path == "cabal.project"
+
+seedUpstreamReferenced :: ByteString -> ByteString -> Bool
+seedUpstreamReferenced marker bytes = marker `ByteString.isInfixOf` bytes
+
+seedNamespaceMember :: FilePath -> FilePath -> Bool
+seedNamespaceMember root path =
+  root == path || (root <> "/") `isPrefixOf` path
+
+-- | The observed state for a seed binding.
+--
+-- Zero loci is an Active zero, which the evaluator admits only at the owning
+-- phase; a non-zero count is the later-owned debt this repository actually
+-- carries today.
+seedDependencyState :: SourceSnapshot -> LegacyId -> LegacyObservedState
+seedDependencyState snapshot identifier = case seedDependencies snapshot identifier of
+  [] -> LegacyObservedZero
+  loci -> LegacyObservedOpen (length loci) (seedDependencyDigest loci)
+
+-- | An open observation binds its loci by a domain-separated digest rather
+-- than by prose, so the count cannot drift from the set it summarizes.
+seedDependencyDigest :: [SeedDependencyLocus] -> Text
+seedDependencyDigest loci =
+  Text.pack . show . Crypto.hashWith Crypto.SHA256 . ByteString.concat $
+    seedDependencyDigestDomain <> map seedDependencyLocusBytes (sortOn id loci)
+
+seedDependencyDigestDomain :: [ByteString]
+seedDependencyDigestDomain = ["amoebius-legacy-seed-dependency-v0\0"]
+
+seedDependencyLocusBytes :: SeedDependencyLocus -> ByteString
+seedDependencyLocusBytes =
+  TextEncoding.encodeUtf8 . (<> "\0") . renderSeedDependencyLocus
+
+renderSeedDependencyLocus :: SeedDependencyLocus -> Text
+renderSeedDependencyLocus locus = case locus of
+  SeedProjectFetch path -> "upstream-fetch:" <> Text.pack path
+  SeedNamespaceModule path -> "namespace-module:" <> Text.pack path
 
 unimplementedEvidence :: SourceSnapshot -> LegacyId -> ClosedLegacyEvidence
 unimplementedEvidence snapshot identifier
@@ -6727,6 +6966,7 @@ nonSourceLegacyUniverse =
   , LtdRun001
   , LtdSeed001
   , LtdSeed002
+  , LtdBoot001
       ])
 
 nonSourceLegacyUniverseOrder :: [LegacyId] -> [LegacyId]
@@ -6824,6 +7064,12 @@ nonSourceLegacyRouteRetained identifier = case identifier of
 #endif
   LtdSeed002 ->
 #if defined(VALIDATION_LEGACY_INTERNAL_NON_SOURCE_LTD_SEED002_DROP_MUTANT)
+    False
+#else
+    True
+#endif
+  LtdBoot001 ->
+#if defined(VALIDATION_LEGACY_INTERNAL_NON_SOURCE_LTD_BOOT001_DROP_MUTANT)
     False
 #else
     True

@@ -870,7 +870,7 @@ expectedPolicyResult =
         , Observation "policy.registry-provider" "registry:2"
         , Observation "policy.active-register" "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md"
         , Observation "policy.phase-zero-status" "active-not-validated"
-        , Observation "policy.phase-roles" "hardware-free-dsl-barrier=49,bounded-pb-handoff-validation=50,haskell-host-ensure=51,first-hardware-validation=52"
+        , Observation "policy.phase-roles" "hardware-free-dsl-barrier=49,bounded-pb-handoff-validation=50,haskell-host-ensure=51,first-hardware-validation=52,registry-boundary=56"
         , Observation "policy.dsl-barrier-source-closure" "all-ltd-src-queries-zero-before-phase-49"
         , Observation "policy.pb-transport" "direct-haskell-through-49;observed-pb-at-50;phase-50-gate-pass-bound-pb-after-50"
         , Observation "policy.gate-pass-rule" "qualified-gate-pass"
@@ -897,7 +897,7 @@ expectedPolicyResult =
   commitmentDetail = "; policy-contract-sha256=" <> expectedPolicyDigest
 
 expectedPolicyDigest :: Text
-expectedPolicyDigest = "c53ae80762bc0aa9fc5ee4f0193c4bd68d2ff3405a58870c77db4f4a30feb244"
+expectedPolicyDigest = "396f2437c738c66c5ac5911279965630ef42eb93cbe3fb5cfdafab4ff612373e"
 
 literalPolicyLines :: [Text]
 literalPolicyLines =
@@ -922,7 +922,7 @@ literalPolicyLines =
   , "universe.sprint-reset-rule=every-sprint-not-validated"
   , "universe.historical-evidence-rule=prior-validation-permanently-invalid"
   , "universe.predecessor-rule=immediate-numeric-predecessor"
-  , "universe.phase-role=hardware-free-dsl-barrier,bounded-pb-handoff-validation,haskell-host-ensure,first-hardware-validation"
+  , "universe.phase-role=hardware-free-dsl-barrier,bounded-pb-handoff-validation,haskell-host-ensure,first-hardware-validation,registry-boundary"
   , "universe.phase50-migration-rule=no-source-migration"
   , "universe.dsl-barrier-source-closure=all-ltd-src-queries-zero-before-phase-49"
   , "universe.prehardware-rule=no-hardware-through-phase-51"
@@ -954,7 +954,7 @@ literalPolicyLines =
   , "status.historical-evidence=prior-validation-permanently-invalid"
   , "ordering.domain=00..95"
   , "ordering.predecessor=immediate-numeric-predecessor"
-  , "ordering.roles=hardware-free-dsl-barrier=49,bounded-pb-handoff-validation=50,haskell-host-ensure=51,first-hardware-validation=52"
+  , "ordering.roles=hardware-free-dsl-barrier=49,bounded-pb-handoff-validation=50,haskell-host-ensure=51,first-hardware-validation=52,registry-boundary=56"
   , "ordering.phase50-migration=no-source-migration"
   , "ordering.dsl-barrier-source-closure=all-ltd-src-queries-zero-before-phase-49"
   , "ordering.prehardware=no-hardware-through-phase-51"

@@ -89,9 +89,10 @@ same-workstream component work that has not been independently qualified or exte
 
 A 2026-08-23 supporting `cabal build lib:validation-kernel test:validation-kernel-component` diagnostic and
 unmutated `cabal test validation-kernel-component` component diagnostic earlier completed with fourteen named
-component oracles. The runner now contains eighteen named component oracles. The 2026-08-26 aggregate reached
-all eighteen and every oracle reported its bounded diagnostic expectations met after the documentation-header
-repair. This is neither qualification nor candidate evidence. In each earlier separate build
+component oracles. The aggregate runner now contains seventeen named component oracles: the eighteenth,
+`PhaseContractInternalOracle`, moved to its own `validation-phase-contract-internal-component` suite. The
+2026-08-26 aggregate reached the then-eighteen and every oracle reported its bounded diagnostic expectations
+met after the documentation-header repair. This is neither qualification nor candidate evidence. In each earlier separate build
 that widened the compiled Registry-provider universe, redirected the compiled owner map, or admitted `pb` as
 transport before Phase 50, the runner executed all nine named component oracles; only `PolicyContractOracle`
 failed. The other eight oracles stayed green. Those observations establish only
@@ -110,12 +111,186 @@ bindings remain explicit rather than being guessed. Two independent read-only au
 schema or blocker-edge mismatch across the 262 later-phase sprints. These specification corrections are not
 validation. Phase 0 therefore remains Active — NOT VALIDATED, and Phase 1 remains shut.
 
-On 2026-08-29 a new serialized development diagnostic compiled the current 39-module validation library and
+On 2026-08-29 a new serialized development diagnostic compiled the current 34-module validation library and
 20-module aggregate runner through a development-only package projection beneath ignored `.build/**`; all
-eighteen component oracles again reported their bounded expectations met. This projection avoided the authored
+then-registered component oracles again reported their bounded expectations met. This projection avoided the authored
 monolithic package's cold dependency-solver cost but is not the authored package boundary, pinned toolchain
 input, qualification harness, clean-room candidate, source snapshot integrity, complete gate execution, or
 phase-gate evidence. It changes no readiness finding and leaves every status NOT VALIDATED.
+
+Later on 2026-08-29 the gate kernel's unconditional refusals were replaced by predicates over evidence, at the
+authored package boundary and with `--jobs=1` throughout. `Amoebius.Validation.PhaseSemanticContract` no longer
+requires the registry to hold exactly 1,728 `ContractGap` slots while simultaneously refusing any slot that is
+not one; `ContractSlot` is now the `ContractGap`/`BoundSpecification` pair that
+[development_plan_gate_integrity.md §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass)
+names, slot identity is checked on the slot's own ordinal and category rather than on its being unbound, and a
+gap is fatal at or below the phase under validation while a gap above it is an explicit deferred-gap
+observation. `Amoebius.Validation.Dispatch` replaces the nine constant Phase-0 readiness findings with a
+predicate over a typed `PhaseReadiness` record whose fields are all currently unobserved, so the emitted
+findings are unchanged while each row can now be retired by supplying its evidence; and `validatePhase` no
+longer refuses every later phase by constant, instead re-deriving gates 0..N at the current snapshot and
+reporting `DISPATCH-PHASE-SUBJECT-ABSENT` for a phase whose production subject does not exist. The
+seventeen-oracle aggregate, the phase-contract, phase-contract-internal, source-debt-internal, and
+compiler-source-graph-acquired component suites all report their bounded expectations met after their
+independent expectations were re-authored. This is a structural change to what the kernel can express: it is
+neither qualification, clean-room observation, candidate evidence, nor a gate run, and every status remains
+NOT VALIDATED. No slot is bound, so all eighteen Phase-0 semantic slots remain `ContractGap` and the Phase-0
+candidate remains RED.
+
+The same 2026-08-29 session then implemented the first executable `LegacyClosureRule` predicate in the
+repository. `CloseInfernixSeedDependency` and `CloseJitMlSeedDependency` were bare constructors whose meaning
+existed only as prose in the reader-facing register, so neither binding could be decided in either direction.
+`Amoebius.Validation.Legacy` now derives both from the captured snapshot — counting upstream-fetch stanzas in
+`cabal.project` and tracked modules beneath the seed's authored namespace root — and binds the locus set by a
+domain-separated digest. The analyzer observes only on the acquired path; a caller-authored snapshot refuses,
+matching the source-debt bindings, so a supplied snapshot cannot manufacture a closed seed binding. The
+integrated run observes seven open loci for `LTD-SEED-001` and one for `LTD-SEED-002`, and the Phase-0 refusal
+inventory is unchanged at 2,176 across 28 codes. This makes two previously silent later-owned bindings
+measurable; it closes nothing, and every status remains NOT VALIDATED.
+
+The same session then removed the ordinal hard-coding that made the plan's order expensive to change, without
+changing any ordinal. `Amoebius.Validation.PolicyContract` gained a fifth `PhaseRole`, `RegistryBoundary`, so
+all five semantic cuts are named by role; `PhaseSemanticContract` reads every cut through `phaseRoleOrdinal`
+rather than from the literals 49/50/51/52/56, including `executionStageFor`, `stageMatchesOrdinal` and the
+guard table, whose literal patterns became role-keyed guards with every changed-production mutant preserved.
+`Amoebius.Validation.PhaseIdentity` gained the reverse projection `lookupCapabilityOrdinal`, and both
+`legacyIdOwner` and the resource-provision requirement set are now keyed by phase capability with the ordinal
+derived: 50 ordinal literals in the legacy owner table and 55 in the resource set became capability names, and
+an owner or requirement naming a capability no phase provides is reported rather than silently absorbed. Every
+one of these is ordinal-equal by construction, so the integrated refusal inventory is unchanged at 2,176 across
+28 codes and `LTD-SEED-001@91` still resolves.
+
+The four hand-copied mutation-selector command lines were also collapsed into one `SelectorCli` module. The
+copies had drifted: three defaulted a bare invocation to `--all` and one failed, two spelled the exact-case
+listing `--cases` and one `--case-list`, and only some offered `--impacted` or `--control`. A selector harness
+whose invocation grammar differs per suite cannot be driven uniformly, which is why the per-gate relevance rule
+could not be applied across suites at all. Each suite now declares the operations it implements, an
+unimplemented operation is refused by name instead of silently accepted, and `--impacted`/`--unaffected` behave
+two-sidedly on all four suites. None of this is qualification, candidate evidence, or a gate run, and every
+status remains NOT VALIDATED.
+
+A typed capability relation now exists at `src/validation-kernel/Amoebius/Validation/CapabilityGraph.hs`.
+The plan's declared dependency graph is clean — all 96 `Depends on` fields and all 270 sprint `Blocked by`
+fields name only an immediate predecessor, with no forward edge — but that is not where the real dependencies
+live. They live in deliverable, validation and gate-row prose, which
+[development_plan_gate_integrity.md §M.1](development_plan_gate_integrity.md#m1-the-fixed-gate-contract) forbids
+any checker from interpreting, so the plan's own forward-dependency check cannot reach them. The relation
+states, as typed values, which phase capability provides what and which consumes it. Twenty-five of the
+twenty-nine provisions take their provider from the compiled legacy owner map rather than from a re-authored
+ordinal, and each edge carries a witness that distinguishes a typed source from a claim proposed by plan prose.
+It currently declares 67 edges over 50 of the 96 phases, of which 61 are confirmed and 6 proposed, and reports
+63 that run backwards in the present order — the five calculi reaching the later compile-fail harness, four
+from the toolchain phase, five from the layout phase, one documentation-phase toolchain requirement, one
+boundary-phase generated-fake requirement, and forty-seven phases inheriting run-input closure from a later
+owner.
+
+**Nothing consumes this module.** The integrated refusal inventory is unchanged at 2,176 across 28 codes and no
+capability finding reaches the gate. That is deliberate: the defects it reports are real today, and consuming
+it before they are fixed would hold the gate red across several steps with no way to separate an expected red
+from a regression — and the only relief for that is an allowlist, which is the spoof this reset exists to
+remove. A separately authored `CapabilityGraphOracle` asserts the exact expected set instead, so a new forward
+dependency fails and so does one that silently disappears. Declared coverage is 50 of 96 phases; the relation
+is not complete and must not be read as though it were.
+
+Five of the eight recorded ordering defects were then fixed in place, at today's ordinals, with the capability
+relation re-run after each. `LTD-VAL-006` moved from Phase 47 to Phase 0, which removed 47 backward edges in
+one typed edit and, because the binding is now due at the candidate phase, added one refusal: the integrated
+inventory is 2,177 across 28 codes and `LEGACY-OBSERVATION-REFUSED` rises from 14 to 15. That is the intended
+trade — hidden later-owned debt became a visible Phase-0 obligation. The Phase-2 layout claim was narrowed from
+absolute absence of generated foreign products, which is false at its ordinal, to what it can two-sidedly
+observe; the Phase-1 toolchain claim dropped project-schema rendering and the seed-freedom assertion, the
+latter because cabal fetches both `source-repository-package` stanzas at configure time regardless of ordering,
+so no reordering could have made it true; and the stale Proto-owner reference in `phase_02` was corrected from
+Phase 67 to Phase 26, the owner the compiled inventory names, before any renumber could make a reference from
+an older numbering silently worse. The relation now reports 7 backward edges, down from 63.
+
+Fixing those exposed a defect that was previously invisible. With run-input closure owned at Phase 0, the
+documentation phase both provides it and consumes the pinned toolchain from Phase 1, which consumes run-input
+closure back — a two-node cycle the relation now reports at an exact locus. It is not new; it is the
+trusting-trust bootstrap that was always there, and it stays until it is minted as an owned binding. The
+capability module still has no consumers, so none of this reddens a gate.
+
+The sixth defect was closed by minting `LTD-BOOT-001` into the legacy universe, which grows from 25 to 26
+constructors with its own analyzer, observation rule, closure rule and reintroduction case. The bootstrap cycle
+the capability relation exposed is a trusting-trust dependency, not a misordering: Phase 0's command needs a
+pinned toolchain input, which is the toolchain phase's own claim, and no arrangement of the phases removes that
+because something must compile the thing that checks. It is therefore owned rather than dissolved. The binding
+is due at its owner, so its unimplemented analyzer refuses and the integrated inventory rises to 2,178 across
+28 codes; the bootstrap edge in the capability relation now carries a typed owner witness instead of a claim
+read out of plan prose, leaving 101 confirmed and 5 proposed edges. What was an unstated axiom is now a
+declared, closable obligation with an independently authored negative to write.
+
+This closes the six in-place ordering fixes. Two ordering defects remain, both relocations rather than
+narrowings — the compile-fail harness that five calculi consume, and the generation harness the boundary phase
+consumes — and both belong to the rebalance rather than to a claim edit. The capability module still has no
+consumers, so none of the seven remaining backward edges reddens a gate.
+
+A proposed plan revision now exists as typed values at
+`src/validation-kernel/Amoebius/Validation/PlanRevision.hs`, held dormant beside the identity table the gate
+actually reads. It states a ninety-one-phase arrangement and the complete old-to-new audit map that
+[development_plan_phase_model.md §E](development_plan_phase_model.md#e-one-canonical-phase-model) requires of
+any reordering: ninety-six old phases become ninety-one through eight splits and ten merged capabilities,
+every old ordinal is covered exactly once, and every revised capability is reached. The nine bands each occupy
+one contiguous range.
+
+Two results are worth recording. First, applying the §O merge rule as a computed predicate rather than an
+asserted one rejected a merge that had been proposed for the two Register-2 UI phases: they agree on register,
+substrate and lane but not on whether they must declare a resource-provision contract, and that fourth
+conjunct is part of the rule. Second, the four role-bearing phases — the hardware-free barrier, the bounded
+handoff, the Haskell host ensure and the first hardware validation — stay at 49, 50, 51 and 52, because the
+splits above them and the merges below them cancel exactly. The revision moves no semantic cut.
+
+On 2026-08-30 that sprint-sufficiency check was found to be wrong and was replaced. It compared one parent's
+sprint budget against the number of capabilities it becomes, which ignores that a capability formed by a merge
+draws sprints from any of its parents. The single reported deficit was the pair `{P46, P47}` becoming
+`generation_harness` and `ui_contract_and_tool_corpus` — two parents, two sprints, two capabilities, and
+feasible. Sufficiency is now computed over each connected component of the parent-and-capability graph:
+eighty-two components, none infeasible, so all 270 sprints redistribute across the ninety-one capabilities with
+no new sprint body authored. The tool-and-mutant phase remains the one genuine authoring item, because its
+single sprint body divides at `Tools.hs` against `TestCorpus.hs`.
+
+Replacing that check exposed a real defect it could not see. Sprint `Blocked by` chains are linear, so
+projecting a split through the chain yields a phase edge from the owner of each sprint to the owner of the
+next; the split stays acyclic exactly when every capability's sprints form a contiguous run. Three of the eight
+splits had been cut by subject rather than by sprint order — Phase 0 three ways over sprints {1,4,7}, {2,3} and
+{5,6,8}, Phase 1 as {1,6,7,8} against {2,3,4,5}, and Phase 2 as {1,4,5} against {2,3,6} — and each would have
+manufactured a dependency edge running backwards between the very phases the split creates, which is the defect
+the revision exists to remove. All three were re-cut at contiguous seams and renamed accordingly, and
+`REVISION-SPLIT-DISCONTIGUOUS` now refuses any assignment that is not a contiguous run. Nothing consumes this
+module, the present ninety-six-row table remains authoritative, and the integrated inventory is unchanged at
+2,178 across 28 codes.
+
+The same 2026-08-30 session made the mutation corpus executable and then measured how little of it was. Two
+selector drivers were exported and never called from any `Main.hs`: a 659-locus registry over the Cabal
+component plan and a 374-locus registry over the `pb` bootstrap grammar. Their flags existed, their production
+guards existed, and the two-way registry reconciliation was exact — but no Cabal stanza could reach them, so
+none of the 1,033 mutants could be run. Both now have a suite driven by the shared `SelectorCli`, and both were
+verified two-sidedly against the source-built binary: with a mutant set, its own `--impacted` passes because
+its declared case reddened, `--unaffected` passes because the others stayed green, `--all` reddens, and a
+different selector's `--impacted` fails because the reddening is attributed to the selector that caused it
+rather than to any selector. That last property is what separates a mutation registry from a rubber stamp.
+Executable loci rose from 151 to 1,184.
+
+Measuring the remainder produced a new standing refusal. The kernel declares 5,712 guarded mutation loci and
+five suites between them can execute 1,184, so 4,528 change production under a flag with nothing observing the
+change. A locus counted that way reports coverage it does not carry, which is exactly the criticism
+`LTD-VAL-002` records. `Amoebius.Validation.MutationCoverage` states the corpus and the driving suites as typed
+values, `MutationCoverageOracle` restates both independently, and `MUTANT-UNWIRED` reports the difference
+against the capability that owns it. Closing a locus needs an exact case that observes the changed production,
+an intent row and an impact row; a flag declaration supplies none of the three, so the count is an obligation
+rather than a number to be reduced by deleting flags. The fourteen `LTD-BOOT-001` mutants minted the previous
+day were also given their Cabal flags, which is what moved the declared corpus to 5,712. The integrated
+inventory is now 2,179 across 29 codes, and every status remains NOT VALIDATED.
+
+Six hard-coded phase-domain literals were then replaced by derivations of the policy contract, each
+byte-identical today. `DISPATCH-PHASE-RANGE` and `LEGACY-PHASE-RANGE` had spelled out "00 through 95" beside
+code that already derived the same label; the tracker-row, ordinal-domain and resource-domain messages had
+spelled out 96, `0..95` and 96 likewise. A seventh change is not a derivation but a new check. The join module
+carries its own hand-written ninety-six-entry phase-path table that nothing ever compared against the identity
+table's projected paths: the two agreed only because both happened to be right, and a drift would have appeared
+as one missing and one unknown finding per affected phase rather than as the single fact that the tables
+disagree. `PLAN-SEMANTIC-PATH-TABLE-DISAGREEMENT` now asserts their equality while keeping both authorships.
+The integrated inventory is unchanged at 2,179 across 29 codes and the new code does not fire.
 
 An earlier 2026-08-23 Sprint-0.2 clean-plus-thirteen component matrix remains stale. Sprint 0.3 exposed and
 corrected a lifecycle sequencing error: an Active zero must be admissible at the exact owning-phase candidate,
@@ -300,7 +475,7 @@ creating a second historical register.
 
 - One canonical active-only Markdown register whose rows explain current work to readers and cannot alter a
   legacy binding or closure verdict.
-- A closed 25-constructor Haskell legacy-ID universe with unique stable encodings and total owner, lifecycle,
+- A closed 26-constructor Haskell legacy-ID universe with unique stable encodings and total owner, lifecycle,
   required-analyzer, and dispatch bindings. Missing analyzer evidence always produces a typed unavailable state;
   it refuses at or beyond the owner and can never represent closure before then.
 - One private candidate evidence type bound to the exact snapshot, row, and analyzer. Caller-authored lifecycle
@@ -481,7 +656,7 @@ sentences over forty-five words across 195 governed documents, 128 over ninety, 
 table and fenced cases were exempt; the physical-line mutant missed only the wrapped overage, and the omission
 mutant erased both controls. These are supporting diagnostics, not a candidate or validation. The exact live
 counts must be re-frozen after documentation edits stabilize, and both changed-production builds must run
-through the complete component runner. The 2026-08-26 aggregate executed all eighteen named component oracles,
+through the complete component runner. The 2026-08-26 aggregate executed all then-eighteen named component oracles,
 and every oracle reported its bounded diagnostic expectations met after the six missing documentation-header
 finding projections were restored. A provisional post-schema measurement observed
 1,583 over-target sentences and 655 over-target paragraphs, with all 1,728 typed semantic slots represented by
@@ -1022,8 +1197,8 @@ The current production source has since reached 153 unique selectors by adding t
 grammar loci. The literal oracle and Cabal registries still contain only the earlier 24-row tested subset, so
 129 production selectors are intentionally unreconciled and no 153-row matrix is admissible. The 2026-08-26
 strict serialized build exposed six missing header-finding projections introduced during that expansion; those
-projections are now restored, and the aggregate component binary executes all eighteen named oracles green on
-the mutable worktree. The Documentation oracle still freezes the bounded live prose observation at 1,591
+projections are now restored, and the aggregate component binary executed all then-eighteen named oracles green on
+the mutable worktree. The Documentation oracle still freezes the bounded live prose observation at 1,601
 over-target sentences. This is a repair and component diagnostic only. Completing the independent 153-plus
 oracle/Cabal registry, the broader parser/output audit, package-opacity matrix, qualification, exact captured
 inputs, run binding, and documentation-gate correspondence remains open.

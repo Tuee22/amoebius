@@ -1,9 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module CompilerComponentPlanOracle
-  ( compilerComponentPlanSelectorNames
+  ( compilerComponentPlanExactCaseNames
+  , compilerComponentPlanSelectorMatrixRows
+  , compilerComponentPlanSelectorNames
+  , runCompilerComponentPlanExactCase
   , runCompilerComponentPlanOracle
-  , runCompilerComponentPlanSelectedOracle
   , runCompilerComponentPlanSelectorImpactOracle
   , runCompilerComponentPlanSelectorOracle
   , runCompilerComponentPlanSelectorIsolationOracle
@@ -29,7 +31,6 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
-import System.Environment (getArgs)
 
 -- This oracle deliberately knows only the facade's raw wire.  Every fixture,
 -- ceiling, digest frame, assignment projection, observation, and finding is
@@ -102,16 +103,28 @@ runCompilerComponentPlanSelectorProductControlOracle selector =
     [exactCase] -> runSelectorProductControl selector exactCase
     _ -> ["product control did not resolve one primary exact case: selector=" <> selector]
 
-runCompilerComponentPlanSelectedOracle :: IO ()
-runCompilerComponentPlanSelectedOracle = do
-  arguments <- getArgs
-  case arguments of
-    ["--all"] -> runCompilerComponentPlanOracle
-    ["--impacted", selector] -> runCompilerComponentPlanSelectorImpactOracle selector
-    ["--unaffected", selector] -> runCompilerComponentPlanSelectorIsolationOracle selector
-    ["--control", selector] -> runCompilerComponentPlanSelectorProductControlOracle selector
-    [selector] -> runCompilerComponentPlanSelectorOracle selector
-    _ -> fail "CompilerComponentPlanOracle selector driver requires a selector or --impacted/--unaffected/--control SELECTOR"
+-- | The exact cases a selector may be assigned to, and the selector-to-impact
+-- assignment the shared driver prints. The dispatcher itself lives in
+-- 'SelectorCli'; this module states only what it is a suite /of/.
+compilerComponentPlanExactCaseNames :: [String]
+compilerComponentPlanExactCaseNames = map exactCaseLabel exactCases
+
+compilerComponentPlanSelectorMatrixRows :: [(String, [String], String)]
+compilerComponentPlanSelectorMatrixRows =
+  [ (selector, selectorAffectedCaseLabels selector, "product-control")
+  | selector <- compilerComponentPlanSelectorNames
+  ]
+
+runCompilerComponentPlanExactCase :: String -> IO ()
+runCompilerComponentPlanExactCase label =
+  finishDiagnostics
+    "CompilerComponentPlanOracle exact case"
+    ( registryIntegrityProblems
+        <> fixtureIntegrityProblems
+        <> case [exactCase | exactCase <- exactCases, exactCaseLabel exactCase == label] of
+          [exactCase] -> runExactCase exactCase
+          _ -> ["unknown exact case: " <> label]
+    )
 
 -- Independently literal selector authority. Production CPP declarations and
 -- Cabal mappings are reconciled against these names by the matrix driver; they

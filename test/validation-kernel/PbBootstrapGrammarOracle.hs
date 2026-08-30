@@ -2,9 +2,12 @@
 
 module PbBootstrapGrammarOracle
   ( pbBootstrapFixtureBytes
+  , pbBootstrapGrammarExactCaseNames
+  , pbBootstrapGrammarSelectorMatrixRows
   , pbBootstrapGrammarSelectorNames
+  , runPbBootstrapGrammarExactCase
   , runPbBootstrapGrammarOracle
-  , runPbBootstrapGrammarSelectedOracle
+  , runPbBootstrapGrammarSelectorControlOracle
   , runPbBootstrapGrammarSelectorOracle
   ) where
 
@@ -42,7 +45,6 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Word (Word32, Word64, Word8)
 import Numeric (showHex)
-import System.Environment (getArgs)
 
 runPbBootstrapGrammarOracle :: IO ()
 runPbBootstrapGrammarOracle =
@@ -492,13 +494,26 @@ runPbBootstrapGrammarSelectorControlOracle selector =
             ]
     )
 
-runPbBootstrapGrammarSelectedOracle :: IO ()
-runPbBootstrapGrammarSelectedOracle = do
-  arguments <- getArgs
-  case arguments of
-    [selector] -> runPbBootstrapGrammarSelectorOracle selector
-    ["--control", selector] -> runPbBootstrapGrammarSelectorControlOracle selector
-    _ -> fail "PbBootstrapGrammarOracle selector runner requires SELECTOR or --control SELECTOR"
+-- | The exact cases a selector may be assigned to, and the selector-to-case
+-- assignment the shared driver prints. The dispatcher itself lives in
+-- 'SelectorCli'; this module states only what it is a suite /of/.
+pbBootstrapGrammarExactCaseNames :: [String]
+pbBootstrapGrammarExactCaseNames = selectorExactCaseLabels
+
+pbBootstrapGrammarSelectorMatrixRows :: [(String, [String], String)]
+pbBootstrapGrammarSelectorMatrixRows =
+  [(selector, [target], control) | (selector, target, control) <- pbBootstrapGrammarSelectorIntents]
+
+runPbBootstrapGrammarExactCase :: String -> IO ()
+runPbBootstrapGrammarExactCase label =
+  finishDiagnostics
+    "PbBootstrapGrammarOracle exact case"
+    ( selectorRegistryIntegrityProblems
+        <> selectorIndependentControlProblems
+        <> if label `elem` selectorExactCaseLabels
+          then selectorTargetProblems label
+          else ["unknown exact case: " <> label]
+    )
 
 selectorRegistryIntegrityProblems :: [String]
 selectorRegistryIntegrityProblems =

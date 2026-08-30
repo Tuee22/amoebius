@@ -686,9 +686,10 @@ expectedSemanticObservations =
   [ ("semantic.phase-count", "96")
   , ("semantic.slot-count", "1728")
   , ("semantic.gap-count", "1728")
-  , ("semantic.draft-count", "0")
-  , ("semantic.gate-ready-count", "0")
-  , ("semantic.legacy-count", "25")
+  , ("semantic.bound-count", "0")
+  , ("semantic.target-phase", "none")
+  , ("semantic.deferred-gap-count", "0")
+  , ("semantic.legacy-count", "26")
   ]
     <> [("semantic.phase", localPhaseProjection row) | row <- oraclePhases]
 
@@ -698,7 +699,7 @@ expectedSemanticFindings =
     <> [ ExpectedFinding
            "PLAN-SEMANTIC-DIAGNOSTIC-ONLY"
            planRoot
-           "all 1,728 semantic slots are ContractGap; no gate-ready value exists, and these observations cannot pass a phase"
+           "the nullary registry view names no phase under validation and cannot pass a phase"
        ]
 
 localSlotFindings :: OraclePhase -> [ExpectedFinding]
@@ -767,14 +768,14 @@ localLegacyIds ordinal = Map.findWithDefault [] ordinal localLegacyReverseMap
 localLegacyReverseMap :: Map.Map Int [Text]
 localLegacyReverseMap =
   Map.fromList
-    [ (0, ["LTD-SRC-000", "LTD-SRC-008", "LTD-VAL-001", "LTD-VAL-002", "LTD-VAL-003", "LTD-VAL-004"])
+    [ (0, ["LTD-SRC-000", "LTD-SRC-008", "LTD-VAL-001", "LTD-VAL-002", "LTD-VAL-003", "LTD-VAL-004", "LTD-VAL-006", "LTD-BOOT-001"])
     , (1, ["LTD-SRC-007", "LTD-SRC-009"])
     , (2, ["LTD-META-001", "LTD-NAME-001"])
     , (25, ["LTD-SRC-002"])
     , (26, ["LTD-SRC-003"])
     , (27, ["LTD-DOC-001"])
     , (46, ["LTD-SRC-004"])
-    , (47, ["LTD-SRC-001", "LTD-SRC-005", "LTD-SRC-006", "LTD-VAL-006"])
+    , (47, ["LTD-SRC-001", "LTD-SRC-005", "LTD-SRC-006"])
     , (49, ["LTD-VAL-005"])
     , (51, ["LTD-HOST-001", "LTD-HOST-002"])
     , (55, ["LTD-RUN-001"])
@@ -2326,15 +2327,15 @@ oracleLiteralProblems =
              (\row -> vectorResourceProjection row `notElem` ["required|UNRESOLVED", "not-required|ABSENT"])
              oraclePhaseVectors
        ]
-    <> [ "the frozen clean semantic and resource inventories must retain 102 observations and 1,729/386 findings"
-       | length expectedSemanticObservations /= 102
+    <> [ "the frozen clean semantic and resource inventories must retain 103/102 observations and 1,729/386 findings"
+       | length expectedSemanticObservations /= 103
            || length expectedSemanticFindings /= 1729
            || length expectedResourceObservations /= 102
            || length expectedResourceFindings /= 386
        ]
-    <> [ "oracle reverse legacy map must contain exactly 25 unique IDs"
+    <> [ "oracle reverse legacy map must contain exactly 26 unique IDs"
        | let identifiers = concat (Map.elems localLegacyReverseMap)
-        in length identifiers /= 25 || Set.size (Set.fromList identifiers) /= 25
+        in length identifiers /= 26 || Set.size (Set.fromList identifiers) /= 26
        ]
     <> [ "the inert-prose negative must replace a nonzero, independently counted sentence in every phase"
        | inertProseReplacementCount <= 0 || inertProseReplacementCount /= 96

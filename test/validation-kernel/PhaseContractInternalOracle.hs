@@ -123,18 +123,19 @@ selectorIntegrityProblems =
 exactCaseProblems :: String -> [String]
 exactCaseProblems exactCase = case exactCase of
   "semantic-observation-composition" ->
-    expectCount "full-mode observation carrier" 218 (length (checkObservations cleanResult))
+    expectCount "full-mode observation carrier" 219 (length (checkObservations cleanResult))
   "semantic-finding-composition" ->
-    expectCount "full-mode finding carrier" 2658 (length (checkFindings cleanResult))
+    expectCount "full-mode finding carrier" 947 (length (checkFindings cleanResult))
   "phase-semantic-contract-route" ->
     expectObservation "semantic phase count" "semantic.phase-count" "96" cleanResult
       <> expectObservation "semantic slot count" "semantic.slot-count" "1728" cleanResult
       <> expectObservation "semantic gap count" "semantic.gap-count" "1728" cleanResult
-      <> expectObservation "semantic draft count" "semantic.draft-count" "0" cleanResult
-      <> expectObservation "semantic gate-ready count" "semantic.gate-ready-count" "0" cleanResult
-      <> expectObservation "semantic legacy count" "semantic.legacy-count" "25" cleanResult
-      <> expectFindingCount "semantic gap findings" "PLAN-SEMANTIC-CONTRACT-GAP" 1728 cleanResult
-      <> expectFindingCount "semantic diagnostic refusal" "PLAN-SEMANTIC-DIAGNOSTIC-ONLY" 1 cleanResult
+      <> expectObservation "semantic bound count" "semantic.bound-count" "0" cleanResult
+      <> expectObservation "semantic target phase" "semantic.target-phase" "00" cleanResult
+      <> expectObservation "semantic deferred gap count" "semantic.deferred-gap-count" "1710" cleanResult
+      <> expectObservation "semantic legacy count" "semantic.legacy-count" "26" cleanResult
+      <> expectFindingCount "semantic gap findings" "PLAN-SEMANTIC-CONTRACT-GAP" 18 cleanResult
+      <> expectFindingCount "semantic diagnostic refusal" "PLAN-SEMANTIC-DIAGNOSTIC-ONLY" 0 cleanResult
   "resource-provision-contract-route" ->
     expectObservation "resource phase domain" "resource.phase-domain-count" "96" cleanResult
       <> expectObservation "resource required phases" "resource.required-phase-count" "55" cleanResult

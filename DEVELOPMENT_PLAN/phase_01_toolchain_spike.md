@@ -380,7 +380,7 @@ repository-retained generated evidence with dynamic run-local resolution and rep
 - Replacement of `toolchain/pins.json`: keep compatibility requirements in a checked Haskell declaration and
   generate every resolved path, version, URL, identity, and integrity observation beneath `.build/toolchain/**`.
 - A resolver that writes the selected graph and tools only beneath `.build/`.
-- Generated protocol bindings and checksums only beneath `.build/proto/**`.
+- Resolved protocol package identity and checksums recorded beneath `.build/toolchain/**`. Rendering the wire schema and bindings beneath `.build/proto/**` is `LTD-SRC-003`, owned by its declared later phase, and is not a deliverable here.
 - An authored-root write guard and run-local record beneath `.build/**` covering every probe and applied
   Haskell mutation operator.
 - Tracked-path and container-context checks that reject every legacy generated class.
@@ -481,7 +481,7 @@ declared in Haskell.
   `src/vendor/**` and separately authored against Haskell expectations.
 - Haskell provenance values recording an immutable upstream release identity; any reader-facing provenance
   report is generated beneath `.build/**` and is not a build input.
-- A `cabal.project` that reaches only admitted tracked Haskell packages and carries no mutable `supernova`
+- A `cabal.project` with no developer-home path and a fixed dependency identity for every input, carrying no mutable `supernova`
   source reference or post-checkout command.
 - `patches/supernova_ghc_9_12.patch` and `tools/apply_supernova_patch` deleted, and the `patches/` root with
   them.

@@ -5,6 +5,7 @@ module Amoebius.Validation.PhaseSemanticJoin
   ( phaseSemanticJoinDiagnostic
   ) where
 
+import Amoebius.Validation.PhaseIdentity qualified as PhaseIdentity
 import Amoebius.Validation.PhaseSemanticContract
   ( phaseStructuralProjectionDiagnostic
   )
@@ -156,6 +157,7 @@ phaseSemanticJoinWithinLimits supplied =
           <> trackerInventoryFindings
           <> checkFindings semanticDiagnostic
           <> checkFindings resourceDiagnostic
+          <> canonicalPhasePathAgreementFindings
           <> [markdownDiagnosticRefusal]
     }
  where
@@ -414,6 +416,30 @@ canonicalPhasePathByOrdinal =
     | path <- canonicalPhasePaths
     , Just ordinal <- [phaseOrdinalFromPath path]
     ]
+
+-- | The two independently authored phase-path tables must agree.
+--
+-- 'canonicalPhasePaths' below is written out by hand in this module, and the
+-- identity table projects its own path for every phase. Nothing compared them:
+-- they agreed only because both happened to be right, and a drift would surface
+-- as one missing and one unknown finding per affected phase rather than as the
+-- single fact that the two tables disagree. Keeping both authorships and
+-- asserting their equality is what makes the pair a check instead of a
+-- duplicate.
+canonicalPhasePathAgreementFindings :: [Finding]
+canonicalPhasePathAgreementFindings =
+  [ finding
+      "PLAN-SEMANTIC-PATH-TABLE-DISAGREEMENT"
+      "DEVELOPMENT_PLAN/"
+      ( "the join's authored phase-path table and the identity table's projected paths differ; join-only="
+          <> showText [path | path <- canonicalPhasePaths, path `notElem` identityPaths]
+          <> " identity-only="
+          <> showText [path | path <- identityPaths, path `notElem` canonicalPhasePaths]
+      )
+  | canonicalPhasePaths /= identityPaths
+  ]
+ where
+  identityPaths = map PhaseIdentity.phaseIdentityPath PhaseIdentity.allPhaseIdentities
 
 canonicalPhasePaths :: [FilePath]
 canonicalPhasePaths =

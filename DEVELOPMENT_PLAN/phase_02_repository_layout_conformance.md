@@ -87,7 +87,7 @@ NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — enforce the target repository layout, including the tracked-source boundary: behavioral source is `.hs` only outside `pb/**`, consumers resolve at canonical Haskell module and package paths, and generated foreign products are absent from Git. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — enforce the target repository layout, including the tracked-source boundary: behavioral source is `.hs` only outside `pb/**`, consumers resolve at canonical Haskell module and package paths, no newly tracked non-`.hs` behavioural source appears, and every existing one joins an `LTD-SRC-*` binding whose typed owner is a declared later phase. Absolute absence of generated foreign products is the hardware-free barrier's claim, which already requires every `LTD-SRC-*` query to be zero; it is not assertable here. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
 | `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
 | `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 02` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
@@ -217,7 +217,7 @@ owned legacy closure, exact Haskell package/module discovery, and clean-source c
 `Setup.hs` generated the Pulsar protobuf bindings. A root `Setup.hs` is not in the section 2 tree and
 [§2.1](../documents/engineering/repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package)
 admits no ground for a package that exists only to carry one, so the generator retired with the split. The
-condemned tracked Proto schema remains migration debt, and Phase 67 re-establishes both schema projection and
+condemned tracked Proto schema remains migration debt, and Phase 26 — its owner in the compiled inventory — re-establishes both schema projection and
 binding generation from checked Haskell declarations beneath `.build/proto/**`. Its typed legacy binding is
 explained in the reader-facing register.
 

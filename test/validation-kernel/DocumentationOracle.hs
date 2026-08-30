@@ -769,7 +769,7 @@ productionCorpusProblems = do
             <> expectObservation
               "independent production paragraph-spanning over-target count"
               "prose-budget.sentence-over-target-count"
-              "1591"
+              "1604"
               result
             <> expectObservation
               "independent production severe-sentence count"
@@ -815,14 +815,13 @@ expectedProductionFindingCounts =
   , ("PLAN-RESOURCE-CONTRACT-GAP", 385)
   , ("PLAN-RESOURCE-DIAGNOSTIC-ONLY", 1)
   , ("PLAN-RESOURCE-JOIN-DIAGNOSTIC-ONLY", 1)
-  , ("PLAN-SEMANTIC-CONTRACT-GAP", 1728)
-  , ("PLAN-SEMANTIC-DIAGNOSTIC-ONLY", 1)
+  , ("PLAN-SEMANTIC-CONTRACT-GAP", 18)
   , ("PLAN-SEMANTIC-JOIN-DIAGNOSTIC-ONLY", 1)
   , ("PLAN-SEMANTIC-MARKDOWN-DIAGNOSTIC-ONLY", 1)
   ]
 
 expectedProductionFindingManifestSha256 :: Text
-expectedProductionFindingManifestSha256 = "4c64dc3928ba3647570e90819769c6af060c034852b1dd4e5479c2085f673b74"
+expectedProductionFindingManifestSha256 = "9431c940540f3f81c51aa74f2dd9b23ccf39e277e43ef6820e0f11712b522b34"
 
 findingManifestProblems :: [(Text, Int)] -> Text -> [Finding] -> [String]
 findingManifestProblems expectedCounts expectedDigest findings =

@@ -16,6 +16,7 @@ import Amoebius.Validation.CompilerSourceGraph.Internal
   , analyzeAcquiredCompilerSourceGraph
   )
 import Amoebius.Validation.Documentation.Internal (checkDocuments)
+import Amoebius.Validation.MutationCoverage (mutationCoverageCheck)
 import Amoebius.Validation.Legacy.Internal (legacyCheck, legacyCheckAcquired)
 import Amoebius.Validation.PhaseContract.Internal (checkPhaseContracts)
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
@@ -370,7 +371,7 @@ dispatchRawProblemFinding analysis problem = case problem of
       ("the changed subject suppressed the bound-specific predicate; the outer preflight envelope still refused before traversal; guard=" <> label)
   DispatchPhaseWidth _ -> grammar "DISPATCH-PHASE-WIDTH" "<requested-phase>" "expected exactly two ASCII decimal characters"
   DispatchPhaseAlphabet _ -> grammar "DISPATCH-PHASE-ALPHABET" "<requested-phase>" "expected ASCII decimal characters only"
-  DispatchPhaseRange _ -> grammar "DISPATCH-PHASE-RANGE" "<requested-phase>" "expected a phase in the closed range 00 through 95"
+  DispatchPhaseRange _ -> grammar "DISPATCH-PHASE-RANGE" "<requested-phase>" ("expected a phase in the closed range " <> policyDomainLabel)
   DispatchComponentCardinality expected observed -> grammar "DISPATCH-COMPONENT-CARDINALITY" "<components>" ("expected=" <> Text.pack (show expected) <> "; observed=" <> Text.pack (show observed))
   DispatchComponentDuplicate role -> grammar "DISPATCH-COMPONENT-DUPLICATE" (Text.unpack role) "component role occurs more than once"
   DispatchComponentUnknown role -> grammar "DISPATCH-COMPONENT-UNKNOWN" (Text.unpack role) "component role is outside the closed Phase-0 raw composition"
@@ -645,18 +646,6 @@ validatePhase gitPath root phase
                   ("the phase ordinal must be in the closed repository range " <> policyDomainLabel)
               ]
           }
-  | phase /= policyDomainLower =
-      pure
-        CheckResult
-          { checkName = "validation-phase-dispatch"
-          , checkObservations = [observation "validation.requested-phase" (formatOrdinal phase)]
-          , checkFindings =
-              [ finding
-                  "DISPATCH-PHASE-BLOCKED"
-                  ("phase-" <> Text.unpack (formatOrdinal phase))
-                  "only Phase 0 is active; every later phase requires its immediate predecessor's gate pass"
-              ]
-          }
   | otherwise =
       case mkGitExecutable gitPath of
         Left problem -> pure (snapshotFailure [problem])
@@ -665,7 +654,7 @@ validatePhase gitPath root phase
           case snapshotResult of
             Left problems -> pure (snapshotFailure problems)
             Right acquired -> do
-              result <- checkAcquiredPhaseZeroSnapshot acquired
+              result <- checkAcquiredPhaseChain acquired phase
               finalSnapshot <- loadGitSnapshot git root
               pure (bindFinalSourceSnapshot acquired finalSnapshot result)
 
@@ -680,10 +669,52 @@ checkPhaseZeroSnapshot snapshot =
     , syntheticSnapshotRefusal
     ]
 
-checkAcquiredPhaseZeroSnapshot :: AcquiredSourceSnapshot -> IO CheckResult
-checkAcquiredPhaseZeroSnapshot acquired = do
+-- | Gate N is the conjunction of gates 0..N re-derived at the current
+-- snapshot.
+--
+-- Nothing durable is stored, so a predecessor result cannot be replayed from
+-- a receipt, cache, or Markdown status marker, and work done for a later
+-- phase that weakens an earlier phase's subject reddens that earlier phase
+-- inside this same run.  The compiler source graph is analyzed once and
+-- shared, because every phase in the chain observes the one snapshot.
+checkAcquiredPhaseChain :: AcquiredSourceSnapshot -> Int -> IO CheckResult
+checkAcquiredPhaseChain acquired target = do
   compilerEvidence <- analyzeAcquiredCompilerSourceGraph acquired
-  pure (checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence)
+  pure
+    ( mergeChecks
+        ("phase-" <> formatOrdinal target)
+        [ checkAcquiredPhaseInChain acquired compilerEvidence ordinal
+        | ordinal <- [policyDomainLower .. target]
+        ]
+    )
+
+checkAcquiredPhaseInChain
+  :: AcquiredSourceSnapshot
+  -> AcquiredCompilerSourceGraph
+  -> Int
+  -> CheckResult
+checkAcquiredPhaseInChain acquired compilerEvidence ordinal
+  | ordinal == policyDomainLower = checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence
+  | otherwise = phaseSubjectAbsent ordinal
+
+-- | A phase whose production subject has not been implemented.  This is an
+-- observed absence at the current snapshot, not a policy statement that the
+-- phase may never run: it retires when the phase's subject and oracle exist.
+phaseSubjectAbsent :: Int -> CheckResult
+phaseSubjectAbsent ordinal =
+  CheckResult
+    { checkName = "phase-" <> formatOrdinal ordinal
+    , checkObservations =
+        [ observation "phase.ordinal" (formatOrdinal ordinal)
+        , observation "phase.subject" "no production subject is implemented for this phase"
+        ]
+    , checkFindings =
+        [ finding
+            "DISPATCH-PHASE-SUBJECT-ABSENT"
+            ("phase-" <> Text.unpack (formatOrdinal ordinal))
+            "this phase has no implemented production subject, independent oracle, or gate rows to re-derive at the current snapshot"
+        ]
+    }
 
 bindFinalSourceSnapshot
   :: AcquiredSourceSnapshot
@@ -730,6 +761,7 @@ checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence =
                , Policy.checkPolicyContract Policy.canonicalPolicyContract
                , CheckResult "documentation-snapshot" [] decodeFindings
                , unavailablePhaseContractCheck decodeFindings
+               , mutationCoverageCheck
                , phaseZeroReadinessBlockers
                ]
         )
@@ -741,6 +773,7 @@ checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence =
                , Policy.checkPolicyContract Policy.canonicalPolicyContract
                , checkDocuments documents
                , checkPhaseContracts documents
+               , mutationCoverageCheck
                , phaseZeroReadinessBlockers
                ]
         )
@@ -929,62 +962,143 @@ syntheticSnapshotFindings =
 -- the raw evidence named here; no caller flag can turn it green.  In
 -- particular, Gate.checkQualificationReportDiagnostic is a pure consistency check over
 -- caller-supplied values and cannot retire the execution blocker.
-phaseZeroReadinessBlockers :: CheckResult
-phaseZeroReadinessBlockers =
+-- | The evidence each Phase-0 readiness row consumes.
+--
+-- Every field is 'Nothing' until its separately authored implementation
+-- supplies the raw evidence named in the corresponding finding, so today this
+-- record is uniformly unobserved and the emitted findings are byte-identical
+-- to the former constant.  The difference is that each row is now a predicate
+-- over evidence rather than a literal: implementing the work retires the row.
+-- No caller flag can turn a row green, because the only constructor of a
+-- present field is the module that performs the observation.
+data PhaseReadiness = PhaseReadiness
+  { readinessQualification :: Maybe Text
+  , readinessPolicyContract :: Maybe Text
+  , readinessPbGrammar :: Maybe Text
+  , readinessPhaseContractSemantics :: Maybe Text
+  , readinessLegacyAnalyzers :: Maybe Text
+  , readinessOracleIndependence :: Maybe Text
+  , readinessCleanroomObserver :: Maybe Text
+  , readinessCandidateIntegration :: Maybe Text
+  , readinessEvidenceSchema :: Maybe Text
+  }
+  deriving (Eq, Show)
+
+-- | No readiness evidence has been observed.  This is the current state of
+-- every Phase-0 code path.
+unobservedPhaseReadiness :: PhaseReadiness
+unobservedPhaseReadiness =
+  PhaseReadiness
+    { readinessQualification = Nothing
+    , readinessPolicyContract = Nothing
+    , readinessPbGrammar = Nothing
+    , readinessPhaseContractSemantics = Nothing
+    , readinessLegacyAnalyzers = Nothing
+    , readinessOracleIndependence = Nothing
+    , readinessCleanroomObserver = Nothing
+    , readinessCandidateIntegration = Nothing
+    , readinessEvidenceSchema = Nothing
+    }
+
+-- | One readiness row: the observation key, the absent-evidence text, the
+-- finding it raises while unobserved, and the field it reads.
+data ReadinessRow = ReadinessRow
+  { readinessKey :: Text
+  , readinessAbsentDetail :: Text
+  , readinessCode :: Text
+  , readinessSubject :: FilePath
+  , readinessRefusal :: Text
+  , readinessEvidence :: PhaseReadiness -> Maybe Text
+  }
+
+readinessRows :: [ReadinessRow]
+readinessRows =
+  [ ReadinessRow
+      "readiness.harness-qualification"
+      "report consistency checker present; execution not implemented"
+      "QUALIFICATION-NOT-EXECUTED"
+      "Amoebius.Validation.Gate"
+      "the fixed sabotage corpus has not been executed against the exact dispatcher/harness build"
+      readinessQualification
+  , ReadinessRow
+      "readiness.policy-contract"
+      "typed contract is integrated; changed-subject qualification and documentation correspondence check are absent"
+      "POLICY-CONTRACT-UNQUALIFIED"
+      "Amoebius.Validation.PolicyContract"
+      "the typed cross-cutting contract is integrated, but its Registry-provider, owner-map, and pb-transport changed-subject mutants have not been qualified and the documentation correspondence gate has not passed"
+      readinessPolicyContract
+  , ReadinessRow
+      "readiness.pb-source-grammar"
+      "the static source-bound grammar is integrated; changed-subject qualification and the separately authored oracle are absent"
+      "PB-GRAMMAR-UNQUALIFIED"
+      "Amoebius.Validation.PbBootstrapGrammar"
+      "the versioned static AST/import/resolved-call/control-flow/potential-effect analyzer is integrated, but its changed-subject qualification and separately authored oracle remain open; Phase 50 alone owns external runtime handoff observation"
+      readinessPbGrammar
+  , ReadinessRow
+      "readiness.phase-contract-semantics"
+      "the closed typed registry, structural joins, and phase-scoped gap rule are integrated; the phase-under-validation slots are not yet bound"
+      "PHASE-CONTRACT-SEMANTIC-GAPS"
+      "Amoebius.Validation.PhaseContract"
+      "the closed typed 96-phase registry and structural joins are integrated, but the slots owned by the phase under validation are still ContractGap"
+      readinessPhaseContractSemantics
+  , ReadinessRow
+      "readiness.legacy-owner-analyzers"
+      "closed typed inventory and fail-closed dispatch are integrated; LTD-SRC-000 and LTD-SRC-008 source analyzers are present but unqualified, while LTD-VAL-001 through LTD-VAL-004 owner analyzers remain unavailable"
+      "LEGACY-VALIDATION-ANALYZERS-MISSING"
+      "Amoebius.Validation.Legacy"
+      "the closed legacy inventory dispatches every ID and the LTD-SRC-000 and LTD-SRC-008 source analyzers are integrated but unqualified; the LTD-VAL-001 through LTD-VAL-004 owner analyzers and their independently authored reintroduction executions remain unavailable"
+      readinessLegacyAnalyzers
+  , ReadinessRow
+      "readiness.oracle-independence"
+      "complete gate result absent"
+      "ORACLE-INDEPENDENCE-MISSING"
+      "phase-00-oracles"
+      "component diagnostics are not a complete qualified gate"
+      readinessOracleIndependence
+  , ReadinessRow
+      "readiness.cleanroom-residue"
+      "external observer absent"
+      "CLEANROOM-OBSERVER-MISSING"
+      "phase-00-cleanroom"
+      "fresh-run input closure and external residue have no implemented independent observer"
+      readinessCleanroomObserver
+  , ReadinessRow
+      "readiness.candidate-integration"
+      "evidence writer not connected to dispatcher"
+      "EVIDENCE-INTEGRATION-MISSING"
+      "Amoebius.Validation.Dispatch"
+      "the dispatcher cannot emit candidate evidence until qualification and cleanroom checks are connected"
+      readinessCandidateIntegration
+  , ReadinessRow
+      "readiness.evidence-schema"
+      "command, toolchain, substrate, run, and cleanup fields are not represented by a closed typed schema"
+      "EVIDENCE-SCHEMA-INCOMPLETE"
+      "Amoebius.Validation.Evidence"
+      "the candidate schema does not yet require typed exact-command, toolchain, substrate/lane/architecture, run-identity, or cleanup observations"
+      readinessEvidenceSchema
+  ]
+
+-- | Phase-0 readiness as a predicate over observed evidence.
+phaseReadinessCheck :: PhaseReadiness -> CheckResult
+phaseReadinessCheck readiness =
   CheckResult
     { checkName = "phase-00-readiness"
     , checkObservations =
-        [ observation "readiness.harness-qualification" "report consistency checker present; execution not implemented"
-        , observation "readiness.policy-contract" "typed contract is integrated; changed-subject qualification and documentation correspondence check are absent"
-        , observation "readiness.pb-source-grammar" "the static source-bound grammar is integrated; changed-subject qualification and the separately authored oracle are absent"
-        , observation "readiness.phase-contract-semantics" "the closed typed registry and structural joins are integrated; all 1,728 semantic slots and 385 resource slots remain gaps, with no gate-ready payload"
-        , observation "readiness.legacy-owner-analyzers" "closed typed inventory and fail-closed dispatch are integrated; LTD-SRC-000 and LTD-SRC-008 source analyzers are present but unqualified, while LTD-VAL-001 through LTD-VAL-004 owner analyzers remain unavailable"
-        , observation "readiness.oracle-independence" "complete gate result absent"
-        , observation "readiness.cleanroom-residue" "external observer absent"
-        , observation "readiness.candidate-integration" "evidence writer not connected to dispatcher"
-        , observation "readiness.evidence-schema" "command, toolchain, substrate, run, and cleanup fields are not represented by a closed typed schema"
-        , observation "readiness.local-source-capture" "opening and closing exact local snapshots are integrated"
+        [ observation
+            (readinessKey row)
+            (maybe (readinessAbsentDetail row) ("observed=" <>) (readinessEvidence row readiness))
+        | row <- readinessRows
         ]
+          <> [observation "readiness.local-source-capture" "opening and closing exact local snapshots are integrated"]
     , checkFindings =
-        [ finding
-            "QUALIFICATION-NOT-EXECUTED"
-            "Amoebius.Validation.Gate"
-            "the fixed sabotage corpus has not been executed against the exact dispatcher/harness build"
-        , finding
-            "POLICY-CONTRACT-UNQUALIFIED"
-            "Amoebius.Validation.PolicyContract"
-            "the typed cross-cutting contract is integrated, but its Registry-provider, owner-map, and pb-transport changed-subject mutants have not been qualified and the documentation correspondence gate has not passed"
-        , finding
-            "PB-GRAMMAR-UNQUALIFIED"
-            "Amoebius.Validation.PbBootstrapGrammar"
-            "the versioned static AST/import/resolved-call/control-flow/potential-effect analyzer is integrated, but its changed-subject qualification and separately authored oracle remain open; Phase 50 alone owns external runtime handoff observation"
-        , finding
-            "PHASE-CONTRACT-SEMANTIC-GAPS"
-            "Amoebius.Validation.PhaseContract"
-            "the closed typed 96-phase registry and structural joins are integrated, but all 1,728 semantic slots and 385 resource slots remain gaps, with no gate-ready payload"
-        , finding
-            "LEGACY-VALIDATION-ANALYZERS-MISSING"
-            "Amoebius.Validation.Legacy"
-            "the closed legacy inventory dispatches every ID and the LTD-SRC-000 and LTD-SRC-008 source analyzers are integrated but unqualified; the LTD-VAL-001 through LTD-VAL-004 owner analyzers and their independently authored reintroduction executions remain unavailable"
-        , finding
-            "ORACLE-INDEPENDENCE-MISSING"
-            "phase-00-oracles"
-            "component diagnostics are not a complete qualified gate"
-        , finding
-            "CLEANROOM-OBSERVER-MISSING"
-            "phase-00-cleanroom"
-            "fresh-run input closure and external residue have no implemented independent observer"
-        , finding
-            "EVIDENCE-INTEGRATION-MISSING"
-            "Amoebius.Validation.Dispatch"
-            "the dispatcher cannot emit candidate evidence until qualification and cleanroom checks are connected"
-        , finding
-            "EVIDENCE-SCHEMA-INCOMPLETE"
-            "Amoebius.Validation.Evidence"
-            "the candidate schema does not yet require typed exact-command, toolchain, substrate/lane/architecture, run-identity, or cleanup observations"
+        [ finding (readinessCode row) (readinessSubject row) (readinessRefusal row)
+        | row <- readinessRows
+        , readinessEvidence row readiness == Nothing
         ]
     }
 
+phaseZeroReadinessBlockers :: CheckResult
+phaseZeroReadinessBlockers = phaseReadinessCheck unobservedPhaseReadiness
 snapshotDocuments :: SourceSnapshot -> Either [Finding] [(FilePath, Text)]
 snapshotDocuments snapshot =
   if null problems then Right documents else Left problems

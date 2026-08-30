@@ -192,9 +192,10 @@ The current audit makes no validation attribution.
 The 2026-08-23 inspection reran `cabal build lib:validation-kernel test:validation-kernel-component` and the
 clean `cabal test validation-kernel-component` aggregate after connecting the source-debt, source-consumer,
 compiler-component, compiler-graph, and one-file `pb` grammar modules. All fourteen then-named component oracles
-executed and reported their diagnostic expectations met. The runner now contains eighteen oracles; its
-2026-08-26 aggregate reached every oracle and all eighteen reported their bounded diagnostic expectations met
-after the documentation-header repair. Earlier policy and
+executed and reported their diagnostic expectations met. The aggregate runner now contains seventeen oracles
+after `PhaseContractInternalOracle` moved to its own `validation-phase-contract-internal-component` suite; the
+2026-08-26 aggregate reached every then-registered oracle and all eighteen reported their bounded diagnostic
+expectations met after the documentation-header repair. Earlier policy and
 legacy changed-production runs are stale wherever their production/oracle subjects changed; the current
 clean-plus-twenty legacy matrix and the integrated source/compiler/bootstrap/semantic mutant matrix must be
 rerun before candidate preparation. Supporting
@@ -225,11 +226,26 @@ The 2026-08-29 serialized development diagnostic established a fresh current-cod
 compiler concurrency. The authored monolithic package spent nearly ten minutes in dependency solving before
 any compiler invocation, so a development-only package projection beneath ignored `.build/**` isolated the
 current `validation-kernel` library and aggregate component test. Its task-local store was populated one
-package at a time, the 34-module projected library and 20-module test runner compiled, and all eighteen component oracles
+package at a time, the 34-module projected library and 20-module test runner compiled, and all then-eighteen component oracles
 again reported their bounded diagnostic expectations met. The projection, cached inputs, compile, and green
 aggregate are not a complete clean-room run, the authored package boundary, qualification, candidate evidence,
 or the complete gate. A later same-day serialized rerun after the gate-pass policy rewrite again passed all
-eighteen oracles, including local source capture/recheck and `GatePass`; no current status changed.
+then-eighteen oracles, including local source capture/recheck and `GatePass`; no current status changed.
+
+A further 2026-08-29 serialized inspection ran at the **authored package boundary**, not a projection, with
+`--jobs=1` and one compiler command at a time. Against a warm dependency store the solver reported only
+`lib:validation-kernel` as needing work; a clean library build took 52 seconds and the aggregate component
+binary built and linked in 38 seconds, so the earlier ten-minute solve reflects a cold store rather than a
+standing property of the authored package. That inspection then replaced the gate kernel's unconditional
+refusals with predicates over evidence: the `PhaseSemanticContract` registry no longer both requires and
+forbids an unbound slot, `ContractSlot` is the `ContractGap`/`BoundSpecification` pair, a contract gap is fatal
+only at or below the phase under validation, the nine constant Phase-0 readiness findings became a predicate
+over a typed all-unobserved `PhaseReadiness` record, and `validatePhase` re-derives gates 0..N at the current
+snapshot instead of refusing every later phase by constant. The seventeen-oracle aggregate and the
+phase-contract, phase-contract-internal, source-debt-internal, and compiler-source-graph-acquired suites all
+report their bounded expectations met after their independent expectations were re-authored. This changes what
+the kernel can express, not what has been observed: it is not qualification, clean-room observation, candidate
+evidence, or a gate run, no semantic slot is bound, and every phase and sprint status is unchanged.
 
 Capability-by-capability target ownership remains in the linked phase contracts and the target-only
 [system_components.md](system_components.md). Current divergence identity, ownership, and closure are typed

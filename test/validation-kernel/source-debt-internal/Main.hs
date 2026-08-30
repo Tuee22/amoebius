@@ -1,5 +1,10 @@
 module Main (main) where
 
+import SelectorCli
+  ( SelectorSuite (..)
+  , runSelectorCli
+  , selectorSuite
+  )
 import SourceDebtBaselineInternalOracle
   ( runSourceDebtBaselineInternalExactCaseOracle
   , runSourceDebtBaselineInternalOracle
@@ -9,17 +14,17 @@ import SourceDebtBaselineInternalOracle
   , sourceDebtBaselineInternalExactCaseLabels
   , sourceDebtBaselineInternalSelectorNames
   )
-import System.Environment (getArgs)
 
 main :: IO ()
-main = do
-  arguments <- getArgs
-  case arguments of
-    ["--all"] -> runSourceDebtBaselineInternalOracle
-    ["--list"] -> mapM_ putStrLn sourceDebtBaselineInternalSelectorNames
-    ["--case-list"] -> mapM_ putStrLn sourceDebtBaselineInternalExactCaseLabels
-    ["--case", label] -> runSourceDebtBaselineInternalExactCaseOracle label
-    ["--impacted", selector] -> runSourceDebtBaselineInternalSelectorImpactOracle selector
-    ["--unaffected", selector] -> runSourceDebtBaselineInternalSelectorIsolationOracle selector
-    [selector] -> runSourceDebtBaselineInternalSelectorOracle selector
-    _ -> fail "expected --all, --list, --case-list, --case LABEL, --impacted/--unaffected SELECTOR, or SELECTOR"
+main =
+  runSelectorCli
+    (selectorSuite
+      "SourceDebtBaselineInternalOracle"
+      runSourceDebtBaselineInternalOracle
+      runSourceDebtBaselineInternalSelectorOracle)
+      { suiteSelectorNames = sourceDebtBaselineInternalSelectorNames
+      , suiteExactCaseNames = sourceDebtBaselineInternalExactCaseLabels
+      , suiteRunExactCase = Just runSourceDebtBaselineInternalExactCaseOracle
+      , suiteRunImpacted = Just runSourceDebtBaselineInternalSelectorImpactOracle
+      , suiteRunUnaffected = Just runSourceDebtBaselineInternalSelectorIsolationOracle
+      }
