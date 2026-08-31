@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -403,8 +403,9 @@ refined execution retains its exact resource subtree; no provisioned total is sy
     `BackingId`/`CacheBackingId`/`HostStorageBackingId` and its `NamedDiskCarve`; a build-scratch pool
     preserves the `BuildScratch` purpose rather than relying on a name.
   - gadt-decode preserves this graph as opaque branded ids;
-  - Phase 9 owns value-level global uniqueness, exactly-one parent/reference, layout alias/support checks,
-    injective logical-id→carve resolution, role compatibility, and arithmetic.
+  - [Phase 28](phase_28_storage_geometry_folds.md) owns value-level global uniqueness, exactly-one parent/reference, layout alias/support
+    checks, injective logical-id→carve resolution, and role compatibility as storage geometry; [Phase 9](phase_09_resource_index.md) owns
+    the core capacity arithmetic they feed.
   - CUDA device supply likewise preserves stable identity/profile plus `rawVram`, mandatory
     `driverRuntimeReserve`, and net `allocatableVram`; only the net value is a later fold operand.
 - A managed provider target preserves the exact normalized `{ account : CloudAccountId, nodeClasses :
@@ -438,9 +439,10 @@ refined execution retains its exact resource subtree; no provisioned total is sy
   - gadt-decode never invents or reuses a future node's physical identity.
   - It preserves the fields needed to derive a globally scoped `ProviderInstanceId { account, cluster,
     class, ordinal }`, copying `account` unchanged from the managed target, plus the full disk/carve/slot
-    template path and the operands for the Phase-9 local uniqueness, reference, layout alias/support,
-    role-byte, provider-disk raw-to-mounted-usable/nested-fit arithmetic, and accelerator raw-reserve-net
-    checks.
+    template path and the operands for the [Phase 28](phase_28_storage_geometry_folds.md) local uniqueness, reference, layout
+    alias/support and role-byte checks, together with the [Phase 29](phase_29_execution_accelerator_folds.md) provider-disk
+    raw-to-mounted-usable/nested-fit arithmetic and accelerator raw-reserve-net checks. The provider-root
+    derivation is Phase 29's `ProvisionedNodeRootVolumeRequest` named above, not a Phase-9 fold.
   - Each class also preserves the exact `name`, `sku`, `allocatable`, `quotaVcpu`, `zones`, `price`,
     `baseCount`, and `maxCount` fields.
   - The outer normalized quota preserves all five exact fields: `ProviderQuota { maxInstances, maxVcpu,
@@ -467,8 +469,8 @@ refined execution retains its exact resource subtree; no provisioned total is sy
   per-stage intermediate-byte peak plus cache-write delta; `scratchBacking : HostStorageBackingId`; `cache : HostCacheDemand` with
   typed `CacheBackingId` plus `CacheBudget`; and separate
   `Serial | BoundedParallel PositiveNatural` architecture and stage concurrency policies. The decoder proves
-  dependency references are closed and the graph acyclic; Phase 9 derives maxima over every legal concurrent
-  set. All quantities and references survive in their refined domains; there is no optional, editable-
+  dependency references are closed and the graph acyclic; [Phase 29](phase_29_execution_accelerator_folds.md) derives maxima over every legal
+  concurrent set, because build-stage concurrency is an execution-epoch fold rather than a capacity-core one. All quantities and references survive in their refined domains; there is no optional, editable-
   aggregate, or descriptor-independent builder-resource bypass. Phase 56 owns snapshot-bound live admission,
   not decoding.
 - Every normalized `KindEngineDemand` retains non-empty ordinal-indexed node-container runtime, full
@@ -808,6 +810,11 @@ type.
 - A `PlaintextSecret` `DecodeError` tag and the refinement that returns it.
 - A dhall-typecheck-green negative that must still be rejected, with its one-place paired positive.
 - The §M.8 paired positive of every negative decoded and required to succeed.
+- The formal-bridge projection transplanted from Phase 18: five decoder positives, four exact negatives, and
+  a stated non-hash semantic projection, projected through the
+  [Phase 11](phase_11_formal_model_kernel.md) `Model` bridge. Phase 18 named these against `decodeCluster`,
+  which is this phase's Sprint 26.3 deliverable, so the projection is made here where the decoder exists
+  rather than four phases before it.
 
 ### Validation
 

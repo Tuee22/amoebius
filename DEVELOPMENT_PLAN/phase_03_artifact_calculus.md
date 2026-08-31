@@ -72,6 +72,7 @@ materialization, consumption, and reap boundaries as one typed Haskell calculus.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 2](phase_02_repository_layout_conformance.md)
+**Forward-deferred:** [Phase 15](phase_15_compile_fail_harness.md) — compile-fail diagnostic harness; residue `UNVERIFIED` exact-reason expectation.
 **Gate:** `pb validate phase 03`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -98,6 +99,13 @@ materialization, consumption, and reap boundaries as one typed Haskell calculus.
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 02; candidate execution refuses an absent, stale, replayed, or different-source result. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+
+**The compile-fail harness this claim needs is owned later.** Each illegal twin below must be rejected for the
+exact reason a separately authored Haskell expectation names. The harness that classifies a GHC diagnostic to
+that precision is [Phase 15](phase_15_compile_fail_harness.md). Until it lands, a parse error, an unbound name,
+or a missing import would satisfy a twin, so each twin's exact-reason expectation is `UNVERIFIED` residue. The
+`Forward-deferred:` field records the reach; the relocation is owned by the plan rebalance rather than by this
+phase.
 
 ## Doctrine adopted
 
@@ -130,16 +138,35 @@ Give every artifact amoebius emits a type, a recipe, and a name that is a total 
 
 ### Validation
 
-Two independently seeded processes render each target and must agree byte for byte; an artifact referenced after its region ends fails to compile.
+Two differently situated processes render each target and must agree byte for byte; an artifact referenced
+after its region ends fails to compile.
 
 **Both are checked where they can actually fail, which is not where the suite runs.** The determinism claim is
 one a single process structurally cannot settle: it shares whatever ambient state a recipe reached for, so it
-would agree with itself. The suite therefore prints its renderings under a seed given on the command line and
-the gate runs it twice with different seeds — and the clock mutant proves the arrangement is load-bearing, by
-leaving the in-process suite entirely green while the two reports diverge. The escape claim is a type-level
-one, so it is a checked `.hs` compile-fail pair typechecked under `-fno-code` rather than a test that runs.
-Its separately authored Haskell oracle requires the rejection to name the rigid type variable rather than
-merely to fail; any serialized diagnostic is a lazy `.build/**` observation.
+would agree with itself. The suite therefore prints its renderings and the gate runs it twice, comparing the
+two reports.
+
+**The two runs must differ in every source the deliverable forbids.** A recipe is required to read no clock,
+no environment and no working directory, so varying a seed alone leaves two of those three unobservable: both
+runs see the same environment and the same cwd, agree, and a recipe calling `getEnv` or `getCurrentDirectory`
+passes. The second invocation therefore runs under a different seed, from a different run-scoped cwd beneath
+`.build/runs/**`, and with a differently populated environment. Three changed-subject mutants — a clock read,
+an environment read, and a working-directory read — each make the two reports diverge while leaving the
+in-process suite entirely green, which is what proves the arrangement is load-bearing rather than decorative.
+
+The escape claim is a type-level one, so it is a checked `.hs` compile-fail pair typechecked under `-fno-code`
+rather than a test that runs. Its separately authored Haskell oracle requires the rejection to name the rigid
+type variable rather than merely to fail
+([§M.8](development_plan_gate_integrity.md#m8-paired-negatives-assert-an-exact-reason-at-an-exact-locus)); any
+serialized diagnostic is a lazy `.build/**` observation. It carries a weaken-the-constraint mutant that
+relaxes the region's rank-2 skolem, under which the illegal twin must compile and only then.
+
+**The remaining two deliverables each carry a mutant.** The closed `Target` index is settled by a mutant that
+admits one kind where another is expected; the address is settled by a mutant that drops one of its four
+operands — target, recipe identity, declaration, rendered bytes — so two distinct artifacts collide. Neither
+is covered by the determinism or escape rows, and
+[§M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject) requires a
+selector per independent deliverable.
 
 ### Remaining Work
 

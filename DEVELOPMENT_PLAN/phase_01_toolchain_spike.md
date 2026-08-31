@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/engineering/content_addressing_determinism.md, documents/engineering/pulsar_client_doctrine.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/engineering/content_addressing_determinism.md, documents/engineering/pulsar_client_doctrine.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
 **Generated sections**: none
 
 </details>
@@ -31,11 +31,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Sprint 1.1: Historical shared-resolution spike ⏸️](#sprint-11-historical-shared-resolution-spike-)
 - [Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ⏸️](#sprint-12-dhall-in-process-decoder-build-probe-gadt-decode-dependency-)
 - [Sprint 1.3: `io-sim` + `io-classes` simulation build probe ⏸️](#sprint-13-io-sim--io-classes-simulation-build-probe-)
-- [Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️](#sprint-14-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
-- [Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe ⏸️](#sprint-15-supernova-fork--proto-lens-codegen-build-probe-)
-- [Sprint 1.6: Dynamic resolution and generated-output migration ⏸️](#sprint-16-dynamic-resolution-and-generated-output-migration-)
-- [Sprint 1.7: Pure discovery/ensure planning over injected inputs ⏸️](#sprint-17-pure-discoveryensure-planning-over-injected-inputs-)
-- [Sprint 1.8: Remove top-level vendor source and own the Haskell fork ⏸️](#sprint-18-remove-top-level-vendor-source-and-own-the-haskell-fork-)
+- [Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ⏸️](#sprint-14-supernova-fork--proto-lens-codegen-build-probe-)
+- [Sprint 1.5: Dynamic resolution and generated-output migration ⏸️](#sprint-15-dynamic-resolution-and-generated-output-migration-)
+- [Sprint 1.6: Pure discovery/ensure planning over injected inputs ⏸️](#sprint-16-pure-discoveryensure-planning-over-injected-inputs-)
+- [Sprint 1.7: Remove top-level vendor source and own the Haskell fork ⏸️](#sprint-17-remove-top-level-vendor-source-and-own-the-haskell-fork-)
+- [Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️](#sprint-18-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -104,7 +104,7 @@ committing resolution output, integrity pins, generated code, or host-specific p
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: Phase-1-owned `LTD-SRC-007` and `LTD-SRC-009` remain active; their exact zero-finding checks, reintroduction negatives, and separately authored Haskell bindings have not yet been demonstrated by a passing gate. Sprint 1.8 names `LTD-SRC-009`, but no rewritten sprint owns `LTD-SRC-007`; that missing assignment is itself blocking. |
+| `Legacy closure` | UNRESOLVED — blocks validation: Phase-1-owned `LTD-SRC-007` and `LTD-SRC-009` remain active; their exact zero-finding checks, reintroduction negatives, and separately authored Haskell bindings have not yet been demonstrated by a passing gate. Sprint 1.7 names `LTD-SRC-009`, but no rewritten sprint owns `LTD-SRC-007`; that missing assignment is itself blocking. |
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 00; candidate execution refuses an absent, stale, replayed, or different-source result. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
@@ -188,9 +188,9 @@ buildable on the pin before Phase 26 promises an executable decoder. `dhall` his
 ### Deliverables
 - A recorded resolution: the concrete `allow-newer`/patch/fork/pin that makes `dhall` build on GHC 9.12.4,
   with fresh `cabal build` + `cabal run probe:decode` transcripts beneath `.build/runs/phase_1/**` produced
-  under exactly that set,
-  **or** a recorded blocker carrying the verbatim failing output and one failing transcript per remediation
-  class (bare `allow-newer`, source patch, fork/pin).
+  under exactly that set. There is no failing-transcript alternative: a dependency universe that does not
+  resolve leaves the phase `⏸️ Blocked — NOT VALIDATED` with the blocker recorded as explicit `UNVERIFIED`
+  residue. That is a recorded blocker, not a gate pass.
 - Haskell-declared positive and bad-type probe cases plus separately authored Haskell expected decoded value
   and rejection tag; any Dhall form is generated beneath `.build/probe/**` and is never tracked source.
 
@@ -203,9 +203,9 @@ buildable on the pin before Phase 26 promises an executable decoder. `dhall` his
    separately authored Haskell `dhall` type-error expectation (§M.8), not merely report a generic failure.
 3. The exact `allow-newer`/source-patch/fork required by `dhall`'s transitive deps (`template-haskell`,
    `aeson`, `megaparsec`, `prettyprinter`) is recorded **together with** the green transcript produced with
-   exactly that set. **The "or recorded" branch is evidentiary** per the Gate line — a remediation set counts
-   only with its matching green transcript; a blocker counts only with verbatim failing output per remediation
-   class. Prose alone never passes.
+   exactly that set. A remediation set counts only with its matching green transcript. A failing transcript is
+   never an alternative route to this row: it records why the phase is blocked, and a blocked phase does not
+   pass. Prose alone never passes.
 
 ### Remaining Work
 The pre-reset record said `None`; that statement and its 2026-08-08 decode observations are permanently
@@ -231,7 +231,8 @@ by this probe.
 
 ### Deliverables
 - A recorded resolution for `io-sim` + `io-classes` on the pin with fresh build + `cabal run probe:sim`
-  transcripts beneath `.build/runs/phase_1/**`, **or** a run-local blocker observation per remediation class.
+  transcripts beneath `.build/runs/phase_1/**`. An unresolvable pin is run-local blocker residue that leaves
+  the phase blocked, not a second way to satisfy this deliverable.
 - A checked Haskell declaration of the `IOSimPOR` schedule and a separately authored Haskell expected
   terminal state, plus a Haskell comparison oracle and schedule-perturbation mutation operator. Any serialized
   terminal state or applied mutant is generated only beneath `.build/probe/**`.
@@ -245,15 +246,16 @@ by this probe.
 2. The checked Haskell schedule-perturbation operator changes the step ordering and drops one fairness step
    in a temporary subject beneath `.build/probe/**`. Re-running it MUST turn `probe:sim` red at the independent
    terminal-state oracle (§M.2), while the unchanged positive remains green.
-3. The transcript is retained only beneath `.build/runs/phase_1/**`, **or** the exact remediation/blocker is
-   recorded there per the Gate line. Prose alone never passes.
+3. The green transcript and the exact remediation set that produced it are retained only beneath
+   `.build/runs/phase_1/**`. A recorded blocker is not a substitute for it; the blocker leaves the phase
+   blocked. Prose alone never passes.
 
 ### Remaining Work
 The pre-reset record said `None`; that statement and its 2026-08-08 simulation observations are permanently
 cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
 gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️
+## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
@@ -264,74 +266,18 @@ gate pass, owned legacy closure, and phase-specific obligation in the redesigned
 **Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
-Adopt [`content_addressing_determinism.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
-the shared `jit-build` resolver that materializes named catalog identities into the `CacheBudget`-bounded
-content-addressed cache carries its own Haskell dependencies. Fold them into one probe that also links `dhall`
-+ `io-sim` + `io-classes`, so the whole pre-cluster in-process surface is proven buildable as **one**
-dependency universe — the phase gate.
-
-### Deliverables
-- The consolidated throwaway probe executable whose `build-depends` matches the Representative-set list
-  exactly — all five clauses (i)–(v): `dhall` + `io-sim` + `io-classes` + the eight `jit-build` resolver
-  packages (`cryptohash-sha256`, `http-client`, `http-client-tls`, `typed-process`, `tar`, `zlib`,
-  `directory`, `filepath` — content-hashing, download-or-build, and process control) + the build-only
-  `purescript-bridge` contract generator + the `supernova` fork with its `proto-lens` codegen (the last
-  folded in from Sprint 1.5).
-- A run-local recorded-resolution ledger beneath `.build/runs/phase_1/**` (the `allow-newer`/patch/fork set
-  with its matching observations, or the hard blocker with per-remediation-class failing output). The tracker
-  may link a reader to evidence but cannot supply a behavioral input or verdict.
-- GateReady Haskell compatibility, terminal-state expectation, and mutation declarations. Solver selections,
-  build/run transcripts, any freeze projection, and applied mutant subjects are fresh outputs beneath
-  `.build/runs/phase_1/**`; no evidence bundle or serialized expectation is tracked.
-- A first-class proven/tested/assumed ledger artifact ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) — naming **Register 1**, recording the green build +
-  executed-fixture results as *tested*, and marking every runtime, cluster, and gadt-decode-semantics layer
-  **UNVERIFIED** — emitted beneath `.build/runs/phase_1/**` even though the probe package itself is deleted
-  after resolution.
-
-### Validation
-1. The consolidated probe's `build-depends` matches the Representative-set list exactly — all five clauses
-   (i)–(v); a category description, or a set already in the stock closure, does not satisfy this. It builds
-   and links under GHC 9.12.4 / Cabal 3.16.1.0 from a clean store.
-2. `cabal run probe:decode` exits 0 on the Haskell-declared positive rendered beneath `.build/probe/**`, and
-   `cabal run probe:sim`'s reported terminal state satisfies the separately authored Haskell expectation,
-   never the probe's self-exit.
-3. **Both** checked Haskell mutation operators are applied beneath `.build/probe/**` and re-run: dropping the
-   compatibility allowance reddens the version-resolution locus, while perturbing the simulation schedule
-   reddens the terminal-state locus —
-   together proving the gate detects an unbuildable config and a wrong-terminal-state sim rather than
-   rubber-stamping a green one.
-4. **Or** the consolidated `allow-newer`/patch/fork set is recorded with its matching green transcripts
-   (branch-1), or the exact blocker with verbatim per-remediation-class failing output (branch-2), in the
-   fresh Phase-1 run bundle. All transcripts and the proven/tested/assumed ledger exist only beneath `.build/**` —
-   the Phase-1 acceptance condition. Prose in the tracker without matching run-local observations never passes.
-
-### Remaining Work
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work
-includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and the
-Haskell probe, oracle, and mutation obligations of the redesigned gate.
-
-## Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe ⏸️
-
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
-**Blocked by**: Sprint 1.4
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
-
-### Objective
 De-risk the native Pulsar client's `supernova` fork plus its `proto-lens` codegen — clause (v) of the
 Representative set, the Pulsar-client band's load-bearing build dependency — on the shared pin **here**, before
 the Pulsar-client phase promises it, rather than discovering mid-implementation that a forked client or its
 generated protobuf modules will not compile on GHC 9.12.4. This is the riskiest single leg (a fork plus a
-codegen step), so it is isolated as its own recorded resolution-or-blocker and then folded into the Sprint 1.4
-consolidated gate.
+codegen step), so it is isolated as its own recorded resolution and then folded into the Sprint 1.8
+consolidated gate. Isolating it bounds the blast radius of a blocker; it does not make a blocker acceptable.
 
 ### Deliverables
 - A recorded resolution: the concrete `supernova` fork ref + `proto-lens` `allow-newer`/patch/pin that makes the
   fork and its codegen build on GHC 9.12.4. The fresh `cabal build` transcript is produced beneath
-  `.build/runs/phase_1/**` under exactly that set, or the same run root records a blocker per remediation class.
+  `.build/runs/phase_1/**` under exactly that set. A blocker recorded in the same run root is residue that
+  leaves the phase blocked, not an alternative accepting observation.
 - The `proto-lens` protobuf module and build transcript materialized only beneath `.build/proto/**` and
   `.build/runs/phase_1/**`. Neither generated module nor transcript is tracked source or evidence authority.
 
@@ -343,22 +289,22 @@ consolidated gate.
 2. The checked Haskell dependency-resolution operator removes the fork identity or compatibility declaration
    in a temporary subject beneath `.build/probe/**`. Re-running it turns `cabal build` red at the
    `supernova`/`proto-lens` resolution locus while the unchanged control remains green.
-3. **Or** the blocker is recorded with the verbatim failing `cabal build` output **plus one failing transcript
-   per remediation class** (bare `allow-newer`, source patch, fork/pin), each naming the failing package and
-   the compile-fail locus. Prose alone never passes.
+3. The fork identity and compatibility declaration that produced the green build are recorded with it. An
+   unresolvable fork is recorded as explicit `UNVERIFIED` residue and leaves the phase blocked; a failing
+   `cabal build` is never evidence for this row. Prose alone never passes.
 
 ### Remaining Work
 The pre-reset record said `None`; that statement and every recorded fork/codegen observation are permanently
 cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
 gate pass, owned legacy closure, and the Haskell provenance/oracle/mutation obligations of the redesigned gate.
-[Sprint 1.8](#sprint-18-remove-top-level-vendor-source-and-own-the-haskell-fork-) owns the target split between
+[Sprint 1.7](#sprint-17-remove-top-level-vendor-source-and-own-the-haskell-fork-) owns the target split between
 maintained `.hs` modules under `src/vendor/**` and lazy upstream material beneath `.build/vendor/**`.
 
-## Sprint 1.6: Dynamic resolution and generated-output migration ⏸️
+## Sprint 1.5: Dynamic resolution and generated-output migration ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
-**Blocked by**: Sprint 1.5
+**Blocked by**: Sprint 1.4
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
 **Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
@@ -404,11 +350,11 @@ phase-specific obligation in the redesigned gate. The target must replace the co
 checked Haskell compatibility declarations, confine every resolved product to `.build/**`, and independently
 demonstrate clean-source repeatability without network or outside-host observation.
 
-## Sprint 1.7: Pure discovery/ensure planning over injected inputs ⏸️
+## Sprint 1.6: Pure discovery/ensure planning over injected inputs ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
-**Blocked by**: Sprint 1.6
+**Blocked by**: Sprint 1.5
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
 **Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
 **Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
@@ -456,11 +402,11 @@ owned legacy closure, checked Haskell provider/platform/acquisition declarations
 expectations, applied mutation controls, and fresh contained observations beneath `.build/**`. Any real host
 or acquisition correspondence remains explicitly UNVERIFIED.
 
-## Sprint 1.8: Remove top-level vendor source and own the Haskell fork ⏸️
+## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ⏸️
 
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
-**Blocked by**: Sprint 1.7
+**Blocked by**: Sprint 1.6
 **Independent Validation**: An immutable-input clean build is the positive; a mutable-ref acquisition is the paired negative; an applied top-level-vendor reintroduction mutant reddens its exact source row while the Haskell control stays green; upstream semantic fidelity and licensing remain explicit residue.
 **Oracle**: planned separately authored `test/Amoebius/Vendor/ProvenanceOracle.hs`; provenance and independence boundary unresolved
 **Legacy IDs**: `LTD-SRC-009`
@@ -506,6 +452,73 @@ declared in Haskell.
 materialization, independent oracle, and generated reintroduction corpus do not yet exist. This sprint cannot
 become a candidate until Phase 0 is gate-passed and the typed Haskell closure binding explained to readers
 as `LTD-SRC-009` is green.
+
+## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️
+
+**Status**: Blocked — NOT VALIDATED
+**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Blocked by**: Sprint 1.7
+**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
+**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
+**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
+**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+
+### Objective
+Adopt [`content_addressing_determinism.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
+the shared `jit-build` resolver that materializes named catalog identities into the `CacheBudget`-bounded
+content-addressed cache carries its own Haskell dependencies. Fold them into one probe that also links `dhall`
++ `io-sim` + `io-classes`, so the whole pre-cluster in-process surface is proven buildable as **one**
+dependency universe — the phase gate.
+
+**The gate runs last because it is the only run over the final source.** This sprint used to sit fourth, which
+made two things impossible at once: it needed the `supernova` fork that a later sprint produced, while that
+sprint declared this one as its blocker, and the pin replacement and vendor removal that follow it invalidated
+every transcript the earlier probes had recorded. A gate over a dependency universe has to observe the
+universe the phase actually leaves behind, so it is now the last seam and every earlier probe feeds it.
+
+### Deliverables
+- The consolidated throwaway probe executable whose `build-depends` matches the Representative-set list
+  exactly — all five clauses (i)–(v): `dhall` + `io-sim` + `io-classes` + the eight `jit-build` resolver
+  packages (`cryptohash-sha256`, `http-client`, `http-client-tls`, `typed-process`, `tar`, `zlib`,
+  `directory`, `filepath` — content-hashing, download-or-build, and process control) + the build-only
+  `purescript-bridge` contract generator + the `supernova` fork with its `proto-lens` codegen (the last
+  folded in from Sprint 1.4).
+- A run-local recorded-resolution ledger beneath `.build/runs/phase_1/**`: the `allow-newer`/patch/fork set
+  with its matching green observations. A hard blocker is recorded in the same ledger as `UNVERIFIED` residue
+  and holds the phase shut; it is never an accepting ledger. The tracker
+  may link a reader to evidence but cannot supply a behavioral input or verdict.
+- GateReady Haskell compatibility, terminal-state expectation, and mutation declarations. Solver selections,
+  build/run transcripts, any freeze projection, and applied mutant subjects are fresh outputs beneath
+  `.build/runs/phase_1/**`; no evidence bundle or serialized expectation is tracked.
+- A first-class proven/tested/assumed ledger artifact ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) — naming **Register 1**, recording the green build +
+  executed-fixture results as *tested*, and marking every runtime, cluster, and gadt-decode-semantics layer
+  **UNVERIFIED** — emitted beneath `.build/runs/phase_1/**` even though the probe package itself is deleted
+  after resolution.
+
+### Validation
+1. The consolidated probe's `build-depends` matches the Representative-set list exactly — all five clauses
+   (i)–(v); a category description, or a set already in the stock closure, does not satisfy this. It builds
+   and links under GHC 9.12.4 / Cabal 3.16.1.0 from a clean store.
+2. `cabal run probe:decode` exits 0 on the Haskell-declared positive rendered beneath `.build/probe/**`, and
+   `cabal run probe:sim`'s reported terminal state satisfies the separately authored Haskell expectation,
+   never the probe's self-exit.
+3. **Both** checked Haskell mutation operators are applied beneath `.build/probe/**` and re-run: dropping the
+   compatibility allowance reddens the version-resolution locus, while perturbing the simulation schedule
+   reddens the terminal-state locus —
+   together proving the gate detects an unbuildable config and a wrong-terminal-state sim rather than
+   rubber-stamping a green one.
+4. The consolidated `allow-newer`/patch/fork set is recorded with its matching green transcripts in the
+   fresh Phase-1 run bundle. This row has one branch. An unresolvable set is recorded as explicit `UNVERIFIED`
+   residue and leaves the phase blocked, because a gate a failing transcript can satisfy tests nothing: a
+   deliberately malformed `cabal.project` produces exactly those artefacts while building none of the probes.
+   All transcripts and the proven/tested/assumed ledger exist only beneath `.build/**` —
+   the Phase-1 acceptance condition. Prose in the tracker without matching run-local observations never passes.
+
+### Remaining Work
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work
+includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and the
+Haskell probe, oracle, and mutation obligations of the redesigned gate.
+
 
 ## Documentation Requirements
 
@@ -559,5 +572,5 @@ as `LTD-SRC-009` is green.
 - [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — the `jit-build`
   resolver and the `CacheBudget`-bounded cache whose deps this probe includes.
 - [Repository Layout and Artifact Provenance](../documents/engineering/repository_layout_doctrine.md) — the
-  authored requirements, generated resolution, repository-local evidence, and ignore/context contract that Sprint 1.6
+  authored requirements, generated resolution, repository-local evidence, and ignore/context contract that Sprint 1.5
   implements.

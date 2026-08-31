@@ -195,7 +195,7 @@ must pass `dhall type` and decode-reject — never billing a gadt-decode-only fo
   that declares lawful headroom, so the pinned tag proves the pad rule fired rather than an unrelated shape
   error.
 - **Provisioning-deferred negatives are selected by tags, never section-number ranges.** A registry row with
-  `validation_locus = provision-seal`, an `owner_phase` of `Phase-9` or `Phase-31`, and a `case_family` of
+  `validation_locus = provision-seal`, any fold-owning or seal-owning `owner_phase`, and a `case_family` of
   `topology`, `capacity`, `storage`, `cache`, `accelerator`, or `capability-provision` carries no rejecting
   fixture in Phase 27 and is ledgered with that owner. The generated selection must include every current
   aggregate and atomic fit case: engine/substrate incompatibility and host reuse; host/VM/cluster and
@@ -207,7 +207,11 @@ must pass `dhall type` and decode-reject — never billing a gadt-decode-only fo
   requested on a CPU-only target;
   whole-device-count shortage; accelerator source/workload or policy-domain mismatch; invalid residency/shard
   structure; a policy-permitted coexistence epoch whose co-resident per-device aggregate exceeds net
-  allocatable VRAM; and provider-expanded resource demand. Phase 9 owns the pure folds and Phase 31 owns the end-to-end post-bind
+  allocatable VRAM; and provider-expanded resource demand. The pure folds are split across their owners —
+  [Phase 9](phase_09_resource_index.md) the capacity core and topology relation,
+  [Phase 28](phase_28_storage_geometry_folds.md) the storage geometry, and
+  [Phase 29](phase_29_execution_accelerator_folds.md) the execution-epoch, accelerator and provider-root
+  arithmetic — and [Phase 31](phase_31_provision_seal.md) owns the end-to-end post-bind
   `ProvisionContext → Topology → BoundDeployment → Either ProvisionError ProvisionedSpec` boundary. Adding a new catalog row with
   those tags automatically adds it to the deferred set; no phase-doc range edit is required.
 - **Near-miss twinning (forecloses wrong-reason negatives, §M.8).** Each dhall-typecheck negative is a
@@ -394,8 +398,12 @@ its schema, linter, and path are centrally owned rather than re-derived here.
   `.build/**`, checks the production Haskell catalogue against separately authored Haskell expectations. It
   never derives semantics from the catalogue Markdown. The generated projection has columns at minimum
   `entry`, `subcase`, `validation_locus`, `owner_phase`, and `case_family`. The
-  provisioning-deferred set is a query over those Haskell-declared rows (`owner_phase ∈ {Phase-9, Phase-31}` plus the
-  provisioning case families), not a duplicated literal section-number list.
+  provisioning-deferred set is a query over those Haskell-declared rows: the `owner_phase` column itself,
+  joined to the provisioning case families, rather than a literal owner set. The predicate must range over the
+  registry's own owner values, because a literal set silently misclassifies every row whose owner is not in
+  it: seven catalog rows already carry a `Phase-28` or `Phase-29` delivery owner with
+  `validation_locus = provision-seal`, and against a `{Phase-9, Phase-31}` literal the cheapest way to turn
+  Validation 4 green is to relabel those rows rather than to fix the query.
 - A coverage assertion that **reconciles the emitter's locus for every entry against the registry** and goes
   red on any locus/owner/family divergence, then requires every reached `dhall-typecheck` /
   `gadt-decode` row to have its rejecting fixture present and passing here, and every later-owned row to be
@@ -413,10 +421,16 @@ its schema, linter, and path are centrally owned rather than re-derived here.
    decide which class owes a case.
 3. The coverage assertion is green: every reached `dhall-typecheck` or `gadt-decode` row carries a
    passing rejecting fixture here, and every deferred row names its registry owner — `provision-seal`
-   topology/capacity/storage/cache/accelerator/capability-provision rows → Phase 9 or Phase 31,
+   topology/capacity/storage/cache/accelerator/capability-provision rows → whichever fold or seal owner the
+   registry records (Phase 9, Phase 28, Phase 29, or Phase 31),
    `rendered-artifact-oracle` → Phase 33, `live-effect` → the live band — without being reclassified.
 4. The suite is red if any entry or subcase is unmapped, misclassified relative to the registry, selected by
    a stale hard-coded range, or claimed settled before its owner phase.
+5. The registry reconciles two-way against [Phase 9](phase_09_resource_index.md)'s own closed list of the
+   eleven capacity and topology subcases it settles: every member of that list appears in the registry with a
+   `Phase-9` owner, and every registry row owned by Phase 9 appears in that list. Phase 9 records the
+   classification as `UNVERIFIED` residue precisely because this is where it becomes decidable; a divergence
+   in either direction is red here rather than absorbed.
 
 ### Remaining Work
 

@@ -102,7 +102,10 @@ independently useful provider feature is required.
 - Complete pod/image/slot/API/etcd/storage/message demand plus probe and observer envelopes admitted before the
   first realm, row, object, or topic mutation.
 
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`; negatives under `.build/test-corpora/user_tenant_isolation_live/`.
+- **Extension conformance.** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`, as defined by
+  [`extension_conformance_laws.md` §3 — L1–L5: the per-extension laws](../documents/engineering/extension_conformance_laws.md#3-l1l5-the-per-extension-laws),
+  [§4 — C1–C7: the compositional laws](../documents/engineering/extension_conformance_laws.md#4-c1c7-the-compositional-laws), and
+  [`extension_conformance_security.md` §4 — S1–S6](../documents/engineering/extension_conformance_security.md#4-s1s6); negatives under `.build/test-corpora/user_tenant_isolation_live/`.
 
 ## Doctrine adopted
 

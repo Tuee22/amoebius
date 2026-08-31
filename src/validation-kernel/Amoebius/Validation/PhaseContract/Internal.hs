@@ -731,8 +731,26 @@ selectPhaseTitle candidates =
 summaryFieldNames :: [Text]
 summaryFieldNames = ["Phase scope", "Substrate", "Lane", "Register", "Depends on", "Gate"]
 
+-- | The one conditional Phase Summary field. It is present exactly when the
+-- phase names an artefact a later phase owns, so it is neither required nor
+-- free: both its presence and its position are exact.
+summaryConditionalFieldNames :: [Text]
+summaryConditionalFieldNames = ["Forward-deferred"]
+
+-- | Every field name the summary parser recognises.
+summaryParsedFieldNames :: [Text]
+summaryParsedFieldNames = summaryFieldNames <> summaryConditionalFieldNames
+
+-- | The two admitted orders: the six unconditional fields, and the same six
+-- with @Forward-deferred@ between @Depends on@ and @Gate@. Both are exact; a
+-- field anywhere else is still a containment finding.
+admittedSummaryFieldOrders :: [[Text]]
+admittedSummaryFieldOrders = [summaryFieldNames, before <> summaryConditionalFieldNames <> after]
+ where
+  (before, after) = break (== "Gate") summaryFieldNames
+
 fieldEntries :: [(Int, Text)] -> [(Int, Text, Text)]
-fieldEntries visible = sortOn (\(lineNumber, _, _) -> lineNumber) (concatMap entriesFor summaryFieldNames)
+fieldEntries visible = sortOn (\(lineNumber, _, _) -> lineNumber) (concatMap entriesFor summaryParsedFieldNames)
  where
   entriesFor name =
     [ (lineNumber, name, value)
@@ -1196,14 +1214,14 @@ summaryContainmentFindings phase =
   [ finding
       "PLAN-SUMMARY-CONTAINMENT"
       (phasePath phase)
-      ( "Phase Summary fields must occur inside that section in exact order "
-          <> showText summaryFieldNames
+      ( "Phase Summary fields must occur inside that section in one of the exact orders "
+          <> showText admittedSummaryFieldOrders
           <> "; observed order "
           <> showText (phaseSummaryFieldOrder phase)
           <> "; outside-section fields "
           <> showText (phaseSummaryFieldStrays phase)
       )
-  | phaseSummaryFieldOrder phase /= summaryFieldNames
+  | phaseSummaryFieldOrder phase `notElem` admittedSummaryFieldOrders
       || not (null (phaseSummaryFieldStrays phase))
   ]
 #endif
@@ -2445,10 +2463,35 @@ checkProjectionVocabulary phases rows =
     checkPhaseValue (phasePath phase) "Substrate" substrateVocabulary (phaseValue phase "Substrate")
       <> checkPhaseValue (phasePath phase) "Lane" laneVocabulary (phaseValue phase "Lane")
       <> checkPhaseValue (phasePath phase) "Register" registerVocabulary (phaseValue phase "Register")
+      <> checkPair
+        (phasePath phase)
+        (closedVocabularyToken <$> phaseValue phase "Substrate")
+        (closedVocabularyToken <$> phaseValue phase "Lane")
   checkTracker row =
     checkTrackerValue trackerPath (phaseLabel row "Substrate") substrateVocabulary (trackerSubstrate row)
       <> checkTrackerValue trackerPath (phaseLabel row "Lane") laneVocabulary (trackerLane row)
       <> checkTrackerValue trackerPath (phaseLabel row "Register") registerVocabulary (trackerRegister row)
+      <> checkPair
+        (Text.unpack (phaseLabel row "Substrate/Lane"))
+        (Just (trackerSubstrate row))
+        (Just (trackerLane row))
+  checkPair subject substrate lane =
+    [ finding
+        "PLAN-SUBSTRATE-LANE-PAIR"
+        subject
+        ( "lane "
+            <> showText observedLane
+            <> " is not admissible on substrate "
+            <> showText observedSubstrate
+            <> "; a phase declares at most one specialized substrate, so a specialized lane pins"
+            <> " exactly the substrate that provides it"
+        )
+    | Just observedSubstrate <- [substrate]
+    , Just observedLane <- [lane]
+    , observedSubstrate `elem` substrateVocabulary
+    , observedLane `elem` laneVocabulary
+    , not (laneAdmissibleOn observedSubstrate observedLane)
+    ]
   phaseValue phase field = case Map.findWithDefault [] field (phaseFields phase) of
     [value] -> Just value
     _ -> Nothing
@@ -2473,6 +2516,31 @@ substrateVocabulary = ["none", "apple", "linux-cpu", "linux-cuda", "windows"]
 
 laneVocabulary :: [Text]
 laneVocabulary = ["none", "linux-cpu/amd64", "linux-cpu/arm64", "metal", "cuda", "provider"]
+
+-- | Which lanes a substrate can carry.
+--
+-- Substrate and lane were each checked against a closed vocabulary but never
+-- against each other, so @apple@ paired with @cuda@, or @windows@ with
+-- @metal@, passed. Either pair would need two specialized machines for one
+-- gate, which is what
+-- @development_plan_phase_model.md@ section L forecloses when it says a phase
+-- "declares exactly one" substrate "plus its natural lane".
+--
+-- A specialized lane therefore pins exactly the substrate that provides it:
+-- @metal@ only on @apple@, @cuda@ only on @linux-cuda@. A baseline lane pins
+-- the natural architecture instead, and never a second specialized substrate:
+-- Lima gives Apple @arm64@, WSL2 gives Windows @amd64@, Incus gives Linux and
+-- Linux-CUDA their own. @provider@ is a managed target driven from one
+-- @linux-cpu@ parent rather than a substrate of its own.
+laneAdmissibleOn :: Text -> Text -> Bool
+laneAdmissibleOn substrate lane = case lane of
+  "none" -> substrate == "none"
+  "metal" -> substrate == "apple"
+  "cuda" -> substrate == "linux-cuda"
+  "provider" -> substrate == "linux-cpu"
+  "linux-cpu/arm64" -> substrate `elem` ["apple", "linux-cpu"]
+  "linux-cpu/amd64" -> substrate `elem` ["linux-cpu", "linux-cuda", "windows"]
+  _ -> False
 
 registerVocabulary :: [Text]
 registerVocabulary = ["—", "1", "2", "3"]

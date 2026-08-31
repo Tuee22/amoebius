@@ -254,8 +254,8 @@ an authoring-time boundary that fires before any binary runs.
   - dhall-typecheck proves those fields and closed arms are present.
   - Phase 26 refines/normalizes the quantities and preserves the identity graph in opaque, unit-tagged
     values;
-  - Phase 9 checks global backing/carve uniqueness, exactly-once reference resolution, `requests ≤ limits`,
-    and capacity arithmetic.
+  - [Phase 28](phase_28_storage_geometry_folds.md) checks global backing/carve uniqueness and exactly-once reference resolution as storage
+    geometry, while [Phase 9](phase_09_resource_index.md) checks `requests ≤ limits` and the core capacity arithmetic.
   - Kubernetes resource maps, uniform claim-template PVC sizes, cache volumes, and accelerator extended
     resources are later rendered projections of these pure values, never authorable parallel fields.
 - An in-file **honesty caveat**: because Dhall has no opaque types, binding- and phantom-index foreclosures
@@ -316,7 +316,8 @@ require distinct nodefs/imagefs references, and containerfs is derived from the 
 a third capacity. Those pools carry the typed logical ids consumed by durable/cache/ host-worker/build
 demands and their physical `NamedDiskCarve`; build scratch has its own required purpose tag. The globally
 scoped ids and all parent/reference edges are required schema fields; their value-level uniqueness,
-one-parent ownership, and arithmetic are the Phase-9 fold rather than a dishonest Dhall type claim. The
+one-parent ownership, and arithmetic are the [Phase 28](phase_28_storage_geometry_folds.md) storage-geometry fold over the [Phase 9](phase_09_resource_index.md) capacity core, rather
+than a dishonest Dhall type claim. The
 inventory also carries a closed accelerator offering: CUDA family/wholesale whole-device count, Apple Metal
 profile with unified memory charged to host memory, or `None`; every non-None owner demand carries exact
 equal-keyed source/workload maps plus structural residency and finite class-based coexistence policy. The
@@ -363,7 +364,9 @@ attach only when each node materializes. That same `CloudAccountId` exact-joins 
 the later constructor checks: class-local template-id uniqueness, filesystem references and layout aliases,
 role bytes within their carve, conversion of instance-store raw supply or the derived ephemeral-root-EBS
 request to mounted usable capacity before fitting system reserve plus unique usable carves, and reserved
-plus allocatable VRAM within raw VRAM. Their value arithmetic is Phase 9, not a Dhall type claim. Every
+plus allocatable VRAM within raw VRAM. Their value arithmetic is the [Phase 28](phase_28_storage_geometry_folds.md) storage-geometry fold for the
+template, filesystem and carve terms, and the [Phase 29](phase_29_execution_accelerator_folds.md) accelerator and provider-root folds for the raw-to-mounted
+conversion and the VRAM bound, not a Dhall type claim. Every
 `Observability` deployment binding also requires a non-optional finite `MonitoringWorkBudget { maxWorkflows,
 maxRules, maxSeries, maxScrapeSamplesPerSecond, evaluationInterval, evaluationCpu, evaluationMemory,
 retention, query : QueryWorkBudget { maxConcurrentQueries, maxSeriesPerQuery, maxSamplesPerQuery, maxRange,

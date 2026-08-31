@@ -17,14 +17,24 @@
 -- as typed values, so a forward dependency becomes a finding at an exact locus
 -- instead of an unreadable sentence.
 --
--- __This module has no consumers.__ Nothing imports it, so the findings below
--- redden no gate. That is deliberate: the graph reports defects that are real
--- today, and wiring it into a gate before those defects are fixed would leave
--- the gate red across many steps with no way to separate an expected red from a
--- regression. The only relief for that is an allowlist, which is the rubber
--- stamp this whole effort exists to remove.
+-- The relation is consumed through 'capabilityGraphDiagnosticWith', which takes
+-- the forward reaches the phase documents declare in their @Forward-deferred:@
+-- field and reconciles them against the edges below in both directions. An
+-- undeclared backward edge is a finding; a declaration matching no edge is also
+-- a finding; a declared edge is an accounted observation naming its owner.
+--
+-- That declaration is not an allowlist. An allowlist lives beside the checker,
+-- is invisible to a reader of the plan, and grows silently. A
+-- @Forward-deferred:@ field lives in the phase document that has the reach, names
+-- the owner that discharges it, is checked two-way here, and is read by anyone
+-- reading the phase. It is the same accounting the source-hygiene rule already
+-- applies to a strictly-later legacy binding: visible, owned, and closable.
+--
+-- 'capabilityGraphDiagnostic' remains the no-declaration projection, so the raw
+-- backward-edge set stays observable on its own.
 module Amoebius.Validation.CapabilityGraph
   ( capabilityGraphDiagnostic
+  , capabilityGraphDiagnosticWith
   ) where
 
 import Amoebius.Validation.Legacy.Internal qualified as Legacy
@@ -203,8 +213,14 @@ systemicRunInputEdges =
 capabilityOrdinal :: Text -> Maybe Int
 capabilityOrdinal = PhaseIdentity.lookupCapabilityOrdinal
 
+-- | The relation with no declared reaches: every backward edge is a finding.
 capabilityGraphDiagnostic :: CheckResult
-capabilityGraphDiagnostic =
+capabilityGraphDiagnostic = capabilityGraphDiagnosticWith []
+
+-- | The relation reconciled against the declared @Forward-deferred:@ reaches,
+-- each given as an exact @(consumer ordinal, provider ordinal)@ pair.
+capabilityGraphDiagnosticWith :: [(Int, Int)] -> CheckResult
+capabilityGraphDiagnosticWith declared =
   CheckResult
     { checkName = "capability-graph"
     , checkObservations =
@@ -215,10 +231,40 @@ capabilityGraphDiagnostic =
         , observation "capability.consumer-phase-count" (showText (Set.size consumerCapabilities))
         , observation "capability.declared-coverage" (showText (Set.size consumerCapabilities) <> "/" <> showText (length PhaseIdentity.allPhaseIdentities))
         , observation "capability.forward-edge-count" (showText (length forwardEdges))
+        , observation "capability.forward-declared-count" (showText (length declaredForwardEdges))
+        , observation "capability.forward-undeclared-count" (showText (length undeclaredForwardEdges))
+        , observation "capability.forward-declaration-count" (showText (length declaredPairs))
+        , observation "capability.owned-cycle-count" (showText (length ownedCycles))
+        , observation "capability.unowned-cycle-count" (showText (length unownedCycles))
         ]
-    , checkFindings = providerFindings <> consumerFindings <> forwardFindings <> cycleFindings
+    , checkFindings =
+        providerFindings
+          <> consumerFindings
+          <> forwardFindings
+          <> unmatchedDeclarationFindings
+          <> cycleFindings
     }
  where
+  declaredPairs = nub declared
+  isDeclared consumerOrdinal providerOrdinal =
+    (consumerOrdinal, providerOrdinal) `elem` declaredPairs
+  declaredForwardEdges =
+    [edge | edge@(_, _, _, c, p) <- forwardEdges, isDeclared c p]
+  undeclaredForwardEdges =
+    [edge | edge@(_, _, _, c, p) <- forwardEdges, not (isDeclared c p)]
+  matchedPairs = nub [(c, p) | (_, _, _, c, p) <- declaredForwardEdges]
+  unmatchedDeclarationFindings =
+    [ finding
+        "PLAN-FORWARD-DECLARATION-UNMATCHED"
+        ("phase " <> Text.unpack (renderOrdinal consumerOrdinal))
+        ( "a Forward-deferred field declares a reach to phase "
+            <> renderOrdinal providerOrdinal
+            <> " that the capability relation does not carry; the field is present"
+            <> " exactly when the reach is, so an unmatched declaration is stale"
+        )
+    | (consumerOrdinal, providerOrdinal) <- declaredPairs
+    , (consumerOrdinal, providerOrdinal) `notElem` matchedPairs
+    ]
   allProvisions = [minBound .. maxBound] :: [Provision]
   confirmedEdges = [edge | edge@(_, _, witness) <- requirementEdges, edgeWitnessConfirmed witness]
   proposedEdges = [edge | edge@(_, _, witness) <- requirementEdges, not (edgeWitnessConfirmed witness)]
@@ -252,7 +298,7 @@ capabilityGraphDiagnostic =
 
   forwardFindings =
     [ finding
-        "PLAN-CAPABILITY-FORWARD-DEPENDENCY"
+        "PLAN-CAPABILITY-FORWARD-UNDECLARED"
         (Text.unpack consumer)
         ( "phase "
             <> renderOrdinal consumerOrdinal
@@ -264,16 +310,27 @@ capabilityGraphDiagnostic =
             <> provisionProvider provision
             <> "); witness="
             <> renderWitness witness
+            <> "; no Forward-deferred field declares it"
         )
-    | (consumer, provision, witness, consumerOrdinal, providerOrdinal) <- forwardEdges
+    | (consumer, provision, witness, consumerOrdinal, providerOrdinal) <- undeclaredForwardEdges
     ]
 
+  -- A cycle every one of whose outbound edges carries a typed legacy owner is
+  -- already an owned, closable obligation; its analyzer refuses at that owner.
+  -- Refusing here as well would report one obligation twice without adding a
+  -- second observation, so it is recorded and left to its owner.
+  cycleOwned node =
+    not (null (outEdges node))
+      && all (\(_, _, witness) -> edgeWitnessLegacyOwned witness) (outEdges node)
+  outEdges node = [edge | edge@(consumer, _, _) <- requirementEdges, consumer == node]
+  ownedCycles = [members | members <- capabilityCycles, all cycleOwned members]
+  unownedCycles = [members | members <- capabilityCycles, not (all cycleOwned members)]
   cycleFindings =
     [ finding
         "PLAN-CAPABILITY-CYCLE"
         (Text.unpack (Text.intercalate "->" cycleMembers))
-        "the declared requirement relation contains a cycle"
-    | cycleMembers <- capabilityCycles
+        "the declared requirement relation contains a cycle with no typed owner"
+    | cycleMembers <- unownedCycles
     ]
 
 -- | Capability-level cycle detection over the requirement relation.
@@ -302,6 +359,14 @@ capabilityCycles =
          in step (foldr Set.insert seen next) (nub next)
   reachesItself node =
     Set.member node (step Set.empty (Map.findWithDefault [] node adjacency))
+
+-- | Whether an edge's witness binds it to a typed legacy owner that refuses on
+-- its own behalf.
+edgeWitnessLegacyOwned :: EdgeWitness -> Bool
+edgeWitnessLegacyOwned witness = case witness of
+  LegacyOwnerBinding _ -> True
+  GeneratedRootConsumption _ -> False
+  ProposedFromPlanText _ -> False
 
 renderProvision :: Provision -> Text
 renderProvision = Text.pack . show

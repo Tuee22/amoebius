@@ -102,7 +102,10 @@ Provisioning accounts for upload staging, chunk concurrency, WebSocket control m
 content verification, MinIO object and metadata demand, receipt retention, retries, and the declared reconnect
 storm. Browser quota remains runtime-observed and cannot masquerade as cluster capacity.
 
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`; Haskell negative declarations
+- **Extension conformance.** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`, as defined by
+  [`extension_conformance_laws.md` §3 — L1–L5: the per-extension laws](../documents/engineering/extension_conformance_laws.md#3-l1l5-the-per-extension-laws),
+  [§4 — C1–C7: the compositional laws](../documents/engineering/extension_conformance_laws.md#4-c1c7-the-compositional-laws), and
+  [`extension_conformance_security.md` §4 — S1–S6](../documents/engineering/extension_conformance_security.md#4-s1s6); Haskell negative declarations
   materialize serialized cases lazily under `.build/test-corpora/offline_blobs_isolation/`.
 
 ## Doctrine adopted

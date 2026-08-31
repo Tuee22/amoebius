@@ -131,21 +131,30 @@ hashes or byte snapshots as semantic evidence.
 
 ### Deliverables
 
-- Five actual decoder positives, four exact negatives, and a stated non-hash semantic projection.
 - Exhaustive four-axis `0..2` demand/capacity differential over 6,561 pairs.
-- Two actual provision/render/chain projections totaling 19 objects and steps.
 - Actual five-calculus composition projected through the shared formal bridge.
 
 ### Validation
 
-1. Require exact decoder surfaces, structural counts, and negative tags.
-2. Compare `fits` to independent componentwise subtraction on every finite-domain pair.
-3. Require exact render/chain identities and frames, unique objects, and zero construction-time effects.
-4. Match all eight shared calculus facts.
+1. Compare `fits` to independent componentwise subtraction on every finite-domain pair.
+2. Match all eight shared calculus facts.
+
+**The decoder and the provision/render/chain tranches are not this phase's to project.** Both named artefacts
+this phase does not own: `decodeCluster` is built at
+[Phase 26](phase_26_gadt_decode_ir.md), `provision` at [Phase 31](phase_31_provision_seal.md), `renderAll` at
+[Phase 33](phase_33_render_manifest_oracles.md), and `Step`/`chain` at
+[Phase 34](phase_34_chain_kernel_boundary.md). Requiring "five actual decoder positives" and "two actual
+provision/render/chain projections" here made a phase-18 gate pass depend on four later phases, which
+`Depends on:` cannot express and no checker could see. Each tranche moves to a sprint of its owning phase and
+projects back through this phase's formal bridge locally, where the artefact already exists. What remains at
+18 is what Phases 3–17 deliver: the capacity differential over the Phase-9 fold, and the five-calculus
+composition over Phase-11 `Model` values.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. The two removed tranches are
+carried as obligations on Phases 26 and 34 rather than as residue here, because this phase no longer claims
+them.
 
 ## Sprint 18.2: Protocol models and correspondence ⏸️
 

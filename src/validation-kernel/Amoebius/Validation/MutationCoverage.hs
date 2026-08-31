@@ -21,13 +21,20 @@
 -- here would rest this count on an unvalidated subject.
 module Amoebius.Validation.MutationCoverage
   ( DrivenSuite (..)
+  , SelectionMode (..)
   , declaredMutationLoci
   , drivenSuites
+  , milestoneCapabilities
   , mutationCoverageCheck
+  , mutationPolicyCheck
+  , mutationSelectionMode
   , unwiredMutationLoci
   ) where
 
+import Amoebius.Validation.PhaseIdentity qualified as PhaseIdentity
 import Amoebius.Validation.Types (CheckResult (..), finding, observation)
+import Data.List (nub, sort)
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 
@@ -127,6 +134,161 @@ mutationCoverageCheck =
     | unwiredMutationLoci > 0
     , owner <- ["documentation_suite"]
     ]
+
+-- | How much of the corpus a gate runs.
+--
+-- Mutation effort is bounded by what a gate claims. Running the whole corpus at
+-- every gate is what made the corpus unbounded in the first place: an atomic
+-- selector per acceptance conjunct, demanded everywhere, produces thousands of
+-- loci nobody drives, which is the 'unwiredMutationLoci' number above.
+data SelectionMode
+  = -- | The complete selector corpus. Reserved for a milestone.
+    MatrixAll
+  | -- | Exactly the selectors whose impact set meets the phase's own contract
+    -- rows. Every other gate.
+    Impacted
+  deriving (Eq, Show)
+
+-- | The capabilities whose gates run the complete corpus.
+--
+-- Named as capabilities and resolved through the identity table, never as
+-- ordinal literals: a rebalance moves ordinals, and a milestone list written in
+-- ordinals would keep pointing at whatever phase inherited the number. A split
+-- must hand the milestone to a named successor, which is a visible edit here
+-- rather than a silent drift.
+--
+-- Each entry closes a band or a role boundary, so it is the point at which a
+-- regression anywhere beneath it must still be caught.
+milestoneCapabilities :: [Text]
+milestoneCapabilities =
+  -- role boundaries
+  [ "self_referential_gates"
+  , "host_assert_cli"
+  , "host_ensure_kernel"
+  , "linux_engine_bringup"
+  -- band closures
+  , "repository_layout_conformance"
+  , "calculus_composition"
+  , "compile_fail_harness"
+  , "conformance_gate_generator"
+  , "chain_kernel_boundary"
+  , "test_workflow_algebra"
+  -- live closures
+  , "live_dsl_deploy"
+  , "determinism_jitcache"
+  , "test_topology_live"
+  ]
+
+-- | The selection mode a capability's gate runs under.
+mutationSelectionMode :: Text -> SelectionMode
+mutationSelectionMode capability
+  | capability `elem` milestoneCapabilities = MatrixAll
+  | otherwise = Impacted
+
+-- | The rulebook states the same milestone set in prose. Haskell owns the
+-- value; this checks that the prose says what the value says, in both
+-- directions, which is a correspondence obligation rather than a semantic
+-- derivation from prose.
+mutationPolicyCheck :: [(FilePath, Text)] -> CheckResult
+mutationPolicyCheck supplied =
+  CheckResult
+    { checkName = "mutation-policy"
+    , checkObservations =
+        [ observation "mutation.milestone-count" (showText (length milestoneCapabilities))
+        , observation "mutation.ordinary-gate-count" (showText ordinaryCount)
+        , observation "mutation.policy-section-found" (showText (not (Text.null policySection)))
+        ]
+    , checkFindings = duplicateFindings <> unresolvedFindings <> correspondenceFindings
+    }
+ where
+  ordinaryCount = length PhaseIdentity.allPhaseIdentities - length milestoneCapabilities
+
+  duplicateFindings =
+    [ finding
+        "MUTANT-POLICY-DUPLICATE"
+        "Amoebius.Validation.MutationCoverage.milestoneCapabilities"
+        ("a milestone capability is named more than once: " <> capability)
+    | capability <- nub milestoneCapabilities
+    , length (filter (== capability) milestoneCapabilities) > 1
+    ]
+
+  -- A milestone naming a capability no phase carries is the exact rot the
+  -- capability indirection exists to prevent, so it refuses rather than being
+  -- silently skipped.
+  unresolvedFindings =
+    [ finding
+        "MUTANT-POLICY-UNRESOLVED"
+        "Amoebius.Validation.MutationCoverage.milestoneCapabilities"
+        ("a milestone names a capability no phase provides: " <> capability)
+    | capability <- milestoneCapabilities
+    , PhaseIdentity.lookupCapabilityOrdinal capability == Nothing
+    ]
+
+  knownCapabilities =
+    Set.fromList (map PhaseIdentity.phaseIdentityCapability PhaseIdentity.allPhaseIdentities)
+
+  policySection = sectionBody "### M.3 " gateIntegrityText
+  gateIntegrityText =
+    Text.concat
+      [ contents
+      | (path, contents) <- supplied
+      , normaliseSlashes path == "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
+      ]
+
+  prosed =
+    Set.fromList
+      [ token
+      | token <- codeSpans policySection
+      , Set.member token knownCapabilities
+      ]
+  declared = Set.fromList milestoneCapabilities
+
+  correspondenceFindings =
+    [ finding
+        "MUTANT-POLICY-PROSE-MISSING"
+        "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
+        ("section M.3 does not name the milestone capability: " <> capability)
+    | not (Text.null policySection)
+    , capability <- sort (Set.toList (Set.difference declared prosed))
+    ]
+      <> [ finding
+             "MUTANT-POLICY-PROSE-EXTRA"
+             "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
+             ("section M.3 names a capability that is not a declared milestone: " <> capability)
+         | not (Text.null policySection)
+         , capability <- sort (Set.toList (Set.difference prosed declared))
+         ]
+      <> [ finding
+             "MUTANT-POLICY-PROSE-ABSENT"
+             "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
+             "section M.3 is absent from the supplied corpus, so the milestone set has no prose correspondence"
+         | Text.null policySection
+         ]
+
+normaliseSlashes :: FilePath -> Text
+normaliseSlashes = Text.replace "\\" "/" . Text.pack
+
+-- | The body of a heading, up to the next heading of the same depth.
+sectionBody :: Text -> Text -> Text
+sectionBody heading source = case Text.breakOn heading source of
+  (_, rest)
+    | Text.null rest -> ""
+    | otherwise ->
+        let body = Text.drop (Text.length heading) rest
+         in fst (Text.breakOn "\n### " body)
+
+-- | Backticked tokens, which is where a capability name appears in prose.
+codeSpans :: Text -> [Text]
+codeSpans source = go source
+ where
+  go remaining = case Text.breakOn "`" remaining of
+    (_, rest)
+      | Text.null rest -> []
+      | otherwise ->
+          let body = Text.drop 1 rest
+              (token, after) = Text.breakOn "`" body
+           in [token | not (Text.null token)] <> go (Text.drop 1 after)
+
 
 showText :: Show value => value -> Text
 showText = Text.pack . show

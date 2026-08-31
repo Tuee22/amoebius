@@ -168,6 +168,7 @@ Every `phase_NN_<slug>.md` uses this order:
 **Lane:** <none | linux-cpu/amd64 | linux-cpu/arm64 | metal | cuda | provider>
 **Register:** <— | 1 | 2 | 3>
 **Depends on:** <the exact linked immediate numeric predecessor only, or genesis for Phase 0; additional earlier dependencies belong in typed contract/prose rather than this structural field>
+**Forward-deferred:** <conditional; each later-owned capability this phase names, with its owner and residue tag>
 **Gate:** `pb validate phase NN`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -182,8 +183,20 @@ Every `phase_NN_<slug>.md` uses this order:
 ## Related Documents
 ```
 
-The six Phase Summary fields are required, closed, and ordered exactly as shown. The Gate line is a future
-public-command target, not an assertion that it exists, runs, or passes. Until Phase 50's qualified gate passes,
+The six unconditional Phase Summary fields are required, closed, and ordered exactly as shown. The Gate line
+is a future public-command target, not an assertion that it exists, runs, or passes.
+
+`Forward-deferred:` is the one conditional field, placed exactly between `Depends on:` and `Gate:`. It is
+present when and only when the phase names an artefact a later phase owns, and it carries that owner's
+capability plus the residue tag under which the reach is recorded. `Depends on:` is structurally restricted to
+the immediate predecessor and
+[`development_plan_phase_model.md` §E](development_plan_phase_model.md#e-one-canonical-phase-model) routes
+additional dependencies to prose only when they run backwards in the plan's order, so without this field a
+forward reach has nowhere to be stated and is invisible to every checker. Naming one is not permission to
+consume it: the reach is residue the later owner discharges, and a phase whose claim cannot be settled without
+the later artefact is mis-ordered rather than forward-deferred.
+
+Until Phase 50's qualified gate passes,
 `pb` is an inadmissible validation transport: Phase 0 through Phase 49 build and invoke the exact
 source-bound Haskell executable directly from an pinned, network-independent toolchain input. Phase 50
 alone places the already source-bounded `pb` ensure/build/unchanged-argv/exec handoff under external runtime
@@ -253,6 +266,7 @@ Each sprint uses this exact header and field set:
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: <authored .hs path, documentation path, or pb/** bootstrap path>
 **Blocked by**: <immediate prior sprint or earlier phase gate pass; genesis only where true>
+**Forward-deferred**: <conditional; later-owned capability this sprint names, with owner and residue tag; omit if none>
 **Requires**: <`natural-linux-cpu-amd64-host` | `disposable-linux-cpu-amd64-host`; omit if none>
 **Independent Validation**: <one falsifiable seam; never merely the parent gate>
 **Oracle**: <separate .hs module and independence boundary>
@@ -288,6 +302,10 @@ targets, and omissions; and run each changed subject against its assigned exact 
 derived from production or build declarations, cardinality-only agreement, or an aggregate oracle that turns
 red outside the assigned case is inadmissible under
 [`testing_spoof_resistance.md` §12.4](../documents/engineering/testing_spoof_resistance.md#124-subject-change-witnesses).
+
+`Forward-deferred` is present when and only when the sprint's deliverables or validation name an artefact a
+later phase owns. It records the reach as residue with its owner; it never authorises consuming that artefact
+to settle this sprint's claim.
 
 `Blocked by` names plan work. `Requires` names only an environmental fact no phase can build. Its current
 closed vocabulary is `natural-linux-cpu-amd64-host` and `disposable-linux-cpu-amd64-host`; a new fact requires
@@ -435,6 +453,12 @@ A candidate is inadmissible unless the harness first rejects the qualification s
 is observed to change the intended production locus and redden the intended oracle, discovery is non-empty and
 two-way complete, stale evidence and self-reporting fail, and cleanup leaves no residue. Once the complete
 gate passes, the status update is mechanical.
+
+Mutation scope is bounded by the claim. The complete selector corpus runs only at the milestone capabilities
+named in [`development_plan_gate_integrity.md` §M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject).
+An ordinary gate runs exactly those selectors whose declared impact set intersects its own `Claim`,
+`Positive controls`, and `Paired negatives` rows, subject to the per-deliverable and foreclosure floor. A
+milestone is named as a capability, never as an ordinal.
 
 Before an adapter has authenticated every authority its claim requires, its parser and integrity-consistent
 values remain private behind an always-refusing `CheckResult`; it may not export a conventional success branch,

@@ -251,7 +251,7 @@ transformations are declared in authored Haskell values and rendered only as rea
 the fixed-source rule in
 [`repository_layout_doctrine.md` §4.1](./repository_layout_doctrine.md#41-a-compatibility-edit-is-fixed-source-not-a-patch-against-a-moving-head),
 owned by
-[`phase_01_toolchain_spike.md` Sprint 1.8](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md#sprint-18-remove-top-level-vendor-source-and-own-the-haskell-fork-).
+[`phase_01_toolchain_spike.md` Sprint 1.7](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md#sprint-17-remove-top-level-vendor-source-and-own-the-haskell-fork-).
 
 > **Honesty.** Supernova remains provenance, not evidence. Phase 67 must independently validate amoebius's
 > generated framing, CONNECT/LOOKUP, produce/consume/subscribe/seek surface, broker dedup, redelivery, and

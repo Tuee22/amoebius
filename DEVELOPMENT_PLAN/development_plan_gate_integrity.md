@@ -13,7 +13,7 @@ section lettering lives in [`development_plan_standards.md`](development_plan_st
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_artifact_calculus.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -145,9 +145,38 @@ subject. A build flag is admissible only when the resulting compiled production 
 both observed. Production or build declarations may be reconciled against the oracle registry, but may not
 generate it or define its expected cardinality. An aggregate oracle red outside the assigned row, a
 warning-as-error caused by dead changed-subject code, or a failure at another boundary is not a mutant kill.
-Every independent acceptance conjunct, permanent refusal, resource and result-retention bound,
-closed-grammar alternative, and routing or composition decision requires an atomic selector; a compound
-challenge is supplemental rather than a substitute.
+At a milestone gate, every independent acceptance conjunct, permanent refusal, resource and
+result-retention bound, closed-grammar alternative, and routing or composition decision requires an atomic
+selector; a compound challenge is supplemental rather than a substitute. An ordinary gate draws from that same
+corpus by the selection rule below.
+
+**Which gates run the whole corpus.** Mutation effort is bounded by what a gate claims, not by what the corpus
+contains. The complete selector corpus runs only at a milestone gate. A milestone is named as a phase
+capability and resolved through the identity table, never as an ordinal literal, so a reorder cannot silently
+move it and a split must assign it to a named successor rather than let it lapse. The milestones are:
+
+- the role boundaries — `self_referential_gates`, `host_assert_cli`, `host_ensure_kernel`, and
+  `linux_engine_bringup`;
+- the band closures — `repository_layout_conformance`, `calculus_composition`, `compile_fail_harness`,
+  `conformance_gate_generator`, `chain_kernel_boundary`, and `test_workflow_algebra`; and
+- the live closures — `live_dsl_deploy`, `determinism_jitcache`, and `test_topology_live`.
+
+Each closes a band or a role boundary, so it is the point at which a regression anywhere beneath it must still
+be caught.
+
+**What an ordinary gate runs.** An ordinary gate runs a selector if and only if that selector's declared impact
+set intersects the exact oracle cases named by the phase's own contract in its `Claim`, `Positive controls`,
+and `Paired negatives` rows. The intersection is computed from typed values; no author decides it. The gate
+asserts both directions: the impacted selection reddens exactly the intersecting cases, and the complement
+stays green. A selector whose reddening is attributed to another selector fails the run, which is what
+separates a mutation registry from a rubber stamp. A phase may not narrow its own contract rows to shrink this
+set, because those rows are themselves checked against the claim.
+
+**The floor.** Relevance bounds effort; it never excuses absence. Every independent `Deliverables` bullet in a
+sprint requires at least one selector. Every permanent refusal and every compile-fail foreclosure claim
+requires a weaken-the-constraint selector, whose changed subject makes the illegal twin compile, or the
+refusal lift, and only then. A declared locus no suite can execute is not coverage; it is reported against the
+capability that owns closing it and is never counted as a mutant.
 
 ### M.4 Harness qualification precedes every candidate
 
@@ -203,6 +232,35 @@ The gate compares the contract, qualification observations, clean observations, 
 residue, predecessor result, and exact proposed status-only projection. When every required row is green and
 every required refusal was observed, the gate passes and that result is sufficient to apply the projection. A
 human, agent, or CI job may repeat this validate-and-record sequence across consecutive phases.
+
+### M.7 Representative corpora and partitions
+
+A claim whose domain is too large to enumerate may be gated over a named representative corpus rather than the
+whole domain. The corpus is admissible only when it is a closed Haskell value authored from the requirement,
+each member names the exact dimension it stands for, the selection rule is stated, and `Residue` names the
+unexercised remainder as `UNVERIFIED`. A count of passing cases is not a representative corpus. Neither is a
+sample drawn from subject output, nor one whose membership a production declaration decides.
+
+A partition splits one domain across several owners. It is admissible only when every member is assigned to
+exactly one owner, the assignment reconciles two-way against the domain with no duplicate and no unassigned
+member, and each member is exercised once, at its assigned owner. Where one phase owns a fold's mechanics and
+another owns the gate oracle for the same member, the partition names both roles and the member is gated at
+the oracle owner. An unassigned member refuses the candidate; it is not silently inherited by the earlier
+phase.
+
+### M.8 Paired negatives assert an exact reason at an exact locus
+
+A negative that merely fails is not evidence. For every foreclosed dimension the gate carries a minimally
+different positive/negative pair. The paired positive differs in exactly that one dimension and must succeed.
+The negative must be refused with the exact reason and at the exact locus a separately authored Haskell
+expectation names. This is the operative form of the `Paired negatives` row in [§M.1](#m1-the-fixed-gate-contract)
+and of the one-over rule in [§M.2](#m2-oracle-independence).
+
+None of the following is a kill: a generic failure, a non-zero exit, any compile failure rather than the named
+one, a refusal at another locus, an unpaired negative, an expectation captured from subject output, or a twin
+that differs in more than the foreclosed dimension. Where an input carries several sufficient loci, each locus
+owes its own pair rejected at that locus; the single truth-maker recorded for the entry is the
+earliest-sufficient locus in pipeline order, which selects the record rather than excusing the other pairs.
 
 ---
 

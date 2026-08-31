@@ -126,7 +126,10 @@ substrate, HA fault, or a second independently useful claim.
 - A projection cannot be served until caught up to the release-required watermark. Phase 72 pins that
   watermark/ABI in the immutable UI release; this phase's target must establish the live primitive only.
 
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`; negatives under `.build/test-corpora/ui_projection_runtime/`.
+- **Extension conformance.** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`, as defined by
+  [`extension_conformance_laws.md` §3 — L1–L5: the per-extension laws](../documents/engineering/extension_conformance_laws.md#3-l1l5-the-per-extension-laws),
+  [§4 — C1–C7: the compositional laws](../documents/engineering/extension_conformance_laws.md#4-c1c7-the-compositional-laws), and
+  [`extension_conformance_security.md` §4 — S1–S6](../documents/engineering/extension_conformance_security.md#4-s1s6); negatives under `.build/test-corpora/ui_projection_runtime/`.
 
 ## Doctrine adopted
 

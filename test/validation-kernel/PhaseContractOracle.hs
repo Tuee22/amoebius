@@ -1121,15 +1121,25 @@ runPhaseContractOracle =
             (replaceProjection 10 "Register" (registerValue 10) "2.5" validCorpus)
         , concat
             [ expectDiagnosticOnly
-                ("every independent substrate universe member remains structurally representable: " <> Text.unpack value)
-                (replaceProjection 10 "Substrate" (substrateValue 10) value validCorpus)
-            | value <- expectedSubstrates
+                ( "every admissible substrate/lane pair remains structurally representable: "
+                    <> Text.unpack substrate
+                    <> "/"
+                    <> Text.unpack lane
+                )
+                (replaceSubstrateLane 10 substrate lane validCorpus)
+            | (substrate, lane) <- admissibleSubstrateLanePairs
             ]
         , concat
-            [ expectDiagnosticOnly
-                ("every independent lane universe member remains structurally representable: " <> Text.unpack value)
-                (replaceProjection 10 "Lane" (laneValue 10) value validCorpus)
-            | value <- expectedLanes
+            [ expectFinding
+                ( "a substrate/lane pair needing a second specialized substrate is refused: "
+                    <> Text.unpack substrate
+                    <> "/"
+                    <> Text.unpack lane
+                )
+                "PLAN-SUBSTRATE-LANE-PAIR"
+                (phasePath 10)
+                (replaceSubstrateLane 10 substrate lane validCorpus)
+            | (substrate, lane) <- inadmissibleSubstrateLanePairs
             ]
         , concat
             [ expectDiagnosticOnly
@@ -1690,11 +1700,11 @@ phaseProjectionSemanticDecoyCorpus =
         ( replaceIn
             trackerPath
             (trackerRowWith 51 "none" "none" "2" blockedTrackerStatus)
-            (trackerRowWith 51 "linux-cpu" "cuda" "3" blockedTrackerStatus)
+            (trackerRowWith 51 "linux-cuda" "cuda" "3" blockedTrackerStatus)
             ( replaceIn
                 (phasePath 51)
                 "**Substrate:** none\n\n**Lane:** none\n\n**Register:** 2"
-                "**Substrate:** linux-cpu\n\n**Lane:** cuda\n\n**Register:** 3"
+                "**Substrate:** linux-cuda\n\n**Lane:** cuda\n\n**Register:** 3"
                 validCorpus
             )
         )
@@ -3230,6 +3240,63 @@ relocateAfter wanted moved marker =
 
 summaryLine :: Text -> Text -> Text
 summaryLine name value = "**" <> name <> ":** " <> value
+
+-- | Set Substrate and Lane together.
+--
+-- 'replaceProjection' rebuilds the tracker row from the unchanged projections,
+-- so two chained calls would look for a row the first call already rewrote.
+-- A pair has to move as one edit.
+replaceSubstrateLane :: Int -> Text -> Text -> [(FilePath, Text)] -> [(FilePath, Text)]
+replaceSubstrateLane number substrate lane corpus =
+  replaceIn
+    trackerPath
+    (trackerRow number status)
+    (trackerRowWith number substrate lane (registerValue number) status)
+    ( replaceIn
+        (phasePath number)
+        (summaryLine "Lane" (laneValue number))
+        (summaryLine "Lane" lane)
+        ( replaceIn
+            (phasePath number)
+            (summaryLine "Substrate" (substrateValue number))
+            (summaryLine "Substrate" substrate)
+            corpus
+        )
+    )
+ where
+  status = if number == 0 then activeTrackerStatus else blockedTrackerStatus
+
+-- | Each substrate with a lane it can carry, and each lane with a substrate
+-- that provides it. Every vocabulary member on both axes appears at least
+-- once, so representability is still covered without asserting a pair that
+-- would need two specialized machines for one gate.
+admissibleSubstrateLanePairs :: [(Text, Text)]
+admissibleSubstrateLanePairs =
+  [ ("none", "none")
+  , ("apple", "linux-cpu/arm64")
+  , ("apple", "metal")
+  , ("linux-cpu", "linux-cpu/amd64")
+  , ("linux-cpu", "linux-cpu/arm64")
+  , ("linux-cpu", "provider")
+  , ("linux-cuda", "linux-cpu/amd64")
+  , ("linux-cuda", "cuda")
+  , ("windows", "linux-cpu/amd64")
+  ]
+
+-- | Pairs that would require a second specialized substrate, or a lane with no
+-- host to run on. Each must be refused at its own locus.
+inadmissibleSubstrateLanePairs :: [(Text, Text)]
+inadmissibleSubstrateLanePairs =
+  [ ("apple", "cuda")
+  , ("apple", "linux-cpu/amd64")
+  , ("windows", "metal")
+  , ("linux-cuda", "metal")
+  , ("linux-cpu", "metal")
+  , ("linux-cpu", "cuda")
+  , ("none", "linux-cpu/amd64")
+  , ("apple", "none")
+  , ("windows", "provider")
+  ]
 
 replaceProjection :: Int -> Text -> Text -> Text -> [(FilePath, Text)] -> [(FilePath, Text)]
 replaceProjection number field oldValue newValue corpus =

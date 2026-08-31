@@ -9,6 +9,7 @@ module Amoebius.Validation.Documentation.Internal
   , checkDocuments
   , checkPolicyOwnerDiagnostic
   , checkPolicyOwnerReferences
+  , forwardDeferredDeclarations
   , githubAnchor
   ) where
 
@@ -29,7 +30,7 @@ import Control.Exception (bracket)
 import Control.Monad (foldM, forM)
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.ByteString qualified as ByteString
-import Data.Char (intToDigit, isAlphaNum, isSpace, toLower)
+import Data.Char (intToDigit, isAlphaNum, isDigit, isSpace, isUpper, toLower)
 import Data.List (sort)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
@@ -293,6 +294,8 @@ checkDocumentsWithinEnvelope enforceCanonicalInventory supplied =
             | enforceCanonicalInventory
             , item <- policyOwnerFindings canonicalRawPolicyOwners documents
             ]
+          <> retainDocumentationCitationFindings (checkRulebookCitations documents governed)
+          <> retainDocumentationForwardDeferredFindings (checkForwardDeferred governed)
     }
  where
   normalized = [(normalizePath path, contents) | (path, contents) <- supplied]
@@ -2353,6 +2356,230 @@ stripClosingHeadingMarks heading =
         else heading
 
 -- | GitHub heading slugging as fixed by documentation_standards.md section 4.
+-- | These two checks deliberately carry no @#ifdef@ bypass guard yet.
+--
+-- The convention elsewhere in this module is a guarded retain function per
+-- check, but no suite drives the @VALIDATION_DOCUMENT_*@ family: 155 guarded
+-- symbols exist here and a handful are reachable, which is most of the
+-- @MUTANT-UNWIRED@ gap 'Amoebius.Validation.MutationCoverage' refuses. Adding
+-- two more undriven flags would raise the declared corpus while observing
+-- nothing, which is exactly what
+-- @development_plan_gate_integrity.md@ section M.3 now forbids: "A declared
+-- locus no suite can execute is not coverage."
+--
+-- So the obligation is a driven document selector family, not two more flags.
+-- When that family exists these two checks take guards with it.
+retainDocumentationCitationFindings :: [Finding] -> [Finding]
+retainDocumentationCitationFindings = id
+
+retainDocumentationForwardDeferredFindings :: [Finding] -> [Finding]
+retainDocumentationForwardDeferredFindings = id
+
+-- | The three rulebook files whose lettered sections and @M.n@ subsections a
+-- @\167@ citation may name.
+rulebookDocuments :: [FilePath]
+rulebookDocuments =
+  [ "DEVELOPMENT_PLAN/development_plan_standards.md"
+  , "DEVELOPMENT_PLAN/development_plan_phase_model.md"
+  , "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
+  ]
+
+-- | One citation occurrence: the raw token and the line it sits on.
+data Citation = Citation
+  { citationLine :: Int
+  , citationToken :: Text
+  }
+  deriving (Eq, Ord, Show)
+
+-- | Citations are read from raw bytes, fences and comments included: a reader
+-- follows @\167M.8@ wherever it appears, and a checker that skipped fenced text
+-- would miss exactly the copies a decoy would use.
+documentCitations :: Document -> [Citation]
+documentCitations document =
+  [ Citation lineNumber token
+  | (lineNumber, lineText) <- zip [1 ..] (Text.lines (documentText document))
+  , token <- citationTokens lineText
+  ]
+
+citationTokens :: Text -> [Text]
+citationTokens lineText = case Text.breakOn "\167" lineText of
+  (_, rest)
+    | Text.null rest -> []
+    | otherwise ->
+        let body = Text.drop 1 rest
+            taken = Text.dropWhileEnd (== '.') (Text.takeWhile (\c -> isAlphaNum c || c == '.') body)
+         in [taken | not (Text.null taken)] <> citationTokens body
+
+-- | Sections the rulebook actually defines: lettered @## X.@ headings and
+-- numbered @### M.n@ subsections.
+rulebookSections :: Map FilePath Document -> (Set Text, Set Text)
+rulebookSections documents = (letters, numbered)
+ where
+  headings =
+    [ Text.strip stripped
+    | path <- rulebookDocuments
+    , Just document <- [Map.lookup path documents]
+    , lineText <- Text.lines (documentText document)
+    , Just stripped <- [Text.stripPrefix "## " lineText, Text.stripPrefix "### " lineText]
+    ]
+  letters =
+    Set.fromList
+      [ Text.take 1 heading
+      | heading <- headings
+      , Text.length heading >= 2
+      , isUpper (Text.head heading)
+      , Text.index heading 1 == '.'
+      ]
+  numbered =
+    Set.fromList
+      [ Text.takeWhile (\c -> isAlphaNum c || c == '.') heading
+      | heading <- headings
+      , Text.length heading >= 3
+      , isUpper (Text.head heading)
+      , Text.index heading 1 == '.'
+      , isDigit (Text.index heading 2)
+      ]
+
+-- | A citation to a rulebook section that does not exist is worse than no
+-- citation: it delegates the rule to a blank, and the reader who follows it
+-- finds nothing and falls back to whatever the citing sentence was trying to
+-- forbid. Structural link checking cannot see these, because a citation is
+-- plain text rather than a Markdown link.
+checkRulebookCitations :: Map FilePath Document -> [Document] -> [Finding]
+checkRulebookCitations documents governed =
+  [ finding
+      "DOC-RULEBOOK-SECTION-MISSING"
+      (documentPath document)
+      ( "line "
+          <> showText (citationLine citation)
+          <> " cites rulebook section \167"
+          <> citationToken citation
+          <> ", which no rulebook document defines"
+      )
+  | document <- governed
+  , citation <- documentCitations document
+  , unresolved (citationToken citation)
+  ]
+ where
+  (letters, numbered) = rulebookSections documents
+  unresolved token
+    -- A numbered subsection such as M.8 must have its own heading.
+    | Text.length token >= 3
+    , isUpper (Text.head token)
+    , Text.index token 1 == '.'
+    , isDigit (Text.index token 2) =
+        not (Set.member token numbered)
+    -- A bare letter such as L must have a lettered section. S1 is a security
+    -- law rather than a rulebook section, so a letter followed by a digit with
+    -- no separating dot is not a citation of this kind.
+    | Text.length token == 1
+    , isUpper (Text.head token) =
+        not (Set.member token letters)
+    | otherwise = False
+
+-- | The ordinal a phase document path carries, if it is a phase document.
+phaseDocumentOrdinal :: FilePath -> Maybe Int
+phaseDocumentOrdinal path = case Text.stripPrefix "DEVELOPMENT_PLAN/phase_" (Text.pack path) of
+  Nothing -> Nothing
+  Just rest ->
+    let digits = Text.takeWhile isDigit rest
+     in if Text.null digits then Nothing else Just (read (Text.unpack digits))
+
+-- | The @Forward-deferred:@ field body of a phase document, if present.
+forwardDeferredField :: Document -> Maybe (Int, Text)
+forwardDeferredField document =
+  listToMaybe
+    [ (lineNumber, Text.strip body)
+    | (lineNumber, lineText) <- zip [1 ..] (Text.lines (documentText document))
+    , Just body <- [Text.stripPrefix "**Forward-deferred:** " lineText]
+    ]
+
+-- | Every phase document a @Forward-deferred:@ field names, as an exact
+-- @(consumer ordinal, provider ordinal)@ pair. This is the input the capability
+-- relation reconciles against, so a reach is accounted for in the document that
+-- has it rather than in a checker-side allowlist.
+forwardDeferredDeclarations :: [(FilePath, Text)] -> [(Int, Int)]
+forwardDeferredDeclarations supplied =
+  [ (consumerOrdinal, providerOrdinal)
+  | (path, contents) <- supplied
+  , Just consumerOrdinal <- [phaseDocumentOrdinal (normalizePath path)]
+  , lineText <- Text.lines contents
+  , Just body <- [Text.stripPrefix "**Forward-deferred:** " lineText]
+  , providerOrdinal <- referencedPhaseOrdinals body
+  ]
+
+-- | The phase ordinals a field body links to, read from its Markdown link
+-- targets rather than from its prose.
+referencedPhaseOrdinals :: Text -> [Int]
+referencedPhaseOrdinals body = go body
+ where
+  go remaining = case Text.breakOn "](phase_" remaining of
+    (_, rest)
+      | Text.null rest -> []
+      | otherwise ->
+          let after = Text.drop (Text.length "](phase_") rest
+              digits = Text.takeWhile isDigit after
+           in [read (Text.unpack digits) | not (Text.null digits)] <> go after
+
+-- | The field is present exactly when a reach is declared, sits between
+-- @Depends on:@ and @Gate:@, and names at least one later phase.
+checkForwardDeferred :: [Document] -> [Finding]
+checkForwardDeferred governed = concatMap check (filter notRulebook governed)
+ where
+  -- The rulebook states the field's template, so its occurrence there is the
+  -- schema rather than a declaration.
+  notRulebook document = documentPath document `notElem` rulebookDocuments
+  check document = case (phaseDocumentOrdinal (documentPath document), forwardDeferredField document) of
+    (Nothing, Just _) ->
+      [ finding
+          "DOC-FORWARD-DEFERRED-UNEXPECTED"
+          (documentPath document)
+          "only a phase document may carry a Forward-deferred field"
+      ]
+    (Just consumerOrdinal, Just (lineNumber, body)) ->
+      placementFindings document lineNumber
+        <> targetFindings document consumerOrdinal body
+    _ -> []
+
+  placementFindings document lineNumber =
+    [ finding
+        "DOC-FORWARD-DEFERRED-MISPLACED"
+        (documentPath document)
+        "the Forward-deferred field must sit between the Depends on and Gate fields"
+    | not (between (fieldLine document "**Depends on:**") lineNumber (fieldLine document "**Gate:**"))
+    ]
+
+  between (Just before) here (Just after) = before < here && here < after
+  between _ _ _ = False
+
+  fieldLine document prefix =
+    listToMaybe
+      [ lineNumber
+      | (lineNumber, lineText) <- zip [1 ..] (Text.lines (documentText document))
+      , prefix `Text.isPrefixOf` lineText
+      ]
+
+  targetFindings document consumerOrdinal body =
+    case referencedPhaseOrdinals body of
+      [] ->
+        [ finding
+            "DOC-FORWARD-DEFERRED-UNOWNED"
+            (documentPath document)
+            "a Forward-deferred field must link the phase document that owns the reach"
+        ]
+      targets ->
+        [ finding
+            "DOC-FORWARD-DEFERRED-NOT-LATER"
+            (documentPath document)
+            ( "a Forward-deferred field names phase "
+                <> showText target
+                <> ", which is not later than this phase; an earlier dependency is not a forward reach"
+            )
+        | target <- targets
+        , target <= consumerOrdinal
+        ]
+
+
 githubAnchor :: Text -> Text
 githubAnchor = Text.map spaceToDash . Text.filter admitted . Text.toLower . stripHeadingMarkup . Text.strip
  where

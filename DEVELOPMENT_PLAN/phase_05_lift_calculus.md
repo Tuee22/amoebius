@@ -71,6 +71,7 @@ relation, and consumed transition witness as one typed Haskell lift calculus. NO
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 4](phase_04_budget_calculus.md)
+**Forward-deferred:** [Phase 15](phase_15_compile_fail_harness.md) — compile-fail diagnostic harness; residue `UNVERIFIED` exact-reason expectation.
 **Gate:** `pb validate phase 05`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -97,6 +98,13 @@ relation, and consumed transition witness as one typed Haskell lift calculus. NO
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 04; candidate execution refuses an absent, stale, replayed, or different-source result. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+
+**The compile-fail harness this claim needs is owned later.** Each illegal twin below must be rejected for the
+exact reason a separately authored Haskell expectation names. The harness that classifies a GHC diagnostic to
+that precision is [Phase 15](phase_15_compile_fail_harness.md). Until it lands, a parse error, an unbound name,
+or a missing import would satisfy a twin, so each twin's exact-reason expectation is `UNVERIFIED` residue. The
+`Forward-deferred:` field records the reach; the relocation is owned by the plan rebalance rather than by this
+phase.
 
 ## Doctrine adopted
 
@@ -129,17 +137,29 @@ Make where an effect runs part of its type, and make the relation between layers
 
 ### Validation
 
-A wildcard-arm scan over the dispatch must find no fallback, and an asserted witness must fail to compile.
+The compiler decides totality, and an asserted witness must fail to compile.
 
-**The scan reads the preprocessed source, not the file.** Three of this phase's mutations live behind
-`#ifdef`s in the modules being scanned, so raw text contains every one of them at once and a scan over it
-would report the clean tree as carrying a fallback. The gate selects the branches the run's own defines choose
-and scans what remains — which is the source the compiler sees, and therefore the source the claim is about.
+**Totality is a typechecker result, not a text result.** The relation is a closed GADT indexed by its source
+and target layer, compiled under `-Wincomplete-patterns -Werror`, so a dispatch that omits an inhabited pair
+does not build. A lexical scan cannot settle this claim: it inspects the spelling of the arms an author
+happened to write, and a genuinely partial relation carrying enough hand-written constructors to satisfy the
+scan passes it while leaving pairs undecided. The scan is retained only as a supplementary observation that no
+`Other` arm and no catch-all were introduced; it is never the totality oracle.
 
-**A catch-all is decided by its pattern, not by its spelling.** `_ ->` is the obvious form and
-`(_from, _to) ->` is the one that gets past a scan looking for the obvious form, so the rule is stated over
-the pattern's atoms: an alternative is a catch-all when every atom is a variable or a wildcard. One
-constructor anywhere in it — including an operator constructor like `:` — makes it a real alternative.
+**Each mutant removes a constructor rather than adding an arm.** Appending a catch-all to a relation that is
+already total changes a locus the compiler never selects, so it reddens a scanner and not the subject — which
+[§M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject) excludes:
+*"A deliberately broken alternate implementation that production can never select is not a mutant of the
+subject."* Each of this phase's changed-subject mutants therefore deletes one constructor from the closed
+relation, so the incomplete-pattern error names the missing pair at its own locus while the unrelated
+positives stay green.
+
+**A weaken-the-constraint mutant per foreclosure claim.** The witness claim and the composition claim are each
+settled by a compile-fail twin, so each carries a mutant that loosens the constraint the twin violates — the
+witness constructor made public, and the source/target layer equality on composition relaxed. The illegal twin
+must compile under that mutant and only under it; a twin that fails for a parse error, an unbound name, or a
+missing import satisfies nothing
+([§M.8](development_plan_gate_integrity.md#m8-paired-negatives-assert-an-exact-reason-at-an-exact-locus)).
 
 ### Remaining Work
 

@@ -15,7 +15,12 @@ module MutationCoverageOracle
   ( runMutationCoverageOracle
   ) where
 
-import Amoebius.Validation.MutationCoverage (mutationCoverageCheck)
+import Amoebius.Validation.MutationCoverage
+  ( SelectionMode (..)
+  , mutationCoverageCheck
+  , mutationPolicyCheck
+  , mutationSelectionMode
+  )
 import Amoebius.Validation.Types (CheckResult (..), Finding (..), Observation (..))
 import Control.Monad (unless)
 import Data.List (sort)
@@ -24,13 +29,94 @@ import Data.Text qualified as Text
 
 runMutationCoverageOracle :: IO ()
 runMutationCoverageOracle = do
-  let problems = observationProblems <> findingProblems
+  let problems = observationProblems <> findingProblems <> policyProblems
   unless (null problems) $
     fail (unlines ("MutationCoverageOracle component diagnostics failed:" : map ("  " <>) problems))
   putStrLn
     ( "MutationCoverageOracle: the declared mutation corpus, the five driving suites, and the "
-        <> "unwired remainder agree with an independently stated count. A standing gap, not a gate result."
+        <> "unwired remainder agree with an independently stated count; the milestone set and its "
+        <> "selection modes agree with an independently restated list. A standing gap, not a gate result."
     )
+
+-- | The thirteen capabilities whose gates run the complete corpus, restated
+-- here from the rulebook rather than read back from the module. Every other
+-- gate runs only the selectors its own contract rows reach.
+--
+-- The list is authored as a literal precisely so that changing production's
+-- milestone set without changing the rulebook, or the reverse, fails here.
+expectedMilestones :: [Text]
+expectedMilestones =
+  [ "calculus_composition"
+  , "chain_kernel_boundary"
+  , "compile_fail_harness"
+  , "conformance_gate_generator"
+  , "determinism_jitcache"
+  , "host_assert_cli"
+  , "host_ensure_kernel"
+  , "linux_engine_bringup"
+  , "live_dsl_deploy"
+  , "repository_layout_conformance"
+  , "self_referential_gates"
+  , "test_topology_live"
+  , "test_workflow_algebra"
+  ]
+
+-- | A capability that is deliberately not a milestone. An ordinary gate runs
+-- the impacted selection, not the matrix.
+expectedOrdinary :: [Text]
+expectedOrdinary =
+  [ "artifact_calculus"
+  , "app_tenancy"
+  , "documentation_suite"
+  , "provision_seal"
+  , "vault_pki"
+  ]
+
+-- | A minimal section-M.3 body naming exactly the expected milestones, authored
+-- here rather than read from the rulebook, so the correspondence check is
+-- exercised against a corpus this oracle controls.
+syntheticRulebook :: [(FilePath, Text)]
+syntheticRulebook =
+  [ ( "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
+    , Text.unlines
+        ( ["### M.3 Mutants must prove that they changed the subject", "", "The milestones are:", ""]
+            <> ["- `" <> capability <> "`;" | capability <- expectedMilestones]
+            <> ["", "### M.4 Harness qualification precedes every candidate", "", "Unrelated."]
+        )
+    )
+  ]
+
+policyProblems :: [String]
+policyProblems =
+  [ "selection mode for milestone " <> Text.unpack capability <> " must be MatrixAll"
+  | capability <- expectedMilestones
+  , mutationSelectionMode capability /= MatrixAll
+  ]
+    <> [ "selection mode for ordinary gate " <> Text.unpack capability <> " must be Impacted"
+       | capability <- expectedOrdinary
+       , mutationSelectionMode capability /= Impacted
+       ]
+    <> [ "against a rulebook naming exactly the expected milestones the policy check must be clean, observed "
+           <> show (map (Text.unpack . findingCode) (checkFindings (mutationPolicyCheck syntheticRulebook)))
+       | not (null (checkFindings (mutationPolicyCheck syntheticRulebook)))
+       ]
+    <> [ "a rulebook omitting a milestone must be reported missing, observed " <> show observedOmitted
+       | observedOmitted /= ["MUTANT-POLICY-PROSE-MISSING"]
+       ]
+    <> [ "a rulebook naming a non-milestone capability must be reported extra, observed " <> show observedExtra
+       | observedExtra /= ["MUTANT-POLICY-PROSE-EXTRA"]
+       ]
+    <> [ "an absent section M.3 must refuse, observed " <> show observedAbsent
+       | observedAbsent /= ["MUTANT-POLICY-PROSE-ABSENT"]
+       ]
+ where
+  observedOmitted =
+    map (Text.unpack . findingCode) (checkFindings (mutationPolicyCheck (mutate (Text.replace "- `test_topology_live`;" ""))))
+  observedExtra =
+    map (Text.unpack . findingCode) (checkFindings (mutationPolicyCheck (mutate (Text.replace "- `live_dsl_deploy`;" "- `live_dsl_deploy`;\n- `app_tenancy`;"))))
+  observedAbsent = map (Text.unpack . findingCode) (checkFindings (mutationPolicyCheck []))
+  mutate transform = [(path, transform contents) | (path, contents) <- syntheticRulebook]
+
 
 -- | Restated from the corpus. 73 + 70 + 8 + 659 + 374 = 1,184 driven;
 -- 5,712 - 1,184 = 4,528 unwired.

@@ -18,7 +18,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -111,6 +111,7 @@ Haskell gate, which owns both pure observations and generated-fake boundary obse
 Register-1 semantic-plan checks are mandatory supporting rows, not a second final gate ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 33](phase_33_render_manifest_oracles.md)
+**Forward-deferred:** [Phase 47](phase_47_tool_and_mutant_generation.md) — generated fake executables; residue `UNVERIFIED` fake provenance.
 **Gate:** `pb validate phase 34`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -338,6 +339,13 @@ proves no action runs during render, emitting a Register-1 proven/tested/assumed
 correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Register 3).
 
 ### Deliverables
+
+- The formal-bridge projection transplanted from Phase 18: two provision/render/chain projections totaling 19
+  objects and steps, with exact render/chain identities and frames, unique objects, and zero
+  construction-time effects, projected through the [Phase 11](phase_11_formal_model_kernel.md) `Model` bridge.
+  Phase 18 named these against `provision` ([Phase 31](phase_31_provision_seal.md)), `renderAll`
+  ([Phase 33](phase_33_render_manifest_oracles.md)) and this phase's `Step`/`chain`, so the projection is made
+  here, where all three exist, rather than sixteen phases before the last of them.
 
 - The independently authored Haskell corpus: two consumed cases, the ordered plan-semantic expectations, and
   a five-component calculus projection. Any TSV diagnostic and renderer-produced plan/descent bytes are

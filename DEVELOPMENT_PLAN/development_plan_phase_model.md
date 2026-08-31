@@ -234,7 +234,9 @@ Every sprint has:
 - one concrete Haskell implementation target, except documentation-only work;
 - one independently stated validation claim and oracle boundary;
 - positive and paired-negative cases appropriate to that seam;
-- at least one changed-subject mutant for behavioural logic;
+- at least one changed-subject mutant per independent behavioural deliverable, plus a
+  weaken-the-constraint mutant for each foreclosure claim, per
+  [`development_plan_gate_integrity.md` §M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject);
 - named legacy IDs it must reduce to zero; and
 - explicit `UNVERIFIED` residue.
 

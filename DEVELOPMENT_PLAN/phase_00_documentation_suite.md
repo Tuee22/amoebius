@@ -311,6 +311,7 @@ join input. It splits if product or live-infrastructure behaviour is required.
 **Lane:** `none`
 **Register:** —
 **Depends on:** genesis
+**Forward-deferred:** [Phase 1](phase_01_toolchain_spike.md) — pinned toolchain input; residue `LTD-BOOT-001`.
 **Gate:** `pb validate phase 00`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity

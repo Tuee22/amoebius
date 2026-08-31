@@ -171,7 +171,10 @@ directories are not target roots; any such transport artifact is rendered lazily
 
 1. Every behavioral file beneath `test/**` is `.hs`, every serialized transport product is contained beneath
    `.build/**`, and a whole-tree Haskell reference scan finds no dangling consumer.
-2. m1 and m6 redden `target-tree-clean` and `collision-free-tree` respectively, and no other check.
+2. Two changed-subject mutants — one weakening the test-tree source-language predicate, one weakening the
+   case-collision predicate — redden exactly `target-tree-clean` and `collision-free-tree` respectively, each
+   at its own locus, and no other check. UNRESOLVED — blocks validation: neither mutant is bound to an exact
+   Haskell selector identity, production locus, or assigned oracle case.
 
 ### Remaining Work
 
@@ -206,7 +209,10 @@ already states; the two out-of-tree `hs-source-dirs` become `source-repository-p
 ### Validation
 
 1. Resolution and dry-run test discovery both succeed at the new names.
-2. m5 reddens: a stanza renamed without its source directory fails.
+2. A changed-subject mutant that renames a Cabal stanza without its source directory reddens the
+   stanza-to-source-directory agreement check at that stanza and no other check. UNRESOLVED — blocks
+   validation: the mutant is not bound to an exact Haskell selector identity, production locus, or assigned
+   oracle case.
 
 ### Remaining Work
 
@@ -279,8 +285,12 @@ makes every future re-baseline documentation-only.
 
 ### Validation
 
-1. `r15` reports zero findings.
-2. m2 reddens: a reintroduced ordinal-bearing tool name fails.
+1. The Haskell ordinal-bearing-name analyzer reports zero findings over every authored path, and consumes no
+   Markdown row or count. UNRESOLVED — blocks validation: the analyzer is not bound to an exact Haskell module
+   and entry point; `LTD-NAME-001` is a reader-facing reference, not the check.
+2. A changed-subject mutant that reintroduces an ordinal-bearing tool name reddens that analyzer at the
+   reintroduced path and no other check. UNRESOLVED — blocks validation: the mutant is not bound to an exact
+   Haskell selector identity, production locus, or assigned oracle case.
 
 ### Remaining Work
 
@@ -290,7 +300,7 @@ Python gates are non-operative debt and may not be copied into the replacement.
 
 **The `-DPHASE31_*` preprocessor symbols are deliberately untouched.** A cpp macro is not a name that becomes
 a path, so [§U](development_plan_gate_integrity.md#u-the-final-repository-layout) clause 3 does not reach it
-and `r15` does not scan it; the tree's own precedent — `PHASE26_*` beside `object-reconciler-*` — leaves it to
+and the ordinal-bearing-name analyzer does not scan it; the tree's own precedent — `PHASE26_*` beside `object-reconciler-*` — leaves it to
 the phase that owns the module. Renaming two hundred macros across the Haskell sources would be a behavioural
 edit this phase's scope excludes.
 
@@ -321,6 +331,9 @@ mutation registry. Applied source copies and any serialized registry projection 
 1. The Haskell registry enumerates every declared mutation, and every run-local applied mutant resolves through
    it in both directions.
 2. A mutation reachable only by a build flag fails the gate.
+3. The registry carries no disposition that admits a mutation lacking an operator or a production locus, and
+   admission reads no tracker status. A negative that reintroduces either — an operator-less row, or a read of
+   a phase's Done marker — is refused at its own locus.
 
 ### Remaining Work
 
@@ -332,9 +345,14 @@ executable helper is generated beneath `.build/**`; no tracked table or Python p
 
 **Why the registry, and not a body file per flag.** A hundred and six mutations existed only as a cabal flag,
 and inventing a body for each would have fabricated an operator and a locus nobody authored. The registry
-records what is known and marks the rest `unstated` — and the gate admits `unstated` only for a capability
-whose phase the tracker does not mark Done, so the first phase to seal against a mutation must state its
-operator and locus to get past its own gate. That is a ratchet, not a blank.
+records what is known and stops there. There is no `unstated` disposition, and admission never reads the
+tracker. Both were one mechanism, and it had no first tooth: at a phase's own gate that phase is by definition
+not Done, so the condition admitted every one of its own mutants, and under the reset — where nothing is
+Done — it was universally true. Reading the marker was independently inadmissible, because
+[§M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass) forbids reader-facing Markdown
+from converting a refusal into a satisfied state. A flag with no authored operator and locus is therefore not
+a registry row at all: it is deleted, or it is authored into a real mutant. Until then it is reported as
+unwired coverage against the capability that owns closing it, and is never counted.
 
 ## Sprint 2.6: Typed legacy bindings and the register reconcile ⏸️
 
@@ -348,18 +366,21 @@ operator and locus to get past its own gate. That is a ratchet, not a blank.
 
 ### Objective
 
-Close every typed Haskell `r13` and `r15` legacy binding, re-own each remaining binding under the checked
+Close the two typed Haskell legacy bindings this phase owns, `LTD-META-001` and `LTD-NAME-001`, re-own each
+remaining binding under the checked
 Haskell audit map, and narrow the bindings whose residue is behavioral rather than positional. Reader-facing
 rows explain the values but are never operands.
 
 ### Deliverables
 
-- Zero Haskell findings for the `r13` and `r15` binding families.
+- Zero Haskell findings for the `LTD-META-001` and `LTD-NAME-001` bindings.
 - Each residual Haskell binding narrowed to the behavioral half its subject-matter phase owns.
 
 ### Validation
 
-1. The Haskell artifact audit reports zero `r13`/`r15` findings and cannot consume a Markdown row or count.
+1. The Haskell artifact audit reports zero `LTD-META-001` and `LTD-NAME-001` findings under their compiled
+   closure predicates, and cannot consume a Markdown row or count. UNRESOLVED — blocks validation: the owning
+   analyzers and their independently authored reintroduction negatives are not bound to exact Haskell modules.
 2. The typed deferral inventory contains only the declared deletion class and rejects an unbound residue.
 
 ### Remaining Work

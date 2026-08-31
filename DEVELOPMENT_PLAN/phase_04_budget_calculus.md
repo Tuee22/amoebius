@@ -145,7 +145,17 @@ of the suite rather than asserted inside it.
 The refusal's *reason* is checked as well as its verdict. The authored capacity table names one of five
 admission reasons per refused row, and the order the reasons are tested in is part of the expectation: three
 rows are wrong in two ways at once and each names the earlier reason, so a refusal stays attributable to one
-arm rather than to whichever check happened to run first.
+arm rather than to whichever check happened to run first
+([§M.8](development_plan_gate_integrity.md#m8-paired-negatives-assert-an-exact-reason-at-an-exact-locus)).
+
+**Each remaining deliverable carries its own selector.** `admit-after-partial-write` settles one deliverable;
+the other three are unobserved without their own, which
+[§M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject) forbids. The
+pool-specificity claim carries a mutant admitting a grant at a foreign location or purpose. The shared
+ceiling/concurrency constructor carries a weaken-the-constraint mutant that splits it into two independently
+statable fields, under which the illegal twin — a ceiling stated without its bound — must compile and only
+then. The reaper-less retention grant carries the same shape of weaken-the-constraint mutant. A twin that
+fails for a parse error, an unbound name, or a missing import satisfies none of them.
 
 ### Remaining Work
 

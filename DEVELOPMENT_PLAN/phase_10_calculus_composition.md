@@ -72,6 +72,7 @@ core calculi. NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 9](phase_09_resource_index.md)
+**Forward-deferred:** [Phase 15](phase_15_compile_fail_harness.md) — compile-fail diagnostic harness; residue `UNVERIFIED` exact-reason expectation.
 **Gate:** `pb validate phase 10`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
 
 ## Gate integrity
@@ -98,6 +99,13 @@ core calculi. NOT VALIDATED.
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 09; candidate execution refuses an absent, stale, replayed, or different-source result. |
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+
+**The compile-fail harness this claim needs is owned later.** Each illegal twin below must be rejected for the
+exact reason a separately authored Haskell expectation names. The harness that classifies a GHC diagnostic to
+that precision is [Phase 15](phase_15_compile_fail_harness.md). Until it lands, a parse error, an unbound name,
+or a missing import would satisfy a twin, so each twin's exact-reason expectation is `UNVERIFIED` residue. The
+`Forward-deferred:` field records the reach; the relocation is owned by the plan rebalance rather than by this
+phase.
 
 ## Doctrine adopted
 

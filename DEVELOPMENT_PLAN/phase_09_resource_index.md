@@ -15,7 +15,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_node_inventory.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_node_inventory.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -148,8 +148,17 @@ and [`cluster_topology_doctrine.md` §5 — the compatibility relation](../docum
 3. Compile each Haskell legal twin and reject its illegal twin at the pinned reason.
 4. Meet both-direction coverage floors for all four properties and require all nineteen mutations, including
    five validator weakenings, to turn red at their declared loci.
-5. Join all eleven Phase-9 catalogue subcases, requiring eight discharged and three Phase-25 deferrals; join
-   every test surface, keep output generated, and bind the result to the natural architecture and snapshot.
+5. Join a Phase-9-owned closed Haskell list of the eleven capacity and topology subcases this phase settles,
+   each with its own independently authored expectation; join every test surface, keep output generated, and
+   bind the result to the natural architecture and snapshot.
+
+**The classification is not this phase's to make.** The eight-discharged/three-deferred split was a query over
+`owner_phase`, and those Haskell-declared rows are built at
+[Phase 27](phase_27_illegal_state_covering.md) Sprint 27.1 — which additionally forbids reading the Markdown
+catalogue as a registry, so at Phase 9 the only implementable form was a local literal whose author also wrote
+the expectation it was checked against. This phase therefore lists its own subcases and settles them. The
+`owner_phase` classification and the Phase-25 deferral attribution are explicit `UNVERIFIED` residue here,
+owned by Phase 27 Sprint 27.4, which reconciles its registry against this list in both directions.
 
 ### Remaining Work
 

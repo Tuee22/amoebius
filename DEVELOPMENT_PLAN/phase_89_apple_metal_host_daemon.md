@@ -252,7 +252,9 @@ Haskell operators replace the worker before observed release, omit the Pulsar wo
 gateway/collector, or attempt a direct MinIO backend put. Each must turn the gate red before any lasting effect,
 and every external mutation form is generated beneath `.build/test-corpora/**`.
 
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; Haskell negatives may render external forms only beneath `.build/test-corpora/**`.
+- **Extension conformance.** `L1`–`L5`, `C1`–`C7`, as defined by
+  [`extension_conformance_laws.md` §3 — L1–L5: the per-extension laws](../documents/engineering/extension_conformance_laws.md#3-l1l5-the-per-extension-laws) and
+  [§4 — C1–C7: the compositional laws](../documents/engineering/extension_conformance_laws.md#4-c1c7-the-compositional-laws); Haskell negatives may render external forms only beneath `.build/test-corpora/**`.
 
 ## Doctrine adopted
 

@@ -15,8 +15,9 @@ import Amoebius.Validation.CompilerSourceGraph.Internal
   , acquiredCompilerSourceCheck
   , analyzeAcquiredCompilerSourceGraph
   )
-import Amoebius.Validation.Documentation.Internal (checkDocuments)
-import Amoebius.Validation.MutationCoverage (mutationCoverageCheck)
+import Amoebius.Validation.CapabilityGraph (capabilityGraphDiagnosticWith)
+import Amoebius.Validation.Documentation.Internal (checkDocuments, forwardDeferredDeclarations)
+import Amoebius.Validation.MutationCoverage (mutationCoverageCheck, mutationPolicyCheck)
 import Amoebius.Validation.Legacy.Internal (legacyCheck, legacyCheckAcquired)
 import Amoebius.Validation.PhaseContract.Internal (checkPhaseContracts)
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
@@ -761,7 +762,9 @@ checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence =
                , Policy.checkPolicyContract Policy.canonicalPolicyContract
                , CheckResult "documentation-snapshot" [] decodeFindings
                , unavailablePhaseContractCheck decodeFindings
+               , capabilityGraphDiagnosticWith []
                , mutationCoverageCheck
+               , mutationPolicyCheck []
                , phaseZeroReadinessBlockers
                ]
         )
@@ -773,7 +776,9 @@ checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence =
                , Policy.checkPolicyContract Policy.canonicalPolicyContract
                , checkDocuments documents
                , checkPhaseContracts documents
+               , capabilityGraphDiagnosticWith (forwardDeferredDeclarations documents)
                , mutationCoverageCheck
+               , mutationPolicyCheck documents
                , phaseZeroReadinessBlockers
                ]
         )
