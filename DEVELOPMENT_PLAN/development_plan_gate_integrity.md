@@ -42,12 +42,16 @@ Two test responsibilities remain deliberately distinct:
 2. the **oracle and harness** attempt to falsify that behaviour without importing its decision logic.
 
 The gate remains **NOT VALIDATED** until every required row passes in one qualified run. That complete pass may
-be recorded as ✅ Done by a human, agent, or CI job. The gate result binds the source snapshot, phase-contract digest, qualified-harness digest,
-raw-observation digest, and exact status projection.
+be recorded as ✅ Done by a human, agent, or CI job. The package-hidden `VerifiedGatePass` binds phase, source
+preimage, complete acquired-evidence digest, exact status-projection digest, and projected whole-source postimage
+digest, and retains the opaque durable-publication receipt. Every identity, execution-context value, predecessor,
+ordered row observation, and residue entry is transitively bound by the evidence digest.
 
-The projection's closed diff may touch only the tracker, phase, and sprint status fields named in the passing
-result. Any other source, contract, oracle, or documentation change requires a new gate run rather than
-borrowing the result for the pre-edit snapshot.
+The projection's closed diff may touch only the typed status frontier derived for the passing phase: its tracker
+row and phase-status line, both status surfaces for every sprint it closes, and—except at the terminal
+phase—the successor's tracker row, phase-status line, and first-sprint heading/status activation. Any other
+source, contract, oracle, or documentation change requires a new gate run rather than borrowing the result for
+the pre-edit snapshot.
 
 Independent oracle expectations, changed-subject qualification, and raw observations keep the test meaningful.
 They are test requirements. After recording a pass, execution may continue
@@ -73,7 +77,7 @@ evidence cannot populate authored contract fields.
 | `Observer` | The observer outside the subject, raw observation it reads, authenticity check, and fail-closed rule. |
 | `Authority/bypass` | Paired least-privilege success/foreign-scope denial and alternate-path probes, or tested non-applicability. |
 | `Freshness` | How stale state, cached output, prior evidence, and replayed responses are made unable to pass. |
-| `Qualification` | Sabotage cases that qualify the harness before the clean candidate run. |
+| `Qualification` | The closed seventeen-case sabotage corpus that qualifies the exact harness before the clean candidate run. |
 | `Cleanroom` | Proof that the gate starts without generated products or condemned legacy copies and derives everything required lazily. |
 | `Legacy closure` | Reader-facing references to the typed Haskell IDs due in this phase; the compiled lifecycle/owner/required-analyzer dispatch and the owning analyzer's independent oracle supply the zero-finding decision. An unavailable analyzer for a due or retired ID refuses; before its owner an active unavailable analyzer is explicit later-owned debt and cannot claim closure. Cell text supplies no executable value. |
 | `Predecessor` | The immediately preceding phase's current gate-pass result, or `genesis` for Phase 0. |
@@ -180,28 +184,52 @@ capability that owns closing it and is never counted as a mutant.
 
 ### M.4 Harness qualification precedes every candidate
 
-The harness is qualified against a fixed, separately authored sabotage corpus before it judges a candidate. Qualification
-must show that it rejects, at minimum:
+The harness is qualified against a fixed, separately authored seventeen-case sabotage corpus before it judges
+a candidate. Qualification must show that it rejects exactly the closed inventory before any additional
+supplemental cases:
 
 1. a constant-success verdict;
 2. a no-op subject;
 3. a wrong but well-formed output;
-4. empty discovery and a missing subject or oracle;
-5. a skipped or no-op mutant;
-6. a mutant that fails at the wrong locus;
-7. stale or replayed evidence;
-8. a self-reported observer substituted for the external observer;
-9. an authority or bypass violation;
-10. residue or teardown leakage; and
-11. a generated or legacy input smuggled into the cleanroom run;
-12. a selector omitted from any one of production, the independently literal oracle registry, or the build
-    mapping; and
-13. a changed subject that makes only an unassigned oracle row red.
+4. empty discovery;
+5. a missing subject;
+6. a missing oracle;
+7. a skipped or no-op mutant;
+8. a mutant that fails at the wrong locus;
+9. stale or replayed evidence;
+10. a self-reported observer substituted for the external observer;
+11. an authority or bypass violation;
+12. residue or teardown leakage;
+13. a generated or legacy input smuggled into the cleanroom run;
+14. a selector omitted from production;
+15. a selector omitted from the independently literal oracle registry;
+16. a selector omitted from the build mapping; and
+17. a changed subject that makes only an unassigned oracle row red.
 
 Qualification and the clean run are separate invocations over the same harness digest. A candidate produced
 by an unqualified harness is rejected regardless of its own result. The qualification corpus is Haskell
 source authored independently of the harness implementation; its raw observations are generated lazily and
-never committed.
+never committed. The public `checkQualificationReportDiagnostic` seam checks only the consistency of a
+caller-supplied report and permanently emits `QUALIFICATION-REPORT-DIAGNOSTIC-ONLY`; it cannot mint the
+execution-derived qualification digest used by candidate evidence.
+
+The candidate-capable attempt is opaque. It binds one common source, executable, harness, oracle, compiler,
+toolchain, and execution identity to a clean full-subject run, all seventeen positional sabotage runs, and one
+terminal teardown observation. Each sabotage carries the exact source and executable preimage/postimage,
+independently assigned code/subject/gate-row locus, exact same-run unaffected-control inventory, bounded raw
+result and transcript projections, and zero-residue teardown. The verifier recomputes a canonical bounded
+transcript digest; a digest-shaped caller value, a different clean/control inventory, an unchanged source or
+binary, or a result copied from another run cannot mint authority. The acquisition boundary remains a refusal
+until one Haskell supervisor actually produces those observations.
+
+The case contract is a distinct acquired authority; an attempt may not nominate its own target, operator,
+expected result, or control inventory and then compare the observation back to that nomination. Process evidence
+is likewise inseparable from execution: one opaque bounded supervisor receipt owns exact executable file identity,
+argv, working directory, environment policy, stdout/stderr EOF and non-truncation, termination mode, and the parsed
+result derived from those same bytes. A signal, timeout, spawn failure, or resource/output limit is not an ordinary
+refusal. The supervisor issues a fresh candidate-run challenge after acquisition and hash-chains the ordered
+sabotage, restored-clean, and teardown receipts to it; replaying an older protocol for identical source bytes or
+wrapping a copied `CheckResult` in a new scalar run identity must fail candidate binding.
 
 ### M.5 Effectful and pure claims
 
@@ -216,10 +244,34 @@ Property sampling reports only the explored sample and its coverage; it never up
 
 ### M.6 Candidate evidence and gate pass
 
-The Haskell gate writes raw observations and a schema-checked candidate bundle beneath `.build/runs/**`. Its
-digest binds provenance; it does not make the contents true. The candidate must contain explicit per-row
-`green`, `red`, `refused`, or `UNVERIFIED` states. Missing rows, empty arrays, implicit defaults, skipped work,
-or a top-level success bit without row evidence fail schema validation.
+Production runner selection is a closed capability-keyed Haskell registry. The dispatcher first resolves the
+requested ordinal through the compiled phase-identity table and then requires exactly one registered runner for
+that capability; an absent identity, absent runner, duplicate capability, or ambiguous selection refuses. A
+second ordinal switch or caller-supplied runner name is not an execution authority.
+
+The dispatcher first constructs one opaque acquired run whose owner recomputes the selected Subject from the
+exact source/compiler/qualification/debt/contract products. Evidence cannot accept a caller-authored Subject or
+opening digest. It seals the sixteen non-circular rows, evaluates Legacy from those exact premises, and derives
+Pass criterion only afterward. The dispatcher then serializes those raw observations into a package-hidden, schema-checked
+candidate bundle beneath `.build/runs/phase-NN/candidates/**`. Its content digest binds the serialized evidence;
+it does not make the contents true. The writer publishes the bounded canonical bytes without replacement at the
+exact phase/content address, exact-reads and synchronizes the same no-follow regular-file descriptor and parent,
+exact-reads again, and only then returns an opaque receipt bound to repository, directory, and file identity.
+The acquired v2 candidate records opening and closing source digests, contract/subject/oracle/
+harness/observer/qualification identities, proposed-projection and postimage digests, typed predecessor,
+executable path/digest and argv, toolchain/substrate/lane/architecture/run/cleanup context, the exact ordered
+eighteen-row inventory, and explicit residue. Each row is exactly execution-derived `green`, `red`, or
+`unverified`; a green row must retain at least one well-formed raw observation. Missing, duplicate, reordered,
+empty, defaulted, skipped, or caller-constructed row evidence cannot pass verification.
+
+The public evidence and gate-pass records remain caller-constructible diagnostic seams and carry no tracked-
+state write authority. `verifyPublishedGatePass` first re-acquires the absolute canonical content-addressed
+regular non-symlink file, its stored identities, and exact bytes; an unpublished or in-memory candidate cannot
+mint authority. Only that package-hidden verifier can mint `VerifiedGatePass`, and only after the source is
+unchanged, every required identity and execution-context field is present and canonical, all eighteen rows are
+green, residue is empty, and the typed predecessor is `genesis` only for Phase 0 or the immediate predecessor's
+evidence digest otherwise. The token binds phase, source, complete evidence digest, exact proposed projection,
+projected whole-source postimage, and the retained publication receipt.
 
 An authored `ContractGap` and an observed `EvidenceAbsent` are different typed refusals. A gate-table slot is
 `Bound specification` or `ContractGap`; it never embeds the current presence of a receipt, live host, or run
@@ -228,10 +280,36 @@ artifact. Candidate execution separately records whether each specified input wa
 finding, not a reason to leave the contract itself as generic `MISSING`. Reader-facing Markdown cannot convert
 either refusal to a satisfied state.
 
-The gate compares the contract, qualification observations, clean observations, source diff, unverified
-residue, predecessor result, and exact proposed status-only projection. When every required row is green and
-every required refusal was observed, the gate passes and that result is sufficient to apply the projection. A
-human, agent, or CI job may repeat this validate-and-record sequence across consecutive phases.
+The status projection is derived from the acquired source snapshot and typed status frontier, never from a
+caller-supplied edit. Its exact target set is the closing phase's tracker/phase status and every sprint heading/
+status pair, plus the successor's tracker/phase status and first sprint heading/status when a successor exists.
+The projected postimage must satisfy the compiled post-pass phase-contract check before its digest can be bound
+into candidate evidence. Authorization requires the hidden verified token to match phase, source preimage,
+projection digest, and projected whole-source postimage digest exactly, and retains the complete verified pass
+and receipt.
+
+One repository-scoped, crash-releasing lock spans startup recovery, opening capture, runner/checks, closing
+capture, publication, verification, authorization, application, and reported commit; held or unavailable locking
+refuses. Application rechecks the retained publication before taking a fresh preimage or writing a durable
+content-bound journal beneath `.build/runs/**`. It then serially replaces each projected whole file. On Linux and
+macOS each leaf uses an fd-relative atomic exchange, inspects the displaced inode, restores on mismatch, and
+preserves independently changed target bytes; unsupported hosts fail closed. The multi-file transition is
+recoverable, not atomic. Normal success is reported only after a fresh exact whole-source postimage confirmation;
+a stale preimage, symlink, unexpected file content, widened target set, write failure, or live postimage mismatch
+refuses and invokes rollback of exact projected images.
+
+Every locked invocation derives recovery only from a fresh tracked status frontier; ignored journal presence,
+names, and bytes are diagnostics, not authority. A unique mixed transition rolls back, canonical all-before is
+retained, canonical all-after is the recovered committed state, and noncanonical or ambiguous state refuses.
+Thus a crash after the last durable file exchange may recover as committed even if the live process had not yet
+reported postimage confirmation. Journal finalization follows normal postimage confirmation as bookkeeping and
+cannot advance or demote tracked status.
+
+The gate therefore compares the contract, qualification observations, clean observations, source diff,
+unverified residue, predecessor result, and exact proposed status-only projection before the token can exist.
+When every required row is green and every required refusal was observed, the verified result is sufficient to
+apply that projection. These structural paths do not themselves prove that any current phase qualified or
+passed. A human, agent, or CI job may repeat this validate-and-record sequence across consecutive phases.
 
 ### M.7 Representative corpora and partitions
 
@@ -282,8 +360,9 @@ qualifies its analyzer in numerical order.
 
 The current Sprint-0.2 disposition universe is Active-only. Retirement is a future typed transition, not
 deletion of executable memory. Sprint 0.2 retains a required reintroduction-case identity, not an executed
-guard. An Active zero is admissible only in the owning phase's integrated candidate after the owner analyzer
-implements and passes its independently authored negative; it is candidate readiness, not a status or
+guard. An Active zero is admissible only in the owning phase's integrated candidate when opaque evidence binds
+the same row and source snapshot to the exact canonical reintroduction-case set and qualifying transcript, after
+the owner analyzer implements and passes its independently authored negative; it is candidate readiness, not a status or
 lifecycle transition. After predecessor evidence is present and that owning gate passes, the next
 phase's source records the `Retired` transition. An Active zero before its owner refuses as a stale/missing
 finding, and an Active zero after its owner refuses as an unrecorded post-pass transition. The retired
@@ -375,7 +454,7 @@ Every phase inherits the following postconditions. They are part of the gate, no
 
 <a id="s-commit-timing"></a>
 
-The source-snapshot digest records what ran; commit timing is not an input. A later source or contract change
+The source-snapshot digest records what ran; version-control commit timing is not a gate input. A later source or contract change
 invalidates only evidence it changes, but every phase in the present reset is explicitly **NOT VALIDATED** and
 has no reusable gate pass. No pre-reset result may be carried into the current gate.
 

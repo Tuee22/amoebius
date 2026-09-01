@@ -2,16 +2,22 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.PhaseSemanticJoin
-  ( phaseSemanticJoinDiagnostic
+  ( phaseSemanticJoinCheck
+  , phaseSemanticJoinCheckAtFrontier
+  , phaseSemanticJoinCheckForPhase
+  , phaseSemanticJoinDiagnostic
   ) where
 
 import Amoebius.Validation.PhaseIdentity qualified as PhaseIdentity
 import Amoebius.Validation.PhaseSemanticContract
-  ( phaseStructuralProjectionDiagnostic
+  ( phaseStructuralProjectionCheckAtFrontier
+  , phaseStructuralProjectionDiagnostic
   )
 import Amoebius.Validation.ResourceProvisionContract
-  ( resourceProvisionProjectionDiagnostic
+  ( resourceProvisionProjectionCheck
+  , resourceProvisionProjectionDiagnostic
   )
+import Amoebius.Validation.StatusFrontier qualified as Status
 import Amoebius.Validation.Types
   ( CheckResult (..)
   , Finding
@@ -117,15 +123,47 @@ maximumPhaseRows :: Integer
 maximumPhaseRows = 32
 
 phaseSemanticJoinDiagnostic :: [(FilePath, Text)] -> CheckResult
-phaseSemanticJoinDiagnostic supplied =
-  case basicInputLimitFindings supplied of
-    basicFindings@(_ : _) -> inputLimitRefusal supplied basicFindings
-    [] -> case rowLimitFindings supplied of
-      rowFindings@(_ : _) -> inputLimitRefusal supplied rowFindings
-      [] -> phaseSemanticJoinWithinLimits supplied
+phaseSemanticJoinDiagnostic =
+  phaseSemanticJoinWithAuthority False Status.initialFrontier
 
-inputLimitRefusal :: [(FilePath, Text)] -> [Finding] -> CheckResult
-inputLimitRefusal supplied limitFindings =
+-- | Integrated correspondence check over captured Markdown bytes. Unlike the
+-- public diagnostic seam, it retains no permanent diagnostic-only finding;
+-- authority still comes solely from the separately checked typed registry.
+phaseSemanticJoinCheck :: [(FilePath, Text)] -> CheckResult
+phaseSemanticJoinCheck = phaseSemanticJoinCheckForPhase 0
+
+phaseSemanticJoinCheckForPhase :: Int -> [(FilePath, Text)] -> CheckResult
+phaseSemanticJoinCheckForPhase phaseUnderValidation supplied =
+  case Status.frontierForGate phaseUnderValidation of
+    Nothing ->
+      CheckResult
+        { checkName = "phase-semantic-join-diagnostic"
+        , checkObservations = [observation "semantic.join.status-frontier" "invalid"]
+        , checkFindings =
+            [ finding
+                "PLAN-SEMANTIC-STATUS-FRONTIER"
+                "DEVELOPMENT_PLAN/"
+                "the requested phase is outside the canonical status-frontier domain"
+            ]
+        }
+    Just frontier -> phaseSemanticJoinCheckAtFrontier frontier supplied
+
+phaseSemanticJoinCheckAtFrontier
+  :: Status.StatusFrontier
+  -> [(FilePath, Text)]
+  -> CheckResult
+phaseSemanticJoinCheckAtFrontier = phaseSemanticJoinWithAuthority True
+
+phaseSemanticJoinWithAuthority :: Bool -> Status.StatusFrontier -> [(FilePath, Text)] -> CheckResult
+phaseSemanticJoinWithAuthority integrated frontier supplied =
+  case basicInputLimitFindings supplied of
+    basicFindings@(_ : _) -> inputLimitRefusal integrated supplied basicFindings
+    [] -> case rowLimitFindings supplied of
+      rowFindings@(_ : _) -> inputLimitRefusal integrated supplied rowFindings
+      [] -> phaseSemanticJoinWithinLimits integrated frontier supplied
+
+inputLimitRefusal :: Bool -> [(FilePath, Text)] -> [Finding] -> CheckResult
+inputLimitRefusal integrated supplied limitFindings =
   CheckResult
     { checkName = "phase-semantic-join-diagnostic"
     , checkObservations =
@@ -134,13 +172,13 @@ inputLimitRefusal supplied limitFindings =
         , observation "semantic.join.tracker-candidate-count" (showText trackerCount)
         , observation "semantic.join.input-preflight" "refused-before-semantic-parsing"
         ]
-    , checkFindings = limitFindings <> [markdownDiagnosticRefusal]
+    , checkFindings = limitFindings <> [markdownDiagnosticRefusal | not integrated]
     }
  where
   trackerCount = length [() | (path, _) <- supplied, path == canonicalTrackerPath]
 
-phaseSemanticJoinWithinLimits :: [(FilePath, Text)] -> CheckResult
-phaseSemanticJoinWithinLimits supplied =
+phaseSemanticJoinWithinLimits :: Bool -> Status.StatusFrontier -> [(FilePath, Text)] -> CheckResult
+phaseSemanticJoinWithinLimits integrated frontier supplied =
   CheckResult
     { checkName = "phase-semantic-join-diagnostic"
     , checkObservations =
@@ -158,7 +196,7 @@ phaseSemanticJoinWithinLimits supplied =
           <> checkFindings semanticDiagnostic
           <> checkFindings resourceDiagnostic
           <> canonicalPhasePathAgreementFindings
-          <> [markdownDiagnosticRefusal]
+          <> [markdownDiagnosticRefusal | not integrated]
     }
  where
   phaseDocuments =
@@ -177,8 +215,14 @@ phaseSemanticJoinWithinLimits supplied =
     [ (documentOrdinal document, documentResourceHeading document, documentResourceBlocker document)
     | document <- phaseDocuments
     ]
-  semanticDiagnostic = phaseStructuralProjectionDiagnostic structuralRows
-  resourceDiagnostic = resourceProvisionProjectionDiagnostic resourceRows
+  semanticDiagnostic =
+    if integrated
+      then phaseStructuralProjectionCheckAtFrontier frontier structuralRows
+      else phaseStructuralProjectionDiagnostic structuralRows
+  resourceDiagnostic =
+    if integrated
+      then resourceProvisionProjectionCheck resourceRows
+      else resourceProvisionProjectionDiagnostic resourceRows
   trackerCardinalityFindings =
     [ finding
         "PLAN-SEMANTIC-TRACKER-CARDINALITY"
@@ -729,7 +773,8 @@ uniqueResetStatus visible =
     [ Text.dropWhileEnd (== '.') (Text.strip line)
     | rawLine <- visible
     , Just line <- [structuralBlockLine rawLine]
-    , "🔄 Active —" `Text.isPrefixOf` Text.strip line
+    , "✅ Done" `Text.isPrefixOf` Text.strip line
+        || "🔄 Active —" `Text.isPrefixOf` Text.strip line
         || "⏸️ Blocked —" `Text.isPrefixOf` Text.strip line
     ]
 

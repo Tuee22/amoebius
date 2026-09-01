@@ -28,11 +28,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 52.1: The pristine guest and its recorded preflight ⏸️](#sprint-521-the-pristine-guest-and-its-recorded-preflight-)
-- [Sprint 52.2: The pre-binary leg on a host that carries nothing ⏸️](#sprint-522-the-pre-binary-leg-on-a-host-that-carries-nothing-)
-- [Sprint 52.3: The engine, and sudoless access as three proofs ⏸️](#sprint-523-the-engine-and-sudoless-access-as-three-proofs-)
-- [Sprint 52.4: The native build and the version verdict ⏸️](#sprint-524-the-native-build-and-the-version-verdict-)
-- [Sprint 52.5: The second run that changes nothing ⏸️](#sprint-525-the-second-run-that-changes-nothing-)
+- [Sprint 52.1: The pristine guest and its recorded preflight](#sprint-521-the-pristine-guest-and-its-recorded-preflight-)
+- [Sprint 52.2: The pre-binary leg on a host that carries nothing](#sprint-522-the-pre-binary-leg-on-a-host-that-carries-nothing-)
+- [Sprint 52.3: The engine, and sudoless access as three proofs](#sprint-523-the-engine-and-sudoless-access-as-three-proofs-)
+- [Sprint 52.4: The native build and the version verdict](#sprint-524-the-native-build-and-the-version-verdict-)
+- [Sprint 52.5: The second run that changes nothing](#sprint-525-the-second-run-that-changes-nothing-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -92,7 +92,7 @@ appears.
 **Register:** 3 — live: the claim is about a host's observable state, which no in-process model settles ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 51](phase_51_host_ensure_kernel.md)
-**Gate:** `pb validate phase 52`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 52`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

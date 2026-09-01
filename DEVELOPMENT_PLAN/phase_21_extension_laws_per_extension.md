@@ -30,7 +30,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 21.1: The per-extension laws L1-L5 ⏸️](#sprint-211-the-per-extension-laws-l1-l5-)
+- [Sprint 21.1: The per-extension laws L1-L5](#sprint-211-the-per-extension-laws-l1-l5-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -73,7 +73,7 @@ using independently authored `.hs` controls, oracles, paired negatives, and muta
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 20](phase_20_extension_declaration.md)
-**Gate:** `pb validate phase 21`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 21`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

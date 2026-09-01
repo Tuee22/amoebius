@@ -29,7 +29,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 92.1: Bind the infernix workflow-to-interaction UI adapter ⏸️](#sprint-921-bind-the-infernix-workflow-to-interaction-ui-adapter-)
+- [Sprint 92.1: Bind the infernix workflow-to-interaction UI adapter](#sprint-921-bind-the-infernix-workflow-to-interaction-ui-adapter-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -87,7 +87,7 @@ command; it excludes a new generic UI constructor, Phase-91 compute change, or s
 
 **Register:** 3 (live infrastructure)
 **Depends on:** [Phase 91](phase_91_infernix_rederivation.md)
-**Gate:** `pb validate phase 92`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 92`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

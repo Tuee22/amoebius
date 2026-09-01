@@ -28,14 +28,14 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 1.1: Historical shared-resolution spike ⏸️](#sprint-11-historical-shared-resolution-spike-)
-- [Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ⏸️](#sprint-12-dhall-in-process-decoder-build-probe-gadt-decode-dependency-)
-- [Sprint 1.3: `io-sim` + `io-classes` simulation build probe ⏸️](#sprint-13-io-sim--io-classes-simulation-build-probe-)
-- [Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ⏸️](#sprint-14-supernova-fork--proto-lens-codegen-build-probe-)
-- [Sprint 1.5: Dynamic resolution and generated-output migration ⏸️](#sprint-15-dynamic-resolution-and-generated-output-migration-)
-- [Sprint 1.6: Pure discovery/ensure planning over injected inputs ⏸️](#sprint-16-pure-discoveryensure-planning-over-injected-inputs-)
-- [Sprint 1.7: Remove top-level vendor source and own the Haskell fork ⏸️](#sprint-17-remove-top-level-vendor-source-and-own-the-haskell-fork-)
-- [Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️](#sprint-18-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
+- [Sprint 1.1: Historical shared-resolution spike](#sprint-11-historical-shared-resolution-spike-)
+- [Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency)](#sprint-12-dhall-in-process-decoder-build-probe-gadt-decode-dependency-)
+- [Sprint 1.3: `io-sim` + `io-classes` simulation build probe](#sprint-13-io-sim--io-classes-simulation-build-probe-)
+- [Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe](#sprint-14-supernova-fork--proto-lens-codegen-build-probe-)
+- [Sprint 1.5: Dynamic resolution and generated-output migration](#sprint-15-dynamic-resolution-and-generated-output-migration-)
+- [Sprint 1.6: Pure discovery/ensure planning over injected inputs](#sprint-16-pure-discoveryensure-planning-over-injected-inputs-)
+- [Sprint 1.7: Remove top-level vendor source and own the Haskell fork](#sprint-17-remove-top-level-vendor-source-and-own-the-haskell-fork-)
+- [Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate](#sprint-18-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -82,7 +82,7 @@ committing resolution output, integrity pins, generated code, or host-specific p
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 0](phase_00_documentation_suite.md)
-**Gate:** `pb validate phase 01`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 01`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

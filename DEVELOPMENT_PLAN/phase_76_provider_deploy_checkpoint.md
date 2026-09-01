@@ -29,7 +29,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 76.1: Provider-cluster Pulumi deploy from inside a parent ⏸️](#sprint-761-provider-cluster-pulumi-deploy-from-inside-a-parent-)
+- [Sprint 76.1: Provider-cluster Pulumi deploy from inside a parent](#sprint-761-provider-cluster-pulumi-deploy-from-inside-a-parent-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -131,7 +131,7 @@ managed node group) and writes real Vault-enveloped checkpoint objects into MinI
 check discharges it.
 
 **Depends on:** [Phase 75](phase_75_gateway_migration_drills.md)
-**Gate:** `pb validate phase 76`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 76`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

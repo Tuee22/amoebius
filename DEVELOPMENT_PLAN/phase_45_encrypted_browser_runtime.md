@@ -26,7 +26,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 45.1: Build the encrypted local interpreter ⏸️](#sprint-451-build-the-encrypted-local-interpreter-)
+- [Sprint 45.1: Build the encrypted local interpreter](#sprint-451-build-the-encrypted-local-interpreter-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -64,7 +64,7 @@ service-worker, or WebCrypto fidelity; those are post-Phase-49 live-browser obli
 **Register:** 1 — pure Haskell semantic, property, and generator checks.
 
 **Depends on:** [Phase 44](phase_44_ui_local_composition.md)
-**Gate:** `pb validate phase 45`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 45`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

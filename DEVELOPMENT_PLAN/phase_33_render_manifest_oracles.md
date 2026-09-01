@@ -28,9 +28,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 33.1: The typed `K8sObject` model + Aeson serialization ⏸️](#sprint-331-the-typed-k8sobject-model--aeson-serialization-)
-- [Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ⏸️](#sprint-332-pure-total-renderall--best-practice-by-construction-)
-- [Sprint 33.3: The rendered-output semantic-oracle battery (`render-oracle`) — the gate ⏸️](#sprint-333-the-rendered-output-semantic-oracle-battery-render-oracle--the-gate-)
+- [Sprint 33.1: The typed `K8sObject` model + Aeson serialization](#sprint-331-the-typed-k8sobject-model--aeson-serialization-)
+- [Sprint 33.2: Pure total `renderAll` + best-practice-by-construction](#sprint-332-pure-total-renderall--best-practice-by-construction-)
+- [Sprint 33.3: The rendered-output semantic-oracle battery (`render-oracle`) — the gate](#sprint-333-the-rendered-output-semantic-oracle-battery-render-oracle--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -108,7 +108,7 @@ separately authored Haskell predicate. Renderer output is never its own expectat
 **Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 32](phase_32_inference_accelerator_provision.md)
-**Gate:** `pb validate phase 33`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 33`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

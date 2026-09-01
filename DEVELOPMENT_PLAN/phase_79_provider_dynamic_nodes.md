@@ -30,8 +30,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 79.1: Dynamic node provisioning by signal ⏸️](#sprint-791-dynamic-node-provisioning-by-signal-)
-- [Sprint 79.2: Phase gate — spin a provider cluster, provision a node by signal, tear down leak-free ⏸️](#sprint-792-phase-gate--spin-a-provider-cluster-provision-a-node-by-signal-tear-down-leak-free-)
+- [Sprint 79.1: Dynamic node provisioning by signal](#sprint-791-dynamic-node-provisioning-by-signal-)
+- [Sprint 79.2: Phase gate — spin a provider cluster, provision a node by signal, tear down leak-free](#sprint-792-phase-gate--spin-a-provider-cluster-provision-a-node-by-signal-tear-down-leak-free-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -136,7 +136,7 @@ per-run leak-freedom on that EKS target, classify durable-EBS retention by lifet
 reclamation to [Phase 90](phase_90_test_topology_live.md). The ledger cannot make the phase gate pass.
 
 **Depends on:** [Phase 78](phase_78_provider_ebs_credential.md)
-**Gate:** `pb validate phase 79`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 79`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

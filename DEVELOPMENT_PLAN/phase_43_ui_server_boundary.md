@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 43.1: Authenticated scoped UI-server dispatch ⏸️](#sprint-431-authenticated-scoped-ui-server-dispatch-)
+- [Sprint 43.1: Authenticated scoped UI-server dispatch](#sprint-431-authenticated-scoped-ui-server-dispatch-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -81,7 +81,7 @@ and HA remain deferred.
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 **Register:** 2 — boundary integration with fakes.
 **Depends on:** [Phase 42](phase_42_ui_browser_interpreter.md)
-**Gate:** `pb validate phase 43`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 43`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

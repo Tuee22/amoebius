@@ -3,7 +3,10 @@
 
 module Amoebius.Validation.Legacy.Internal
   ( ActiveRegister
+  , GatePrerequisiteObservation
+  , GateCompletionPremises
   , LegacyAnalyzer (..)
+  , LegacyClosure
   , LegacyClosureRule (..)
   , LegacyDisposition (..)
   , LegacyId (..)
@@ -16,8 +19,14 @@ module Amoebius.Validation.Legacy.Internal
   , activeRegisterPath
   , acceptedLegacyIdEncodings
   , allLegacyIds
+  , assembleGateCompletionPremises
+  , gatePrerequisitePassed
+  , gatePrerequisiteRefused
+  , gatePrerequisiteUnverified
   , legacyCheck
   , legacyCheckAcquired
+  , legacyClosureAcquired
+  , legacyClosureResult
   , legacyInventoryDiagnostic
   , legacyRawDiagnosticBindings
   , legacyRawDiagnosticJoins
@@ -40,9 +49,15 @@ module Amoebius.Validation.Legacy.Internal
 import Amoebius.Validation.PhaseIdentity qualified as PhaseIdentity
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
 import Amoebius.Validation.CompilerSourceGraph.Internal
-  ( AcquiredCompilerSourceGraph
+  ( CompilerSourceAttempt
   , acquiredCompilerSnapshotIdentity
-  , acquiredCompilerSourceCheck
+  , compilerSourceAttemptCheck
+  , compilerSourceAttemptDiagnostic
+  )
+import Amoebius.Validation.PhaseContract.Evidence.Internal
+  ( AcquiredPhaseContractEvidence
+  , acquiredPhaseContractEvidenceCheck
+  , acquiredPhaseContractEvidenceSnapshot
   )
 import Amoebius.Validation.SourceClosure.Internal
   ( AcquiredSourceSnapshot
@@ -267,6 +282,51 @@ data LegacyObservedState
   | LegacyObservationRefused Text
   deriving (Eq, Ord, Show)
 
+-- | One outcome captured from a required gate row before legacy closure is
+-- evaluated.  The constructor is deliberately private: the evidence
+-- finalizer can name an observed row through the three functions below, but
+-- neither a public caller nor a @CheckResult@ can manufacture the assembled
+-- gate-completion premise.
+data GatePrerequisiteObservation = GatePrerequisiteObservation
+  { gatePrerequisiteName :: Text
+  , gatePrerequisiteOutcome :: GatePrerequisiteOutcome
+  }
+  deriving (Eq, Ord, Show)
+
+data GatePrerequisiteOutcome
+  = GatePrerequisitePassed
+  | GatePrerequisiteRefused
+  | GatePrerequisiteUnverified
+  deriving (Eq, Ord, Show)
+
+-- | The exact non-circular inputs to @LTD-VAL-004@.  @Legacy closure@ is not
+-- one of its own premises and @Pass criterion@ is derived only afterwards.
+-- The constructor remains package-private and is not exported even from this
+-- internal module.
+newtype GateCompletionPremises = GateCompletionPremises [GatePrerequisiteObservation]
+  deriving (Eq, Ord, Show)
+
+-- | A legacy-closure row can only be obtained by running the acquired legacy
+-- inventory against an exact gate-completion premise.  Its constructor is
+-- hidden so a caller-supplied @CheckResult@ cannot impersonate the row.
+newtype LegacyClosure = LegacyClosure CheckResult
+  deriving (Eq, Show)
+
+gatePrerequisitePassed :: Text -> GatePrerequisiteObservation
+gatePrerequisitePassed name = GatePrerequisiteObservation name GatePrerequisitePassed
+
+gatePrerequisiteRefused :: Text -> GatePrerequisiteObservation
+gatePrerequisiteRefused name = GatePrerequisiteObservation name GatePrerequisiteRefused
+
+gatePrerequisiteUnverified :: Text -> GatePrerequisiteObservation
+gatePrerequisiteUnverified name = GatePrerequisiteObservation name GatePrerequisiteUnverified
+
+-- | Seal the observed prerequisite inventory.  Exact order and cardinality
+-- are checked again when @LTD-VAL-004@ is evaluated, so a missing, duplicate,
+-- reordered, or unexpected row becomes a refusal rather than a smaller gate.
+assembleGateCompletionPremises :: [GatePrerequisiteObservation] -> GateCompletionPremises
+assembleGateCompletionPremises = GateCompletionPremises
+
 -- | An owner-domain observation carries the analyzer identity that produced
 -- it. This value is input, not authority: the evaluator rejects a key that
 -- differs from the canonical binding. An Active zero is admissible only at
@@ -290,6 +350,21 @@ data ClosedLegacyEvidence = ClosedLegacyEvidence
   , closedEvidenceAnalyzer :: LegacyAnalyzer
   , closedEvidenceSnapshot :: Text
   , closedEvidenceObservation :: Maybe LegacyObservation
+  , closedEvidenceReintroduction :: Maybe LegacyReintroductionWitness
+  }
+  deriving (Eq, Ord, Show)
+
+-- | Execution evidence for the immutable negative(s) attached to one legacy
+-- row.  Declaring a 'LegacyReintroductionCase' in the binding registry is not
+-- evidence that it ran.  The hidden witness binds the exact row, source
+-- snapshot, complete canonical case set, and qualifying transcript identity.
+-- No producer exists until the qualification supervisor executes those
+-- owner-domain negatives, so an owner-phase zero currently remains red.
+data LegacyReintroductionWitness = LegacyReintroductionWitness
+  { legacyReintroductionWitnessId :: LegacyId
+  , legacyReintroductionWitnessSnapshot :: Text
+  , legacyReintroductionWitnessCases :: NonEmpty LegacyReintroductionCase
+  , legacyReintroductionWitnessTranscript :: Text
   }
   deriving (Eq, Ord, Show)
 
@@ -3630,6 +3705,7 @@ closedEvidenceIntegrityScenarios =
     ClosedLegacyEvidence LtdSrc001 (Just SourceTools) AnalyzeSourceTools
       (snapshotIdentity projectionEvidenceSnapshot)
       (Just (LegacyObservation AnalyzeSourceTools LegacyObservedZero))
+      Nothing
 
 projectionEvidenceSnapshot :: SourceSnapshot
 projectionEvidenceSnapshot = projectionSnapshot []
@@ -4173,6 +4249,7 @@ data OwnerRelation
   = OwnerBefore
   | OwnerAt
   | OwnerAfter
+  deriving (Eq)
 
 compareOwner :: Policy.PhaseOrdinal -> Maybe Policy.PhaseOrdinal -> OwnerRelation
 compareOwner _ Nothing =
@@ -5595,6 +5672,7 @@ legacyCheck candidatePhase snapshot =
         candidatePhase
         snapshot
         Nothing
+        Nothing
         rawClosureCheck
         rawDebtCheck
         rawConsumerCheck
@@ -5702,19 +5780,66 @@ legacyRawCaptureDetail role =
 legacyCheckAcquired
   :: Policy.PhaseOrdinal
   -> AcquiredSourceSnapshot
-  -> AcquiredCompilerSourceGraph
+  -> CompilerSourceAttempt
   -> SourceDebtEvidence
+  -> AcquiredPhaseContractEvidence
   -> CheckResult
-legacyCheckAcquired candidatePhase acquired compilerEvidence debtEvidence =
-  let snapshot = acquiredSourceSnapshot acquired
+legacyCheckAcquired candidatePhase acquired compilerAttempt debtEvidence contractEvidence =
+  legacyCheckAcquiredWithGateCompletion
+    candidatePhase
+    acquired
+    compilerAttempt
+    debtEvidence
+    contractEvidence
+    Nothing
+
+-- | Finalize the legacy row after the evidence layer has captured every
+-- non-circular prerequisite.  The only result capable of populating the
+-- candidate's @Legacy closure@ row is this opaque wrapper; the ordinary
+-- acquired check above remains useful as a fail-closed component diagnostic
+-- but cannot be substituted as row authority.
+legacyClosureAcquired
+  :: Policy.PhaseOrdinal
+  -> AcquiredSourceSnapshot
+  -> CompilerSourceAttempt
+  -> SourceDebtEvidence
+  -> AcquiredPhaseContractEvidence
+  -> GateCompletionPremises
+  -> LegacyClosure
+legacyClosureAcquired candidatePhase acquired compilerAttempt debtEvidence contractEvidence premises =
+  LegacyClosure
+    ( legacyCheckAcquiredWithGateCompletion
+        candidatePhase
+        acquired
+        compilerAttempt
+        debtEvidence
+        contractEvidence
+        (Just premises)
+    )
+
+legacyClosureResult :: LegacyClosure -> CheckResult
+legacyClosureResult (LegacyClosure result) = result
+
+legacyCheckAcquiredWithGateCompletion
+  :: Policy.PhaseOrdinal
+  -> AcquiredSourceSnapshot
+  -> CompilerSourceAttempt
+  -> SourceDebtEvidence
+  -> AcquiredPhaseContractEvidence
+  -> Maybe GateCompletionPremises
+  -> CheckResult
+legacyCheckAcquiredWithGateCompletion candidatePhase acquired compilerAttempt debtEvidence contractEvidence gateCompletion =
+  let compilerEvidence = compilerSourceAttemptDiagnostic compilerAttempt
+      snapshot = acquiredSourceSnapshot acquired
       result =
         legacyCheckCore
           candidatePhase
           snapshot
-          (Just (acquired, debtEvidence))
+          (Just (acquired, debtEvidence, contractEvidence))
+          gateCompletion
           (sourceClosureCheckAcquired acquired)
           (sourceDebtEvidenceCheck acquired debtEvidence)
-          (acquiredCompilerSourceCheck compilerEvidence)
+          (compilerSourceAttemptCheck compilerAttempt)
    in appendCompilerSnapshotMismatchFinding
         (acquiredCompilerSnapshotIdentity compilerEvidence)
         (snapshotIdentity snapshot)
@@ -5786,12 +5911,13 @@ compilerSnapshotMismatchDetail =
 legacyCheckCore
   :: Policy.PhaseOrdinal
   -> SourceSnapshot
-  -> Maybe (AcquiredSourceSnapshot, SourceDebtEvidence)
+  -> Maybe (AcquiredSourceSnapshot, SourceDebtEvidence, AcquiredPhaseContractEvidence)
+  -> Maybe GateCompletionPremises
   -> CheckResult
   -> CheckResult
   -> CheckResult
   -> CheckResult
-legacyCheckCore candidatePhase snapshot acquiredDebtEvidence closureCheck debtCheck consumerCheck =
+legacyCheckCore candidatePhase snapshot acquiredDebtEvidence gateCompletion closureCheck debtCheck consumerCheck =
   CheckResult
     { checkName = legacyCoreResultName semanticCheck
     , checkObservations = legacyCoreObservations semanticCheck structuralObservations
@@ -5802,7 +5928,7 @@ legacyCheckCore candidatePhase snapshot acquiredDebtEvidence closureCheck debtCh
     legacyCandidateInventoryCheck
       candidatePhase
       snapshot
-      (closedLegacyEvidenceRegistry snapshot acquiredDebtEvidence closureCheck debtCheck consumerCheck)
+      (closedLegacyEvidenceRegistry snapshot acquiredDebtEvidence gateCompletion closureCheck debtCheck consumerCheck)
   (structuralObservations, structuralFindings) = case activeRegisterFromSnapshot snapshot of
     Left problems -> ([], map registerFinding problems)
     Right register ->
@@ -6036,9 +6162,62 @@ legacyCandidateInventoryCheck candidatePhase snapshot registry =
       [ evaluateCanonicalBinding
           candidatePhase
           (legacyBinding identifier)
-          (closedEvidenceObservation =<< Map.lookup identifier registry)
+          (closedEvidenceObservationForCandidate candidatePhase =<< Map.lookup identifier registry)
       | identifier <- canonicalLegacyUniverse
       ]
+
+-- | A zero observation at its owning phase is only candidate-ready after the
+-- row's independently executed reintroduction negatives are bound to the
+-- same source snapshot.  This closes the former loophole where, notably,
+-- @LTD-SRC-008@ could report zero from static @pb@ grammar alone while its
+-- required widened-bootstrap negative had never run.
+closedEvidenceObservationForCandidate :: Policy.PhaseOrdinal -> ClosedLegacyEvidence -> Maybe LegacyObservation
+closedEvidenceObservationForCandidate candidatePhase evidence =
+  case closedEvidenceObservation evidence of
+    Just observed@(LegacyObservation analyzer LegacyObservedZero)
+      | zeroOwnerRelation candidatePhase (Just owner) == OwnerAt ->
+          case legacyReintroductionWitnessProblems evidence of
+            [] -> Just observed
+            problems ->
+              Just
+                ( LegacyObservation
+                    analyzer
+                    ( LegacyObservationRefused
+                        ( "owner-domain reintroduction evidence is unavailable or invalid: "
+                            <> Text.intercalate "; " problems
+                        )
+                    )
+                )
+      where
+        owner = legacyIdOwner (closedEvidenceId evidence)
+    other -> other
+
+legacyReintroductionWitnessProblems :: ClosedLegacyEvidence -> [Text]
+legacyReintroductionWitnessProblems evidence =
+  case closedEvidenceReintroduction evidence of
+    Nothing -> ["no executed reintroduction witness"]
+    Just witness ->
+      [ "witness names a different legacy row"
+      | legacyReintroductionWitnessId witness /= identifier
+      ]
+        <> [ "witness names a different source snapshot"
+           | legacyReintroductionWitnessSnapshot witness /= closedEvidenceSnapshot evidence
+           ]
+        <> [ "witness case inventory differs from the canonical binding"
+           | legacyReintroductionWitnessCases witness /= legacyIdReintroductionCases identifier
+           ]
+        <> [ "witness transcript identity is not lowercase SHA-256"
+           | not (legacySha256Identity (legacyReintroductionWitnessTranscript witness))
+           ]
+  where
+    identifier = closedEvidenceId evidence
+
+legacySha256Identity :: Text -> Bool
+legacySha256Identity value =
+  Text.length value == 64
+    && Text.all
+      (\character -> (character >= '0' && character <= '9') || (character >= 'a' && character <= 'f'))
+      value
 
 legacyCandidateObservationComposition
   :: [Observation] -> [Observation] -> [Observation] -> [Observation]
@@ -6348,12 +6527,13 @@ closedEvidenceFindingDetail kind detail = case kind of
 -- typed unavailable state until their owner implements them.
 closedLegacyEvidenceRegistry
   :: SourceSnapshot
-  -> Maybe (AcquiredSourceSnapshot, SourceDebtEvidence)
+  -> Maybe (AcquiredSourceSnapshot, SourceDebtEvidence, AcquiredPhaseContractEvidence)
+  -> Maybe GateCompletionPremises
   -> CheckResult
   -> CheckResult
   -> CheckResult
   -> Map LegacyId ClosedLegacyEvidence
-closedLegacyEvidenceRegistry snapshot acquiredDebtEvidence closureCheck debtCheck consumerCheck =
+closedLegacyEvidenceRegistry snapshot acquiredDebtEvidence gateCompletion closureCheck debtCheck consumerCheck =
   Map.fromList [legacyRegistryPair evidence | evidence <- candidateEntries]
  where
   candidateEntries =
@@ -6361,7 +6541,7 @@ closedLegacyEvidenceRegistry snapshot acquiredDebtEvidence closureCheck debtChec
   canonicalEntries =
     legacyCompleteEvidenceEntry snapshot completeState
       <> map (sourceDebtEvidence snapshot) sourceDebtUniverse
-      <> map (nonSourceEvidence snapshot acquiredDebtEvidence) nonSourceLegacyUniverse
+      <> map (nonSourceEvidence snapshot acquiredDebtEvidence gateCompletion) nonSourceLegacyUniverse
   completeFindings =
     legacyCompleteFindingOrder
       ( legacyCompleteContributionComposition
@@ -6379,7 +6559,7 @@ closedLegacyEvidenceRegistry snapshot acquiredDebtEvidence closureCheck debtChec
   sourceState sourceId = case acquiredDebtEvidence of
     Nothing ->
       legacyCallerSnapshotSourceState
-    Just (acquired, evidence) ->
+    Just (acquired, evidence, _) ->
       foldAcquiredSourceDebtState
         acquired
         evidence
@@ -6559,6 +6739,7 @@ closedEvidence snapshot identifier sourceDebtId state =
     , closedEvidenceAnalyzer = closedEvidenceAnalyzerRoute analyzer
     , closedEvidenceSnapshot = closedEvidenceSnapshotRoute snapshot
     , closedEvidenceObservation = closedEvidenceObservationRoute analyzer state
+    , closedEvidenceReintroduction = Nothing
     }
  where
   analyzer = legacyIdAnalyzer identifier
@@ -6606,10 +6787,29 @@ closedEvidenceObservationRoute analyzer state = LegacyObservation analyzer <$> s
 -- owner-domain analyzer joins.
 nonSourceEvidence
   :: SourceSnapshot
-  -> Maybe (AcquiredSourceSnapshot, SourceDebtEvidence)
+  -> Maybe (AcquiredSourceSnapshot, SourceDebtEvidence, AcquiredPhaseContractEvidence)
+  -> Maybe GateCompletionPremises
   -> LegacyId
   -> ClosedLegacyEvidence
-nonSourceEvidence snapshot acquiredDebtEvidence identifier
+nonSourceEvidence snapshot acquiredDebtEvidence gateCompletion identifier
+  | identifier == LtdVal002 =
+      case acquiredDebtEvidence of
+        Nothing -> unimplementedEvidence snapshot identifier
+        Just (acquired, _, contractEvidence) ->
+          closedEvidence
+            snapshot
+            identifier
+            Nothing
+            (Just (phaseContractObservedState acquired contractEvidence))
+  | identifier == LtdVal004 =
+      case gateCompletion of
+        Nothing -> unimplementedEvidence snapshot identifier
+        Just premises ->
+          closedEvidence
+            snapshot
+            identifier
+            Nothing
+            (Just (gateCompletionObservedState premises))
   | seedLegacyDependencyRoot identifier == Nothing = unimplementedEvidence snapshot identifier
   | otherwise =
       closedEvidence
@@ -6624,8 +6824,76 @@ nonSourceEvidence snapshot acquiredDebtEvidence identifier
   -- snapshot reaches the analyzer.
   seedState = case acquiredDebtEvidence of
     Nothing -> legacyCallerSnapshotSourceState
-    Just (acquired, _) ->
+    Just (acquired, _, _) ->
       seedDependencyState (acquiredSourceSnapshot acquired) identifier
+
+phaseContractObservedState :: AcquiredSourceSnapshot -> AcquiredPhaseContractEvidence -> LegacyObservedState
+phaseContractObservedState acquired evidence
+  | acquiredPhaseContractEvidenceSnapshot evidence /= expectedSnapshot =
+      LegacyObservationRefused "phase-contract evidence is bound to a different source snapshot"
+  | null problems = LegacyObservedZero
+  | otherwise =
+      LegacyObservationRefused
+        ( "the acquired Phase-0 contract/correspondence check refused: "
+            <> Text.intercalate "," (map findingCode problems)
+        )
+ where
+  expectedSnapshot = snapshotIdentity (acquiredSourceSnapshot acquired)
+  problems = checkFindings (acquiredPhaseContractEvidenceCheck evidence)
+
+-- | The exact prerequisite universe for @CloseGateCompletion@.  It contains
+-- every fixed gate row except the legacy row being decided and the pass
+-- criterion which is derived from that decision.  Keeping this inventory in
+-- the lifecycle analyzer makes omission or reordering a refusal instead of a
+-- smaller definition of "complete".
+gateCompletionPrerequisiteNames :: [Text]
+gateCompletionPrerequisiteNames =
+  [ "Claim"
+  , "Subject"
+  , "Command"
+  , "Oracle"
+  , "Positive controls"
+  , "Paired negatives"
+  , "Mutants"
+  , "Discovery"
+  , "Challenge"
+  , "Observer"
+  , "Authority/bypass"
+  , "Freshness"
+  , "Qualification"
+  , "Cleanroom"
+  , "Predecessor"
+  , "Residue"
+  ]
+
+gateCompletionObservedState :: GateCompletionPremises -> LegacyObservedState
+gateCompletionObservedState (GateCompletionPremises premises)
+  | map gatePrerequisiteName premises /= gateCompletionPrerequisiteNames =
+      LegacyObservationRefused
+        ( "gate-completion prerequisite inventory mismatch: expected="
+            <> showText gateCompletionPrerequisiteNames
+            <> ", actual="
+            <> showText (map gatePrerequisiteName premises)
+        )
+  | null blockers = LegacyObservedZero
+  | otherwise =
+      LegacyObservationRefused
+        ( "gate-completion prerequisites are not all execution-derived green: "
+            <> Text.intercalate "," (map renderGatePrerequisite premises)
+        )
+ where
+  blockers =
+    [ premise
+    | premise <- premises
+    , gatePrerequisiteOutcome premise /= GatePrerequisitePassed
+    ]
+
+renderGatePrerequisite :: GatePrerequisiteObservation -> Text
+renderGatePrerequisite premise =
+  gatePrerequisiteName premise <> "=" <> case gatePrerequisiteOutcome premise of
+    GatePrerequisitePassed -> "passed"
+    GatePrerequisiteRefused -> "refused"
+    GatePrerequisiteUnverified -> "unverified"
 
 -- | One observed seed-dependency locus.
 --

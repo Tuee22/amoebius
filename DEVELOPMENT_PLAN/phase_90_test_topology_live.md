@@ -28,7 +28,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 90.1: The live test topology and elevated harness ⏸️](#sprint-901-the-live-test-topology-and-elevated-harness-)
+- [Sprint 90.1: The live test topology and elevated harness](#sprint-901-the-live-test-topology-and-elevated-harness-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -57,7 +57,7 @@ Run a self-tearing-down topology against the live platform under the elevated ha
 **Lane:** `linux-cpu/amd64`
 **Register:** 3
 **Depends on:** [Phase 89](phase_89_apple_metal_host_daemon.md)
-**Gate:** `pb validate phase 90`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 90`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

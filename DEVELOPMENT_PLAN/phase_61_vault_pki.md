@@ -28,10 +28,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 61.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild ⏸️](#sprint-611-root-single-node-password-encrypted-vault--init-once--unseal-on-rebuild-)
-- [Sprint 61.2: The self-signed PKI trust anchor issues ⏸️](#sprint-612-the-self-signed-pki-trust-anchor-issues-)
-- [Sprint 61.3: Built-in Haskell Vault client (no agent sidecar) reads a `SecretRef` by name — the gate ⏸️](#sprint-613-built-in-haskell-vault-client-no-agent-sidecar-reads-a-secretref-by-name--the-gate-)
-- [Sprint 61.4: Register-2.5 fail-closed Vault unseal under simulated faults ⏸️](#sprint-614-register-25-fail-closed-vault-unseal-under-simulated-faults-)
+- [Sprint 61.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild](#sprint-611-root-single-node-password-encrypted-vault--init-once--unseal-on-rebuild-)
+- [Sprint 61.2: The self-signed PKI trust anchor issues](#sprint-612-the-self-signed-pki-trust-anchor-issues-)
+- [Sprint 61.3: Built-in Haskell Vault client (no agent sidecar) reads a `SecretRef` by name — the gate](#sprint-613-built-in-haskell-vault-client-no-agent-sidecar-reads-a-secretref-by-name--the-gate-)
+- [Sprint 61.4: Register-2.5 fail-closed Vault unseal under simulated faults](#sprint-614-register-25-fail-closed-vault-unseal-under-simulated-faults-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -92,7 +92,7 @@ on Apple, and WSL2 on Windows.
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 60](phase_60_retained_storage.md)
-**Gate:** `pb validate phase 61`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 61`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

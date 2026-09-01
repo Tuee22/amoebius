@@ -29,10 +29,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 71.1: The immutable `Release` ledger (`releaseHash`) ⏸️](#sprint-711-the-immutable-release-ledger-releasehash-)
-- [Sprint 71.2: The `Environment` ETag-CAS promotion pointer ⏸️](#sprint-712-the-environment-etag-cas-promotion-pointer-)
-- [Sprint 71.3: The `PromotionGate` — promote-unverified→prod type-foreclosed ⏸️](#sprint-713-the-promotiongate--promote-unverifiedprod-type-foreclosed-)
-- [Sprint 71.4: `RolloutPlan`/`RolloutPhase` readiness-gated apply + DB schema-migration phase (gate) ⏸️](#sprint-714-rolloutplanrolloutphase-readiness-gated-apply--db-schema-migration-phase-gate-)
+- [Sprint 71.1: The immutable `Release` ledger (`releaseHash`)](#sprint-711-the-immutable-release-ledger-releasehash-)
+- [Sprint 71.2: The `Environment` ETag-CAS promotion pointer](#sprint-712-the-environment-etag-cas-promotion-pointer-)
+- [Sprint 71.3: The `PromotionGate` — promote-unverified→prod type-foreclosed](#sprint-713-the-promotiongate--promote-unverifiedprod-type-foreclosed-)
+- [Sprint 71.4: `RolloutPlan`/`RolloutPhase` readiness-gated apply + DB schema-migration phase (gate)](#sprint-714-rolloutplanrolloutphase-readiness-gated-apply--db-schema-migration-phase-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -96,7 +96,7 @@ future bounded live validation of the otherwise substrate-agnostic ledger/pointe
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 70](phase_70_ui_projection_runtime.md)
-**Gate:** `pb validate phase 71`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 71`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

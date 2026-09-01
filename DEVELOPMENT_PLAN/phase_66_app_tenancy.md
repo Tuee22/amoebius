@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 66.1: Derive, apply, and externally read back tenant provider policy ⏸️](#sprint-661-derive-apply-and-externally-read-back-tenant-provider-policy-)
+- [Sprint 66.1: Derive, apply, and externally read back tenant provider policy](#sprint-661-derive-apply-and-externally-read-back-tenant-provider-policy-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -70,7 +70,7 @@ a separately useful provider feature.
 **Register:** 3 — live provider materialization and independent readback; NOT VALIDATED.
 
 **Depends on:** [Phase 65](phase_65_live_dsl_deploy.md)
-**Gate:** `pb validate phase 66`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 66`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

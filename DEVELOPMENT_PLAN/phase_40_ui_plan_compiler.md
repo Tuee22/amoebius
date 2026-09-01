@@ -27,9 +27,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 40.1: Paired semantic projection ⏸️](#sprint-401-paired-semantic-projection-)
-- [Sprint 40.2: Canonical artifacts, digests, and demand ⏸️](#sprint-402-canonical-artifacts-digests-and-demand-)
-- [Sprint 40.3: Calculus projection and phase seal ⏸️](#sprint-403-calculus-projection-and-phase-seal-)
+- [Sprint 40.1: Paired semantic projection](#sprint-401-paired-semantic-projection-)
+- [Sprint 40.2: Canonical artifacts, digests, and demand](#sprint-402-canonical-artifacts-digests-and-demand-)
+- [Sprint 40.3: Calculus projection and phase seal](#sprint-403-calculus-projection-and-phase-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -73,7 +73,7 @@ pure; the canonical Haskell gate has no credentials or network.
 publication, edge enforcement, and live authority freshness remain UNVERIFIED.
 
 **Depends on:** [Phase 39](phase_39_ui_effect_binding.md)
-**Gate:** `pb validate phase 40`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 40`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

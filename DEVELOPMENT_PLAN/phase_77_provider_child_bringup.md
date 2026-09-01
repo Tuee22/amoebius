@@ -32,10 +32,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 77.1: Two-stage capacity bootstrap for a hostless provider child ⏸️](#sprint-771-two-stage-capacity-bootstrap-for-a-hostless-provider-child-)
-- [Sprint 77.2: Parent→child Lease handoff + hostless daemon topology ⏸️](#sprint-772-parentchild-lease-handoff--hostless-daemon-topology-)
-- [Sprint 77.3: Standard-HA platform-service convergence from typed manifests ⏸️](#sprint-773-standard-ha-platform-service-convergence-from-typed-manifests-)
-- [Sprint 77.4: The provider-child bring-up gate ⏸️](#sprint-774-the-provider-child-bring-up-gate-)
+- [Sprint 77.1: Two-stage capacity bootstrap for a hostless provider child](#sprint-771-two-stage-capacity-bootstrap-for-a-hostless-provider-child-)
+- [Sprint 77.2: Parent→child Lease handoff + hostless daemon topology](#sprint-772-parentchild-lease-handoff--hostless-daemon-topology-)
+- [Sprint 77.3: Standard-HA platform-service convergence from typed manifests](#sprint-773-standard-ha-platform-service-convergence-from-typed-manifests-)
+- [Sprint 77.4: The provider-child bring-up gate](#sprint-774-the-provider-child-bring-up-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -129,7 +129,7 @@ convergence. EKS is the deploy target, not a hardware substrate
 standard-service convergence and re-runs it; no register-1/2 in-process check discharges it.
 
 **Depends on:** [Phase 76](phase_76_provider_deploy_checkpoint.md)
-**Gate:** `pb validate phase 77`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 77`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

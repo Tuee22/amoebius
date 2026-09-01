@@ -28,9 +28,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 18.1: Actual bounded DSL projections ⏸️](#sprint-181-actual-bounded-dsl-projections-)
-- [Sprint 18.2: Protocol models and correspondence ⏸️](#sprint-182-protocol-models-and-correspondence-)
-- [Sprint 18.3: Explorer, TLC, mutation, and gate ⏸️](#sprint-183-explorer-tlc-mutation-and-gate-)
+- [Sprint 18.1: Actual bounded DSL projections](#sprint-181-actual-bounded-dsl-projections-)
+- [Sprint 18.2: Protocol models and correspondence](#sprint-182-protocol-models-and-correspondence-)
+- [Sprint 18.3: Explorer, TLC, mutation, and gate](#sprint-183-explorer-tlc-mutation-and-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -75,7 +75,7 @@ CFG, or rendered fixture product generated only beneath `.build/**`. NOT VALIDAT
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 17](phase_17_gateway_migration_model.md)
-**Gate:** `pb validate phase 18`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 18`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

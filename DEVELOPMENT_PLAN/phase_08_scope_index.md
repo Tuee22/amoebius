@@ -28,7 +28,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 8.1: Rank-2 scope index and total flow checking ⏸️](#sprint-81-rank-2-scope-index-and-total-flow-checking-)
+- [Sprint 8.1: Rank-2 scope index and total flow checking](#sprint-81-rank-2-scope-index-and-total-flow-checking-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -72,7 +72,7 @@ exchange. NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 7](phase_07_evidence_calculus.md)
-**Gate:** `pb validate phase 08`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 08`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

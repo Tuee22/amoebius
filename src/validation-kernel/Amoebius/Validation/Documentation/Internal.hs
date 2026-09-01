@@ -386,6 +386,12 @@ requiredGovernedRootDocuments =
 #else
       ["CLAUDE.md"]
 #endif
+    ,
+#ifdef VALIDATION_DOCUMENT_REQUIRED_CRASH_SUMMARY_OMISSION_MUTANT
+      []
+#else
+      ["CRASH_SUMMARY.md"]
+#endif
     ]
 
 requiredGovernedSubtrees :: [FilePath]
@@ -1314,11 +1320,11 @@ canonicalGovernedPathCount :: Int
 #ifdef VALIDATION_DOCUMENT_INVENTORY_BASELINE_MUTANT
 canonicalGovernedPathCount = 194
 #else
-canonicalGovernedPathCount = 195
+canonicalGovernedPathCount = 196
 #endif
 
 canonicalGovernedPathDigest :: Text
-canonicalGovernedPathDigest = "51c38807d39526404f678c6a89ccaf6210ff91d7b17d4cde7989f1bc2a9e55f2"
+canonicalGovernedPathDigest = "8e9efb1fce225cb97f26ddf7c6256210ec2113354825966624480f5610036ba7"
 
 hex :: ByteString.ByteString -> Text
 hex = Text.pack . concatMap byteHex . ByteString.unpack
@@ -1364,7 +1370,7 @@ discoverDocuments root = do
   finalBudget <- readIORef budget
   pure (documents, problems <> missing, finalBudget)
  where
-  rootDocuments = ["README.md", "AGENTS.md", "CLAUDE.md"]
+  rootDocuments = ["README.md", "AGENTS.md", "CLAUDE.md", "CRASH_SUMMARY.md"]
 
 -- Worktree diagnostics need non-governed Markdown as graph input even though
 -- only the canonical roots receive header checks.  In particular, vendor
@@ -1736,6 +1742,7 @@ isGovernedPath path =
   governedReadmePath path
     || governedAgentsPath path
     || governedClaudePath path
+    || governedCrashSummaryPath path
     || governedDocumentsPath path
     || governedDevelopmentPlanPath path
 
@@ -1758,6 +1765,13 @@ governedClaudePath :: FilePath -> Bool
 governedClaudePath path = path == "CLAUDE.md" `seq` False
 #else
 governedClaudePath path = path == "CLAUDE.md"
+#endif
+
+governedCrashSummaryPath :: FilePath -> Bool
+#ifdef VALIDATION_DOCUMENT_GOVERNED_CRASH_SUMMARY_OMISSION_MUTANT
+governedCrashSummaryPath path = path == "CRASH_SUMMARY.md" `seq` False
+#else
+governedCrashSummaryPath path = path == "CRASH_SUMMARY.md"
 #endif
 
 governedDocumentsPath :: FilePath -> Bool

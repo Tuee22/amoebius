@@ -29,11 +29,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 67.1: Fork supernova → amoebius-pulsar native binary protocol ⏸️](#sprint-671-fork-supernova--amoebius-pulsar-native-binary-protocol-)
-- [Sprint 67.2: Capability surface + exclusively-CBOR payload codec ⏸️](#sprint-672-capability-surface--exclusively-cbor-payload-codec-)
-- [Sprint 67.3: Declarative topology algebra + one-sided-link validation ⏸️](#sprint-673-declarative-topology-algebra--one-sided-link-validation-)
-- [Sprint 67.4: At-least-once + broker-side dedup + the command→event round-trip gate ⏸️](#sprint-674-at-least-once--broker-side-dedup--the-commandevent-round-trip-gate-)
-- [Sprint 67.5: Register-2.5 exactly-once effect under simulated redelivery ⏸️](#sprint-675-register-25-exactly-once-effect-under-simulated-redelivery-)
+- [Sprint 67.1: Fork supernova → amoebius-pulsar native binary protocol](#sprint-671-fork-supernova--amoebius-pulsar-native-binary-protocol-)
+- [Sprint 67.2: Capability surface + exclusively-CBOR payload codec](#sprint-672-capability-surface--exclusively-cbor-payload-codec-)
+- [Sprint 67.3: Declarative topology algebra + one-sided-link validation](#sprint-673-declarative-topology-algebra--one-sided-link-validation-)
+- [Sprint 67.4: At-least-once + broker-side dedup + the command→event round-trip gate](#sprint-674-at-least-once--broker-side-dedup--the-commandevent-round-trip-gate-)
+- [Sprint 67.5: Register-2.5 exactly-once effect under simulated redelivery](#sprint-675-register-25-exactly-once-effect-under-simulated-redelivery-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -86,7 +86,7 @@ remain additive and are exercised by later phases.
 in-process fake.
 
 **Depends on:** [Phase 66](phase_66_app_tenancy.md)
-**Gate:** `pb validate phase 67`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 67`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

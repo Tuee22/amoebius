@@ -33,7 +33,12 @@ data Sabotage
   | StaleEvidence
   | SelfObserver
   | AuthorityBypass
-  | ResidueSmuggling
+  | ResidueLeakage
+  | GeneratedOrLegacyInputSmuggling
+  | ProductionSelectorOmission
+  | OracleSelectorOmission
+  | BuildSelectorOmission
+  | ChangedSubjectUnassignedRowRed
   deriving (Bounded, Enum, Eq, Ord, Show)
 
 data DiagnosticMutationWitness = DiagnosticMutationWitness
@@ -76,7 +81,12 @@ sabotageName item = case item of
   StaleEvidence -> "stale-evidence"
   SelfObserver -> "self-observer"
   AuthorityBypass -> "authority-bypass"
-  ResidueSmuggling -> "residue-or-smuggled-input"
+  ResidueLeakage -> "residue-or-teardown-leakage"
+  GeneratedOrLegacyInputSmuggling -> "generated-or-legacy-input-smuggling"
+  ProductionSelectorOmission -> "production-selector-omission"
+  OracleSelectorOmission -> "oracle-selector-omission"
+  BuildSelectorOmission -> "build-selector-omission"
+  ChangedSubjectUnassignedRowRed -> "changed-subject-unassigned-row-red"
 
 -- | Check the internal consistency of a caller-supplied qualification report.
 --
@@ -249,7 +259,12 @@ expectedFindingCode item = case item of
   StaleEvidence -> "SABOTAGE-STALE-EVIDENCE"
   SelfObserver -> "SABOTAGE-SELF-OBSERVER"
   AuthorityBypass -> "SABOTAGE-AUTHORITY-BYPASS"
-  ResidueSmuggling -> "SABOTAGE-RESIDUE"
+  ResidueLeakage -> "SABOTAGE-RESIDUE"
+  GeneratedOrLegacyInputSmuggling -> "SABOTAGE-SMUGGLED-INPUT"
+  ProductionSelectorOmission -> "SABOTAGE-PRODUCTION-SELECTOR-OMISSION"
+  OracleSelectorOmission -> "SABOTAGE-ORACLE-SELECTOR-OMISSION"
+  BuildSelectorOmission -> "SABOTAGE-BUILD-SELECTOR-OMISSION"
+  ChangedSubjectUnassignedRowRed -> "SABOTAGE-UNASSIGNED-ROW-RED"
 
 duplicates :: Ord a => [a] -> [a]
 duplicates = foldr repeated [] . group . sort

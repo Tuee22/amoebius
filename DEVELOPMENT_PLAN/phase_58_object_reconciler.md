@@ -33,11 +33,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 58.1: Deployment-global desired state + authenticated live inventory + typed action plan ⏸️](#sprint-581-deployment-global-desired-state--authenticated-live-inventory--typed-action-plan-)
-- [Sprint 58.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch ⏸️](#sprint-582-bootstrap-lease-authority--generic-typed-action-dispatcher--scoped-ssa--storage-scaling-dispatch-)
-- [Sprint 58.3: Staged execution transitions, Job terminal protocol, and authenticated deletion ⏸️](#sprint-583-staged-execution-transitions-job-terminal-protocol-and-authenticated-deletion-)
-- [Sprint 58.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) ⏸️](#sprint-584-wait-for-ready--the-idempotent-convergence-gate-re-run-no-op-)
-- [Sprint 58.5: Register-2.5 reconciler + staged-execution convergence under simulated faults ⏸️](#sprint-585-register-25-reconciler--staged-execution-convergence-under-simulated-faults-)
+- [Sprint 58.1: Deployment-global desired state + authenticated live inventory + typed action plan](#sprint-581-deployment-global-desired-state--authenticated-live-inventory--typed-action-plan-)
+- [Sprint 58.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch](#sprint-582-bootstrap-lease-authority--generic-typed-action-dispatcher--scoped-ssa--storage-scaling-dispatch-)
+- [Sprint 58.3: Staged execution transitions, Job terminal protocol, and authenticated deletion](#sprint-583-staged-execution-transitions-job-terminal-protocol-and-authenticated-deletion-)
+- [Sprint 58.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op)](#sprint-584-wait-for-ready--the-idempotent-convergence-gate-re-run-no-op-)
+- [Sprint 58.5: Register-2.5 reconciler + staged-execution convergence under simulated faults](#sprint-585-register-25-reconciler--staged-execution-convergence-under-simulated-faults-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -178,7 +178,7 @@ Phase 89 respectively).
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 57](phase_57_complementary_arch_child.md)
-**Gate:** `pb validate phase 58`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 58`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

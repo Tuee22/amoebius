@@ -7,6 +7,7 @@ import CompilerSourceGraphAcquiredOracle
   , runCompilerSourceGraphAcquiredSelectorOracle
   , runCompilerSourceGraphAcquiredSelectorProductControlOracle
   )
+import CompilerSubjectRegistryOracle (runCompilerSubjectRegistryOracle)
 import SelectorCli
   ( SelectorSuite (..)
   , runSelectorCli
@@ -14,7 +15,8 @@ import SelectorCli
   )
 
 main :: IO ()
-main =
+main = do
+  runCompilerSubjectRegistryOracle
   runSelectorCli
     (selectorSuite
       "CompilerSourceGraphAcquiredOracle"

@@ -28,7 +28,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 20.1: Complete indexed declaration ⏸️](#sprint-201-complete-indexed-declaration-)
+- [Sprint 20.1: Complete indexed declaration](#sprint-201-complete-indexed-declaration-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -73,7 +73,7 @@ content-derived identity. NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 19](phase_19_reconcile_core_simulation.md)
-**Gate:** `pb validate phase 20`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 20`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

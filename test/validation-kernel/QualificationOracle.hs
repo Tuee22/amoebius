@@ -301,7 +301,7 @@ runQualificationOracle =
           ( checkQualificationReportDiagnostic
               qualificationBaseline
               ( changeRun
-                  ResidueSmuggling
+                  GeneratedOrLegacyInputSmuggling
                   (\run -> run {sabotageWitness = (sabotageWitness run) {mutationBeforeDigest = alternateDigest}})
                   cleanRuns
               )
@@ -327,7 +327,12 @@ requiredCases =
   , RequiredCase StaleEvidence "stale-evidence" "SABOTAGE-STALE-EVIDENCE"
   , RequiredCase SelfObserver "self-observer" "SABOTAGE-SELF-OBSERVER"
   , RequiredCase AuthorityBypass "authority-bypass" "SABOTAGE-AUTHORITY-BYPASS"
-  , RequiredCase ResidueSmuggling "residue-or-smuggled-input" "SABOTAGE-RESIDUE"
+  , RequiredCase ResidueLeakage "residue-or-teardown-leakage" "SABOTAGE-RESIDUE"
+  , RequiredCase GeneratedOrLegacyInputSmuggling "generated-or-legacy-input-smuggling" "SABOTAGE-SMUGGLED-INPUT"
+  , RequiredCase ProductionSelectorOmission "production-selector-omission" "SABOTAGE-PRODUCTION-SELECTOR-OMISSION"
+  , RequiredCase OracleSelectorOmission "oracle-selector-omission" "SABOTAGE-ORACLE-SELECTOR-OMISSION"
+  , RequiredCase BuildSelectorOmission "build-selector-omission" "SABOTAGE-BUILD-SELECTOR-OMISSION"
+  , RequiredCase ChangedSubjectUnassignedRowRed "changed-subject-unassigned-row-red" "SABOTAGE-UNASSIGNED-ROW-RED"
   ]
 
 constantSuccessCase :: RequiredCase
@@ -399,7 +404,12 @@ caseFor item = case item of
   StaleEvidence -> RequiredCase StaleEvidence "stale-evidence" "SABOTAGE-STALE-EVIDENCE"
   SelfObserver -> RequiredCase SelfObserver "self-observer" "SABOTAGE-SELF-OBSERVER"
   AuthorityBypass -> RequiredCase AuthorityBypass "authority-bypass" "SABOTAGE-AUTHORITY-BYPASS"
-  ResidueSmuggling -> RequiredCase ResidueSmuggling "residue-or-smuggled-input" "SABOTAGE-RESIDUE"
+  ResidueLeakage -> RequiredCase ResidueLeakage "residue-or-teardown-leakage" "SABOTAGE-RESIDUE"
+  GeneratedOrLegacyInputSmuggling -> RequiredCase GeneratedOrLegacyInputSmuggling "generated-or-legacy-input-smuggling" "SABOTAGE-SMUGGLED-INPUT"
+  ProductionSelectorOmission -> RequiredCase ProductionSelectorOmission "production-selector-omission" "SABOTAGE-PRODUCTION-SELECTOR-OMISSION"
+  OracleSelectorOmission -> RequiredCase OracleSelectorOmission "oracle-selector-omission" "SABOTAGE-ORACLE-SELECTOR-OMISSION"
+  BuildSelectorOmission -> RequiredCase BuildSelectorOmission "build-selector-omission" "SABOTAGE-BUILD-SELECTOR-OMISSION"
+  ChangedSubjectUnassignedRowRed -> RequiredCase ChangedSubjectUnassignedRowRed "changed-subject-unassigned-row-red" "SABOTAGE-UNASSIGNED-ROW-RED"
 
 cleanRun :: RequiredCase -> DiagnosticSabotageRun
 cleanRun required =

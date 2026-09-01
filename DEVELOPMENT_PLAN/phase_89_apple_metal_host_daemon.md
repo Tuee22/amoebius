@@ -31,11 +31,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 89.1: Apple substrate management — Lima Linux VM + brew lazy tool-ensure ⏸️](#sprint-891-apple-substrate-management--lima-linux-vm--brew-lazy-tool-ensure-)
-- [Sprint 89.2: Host-only loopback NodePort exposure of the content-mutation gateway + Pulsar ⏸️](#sprint-892-host-only-loopback-nodeport-exposure-of-the-content-mutation-gateway--pulsar-)
-- [Sprint 89.3: Headless host-native Metal bridge + native worker build (no Tart) ⏸️](#sprint-893-headless-host-native-metal-bridge--native-worker-build-no-tart-)
-- [Sprint 89.4: Host compute daemon lifecycle as a managed subprocess ⏸️](#sprint-894-host-compute-daemon-lifecycle-as-a-managed-subprocess-)
-- [Sprint 89.5: Channel-2 peer + wild-exposure unrepresentable + the Apple-Metal peer gate ⏸️](#sprint-895-channel-2-peer--wild-exposure-unrepresentable--the-apple-metal-peer-gate-)
+- [Sprint 89.1: Apple substrate management — Lima Linux VM + brew lazy tool-ensure](#sprint-891-apple-substrate-management--lima-linux-vm--brew-lazy-tool-ensure-)
+- [Sprint 89.2: Host-only loopback NodePort exposure of the content-mutation gateway + Pulsar](#sprint-892-host-only-loopback-nodeport-exposure-of-the-content-mutation-gateway--pulsar-)
+- [Sprint 89.3: Headless host-native Metal bridge + native worker build (no Tart)](#sprint-893-headless-host-native-metal-bridge--native-worker-build-no-tart-)
+- [Sprint 89.4: Host compute daemon lifecycle as a managed subprocess](#sprint-894-host-compute-daemon-lifecycle-as-a-managed-subprocess-)
+- [Sprint 89.5: Channel-2 peer + wild-exposure unrepresentable + the Apple-Metal peer gate](#sprint-895-channel-2-peer--wild-exposure-unrepresentable--the-apple-metal-peer-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -145,7 +145,7 @@ touched by the gate, and the windows-CUDA host worker is named only as the struc
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 88](phase_88_offline_multizone_continuity.md)
-**Gate:** `pb validate phase 89`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 89`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

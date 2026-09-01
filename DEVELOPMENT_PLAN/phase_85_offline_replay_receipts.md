@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 85.1: Gate durable replay across replicas ⏸️](#sprint-851-gate-durable-replay-across-replicas-)
+- [Sprint 85.1: Gate durable replay across replicas](#sprint-851-gate-durable-replay-across-replicas-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -69,7 +69,7 @@ but this linux-cpu gate does not claim a live offline CUDA training result.
 **Register:** 3 — live infrastructure.
 
 **Depends on:** [Phase 84](phase_84_ui_ha_multizone.md)
-**Gate:** `pb validate phase 85`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 85`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

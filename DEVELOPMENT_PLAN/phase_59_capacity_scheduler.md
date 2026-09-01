@@ -31,11 +31,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 59.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms ⏸️](#sprint-591-state-indexed-reservation-ledger--normalization--absent-pod-recovery-arms-)
-- [Sprint 59.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses ⏸️](#sprint-592-scheduler-bootstrap-authority--two-stage-taintrbac-cutover--readiness-witnesses-)
-- [Sprint 59.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery ⏸️](#sprint-593-scheduler-loop--reservedbindinginflightbindingbound-cas--placement--recovery-)
-- [Sprint 59.4: Live scheduler binding + bootstrap→steady cutover gate ⏸️](#sprint-594-live-scheduler-binding--bootstrapsteady-cutover-gate-)
-- [Sprint 59.5: Register-2.5 scheduler convergence under simulated faults ⏸️](#sprint-595-register-25-scheduler-convergence-under-simulated-faults-)
+- [Sprint 59.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms](#sprint-591-state-indexed-reservation-ledger--normalization--absent-pod-recovery-arms-)
+- [Sprint 59.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses](#sprint-592-scheduler-bootstrap-authority--two-stage-taintrbac-cutover--readiness-witnesses-)
+- [Sprint 59.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery](#sprint-593-scheduler-loop--reservedbindinginflightbindingbound-cas--placement--recovery-)
+- [Sprint 59.4: Live scheduler binding + bootstrap→steady cutover gate](#sprint-594-live-scheduler-binding--bootstrapsteady-cutover-gate-)
+- [Sprint 59.5: Register-2.5 scheduler convergence under simulated faults](#sprint-595-register-25-scheduler-convergence-under-simulated-faults-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -126,7 +126,7 @@ and WSL2 on Windows. This execution uses Phase 55's single-node `kind` cluster a
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 58](phase_58_object_reconciler.md)
-**Gate:** `pb validate phase 59`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 59`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

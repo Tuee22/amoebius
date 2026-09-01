@@ -28,11 +28,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 54.1: The firmware and elevation preflight ⏸️](#sprint-541-the-firmware-and-elevation-preflight-)
-- [Sprint 54.2: Ensuring WSL2 through the vendor installer ⏸️](#sprint-542-ensuring-wsl2-through-the-vendor-installer-)
-- [Sprint 54.3: The reboot verdict and the convergent retry ⏸️](#sprint-543-the-reboot-verdict-and-the-convergent-retry-)
-- [Sprint 54.4: The amoebius-owned distro ⏸️](#sprint-544-the-amoebius-owned-distro-)
-- [Sprint 54.5: The lifted Linux plan ⏸️](#sprint-545-the-lifted-linux-plan-)
+- [Sprint 54.1: The firmware and elevation preflight](#sprint-541-the-firmware-and-elevation-preflight-)
+- [Sprint 54.2: Ensuring WSL2 through the vendor installer](#sprint-542-ensuring-wsl2-through-the-vendor-installer-)
+- [Sprint 54.3: The reboot verdict and the convergent retry](#sprint-543-the-reboot-verdict-and-the-convergent-retry-)
+- [Sprint 54.4: The amoebius-owned distro](#sprint-544-the-amoebius-owned-distro-)
+- [Sprint 54.5: The lifted Linux plan](#sprint-545-the-lifted-linux-plan-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -87,7 +87,7 @@ if a second substrate or a second acceptance register appears.
 **Register:** 3 — live: a firmware bit, an optional-feature install, and a host reboot are facts about one real machine ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 53](phase_53_apple_engine_bringup.md)
-**Gate:** `pb validate phase 54`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 54`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

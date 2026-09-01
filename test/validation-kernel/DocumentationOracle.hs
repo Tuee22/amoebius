@@ -455,7 +455,7 @@ establishedDocumentationTargetProblems selector =
             ( Finding
                 "DOC-INVENTORY-COUNT"
                 "documents/"
-                "governed path count differs from the authored Haskell baseline: expected=195, observed=6"
+                "governed path count differs from the authored Haskell baseline: expected=196, observed=7"
             )
             (documentationInventoryDiagnostic linkedCorpus)
         )
@@ -677,7 +677,7 @@ establishedDocumentationControlProblems selector =
                   result
                 <> expectFindingCount
                   "output aggregate selector control finding cardinality"
-                  2502
+                  2492
                   result
                 <> expectResultFieldCharacterCount
                   "output aggregate selector control cardinality"
@@ -769,7 +769,7 @@ productionCorpusProblems = do
             <> expectObservation
               "independent production paragraph-spanning over-target count"
               "prose-budget.sentence-over-target-count"
-              "1614"
+              "1618"
               result
             <> expectObservation
               "independent production severe-sentence count"
@@ -784,7 +784,7 @@ productionCorpusProblems = do
             <> expectObservation
               "independent production over-target paragraph count"
               "prose-budget.paragraph-over-target-count"
-              "664"
+              "668"
               result
             <> findingManifestProblems
               expectedProductionFindingCounts
@@ -800,10 +800,10 @@ ancestors path = path : if parent == path then [] else ancestors parent
   parent = takeDirectory path
 
 expectedProductionGovernedCount :: Text
-expectedProductionGovernedCount = "195"
+expectedProductionGovernedCount = "196"
 
 expectedProductionGovernedPathDigest :: Text
-expectedProductionGovernedPathDigest = "51c38807d39526404f678c6a89ccaf6210ff91d7b17d4cde7989f1bc2a9e55f2"
+expectedProductionGovernedPathDigest = "8e9efb1fce225cb97f26ddf7c6256210ec2113354825966624480f5610036ba7"
 
 -- These are open residue, not accepted validation evidence. The exact count
 -- vector prevents an unrecognized code from replacing a declared class; the
@@ -811,17 +811,10 @@ expectedProductionGovernedPathDigest = "51c38807d39526404f678c6a89ccaf6210ff91d7
 expectedProductionFindingCounts :: [(Text, Int)]
 expectedProductionFindingCounts =
   [ ("DOC-CORPUS-DIAGNOSTIC-ONLY", 1)
-  , ("PLAN-GATE-UNRESOLVED", 1728)
-  , ("PLAN-RESOURCE-CONTRACT-GAP", 385)
-  , ("PLAN-RESOURCE-DIAGNOSTIC-ONLY", 1)
-  , ("PLAN-RESOURCE-JOIN-DIAGNOSTIC-ONLY", 1)
-  , ("PLAN-SEMANTIC-CONTRACT-GAP", 18)
-  , ("PLAN-SEMANTIC-JOIN-DIAGNOSTIC-ONLY", 1)
-  , ("PLAN-SEMANTIC-MARKDOWN-DIAGNOSTIC-ONLY", 1)
   ]
 
 expectedProductionFindingManifestSha256 :: Text
-expectedProductionFindingManifestSha256 = "9431c940540f3f81c51aa74f2dd9b23ccf39e277e43ef6820e0f11712b522b34"
+expectedProductionFindingManifestSha256 = "9e96fd54e625ee1e2994783c2b74cf51c8fa7462cc1ae0acc9f79cfb07713b8f"
 
 findingManifestProblems :: [(Text, Int)] -> Text -> [Finding] -> [String]
 findingManifestProblems expectedCounts expectedDigest findings =
@@ -1071,7 +1064,7 @@ outputEnvelopeProblems =
         totalBoundaryResult
     , expectFindingCount
         "exact output aggregate boundary remains below the finding ceiling"
-        2502
+        2492
         totalBoundaryResult
     , expectResultFieldCharacterCount
         "exact output aggregate boundary"
@@ -1137,11 +1130,11 @@ outputFieldTarget over =
   targetLength = 8192 + (if over then 1 else 0) - Text.length outputFieldDetailPrefix
   extension = ".md"
 
--- Add 250 empty governed documents. Each independently contributes exactly
+-- Add 249 empty governed documents. Each independently contributes exactly
 -- ten header findings: title, Purpose, Read-this-if, details presence, header
 -- order, metadata-block order, and four metadata-field cardinalities. With
 -- one missing-link finding and the permanent refusal, the final count is
--- 2,502. Only the missing-link target changes in the first-over case, and it
+-- 2,492. Only the missing-link target changes in the first-over case, and it
 -- appears in exactly one finding detail, so that attack adds one character.
 outputTotalBoundaryCorpus :: Bool -> [(FilePath, Text)]
 outputTotalBoundaryCorpus over =
@@ -1153,7 +1146,7 @@ outputTotalBoundaryCorpus over =
     )
     ( unlinkedCorpus
         <> [ (fixedLengthOutputDocumentPath outputTotalCommonPathLength ordinal, "")
-           | ordinal <- [(1 :: Int) .. 250]
+           | ordinal <- [(1 :: Int) .. 249]
            ]
     )
 
@@ -1174,10 +1167,10 @@ fixedLengthOutputTarget wantedLength ordinal =
   padding = wantedLength - length prefix - length suffix
 
 outputTotalCommonPathLength :: Int
-outputTotalCommonPathLength = 726
+outputTotalCommonPathLength = 729
 
 outputTotalSpecialTargetLength :: Int
-outputTotalSpecialTargetLength = 986
+outputTotalSpecialTargetLength = 1898
 
 outputBoundarySentence :: Text
 outputBoundarySentence = Text.unwords (replicate 45 "x" <> ["x."])
@@ -1597,6 +1590,13 @@ documentationCorpus includeLink =
     )
   , ("AGENTS.md", governedDocument "Agent Instructions" "Agent policy." "CLAUDE.md" "## Rules\n\nAgent rules live here.")
   , ("CLAUDE.md", "@AGENTS.md\n")
+  , ( "CRASH_SUMMARY.md"
+    , governedDocument
+        "Historical Compiler Crash"
+        "Preserve one operational failure record."
+        "none"
+        "## Evidence\n\nThe synthetic historical record is structurally governed."
+    )
   , ( policyPath
     , governedDocument
         "Target Policy"

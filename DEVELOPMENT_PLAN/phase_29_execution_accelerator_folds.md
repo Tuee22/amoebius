@@ -30,11 +30,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ⏸️](#sprint-291-execution-epoch-expansion--scheduler-reservation-algebra-)
-- [Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ⏸️](#sprint-292-kubeletcri-runtime-metadata--node-local-oci-contentsnapshotimage--physical-disk-parent-accounting-)
-- [Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ⏸️](#sprint-293-accelerator-residencynet-allocatable-vram--provider-root-disk-template--enginebuildetcdmonitoring-compute-)
-- [Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ⏸️](#sprint-294-the-composed-full-resource-vector-place-witness--properties--independent-validator--per-axis-mutants-)
-- [Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ⏸️](#sprint-295-the-executionacceleratorprovider-root-fold-negative-corpus--the-composed-gate-)
+- [Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra](#sprint-291-execution-epoch-expansion--scheduler-reservation-algebra-)
+- [Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting](#sprint-292-kubeletcri-runtime-metadata--node-local-oci-contentsnapshotimage--physical-disk-parent-accounting-)
+- [Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute](#sprint-293-accelerator-residencynet-allocatable-vram--provider-root-disk-template--enginebuildetcdmonitoring-compute-)
+- [Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants](#sprint-294-the-composed-full-resource-vector-place-witness--properties--independent-validator--per-axis-mutants-)
+- [Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate](#sprint-295-the-executionacceleratorprovider-root-fold-negative-corpus--the-composed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -140,7 +140,7 @@ names the refusing axis. It observes no device, host, provider, or cluster.
 **Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 28](phase_28_storage_geometry_folds.md)
-**Gate:** `pb validate phase 29`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 29`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

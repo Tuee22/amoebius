@@ -28,11 +28,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 51.1: The closed substrate algebra ⏸️](#sprint-511-the-closed-substrate-algebra-)
-- [Sprint 51.2: Install steps as typed data ⏸️](#sprint-512-install-steps-as-typed-data-)
-- [Sprint 51.3: The reconciler table ⏸️](#sprint-513-the-reconciler-table-)
-- [Sprint 51.4: The probe-first ensure driver ⏸️](#sprint-514-the-probe-first-ensure-driver-)
-- [Sprint 51.5: The lift fold to argv ⏸️](#sprint-515-the-lift-fold-to-argv-)
+- [Sprint 51.1: The closed substrate algebra](#sprint-511-the-closed-substrate-algebra-)
+- [Sprint 51.2: Install steps as typed data](#sprint-512-install-steps-as-typed-data-)
+- [Sprint 51.3: The reconciler table](#sprint-513-the-reconciler-table-)
+- [Sprint 51.4: The probe-first ensure driver](#sprint-514-the-probe-first-ensure-driver-)
+- [Sprint 51.5: The lift fold to argv](#sprint-515-the-lift-fold-to-argv-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -86,7 +86,7 @@ second substrate appears.
 **Register:** 2 — boundary-with-fakes: the claim is about tool resolution and emitted argv, not about a value ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 50](phase_50_host_assert_cli.md)
-**Gate:** `pb validate phase 51`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 51`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

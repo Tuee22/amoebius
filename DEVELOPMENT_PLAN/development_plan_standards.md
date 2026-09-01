@@ -100,8 +100,10 @@ aliases from arbitrary prose or filenames. The general documentation checker may
 orientation metadata, headings, links, and anchors. It also applies a basename-substring
 register-cardinality diagnostic and a case-folded forbidden-archive-basename content diagnostic; those are
 documentation findings, not legacy semantic findings. A closed Haskell legacy inventory owns identities,
-owners, observation bindings, closure bindings, and required reintroduction-case identities. An owning
-analyzer must later qualify the corresponding negative before retirement; neither structural seam may
+owners, observation bindings, closure bindings, and required reintroduction-case identities. At the owner, a
+zero is admissible only with opaque execution evidence binding the same row and source snapshot to the exact
+canonical case set and qualifying transcript. An owning analyzer must later qualify the corresponding negative
+before retirement; neither structural seam may
 interpret a Markdown row, cell, count, ID spelling, owner phrase, or predicate-shaped string as legacy
 semantics or use it in an executable closure verdict.
 The documentation gate owns structural correspondence between the two surfaces; semantic discrepancies are
@@ -124,12 +126,13 @@ At this reset, Phase 0 is `🔄 Active — NOT VALIDATED`; every later numbered 
 `⏸️ Blocked — NOT VALIDATED` pending its immediate predecessor's gate pass. No prior completion claim or
 earlier status survives as a current result.
 
-The current phase-status line and the `**Gate:**` summary line are raw, one-line, exact fields and each occurs
-once. A substring such as `Validated — NOT VALIDATED`, a second bare status marker, another `**Status**:` field,
-or a canonical-looking copy supplied through a fence, HTML comment, or physical line wrap is a defect. Sprint
-sections likewise contain exactly one current `**Status**:` field and no additional bare current-status marker.
-Historical status is described only as explicitly invalidated prose; it is never restated as a second status
-field or bare marker.
+The current phase-status line is a raw, one-line, exact field and occurs once. The `**Gate:**` summary is a
+separate immutable command/link field: it never carries status or result prose, so recording a pass cannot make
+the summary contradict the phase status or require it to join the status projection. A substring such as
+`Validated — NOT VALIDATED`, a second bare status marker, another `**Status**:` field, or a canonical-looking
+copy supplied through a fence, HTML comment, or physical line wrap is a defect. Sprint sections likewise
+contain exactly one current `**Status**:` field and no additional bare current-status marker. Historical status
+is described only as explicitly invalidated prose; it is never restated as a second status field or bare marker.
 
 Contract specification, candidate observation, and status recording are distinct state spaces. An authored gate cell
 uses `UNRESOLVED` only when its required specification is incomplete. It must not use `MISSING` to stand for a
@@ -141,8 +144,10 @@ among these states: the compiled Haskell registry and captured observations do.
 
 A status update is the mechanical status-only projection produced after the exact current phase gate passes. The
 gate binds the source snapshot it tested and permits only the tracker, phase, and sprint status fields named by
-that result to change. A human, agent, or CI job may apply that projection. Any
-other byte change creates a new candidate and requires the gate to run again.
+that result to change. The one contiguous frontier advances with the pass: the closing phase and all of its
+sprints become Done, and its immediate successor plus that successor's first sprint become Active when one
+exists; every later phase remains Blocked. A human, agent, or CI job may apply that projection. Any other byte
+change creates a new candidate and requires the gate to run again.
 
 ---
 
@@ -169,7 +174,7 @@ Every `phase_NN_<slug>.md` uses this order:
 **Register:** <— | 1 | 2 | 3>
 **Depends on:** <the exact linked immediate numeric predecessor only, or genesis for Phase 0; additional earlier dependencies belong in typed contract/prose rather than this structural field>
 **Forward-deferred:** <conditional; each later-owned capability this phase names, with its owner and residue tag>
-**Gate:** `pb validate phase NN`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase NN`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 <the exact §M table; required>
@@ -183,8 +188,9 @@ Every `phase_NN_<slug>.md` uses this order:
 ## Related Documents
 ```
 
-The six unconditional Phase Summary fields are required, closed, and ordered exactly as shown. The Gate line
-is a future public-command target, not an assertion that it exists, runs, or passes.
+The six unconditional Phase Summary fields are required, closed, and ordered exactly as shown. The immutable
+Gate line is a future public-command target, not an assertion that it exists, runs, or passes; status belongs
+only to the tracker, phase-status line, sprint headings, and sprint status fields.
 
 `Forward-deferred:` is the one conditional field, placed exactly between `Depends on:` and `Gate:`. It is
 present when and only when the phase names an artefact a later phase owns, and it carries that owner's
@@ -468,6 +474,13 @@ projections, and exact boundary/one-over results rather than production construc
 shared expected lists. A green diagnostic that violates this shape is a gate defect and cannot be retained as
 candidate evidence.
 
+An execution attempt cannot supply both its evidence and the contract used to declare that evidence complete.
+The expected target/operator/result/control registry is a distinct acquired authority joined to exact source and
+build inputs. A process-backed claim retains one opaque bounded supervisor receipt from opened executable identity
+through argv/environment policy, complete stdout/stderr capture, termination, parsing, cleanup, and fresh run
+challenge; digest-shaped transcript fields or a `CheckResult` wrapped in a caller-nominated run identity are
+diagnostic data only.
+
 The full rule is in
 [`development_plan_gate_integrity.md` §M](development_plan_gate_integrity.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
 
@@ -504,7 +517,9 @@ Plan documents inherit the shape, orientation, prose, and diagram rules in
 2. field values stay brief and move detail to the owned section;
 3. the Gate line is the canonical command plus Gate-integrity link, not a result narrative;
 4. one deliverable appears per bullet; and
-5. current requirements and invalidated history never share an unbounded paragraph.
+5. current requirements and invalidated history never share an unbounded paragraph; and
+6. Contents navigation labels omit status markers, so the one current sprint heading remains the only
+   heading-marker projection target.
 
 ---
 

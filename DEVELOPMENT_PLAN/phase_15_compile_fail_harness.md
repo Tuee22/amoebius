@@ -29,8 +29,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 15.1: Structured diagnostic and twin contract ⏸️](#sprint-151-structured-diagnostic-and-twin-contract-)
-- [Sprint 15.2: Claim inventory and mutation evidence ⏸️](#sprint-152-claim-inventory-and-mutation-evidence-)
+- [Sprint 15.1: Structured diagnostic and twin contract](#sprint-151-structured-diagnostic-and-twin-contract-)
+- [Sprint 15.2: Claim inventory and mutation evidence](#sprint-152-claim-inventory-and-mutation-evidence-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -74,7 +74,7 @@ must fail. NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 14](phase_14_refinement_checker.md)
-**Gate:** `pb validate phase 15`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 15`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

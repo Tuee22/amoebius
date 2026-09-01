@@ -222,7 +222,7 @@ canonicalSnapshot =
 expectedRequiredFacts :: [RequiredCompilerFact]
 expectedRequiredFacts =
   [ CompilerParseSucceeded
-  , ConditionalPreprocessingAbsent
+  , ConditionalPreprocessingClosed
   , CompileTimeExecutionFeaturesAbsent
   , ImportsRenamed
   , CallsResolved
@@ -433,7 +433,7 @@ renderUse use = case use of
 renderFact :: RequiredCompilerFact -> Text
 renderFact fact = case fact of
   CompilerParseSucceeded -> "CompilerParseSucceeded"
-  ConditionalPreprocessingAbsent -> "ConditionalPreprocessingAbsent"
+  ConditionalPreprocessingClosed -> "ConditionalPreprocessingClosed"
   CompileTimeExecutionFeaturesAbsent -> "CompileTimeExecutionFeaturesAbsent"
   ImportsRenamed -> "ImportsRenamed"
   CallsResolved -> "CallsResolved"

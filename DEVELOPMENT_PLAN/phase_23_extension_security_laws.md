@@ -30,7 +30,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 23.1: The security laws S1-S6 ⏸️](#sprint-231-the-security-laws-s1-s6-)
+- [Sprint 23.1: The security laws S1-S6](#sprint-231-the-security-laws-s1-s6-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -74,7 +74,7 @@ NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 22](phase_22_extension_laws_compositional.md)
-**Gate:** `pb validate phase 23`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 23`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

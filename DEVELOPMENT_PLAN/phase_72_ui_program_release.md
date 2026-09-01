@@ -28,7 +28,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 72.1: Release immutable UI plans without rebuilding the runtime ⏸️](#sprint-721-release-immutable-ui-plans-without-rebuilding-the-runtime-)
+- [Sprint 72.1: Release immutable UI plans without rebuilding the runtime](#sprint-721-release-immutable-ui-plans-without-rebuilding-the-runtime-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -75,7 +75,7 @@ schema migration, amoebius runtime image build, or independently useful second c
 
 **Register:** 3 (live infrastructure)
 **Depends on:** [Phase 71](phase_71_release_lifecycle.md)
-**Gate:** `pb validate phase 72`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 72`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

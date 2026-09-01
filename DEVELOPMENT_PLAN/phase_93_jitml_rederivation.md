@@ -30,7 +30,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 93.1: Produce one pointer-committed jitML artifact on CUDA ⏸️](#sprint-931-produce-one-pointer-committed-jitml-artifact-on-cuda-)
+- [Sprint 93.1: Produce one pointer-committed jitML artifact on CUDA](#sprint-931-produce-one-pointer-committed-jitml-artifact-on-cuda-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -108,7 +108,7 @@ suite, one live evidence reader, and one aggregate command; no Phase-94 presenta
 
 **Register:** 3 (live infrastructure)
 **Depends on:** [Phase 92](phase_92_infernix_ui_rederivation.md)
-**Gate:** `pb validate phase 93`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 93`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

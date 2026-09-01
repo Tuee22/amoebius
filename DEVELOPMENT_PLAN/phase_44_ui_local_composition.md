@@ -26,7 +26,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate ⏸️](#sprint-441-single-multi-tenant-workflow-to-artifact-composition-gate-)
+- [Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate](#sprint-441-single-multi-tenant-workflow-to-artifact-composition-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -62,7 +62,7 @@ infrastructure. Any external-language encoding or fake executable is generated r
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 **Register:** 2 — boundary integration with fakes.
 **Depends on:** [Phase 43](phase_43_ui_server_boundary.md)
-**Gate:** `pb validate phase 44`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 44`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

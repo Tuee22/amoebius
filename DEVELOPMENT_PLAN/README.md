@@ -186,33 +186,37 @@ The current audit makes no validation attribution.
 
 | Phase(s) | Current classification | Meaning |
 |---|---|---|
-| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and component oracles exist. The typed policy contract, closed legacy lifecycle/analyzer dispatch, exact local snapshot capture/recheck, one-file static `pb` grammar, compiler/consumer adapters, gate-pass decision, and typed phase/resource registries are present. The structural and component brackets remain diagnostic-only; qualification, clean-room execution, evidence integration, contract resolution, legacy closure, and the complete integrated gate run remain open. |
+| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and component oracles exist. The typed policy contract, closed legacy lifecycle/analyzer dispatch with fail-closed reintroduction-witness binding, exact local snapshot capture/recheck, one-file static `pb` grammar, branch-specific compiler success/refusal/fixture evidence schema, closed qualification case/control contract, closed runner selection, opaque acquired Phase-0 subject, snapshot-bound phase-contract evidence, durable acquired-evidence publication/recheck, hidden gate-pass authority, recoverable status projection, and typed phase/resource registries are present. The structural and component brackets remain diagnostic-only; authenticated compiler/elaboration/process producers, execution-derived qualification and legacy witnesses, clean-room execution, complete row-specific evidence, legacy closure, integrated lifecycle qualification, and the complete gate run remain open. |
 | 1–95 | **Observed footprint / Known partial — NOT VALIDATED** | Existing files and historical run material are migration input only; each phase is blocked behind its numerical predecessor's gate pass. |
 
-The 2026-08-23 inspection reran `cabal build lib:validation-kernel test:validation-kernel-component` and the
-clean `cabal test validation-kernel-component` aggregate after connecting the source-debt, source-consumer,
-compiler-component, compiler-graph, and one-file `pb` grammar modules. All fourteen then-named component oracles
-executed and reported their diagnostic expectations met. The aggregate runner now contains seventeen oracles
-after `PhaseContractInternalOracle` moved to its own `validation-phase-contract-internal-component` suite; the
-2026-08-26 aggregate reached every then-registered oracle and all eighteen reported their bounded diagnostic
-expectations met after the documentation-header repair. Earlier policy and
-legacy changed-production runs are stale wherever their production/oracle subjects changed; the current
-clean-plus-twenty legacy matrix and the integrated source/compiler/bootstrap/semantic mutant matrix must be
-rerun before candidate preparation. Supporting
-focused mutant observations are compilation and component diagnostics only, never validation or a complete
-gate result. A dirty worktree is admissible only when the gate captures and tests its exact bytes and rejects
-any mid-run change; the dispatcher now provides that local capture/recheck path, but it has only component-level
-coverage rather than an integrated qualified gate run. The dispatcher also carries explicit fail-closed findings for unexecuted qualification,
-missing complete gate execution, missing external clean-room observation, and missing evidence
-integration. The evidence schema also lacks closed typed command, toolchain, substrate, run, and cleanup
-fields. In addition, all 96 phase contracts contain 1,728 exact-prefix `UNRESOLVED` gate cells. The former 92 generic `MISSING`
-predecessor cells now specify typed `ImmediatePredecessorPass` inputs and leave result availability to
-candidate observation; this specification correction supplies no gate pass or validation. All 270 sprint
-sections now carry the exact ordered reset schema and immediate blocker edge. Unknown implementation, oracle,
-validation, legacy, and documentation bindings remain explicit `UNRESOLVED` values, and no structural rewrite
-claims their semantics are complete. The compiled phase-semantic/resource registry and its independent oracle
-are under adversarial integration testing; every remaining gap and missing complete gate result keeps the
-Phase-0 gate refusing.
+The dated 2026-08-23 and 2026-08-26 component runs remain historical diagnostics and are invalid wherever their
+production or oracle subjects changed. The aggregate runner source now names twenty-one component oracles; the
+separate phase-contract-internal suite runs acquired-evidence/gate-pass, status-projection, and phase-contract
+internal oracles. Current focused checks establish bounded, no-replace, content-addressed candidate publication;
+descriptor-bounded readback and synchronization; repository/directory/file identity binding; byte tamper and
+replacement-inode refusal; source-derived frontier classification; and fd-relative atomic leaf exchange with
+independent-byte preservation. Status diagnostics also cover bounded descriptor-relative journal discovery,
+finalization, pruning, replacement/symlink/rebinding adversaries, and injected finalization/recovery cutpoints.
+They do not establish a complete green token or qualified phase gate.
+
+A dirty worktree is admissible only when the gate captures and tests its exact bytes and rejects any mid-run
+change. The dispatcher provides that local capture/recheck path, closed runner selection, durable publication,
+hidden verification/authorization, one repository lock, startup recovery, and a journaled serial status
+projection. The three-file transition is recoverable rather than atomic, Windows mutation fails closed, and the
+real lock-contention, receipt-through-application, and actually interrupted full-projection recovery lifecycle is
+not yet qualified. The dispatcher deliberately
+records absent contract/subject/oracle/harness/observer/qualification and execution-context identities, mostly
+unverified rows, and explicit residue, so no verified token can currently be minted. The compiled semantic
+corpus has 1,728 total slots: Phase 0 has eighteen bound specifications and Phases 1–95 retain 1,710 exact-prefix
+`UNRESOLVED`/`ContractGap` cells. All 270 sprint sections carry the ordered reset schema and immediate blocker
+edge. Every remaining gap and missing complete gate result keeps Phase 0 refusing; no status changed.
+
+On 2026-08-31 the exact source-bound Haskell dispatcher was invoked directly with `validate phase 00`. It
+durably published and reacquired a candidate and then refused it, with genesis present, because authenticated
+compiler/toolchain/process producers, execution-derived qualification and legacy witnesses, independent
+oracle/clean-room observation, complete identities/context and rows, and residue cleanup are still absent. This
+was the complete current gate attempt, not a pass or a status transition; Phase 0 remains NOT VALIDATED and
+Phase 1 remains blocked.
 
 The 2026-08-26 serialized diagnostic restored the two exact pinned source-repository inputs beneath ignored
 `.build/**`, built `lib:validation-kernel` and `test:validation-kernel-component` with one Cabal job, repaired
@@ -245,7 +249,8 @@ snapshot instead of refusing every later phase by constant. The seventeen-oracle
 phase-contract, phase-contract-internal, source-debt-internal, and compiler-source-graph-acquired suites all
 report their bounded expectations met after their independent expectations were re-authored. This changes what
 the kernel can express, not what has been observed: it is not qualification, clean-room observation, candidate
-evidence, or a gate run, no semantic slot is bound, and every phase and sprint status is unchanged.
+evidence, or a gate run. At that checkpoint no semantic slot was bound, and every phase and sprint status was
+unchanged.
 
 Capability-by-capability target ownership remains in the linked phase contracts and the target-only
 [system_components.md](system_components.md). Current divergence identity, ownership, and closure are typed

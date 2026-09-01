@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.SourceClosure.Internal
-  ( AcquiredSourceSnapshot (..)
+  ( AcquiredSourceSnapshot
   , ClassifiedPath (..)
   , GitExecutable
   , GitObjectFormat (..)
@@ -25,6 +25,7 @@ module Amoebius.Validation.SourceClosure.Internal
   , classifySnapshot
   , checkGitReportedWorkspaceDiagnostic
   , combineRawExecutableBitsDiagnostic
+  , computeBlobObjectId
   , computeSourceSnapshotIdentity
   , closurePaths
   , closurePbBootstrapDiagnostic
@@ -40,6 +41,7 @@ module Amoebius.Validation.SourceClosure.Internal
   , parseLsFilesStage
   , parseLsFilesTaggedStage
   , parseLsFilesTaggedPaths
+  , pbTrackedFilesFromSnapshot
   , registeredSourceIds
   , repositoryHeadBoundaryProblemsDiagnostic
   , renderSnapshotProblem
@@ -55,17 +57,12 @@ module Amoebius.Validation.SourceClosure.Internal
 import Amoebius.Validation.PbBootstrapGrammar qualified as Pb
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
 import Amoebius.Validation.SourceSnapshot.Internal
-  ( AcquiredSourceSnapshot (..)
-  , GitObjectFormat (..)
+  ( GitObjectFormat (..)
   , IndexEntry (..)
   , IndexMode (..)
   , SourceSnapshot (..)
   , TrackedEntry (..)
-  , acquiredSourceSnapshot
   )
-#if defined(VALIDATION_SOURCE_CLOSURE_INTERNAL_TEST_ACQUIRE)
-import Amoebius.Validation.SourceSnapshot.Internal qualified as SourceSnapshot
-#endif
 import Amoebius.Validation.Types
   ( CheckResult (..)
   , Finding (..)
@@ -2259,12 +2256,21 @@ data WorktreeEntryKind
   | WorktreeOther
   deriving (Eq, Ord, Show)
 
+-- | Marker for a snapshot acquired through this module's exact local Git and
+-- worktree capture. The constructor is module-private; no sibling home module
+-- can upgrade a caller-authored diagnostic snapshot into candidate evidence.
+newtype AcquiredSourceSnapshot = AcquiredSourceSnapshot SourceSnapshot
+  deriving (Eq, Show)
+
+acquiredSourceSnapshot :: AcquiredSourceSnapshot -> SourceSnapshot
+acquiredSourceSnapshot (AcquiredSourceSnapshot snapshot) = snapshot
+
 #if defined(VALIDATION_SOURCE_CLOSURE_INTERNAL_TEST_ACQUIRE)
 -- This constructor exists only when the Cabal-owned direct-source internal
 -- Graph oracle compiles the exact home-module tree.  It is absent from the
 -- packaged validation-kernel library and cannot cross either public facade.
 sourceClosureInternalTestAcquire :: SourceSnapshot -> AcquiredSourceSnapshot
-sourceClosureInternalTestAcquire = SourceSnapshot.AcquiredSourceSnapshot
+sourceClosureInternalTestAcquire = AcquiredSourceSnapshot
 #endif
 
 data WorktreeEntryObservation = WorktreeEntryObservation
@@ -3449,15 +3455,11 @@ classifySnapshot snapshot =
     pbAdmission
   where
     initiallyClassified = map classifyEntry (snapshotEntries snapshot)
-    pbEntries =
-      [ toPbTrackedFile entry
-      | entry <- snapshotEntries snapshot
-      , under canonicalPbRoot (pathOf entry)
-      ]
+    pbEntries = pbTrackedFilesFromSnapshot snapshot
     pbAdmission = Pb.pbBootstrapGrammarDiagnostic pbEntries
     -- A caller-supplied refusal diagnostic is not source-binding authority.
-    -- The bounded pb exception remains registered migration debt until a
-    -- package-hidden local snapshot boundary can consume it.
+    -- The package-hidden acquired boundary separately consumes the same raw
+    -- snapshot bytes through the candidate grammar entry point.
     paths = initiallyClassified
     duplicateProblems = map DuplicateTrackedPath (duplicates (map pathOf (snapshotEntries snapshot)))
     pathOf = indexPath . trackedIndex
@@ -3484,6 +3486,16 @@ toPbTrackedFile entry =
   )
  where
   indexed = trackedIndex entry
+
+-- | Exact raw bootstrap inventory projected from a source snapshot. This is
+-- package-hidden so the acquired source-debt boundary can run the candidate
+-- grammar without exposing an admission constructor publicly.
+pbTrackedFilesFromSnapshot :: SourceSnapshot -> [(FilePath, Text, ByteString)]
+pbTrackedFilesFromSnapshot snapshot =
+  [ toPbTrackedFile entry
+  | entry <- snapshotEntries snapshot
+  , under canonicalPbRoot (indexPath (trackedIndex entry))
+  ]
 
 rawPbPath :: FilePath -> FilePath
 #if defined(VALIDATION_SOURCE_CLOSURE_PB_INPUT_PATH_ROUTE_MUTANT)
@@ -4120,6 +4132,8 @@ rawGovernedDocumentationPath ordinal path
   | ordinal == 194 = "documents/renamed_program.md"
 #elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_195_RETENTION_MUTANT)
   | ordinal == 195 = "documents/renamed_program.md"
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_196_RETENTION_MUTANT)
+  | ordinal == 196 = "documents/renamed_program.md"
 #endif
   | otherwise = ordinal `seq` path
 
@@ -4129,6 +4143,7 @@ canonicalGovernedDocumentationPaths =
     ( zipWith rawGovernedDocumentationPath [1 ..]
     [ "AGENTS.md"
     , "CLAUDE.md"
+    , "CRASH_SUMMARY.md"
     , "DEVELOPMENT_PLAN/README.md"
     , "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
     , "DEVELOPMENT_PLAN/development_plan_phase_model.md"

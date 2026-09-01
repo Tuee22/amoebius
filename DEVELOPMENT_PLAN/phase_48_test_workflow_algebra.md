@@ -26,11 +26,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 48.1: The test-topology type — a deployment-rules layer that always tears down ⏸️](#sprint-481-the-test-topology-type--a-deployment-rules-layer-that-always-tears-down-)
-- [Sprint 48.2: Pure `suggestTest` over supplied models and lazy proposal projection ⏸️](#sprint-482-pure-suggesttest-over-supplied-models-and-lazy-proposal-projection-)
-- [Sprint 48.3: Flagged-authority and test-owned tagging vocabulary ⏸️](#sprint-483-flagged-authority-and-test-owned-tagging-vocabulary-)
-- [Sprint 48.4: Phase-90 transfer for destructive cleanup and leak observation ⏸️](#sprint-484-phase-90-transfer-for-destructive-cleanup-and-leak-observation-)
-- [Sprint 48.5: Pure evidence algebra and Phase-90 failover transfer ⏸️](#sprint-485-pure-evidence-algebra-and-phase-90-failover-transfer-)
+- [Sprint 48.1: The test-topology type — a deployment-rules layer that always tears down](#sprint-481-the-test-topology-type--a-deployment-rules-layer-that-always-tears-down-)
+- [Sprint 48.2: Pure `suggestTest` over supplied models and lazy proposal projection](#sprint-482-pure-suggesttest-over-supplied-models-and-lazy-proposal-projection-)
+- [Sprint 48.3: Flagged-authority and test-owned tagging vocabulary](#sprint-483-flagged-authority-and-test-owned-tagging-vocabulary-)
+- [Sprint 48.4: Phase-90 transfer for destructive cleanup and leak observation](#sprint-484-phase-90-transfer-for-destructive-cleanup-and-leak-observation-)
+- [Sprint 48.5: Pure evidence algebra and Phase-90 failover transfer](#sprint-485-pure-evidence-algebra-and-phase-90-failover-transfer-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -71,7 +71,7 @@ typed teardown continuation, and `suggestTest` is a pure proposal function over 
 
 **Register:** 1 target only; live execution, cleanup, and evidence remain UNVERIFIED.
 **Depends on:** [Phase 47](phase_47_tool_and_mutant_generation.md)
-**Gate:** `pb validate phase 48`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 48`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

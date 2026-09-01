@@ -28,11 +28,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ⏸️](#sprint-261-the-amoebius-cabal-package--gadt-decode-spec-test-suite-skeleton-)
-- [Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ⏸️](#sprint-262-gadt-indexed-ir--smart-constructors--phantom-tenant-refs--ownership-indices-)
-- [Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ⏸️](#sprint-263-the-fail-closed-decoder-dhallinputfile-auto--exception-catch--structured-decodeerror-)
-- [Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ⏸️](#sprint-264-the-gadt-decode-decode-battery-gadt-decode-spec--the-gate-)
-- [Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ⏸️](#sprint-265-decoding-the-shared-secretref-and-rejecting-a-literal-)
+- [Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton](#sprint-261-the-amoebius-cabal-package--gadt-decode-spec-test-suite-skeleton-)
+- [Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices](#sprint-262-gadt-indexed-ir--smart-constructors--phantom-tenant-refs--ownership-indices-)
+- [Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError`](#sprint-263-the-fail-closed-decoder-dhallinputfile-auto--exception-catch--structured-decodeerror-)
+- [Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate](#sprint-264-the-gadt-decode-decode-battery-gadt-decode-spec--the-gate-)
+- [Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal](#sprint-265-decoding-the-shared-secretref-and-rejecting-a-literal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -118,7 +118,7 @@ never a partial result. Generated Dhall/protocol bytes stay beneath `.build/**`;
 **Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 25](phase_25_dhall_schema_generation.md)
-**Gate:** `pb validate phase 26`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 26`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 68.1: Live scoped request and provider-isolation gate ⏸️](#sprint-681-live-scoped-request-and-provider-isolation-gate-)
+- [Sprint 68.1: Live scoped request and provider-isolation gate](#sprint-681-live-scoped-request-and-provider-isolation-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -63,7 +63,7 @@ independently useful provider feature is required.
 **Lane:** `linux-cpu/amd64`.
 **Register:** 3 — live real-authority isolation; NOT VALIDATED.
 **Depends on:** [Phase 67](phase_67_pulsar_client.md)
-**Gate:** `pb validate phase 68`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 68`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

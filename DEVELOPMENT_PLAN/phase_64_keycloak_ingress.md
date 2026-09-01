@@ -28,10 +28,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 64.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak ⏸️](#sprint-641-the-keycloak-owned-edge--loadbalancer--envoygateway-api--keycloak-)
-- [Sprint 64.2: No self-published wild ingress + public-edge TLS ⏸️](#sprint-642-no-self-published-wild-ingress--public-edge-tls-)
-- [Sprint 64.3: East-west NetworkPolicy posture — derived default-deny ⏸️](#sprint-643-east-west-networkpolicy-posture--derived-default-deny-)
-- [Sprint 64.4: The single-door + storage-rebind regression gate ⏸️](#sprint-644-the-single-door--storage-rebind-regression-gate-)
+- [Sprint 64.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak](#sprint-641-the-keycloak-owned-edge--loadbalancer--envoygateway-api--keycloak-)
+- [Sprint 64.2: No self-published wild ingress + public-edge TLS](#sprint-642-no-self-published-wild-ingress--public-edge-tls-)
+- [Sprint 64.3: East-west NetworkPolicy posture — derived default-deny](#sprint-643-east-west-networkpolicy-posture--derived-default-deny-)
+- [Sprint 64.4: The single-door + storage-rebind regression gate](#sprint-644-the-single-door--storage-rebind-regression-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -87,7 +87,7 @@ delete + recreate; a Register-1/2 in-process check cannot discharge it (though t
 impossibility of a self-published ingress must first receive Phase-33 and Phase-49 gate pass).
 
 **Depends on:** [Phase 63](phase_63_platform_services_2.md)
-**Gate:** `pb validate phase 64`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 64`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

@@ -29,7 +29,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 91.1: Re-derive infernix behind one scoped artifact adapter ⏸️](#sprint-911-re-derive-infernix-behind-one-scoped-artifact-adapter-)
+- [Sprint 91.1: Re-derive infernix behind one scoped artifact adapter](#sprint-911-re-derive-infernix-behind-one-scoped-artifact-adapter-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -89,7 +89,7 @@ platform capability, or creates a server/UI runtime.
 
 **Register:** 3 (live infrastructure)
 **Depends on:** [Phase 90](phase_90_test_topology_live.md)
-**Gate:** `pb validate phase 91`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 91`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

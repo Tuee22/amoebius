@@ -30,9 +30,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 62.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming ⏸️](#sprint-621-metallb-loadbalancer--minio-object-substrate--registry-s3-driver-rehoming-)
-- [Sprint 62.2: Pulsar native-protocol backbone + size-triggered S3 offload drill ⏸️](#sprint-622-pulsar-native-protocol-backbone--size-triggered-s3-offload-drill-)
-- [Sprint 62.3: The backbone HA bring-up gate ⏸️](#sprint-623-the-backbone-ha-bring-up-gate-)
+- [Sprint 62.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming](#sprint-621-metallb-loadbalancer--minio-object-substrate--registry-s3-driver-rehoming-)
+- [Sprint 62.2: Pulsar native-protocol backbone + size-triggered S3 offload drill](#sprint-622-pulsar-native-protocol-backbone--size-triggered-s3-offload-drill-)
+- [Sprint 62.3: The backbone HA bring-up gate](#sprint-623-the-backbone-ha-bring-up-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -115,7 +115,7 @@ the future contract requires real cluster bring-up and independent runtime obser
 may classify only that bounded observation as *tested*, never *proven*, and has no ability to set status.
 
 **Depends on:** [Phase 61](phase_61_vault_pki.md)
-**Gate:** `pb validate phase 62`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 62`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

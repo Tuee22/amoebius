@@ -28,7 +28,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 94.1: Bind the jitML training-to-ready-model UI adapter ⏸️](#sprint-941-bind-the-jitml-training-to-ready-model-ui-adapter-)
+- [Sprint 94.1: Bind the jitML training-to-ready-model UI adapter](#sprint-941-bind-the-jitml-training-to-ready-model-ui-adapter-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -91,7 +91,7 @@ artifact. The terminal receipt survives the loss of the UI server, the cache and
 
 **Register:** 3 (live infrastructure)
 **Depends on:** [Phase 93](phase_93_jitml_rederivation.md)
-**Gate:** `pb validate phase 94`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 94`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

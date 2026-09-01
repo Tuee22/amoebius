@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 83.1: Execute and verify the coherent UI release transition ⏸️](#sprint-831-execute-and-verify-the-coherent-ui-release-transition-)
+- [Sprint 83.1: Execute and verify the coherent UI release transition](#sprint-831-execute-and-verify-the-coherent-ui-release-transition-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -72,7 +72,7 @@ Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 82](phase_82_ui_multi_tenant_live.md)
-**Gate:** `pb validate phase 83`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 83`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

@@ -28,10 +28,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 35.1: The typed catalog and its total projection ⏸️](#sprint-351-the-typed-catalog-and-its-total-projection-)
-- [Sprint 35.2: The semantic recipe oracle ⏸️](#sprint-352-the-semantic-recipe-oracle-)
-- [Sprint 35.3: The authored channel and run-local resolution value ⏸️](#sprint-353-the-authored-channel-and-run-local-resolution-value-)
-- [Sprint 35.4: The one-architecture build argv ⏸️](#sprint-354-the-one-architecture-build-argv-)
+- [Sprint 35.1: The typed catalog and its total projection](#sprint-351-the-typed-catalog-and-its-total-projection-)
+- [Sprint 35.2: The semantic recipe oracle](#sprint-352-the-semantic-recipe-oracle-)
+- [Sprint 35.3: The authored channel and run-local resolution value](#sprint-353-the-authored-channel-and-run-local-resolution-value-)
+- [Sprint 35.4: The one-architecture build argv](#sprint-354-the-one-architecture-build-argv-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -83,7 +83,7 @@ digest-free base value, and exact argv; a live engine, build, publication, or ru
 as authority ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 34](phase_34_chain_kernel_boundary.md)
-**Gate:** `pb validate phase 35`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 35`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

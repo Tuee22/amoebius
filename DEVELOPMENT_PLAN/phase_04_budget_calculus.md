@@ -29,7 +29,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 4.1: The budget calculus ⏸️](#sprint-41-the-budget-calculus-)
+- [Sprint 4.1: The budget calculus](#sprint-41-the-budget-calculus-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -73,7 +73,7 @@ NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 3](phase_03_artifact_calculus.md)
-**Gate:** `pb validate phase 04`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 04`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

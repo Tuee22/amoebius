@@ -31,15 +31,15 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 34.1: The `Step` algebra + `chain :: cfg -> \[Step\]` builder ⏸️](#sprint-341-the-step-algebra--chain--cfg---step-builder-)
-- [Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked) ⏸️](#sprint-342-the-pure-descent--nextframeafter--foldlift-semantic-oracle-locked-)
-- [Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ⏸️](#sprint-343-renderchainplan----dry-run-byte-for-byte-render-no-live-infra-)
-- [Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate ⏸️](#sprint-344-the-semantic-plan-battery-chain-spec--the-part-a-gate-)
-- [Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton ⏸️](#sprint-345-the-single-typed-subprocess-seam--boundary-spec-skeleton-)
-- [Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ⏸️](#sprint-346-the-fake-kubectlhelmdockerpulumi-recorders-)
-- [Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ⏸️](#sprint-347-the-boundary-battery--exact-commands--applied-bytes--no-path--the-part-b-gate-)
-- [Sprint 34.8: The sanctioned-API surface — what extension source may reach ⏸️](#sprint-348-the-sanctioned-api-surface--what-extension-source-may-reach-)
-- [Sprint 34.9: extension-astcheck — the extension AST checker and the link seal ⏸️](#sprint-349-extension-astcheck--the-extension-ast-checker-and-the-link-seal-)
+- [Sprint 34.1: The `Step` algebra + `chain :: cfg -> \[Step\]` builder](#sprint-341-the-step-algebra--chain--cfg---step-builder-)
+- [Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked)](#sprint-342-the-pure-descent--nextframeafter--foldlift-semantic-oracle-locked-)
+- [Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra)](#sprint-343-renderchainplan----dry-run-byte-for-byte-render-no-live-infra-)
+- [Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate](#sprint-344-the-semantic-plan-battery-chain-spec--the-part-a-gate-)
+- [Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton](#sprint-345-the-single-typed-subprocess-seam--boundary-spec-skeleton-)
+- [Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders](#sprint-346-the-fake-kubectlhelmdockerpulumi-recorders-)
+- [Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate](#sprint-347-the-boundary-battery--exact-commands--applied-bytes--no-path--the-part-b-gate-)
+- [Sprint 34.8: The sanctioned-API surface — what extension source may reach](#sprint-348-the-sanctioned-api-surface--what-extension-source-may-reach-)
+- [Sprint 34.9: extension-astcheck — the extension AST checker and the link seal](#sprint-349-extension-astcheck--the-extension-ast-checker-and-the-link-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -111,8 +111,11 @@ Haskell gate, which owns both pure observations and generated-fake boundary obse
 Register-1 semantic-plan checks are mandatory supporting rows, not a second final gate ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 33](phase_33_render_manifest_oracles.md)
-**Forward-deferred:** [Phase 47](phase_47_tool_and_mutant_generation.md) — generated fake executables; residue `UNVERIFIED` fake provenance.
-**Gate:** `pb validate phase 34`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 34`; see [Gate integrity](#gate-integrity).
+
+Phase 34 owns the bounded Haskell declarations and run-local materialization for the exact fake executables
+its boundary gate observes. [Phase 47](phase_47_tool_and_mutant_generation.md) later generalizes repository-wide
+tool, corpus, and mutant generation; it does not supply a prerequisite retroactively to this earlier phase.
 
 ## Gate integrity
 

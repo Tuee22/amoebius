@@ -29,10 +29,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ⏸️](#sprint-311-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
-- [Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️](#sprint-312-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
-- [Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️](#sprint-313-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
-- [Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ⏸️](#sprint-314-the-provision-seal-propertycorpus--the-register-1-gate-)
+- [Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`)](#sprint-311-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
+- [Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion](#sprint-312-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
+- [Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation](#sprint-313-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
+- [Sprint 31.4: The provision-seal property/corpus + the Register-1 gate](#sprint-314-the-provision-seal-propertycorpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -112,7 +112,7 @@ observation-shaped value. The phase does not establish that the value was observ
 inventory, provider realization, and engine resolution remain UNVERIFIED live-band obligations.
 
 **Depends on:** [Phase 30](phase_30_capability_bind.md)
-**Gate:** `pb validate phase 31`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 31`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

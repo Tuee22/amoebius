@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 86.1: Gate encrypted blob replay and isolation ⏸️](#sprint-861-gate-encrypted-blob-replay-and-isolation-)
+- [Sprint 86.1: Gate encrypted blob replay and isolation](#sprint-861-gate-encrypted-blob-replay-and-isolation-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -67,7 +67,7 @@ peer-to-peer transfer are out of scope.
 **Register:** 3 — live infrastructure.
 
 **Depends on:** [Phase 85](phase_85_offline_replay_receipts.md)
-**Gate:** `pb validate phase 86`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 86`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

@@ -28,7 +28,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 88.1: Run the offline multi-zone campaign ⏸️](#sprint-881-run-the-offline-multi-zone-campaign-)
+- [Sprint 88.1: Run the offline multi-zone campaign](#sprint-881-run-the-offline-multi-zone-campaign-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -71,7 +71,7 @@ does not itself run ([§L](development_plan_standards.md#l-one-substrate-discipl
 **Register:** 3 — live infrastructure.
 
 **Depends on:** [Phase 87](phase_87_offline_release_evolution.md)
-**Gate:** `pb validate phase 88`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 88`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

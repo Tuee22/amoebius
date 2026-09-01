@@ -29,10 +29,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 69.1: Three-tier content-addressed MinIO store ⏸️](#sprint-691-three-tier-content-addressed-minio-store-)
-- [Sprint 69.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA ⏸️](#sprint-692-orchestratorworker-workflow-runtime--storefetch-by-manifest-sha-)
-- [Sprint 69.3: Pulsar Failover standby takeover + leak-free teardown (gate) ⏸️](#sprint-693-pulsar-failover-standby-takeover--leak-free-teardown-gate-)
-- [Sprint 69.4: Register-2.5 workflow failover takeover under simulated fault ⏸️](#sprint-694-register-25-workflow-failover-takeover-under-simulated-fault-)
+- [Sprint 69.1: Three-tier content-addressed MinIO store](#sprint-691-three-tier-content-addressed-minio-store-)
+- [Sprint 69.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA](#sprint-692-orchestratorworker-workflow-runtime--storefetch-by-manifest-sha-)
+- [Sprint 69.3: Pulsar Failover standby takeover + leak-free teardown (gate)](#sprint-693-pulsar-failover-standby-takeover--leak-free-teardown-gate-)
+- [Sprint 69.4: Register-2.5 workflow failover takeover under simulated fault](#sprint-694-register-25-workflow-failover-takeover-under-simulated-fault-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -99,7 +99,7 @@ future bounded live validation of the otherwise substrate-agnostic CAS protocol 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 68](phase_68_user_tenant_isolation_live.md)
-**Gate:** `pb validate phase 69`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 69`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

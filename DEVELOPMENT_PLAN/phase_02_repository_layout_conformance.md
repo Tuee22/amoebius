@@ -28,12 +28,12 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 2.1: `test/`'s second level collapses to the seven role nouns ⏸️](#sprint-21-tests-second-level-collapses-to-the-seven-role-nouns-)
-- [Sprint 2.2: The package-only roots become cabal stanzas ⏸️](#sprint-22-the-package-only-roots-become-cabal-stanzas-)
-- [Sprint 2.3: Tracked UI roots enter typed deletion ownership ⏸️](#sprint-23-tracked-ui-roots-enter-typed-deletion-ownership-)
-- [Sprint 2.4: Every authored name loses its phase ordinal ⏸️](#sprint-24-every-authored-name-loses-its-phase-ordinal-)
-- [Sprint 2.5: One mutant record format, one registry ⏸️](#sprint-25-one-mutant-record-format-one-registry-)
-- [Sprint 2.6: Typed legacy bindings and the register reconcile ⏸️](#sprint-26-typed-legacy-bindings-and-the-register-reconcile-)
+- [Sprint 2.1: `test/`'s second level collapses to the seven role nouns](#sprint-21-tests-second-level-collapses-to-the-seven-role-nouns-)
+- [Sprint 2.2: The package-only roots become cabal stanzas](#sprint-22-the-package-only-roots-become-cabal-stanzas-)
+- [Sprint 2.3: Tracked UI roots enter typed deletion ownership](#sprint-23-tracked-ui-roots-enter-typed-deletion-ownership-)
+- [Sprint 2.4: Every authored name loses its phase ordinal](#sprint-24-every-authored-name-loses-its-phase-ordinal-)
+- [Sprint 2.5: One mutant record format, one registry](#sprint-25-one-mutant-record-format-one-registry-)
+- [Sprint 2.6: Typed legacy bindings and the register reconcile](#sprint-26-typed-legacy-bindings-and-the-register-reconcile-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -79,7 +79,7 @@ NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 1](phase_01_toolchain_spike.md)
-**Gate:** `pb validate phase 02`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 02`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

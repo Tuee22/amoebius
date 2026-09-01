@@ -91,17 +91,17 @@ runPhaseSemanticContractOracle =
             (semanticMutationFindings [futureCommandMutationFinding])
             futureCommandMutationResult
         , expectExactJoinResult
-            "one reset-status mutation is refused at the exact Phase-0 status locus"
+            "one current-status mutation is refused at the exact Phase-0 status locus"
             expectedJoinObservations
             (semanticMutationFindings [resetStatusMutationFinding])
             resetStatusMutationResult
         , expectExactJoinResult
-            "a tab-indented phase status is code and cannot satisfy the reset-status projection"
+            "a tab-indented phase status is code and cannot satisfy the current-status projection"
             expectedJoinObservations
             (semanticMutationFindings [tabIndentedStatusFinding])
             tabIndentedStatusResult
         , expectExactJoinResult
-            "a phase status hidden inside raw script HTML cannot satisfy the reset-status projection"
+            "a phase status hidden inside raw script HTML cannot satisfy the current-status projection"
             expectedJoinObservations
             (semanticMutationFindings [tabIndentedStatusFinding])
             rawHtmlStatusResult
@@ -517,7 +517,7 @@ phaseVector = OraclePhaseVector
 
 oraclePhaseVectors :: [OraclePhaseVector]
 oraclePhaseVectors =
-  [ phaseVector 0 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
+  [ phaseVector 0 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
   , phaseVector 1 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
   , phaseVector 2 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
   , phaseVector 3 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
@@ -685,13 +685,36 @@ expectedSemanticObservations :: [(Text, Text)]
 expectedSemanticObservations =
   [ ("semantic.phase-count", "96")
   , ("semantic.slot-count", "1728")
-  , ("semantic.gap-count", "1728")
-  , ("semantic.bound-count", "0")
+  , ("semantic.gap-count", "1710")
+  , ("semantic.bound-count", "18")
   , ("semantic.target-phase", "none")
   , ("semantic.deferred-gap-count", "0")
   , ("semantic.legacy-count", "26")
   ]
     <> [("semantic.phase", localPhaseProjection row) | row <- oraclePhases]
+    <> [("semantic.bound-slot", slot) | slot <- expectedPhaseZeroBoundSlots]
+
+expectedPhaseZeroBoundSlots :: [Text]
+expectedPhaseZeroBoundSlots =
+  [ "phase-00-claim=governed-corpus-and-source-policy-closure"
+  , "phase-00-subject=exact-source-bound-phase-zero-dispatcher"
+  , "phase-00-command=direct-pinned-offline-haskell-invocation"
+  , "phase-00-oracle=independent-phase-zero-oracle-set"
+  , "phase-00-positive-controls=closed-phase-zero-positive-corpus"
+  , "phase-00-paired-negatives=minimally-different-phase-zero-negatives"
+  , "phase-00-mutants=changed-production-mutation-matrix"
+  , "phase-00-discovery=complete-runtime-discovery-equality"
+  , "phase-00-challenge=freshness-and-independent-challenge"
+  , "phase-00-observer=raw-independent-observation"
+  , "phase-00-authority-bypass=authority-and-bypass-rejection"
+  , "phase-00-freshness=start-end-source-and-run-freshness"
+  , "phase-00-qualification=fixed-harness-qualification-corpus"
+  , "phase-00-cleanroom=run-scoped-cleanroom-and-residue-containment"
+  , "phase-00-legacy-closure=due-legacy-closure-and-reintroduction-negatives"
+  , "phase-00-predecessor=genesis-predecessor"
+  , "phase-00-residue=explicit-unverified-later-residue"
+  , "phase-00-pass-criterion=qualified-gate-pass"
+  ]
 
 expectedSemanticFindings :: [ExpectedFinding]
 expectedSemanticFindings =
@@ -703,13 +726,13 @@ expectedSemanticFindings =
        ]
 
 localSlotFindings :: OraclePhase -> [ExpectedFinding]
-localSlotFindings row = zipWith findingFor gateCategories slotMarkers
+localSlotFindings row = concat (zipWith findingFor gateCategories slotMarkers)
  where
   ordinal = oracleOrdinal row
   slotMarkers = Text.unpack (vectorSlotBitmap (oraclePhaseVectorFor ordinal))
   findingFor category marker
     | marker == 'G' =
-        ExpectedFinding
+        [ ExpectedFinding
           "PLAN-SEMANTIC-CONTRACT-GAP"
           (oraclePath row)
           ( "phase="
@@ -721,8 +744,9 @@ localSlotFindings row = zipWith findingFor gateCategories slotMarkers
               <> "-"
               <> categorySlug category
           )
+        ]
     | marker == 'D' =
-        ExpectedFinding
+        [ ExpectedFinding
           "PLAN-SEMANTIC-GATE-EVIDENCE-MISSING"
           (oraclePath row)
           ( "phase="
@@ -735,11 +759,14 @@ localSlotFindings row = zipWith findingFor gateCategories slotMarkers
               <> categorySlug category
               <> " gate-evidence=missing"
           )
+        ]
+    | marker == 'B' = []
     | otherwise =
-        ExpectedFinding
+        [ ExpectedFinding
           "ORACLE-UNEXPECTED-SLOT-MARKER"
           (oraclePath row)
           ("phase=" <> renderOrdinal ordinal <> " marker=" <> Text.singleton marker)
+        ]
 
 localPhaseProjection :: OraclePhase -> Text
 localPhaseProjection row =
@@ -792,6 +819,8 @@ expectedResourceObservations =
   , ("resource.gap-count", "385")
   , ("resource.draft-count", "0")
   , ("resource.gate-ready-count", "0")
+  , ("resource.target-phase", "none")
+  , ("resource.deferred-gap-count", "0")
   ]
     <> [ ( "resource.phase"
          , renderOrdinal ordinal
@@ -1604,10 +1633,10 @@ predecessorTrailingFinding =
     ("MALFORMED" :: Text)
 futureCommandMutationFinding =
   semanticMismatch 50 "future-command" ("pb validate phase 50" :: Text) ("pb validate phase 49" :: Text)
-resetStatusMutationFinding = semanticMismatch 0 "reset-status" activeStatus blockedStatus
+resetStatusMutationFinding = semanticMismatch 0 "current-status" activeStatus blockedStatus
 tabIndentedStatusFinding :: ExpectedFinding
 tabIndentedStatusFinding =
-  semanticMismatch 0 "reset-status" activeStatus ("MISSING" :: Text)
+  semanticMismatch 0 "current-status" activeStatus ("MISSING" :: Text)
 summaryOrderMutationFinding =
   semanticMismatch
     34
@@ -2281,8 +2310,9 @@ oracleLiteralProblems =
        | map oraclePhaseVectorFor [0 .. 95] /= oraclePhaseVectors
            || any ((== vectorOrdinal invalidOraclePhaseVector) . vectorOrdinal) oraclePhaseVectors
        ]
-    <> [ "every explicit oracle slot bitmap must contain exactly eighteen ContractGap markers"
-       | any ((/= "GGGGGGGGGGGGGGGGGG") . vectorSlotBitmap) oraclePhaseVectors
+    <> [ "the Phase-0 bitmap must be bound and every later bitmap must retain exactly eighteen ContractGap markers"
+       | vectorSlotBitmap (oraclePhaseVectorFor 0) /= "BBBBBBBBBBBBBBBBBB"
+           || any ((/= "GGGGGGGGGGGGGGGGGG") . vectorSlotBitmap) (drop 1 oraclePhaseVectors)
        ]
     <> [ "the explicit oracle stage vector must retain 50 direct, one pb-child, one fake, and 44 hardware rows"
        | Map.fromListWith (+) [(vectorStage row, 1 :: Int) | row <- oraclePhaseVectors]
@@ -2308,11 +2338,11 @@ oracleLiteralProblems =
     <> [ "oracle gate category literals must contain exactly 18 unique rows"
        | length gateCategories /= 18 || Set.size (Set.fromList gateCategories) /= 18
        ]
-    <> [ "oracle gap total must be exactly 1,728"
-       | sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 1728
+    <> [ "oracle gap total must be exactly 1,710"
+       | sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 1710
        ]
-    <> [ "oracle draft total must remain exactly zero"
-       | 1728 - sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 0
+    <> [ "oracle bound total must be exactly eighteen"
+       | 1728 - sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 18
        ]
     <> [ "oracle resource-required phase set must contain exactly 55 unique ordinals"
        | length resourceRequiredOrdinals /= 55
@@ -2327,10 +2357,10 @@ oracleLiteralProblems =
              (\row -> vectorResourceProjection row `notElem` ["required|UNRESOLVED", "not-required|ABSENT"])
              oraclePhaseVectors
        ]
-    <> [ "the frozen clean semantic and resource inventories must retain 103/102 observations and 1,729/386 findings"
-       | length expectedSemanticObservations /= 103
-           || length expectedSemanticFindings /= 1729
-           || length expectedResourceObservations /= 102
+    <> [ "the frozen semantic and resource inventories must retain 121/104 observations and 1,711/386 findings"
+       | length expectedSemanticObservations /= 121
+           || length expectedSemanticFindings /= 1711
+           || length expectedResourceObservations /= 104
            || length expectedResourceFindings /= 386
        ]
     <> [ "oracle reverse legacy map must contain exactly 26 unique IDs"

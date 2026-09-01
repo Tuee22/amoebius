@@ -27,11 +27,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 53.1: The Homebrew floor is verified, never installed ⏸️](#sprint-531-the-homebrew-floor-is-verified-never-installed-)
-- [Sprint 53.2: Colima ensured, and a frame sized from the carve ⏸️](#sprint-532-colima-ensured-and-a-frame-sized-from-the-carve-)
-- [Sprint 53.3: The provider follows the workload ⏸️](#sprint-533-the-provider-follows-the-workload-)
-- [Sprint 53.4: The ephemeral one-off and the frame that persists ⏸️](#sprint-534-the-ephemeral-one-off-and-the-frame-that-persists-)
-- [Sprint 53.5: The lifted step list and the native image ⏸️](#sprint-535-the-lifted-step-list-and-the-native-image-)
+- [Sprint 53.1: The Homebrew floor is verified, never installed](#sprint-531-the-homebrew-floor-is-verified-never-installed-)
+- [Sprint 53.2: Colima ensured, and a frame sized from the carve](#sprint-532-colima-ensured-and-a-frame-sized-from-the-carve-)
+- [Sprint 53.3: The provider follows the workload](#sprint-533-the-provider-follows-the-workload-)
+- [Sprint 53.4: The ephemeral one-off and the frame that persists](#sprint-534-the-ephemeral-one-off-and-the-frame-that-persists-)
+- [Sprint 53.5: The lifted step list and the native image](#sprint-535-the-lifted-step-list-and-the-native-image-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -79,7 +79,7 @@ appears.
 **Register:** 3 — live: a frame is created, used, and destroyed on physical hardware ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 52](phase_52_linux_engine_bringup.md)
-**Gate:** `pb validate phase 53`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 53`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

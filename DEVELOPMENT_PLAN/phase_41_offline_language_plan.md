@@ -26,9 +26,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 41.1: Author the continuity language ⏸️](#sprint-411-author-the-continuity-language-)
-- [Sprint 41.2: Compile paired offline plans ⏸️](#sprint-412-compile-paired-offline-plans-)
-- [Sprint 41.3: Seal the pure boundary ⏸️](#sprint-413-seal-the-pure-boundary-)
+- [Sprint 41.1: Author the continuity language](#sprint-411-author-the-continuity-language-)
+- [Sprint 41.2: Compile paired offline plans](#sprint-412-compile-paired-offline-plans-)
+- [Sprint 41.3: Seal the pure boundary](#sprint-413-seal-the-pure-boundary-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -65,7 +65,7 @@ deterministic paired plans, not a browser or server-storage mechanism.
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 **Register:** 1 — pure Haskell/type-level target only.
 **Depends on:** [Phase 40](phase_40_ui_plan_compiler.md)
-**Gate:** `pb validate phase 41`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 41`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

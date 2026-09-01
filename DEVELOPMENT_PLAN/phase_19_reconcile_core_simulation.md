@@ -28,9 +28,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 19.1: Pure typed decision core ⏸️](#sprint-191-pure-typed-decision-core-)
-- [Sprint 19.2: Four deterministic reconcile schedules ⏸️](#sprint-192-four-deterministic-reconcile-schedules-)
-- [Sprint 19.3: Historical protocol/gate work ⏸️](#sprint-193-protocol-correspondence-and-sealed-gate-)
+- [Sprint 19.1: Pure typed decision core](#sprint-191-pure-typed-decision-core-)
+- [Sprint 19.2: Four deterministic reconcile schedules](#sprint-192-four-deterministic-reconcile-schedules-)
+- [Sprint 19.3: Historical protocol/gate work](#sprint-193-protocol-correspondence-and-sealed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -75,7 +75,7 @@ three-valued-observation behavior under deterministic modeled schedules. NOT VAL
 **Register:** 2 — Haskell behavior against modeled boundaries only; no live correspondence claim. NOT VALIDATED.
 
 **Depends on:** [Phase 18](phase_18_dsl_formal_model.md)
-**Gate:** `pb validate phase 19`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 19`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

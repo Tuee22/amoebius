@@ -27,9 +27,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 37.1: Closed source algebra and total checker ⏸️](#sprint-371-closed-source-algebra-and-total-checker-)
-- [Sprint 37.2: Independent semantics and rejection coverage ⏸️](#sprint-372-independent-semantics-and-rejection-coverage-)
-- [Sprint 37.3: Calculus projection and phase seal ⏸️](#sprint-373-calculus-projection-and-phase-seal-)
+- [Sprint 37.1: Closed source algebra and total checker](#sprint-371-closed-source-algebra-and-total-checker-)
+- [Sprint 37.2: Independent semantics and rejection coverage](#sprint-372-independent-semantics-and-rejection-coverage-)
+- [Sprint 37.3: Calculus projection and phase seal](#sprint-373-calculus-projection-and-phase-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -75,7 +75,7 @@ browser, server, identity-provider, and storage-provider enforcement remain UNVE
 ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 36](phase_36_transaction_vocabulary.md)
-**Gate:** `pb validate phase 37`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 37`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

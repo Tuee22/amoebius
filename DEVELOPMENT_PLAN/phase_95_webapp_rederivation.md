@@ -28,7 +28,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 95.1: The multi-tenant web application re-derived ⏸️](#sprint-951-the-multi-tenant-web-application-re-derived-)
+- [Sprint 95.1: The multi-tenant web application re-derived](#sprint-951-the-multi-tenant-web-application-re-derived-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -57,7 +57,7 @@ Re-derive the multi-tenant web application as a conforming extension whose insec
 **Lane:** `linux-cpu/amd64`
 **Register:** 3
 **Depends on:** [Phase 94](phase_94_jitml_ui_rederivation.md)
-**Gate:** `pb validate phase 95`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 95`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

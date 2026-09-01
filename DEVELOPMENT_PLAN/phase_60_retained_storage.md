@@ -31,9 +31,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 60.1: The one inert `no-provisioner` StorageClass ⏸️](#sprint-601-the-one-inert-no-provisioner-storageclass-)
-- [Sprint 60.2: Deterministic retained-PV generation + the explicit bind ⏸️](#sprint-602-deterministic-retained-pv-generation--the-explicit-bind-)
-- [Sprint 60.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip ⏸️](#sprint-603-the-lossless-rebind-gate--postgres-row--minio-marker-round-trip-)
+- [Sprint 60.1: The one inert `no-provisioner` StorageClass](#sprint-601-the-one-inert-no-provisioner-storageclass-)
+- [Sprint 60.2: Deterministic retained-PV generation + the explicit bind](#sprint-602-deterministic-retained-pv-generation--the-explicit-bind-)
+- [Sprint 60.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip](#sprint-603-the-lossless-rebind-gate--postgres-row--minio-marker-round-trip-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -111,7 +111,7 @@ The live gate uses the Phase-55 single-node `kind` cluster; pure StorageClass/PV
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 59](phase_59_capacity_scheduler.md)
-**Gate:** `pb validate phase 60`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 60`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

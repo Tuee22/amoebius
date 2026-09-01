@@ -98,6 +98,13 @@ runGatePassOracle = do
               (Left GatePassBindingMalformed)
               (verifyGatePass (candidate {candidatePredecessorDigest = "phase-previous"}) passing)
           , check
+              "genesis is admitted only for Phase 00"
+              (Left GatePassPredecessorGenesisMismatch)
+              ( let laterCandidate = candidate {candidatePhase = "01", candidatePredecessorDigest = "genesis"}
+                    laterResult = passing {passPhase = "01", passPredecessorDigest = "genesis"}
+                 in verifyGatePass laterCandidate laterResult
+              )
+          , check
               "newline injection is not canonical"
               (Left GatePassBindingMalformed)
               (verify (passing {passPhase = "00\n01"}))

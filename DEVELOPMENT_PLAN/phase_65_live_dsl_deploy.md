@@ -30,10 +30,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 65.1: The control-plane daemon — a Deployment replicas=1, single-instance from k8s/etcd ⏸️](#sprint-651-the-control-plane-daemon--a-deployment-replicas1-single-instance-from-k8setcd-)
-- [Sprint 65.2: Live reconcile of the platform + a trivial app from one Haskell declaration ⏸️](#sprint-652-live-reconcile-of-the-platform--a-trivial-app-from-one-haskell-declaration-)
-- [Sprint 65.3: Phase gate harness — live deploy + the pre-cluster negative corpus as a live regression guard ⏸️](#sprint-653-phase-gate-harness--live-deploy--the-pre-cluster-negative-corpus-as-a-live-regression-guard-)
-- [Sprint 65.4: The admin REST surface — `vault init/unseal`, `dhall update`, secret KV-CRUD ⏸️](#sprint-654-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-)
+- [Sprint 65.1: The control-plane daemon — a Deployment replicas=1, single-instance from k8s/etcd](#sprint-651-the-control-plane-daemon--a-deployment-replicas1-single-instance-from-k8setcd-)
+- [Sprint 65.2: Live reconcile of the platform + a trivial app from one Haskell declaration](#sprint-652-live-reconcile-of-the-platform--a-trivial-app-from-one-haskell-declaration-)
+- [Sprint 65.3: Phase gate harness — live deploy + the pre-cluster negative corpus as a live regression guard](#sprint-653-phase-gate-harness--live-deploy--the-pre-cluster-negative-corpus-as-a-live-regression-guard-)
+- [Sprint 65.4: The admin REST surface — `vault init/unseal`, `dhall update`, secret KV-CRUD](#sprint-654-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -97,7 +97,7 @@ substrate is exercised by this phase's gate.
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 64](phase_64_keycloak_ingress.md)
-**Gate:** `pb validate phase 65`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 65`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

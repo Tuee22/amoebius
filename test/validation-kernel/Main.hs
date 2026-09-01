@@ -25,6 +25,7 @@ import QualificationOracle (runQualificationOracle)
 import SourceClosureOracle (runSourceClosureOracle)
 import SourceConsumerGraphOracle (runSourceConsumerGraphOracle)
 import SourceDebtBaselineOracle (runSourceDebtBaselineOracle)
+import StatusFrontierOracle (runStatusFrontierOracle)
 
 main :: IO ()
 main = do
@@ -63,6 +64,7 @@ componentOracles =
   , ("CapabilityGraphOracle", runCapabilityGraphOracle)
   , ("MutationCoverageOracle", runMutationCoverageOracle)
   , ("PlanRevisionOracle", runPlanRevisionOracle)
+  , ("StatusFrontierOracle", runStatusFrontierOracle)
   ]
 
 runComponentOracle :: (String, IO ()) -> IO (Maybe (String, String))

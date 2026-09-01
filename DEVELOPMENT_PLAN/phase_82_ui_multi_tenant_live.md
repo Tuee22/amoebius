@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 82.1: Live opaque tenant switching and stale-scope refusal ⏸️](#sprint-821-live-opaque-tenant-switching-and-stale-scope-refusal-)
+- [Sprint 82.1: Live opaque tenant switching and stale-scope refusal](#sprint-821-live-opaque-tenant-switching-and-stale-scope-refusal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -66,7 +66,7 @@ releasable runtime feature.
 **Lane:** `linux-cpu/amd64`.
 **Register:** 3 — live authenticated multi-tenant browser isolation; NOT VALIDATED.
 **Depends on:** [Phase 81](phase_81_ui_single_tenant_live.md)
-**Gate:** `pb validate phase 82`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 82`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

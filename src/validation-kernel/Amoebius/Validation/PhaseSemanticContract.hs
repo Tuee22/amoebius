@@ -4,12 +4,16 @@
 module Amoebius.Validation.PhaseSemanticContract
   ( phaseSemanticContractCheck
   , phaseSemanticContractDiagnostic
+  , phaseStructuralProjectionCheck
+  , phaseStructuralProjectionCheckAtFrontier
+  , phaseStructuralProjectionCheckForPhase
   , phaseStructuralProjectionDiagnostic
   ) where
 
 import Amoebius.Validation.Legacy.Internal qualified as Legacy
 import Amoebius.Validation.PhaseIdentity qualified as PhaseIdentity
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
+import Amoebius.Validation.StatusFrontier qualified as Status
 import Amoebius.Validation.Types
   ( CheckResult (..)
   , Finding
@@ -87,7 +91,31 @@ data GateCategory
 data GapId = GapId Int GateCategory
   deriving (Eq, Ord, Show)
 
-data GateDraft = GateDraft Int GateCategory
+-- | A compiled contract payload. The requirement constructor carries the
+-- semantic obligation; ordinal/category fields bind that obligation to one
+-- exact registry slot. This is deliberately not derived from Markdown.
+data GateSpecification = GateSpecification Int GateCategory GateRequirement
+  deriving (Eq, Ord, Show)
+
+data GateRequirement
+  = RequireGovernedCorpusAndSourcePolicyClosure
+  | RequireExactSourceBoundPhaseZeroDispatcher
+  | RequireDirectPinnedOfflineHaskellInvocation
+  | RequireIndependentPhaseZeroOracleSet
+  | RequireClosedPhaseZeroPositiveCorpus
+  | RequireMinimallyDifferentPhaseZeroNegatives
+  | RequireChangedProductionMutationMatrix
+  | RequireCompleteRuntimeDiscoveryEquality
+  | RequireFreshnessAndIndependentChallenge
+  | RequireRawIndependentObservation
+  | RequireAuthorityAndBypassRejection
+  | RequireStartEndSourceAndRunFreshness
+  | RequireFixedHarnessQualificationCorpus
+  | RequireRunScopedCleanroomAndResidueContainment
+  | RequireDueLegacyClosureAndReintroductionNegatives
+  | RequireGenesisPredecessor
+  | RequireExplicitUnverifiedLaterResidue
+  | RequireQualifiedGatePass
   deriving (Eq, Ord, Show)
 
 -- | A gate-table slot is exactly @Bound specification@ or @ContractGap@
@@ -149,7 +177,7 @@ data PhaseSemanticContract = PhaseSemanticContract
   , semanticPredecessor :: Predecessor
   , semanticResourceProvision :: PhaseIdentity.ResourceProvisionRequirement
   , semanticLegacyIds :: [Legacy.LegacyId]
-  , semanticGateSlots :: Map GateCategory (ContractSlot GateDraft)
+  , semanticGateSlots :: Map GateCategory (ContractSlot GateSpecification)
   , semanticCriticalGuards :: [CriticalGuard]
   }
   deriving (Eq, Show)
@@ -554,13 +582,37 @@ predecessorFor 52 = ImmediatePredecessor 50
 #endif
 predecessorFor ordinal = ImmediatePredecessor (ordinal - 1)
 
-slotFor :: Int -> GateCategory -> ContractSlot GateDraft
+slotFor :: Int -> GateCategory -> ContractSlot GateSpecification
+slotFor 0 category =
+  BoundSpecification (GateSpecification 0 category (phaseZeroRequirement category))
 #ifdef VALIDATION_PHASE_SEMANTIC_GAP_ACCEPTANCE_MUTANT
-slotFor 1 Subject = BoundSpecification (GateDraft 1 Subject)
+slotFor 1 Subject =
+  BoundSpecification (GateSpecification 1 Subject RequireExactSourceBoundPhaseZeroDispatcher)
 #endif
 slotFor ordinal category = ContractGap (GapId ordinal category)
 
-gateSlotsFor :: Int -> Map GateCategory (ContractSlot GateDraft)
+phaseZeroRequirement :: GateCategory -> GateRequirement
+phaseZeroRequirement category = case category of
+  Claim -> RequireGovernedCorpusAndSourcePolicyClosure
+  Subject -> RequireExactSourceBoundPhaseZeroDispatcher
+  Command -> RequireDirectPinnedOfflineHaskellInvocation
+  Oracle -> RequireIndependentPhaseZeroOracleSet
+  PositiveControls -> RequireClosedPhaseZeroPositiveCorpus
+  PairedNegatives -> RequireMinimallyDifferentPhaseZeroNegatives
+  Mutants -> RequireChangedProductionMutationMatrix
+  Discovery -> RequireCompleteRuntimeDiscoveryEquality
+  Challenge -> RequireFreshnessAndIndependentChallenge
+  Observer -> RequireRawIndependentObservation
+  AuthorityBypass -> RequireAuthorityAndBypassRejection
+  Freshness -> RequireStartEndSourceAndRunFreshness
+  Qualification -> RequireFixedHarnessQualificationCorpus
+  Cleanroom -> RequireRunScopedCleanroomAndResidueContainment
+  LegacyClosure -> RequireDueLegacyClosureAndReintroductionNegatives
+  PredecessorCategory -> RequireGenesisPredecessor
+  Residue -> RequireExplicitUnverifiedLaterResidue
+  PassCriterion -> RequireQualifiedGatePass
+
+gateSlotsFor :: Int -> Map GateCategory (ContractSlot GateSpecification)
 gateSlotsFor ordinal = slotOmissionMutation canonicalSlots
  where
   canonicalSlots = Map.fromList [(category, slotFor ordinal category) | category <- gateCategories]
@@ -870,8 +922,31 @@ semanticSlotIdentitiesAreExact contract =
     Nothing -> False
     Just (ContractGap (GapId slotOrdinal slotCategory)) ->
       slotOrdinal == ordinal && slotCategory == category
-    Just (BoundSpecification (GateDraft slotOrdinal slotCategory)) ->
-      slotOrdinal == ordinal && slotCategory == category
+    Just (BoundSpecification (GateSpecification slotOrdinal slotCategory requirement)) ->
+      slotOrdinal == ordinal
+        && slotCategory == category
+        && requirementCategory requirement == category
+
+requirementCategory :: GateRequirement -> GateCategory
+requirementCategory requirement = case requirement of
+  RequireGovernedCorpusAndSourcePolicyClosure -> Claim
+  RequireExactSourceBoundPhaseZeroDispatcher -> Subject
+  RequireDirectPinnedOfflineHaskellInvocation -> Command
+  RequireIndependentPhaseZeroOracleSet -> Oracle
+  RequireClosedPhaseZeroPositiveCorpus -> PositiveControls
+  RequireMinimallyDifferentPhaseZeroNegatives -> PairedNegatives
+  RequireChangedProductionMutationMatrix -> Mutants
+  RequireCompleteRuntimeDiscoveryEquality -> Discovery
+  RequireFreshnessAndIndependentChallenge -> Challenge
+  RequireRawIndependentObservation -> Observer
+  RequireAuthorityAndBypassRejection -> AuthorityBypass
+  RequireStartEndSourceAndRunFreshness -> Freshness
+  RequireFixedHarnessQualificationCorpus -> Qualification
+  RequireRunScopedCleanroomAndResidueContainment -> Cleanroom
+  RequireDueLegacyClosureAndReintroductionNegatives -> LegacyClosure
+  RequireGenesisPredecessor -> PredecessorCategory
+  RequireExplicitUnverifiedLaterResidue -> Residue
+  RequireQualifiedGatePass -> PassCriterion
 
 pathMatchesCapability :: PhaseSemanticContract -> Bool
 pathMatchesCapability contract =
@@ -909,7 +984,7 @@ renderPhaseProjection contract =
     , Text.intercalate "," (map renderCriticalGuard (semanticCriticalGuards contract))
     ]
 
-renderSlot :: ContractSlot GateDraft -> Text
+renderSlot :: ContractSlot GateSpecification -> Text
 renderSlot slot = case slot of
   ContractGap _ -> "G"
   BoundSpecification _ -> "B"
@@ -918,9 +993,35 @@ renderGapId :: GapId -> Text
 renderGapId (GapId ordinal category) =
   "phase-" <> renderOrdinal ordinal <> "-" <> categorySlug category
 
-renderGateDraft :: GateDraft -> Text
-renderGateDraft (GateDraft ordinal category) =
-  "phase-" <> renderOrdinal ordinal <> "-" <> categorySlug category
+renderGateDraft :: GateSpecification -> Text
+renderGateDraft (GateSpecification ordinal category requirement) =
+  "phase-"
+    <> renderOrdinal ordinal
+    <> "-"
+    <> categorySlug category
+    <> "="
+    <> gateRequirementSlug requirement
+
+gateRequirementSlug :: GateRequirement -> Text
+gateRequirementSlug requirement = case requirement of
+  RequireGovernedCorpusAndSourcePolicyClosure -> "governed-corpus-and-source-policy-closure"
+  RequireExactSourceBoundPhaseZeroDispatcher -> "exact-source-bound-phase-zero-dispatcher"
+  RequireDirectPinnedOfflineHaskellInvocation -> "direct-pinned-offline-haskell-invocation"
+  RequireIndependentPhaseZeroOracleSet -> "independent-phase-zero-oracle-set"
+  RequireClosedPhaseZeroPositiveCorpus -> "closed-phase-zero-positive-corpus"
+  RequireMinimallyDifferentPhaseZeroNegatives -> "minimally-different-phase-zero-negatives"
+  RequireChangedProductionMutationMatrix -> "changed-production-mutation-matrix"
+  RequireCompleteRuntimeDiscoveryEquality -> "complete-runtime-discovery-equality"
+  RequireFreshnessAndIndependentChallenge -> "freshness-and-independent-challenge"
+  RequireRawIndependentObservation -> "raw-independent-observation"
+  RequireAuthorityAndBypassRejection -> "authority-and-bypass-rejection"
+  RequireStartEndSourceAndRunFreshness -> "start-end-source-and-run-freshness"
+  RequireFixedHarnessQualificationCorpus -> "fixed-harness-qualification-corpus"
+  RequireRunScopedCleanroomAndResidueContainment -> "run-scoped-cleanroom-and-residue-containment"
+  RequireDueLegacyClosureAndReintroductionNegatives -> "due-legacy-closure-and-reintroduction-negatives"
+  RequireGenesisPredecessor -> "genesis-predecessor"
+  RequireExplicitUnverifiedLaterResidue -> "explicit-unverified-later-residue"
+  RequireQualifiedGatePass -> "qualified-gate-pass"
 
 renderGateCategory :: GateCategory -> Text
 renderGateCategory category = case category of
@@ -1043,7 +1144,7 @@ allUnique values = all ((== 1) . length) (group (sort values))
 -- The structural join accepts only a deliberately narrow projection produced
 -- by PhaseSemanticJoin.  Each tuple contains ordinal, path, H1 title, ordered
 -- six-field labels, substrate token, lane token, register token, predecessor
--- link token, future command, reset status, ordered gate-row labels, unresolved
+-- link token, future command, current status, ordered gate-row labels, unresolved
 -- row labels, and the exact tracker-row projection.  It never receives Claim,
 -- Subject, Oracle, provider, module, count, Legacy-ID, or other prose.
 phaseStructuralProjectionDiagnostic
@@ -1063,7 +1164,108 @@ phaseStructuralProjectionDiagnostic
        )
      ]
   -> CheckResult
-phaseStructuralProjectionDiagnostic supplied =
+phaseStructuralProjectionDiagnostic =
+  phaseStructuralProjectionWithAuthority False Status.initialFrontier
+
+-- | Integrated correspondence check. The caller-authored projection still
+-- cannot populate a typed slot, but the gate may compare it with the compiled
+-- registry without retaining the public diagnostic seam's permanent refusal.
+phaseStructuralProjectionCheck
+  :: [ ( Int
+       , FilePath
+       , Text
+       , [Text]
+       , Text
+       , Text
+       , Text
+       , Text
+       , Text
+       , Text
+       , [Text]
+       , [Text]
+       , Text
+       )
+     ]
+  -> CheckResult
+phaseStructuralProjectionCheck = phaseStructuralProjectionCheckForPhase 0
+
+-- | Integrated correspondence check at the exact numerical validation
+-- frontier. Earlier phases must already be Done, this phase must be Active,
+-- and later phases must remain Blocked.
+phaseStructuralProjectionCheckForPhase
+  :: Int
+  -> [ ( Int
+       , FilePath
+       , Text
+       , [Text]
+       , Text
+       , Text
+       , Text
+       , Text
+       , Text
+       , Text
+       , [Text]
+       , [Text]
+       , Text
+       )
+     ]
+  -> CheckResult
+phaseStructuralProjectionCheckForPhase phaseUnderValidation supplied =
+  case Status.frontierForGate phaseUnderValidation of
+    Nothing ->
+      CheckResult
+        { checkName = "phase-semantic-structural-projection"
+        , checkObservations = [observation "semantic.status-frontier" "invalid"]
+        , checkFindings =
+            [ finding
+                "PHASE-SEMANTIC-STATUS-FRONTIER"
+                "DEVELOPMENT_PLAN/"
+                "the requested phase is outside the canonical status-frontier domain"
+            ]
+        }
+    Just frontier -> phaseStructuralProjectionCheckAtFrontier frontier supplied
+
+phaseStructuralProjectionCheckAtFrontier
+  :: Status.StatusFrontier
+  -> [ ( Int
+       , FilePath
+       , Text
+       , [Text]
+       , Text
+       , Text
+       , Text
+       , Text
+       , Text
+       , Text
+       , [Text]
+       , [Text]
+       , Text
+       )
+     ]
+  -> CheckResult
+phaseStructuralProjectionCheckAtFrontier =
+  phaseStructuralProjectionWithAuthority True
+
+phaseStructuralProjectionWithAuthority
+  :: Bool
+  -> Status.StatusFrontier
+  -> [ ( Int
+       , FilePath
+       , Text
+       , [Text]
+       , Text
+       , Text
+       , Text
+       , Text
+       , Text
+       , Text
+       , [Text]
+       , [Text]
+       , Text
+       )
+     ]
+  -> CheckResult
+phaseStructuralProjectionWithAuthority integrated frontier supplied =
   CheckResult
     { checkName = "phase-semantic-structural-projection-diagnostic"
     , checkObservations =
@@ -1075,8 +1277,8 @@ phaseStructuralProjectionDiagnostic supplied =
           <> duplicateFindings
           <> missingFindings
           <> extraFindings
-          <> concatMap compareProjection supplied
-          <> structuralDiagnosticRefusal
+          <> concatMap (compareProjection frontier) supplied
+          <> [item | item <- structuralDiagnosticRefusal, not integrated]
     }
  where
   grouped = Map.fromListWith (<>) [(ordinalOf row, [row]) | row <- supplied]
@@ -1127,7 +1329,8 @@ structuralDiagnosticRefusal =
 #endif
 
 compareProjection
-  :: ( Int
+  :: Status.StatusFrontier
+  -> ( Int
      , FilePath
      , Text
      , [Text]
@@ -1142,7 +1345,7 @@ compareProjection
      , Text
      )
   -> [Finding]
-compareProjection row = case lookupPhase (ordinalOf row) canonicalPhaseRegistry of
+compareProjection frontier row = case lookupPhase (ordinalOf row) canonicalPhaseRegistry of
   Nothing -> []
   Just expected ->
     concat
@@ -1154,10 +1357,10 @@ compareProjection row = case lookupPhase (ordinalOf row) canonicalPhaseRegistry 
       , mismatch expected "register" (renderRegister (semanticRegister expected)) (registerOf row)
       , mismatch expected "predecessor-link" (expectedPredecessorLink expected) (predecessorLinkOf row)
       , mismatch expected "future-command" (expectedFutureCommand expected) (futureCommandOf row)
-      , mismatch expected "reset-status" (expectedResetStatus expected) (resetStatusOf row)
+      , mismatch expected "current-status" (expectedCurrentStatus frontier expected) (resetStatusOf row)
       , mismatch expected "gate-row-order" (map renderGateCategory gateCategories) (gateRowsOf row)
       , mismatch expected "unresolved-shape" (expectedUnresolvedRows expected) (unresolvedRowsOf row)
-      , mismatch expected "tracker-row" (expectedTrackerProjection expected) (trackerProjectionOf row)
+      , mismatch expected "tracker-row" (expectedTrackerProjection frontier expected) (trackerProjectionOf row)
       ]
 
 mismatch :: (Eq value, Show value) => PhaseSemanticContract -> Text -> value -> value -> [Finding]
@@ -1193,13 +1396,10 @@ expectedFutureCommand :: PhaseSemanticContract -> Text
 expectedFutureCommand expected =
   "pb validate phase " <> renderOrdinal (semanticOrdinal expected)
 
-expectedResetStatus :: PhaseSemanticContract -> Text
-expectedResetStatus expected =
-  Policy.resetPhaseStatusText
-    ( if semanticOrdinal expected == 0
-        then Policy.ActiveNotValidated
-        else Policy.BlockedNotValidated
-    )
+expectedCurrentStatus :: Status.StatusFrontier -> PhaseSemanticContract -> Text
+expectedCurrentStatus frontier expected =
+  Status.renderTrackerStatus
+    (Status.phaseStatusAt frontier (semanticOrdinal expected))
 
 expectedUnresolvedRows :: PhaseSemanticContract -> [Text]
 expectedUnresolvedRows expected =
@@ -1209,15 +1409,15 @@ expectedUnresolvedRows expected =
     , Just (ContractGap _) <- [Map.lookup category (semanticGateSlots expected)]
     ]
 
-expectedTrackerProjection :: PhaseSemanticContract -> Text
-expectedTrackerProjection expected =
+expectedTrackerProjection :: Status.StatusFrontier -> PhaseSemanticContract -> Text
+expectedTrackerProjection frontier expected =
   Text.intercalate
     "|"
     [ semanticTitle expected
     , renderSubstrate (semanticSubstrate expected)
     , renderLane (semanticLane expected)
     , renderRegister (semanticRegister expected)
-    , expectedResetStatus expected
+    , expectedCurrentStatus frontier expected
     , Text.pack (semanticPath expected)
     ]
 

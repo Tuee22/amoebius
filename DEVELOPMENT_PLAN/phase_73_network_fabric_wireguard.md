@@ -26,9 +26,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 73.1: Vault-KV Curve25519 peer keys — secrets by name, minted and custodied in Vault ⏸️](#sprint-731-vault-kv-curve25519-peer-keys--secrets-by-name-minted-and-custodied-in-vault-)
-- [Sprint 73.2: Rendered peer config + the wg reconcile — render → wg show/diff/wg set ⏸️](#sprint-732-rendered-peer-config--the-wg-reconcile--render--wg-showdiffwg-set-)
-- [Sprint 73.3: Phase gate harness — live fabric + external-observer reachability over the VPN IP ⏸️](#sprint-733-phase-gate-harness--live-fabric--external-observer-reachability-over-the-vpn-ip-)
+- [Sprint 73.1: Vault-KV Curve25519 peer keys — secrets by name, minted and custodied in Vault](#sprint-731-vault-kv-curve25519-peer-keys--secrets-by-name-minted-and-custodied-in-vault-)
+- [Sprint 73.2: Rendered peer config + the wg reconcile — render → wg show/diff/wg set](#sprint-732-rendered-peer-config--the-wg-reconcile--render--wg-showdiffwg-set-)
+- [Sprint 73.3: Phase gate harness — live fabric + external-observer reachability over the VPN IP](#sprint-733-phase-gate-harness--live-fabric--external-observer-reachability-over-the-vpn-ip-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -101,7 +101,7 @@ and resource-control/readback layer on `linux-cpu`. A candidate may call that bo
 *tested*, never *proven*, and cannot make its gate pass.
 
 **Depends on:** [Phase 72](phase_72_ui_program_release.md)
-**Gate:** `pb validate phase 73`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 73`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

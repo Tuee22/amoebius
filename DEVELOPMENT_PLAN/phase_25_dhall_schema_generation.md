@@ -27,10 +27,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ⏸️](#sprint-251-dhall-prelude--typed-surfaces--smart-constructors-)
-- [Sprint 25.2: dhall-typecheck positive corpus ⏸️](#sprint-252-dhall-typecheck-positive-corpus-)
-- [Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ⏸️](#sprint-253-dhall-typecheck-class-negative-corpus--partial-foreclosure-ledger-)
-- [Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ⏸️](#sprint-254-the-shared-secretref-union-and-the-plaintext-secret-negative-)
+- [Sprint 25.1: Dhall prelude + typed surfaces + smart constructors](#sprint-251-dhall-prelude--typed-surfaces--smart-constructors-)
+- [Sprint 25.2: dhall-typecheck positive corpus](#sprint-252-dhall-typecheck-positive-corpus-)
+- [Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger](#sprint-253-dhall-typecheck-class-negative-corpus--partial-foreclosure-ledger-)
+- [Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative](#sprint-254-the-shared-secretref-union-and-the-plaintext-secret-negative-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -68,7 +68,7 @@ the generated typechecker observations.
 **Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 24](phase_24_conformance_gate_generator.md)
-**Gate:** `pb validate phase 25`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 25`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

@@ -27,9 +27,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 38.1: Sealed registry and parity ⏸️](#sprint-381-sealed-registry-and-parity-)
-- [Sprint 38.2: Current-authority decision and negative controls ⏸️](#sprint-382-current-authority-decision-and-negative-controls-)
-- [Sprint 38.3: Calculus projection and phase seal ⏸️](#sprint-383-calculus-projection-and-phase-seal-)
+- [Sprint 38.1: Sealed registry and parity](#sprint-381-sealed-registry-and-parity-)
+- [Sprint 38.2: Current-authority decision and negative controls](#sprint-382-current-authority-decision-and-negative-controls-)
+- [Sprint 38.3: Calculus projection and phase seal](#sprint-383-calculus-projection-and-phase-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -78,7 +78,7 @@ relation; identity-provider truth and runtime/provider enforcement remain UNVERI
 ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 37](phase_37_ui_program_schema.md)
-**Gate:** `pb validate phase 38`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 38`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

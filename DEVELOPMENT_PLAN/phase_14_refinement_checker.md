@@ -29,8 +29,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 14.1: Compiled-source refinement boundary ⏸️](#sprint-141-compiled-source-refinement-boundary-)
-- [Sprint 14.2: Correspondence, negatives, and mutation evidence ⏸️](#sprint-142-correspondence-negatives-and-mutation-evidence-)
+- [Sprint 14.1: Compiled-source refinement boundary](#sprint-141-compiled-source-refinement-boundary-)
+- [Sprint 14.2: Correspondence, negatives, and mutation evidence](#sprint-142-correspondence-negatives-and-mutation-evidence-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -74,7 +74,7 @@ obligation. NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 13](phase_13_symbolic_checker.md)
-**Gate:** `pb validate phase 14`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 14`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

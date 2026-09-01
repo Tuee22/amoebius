@@ -29,10 +29,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 75.1: The gateway-migration runtime — both branches over the Phase-17 `interpret` core ⏸️](#sprint-751-the-gateway-migration-runtime--both-branches-over-the-phase-17-interpret-core-)
-- [Sprint 75.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-spec push-back ⏸️](#sprint-752-teardown-with-cleanup-vs-chaos-failover--unsatisfiable-spec-push-back-)
-- [Sprint 75.3: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation ⏸️](#sprint-753-register-25-gateway-migration-runtime-fidelity--simulation--trace-validation-)
-- [Sprint 75.4: Register-3 correspondence — Inject drills against the running forest + lazy live-gate projection + ledger ⏸️](#sprint-754-register-3-correspondence--inject-drills-against-the-running-forest--lazy-live-gate-projection--ledger-)
+- [Sprint 75.1: The gateway-migration runtime — both branches over the Phase-17 `interpret` core](#sprint-751-the-gateway-migration-runtime--both-branches-over-the-phase-17-interpret-core-)
+- [Sprint 75.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-spec push-back](#sprint-752-teardown-with-cleanup-vs-chaos-failover--unsatisfiable-spec-push-back-)
+- [Sprint 75.3: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation](#sprint-753-register-25-gateway-migration-runtime-fidelity--simulation--trace-validation-)
+- [Sprint 75.4: Register-3 correspondence — Inject drills against the running forest + lazy live-gate projection + ledger](#sprint-754-register-3-correspondence--inject-drills-against-the-running-forest--lazy-live-gate-projection--ledger-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -86,7 +86,7 @@ WireGuard hub-role move, and adversarial fault injection against the running for
 is explicitly outside the target boundary.
 
 **Depends on:** [Phase 74](phase_74_multicluster_spawn_georepl.md)
-**Gate:** `pb validate phase 75`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 75`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

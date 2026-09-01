@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 81.1: Complete single-tenant UI slice ⏸️](#sprint-811-complete-single-tenant-ui-slice-)
+- [Sprint 81.1: Complete single-tenant UI slice](#sprint-811-complete-single-tenant-ui-slice-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -75,7 +75,7 @@ gate-passed predecessor interpreter.
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 80](phase_80_determinism_jitcache.md)
-**Gate:** `pb validate phase 81`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 81`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

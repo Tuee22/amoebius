@@ -27,9 +27,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 39.1: Exact port and capability binding ⏸️](#sprint-391-exact-port-and-capability-binding-)
-- [Sprint 39.2: Trusted links and negative controls ⏸️](#sprint-392-trusted-links-and-negative-controls-)
-- [Sprint 39.3: Calculus projection and phase seal ⏸️](#sprint-393-calculus-projection-and-phase-seal-)
+- [Sprint 39.1: Exact port and capability binding](#sprint-391-exact-port-and-capability-binding-)
+- [Sprint 39.2: Trusted links and negative controls](#sprint-392-trusted-links-and-negative-controls-)
+- [Sprint 39.3: Calculus projection and phase seal](#sprint-393-calculus-projection-and-phase-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -74,7 +74,7 @@ pure; the canonical Haskell gate has no credentials or network.
 implementation, provider state, browser enforcement, and live tenant isolation remain UNVERIFIED.
 
 **Depends on:** [Phase 38](phase_38_ui_authorization_kernel.md)
-**Gate:** `pb validate phase 39`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 39`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

@@ -28,10 +28,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus ⏸️](#sprint-271-exhaustive-negativepositive-corpus-split-by-foreclosure-locus-)
-- [Sprint 27.2: GADT-index compile-refusal cases (type-foreclosed layer) ⏸️](#sprint-272-gadt-index-compile-refusal-cases-type-foreclosed-layer-)
-- [Sprint 27.3: QuickCheck property suite ⏸️](#sprint-273-quickcheck-property-suite-)
-- [Sprint 27.4: The per-entry validation-locus ledger — the gate ⏸️](#sprint-274-the-per-entry-validation-locus-ledger--the-gate-)
+- [Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus](#sprint-271-exhaustive-negativepositive-corpus-split-by-foreclosure-locus-)
+- [Sprint 27.2: GADT-index compile-refusal cases (type-foreclosed layer)](#sprint-272-gadt-index-compile-refusal-cases-type-foreclosed-layer-)
+- [Sprint 27.3: QuickCheck property suite](#sprint-273-quickcheck-property-suite-)
+- [Sprint 27.4: The per-entry validation-locus ledger — the gate](#sprint-274-the-per-entry-validation-locus-ledger--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -69,7 +69,7 @@ invocation and the candidate verdict.
 **Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 26](phase_26_gadt_decode_ir.md)
-**Gate:** `pb validate phase 27`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 27`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

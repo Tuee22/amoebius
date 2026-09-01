@@ -52,8 +52,9 @@ agent, or CI job may record the narrow status projection. The gate-pass contract
 
 The pass result binds two explicit source identities: the tested candidate and one exact
 status-only projection. The projection may change only the tracker plus the named phase and
-sprint status fields. This prevents unrelated edits from borrowing a prior pass while keeping status recording
-mechanical. Any other change requires another gate run.
+sprint status fields for the closing phase and its successor activation. The immutable Gate summary and
+status-free Contents navigation never join that projection. This prevents unrelated edits from borrowing a
+prior pass while keeping status recording mechanical. Any other change requires another gate run.
 
 Status and implementation progress are separate axes. A dated inspection uses only these terms:
 
@@ -66,6 +67,15 @@ Status and implementation progress are separate axes. A dated inspection uses on
 
 Done is machine-checkable only through the complete qualified phase gate. A source path, compilation, or
 partial green command is only an observation.
+
+The recorded status surface is one contiguous frontier. Before candidate Phase N runs, every phase below N
+is Done, Phase N is Active — NOT VALIDATED, and every later phase is Blocked — NOT VALIDATED. Every sprint of
+a Done phase is Done; Sprint N.1 is Active at the frontier and its later sprints are Blocked. A Phase-N pass
+mechanically advances the frontier: Phase N and all of its sprints become Done, while Phase N+1 and its first
+sprint become Active when a successor exists. At the upper bound every phase and sprint is Done. A missing
+Done predecessor, two Active phases, a Done gap, or tracker/phase/sprint disagreement refuses validation.
+Planned and Live-proof pending remain vocabulary for explicitly designed non-candidate states; neither is an
+automated gate frontier until a typed transition contract defines it.
 
 ---
 

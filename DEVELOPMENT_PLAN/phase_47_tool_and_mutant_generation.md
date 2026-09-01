@@ -29,7 +29,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 47.1: Generated repository support material ⏸️](#sprint-471-generated-repository-support-material-)
+- [Sprint 47.1: Generated repository support material](#sprint-471-generated-repository-support-material-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -63,7 +63,7 @@ later provider phases validate provider semantics and live execution, not source
 **Lane:** `none`
 **Register:** 1
 **Depends on:** [Phase 46](phase_46_ui_contract_generation.md)
-**Gate:** `pb validate phase 47`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 47`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

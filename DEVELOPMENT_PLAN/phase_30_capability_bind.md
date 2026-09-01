@@ -29,9 +29,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure ⏸️](#sprint-301-the-closed-capability-union--the-no-product-arm-dhall-typecheck-foreclosure-)
-- [Sprint 30.2: The `CapabilityBinding` + total representational `bind` ⏸️](#sprint-302-the-capabilitybinding--total-representational-bind-)
-- [Sprint 30.3: The bind property/corpus + the Register-1 gate ⏸️](#sprint-303-the-bind-propertycorpus--the-register-1-gate-)
+- [Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure](#sprint-301-the-closed-capability-union--the-no-product-arm-dhall-typecheck-foreclosure-)
+- [Sprint 30.2: The `CapabilityBinding` + total representational `bind`](#sprint-302-the-capabilitybinding--total-representational-bind-)
+- [Sprint 30.3: The bind property/corpus + the Register-1 gate](#sprint-303-the-bind-propertycorpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -104,7 +104,7 @@ graphs when deployment shape differs. Nothing is provisioned, rendered, or obser
 **Register:** 1 — pure/semantic-oracle, in-process, no cluster.
 
 **Depends on:** [Phase 29](phase_29_execution_accelerator_folds.md)
-**Gate:** `pb validate phase 30`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 30`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

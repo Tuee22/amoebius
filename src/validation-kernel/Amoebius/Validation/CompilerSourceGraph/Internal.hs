@@ -2,11 +2,41 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.CompilerSourceGraph.Internal
-  ( AcquiredCompilerSourceGraph
+  ( AcquiredCompilerFacts
+  , AcquiredCompilerRunPlan
+  , AcquiredCompilerSourceGraph
+  , CompilerAcquisitionProblem
+  , CompilerFailureStage
+  , CompilerObservedOutcome
+  , CompilerOutputStream
+  , CompilerProcessTranscript
+  , CompilerProcessTermination
+  , CompilerResourceLimit
+  , CompilerRunKey
+  , CompilerRunExpectation
+  , CompilerRunWitness
+  , CompilerSourceAttempt
+  , acquireCompilerSourceGraph
   , acquiredCompilerSnapshotIdentity
   , acquiredCompilerSourceCheck
   , analyzeAcquiredCompilerSourceGraph
+  , compilerAcquisitionProblemCode
+  , compilerAcquisitionProblemSnapshotIdentity
+  , compilerSourceAttemptDiagnostic
+  , compilerSourceAttemptCheck
+  , compilerSourceAttemptProblems
+  , foldAcquiredCompilerFacts
+  , foldAcquiredCompilerRunPlan
+  , foldCompilerProcessTranscript
+  , foldCompilerRunKey
+  , foldCompilerRunWitness
+  , foldCompilerSourceAttempt
   , rawCompilerSourceGraphDiagnostic
+#if defined(VALIDATION_SOURCE_CLOSURE_INTERNAL_TEST_ACQUIRE)
+  , compilerSourceInternalTestAcquiredBranchProblems
+  , compilerSourceInternalTestClosedGraphProblems
+  , compilerSourceInternalTestTypedBindingProjection
+#endif
   ) where
 
 import Amoebius.Validation.SourceClosure.Internal
@@ -14,15 +44,25 @@ import Amoebius.Validation.SourceClosure.Internal
   , SourceSnapshot (snapshotEntries, snapshotIdentity)
   , acquiredSourceSnapshot
   )
+import Amoebius.Validation.CompilerSubjectRegistry.Internal
+  ( CompilerSubjectContractProblem
+  , acquireCompilerSubjectContract
+  , compilerSubjectContractDigest
+  , compilerSubjectRegistryCheck
+  , deriveCompilerSubjectRegistry
+  , foldCompilerSubjectContractProblem
+  )
 import Amoebius.Validation.SourceConsumerGraph.Internal
-  ( analyzeSourceConsumerGraph
+  ( RequiredCompilerFact (..)
+  , analyzeSourceConsumerGraph
   , sourceConsumerGraphCheck
   )
 import Amoebius.Validation.Types
   ( CheckResult (..)
   , Finding
-  , Observation
+  , Observation (..)
   , finding
+  , findingCode
   , observation
   )
 import Crypto.Hash qualified as Crypto
@@ -32,6 +72,8 @@ import Data.ByteString.Char8 qualified as ByteString8
 import Data.Char (isAsciiLower, isAsciiUpper, ord, toLower)
 import Data.List (group, isPrefixOf, sort)
 import Data.List qualified as List
+import Data.List.NonEmpty (NonEmpty (..))
+import Data.List.NonEmpty qualified as NonEmpty
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
@@ -113,9 +155,1015 @@ maximumAcquiredCompilerEntries = 16385
 maximumAcquiredCompilerEntries = 16384
 #endif
 
+-- | The stage at which a compile-negative row is expected to be rejected.
+-- A non-zero process exit is not evidence of a compiler refusal unless the
+-- independently planned stage and diagnostic identity are also observed.
+data CompilerFailureStage
+  = CompilerParseFailure
+  | CompilerRenameFailure
+  | CompilerTypecheckFailure
+  deriving (Eq, Ord, Show)
+
+-- | Branch-specific authority attached to a planned compiler row.  Success
+-- has no diagnostic payload.  Refusal is bound to an exact compiler stage and
+-- diagnostic digest.  A fixture is bound to its harness, case, expected result
+-- digest, and exact expected exit status.
+data CompilerRunExpectation
+  = CompilerSuccessExpectation
+  | CompilerRefusalExpectation CompilerFailureStage Text
+  | CompilerFixtureExpectation Text Text Text Int
+  deriving (Eq, Ord, Show)
+
+-- | The immutable identity of one required compiler run.  A row is not merely
+-- a source path: the same blob can participate in multiple Cabal components
+-- and flag configurations; generated inputs and exact compiler argv can also
+-- change the compiled program; and each outcome branch has different required
+-- evidence.  Keeping every dimension in one opaque key prevents later
+-- evidence from being replayed across any of those boundaries.
+data CompilerRunKey
+  = CompilerRunKey
+      Text
+      FilePath
+      Text
+      Text
+      Text
+      Text
+      Text
+      CompilerRunExpectation
+  deriving (Eq, Ord, Show)
+
+-- | The outcome observed by the compiler supervisor.  It is deliberately
+-- distinct from the outcome required by the registry key: the verifier must
+-- compare the two instead of treating an expectation as an observation.
+data CompilerObservedOutcome
+  = CompilerObservedSuccess
+  | CompilerObservedRefusal
+  | CompilerObservedFixture
+  deriving (Eq, Ord, Show)
+
+-- | A process can terminate normally, by signal, or because the supervisor
+-- stopped it at one of its independent boundaries.  These cases must never be
+-- collapsed into the non-zero exit required by an intentional compiler
+-- refusal.
+data CompilerResourceLimit
+  = CompilerCpuLimit
+  | CompilerMemoryLimit
+  | CompilerFilesystemLimit
+  | CompilerProcessLimit
+  deriving (Eq, Ord, Show)
+
+data CompilerOutputStream
+  = CompilerStdout
+  | CompilerStderr
+  deriving (Eq, Ord, Show)
+
+data CompilerProcessTermination
+  = CompilerExited Int
+  | CompilerSignalled Int
+  | CompilerTimedOut
+  | CompilerResourceLimited CompilerResourceLimit
+  | CompilerOutputLimited CompilerOutputStream
+  | CompilerSpawnFailed
+  deriving (Eq, Ord, Show)
+
+-- | Bounded process evidence for one exact compiler row.  Output bytes are
+-- retained by length and digest rather than as unbounded text.  A successful
+-- compile must name the resulting object or executable identity; a refusal or
+-- fixture observation must not.  The final digest binds the independently
+-- observed time, memory, filesystem, and process-identity limits.
+data CompilerProcessTranscript
+  = CompilerProcessTranscript
+      CompilerProcessTermination
+      Int
+      Text
+      Int
+      Text
+      (Maybe Text)
+      Text
+  deriving (Eq, Show)
+
+-- | Compiler observations are separate constructors because the three
+-- branches have different evidence obligations.  Only a success may carry
+-- the complete semantic-fact universe.  Refusal must carry the observed
+-- compiler stage and diagnostic digest.  A fixture carries the observed
+-- harness, case, and result digest.
+data CompilerRunWitness
+  = CompilerSuccessWitness
+      CompilerRunKey
+      Text
+      Text
+      Text
+      CompilerProcessTranscript
+      [RequiredCompilerFact]
+  | CompilerRefusalWitness
+      CompilerRunKey
+      Text
+      Text
+      Text
+      CompilerProcessTranscript
+      CompilerFailureStage
+      Text
+  | CompilerFixtureWitness
+      CompilerRunKey
+      Text
+      Text
+      Text
+      CompilerProcessTranscript
+      Text
+      Text
+      Text
+  deriving (Eq, Show)
+
+-- | The expected run inventory belongs to the independently acquired
+-- elaborated-plan authority, not to the execution producer.  The plan identity
+-- is rebound into every witness below, so a producer cannot declare its own
+-- witness list to be complete merely by repeating the same keys twice.
+data AcquiredCompilerRunPlan
+  = AcquiredCompilerRunPlan Text Text [CompilerRunKey]
+  deriving (Eq, Show)
+
+-- | Complete compiler facts are a separate opaque execution product.  Source
+-- acquisition and diagnostic caller input cannot construct this value, and
+-- its inventory is supplied by 'AcquiredCompilerRunPlan'.
+data AcquiredCompilerFacts
+  = AcquiredCompilerFacts AcquiredCompilerRunPlan [CompilerRunWitness]
+  deriving (Eq, Show)
+
+-- | Typed reasons why the acquisition boundary refused to mint compiler
+-- facts.  Every problem remains bound to the exact source snapshot.  The
+-- toolchain case intentionally names an absent verified authority root rather
+-- than blessing locally observed checksums.
+data CompilerAcquisitionProblem
+  = CompilerGraphFactsUnavailable Text
+  | CompilerSubjectOutcomeRegistryUnavailable Text
+  | CompilerSubjectContractRejected Text Text FilePath Text
+  | CompilerElaboratedMultiRunUnavailable Text
+  | CompilerToolchainAuthorityUnavailable Text
+  | CompilerExecutionSupervisionUnavailable Text
+  | CompilerSemanticClosureUnavailable Text
+  deriving (Eq, Ord, Show)
+
+-- | A refusal retains the diagnostic refusal graph.  An acquired attempt uses
+-- a different closed type, minted only after the exact acquired check name and
+-- an empty finding set have been verified.  This prevents the acquired branch
+-- from inheriting the SourceConsumer/refusal residue which production still
+-- reports while no compiler producer exists.
+data CompilerSourceAttempt
+  = CompilerSourceRefused
+      AcquiredCompilerSourceGraph
+      (NonEmpty CompilerAcquisitionProblem)
+  | CompilerSourceAcquired
+      ClosedCompilerSourceGraph
+      AcquiredCompilerFacts
+  deriving (Eq, Show)
+
 data AcquiredCompilerSourceGraph
   = AcquiredCompilerSourceGraph Text CheckResult
   deriving (Eq, Show)
+
+data ClosedCompilerSourceGraph
+  = ClosedCompilerSourceGraph Text CheckResult
+  deriving (Eq, Show)
+
+closedCompilerSourceCheckName :: Text
+closedCompilerSourceCheckName = "acquired-compiler-source-graph"
+
+closeCompilerSourceGraph
+  :: AcquiredCompilerSourceGraph
+  -> Either Finding ClosedCompilerSourceGraph
+closeCompilerSourceGraph (AcquiredCompilerSourceGraph identity result)
+  | checkName result /= closedCompilerSourceCheckName =
+      Left
+        ( acquiredCompilerFinding
+            "SRC-COMPILER-ACQUIRED-DIAGNOSTIC-NOT-CLOSED"
+            "the acquired branch diagnostic does not have the exact closed-graph check name"
+        )
+  | not (null (checkFindings result)) =
+      Left
+        ( acquiredCompilerFinding
+            "SRC-COMPILER-ACQUIRED-DIAGNOSTIC-NOT-CLOSED"
+            "the acquired branch diagnostic retains refusal or other findings"
+        )
+  | otherwise = Right (ClosedCompilerSourceGraph identity result)
+
+projectClosedCompilerSourceGraph
+  :: ClosedCompilerSourceGraph
+  -> AcquiredCompilerSourceGraph
+projectClosedCompilerSourceGraph (ClosedCompilerSourceGraph identity result) =
+  AcquiredCompilerSourceGraph identity result
+
+-- | Eliminate an attempt without exposing either constructor.  Package
+-- consumers may render or route a refusal, but cannot turn it into acquired
+-- facts.
+foldCompilerSourceAttempt
+  :: (AcquiredCompilerSourceGraph -> NonEmpty CompilerAcquisitionProblem -> result)
+  -> (AcquiredCompilerSourceGraph -> AcquiredCompilerFacts -> result)
+  -> CompilerSourceAttempt
+  -> result
+foldCompilerSourceAttempt onRefused onAcquired attempt =
+  case attempt of
+    CompilerSourceRefused diagnostic problems -> onRefused diagnostic problems
+    CompilerSourceAcquired closed facts ->
+      onAcquired (projectClosedCompilerSourceGraph closed) facts
+
+compilerSourceAttemptDiagnostic :: CompilerSourceAttempt -> AcquiredCompilerSourceGraph
+compilerSourceAttemptDiagnostic =
+  foldCompilerSourceAttempt (\diagnostic _ -> diagnostic) (\diagnostic _ -> diagnostic)
+
+-- | Branch-sensitive gate projection.  Consumers which decide a candidate
+-- must use this projection rather than detaching the diagnostic graph: a
+-- refused attempt remains red even if a future diagnostic regression drops
+-- one of its ordinary findings, and the acquired branch must retain a
+-- non-empty fact set bound to the same snapshot as the diagnostic.
+compilerSourceAttemptCheck :: CompilerSourceAttempt -> CheckResult
+compilerSourceAttemptCheck =
+  foldCompilerSourceAttempt refused acquired
+ where
+  refused diagnostic problems =
+    let result = acquiredCompilerSourceCheck diagnostic
+        existingCodes = map findingCode (checkFindings result)
+        retainedProblems =
+          [ finding
+              (compilerAcquisitionProblemCode problem)
+              "compiler-source-acquisition"
+              (compilerAcquisitionProblemDetail problem)
+          | problem <- NonEmpty.toList problems
+          , compilerAcquisitionProblemCode problem `notElem` existingCodes
+          ]
+     in result
+          { checkObservations =
+              checkObservations result
+                <> [observation "compiler-source-attempt" "refused"]
+          , checkFindings = checkFindings result <> retainedProblems
+          }
+  acquired diagnostic facts =
+    let result = acquiredCompilerSourceCheck diagnostic
+        diagnosticIdentity = acquiredCompilerSnapshotIdentity diagnostic
+        (plan, witnesses) = foldAcquiredCompilerFacts (,) facts
+        (planSnapshot, planIdentity, expectedKeys) =
+          foldAcquiredCompilerRunPlan (,,) plan
+        witnessedKeys = map compilerRunWitnessKey witnesses
+        factProblems =
+          [ finding
+              "SRC-COMPILER-ACQUIRED-PLAN-SNAPSHOT"
+              "compiler-source-acquisition"
+              "the acquired compiler run plan does not name the diagnostic source snapshot"
+          | planSnapshot /= diagnosticIdentity
+          ]
+            <> [ finding
+                   "SRC-COMPILER-ACQUIRED-PLAN-IDENTITY"
+                   "compiler-source-acquisition"
+                   "the independent acquired compiler run-plan identity is not lowercase SHA-256"
+               | not (compilerHexIdentity 64 planIdentity)
+               ]
+            <> acquiredCompilerInventoryProblems expectedKeys witnessedKeys
+            <> concatMap
+              (acquiredCompilerRunProblems diagnosticIdentity planIdentity)
+              (zip [(1 :: Int) ..] witnesses)
+     in result
+          { checkObservations =
+              checkObservations result
+                <> [observation "compiler-source-attempt" "acquired"]
+          , checkFindings = checkFindings result <> factProblems
+          }
+
+acquiredCompilerInventoryProblems :: [CompilerRunKey] -> [CompilerRunKey] -> [Finding]
+acquiredCompilerInventoryProblems expectedKeys witnessedKeys =
+  [ acquiredCompilerFinding
+      "SRC-COMPILER-ACQUIRED-RUN-UNIVERSE-EMPTY"
+      "the acquired compiler run-key universe is empty"
+  | null expectedKeys
+  ]
+    <> [ acquiredCompilerFinding
+           "SRC-COMPILER-ACQUIRED-RUN-KEY-DUPLICATE"
+           "the acquired compiler run-key universe contains a duplicate"
+       | hasDuplicates expectedKeys
+       ]
+    <> [ acquiredCompilerFinding
+           "SRC-COMPILER-ACQUIRED-WITNESS-KEY-DUPLICATE"
+           "the acquired compiler witness inventory contains a duplicate run key"
+       | hasDuplicates witnessedKeys
+       ]
+    <> [ acquiredCompilerFinding
+           "SRC-COMPILER-ACQUIRED-RUN-INVENTORY-MISMATCH"
+           "the ordered supervised witness keys do not exactly equal the acquired run-key universe"
+       | expectedKeys /= witnessedKeys
+       ]
+
+compilerRunWitnessKey :: CompilerRunWitness -> CompilerRunKey
+compilerRunWitnessKey witness =
+  foldCompilerRunWitness
+    (\key _ _ _ _ _ -> key)
+    (\key _ _ _ _ _ _ -> key)
+    (\key _ _ _ _ _ _ _ -> key)
+    witness
+
+acquiredCompilerRunProblems :: Text -> Text -> (Int, CompilerRunWitness) -> [Finding]
+acquiredCompilerRunProblems expectedSnapshot expectedPlanIdentity (ordinal, witness) =
+  foldCompilerRunWitness inspectSuccess inspectRefusal inspectFixture witness
+ where
+  inspectSuccess key elaboration toolchainAuthority supervisor transcript facts =
+    foldCompilerRunKey (inspectKey elaboration toolchainAuthority supervisor) key
+      <> successEvidenceProblems key transcript facts
+  inspectRefusal key elaboration toolchainAuthority supervisor transcript observedStage observedDiagnostic =
+    foldCompilerRunKey (inspectKey elaboration toolchainAuthority supervisor) key
+      <> refusalEvidenceProblems key transcript observedStage observedDiagnostic
+  inspectFixture key elaboration toolchainAuthority supervisor transcript observedHarness observedCase observedResult =
+    foldCompilerRunKey (inspectKey elaboration toolchainAuthority supervisor) key
+      <> fixtureEvidenceProblems key transcript observedHarness observedCase observedResult
+  inspectKey elaboration toolchainAuthority supervisor snapshot path objectId component configuration generatedInputs compilerArgv expected =
+    [ runFinding "SNAPSHOT" "the compiler run key names a different source snapshot"
+    | snapshot /= expectedSnapshot
+    ]
+      <> [ runFinding "PATH" "the compiler run key path is empty, absolute, or contains a parent/backslash segment"
+         | not (compilerRunPathValid path)
+         ]
+      <> [ runFinding "OBJECT-IDENTITY" "the compiler run key source object identity is not lowercase SHA-1"
+         | not (compilerHexIdentity 40 objectId)
+         ]
+      <> [ runFinding "COMPONENT" "the compiler run key component identity is empty"
+         | Text.null component
+         ]
+      <> identityProblem "CONFIGURATION" configuration
+      <> identityProblem "GENERATED-INPUTS" generatedInputs
+      <> identityProblem "ARGV" compilerArgv
+      <> [ runFinding "ELABORATION" "the compiler witness is not bound to the independent run-plan identity"
+         | elaboration /= expectedPlanIdentity
+         ]
+      <> identityProblem "TOOLCHAIN" toolchainAuthority
+      <> identityProblem "SUPERVISOR" supervisor
+      <> compilerExpectationProblems expected
+  identityProblem suffix value =
+    [ runFinding suffix "a compiler authority identity is not lowercase SHA-256"
+    | not (compilerHexIdentity 64 value)
+    ]
+  runFinding suffix detail =
+    acquiredCompilerFinding
+      ("SRC-COMPILER-ACQUIRED-RUN-" <> suffix)
+      (detail <> "; run-ordinal=" <> Text.pack (show ordinal))
+  compilerExpectationProblems expected = case expected of
+    CompilerSuccessExpectation -> []
+    CompilerRefusalExpectation _ diagnosticDigest ->
+      [ runFinding "EXPECTED-DIAGNOSTIC" "the planned refusal diagnostic identity is not lowercase SHA-256"
+      | not (compilerHexIdentity 64 diagnosticDigest)
+      ]
+    CompilerFixtureExpectation harness caseLabel resultDigest expectedExit ->
+      [ runFinding "EXPECTED-FIXTURE-HARNESS" "the planned fixture harness identity is empty"
+      | Text.null harness
+      ]
+        <> [ runFinding "EXPECTED-FIXTURE-CASE" "the planned fixture case identity is empty"
+           | Text.null caseLabel
+           ]
+        <> [ runFinding "EXPECTED-FIXTURE-RESULT" "the planned fixture result identity is not lowercase SHA-256"
+           | not (compilerHexIdentity 64 resultDigest)
+           ]
+        <> [ runFinding "EXPECTED-FIXTURE-EXIT" "the planned fixture exit status is outside the portable exit-status range"
+           | not (compilerExitCodeValid expectedExit)
+           ]
+  successEvidenceProblems key transcript facts =
+    [ runFinding "EVIDENCE-BRANCH" "success evidence is attached to a non-success run key"
+    | compilerRunKeyExpectedOutcome key /= CompilerObservedSuccess
+    ]
+      <> compilerTranscriptProblems ordinal (\termination -> termination == CompilerExited 0) True transcript
+      <> [ runFinding "SEMANTIC-FACTS" "the successful compiler witness does not contain the exact complete semantic-fact universe"
+         | facts /= requiredCompilerFactUniverse
+         ]
+  refusalEvidenceProblems key transcript observedStage observedDiagnostic =
+    [ runFinding "EVIDENCE-BRANCH" "refusal evidence is attached to a non-refusal run key"
+    | compilerRunKeyExpectedOutcome key /= CompilerObservedRefusal
+    ]
+      <> case compilerRunExpectationDetails key of
+        Just (Left (expectedStage, expectedDiagnostic)) ->
+          [ runFinding "REFUSAL-STAGE" "the observed compiler refusal stage does not match the independent run plan"
+          | observedStage /= expectedStage
+          ]
+            <> [ runFinding "REFUSAL-DIAGNOSTIC" "the observed compiler diagnostic identity does not match the independent run plan"
+               | observedDiagnostic /= expectedDiagnostic
+               ]
+        _ -> []
+      <> [ runFinding "REFUSAL-DIAGNOSTIC" "the observed compiler diagnostic identity is not lowercase SHA-256"
+         | not (compilerHexIdentity 64 observedDiagnostic)
+         ]
+      <> compilerTranscriptProblems ordinal compilerRefusalTermination False transcript
+  fixtureEvidenceProblems key transcript observedHarness observedCase observedResult =
+    [ runFinding "EVIDENCE-BRANCH" "fixture evidence is attached to a non-fixture run key"
+    | compilerRunKeyExpectedOutcome key /= CompilerObservedFixture
+    ]
+      <> case compilerRunExpectationDetails key of
+        Just (Right (expectedHarness, expectedCase, expectedResult, expectedExit)) ->
+          [ runFinding "FIXTURE-HARNESS" "the observed fixture harness does not match the independent run plan"
+          | observedHarness /= expectedHarness
+          ]
+            <> [ runFinding "FIXTURE-CASE" "the observed fixture case does not match the independent run plan"
+               | observedCase /= expectedCase
+               ]
+            <> [ runFinding "FIXTURE-RESULT" "the observed fixture result identity does not match the independent run plan"
+               | observedResult /= expectedResult
+               ]
+            <> compilerTranscriptProblems ordinal (\termination -> termination == CompilerExited expectedExit) False transcript
+        _ -> compilerTranscriptProblems ordinal (const False) False transcript
+      <> [ runFinding "FIXTURE-RESULT" "the observed fixture result identity is not lowercase SHA-256"
+         | not (compilerHexIdentity 64 observedResult)
+         ]
+
+compilerRunKeyExpectedOutcome :: CompilerRunKey -> CompilerObservedOutcome
+compilerRunKeyExpectedOutcome =
+  foldCompilerRunKey $ \_ _ _ _ _ _ _ expected -> case expected of
+    CompilerSuccessExpectation -> CompilerObservedSuccess
+    CompilerRefusalExpectation {} -> CompilerObservedRefusal
+    CompilerFixtureExpectation {} -> CompilerObservedFixture
+
+compilerRunExpectationDetails
+  :: CompilerRunKey
+  -> Maybe
+       ( Either
+           (CompilerFailureStage, Text)
+           (Text, Text, Text, Int)
+       )
+compilerRunExpectationDetails =
+  foldCompilerRunKey $ \_ _ _ _ _ _ _ expected -> case expected of
+    CompilerSuccessExpectation -> Nothing
+    CompilerRefusalExpectation stage diagnostic -> Just (Left (stage, diagnostic))
+    CompilerFixtureExpectation harness caseLabel result expectedExit ->
+      Just (Right (harness, caseLabel, result, expectedExit))
+
+compilerRefusalTermination :: CompilerProcessTermination -> Bool
+compilerRefusalTermination termination = case termination of
+  CompilerExited code -> compilerExitCodeValid code && code /= 0
+  _ -> False
+
+compilerExitCodeValid :: Int -> Bool
+compilerExitCodeValid code = code >= 0 && code <= 255
+
+compilerTranscriptProblems
+  :: Int
+  -> (CompilerProcessTermination -> Bool)
+  -> Bool
+  -> CompilerProcessTranscript
+  -> [Finding]
+compilerTranscriptProblems ordinal terminationMatches productRequired transcript =
+  foldCompilerProcessTranscript inspect transcript
+ where
+  inspect termination stdoutBytes stdoutDigest stderrBytes stderrDigest productDigest resourceDigest =
+    compilerTerminationProblems termination
+      <> transcriptStreamProblems "STDOUT" stdoutBytes stdoutDigest
+      <> transcriptStreamProblems "STDERR" stderrBytes stderrDigest
+      <> [ transcriptFinding "PRODUCT" "the product identity is inconsistent with the evidence branch"
+         | not (compilerProductMatches productRequired productDigest)
+         ]
+      <> [ transcriptFinding "RESOURCE-OBSERVATION" "the compiler resource-limit observation identity is not lowercase SHA-256"
+         | not (compilerHexIdentity 64 resourceDigest)
+         ]
+  compilerTerminationProblems termination
+    | terminationMatches termination = []
+    | otherwise =
+        [ case termination of
+            CompilerExited _ -> transcriptFinding "EXIT" "the normal process exit status is inconsistent with the evidence branch"
+            CompilerSignalled _ -> transcriptFinding "SIGNAL" "the compiler process was terminated by a signal"
+            CompilerTimedOut -> transcriptFinding "TIMEOUT" "the compiler process exceeded its time limit"
+            CompilerResourceLimited _ -> transcriptFinding "RESOURCE-LIMIT" "the compiler process exceeded an independently supervised resource limit"
+            CompilerOutputLimited _ -> transcriptFinding "OUTPUT-LIMIT" "the compiler process exceeded a bounded output limit"
+            CompilerSpawnFailed -> transcriptFinding "SPAWN" "the compiler process could not be started"
+        ]
+  transcriptStreamProblems label byteCount digest =
+    [ transcriptFinding (label <> "-LENGTH") "a compiler transcript stream has a negative or over-limit byte count"
+    | byteCount < 0 || byteCount > maximumCompilerTranscriptBytes
+    ]
+      <> [ transcriptFinding (label <> "-DIGEST") "a compiler transcript stream identity is not lowercase SHA-256"
+         | not (compilerHexIdentity 64 digest)
+         ]
+  transcriptFinding suffix detail =
+    acquiredCompilerFinding
+      ("SRC-COMPILER-ACQUIRED-TRANSCRIPT-" <> suffix)
+      (detail <> "; run-ordinal=" <> Text.pack (show ordinal))
+
+maximumCompilerTranscriptBytes :: Int
+maximumCompilerTranscriptBytes = 1024 * 1024
+
+requiredCompilerFactUniverse :: [RequiredCompilerFact]
+requiredCompilerFactUniverse =
+  [ CompilerParseSucceeded
+  , ConditionalPreprocessingClosed
+  , CompileTimeExecutionFeaturesAbsent
+  , ImportsRenamed
+  , CallsResolved
+  , IndirectCallsClosed
+  , ControlFlowClosed
+  , FilesystemEffectsClassified
+  , ExternalProcessAndFfiEffectsClassified
+  , TrackedContentProvenanceFlowsClosed
+  , ProductBehaviourSinksClassified
+  , DynamicCodeAndPluginLoadingAbsent
+  ]
+
+compilerProductMatches :: Bool -> Maybe Text -> Bool
+compilerProductMatches productRequired productDigest = case (productRequired, productDigest) of
+  (True, Just digest) -> compilerHexIdentity 64 digest
+  (False, Nothing) -> True
+  _ -> False
+
+compilerRunPathValid :: FilePath -> Bool
+compilerRunPathValid path =
+  not (null path)
+    && not (isAbsolute path)
+    && '\\' `notElem` path
+    && all (`notElem` ["", ".", ".."]) (splitCompilerRunPath path)
+
+splitCompilerRunPath :: String -> [String]
+splitCompilerRunPath value = case break (== '/') value of
+  (segment, []) -> [segment]
+  (segment, _ : remaining) -> segment : splitCompilerRunPath remaining
+
+compilerHexIdentity :: Int -> Text -> Bool
+compilerHexIdentity width value =
+  Text.length value == width
+    && Text.all (\character -> (character >= '0' && character <= '9') || (character >= 'a' && character <= 'f')) value
+
+hasDuplicates :: Eq value => [value] -> Bool
+hasDuplicates values = length values /= length (List.nub values)
+
+acquiredCompilerFinding :: Text -> Text -> Finding
+acquiredCompilerFinding code detail =
+  finding code "compiler-source-acquisition" detail
+
+compilerAcquisitionProblemDetail :: CompilerAcquisitionProblem -> Text
+compilerAcquisitionProblemDetail problem =
+  case problem of
+    CompilerGraphFactsUnavailable _ ->
+      "the exact compiler-derived source graph facts were not acquired"
+    CompilerSubjectOutcomeRegistryUnavailable _ ->
+      "the closed subject/outcome registry was not acquired"
+    CompilerSubjectContractRejected _ code subject detail ->
+      "subject-contract-code="
+        <> code
+        <> "; subject="
+        <> Text.pack subject
+        <> "; "
+        <> detail
+    CompilerElaboratedMultiRunUnavailable _ ->
+      "the authenticated elaborated multi-run plan was not acquired"
+    CompilerToolchainAuthorityUnavailable _ ->
+      "verified toolchain-root authority was not acquired"
+    CompilerExecutionSupervisionUnavailable _ ->
+      "supervised compiler execution was not acquired"
+    CompilerSemanticClosureUnavailable _ ->
+      "compiler-derived semantic closure was not acquired"
+
+compilerSourceAttemptProblems :: CompilerSourceAttempt -> [CompilerAcquisitionProblem]
+compilerSourceAttemptProblems =
+  foldCompilerSourceAttempt
+    (\_ problems -> NonEmpty.toList problems)
+    (\_ _ -> [])
+
+compilerAcquisitionProblemCode :: CompilerAcquisitionProblem -> Text
+compilerAcquisitionProblemCode problem =
+  case problem of
+    CompilerGraphFactsUnavailable _ -> "SRC-CONSUMER-COMPILER-GRAPH-UNAVAILABLE"
+    CompilerSubjectOutcomeRegistryUnavailable _ -> "SRC-COMPILER-SUBJECT-OUTCOME-REGISTRY-UNAVAILABLE"
+    CompilerSubjectContractRejected _ code _ _ -> code
+    CompilerElaboratedMultiRunUnavailable _ -> "SRC-COMPILER-ELABORATED-MULTI-RUN-UNAVAILABLE"
+    CompilerToolchainAuthorityUnavailable _ -> "SRC-COMPILER-TOOLCHAIN-UNAUTHENTICATED"
+    CompilerExecutionSupervisionUnavailable _ -> "SRC-COMPILER-EXECUTION-UNSUPERVISED"
+    CompilerSemanticClosureUnavailable _ -> "SRC-COMPILER-SEMANTIC-CLOSURE-UNAVAILABLE"
+
+compilerAcquisitionProblemSnapshotIdentity :: CompilerAcquisitionProblem -> Text
+compilerAcquisitionProblemSnapshotIdentity problem =
+  case problem of
+    CompilerGraphFactsUnavailable identity -> identity
+    CompilerSubjectOutcomeRegistryUnavailable identity -> identity
+    CompilerSubjectContractRejected identity _ _ _ -> identity
+    CompilerElaboratedMultiRunUnavailable identity -> identity
+    CompilerToolchainAuthorityUnavailable identity -> identity
+    CompilerExecutionSupervisionUnavailable identity -> identity
+    CompilerSemanticClosureUnavailable identity -> identity
+
+-- | Project a run key only through an eliminator.  In particular there is no
+-- constructor or record-update surface which can change a row's expected
+-- outcome while retaining its other identities.
+foldCompilerRunKey
+  :: ( Text
+       -> FilePath
+       -> Text
+       -> Text
+       -> Text
+       -> Text
+       -> Text
+       -> CompilerRunExpectation
+       -> result
+     )
+  -> CompilerRunKey
+  -> result
+foldCompilerRunKey project (CompilerRunKey snapshot path objectId component configuration generatedInputs compilerArgv expected) =
+  project snapshot path objectId component configuration generatedInputs compilerArgv expected
+
+foldCompilerRunWitness
+  :: ( CompilerRunKey
+       -> Text
+       -> Text
+       -> Text
+       -> CompilerProcessTranscript
+       -> [RequiredCompilerFact]
+       -> result
+     )
+  -> ( CompilerRunKey
+       -> Text
+       -> Text
+       -> Text
+       -> CompilerProcessTranscript
+       -> CompilerFailureStage
+       -> Text
+       -> result
+     )
+  -> ( CompilerRunKey
+       -> Text
+       -> Text
+       -> Text
+       -> CompilerProcessTranscript
+       -> Text
+       -> Text
+       -> Text
+       -> result
+     )
+  -> CompilerRunWitness
+  -> result
+foldCompilerRunWitness onSuccess onRefusal onFixture witness =
+  case witness of
+    CompilerSuccessWitness key elaboration toolchainAuthority supervisor transcript facts ->
+      onSuccess key elaboration toolchainAuthority supervisor transcript facts
+    CompilerRefusalWitness key elaboration toolchainAuthority supervisor transcript stage diagnostic ->
+      onRefusal key elaboration toolchainAuthority supervisor transcript stage diagnostic
+    CompilerFixtureWitness key elaboration toolchainAuthority supervisor transcript harness caseLabel result ->
+      onFixture key elaboration toolchainAuthority supervisor transcript harness caseLabel result
+
+foldCompilerProcessTranscript
+  :: ( CompilerProcessTermination
+       -> Int
+       -> Text
+       -> Int
+       -> Text
+       -> Maybe Text
+       -> Text
+       -> result
+     )
+  -> CompilerProcessTranscript
+  -> result
+foldCompilerProcessTranscript project (CompilerProcessTranscript termination stdoutBytes stdoutDigest stderrBytes stderrDigest productDigest resourceDigest) =
+  project termination stdoutBytes stdoutDigest stderrBytes stderrDigest productDigest resourceDigest
+
+foldAcquiredCompilerRunPlan
+  :: (Text -> Text -> [CompilerRunKey] -> result)
+  -> AcquiredCompilerRunPlan
+  -> result
+foldAcquiredCompilerRunPlan project (AcquiredCompilerRunPlan snapshot planIdentity expectedKeys) =
+  project snapshot planIdentity expectedKeys
+
+foldAcquiredCompilerFacts
+  :: (AcquiredCompilerRunPlan -> [CompilerRunWitness] -> result)
+  -> AcquiredCompilerFacts
+  -> result
+foldAcquiredCompilerFacts project (AcquiredCompilerFacts plan witnesses) =
+  project plan witnesses
+
+#if defined(VALIDATION_SOURCE_CLOSURE_INTERNAL_TEST_ACQUIRE)
+-- Direct-source acquired-branch fixtures.  They are compiled only into the
+-- package-hidden oracle and prevent a future producer from relying on a weak
+-- "non-empty witness" check while the real acquisition path remains red.
+compilerSourceInternalTestAcquiredBranchProblems :: [(Text, [Text])]
+compilerSourceInternalTestAcquiredBranchProblems =
+  [ ("valid-mixed", codes (acquiredAttempt validPlan validWitnesses))
+  , ("empty", codes (acquiredAttempt (testPlan []) []))
+  , ("duplicate-plan", codes (acquiredAttempt (testPlan [successKey, successKey]) [successWitness, successWitness]))
+  , ("inventory-mismatch", codes (acquiredAttempt (testPlan [successKey]) []))
+  , ("run-bindings", codes (acquiredAttempt (testPlan [invalidKey]) [invalidSuccessWitness]))
+  , ("success-facts", codes (acquiredAttempt (testPlan [successKey]) [successWitnessWithFacts []]))
+  , ("success-product", codes (acquiredAttempt (testPlan [successKey]) [successWitnessWithTranscript (successTranscript Nothing)]))
+  , ("refusal-stage", codes (acquiredAttempt (testPlan [refusalKey]) [refusalWitnessWithStage CompilerParseFailure]))
+  , ("refusal-diagnostic", codes (acquiredAttempt (testPlan [refusalKey]) [refusalWitnessWithDiagnostic (testDigest '9')]))
+  , ("refusal-signal", codes (acquiredAttempt (testPlan [refusalKey]) [refusalWitnessWithTranscript (refusalTranscript (CompilerSignalled 9))]))
+  , ("refusal-timeout", codes (acquiredAttempt (testPlan [refusalKey]) [refusalWitnessWithTranscript (refusalTranscript CompilerTimedOut)]))
+  , ("refusal-output-limit", codes (acquiredAttempt (testPlan [refusalKey]) [refusalWitnessWithTranscript (refusalTranscript (CompilerOutputLimited CompilerStderr))]))
+  , ("fixture-result", codes (acquiredAttempt (testPlan [fixtureKey]) [fixtureWitnessWithResult (testDigest '8')]))
+  , ("fixture-exit", codes (acquiredAttempt (testPlan [fixtureKey]) [fixtureWitnessWithTranscript (fixtureTranscript (CompilerExited 1))]))
+  , ("wrong-branch", codes (acquiredAttempt (testPlan [refusalKey]) [successWitnessFor refusalKey]))
+  ]
+ where
+  snapshot = Text.replicate 64 "a"
+  planIdentity = testDigest 'b'
+  diagnostic =
+    AcquiredCompilerSourceGraph
+      snapshot
+      CheckResult
+        { checkName = closedCompilerSourceCheckName
+        , checkObservations = [observation "compiler-acquired-test" "observed"]
+        , checkFindings = []
+        }
+  closed = case closeCompilerSourceGraph diagnostic of
+    Left problem -> error ("compiler internal fixture could not close its clean diagnostic: " <> show problem)
+    Right value -> value
+  acquiredAttempt plan witnesses =
+    CompilerSourceAcquired closed (AcquiredCompilerFacts plan witnesses)
+  testPlan keys = AcquiredCompilerRunPlan snapshot planIdentity keys
+  validPlan = testPlan [successKey, refusalKey, fixtureKey]
+  validWitnesses = [successWitness, refusalWitness, fixtureWitness]
+  successKey =
+    CompilerRunKey
+      snapshot
+      "src/validation-kernel/Amoebius/Validation/Types.hs"
+      (Text.replicate 40 "1")
+      "lib:validation-kernel"
+      (testDigest '2')
+      (testDigest '3')
+      (testDigest '4')
+      CompilerSuccessExpectation
+  refusalKey =
+    CompilerRunKey
+      snapshot
+      "test/compile-negative/Example.hs"
+      (Text.replicate 40 "5")
+      "test:compile-negative-example"
+      (testDigest '6')
+      (testDigest '7')
+      (testDigest '8')
+      (CompilerRefusalExpectation CompilerTypecheckFailure refusalDiagnostic)
+  fixtureKey =
+    CompilerRunKey
+      snapshot
+      "test/validation-kernel/ExampleFixture.hs"
+      (Text.replicate 40 "9")
+      "test:validation-example-fixture"
+      (testDigest 'c')
+      (testDigest 'd')
+      (testDigest 'e')
+      (CompilerFixtureExpectation fixtureHarness fixtureCase fixtureResult 0)
+  invalidKey =
+    CompilerRunKey
+      (testDigest 'f')
+      "../Example.hs"
+      "not-an-object"
+      ""
+      "configuration"
+      "generated-inputs"
+      "argv"
+      CompilerSuccessExpectation
+  successTranscript productDigest =
+    CompilerProcessTranscript
+      (CompilerExited 0)
+      0
+      (testDigest '0')
+      0
+      (testDigest '1')
+      productDigest
+      (testDigest '2')
+  refusalTranscript termination =
+    CompilerProcessTranscript
+      termination
+      0
+      (testDigest '3')
+      1
+      (testDigest '4')
+      Nothing
+      (testDigest '5')
+  fixtureTranscript termination =
+    CompilerProcessTranscript
+      termination
+      1
+      (testDigest '6')
+      0
+      (testDigest '7')
+      Nothing
+      (testDigest '8')
+  successWitness = successWitnessWithFacts requiredCompilerFactUniverse
+  successWitnessWithFacts facts =
+    CompilerSuccessWitness
+      successKey
+      planIdentity
+      (testDigest '9')
+      (testDigest 'a')
+      (successTranscript (Just (testDigest 'b')))
+      facts
+  successWitnessWithTranscript transcript =
+    CompilerSuccessWitness
+      successKey
+      planIdentity
+      (testDigest '9')
+      (testDigest 'a')
+      transcript
+      requiredCompilerFactUniverse
+  successWitnessFor key =
+    CompilerSuccessWitness
+      key
+      planIdentity
+      (testDigest '9')
+      (testDigest 'a')
+      (successTranscript (Just (testDigest 'b')))
+      requiredCompilerFactUniverse
+  invalidSuccessWitness =
+    CompilerSuccessWitness
+      invalidKey
+      "elaboration"
+      "toolchain"
+      "supervisor"
+      (successTranscript (Just (testDigest 'b')))
+      requiredCompilerFactUniverse
+  refusalDiagnostic = testDigest 'f'
+  refusalWitness =
+    CompilerRefusalWitness
+      refusalKey
+      planIdentity
+      (testDigest '9')
+      (testDigest 'a')
+      (refusalTranscript (CompilerExited 1))
+      CompilerTypecheckFailure
+      refusalDiagnostic
+  refusalWitnessWithStage stage =
+    CompilerRefusalWitness refusalKey planIdentity (testDigest '9') (testDigest 'a') (refusalTranscript (CompilerExited 1)) stage refusalDiagnostic
+  refusalWitnessWithDiagnostic digest =
+    CompilerRefusalWitness refusalKey planIdentity (testDigest '9') (testDigest 'a') (refusalTranscript (CompilerExited 1)) CompilerTypecheckFailure digest
+  refusalWitnessWithTranscript transcript =
+    CompilerRefusalWitness refusalKey planIdentity (testDigest '9') (testDigest 'a') transcript CompilerTypecheckFailure refusalDiagnostic
+  fixtureHarness = "validation-example-fixture-harness"
+  fixtureCase = "example-fixture-case"
+  fixtureResult = testDigest '0'
+  fixtureWitness =
+    CompilerFixtureWitness
+      fixtureKey
+      planIdentity
+      (testDigest '9')
+      (testDigest 'a')
+      (fixtureTranscript (CompilerExited 0))
+      fixtureHarness
+      fixtureCase
+      fixtureResult
+  fixtureWitnessWithResult result =
+    CompilerFixtureWitness fixtureKey planIdentity (testDigest '9') (testDigest 'a') (fixtureTranscript (CompilerExited 0)) fixtureHarness fixtureCase result
+  fixtureWitnessWithTranscript transcript =
+    CompilerFixtureWitness fixtureKey planIdentity (testDigest '9') (testDigest 'a') transcript fixtureHarness fixtureCase fixtureResult
+  codes = map findingCode . checkFindings . compilerSourceAttemptCheck
+
+compilerSourceInternalTestClosedGraphProblems :: [(Text, [Text])]
+compilerSourceInternalTestClosedGraphProblems =
+  [ ("valid", closeCodes cleanDiagnostic)
+  , ("wrong-name", closeCodes (AcquiredCompilerSourceGraph snapshot (cleanResult {checkName = "compiler-source-graph-diagnostic"})))
+  , ("retained-finding", closeCodes (AcquiredCompilerSourceGraph snapshot (cleanResult {checkFindings = [finding "REFUSAL" "compiler-source-acquisition" "retained"]})))
+  ]
+ where
+  snapshot = testDigest 'a'
+  cleanResult =
+    CheckResult
+      { checkName = closedCompilerSourceCheckName
+      , checkObservations = [observation "compiler-acquired-test" "observed"]
+      , checkFindings = []
+      }
+  cleanDiagnostic = AcquiredCompilerSourceGraph snapshot cleanResult
+  closeCodes diagnostic = case closeCompilerSourceGraph diagnostic of
+    Left problem -> [findingCode problem]
+    Right _ -> []
+
+-- Direct-source test projection.  Constructors stay absent from the package
+-- facade and from the packaged internal module; the oracle can nevertheless
+-- prove that every authority dimension survives all three opaque layers.
+compilerSourceInternalTestTypedBindingProjection :: [(Text, Text)]
+compilerSourceInternalTestTypedBindingProjection =
+  [ ("success-key", renderKey successKey)
+  , ("refusal-key", renderKey refusalKey)
+  , ("fixture-key", renderKey fixtureKey)
+  , ("success-witness", renderWitness successWitness)
+  , ("refusal-witness", renderWitness refusalWitness)
+  , ("fixture-witness", renderWitness fixtureWitness)
+  , ("acquired-facts", renderFacts facts)
+  ]
+ where
+  snapshot = "snapshot-identity"
+  planIdentity = "plan-identity"
+  successKey =
+    CompilerRunKey
+      snapshot
+      "src/Example.hs"
+      "source-object-identity"
+      "lib:example"
+      "configuration-identity"
+      "generated-input-set-identity"
+      "exact-compiler-argv-identity"
+      CompilerSuccessExpectation
+  refusalKey =
+    CompilerRunKey
+      snapshot
+      "test/compile-negative/Example.hs"
+      "source-object-identity"
+      "test:compile-negative-example"
+      "configuration-identity"
+      "generated-input-set-identity"
+      "exact-compiler-argv-identity"
+      (CompilerRefusalExpectation CompilerTypecheckFailure "expected-diagnostic-identity")
+  fixtureKey =
+    CompilerRunKey
+      snapshot
+      "test/ExampleFixture.hs"
+      "source-object-identity"
+      "test:example-fixture"
+      "configuration-identity"
+      "generated-input-set-identity"
+      "exact-compiler-argv-identity"
+      (CompilerFixtureExpectation "fixture-harness" "fixture-case" "expected-result-identity" 0)
+  transcript termination productDigest =
+    CompilerProcessTranscript
+      termination
+      1
+      "stdout-identity"
+      2
+      "stderr-identity"
+      productDigest
+      "resource-observation-identity"
+  successWitness =
+    CompilerSuccessWitness
+      successKey
+      planIdentity
+      "verified-toolchain-root-identity"
+      "supervisor-observation-identity"
+      (transcript (CompilerExited 0) (Just "product-identity"))
+      [CompilerParseSucceeded, ConditionalPreprocessingClosed]
+  refusalWitness =
+    CompilerRefusalWitness
+      refusalKey
+      planIdentity
+      "verified-toolchain-root-identity"
+      "supervisor-observation-identity"
+      (transcript (CompilerExited 1) Nothing)
+      CompilerTypecheckFailure
+      "expected-diagnostic-identity"
+  fixtureWitness =
+    CompilerFixtureWitness
+      fixtureKey
+      planIdentity
+      "verified-toolchain-root-identity"
+      "supervisor-observation-identity"
+      (transcript (CompilerExited 0) Nothing)
+      "fixture-harness"
+      "fixture-case"
+      "expected-result-identity"
+  facts =
+    AcquiredCompilerFacts
+      (AcquiredCompilerRunPlan snapshot planIdentity [successKey, refusalKey, fixtureKey])
+      [successWitness, refusalWitness, fixtureWitness]
+  renderExpectation expected = case expected of
+    CompilerSuccessExpectation -> "success"
+    CompilerRefusalExpectation stage diagnostic ->
+      Text.intercalate ":" ["refusal", Text.pack (show stage), diagnostic]
+    CompilerFixtureExpectation harness caseLabel result exitCode ->
+      Text.intercalate ":" ["fixture", harness, caseLabel, result, Text.pack (show exitCode)]
+  renderKey =
+    foldCompilerRunKey $ \snapshotIdentity path objectId component configuration generatedInputs compilerArgv expected ->
+      Text.intercalate
+        "\t"
+        [ snapshotIdentity
+        , Text.pack path
+        , objectId
+        , component
+        , configuration
+        , generatedInputs
+        , compilerArgv
+        , renderExpectation expected
+        ]
+  renderWitness =
+    foldCompilerRunWitness
+      (\runKey elaboration toolchainAuthority supervisor processTranscript compilerFacts ->
+        Text.intercalate "\t" ["success", renderKey runKey, elaboration, toolchainAuthority, supervisor, renderTranscript processTranscript, Text.intercalate "," (map (Text.pack . show) compilerFacts)]
+      )
+      (\runKey elaboration toolchainAuthority supervisor processTranscript stage diagnostic ->
+        Text.intercalate "\t" ["refusal", renderKey runKey, elaboration, toolchainAuthority, supervisor, renderTranscript processTranscript, Text.pack (show stage), diagnostic]
+      )
+      (\runKey elaboration toolchainAuthority supervisor processTranscript harness caseLabel result ->
+        Text.intercalate "\t" ["fixture", renderKey runKey, elaboration, toolchainAuthority, supervisor, renderTranscript processTranscript, harness, caseLabel, result]
+      )
+  renderTranscript =
+    foldCompilerProcessTranscript $ \termination stdoutBytes stdoutDigest stderrBytes stderrDigest productDigest resourceDigest ->
+      Text.intercalate
+        ":"
+        [ Text.pack (show termination)
+        , Text.pack (show stdoutBytes)
+        , stdoutDigest
+        , Text.pack (show stderrBytes)
+        , stderrDigest
+        , maybe "none" id productDigest
+        , resourceDigest
+        ]
+  renderFacts =
+    foldAcquiredCompilerFacts $ \plan witnesses ->
+      foldAcquiredCompilerRunPlan
+        (\snapshotIdentity acquiredPlanIdentity expectedKeys ->
+          Text.intercalate
+            "\t"
+            [ snapshotIdentity
+            , acquiredPlanIdentity
+            , Text.intercalate ";" (map renderKey expectedKeys)
+            , Text.intercalate ";" (map renderWitness witnesses)
+            ]
+        )
+        plan
+
+testDigest :: Char -> Text
+testDigest character = Text.replicate 64 (Text.singleton character)
+#endif
 
 acquiredCompilerSnapshotIdentity :: AcquiredCompilerSourceGraph -> Text
 acquiredCompilerSnapshotIdentity (AcquiredCompilerSourceGraph identity _) =
@@ -136,30 +1184,73 @@ acquiredCompilerSourceCheck (AcquiredCompilerSourceGraph _ result) =
 -- | Acquired source binding alone is insufficient. This path deliberately does
 -- not invoke GHC until opaque authenticated elaboration, toolchain, subject-role
 -- and supervisor inputs exist.
+acquireCompilerSourceGraph
+  :: AcquiredSourceSnapshot
+  -> IO CompilerSourceAttempt
+acquireCompilerSourceGraph acquired =
+  pure
+    ( CompilerSourceRefused
+        diagnostic
+        (compilerAcquisitionProblems identity registryReady contractProblems)
+    )
+ where
+  (diagnostic, identity, registryReady, contractProblems) = prepareAcquiredCompilerSourceGraph acquired
+
 analyzeAcquiredCompilerSourceGraph
   :: AcquiredSourceSnapshot
   -> IO AcquiredCompilerSourceGraph
 analyzeAcquiredCompilerSourceGraph acquired =
-  pure (assembleAcquiredCompilerSourceGraph identity result)
+ pure diagnostic
+ where
+  (diagnostic, _, _, _) = prepareAcquiredCompilerSourceGraph acquired
+
+prepareAcquiredCompilerSourceGraph
+  :: AcquiredSourceSnapshot
+  -> (AcquiredCompilerSourceGraph, Text, Bool, [CompilerSubjectContractProblem])
+prepareAcquiredCompilerSourceGraph acquired =
+  (assembleAcquiredCompilerSourceGraph identity result, identity, registryReady, contractProblems)
  where
   snapshot = acquiredSourceSnapshot acquired
   identity = mapAcquiredSnapshotIdentity (snapshotIdentity snapshot)
-  (entryCount, consumerComposition, consumerObservations, consumerFindings, envelopeFindings) =
+  ( entryCount
+    , consumerComposition
+    , registryObservation
+    , registryReady
+    , contractProblems
+    , consumerObservations
+    , consumerFindings
+    , contractFindings
+    , envelopeFindings
+    ) =
     case boundedPrefix maximumAcquiredCompilerEntries (snapshotEntries snapshot) of
       PrefixExceeded observed ->
         ( renderAcquiredExceededEntryCount observed
         , acquiredExceededComposition
+        , "refused"
+        , False
+        , []
+        , []
         , []
         , []
         , acquiredEnvelopeFindings observed
         )
       PrefixWithin boundedEntries ->
         let consumerCheck = sourceConsumerGraphCheck (analyzeSourceConsumerGraph snapshot)
+            registryCheck = compilerSubjectRegistryCheck (deriveCompilerSubjectRegistry snapshot)
+            registryFindings = checkFindings registryCheck
+            contractAttempt = acquireCompilerSubjectContract acquired
+            acquiredContract = either (const Nothing) Just contractAttempt
+            exactContractProblems = either NonEmpty.toList (const []) contractAttempt
+            registryDigest = maybe "refused" compilerSubjectContractDigest acquiredContract
             projectedEntries = projectAcquiredBoundedEntries boundedEntries
          in ( renderAcquiredWithinEntryCount (length projectedEntries)
             , acquiredWithinComposition
+            , registryDigest
+            , maybe False (const (null registryFindings)) acquiredContract
+            , exactContractProblems
             , retainAcquiredConsumerObservations (checkObservations consumerCheck)
             , retainAcquiredConsumerFindings (checkFindings consumerCheck)
+            , registryFindings
             , []
             )
   result =
@@ -168,10 +1259,40 @@ analyzeAcquiredCompilerSourceGraph acquired =
       , checkObservations =
           assembleAcquiredObservations
             consumerObservations
-            (acquiredLocalObservations identity entryCount consumerComposition)
+            (acquiredLocalObservations identity entryCount consumerComposition registryObservation)
       , checkFindings =
-          assembleAcquiredFindings consumerFindings envelopeFindings acquiredRefusalFindings
+          assembleAcquiredFindings
+            consumerFindings
+            (contractFindings <> envelopeFindings)
+            (acquiredRefusalFindings registryReady)
       }
+
+-- This producer has no success branch until all four external authority
+-- products and the semantic graph exist.  The leading graph problem records
+-- the still-open SourceConsumerGraph obligation; the optional registry problem
+-- is retained only when the repository-scale two-way assignment itself fails.
+compilerAcquisitionProblems
+  :: Text
+  -> Bool
+  -> [CompilerSubjectContractProblem]
+  -> NonEmpty CompilerAcquisitionProblem
+compilerAcquisitionProblems identity registryReady contractProblems =
+  CompilerGraphFactsUnavailable identity
+    :| ( [CompilerSubjectOutcomeRegistryUnavailable identity | not registryReady]
+           <> map (compilerSubjectContractAcquisitionProblem identity) contractProblems
+           <> [ CompilerElaboratedMultiRunUnavailable identity
+              , CompilerToolchainAuthorityUnavailable identity
+              , CompilerExecutionSupervisionUnavailable identity
+              , CompilerSemanticClosureUnavailable identity
+              ]
+       )
+
+compilerSubjectContractAcquisitionProblem
+  :: Text
+  -> CompilerSubjectContractProblem
+  -> CompilerAcquisitionProblem
+compilerSubjectContractAcquisitionProblem identity =
+  foldCompilerSubjectContractProblem (CompilerSubjectContractRejected identity)
 
 assembleAcquiredCompilerSourceGraph :: Text -> CheckResult -> AcquiredCompilerSourceGraph
 assembleAcquiredCompilerSourceGraph identity result =
@@ -307,14 +1428,14 @@ acquiredDiagnosticCheckName = "acquired-compiler-source-graph-refusal-mutant"
 acquiredDiagnosticCheckName = "acquired-compiler-source-graph-refusal"
 #endif
 
-acquiredLocalObservations :: Text -> Text -> Text -> [Observation]
-acquiredLocalObservations identity entryCount consumerComposition =
+acquiredLocalObservations :: Text -> Text -> Text -> Text -> [Observation]
+acquiredLocalObservations identity entryCount consumerComposition registryObservation =
   orderAcquiredLocalObservations
     ( concat
         [ acquiredLocalObservation 1 "source-compiler.snapshot" identity
         , acquiredLocalObservation 2 "source-compiler.inventory-entry-count" entryCount
         , acquiredLocalObservation 3 "source-compiler.consumer-graph-composition" consumerComposition
-        , acquiredLocalObservation 4 "source-compiler.subject-role-registry" "absent"
+        , acquiredLocalObservation 4 "source-compiler.subject-role-registry" registryObservation
         , acquiredLocalObservation 5 "source-compiler.elaborated-multi-run-plan" "absent"
         , acquiredLocalObservation 6 "source-compiler.toolchain-authentication" "absent"
         , acquiredLocalObservation 7 "source-compiler.execution" "not-attempted"
@@ -438,11 +1559,14 @@ orderAcquiredResultFindings = reverse
 orderAcquiredResultFindings = id
 #endif
 
-acquiredRefusalFindings :: [Finding]
--- The acquired wrapper has no success constructor or discharge branch in this
--- component. Each mandatory residue is independently retained so a selective
--- omission is an atomic changed-production subject.
-acquiredRefusalFindings =
+acquiredRefusalFindings :: Bool -> [Finding]
+-- The current production producer still has no discharge branch.  The opaque
+-- acquired constructor exists for the eventual supervised producer and is
+-- independently checked above; this refusal list remains the only branch
+-- reachable from 'acquireCompilerSourceGraph' today.  Each mandatory residue
+-- is independently retained so a selective omission is an atomic
+-- changed-production subject.
+acquiredRefusalFindings registryReady =
   [ findingValue
   | retainAcquiredRefusalFindings
   , findingValue <-
@@ -451,7 +1575,8 @@ acquiredRefusalFindings =
           "SRC-COMPILER-SUBJECT-OUTCOME-REGISTRY-UNAVAILABLE"
           "compiler-source-graph"
           "no closed Haskell SubjectRole/ExpectedCompilerOutcome registry is two-way complete against the acquired .hs inventory"
-      | retainAcquiredSubjectRegistryResidue
+      | not registryReady
+      , retainAcquiredSubjectRegistryResidue
       ]
         <> [ acquiredMandatoryFinding 2
             "SRC-COMPILER-ELABORATED-MULTI-RUN-UNAVAILABLE"

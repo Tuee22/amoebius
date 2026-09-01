@@ -29,7 +29,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 3.1: The artifact calculus ⏸️](#sprint-31-the-artifact-calculus-)
+- [Sprint 3.1: The artifact calculus](#sprint-31-the-artifact-calculus-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -72,8 +72,7 @@ materialization, consumption, and reap boundaries as one typed Haskell calculus.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 2](phase_02_repository_layout_conformance.md)
-**Forward-deferred:** [Phase 15](phase_15_compile_fail_harness.md) — compile-fail diagnostic harness; residue `UNVERIFIED` exact-reason expectation.
-**Gate:** `pb validate phase 03`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 03`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
@@ -100,12 +99,10 @@ materialization, consumption, and reap boundaries as one typed Haskell calculus.
 | `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 
-**The compile-fail harness this claim needs is owned later.** Each illegal twin below must be rejected for the
-exact reason a separately authored Haskell expectation names. The harness that classifies a GHC diagnostic to
-that precision is [Phase 15](phase_15_compile_fail_harness.md). Until it lands, a parse error, an unbound name,
-or a missing import would satisfy a twin, so each twin's exact-reason expectation is `UNVERIFIED` residue. The
-`Forward-deferred:` field records the reach; the relocation is owned by the plan rebalance rather than by this
-phase.
+**This phase owns its compile-negative evidence.** Each illegal twin below requires a phase-local, source-bound
+GHC invocation, a minimally different positive control, and a separately authored exact-diagnostic oracle.
+[Phase 15](phase_15_compile_fail_harness.md) later consolidates reusable compile-fail machinery; it is not a
+prerequisite of this earlier gate. Until the local runner and oracle exist, these rows remain `UNRESOLVED`.
 
 ## Doctrine adopted
 

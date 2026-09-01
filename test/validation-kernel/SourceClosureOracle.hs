@@ -720,6 +720,7 @@ sourceClosureSelectorIntentsDocumentationCatalog =
   , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_193_RETENTION_MUTANT", "governed documentation path catalog")
   , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_194_RETENTION_MUTANT", "governed documentation path catalog")
   , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_195_RETENTION_MUTANT", "governed documentation path catalog")
+  , ("VALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_196_RETENTION_MUTANT", "governed documentation path catalog")
   ]
 
 sourceClosureSelectorIntentsTraversal :: [(String, String)]
@@ -833,8 +834,8 @@ literalIntegrityProblems =
        | sha256Hex canonicalPbBytes
            /= "e210494d3ad4bcaad716daed5bb89cb5611107547e83eb018a6369e134cd5418"
        ]
-    <> [ "selector intent cardinality changed: expected=606; observed=" <> show (length sourceClosureSelectorIntents)
-       | length sourceClosureSelectorIntents /= 606
+    <> [ "selector intent cardinality changed: expected=607; observed=" <> show (length sourceClosureSelectorIntents)
+       | length sourceClosureSelectorIntents /= 607
        ]
     <> [ "duplicate selector intent: " <> selector
        | selector <- duplicateStrings sourceClosureSelectorNames
@@ -1920,6 +1921,7 @@ expectedDocumentationPathList :: [FilePath]
 expectedDocumentationPathList =
   [ "AGENTS.md"
   , "CLAUDE.md"
+  , "CRASH_SUMMARY.md"
   , "DEVELOPMENT_PLAN/README.md"
   , "DEVELOPMENT_PLAN/development_plan_gate_integrity.md"
   , "DEVELOPMENT_PLAN/development_plan_phase_model.md"

@@ -28,9 +28,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 17.1: Concrete model, semantic renderer, and calculus projection ⏸️](#sprint-171-concrete-model-semantic-renderer-and-calculus-projection-)
-- [Sprint 17.2: Explorer and TLC proof battery ⏸️](#sprint-172-explorer-and-tlc-proof-battery-)
-- [Sprint 17.3: Historical schedule/cutoff gate work ⏸️](#sprint-173-schedule-agreement-structural-cutoff-and-sealed-gate-)
+- [Sprint 17.1: Concrete model, semantic renderer, and calculus projection](#sprint-171-concrete-model-semantic-renderer-and-calculus-projection-)
+- [Sprint 17.2: Explorer and TLC proof battery](#sprint-172-explorer-and-tlc-proof-battery-)
+- [Sprint 17.3: Historical schedule/cutoff gate work](#sprint-173-schedule-agreement-structural-cutoff-and-sealed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -75,7 +75,7 @@ every foreign model-checker product generated only beneath `.build/**`. NOT VALI
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 16](phase_16_deterministic_sim_substrate.md)
-**Gate:** `pb validate phase 17`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 17`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

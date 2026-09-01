@@ -729,6 +729,11 @@ runPhaseContractOracle =
             (phasePath 10)
             (replaceIn (phasePath 10) blockedStatus activeStatus validCorpus)
         , expectFinding
+            "Contents navigation rejects lifecycle status icons"
+            "PLAN-CONTENTS-STATUS"
+            (phasePath 10)
+            (replaceIn (phasePath 10) "Synthetic contents." "Synthetic contents. 🔄" validCorpus)
+        , expectFinding
             "a second bare phase status cannot hide after the reset line"
             "PLAN-PHASE-STATUS"
             (phasePath 10)
@@ -1089,15 +1094,15 @@ runPhaseContractOracle =
                 (replaceIn (phasePath 9) (gateSummaryLine 9) ("**Gate:** " <> commandValue 9 <> "; see [Gate integrity](#gate-integrity). Validated — NOT VALIDATED.") validCorpus)
             )
         , expectFinding
-            "an HTML-comment-spliced reset is not the raw canonical gate summary"
+            "an HTML-comment-spliced link label is not the raw canonical gate summary"
             "PLAN-GATE-SUMMARY-COMMAND"
             (phasePath 9)
-            (replaceIn (phasePath 9) (gateSummaryLine 9) (Text.replace "NOT VALIDATED" "NOT<!-- hidden --> VALIDATED" (gateSummaryLine 9)) validCorpus)
+            (replaceIn (phasePath 9) (gateSummaryLine 9) (Text.replace "Gate integrity" "Gate<!-- hidden --> integrity" (gateSummaryLine 9)) validCorpus)
         , expectFinding
-            "a line-wrapped reset is not the raw canonical gate summary"
+            "a line-wrapped command/link summary is not the raw canonical gate summary"
             "PLAN-GATE-SUMMARY-COMMAND"
             (phasePath 9)
-            (replaceIn (phasePath 9) (gateSummaryLine 9) (Text.replace "NOT VALIDATED" "NOT\nVALIDATED" (gateSummaryLine 9)) validCorpus)
+            (replaceIn (phasePath 9) (gateSummaryLine 9) (Text.replace "; see" ";\nsee" (gateSummaryLine 9)) validCorpus)
         , expectFinding
             "substrate vocabulary is closed independently in phase and tracker projections"
             "PLAN-PROJECTION-VOCABULARY"
@@ -1892,7 +1897,7 @@ commandValue number = "`pb validate phase " <> formatPhase number <> "`"
 
 gateSummaryLine :: Int -> Text
 gateSummaryLine number =
-  "**Gate:** " <> commandValue number <> "; see [Gate integrity](#gate-integrity). NOT VALIDATED."
+  "**Gate:** " <> commandValue number <> "; see [Gate integrity](#gate-integrity)."
 
 sprintBlock :: Int -> Int -> Text -> Text -> Text
 sprintBlock phaseNumberValue sprintNumber status blocker =

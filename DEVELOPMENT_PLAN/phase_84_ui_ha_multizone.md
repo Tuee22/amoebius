@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 84.1: Run the multi-zone UI failure campaign ⏸️](#sprint-841-run-the-multi-zone-ui-failure-campaign-)
+- [Sprint 84.1: Run the multi-zone UI failure campaign](#sprint-841-run-the-multi-zone-ui-failure-campaign-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -78,7 +78,7 @@ Windows.
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 83](phase_83_ui_rollout_reconnect.md)
-**Gate:** `pb validate phase 84`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 84`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

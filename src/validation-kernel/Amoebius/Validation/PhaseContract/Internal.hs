@@ -2,22 +2,41 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.PhaseContract.Internal
-  ( checkPhaseAndTracker
+  ( AcquiredPhaseContractEvidence
+  , acquirePhaseContractEvidence
+  , acquiredPhaseContractEvidenceCheck
+  , acquiredPhaseContractEvidenceSnapshot
+  , checkPhaseAndTracker
   , checkPhaseContractStructure
   , checkPhaseContracts
+  , checkPhaseContractsAfterPass
   , checkPhaseContractsForPhase
   ) where
 
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
+import Amoebius.Validation.PhaseContract.Evidence.Internal
+  ( AcquiredPhaseContractEvidence
+  , acquiredPhaseContractEvidenceCheck
+  , acquiredPhaseContractEvidenceSnapshot
+  , sealAcquiredPhaseContractEvidence
+  )
+import Amoebius.Validation.SourceClosure.Internal
+  ( AcquiredSourceSnapshot
+  , IndexEntry (indexPath)
+  , SourceSnapshot (snapshotEntries, snapshotIdentity)
+  , TrackedEntry (trackedBytes, trackedIndex)
+  , acquiredSourceSnapshot
+  )
 import Amoebius.Validation.PhaseSemanticContract
   ( phaseSemanticContractCheck
   )
 import Amoebius.Validation.PhaseSemanticJoin
-  ( phaseSemanticJoinDiagnostic
+  ( phaseSemanticJoinCheckAtFrontier
   )
 import Amoebius.Validation.ResourceProvisionContract
-  ( resourceProvisionContractDiagnostic
+  ( resourceProvisionContractCheck
   )
+import Amoebius.Validation.StatusFrontier qualified as Status
 import Amoebius.Validation.Types
   ( CheckResult (..)
   , Finding
@@ -33,8 +52,51 @@ import Data.Maybe (listToMaybe, mapMaybe, maybeToList)
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
+import Data.Text.Encoding qualified as TextEncoding
 import System.FilePath.Posix (normalise, takeDirectory, takeFileName)
+import System.FilePath (takeExtension)
 import Text.Read (readMaybe)
+
+acquirePhaseContractEvidence :: AcquiredSourceSnapshot -> AcquiredPhaseContractEvidence
+acquirePhaseContractEvidence acquired =
+  sealAcquiredPhaseContractEvidence identity result
+ where
+  snapshot = acquiredSourceSnapshot acquired
+  identity = snapshotIdentity snapshot
+  decoded = map decodeMarkdownEntry markdownEntries
+  markdownEntries =
+    [ entry
+    | entry <- snapshotEntries snapshot
+    , takeExtension (indexPath (trackedIndex entry)) == ".md"
+    ]
+  documents = [document | Right document <- decoded]
+  decodeFindings = [problem | Left problem <- decoded]
+  result
+    | null decodeFindings = checkPhaseContracts documents
+    | otherwise =
+        CheckResult
+          { checkName = "phase-contract-snapshot"
+          , checkObservations =
+              [ observation
+                  "phase-contract.snapshot-input"
+                  "unavailable because the acquired tracked Markdown snapshot did not decode"
+              ]
+          , checkFindings =
+              decodeFindings
+                <> [ finding
+                       "PHASE-CONTRACT-SNAPSHOT-UNAVAILABLE"
+                       "DEVELOPMENT_PLAN/"
+                       ( "phase-contract analysis did not run because "
+                           <> Text.pack (show (length decodeFindings))
+                           <> " tracked Markdown document(s) failed UTF-8 decoding"
+                       )
+                   ]
+          }
+  decodeMarkdownEntry entry =
+    let path = indexPath (trackedIndex entry)
+     in case TextEncoding.decodeUtf8' (trackedBytes entry) of
+          Left _ -> Left (finding "DOC-SNAPSHOT-UTF8" path "tracked Markdown blob is not UTF-8")
+          Right contents -> Right (path, contents)
 
 data PhaseDocument = PhaseDocument
   { phaseNumber :: Int
@@ -109,7 +171,35 @@ checkPhaseContracts = checkPhaseContractsForPhase phaseDomainLowerNumber
 -- one's, so it is observed rather than fatal
 -- (development_plan_gate_integrity.md section M.6).
 checkPhaseContractsForPhase :: Int -> [(FilePath, Text)] -> CheckResult
-checkPhaseContractsForPhase = checkPhaseContractsWithSemanticBarrier . GateScope
+checkPhaseContractsForPhase phase supplied =
+  case Status.frontierForGate phase of
+    Nothing -> invalidStatusTarget "gate" phase
+    Just frontier -> checkPhaseContractsWithSemanticBarrier (GateScope phase frontier) supplied
+
+-- | Validate the exact in-memory status projection produced by a passing gate
+-- before any tracked byte is replaced. Semantic obligations remain scoped to
+-- the phase that just passed; only the status frontier advances.
+checkPhaseContractsAfterPass :: Int -> [(FilePath, Text)] -> CheckResult
+checkPhaseContractsAfterPass phase supplied =
+  case Status.frontierForGate phase >>= (\frontier -> Status.frontierAfterPass frontier phase) of
+    Nothing -> invalidStatusTarget "post-pass" phase
+    Just frontier -> checkPhaseContractsWithSemanticBarrier (PostPassScope phase frontier) supplied
+
+invalidStatusTarget :: Text -> Int -> CheckResult
+invalidStatusTarget scope phase =
+  CheckResult
+    { checkName = phaseContractCheckName
+    , checkObservations =
+        [ observation "phase-contract.status-scope" scope
+        , observation "phase-contract.status-target" (showText phase)
+        ]
+    , checkFindings =
+        [ finding
+            "PLAN-STATUS-FRONTIER-INVALID"
+            "DEVELOPMENT_PLAN/"
+            "the requested status frontier is outside the canonical phase domain or is not a one-step transition"
+        ]
+    }
 
 -- | Structural parser seam for small oracle corpora. It always carries an
 -- exact diagnostic-only refusal: caller-authored Markdown bytes cannot become
@@ -122,13 +212,15 @@ checkPhaseContractStructure = checkPhaseContractsWithSemanticBarrier StructuralO
 -- names the phase under validation.
 data SemanticScope
   = StructuralOnly
-  | GateScope Int
+  | GateScope Int Status.StatusFrontier
+  | PostPassScope Int Status.StatusFrontier
   deriving (Eq, Show)
 
 semanticAuditRequired :: SemanticScope -> Bool
 semanticAuditRequired scope = case scope of
   StructuralOnly -> False
-  GateScope _ -> True
+  GateScope _ _ -> True
+  PostPassScope _ _ -> True
 
 checkPhaseContractsWithSemanticBarrier :: SemanticScope -> [(FilePath, Text)] -> CheckResult
 checkPhaseContractsWithSemanticBarrier scope supplied =
@@ -189,7 +281,7 @@ checkPhaseContractsWithinEnvelope scope supplied =
 #if defined(VALIDATION_PHASE_CONTRACT_PHASE_STRUCTURE_RESULT_COMPOSITION_BYPASS_MUTANT)
       `seq` []
 #endif
-  guardedPhaseStructureResultFindings = concatMap checkPhaseStructure (Map.elems phases)
+  guardedPhaseStructureResultFindings = concatMap (checkPhaseStructure scope) (Map.elems phases)
   dependencyResultFindings =
     guardedDependencyResultFindings
 #if defined(VALIDATION_PHASE_CONTRACT_DEPENDENCY_RESULT_COMPOSITION_BYPASS_MUTANT)
@@ -201,13 +293,13 @@ checkPhaseContractsWithinEnvelope scope supplied =
 #if defined(VALIDATION_PHASE_CONTRACT_GATE_RESULT_COMPOSITION_BYPASS_MUTANT)
       `seq` []
 #endif
-  guardedGateResultFindings = concatMap checkGate (Map.elems phases)
+  guardedGateResultFindings = concatMap (checkGate scope) (Map.elems phases)
   sprintResultFindings =
     guardedSprintResultFindings
 #if defined(VALIDATION_PHASE_CONTRACT_SPRINT_RESULT_COMPOSITION_BYPASS_MUTANT)
       `seq` []
 #endif
-  guardedSprintResultFindings = concatMap (checkSprintContracts phases (semanticAuditRequired scope)) (Map.elems phases)
+  guardedSprintResultFindings = concatMap (checkSprintContracts phases scope (semanticAuditRequired scope)) (Map.elems phases)
   trackerResultFindings =
     guardedTrackerResultFindings
 #if defined(VALIDATION_PHASE_CONTRACT_TRACKER_RESULT_COMPOSITION_BYPASS_MUTANT)
@@ -289,7 +381,7 @@ checkPhaseContractsWithinEnvelope scope supplied =
   trackerFindings =
     trackerCardinalityFindings
       <> trackerFrameFindings trackerFrame
-      <> checkTrackerShape trackerRows
+      <> checkTrackerShape scope trackerRows
   trackerCardinalityFindings =
     guardedTrackerCardinalityFindings
 #if defined(VALIDATION_PHASE_CONTRACT_TRACKER_CARDINALITY_FINDING_BYPASS_MUTANT)
@@ -308,10 +400,10 @@ checkPhaseContractsWithinEnvelope scope supplied =
   refusalMarkerCount = length (filter containsRefusalMarker gateCellValues)
   semanticDiagnostics = case scope of
     StructuralOnly -> []
-    GateScope phaseUnderValidation ->
-      [ retainPhaseSemanticContractDiagnostic (phaseSemanticContractCheck phaseUnderValidation)
-      , retainResourceProvisionContractDiagnostic resourceProvisionContractDiagnostic
-      , retainPhaseSemanticJoinDiagnostic (phaseSemanticJoinDiagnostic supplied)
+    _ ->
+      [ retainPhaseSemanticContractDiagnostic (phaseSemanticContractCheck (semanticDueOrdinal scope))
+      , retainResourceProvisionContractDiagnostic (resourceProvisionContractCheck (semanticDueOrdinal scope))
+      , retainPhaseSemanticJoinDiagnostic (phaseSemanticJoinCheckAtFrontier (statusFrontier scope) supplied)
       ]
 
 retainPhaseSemanticContractDiagnostic :: CheckResult -> CheckResult
@@ -1095,12 +1187,13 @@ trimAsciiEnd = Text.dropWhileEnd asciiWhitespace
 asciiWhitespace :: Char -> Bool
 asciiWhitespace character = character == ' ' || character == '\t'
 
-checkPhaseStructure :: PhaseDocument -> [Finding]
-checkPhaseStructure phase =
+checkPhaseStructure :: SemanticScope -> PhaseDocument -> [Finding]
+checkPhaseStructure scope phase =
   titleFindings
     <> statusFindings
     <> summaryFindings
     <> sectionShapeFindings phase
+    <> contentsStatusFindings phase
     <> summaryContainmentFindings phase
     <> gateHeadingFindings
  where
@@ -1116,7 +1209,9 @@ checkPhaseStructure phase =
     | phaseTitle phase == Nothing
     ]
   statuses = statusLines phase
-  expectedStatus = Policy.resetPhaseStatusText (policyResetStatus number) <> "."
+  expectedStatus =
+    Status.renderPhaseStatusLine
+      (Status.phaseStatusAt (statusFrontier scope) number)
   statusBodies = sectionBodies "## Phase Status" (phaseLines phase)
   currentStatusClaims =
     [ Text.strip line
@@ -1205,6 +1300,18 @@ sectionShapeFindings phase =
     heading == "## Resource provision"
       || "## Resource provision — " `Text.isPrefixOf` heading
 #endif
+
+contentsStatusFindings :: PhaseDocument -> [Finding]
+contentsStatusFindings phase =
+  [ finding
+      "PLAN-CONTENTS-STATUS"
+      (phasePath phase)
+      "Contents navigation is immutable and must not duplicate lifecycle status markers"
+  | body <- sectionBodies "## Contents" (phaseLines phase)
+  , any (containsStatusMarker . snd) body
+  ]
+ where
+  containsStatusMarker line = any (`Text.isInfixOf` line) ["✅", "🔄", "⏸️"]
 
 summaryContainmentFindings :: PhaseDocument -> [Finding]
 #if defined(VALIDATION_PHASE_CONTRACT_SUMMARY_CONTAINMENT_BYPASS_MUTANT)
@@ -1306,8 +1413,8 @@ checkDependency phases phase =
     | targetNumber <- forward
     ]
 
-checkGate :: PhaseDocument -> [Finding]
-checkGate phase =
+checkGate :: SemanticScope -> PhaseDocument -> [Finding]
+checkGate scope phase =
   gateFrameFindings phase
     <> shapeFindings
     <> unresolvedFindings
@@ -1321,7 +1428,9 @@ checkGate phase =
   rowMap = Map.fromList rows
   commandText = "pb validate phase " <> formatPhase number
   expectedCommand = "`" <> commandText <> "`"
-  expectedSummaryValue = expectedCommand <> "; see [Gate integrity](#gate-integrity). NOT VALIDATED."
+  expectedSummaryValue =
+    expectedCommand
+      <> "; see [Gate integrity](#gate-integrity)."
   expectedSummaryLine = "**Gate:** " <> expectedSummaryValue
   shapeFindings =
     guardedShapeFindings
@@ -1347,6 +1456,7 @@ checkGate phase =
         (key <> " contains a fail-closed UNRESOLVED/MISSING marker")
     | (key, value) <- rows
     , containsRefusalMarker value
+    , unresolvedContractIsDue scope number
     ]
 #endif
   commandFindings =
@@ -1374,13 +1484,19 @@ checkGate phase =
       [ finding
           "PLAN-GATE-SUMMARY-COMMAND"
           path
-          ("Gate summary must be the exact one-line reset form '" <> expectedSummaryLine <> "'")
+          ("Gate summary must be the exact immutable command/link form '" <> expectedSummaryLine <> "'")
       | gateSummaryValueMismatch expectedSummaryValue value
           || validationCommandSpans value /= [(1, commandText)]
           || countOccurrences expectedCommand value /= 1
           || gateSummaryRawLineCountMismatch expectedSummaryLine (phaseRawLines phase)
       ]
     _ -> []
+
+unresolvedContractIsDue :: SemanticScope -> Int -> Bool
+unresolvedContractIsDue scope ordinal = case scope of
+  StructuralOnly -> True
+  GateScope phaseUnderValidation _ -> ordinal <= phaseUnderValidation
+  PostPassScope passedPhase _ -> ordinal <= passedPhase
 
 gateCommandCountMismatch :: Text -> Text -> Bool
 #if defined(VALIDATION_PHASE_CONTRACT_GATE_COMMAND_COUNT_BYPASS_MUTANT)
@@ -1479,8 +1595,8 @@ gateKeys =
   , "Pass criterion"
   ]
 
-checkSprintContracts :: Map Int PhaseDocument -> Bool -> PhaseDocument -> [Finding]
-checkSprintContracts phases enforceCanonicalInventory phase =
+checkSprintContracts :: Map Int PhaseDocument -> SemanticScope -> Bool -> PhaseDocument -> [Finding]
+checkSprintContracts phases scope enforceCanonicalInventory phase =
   inventoryFindings <> concatMap checkSection sprintSections
  where
   sprintSections = sprintSectionsFor phase
@@ -1510,8 +1626,8 @@ checkSprintContracts phases enforceCanonicalInventory phase =
           , Just value <- [Text.stripPrefix "**Status**:" line]
           ]
         statuses = map snd statusEntries
-        expectedStatus = expectedSprintStatus (phaseNumber phase) <$> ordinal
-        expectedMarker = expectedSprintMarker (phaseNumber phase) <$> ordinal
+        expectedStatus = expectedSprintStatus scope (phaseNumber phase) <$> ordinal
+        expectedMarker = expectedSprintMarker scope (phaseNumber phase) <$> ordinal
         observedMarker = sprintHeadingMarker <$> parseSprintHeading (phaseNumber phase) heading
         bareStatusClaims = [Text.strip line | (_, line) <- body, isBareCurrentStatusClaim line]
         rawStatusIsCanonical = case expectedStatus of
@@ -1848,15 +1964,15 @@ sprintSectionsFor phase =
 parseSprintOrdinal :: Int -> Text -> Maybe Int
 parseSprintOrdinal owner = fmap sprintHeadingOrdinal . parseSprintHeading owner
 
-expectedSprintStatus :: Int -> Int -> Text
-expectedSprintStatus phaseNumberValue sprintNumber
-  | phaseNumberValue == 0 && sprintNumber == 1 = "Active — NOT VALIDATED"
-  | otherwise = "Blocked — NOT VALIDATED"
+expectedSprintStatus :: SemanticScope -> Int -> Int -> Text
+expectedSprintStatus scope phaseNumberValue sprintNumber =
+  Status.renderSprintStatus
+    (Status.sprintStatusAt (statusFrontier scope) phaseNumberValue sprintNumber)
 
-expectedSprintMarker :: Int -> Int -> Text
-expectedSprintMarker phaseNumberValue sprintNumber
-  | phaseNumberValue == 0 && sprintNumber == 1 = "🔄"
-  | otherwise = "⏸️"
+expectedSprintMarker :: SemanticScope -> Int -> Int -> Text
+expectedSprintMarker scope phaseNumberValue sprintNumber =
+  Status.renderStatusMarker
+    (Status.sprintStatusAt (statusFrontier scope) phaseNumberValue sprintNumber)
 
 canonicalSprintCounts :: Map Int Int
 canonicalSprintCounts =
@@ -2349,8 +2465,8 @@ isCanonicalLinkTargetCharacter character =
   isAlphaNum character || character `elem` ['/', '.', '_', '-', '#']
 #endif
 
-checkTrackerShape :: [TrackerRow] -> [Finding]
-checkTrackerShape rows =
+checkTrackerShape :: SemanticScope -> [TrackerRow] -> [Finding]
+checkTrackerShape scope rows =
   missingFindings <> statusFindings
  where
   actual = Set.fromList (map trackerNumber rows)
@@ -2371,19 +2487,15 @@ checkTrackerShape rows =
 #endif
   guardedStatusFindings = concatMap checkStatus rows
   checkStatus row =
-    let expectedStatus = Policy.resetPhaseStatusText (policyResetStatus (trackerNumber row))
+    let expectedStatus =
+          Status.renderTrackerStatus
+            (Status.phaseStatusAt (statusFrontier scope) (trackerNumber row))
      in [ finding
             "PLAN-TRACKER-STATUS"
             trackerPath
             ("Phase " <> showText (trackerNumber row) <> " tracker status must equal '" <> expectedStatus <> "'")
         | Text.strip (trackerStatus row) /= expectedStatus
         ]
-          <> [ finding
-                 "PLAN-TRACKER-STATUS"
-                 trackerPath
-                 ("Phase " <> showText (trackerNumber row) <> " tracker status carries a forbidden Done marker")
-             | "Done" `Text.isInfixOf` trackerStatus row || "✅" `Text.isInfixOf` trackerStatus row
-             ]
 
 checkTrackerJoin :: Map Int PhaseDocument -> [TrackerRow] -> [Finding]
 checkTrackerJoin phases rows = concatMap checkRow rows
@@ -3038,13 +3150,17 @@ trackerPath = "DEVELOPMENT_PLAN/README.md"
 policyOrdering :: Policy.OrderingContract
 policyOrdering = Policy.orderingContract Policy.canonicalPolicyContract
 
-policyStatusReset :: Policy.StatusResetContract
-policyStatusReset = Policy.statusResetContract Policy.canonicalPolicyContract
+statusFrontier :: SemanticScope -> Status.StatusFrontier
+statusFrontier scope = case scope of
+  StructuralOnly -> Status.initialFrontier
+  GateScope _ frontier -> frontier
+  PostPassScope _ frontier -> frontier
 
-policyResetStatus :: Int -> Policy.ResetPhaseStatus
-policyResetStatus number
-  | number == phaseDomainLowerNumber = Policy.phaseZeroResetStatus policyStatusReset
-  | otherwise = Policy.laterPhaseResetStatus policyStatusReset
+semanticDueOrdinal :: SemanticScope -> Int
+semanticDueOrdinal scope = case scope of
+  StructuralOnly -> phaseDomainLowerNumber
+  GateScope phaseUnderValidation _ -> phaseUnderValidation
+  PostPassScope passedPhase _ -> passedPhase
 
 phaseDomainLowerNumber :: Int
 phaseDomainLowerNumber = Policy.phaseOrdinalNumber (Policy.phaseDomainLower policyOrdering)

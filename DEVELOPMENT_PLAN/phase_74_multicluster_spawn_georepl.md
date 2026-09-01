@@ -29,8 +29,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 74.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection ⏸️](#sprint-741-amoebic-spawn--projectsubtree-handoff--per-child-unseal--transit-key--secret-injection-)
-- [Sprint 74.2: Geo-replication of two siblings + invariant-confluence classification ⏸️](#sprint-742-geo-replication-of-two-siblings--invariant-confluence-classification-)
+- [Sprint 74.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection](#sprint-741-amoebic-spawn--projectsubtree-handoff--per-child-unseal--transit-key--secret-injection-)
+- [Sprint 74.2: Geo-replication of two siblings + invariant-confluence classification](#sprint-742-geo-replication-of-two-siblings--invariant-confluence-classification-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -127,7 +127,7 @@ This CPU-only Linux lane is always available on every hardware substrate.
 workflow crossing an asynchronous boundary.
 
 **Depends on:** [Phase 73](phase_73_network_fabric_wireguard.md)
-**Gate:** `pb validate phase 74`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 74`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

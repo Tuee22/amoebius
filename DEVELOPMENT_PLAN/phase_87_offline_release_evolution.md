@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 87.1: Gate offline-compatible rollout and rollback ⏸️](#sprint-871-gate-offline-compatible-rollout-and-rollback-)
+- [Sprint 87.1: Gate offline-compatible rollout and rollback](#sprint-871-gate-offline-compatible-rollout-and-rollback-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -67,7 +67,7 @@ incompatible release.
 **Register:** 3 — live infrastructure.
 
 **Depends on:** [Phase 86](phase_86_offline_blobs_isolation.md)
-**Gate:** `pb validate phase 87`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 87`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

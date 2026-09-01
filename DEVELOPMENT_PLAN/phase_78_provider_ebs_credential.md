@@ -31,11 +31,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 78.1: Per-PV durable EBS in its own state + node-vs-storage decoupling ⏸️](#sprint-781-per-pv-durable-ebs-in-its-own-state--node-vs-storage-decoupling-)
-- [Sprint 78.2: The create-vs-delete credential model (cloud-API delete-deny) ⏸️](#sprint-782-the-create-vs-delete-credential-model-cloud-api-delete-deny-)
-- [Sprint 78.3: Static-only baked AWS EBS CSI + static PV over volumeHandle ⏸️](#sprint-783-static-only-baked-aws-ebs-csi--static-pv-over-volumehandle-)
-- [Sprint 78.4: Provider-volume migration + the `CreateProviderCapacity` storage-scaling arm ⏸️](#sprint-784-provider-volume-migration--the-createprovidercapacity-storage-scaling-arm-)
-- [Sprint 78.5: Phase gate — durable EBS retained across teardown + cloud-API delete-deny + static-CSI reattach ⏸️](#sprint-785-phase-gate--durable-ebs-retained-across-teardown--cloud-api-delete-deny--static-csi-reattach-)
+- [Sprint 78.1: Per-PV durable EBS in its own state + node-vs-storage decoupling](#sprint-781-per-pv-durable-ebs-in-its-own-state--node-vs-storage-decoupling-)
+- [Sprint 78.2: The create-vs-delete credential model (cloud-API delete-deny)](#sprint-782-the-create-vs-delete-credential-model-cloud-api-delete-deny-)
+- [Sprint 78.3: Static-only baked AWS EBS CSI + static PV over volumeHandle](#sprint-783-static-only-baked-aws-ebs-csi--static-pv-over-volumehandle-)
+- [Sprint 78.4: Provider-volume migration + the `CreateProviderCapacity` storage-scaling arm](#sprint-784-provider-volume-migration--the-createprovidercapacity-storage-scaling-arm-)
+- [Sprint 78.5: Phase gate — durable EBS retained across teardown + cloud-API delete-deny + static-CSI reattach](#sprint-785-phase-gate--durable-ebs-retained-across-teardown--cloud-api-delete-deny--static-csi-reattach-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -149,7 +149,7 @@ lifetime, and leave elevated-harness reclamation to [Phase 90](phase_90_test_top
 cannot make the phase gate pass.
 
 **Depends on:** [Phase 77](phase_77_provider_child_bringup.md)
-**Gate:** `pb validate phase 78`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 78`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

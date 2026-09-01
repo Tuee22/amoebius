@@ -30,7 +30,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 24.1: The generated conformance gate ⏸️](#sprint-241-the-generated-conformance-gate-)
+- [Sprint 24.1: The generated conformance gate](#sprint-241-the-generated-conformance-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -75,7 +75,7 @@ link-set verdict. NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 23](phase_23_extension_security_laws.md)
-**Gate:** `pb validate phase 24`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 24`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

@@ -123,18 +123,18 @@ selectorIntegrityProblems =
 exactCaseProblems :: String -> [String]
 exactCaseProblems exactCase = case exactCase of
   "semantic-observation-composition" ->
-    expectCount "full-mode observation carrier" 219 (length (checkObservations cleanResult))
+    expectCount "full-mode observation carrier" 239 (length (checkObservations cleanResult))
   "semantic-finding-composition" ->
-    expectCount "full-mode finding carrier" 947 (length (checkFindings cleanResult))
+    expectCount "full-mode finding carrier" 540 (length (checkFindings cleanResult))
   "phase-semantic-contract-route" ->
     expectObservation "semantic phase count" "semantic.phase-count" "96" cleanResult
       <> expectObservation "semantic slot count" "semantic.slot-count" "1728" cleanResult
-      <> expectObservation "semantic gap count" "semantic.gap-count" "1728" cleanResult
-      <> expectObservation "semantic bound count" "semantic.bound-count" "0" cleanResult
+      <> expectObservation "semantic gap count" "semantic.gap-count" "1710" cleanResult
+      <> expectObservation "semantic bound count" "semantic.bound-count" "18" cleanResult
       <> expectObservation "semantic target phase" "semantic.target-phase" "00" cleanResult
       <> expectObservation "semantic deferred gap count" "semantic.deferred-gap-count" "1710" cleanResult
       <> expectObservation "semantic legacy count" "semantic.legacy-count" "26" cleanResult
-      <> expectFindingCount "semantic gap findings" "PLAN-SEMANTIC-CONTRACT-GAP" 18 cleanResult
+      <> expectFindingCount "semantic gap findings" "PLAN-SEMANTIC-CONTRACT-GAP" 0 cleanResult
       <> expectFindingCount "semantic diagnostic refusal" "PLAN-SEMANTIC-DIAGNOSTIC-ONLY" 0 cleanResult
   "resource-provision-contract-route" ->
     expectObservation "resource phase domain" "resource.phase-domain-count" "96" cleanResult
@@ -143,8 +143,8 @@ exactCaseProblems exactCase = case exactCase of
       <> expectObservation "resource gap count" "resource.gap-count" "385" cleanResult
       <> expectObservation "resource draft count" "resource.draft-count" "0" cleanResult
       <> expectObservation "resource gate-ready count" "resource.gate-ready-count" "0" cleanResult
-      <> expectFindingCount "resource gap findings" "PLAN-RESOURCE-CONTRACT-GAP" 385 cleanResult
-      <> expectFindingCount "resource diagnostic refusal" "PLAN-RESOURCE-DIAGNOSTIC-ONLY" 1 cleanResult
+      <> expectFindingCount "resource gap findings" "PLAN-RESOURCE-CONTRACT-GAP" 0 cleanResult
+      <> expectFindingCount "resource diagnostic refusal" "PLAN-RESOURCE-DIAGNOSTIC-ONLY" 0 cleanResult
   "phase-semantic-join-route" ->
     expectObservation "join supplied paths" "semantic.join.supplied-path-count" "97" cleanResult
       <> expectObservation "join parsed phases" "semantic.join.parsed-phase-count" "0" cleanResult
@@ -153,7 +153,7 @@ exactCaseProblems exactCase = case exactCase of
       <> expectObservation "resource join phase count" "resource.join.phase-count" "0" cleanResult
       <> expectFindingCount "semantic path missing findings" "PLAN-SEMANTIC-PHASE-PATH-MISSING" 96 cleanResult
       <> expectFindingCount "semantic path unknown findings" "PLAN-SEMANTIC-PHASE-PATH-UNKNOWN" 96 cleanResult
-      <> expectFindingCount "semantic Markdown refusal" "PLAN-SEMANTIC-MARKDOWN-DIAGNOSTIC-ONLY" 1 cleanResult
+      <> expectFindingCount "semantic Markdown refusal" "PLAN-SEMANTIC-MARKDOWN-DIAGNOSTIC-ONLY" 0 cleanResult
   "sprint-inventory-finding" ->
     expectFindingCount "recorded canonical sprint inventory" "PLAN-SPRINT-INVENTORY" 58 cleanResult
       <> expectExactFinding

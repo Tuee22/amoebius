@@ -122,7 +122,7 @@ data ContentBinding = ContentBinding
 -- module blobs below.
 data RequiredCompilerFact
   = CompilerParseSucceeded
-  | ConditionalPreprocessingAbsent
+  | ConditionalPreprocessingClosed
   | CompileTimeExecutionFeaturesAbsent
   | ImportsRenamed
   | CallsResolved
@@ -631,7 +631,7 @@ requiredCompilerFacts =
   orderedRequiredFacts
     ( concat
         [ retainedRequiredFact CompilerParseLocus (mappedRequiredFact CompilerParseSucceeded)
-        , retainedRequiredFact ConditionalPreprocessingLocus (mappedRequiredFact ConditionalPreprocessingAbsent)
+        , retainedRequiredFact ConditionalPreprocessingLocus (mappedRequiredFact ConditionalPreprocessingClosed)
         , retainedRequiredFact CompileTimeExecutionLocus (mappedRequiredFact CompileTimeExecutionFeaturesAbsent)
         , retainedRequiredFact ImportsRenamedLocus (mappedRequiredFact ImportsRenamed)
         , retainedRequiredFact CallsResolvedLocus (mappedRequiredFact CallsResolved)
@@ -723,9 +723,9 @@ mappedRequiredFact fact = case fact of
   CompilerParseSucceeded -> CompilerParseSucceeded
 #endif
 #if defined(VALIDATION_SOURCE_CONSUMER_INTERNAL_CONDITIONAL_PREPROCESSING_FACT_IDENTITY_MAPPING_MUTANT)
-  ConditionalPreprocessingAbsent -> CallsResolved
+  ConditionalPreprocessingClosed -> CallsResolved
 #else
-  ConditionalPreprocessingAbsent -> ConditionalPreprocessingAbsent
+  ConditionalPreprocessingClosed -> ConditionalPreprocessingClosed
 #endif
 #if defined(VALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILE_TIME_EXECUTION_FACT_IDENTITY_MAPPING_MUTANT)
   CompileTimeExecutionFeaturesAbsent -> CallsResolved
@@ -2506,9 +2506,9 @@ renderRequiredFact fact = case fact of
   CompilerParseSucceeded -> "CompilerParseSucceeded"
 #endif
 #if defined(VALIDATION_SOURCE_CONSUMER_INTERNAL_CONDITIONAL_PREPROCESSING_FACT_RENDER_MAPPING_MUTANT)
-  ConditionalPreprocessingAbsent -> "ConditionalPreprocessingAbsent<"
+  ConditionalPreprocessingClosed -> "ConditionalPreprocessingClosed<"
 #else
-  ConditionalPreprocessingAbsent -> "ConditionalPreprocessingAbsent"
+  ConditionalPreprocessingClosed -> "ConditionalPreprocessingClosed"
 #endif
 #if defined(VALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILE_TIME_EXECUTION_FACT_RENDER_MAPPING_MUTANT)
   CompileTimeExecutionFeaturesAbsent -> "CompileTimeExecutionFeaturesAbsent<"

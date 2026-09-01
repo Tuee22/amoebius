@@ -27,8 +27,10 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 
--- | The exact candidate that a complete phase gate exercised. Digests are
--- provenance inputs to the test; they are not credentials or verdicts.
+-- | A caller-constructible diagnostic description of the exact candidate a
+-- complete phase gate claims to have exercised.  This value is never write
+-- authority; only the package-hidden verified token can authorize a status
+-- projection.
 data CandidateBinding = CandidateBinding
   { candidatePhase :: Text
   , candidateSourceDigest :: Text
@@ -41,9 +43,8 @@ data CandidateBinding = CandidateBinding
   }
   deriving (Eq, Ord, Show)
 
--- | The result of one qualified run. A value passes only when all eighteen
--- required rows are present, qualification and the clean run succeeded, and
--- the tested source remained byte-identical through the run.
+-- | A caller-constructible diagnostic report for one qualified run.  Matching
+-- this report is necessary but not itself authority to change tracked state.
 data GatePass = GatePass
   { passPhase :: Text
   , passSourceDigest :: Text
@@ -69,6 +70,7 @@ data GatePassError
   | GatePassHarnessMismatch
   | GatePassEvidenceMismatch
   | GatePassPredecessorMismatch
+  | GatePassPredecessorGenesisMismatch
   | GatePassProjectionMismatch
   | GatePassStatusFieldsMismatch
   | GatePassRowsIncomplete
@@ -101,7 +103,13 @@ requiredGateRows =
     ]
 
 requiredStatusFields :: Set Text
-requiredStatusFields = Set.fromList ["phase-status", "sprint-statuses"]
+requiredStatusFields =
+  Set.fromList
+    [ "tracker-phase-status"
+    , "phase-status"
+    , "sprint-heading-statuses"
+    , "sprint-status-fields"
+    ]
 
 verifyGatePass :: CandidateBinding -> GatePass -> Either GatePassError ()
 verifyGatePass candidate result = do
@@ -113,6 +121,11 @@ verifyGatePass candidate result = do
   require (passHarnessDigest result == candidateHarnessDigest candidate) GatePassHarnessMismatch
   require (passEvidenceDigest result == candidateEvidenceDigest candidate) GatePassEvidenceMismatch
   require (passPredecessorDigest result == candidatePredecessorDigest candidate) GatePassPredecessorMismatch
+  require
+    ( predecessorMatchesPhase (candidatePhase candidate) (candidatePredecessorDigest candidate)
+        && predecessorMatchesPhase (passPhase result) (passPredecessorDigest result)
+    )
+    GatePassPredecessorGenesisMismatch
   require (passProjectionDigest result == candidateProjectionDigest candidate) GatePassProjectionMismatch
   require
     ( candidateStatusFields candidate == requiredStatusFields
@@ -126,6 +139,11 @@ verifyGatePass candidate result = do
  where
   require True _ = Right ()
   require False problem = Left problem
+
+predecessorMatchesPhase :: Text -> Text -> Bool
+predecessorMatchesPhase phase predecessor
+  | phase == "00" = predecessor == "genesis"
+  | otherwise = predecessor /= "genesis" && sha256Text predecessor
 
 canonicalGateBoundary :: Bool
 canonicalGateBoundary =
@@ -179,11 +197,13 @@ canonicalBinding candidate result =
   singleLine value = not (Text.null value) && not (Text.any (`elem` ['\r', '\n', '\0']) value)
   isDigit character = character >= '0' && character <= '9'
   predecessorText value = value == "genesis" || sha256Text value
-  sha256Text value =
-    Text.length value == 64
-      && Text.all
-        (\character -> isDigit character || (character >= 'a' && character <= 'f'))
-        value
+
+sha256Text :: Text -> Bool
+sha256Text value =
+  Text.length value == 64
+    && Text.all
+      (\character -> (character >= '0' && character <= '9') || (character >= 'a' && character <= 'f'))
+      value
 
 canonicalUpperPhaseText :: Text
 canonicalUpperPhaseText =

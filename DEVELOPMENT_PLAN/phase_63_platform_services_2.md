@@ -27,10 +27,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 63.1: Percona/Patroni Postgres per consumer + pgAdmin + Prometheus/Grafana ⏸️](#sprint-631-perconapatroni-postgres-per-consumer--pgadmin--prometheusgrafana-)
-- [Sprint 63.2: Ephemeral Redis/Sentinel realtime coordination ⏸️](#sprint-632-ephemeral-redissentinel-realtime-coordination-)
-- [Sprint 63.3: The full derived readiness-DAG bring-up + the standard-stack gate ⏸️](#sprint-633-the-full-derived-readiness-dag-bring-up--the-standard-stack-gate-)
-- [Sprint 63.4: Register-2.5 readiness-DAG bring-up under simulated partial failure ⏸️](#sprint-634-register-25-readiness-dag-bring-up-under-simulated-partial-failure-)
+- [Sprint 63.1: Percona/Patroni Postgres per consumer + pgAdmin + Prometheus/Grafana](#sprint-631-perconapatroni-postgres-per-consumer--pgadmin--prometheusgrafana-)
+- [Sprint 63.2: Ephemeral Redis/Sentinel realtime coordination](#sprint-632-ephemeral-redissentinel-realtime-coordination-)
+- [Sprint 63.3: The full derived readiness-DAG bring-up + the standard-stack gate](#sprint-633-the-full-derived-readiness-dag-bring-up--the-standard-stack-gate-)
+- [Sprint 63.4: Register-2.5 readiness-DAG bring-up under simulated partial failure](#sprint-634-register-25-readiness-dag-bring-up-under-simulated-partial-failure-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -115,7 +115,7 @@ the future contract requires real cluster bring-up and independent runtime obser
 may classify only that bounded observation as *tested*, not proved, and cannot make the phase gate pass.
 
 **Depends on:** [Phase 62](phase_62_platform_backbone.md)
-**Gate:** `pb validate phase 63`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 63`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

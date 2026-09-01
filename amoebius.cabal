@@ -2473,8 +2473,663 @@ flag validation-document-retired-artifact-mutant
   default: False
   manual: True
 
+flag validation-document-retired-checked-in-prefix-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_CHECKED_IN_PREFIX_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-comment-line-route-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_COMMENT_LINE_ROUTE_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-committed-prefix-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_COMMITTED_PREFIX_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exact-path-alphanumeric-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXACT_PATH_ALPHANUMERIC_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exact-path-current-segment-bypass-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXACT_PATH_CURRENT_SEGMENT_BYPASS_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exact-path-dot-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXACT_PATH_DOT_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exact-path-empty-segment-bypass-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXACT_PATH_EMPTY_SEGMENT_BYPASS_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exact-path-empty-stem-bypass-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXACT_PATH_EMPTY_STEM_BYPASS_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exact-path-hyphen-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXACT_PATH_HYPHEN_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exact-path-parent-segment-bypass-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXACT_PATH_PARENT_SEGMENT_BYPASS_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exact-path-slash-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXACT_PATH_SLASH_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exact-path-suffix-bypass-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXACT_PATH_SUFFIX_BYPASS_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exact-path-underscore-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXACT_PATH_UNDERSCORE_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-exclamation-clause-boundary-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_EXCLAMATION_CLAUSE_BOUNDARY_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-fixtures-root-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_FIXTURES_ROOT_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-fixtures-word-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_FIXTURES_WORD_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-fixture-root-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_FIXTURE_ROOT_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-fixture-word-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_FIXTURE_WORD_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-goldens-root-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_GOLDENS_ROOT_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-goldens-word-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_GOLDENS_WORD_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-golden-root-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_GOLDEN_ROOT_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-golden-word-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_GOLDEN_WORD_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-mutants-root-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_MUTANTS_ROOT_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-mutants-word-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_MUTANTS_WORD_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-mutant-root-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_MUTANT_ROOT_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-mutant-word-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_MUTANT_WORD_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-negative-root-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_NEGATIVE_ROOT_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-oracles-root-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_ORACLES_ROOT_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-oracles-word-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_ORACLES_WORD_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-oracle-root-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_ORACLE_ROOT_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-oracle-word-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_ORACLE_WORD_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-period-clause-boundary-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_PERIOD_CLAUSE_BOUNDARY_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-phrase-comment-route-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_PHRASE_COMMENT_ROUTE_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-phrase-raw-route-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_PHRASE_RAW_ROUTE_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-question-clause-boundary-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_QUESTION_CLAUSE_BOUNDARY_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-raw-line-route-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_RAW_LINE_ROUTE_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-root-case-fold-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_ROOT_CASE_FOLD_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-semicolon-clause-boundary-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_SEMICOLON_CLAUSE_BOUNDARY_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-wrapped-comment-route-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_WRAPPED_COMMENT_ROUTE_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
+flag validation-document-retired-wrapped-raw-route-omission-mutant
+  description: Enable the VALIDATION_DOCUMENT_RETIRED_WRAPPED_RAW_ROUTE_OMISSION_MUTANT retired-documentation mutation
+  default: False
+  manual: True
+
 flag validation-document-inventory-baseline-mutant
   description: Change the production governed-document inventory baseline
+  default: False
+  manual: True
+
+flag validation-document-archive-route-omission-mutant
+  description: Select the validation-document-archive-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-backlink-route-omission-mutant
+  description: Select the validation-document-backlink-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-claude-route-omission-mutant
+  description: Select the validation-document-claude-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-corpus-discovery-composition-mutant
+  description: Select the validation-document-corpus-discovery-composition-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-corpus-document-composition-mutant
+  description: Select the validation-document-corpus-document-composition-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-corpus-phase-contract-composition-mutant
+  description: Select the validation-document-corpus-phase-contract-composition-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-duplicate-path-bypass-mutant
+  description: Select the validation-document-duplicate-path-bypass-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-duplicate-route-omission-mutant
+  description: Select the validation-document-duplicate-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-empty-discovery-bypass-mutant
+  description: Select the validation-document-empty-discovery-bypass-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-empty-discovery-route-omission-mutant
+  description: Select the validation-document-empty-discovery-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-governed-agents-omission-mutant
+  description: Select the validation-document-governed-agents-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-governed-claude-omission-mutant
+  description: Select the validation-document-governed-claude-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-governed-crash-summary-omission-mutant
+  description: Select the validation-document-governed-crash-summary-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-governed-documents-omission-mutant
+  description: Select the validation-document-governed-documents-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-governed-plan-omission-mutant
+  description: Select the validation-document-governed-plan-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-governed-readme-omission-mutant
+  description: Select the validation-document-governed-readme-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-block-order-mutant
+  description: Select the validation-document-header-block-order-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-close-cardinality-mutant
+  description: Select the validation-document-header-close-cardinality-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-close-limit-mutant
+  description: Select the validation-document-header-close-limit-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-close-tag-mutant
+  description: Select the validation-document-header-close-tag-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-details-block-drop-mutant
+  description: Select the validation-document-header-details-block-drop-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-details-cardinality-mutant
+  description: Select the validation-document-header-details-cardinality-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-details-finding-order-mutant
+  description: Select the validation-document-header-details-finding-order-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-details-limit-mutant
+  description: Select the validation-document-header-details-limit-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-details-tag-mutant
+  description: Select the validation-document-header-details-tag-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-field-block-drop-mutant
+  description: Select the validation-document-header-field-block-drop-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-field-finding-order-mutant
+  description: Select the validation-document-header-field-finding-order-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-lead-after-read-this-mutant
+  description: Select the validation-document-header-lead-after-read-this-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-lead-before-details-mutant
+  description: Select the validation-document-header-lead-before-details-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-lead-nonblank-mutant
+  description: Select the validation-document-header-lead-nonblank-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-lead-nonquote-mutant
+  description: Select the validation-document-header-lead-nonquote-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-metadata-close-limit-mutant
+  description: Select the validation-document-header-metadata-close-limit-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-metadata-generated-close-order-mutant
+  description: Select the validation-document-header-metadata-generated-close-order-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-metadata-referenced-generated-order-mutant
+  description: Select the validation-document-header-metadata-referenced-generated-order-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-metadata-status-supersedes-order-mutant
+  description: Select the validation-document-header-metadata-status-supersedes-order-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-metadata-summary-status-order-mutant
+  description: Select the validation-document-header-metadata-summary-status-order-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-metadata-supersedes-referenced-order-mutant
+  description: Select the validation-document-header-metadata-supersedes-referenced-order-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-nonblank-predicate-mutant
+  description: Select the validation-document-header-nonblank-predicate-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-nonblank-strip-mutant
+  description: Select the validation-document-header-nonblank-strip-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-orientation-before-details-filter-mutant
+  description: Select the validation-document-header-orientation-before-details-filter-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-orientation-details-route-mutant
+  description: Select the validation-document-header-orientation-details-route-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-orientation-details-summary-mutant
+  description: Select the validation-document-header-orientation-details-summary-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-orientation-lead-existence-mutant
+  description: Select the validation-document-header-orientation-lead-existence-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-orientation-purpose-read-this-mutant
+  description: Select the validation-document-header-orientation-purpose-read-this-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-orientation-read-this-details-mutant
+  description: Select the validation-document-header-orientation-read-this-details-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-orientation-title-purpose-mutant
+  description: Select the validation-document-header-orientation-title-purpose-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-purpose-block-drop-mutant
+  description: Select the validation-document-header-purpose-block-drop-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-purpose-cardinality-mutant
+  description: Select the validation-document-header-purpose-cardinality-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-purpose-limit-mutant
+  description: Select the validation-document-header-purpose-limit-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-purpose-prefix-mutant
+  description: Select the validation-document-header-purpose-prefix-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-purpose-value-mutant
+  description: Select the validation-document-header-purpose-value-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-read-this-block-drop-mutant
+  description: Select the validation-document-header-read-this-block-drop-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-read-this-cardinality-mutant
+  description: Select the validation-document-header-read-this-cardinality-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-read-this-limit-mutant
+  description: Select the validation-document-header-read-this-limit-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-read-this-prefix-mutant
+  description: Select the validation-document-header-read-this-prefix-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-read-this-value-mutant
+  description: Select the validation-document-header-read-this-value-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-route-omission-mutant
+  description: Select the validation-document-header-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-summary-cardinality-mutant
+  description: Select the validation-document-header-summary-cardinality-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-summary-limit-mutant
+  description: Select the validation-document-header-summary-limit-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-summary-tag-mutant
+  description: Select the validation-document-header-summary-tag-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-title-block-drop-mutant
+  description: Select the validation-document-header-title-block-drop-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-title-cardinality-mutant
+  description: Select the validation-document-header-title-cardinality-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-title-first-nonblank-mutant
+  description: Select the validation-document-header-title-first-nonblank-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-title-prefix-mutant
+  description: Select the validation-document-header-title-prefix-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-header-visible-limit-threshold-mutant
+  description: Select the validation-document-header-visible-limit-threshold-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-input-envelope-route-bypass-mutant
+  description: Select the validation-document-input-envelope-route-bypass-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-inventory-count-bypass-mutant
+  description: Select the validation-document-inventory-count-bypass-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-inventory-digest-bypass-mutant
+  description: Select the validation-document-inventory-digest-bypass-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-inventory-route-omission-mutant
+  description: Select the validation-document-inventory-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-link-route-omission-mutant
+  description: Select the validation-document-link-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-markdown-route-omission-mutant
+  description: Select the validation-document-markdown-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-metadata-status-authoritative-drop-mutant
+  description: Select the validation-document-metadata-status-authoritative-drop-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-metadata-status-deprecated-drop-mutant
+  description: Select the validation-document-metadata-status-deprecated-drop-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-metadata-status-legal-order-mutant
+  description: Select the validation-document-metadata-status-legal-order-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-metadata-status-reference-drop-mutant
+  description: Select the validation-document-metadata-status-reference-drop-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-normalize-backslash-omission-mutant
+  description: Select the validation-document-normalize-backslash-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-normalize-dot-prefix-omission-mutant
+  description: Select the validation-document-normalize-dot-prefix-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-output-corpus-refusal-retention-mutant
+  description: Select the validation-document-output-corpus-refusal-retention-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-output-discovery-refusal-retention-mutant
+  description: Select the validation-document-output-discovery-refusal-retention-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-output-inventory-refusal-retention-mutant
+  description: Select the validation-document-output-inventory-refusal-retention-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-output-mandatory-finding-limit-bypass-mutant
+  description: Select the validation-document-output-mandatory-finding-limit-bypass-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-output-structure-refusal-retention-mutant
+  description: Select the validation-document-output-structure-refusal-retention-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-owner-route-omission-mutant
+  description: Select the validation-document-owner-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-required-agents-omission-mutant
+  description: Select the validation-document-required-agents-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-required-claude-omission-mutant
+  description: Select the validation-document-required-claude-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-required-corpus-route-omission-mutant
+  description: Select the validation-document-required-corpus-route-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-required-crash-summary-omission-mutant
+  description: Select the validation-document-required-crash-summary-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-required-documents-omission-mutant
+  description: Select the validation-document-required-documents-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-required-findings-after-bound-mutant
+  description: Select the validation-document-required-findings-after-bound-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-required-plan-omission-mutant
+  description: Select the validation-document-required-plan-omission-mutant changed-production subject in Documentation
+  default: False
+  manual: True
+
+flag validation-document-required-readme-omission-mutant
+  description: Select the validation-document-required-readme-omission-mutant changed-production subject in Documentation
   default: False
   manual: True
 
@@ -10168,6 +10823,31 @@ flag validation-legacy-internal-module-opacity-attack
   default: False
   manual: True
 
+flag validation-evidence-finalized-dispatch-candidate-opacity-attack
+  description: Enable the isolated finalized-dispatch-candidate Evidence opacity attack
+  default: False
+  manual: True
+
+flag validation-evidence-pass-criterion-evidence-opacity-attack
+  description: Enable the isolated pass-criterion-evidence Evidence opacity attack
+  default: False
+  manual: True
+
+flag validation-legacy-gate-completion-premises-opacity-attack
+  description: Enable the isolated gate-completion-premises Legacy opacity attack
+  default: False
+  manual: True
+
+flag validation-legacy-gate-prerequisite-construction-opacity-attack
+  description: Enable the isolated gate-prerequisite-construction Legacy opacity attack
+  default: False
+  manual: True
+
+flag validation-legacy-legacy-closure-opacity-attack
+  description: Enable the isolated legacy-closure Legacy opacity attack
+  default: False
+  manual: True
+
 flag validation-legacy-binding-slot-opacity-attack
   description: Enable the isolated binding-slot one-symbol Legacy opacity attack
   default: False
@@ -12894,6 +13574,11 @@ flag validation-source-closure-document-path-194-retention-mutant
 
 flag validation-source-closure-document-path-195-retention-mutant
   description: Select the isolated document-path-195-retention-mutant changed-production subject in SourceClosure
+  default: False
+  manual: True
+
+flag validation-source-closure-document-path-196-retention-mutant
+  description: Select the isolated document-path-196-retention-mutant changed-production subject in SourceClosure
   default: False
   manual: True
 
@@ -16052,8 +16737,8 @@ flag validation-source-debt-problem-limit-widen-mutant
   default: False
   manual: True
 
-flag validation-source-debt-observation-limit-widen-mutant
-  description: Widen the source-debt observation-result limit by one
+flag validation-source-debt-observation-limit-narrow-mutant
+  description: Narrow the source-debt observation-result limit by one
   default: False
   manual: True
 
@@ -31557,22 +32242,33 @@ library validation-kernel
       Amoebius.Validation.SourceClosure
       Amoebius.Validation.SourceConsumerGraph
       Amoebius.Validation.SourceDebtBaseline
+      Amoebius.Validation.StatusFrontier
       Amoebius.Validation.Types
   other-modules:
       Amoebius.Validation.CompilerBuildInfo.Internal
       Amoebius.Validation.CompilerElaboratedPlan.Internal
+      Amoebius.Validation.CompilerExpectationAuthority.Internal
       Amoebius.Validation.CompilerSourceGraph.Internal
+      Amoebius.Validation.CompilerSubjectRegistry.Internal
       Amoebius.Validation.CompilerComponentPlan.Internal
       Amoebius.Validation.Dispatch.Internal
       Amoebius.Validation.Documentation.Internal
+      Amoebius.Validation.Evidence.Internal
+      Amoebius.Validation.Gate.Internal
+      Amoebius.Validation.GatePass.Internal
       Amoebius.Validation.Legacy.Internal
+      Amoebius.Validation.PhaseContract.Evidence.Internal
       Amoebius.Validation.PhaseContract.Internal
       Amoebius.Validation.PhaseIdentity
+      Amoebius.Validation.PhaseRunner.Internal
+      Amoebius.Validation.PhaseZeroRun.Internal
+      Amoebius.Validation.PbBootstrapGrammar.Internal
       Amoebius.Validation.PolicyContract.Internal
       Amoebius.Validation.SourceClosure.Internal
       Amoebius.Validation.SourceSnapshot.Internal
       Amoebius.Validation.SourceConsumerGraph.Internal
       Amoebius.Validation.SourceDebtBaseline.Internal
+      Amoebius.Validation.StatusProjection.Internal
   hs-source-dirs:
       src/validation-kernel
   build-depends:
@@ -32014,8 +32710,270 @@ library validation-kernel
     cpp-options: -DVALIDATION_POLICY_UNIVERSE_STATUS_TRANSITION_RULE_MUTANT
   if flag(validation-policy-universe-tracked-generated-artifact-mutant)
     cpp-options: -DVALIDATION_POLICY_UNIVERSE_TRACKED_GENERATED_ARTIFACT_MUTANT
+  if flag(validation-document-archive-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_ARCHIVE_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-backlink-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_BACKLINK_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-claude-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_CLAUDE_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-corpus-discovery-composition-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_CORPUS_DISCOVERY_COMPOSITION_MUTANT
+  if flag(validation-document-corpus-document-composition-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_CORPUS_DOCUMENT_COMPOSITION_MUTANT
+  if flag(validation-document-corpus-phase-contract-composition-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_CORPUS_PHASE_CONTRACT_COMPOSITION_MUTANT
+  if flag(validation-document-duplicate-path-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_DUPLICATE_PATH_BYPASS_MUTANT
+  if flag(validation-document-duplicate-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_DUPLICATE_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-empty-discovery-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_EMPTY_DISCOVERY_BYPASS_MUTANT
+  if flag(validation-document-empty-discovery-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_EMPTY_DISCOVERY_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-governed-agents-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_GOVERNED_AGENTS_OMISSION_MUTANT
+  if flag(validation-document-governed-claude-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_GOVERNED_CLAUDE_OMISSION_MUTANT
+  if flag(validation-document-governed-crash-summary-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_GOVERNED_CRASH_SUMMARY_OMISSION_MUTANT
+  if flag(validation-document-governed-documents-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_GOVERNED_DOCUMENTS_OMISSION_MUTANT
+  if flag(validation-document-governed-plan-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_GOVERNED_PLAN_OMISSION_MUTANT
+  if flag(validation-document-governed-readme-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_GOVERNED_README_OMISSION_MUTANT
+  if flag(validation-document-header-block-order-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_BLOCK_ORDER_MUTANT
+  if flag(validation-document-header-close-cardinality-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_CLOSE_CARDINALITY_MUTANT
+  if flag(validation-document-header-close-limit-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_CLOSE_LIMIT_MUTANT
+  if flag(validation-document-header-close-tag-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_CLOSE_TAG_MUTANT
+  if flag(validation-document-header-details-block-drop-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_DETAILS_BLOCK_DROP_MUTANT
+  if flag(validation-document-header-details-cardinality-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_DETAILS_CARDINALITY_MUTANT
+  if flag(validation-document-header-details-finding-order-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_DETAILS_FINDING_ORDER_MUTANT
+  if flag(validation-document-header-details-limit-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_DETAILS_LIMIT_MUTANT
+  if flag(validation-document-header-details-tag-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_DETAILS_TAG_MUTANT
+  if flag(validation-document-header-field-block-drop-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_FIELD_BLOCK_DROP_MUTANT
+  if flag(validation-document-header-field-finding-order-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_FIELD_FINDING_ORDER_MUTANT
+  if flag(validation-document-header-lead-after-read-this-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_LEAD_AFTER_READ_THIS_MUTANT
+  if flag(validation-document-header-lead-before-details-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_LEAD_BEFORE_DETAILS_MUTANT
+  if flag(validation-document-header-lead-nonblank-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_LEAD_NONBLANK_MUTANT
+  if flag(validation-document-header-lead-nonquote-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_LEAD_NONQUOTE_MUTANT
+  if flag(validation-document-header-metadata-close-limit-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_METADATA_CLOSE_LIMIT_MUTANT
+  if flag(validation-document-header-metadata-generated-close-order-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_METADATA_GENERATED_CLOSE_ORDER_MUTANT
+  if flag(validation-document-header-metadata-referenced-generated-order-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_METADATA_REFERENCED_GENERATED_ORDER_MUTANT
+  if flag(validation-document-header-metadata-status-supersedes-order-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_METADATA_STATUS_SUPERSEDES_ORDER_MUTANT
+  if flag(validation-document-header-metadata-summary-status-order-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_METADATA_SUMMARY_STATUS_ORDER_MUTANT
+  if flag(validation-document-header-metadata-supersedes-referenced-order-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_METADATA_SUPERSEDES_REFERENCED_ORDER_MUTANT
+  if flag(validation-document-header-nonblank-predicate-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_NONBLANK_PREDICATE_MUTANT
+  if flag(validation-document-header-nonblank-strip-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_NONBLANK_STRIP_MUTANT
+  if flag(validation-document-header-orientation-before-details-filter-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_ORIENTATION_BEFORE_DETAILS_FILTER_MUTANT
+  if flag(validation-document-header-orientation-details-route-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_ORIENTATION_DETAILS_ROUTE_MUTANT
+  if flag(validation-document-header-orientation-details-summary-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_ORIENTATION_DETAILS_SUMMARY_MUTANT
+  if flag(validation-document-header-orientation-lead-existence-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_ORIENTATION_LEAD_EXISTENCE_MUTANT
+  if flag(validation-document-header-orientation-purpose-read-this-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_ORIENTATION_PURPOSE_READ_THIS_MUTANT
+  if flag(validation-document-header-orientation-read-this-details-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_ORIENTATION_READ_THIS_DETAILS_MUTANT
+  if flag(validation-document-header-orientation-title-purpose-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_ORIENTATION_TITLE_PURPOSE_MUTANT
+  if flag(validation-document-header-purpose-block-drop-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_PURPOSE_BLOCK_DROP_MUTANT
+  if flag(validation-document-header-purpose-cardinality-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_PURPOSE_CARDINALITY_MUTANT
+  if flag(validation-document-header-purpose-limit-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_PURPOSE_LIMIT_MUTANT
+  if flag(validation-document-header-purpose-prefix-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_PURPOSE_PREFIX_MUTANT
+  if flag(validation-document-header-purpose-value-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_PURPOSE_VALUE_MUTANT
+  if flag(validation-document-header-read-this-block-drop-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_READ_THIS_BLOCK_DROP_MUTANT
+  if flag(validation-document-header-read-this-cardinality-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_READ_THIS_CARDINALITY_MUTANT
+  if flag(validation-document-header-read-this-limit-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_READ_THIS_LIMIT_MUTANT
+  if flag(validation-document-header-read-this-prefix-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_READ_THIS_PREFIX_MUTANT
+  if flag(validation-document-header-read-this-value-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_READ_THIS_VALUE_MUTANT
+  if flag(validation-document-header-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-header-summary-cardinality-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_SUMMARY_CARDINALITY_MUTANT
+  if flag(validation-document-header-summary-limit-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_SUMMARY_LIMIT_MUTANT
+  if flag(validation-document-header-summary-tag-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_SUMMARY_TAG_MUTANT
+  if flag(validation-document-header-title-block-drop-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_TITLE_BLOCK_DROP_MUTANT
+  if flag(validation-document-header-title-cardinality-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_TITLE_CARDINALITY_MUTANT
+  if flag(validation-document-header-title-first-nonblank-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_TITLE_FIRST_NONBLANK_MUTANT
+  if flag(validation-document-header-title-prefix-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_TITLE_PREFIX_MUTANT
+  if flag(validation-document-header-visible-limit-threshold-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_HEADER_VISIBLE_LIMIT_THRESHOLD_MUTANT
+  if flag(validation-document-input-envelope-route-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_INPUT_ENVELOPE_ROUTE_BYPASS_MUTANT
+  if flag(validation-document-inventory-count-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_INVENTORY_COUNT_BYPASS_MUTANT
+  if flag(validation-document-inventory-digest-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_INVENTORY_DIGEST_BYPASS_MUTANT
+  if flag(validation-document-inventory-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_INVENTORY_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-link-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_LINK_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-markdown-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_MARKDOWN_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-metadata-status-authoritative-drop-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_METADATA_STATUS_AUTHORITATIVE_DROP_MUTANT
+  if flag(validation-document-metadata-status-deprecated-drop-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_METADATA_STATUS_DEPRECATED_DROP_MUTANT
+  if flag(validation-document-metadata-status-legal-order-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_METADATA_STATUS_LEGAL_ORDER_MUTANT
+  if flag(validation-document-metadata-status-reference-drop-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_METADATA_STATUS_REFERENCE_DROP_MUTANT
+  if flag(validation-document-normalize-backslash-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_NORMALIZE_BACKSLASH_OMISSION_MUTANT
+  if flag(validation-document-normalize-dot-prefix-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_NORMALIZE_DOT_PREFIX_OMISSION_MUTANT
+  if flag(validation-document-output-corpus-refusal-retention-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_OUTPUT_CORPUS_REFUSAL_RETENTION_MUTANT
+  if flag(validation-document-output-discovery-refusal-retention-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_OUTPUT_DISCOVERY_REFUSAL_RETENTION_MUTANT
+  if flag(validation-document-output-inventory-refusal-retention-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_OUTPUT_INVENTORY_REFUSAL_RETENTION_MUTANT
+  if flag(validation-document-output-mandatory-finding-limit-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_OUTPUT_MANDATORY_FINDING_LIMIT_BYPASS_MUTANT
+  if flag(validation-document-output-structure-refusal-retention-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_OUTPUT_STRUCTURE_REFUSAL_RETENTION_MUTANT
+  if flag(validation-document-owner-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_OWNER_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-required-agents-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_REQUIRED_AGENTS_OMISSION_MUTANT
+  if flag(validation-document-required-claude-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_REQUIRED_CLAUDE_OMISSION_MUTANT
+  if flag(validation-document-required-corpus-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_REQUIRED_CORPUS_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-required-crash-summary-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_REQUIRED_CRASH_SUMMARY_OMISSION_MUTANT
+  if flag(validation-document-required-documents-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_REQUIRED_DOCUMENTS_OMISSION_MUTANT
+  if flag(validation-document-required-findings-after-bound-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_REQUIRED_FINDINGS_AFTER_BOUND_MUTANT
+  if flag(validation-document-required-plan-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_REQUIRED_PLAN_OMISSION_MUTANT
+  if flag(validation-document-required-readme-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_REQUIRED_README_OMISSION_MUTANT
   if flag(validation-document-retired-artifact-mutant)
     cpp-options: -DVALIDATION_DOCUMENT_RETIRED_ARTIFACT_MUTANT
+  if flag(validation-document-retired-checked-in-prefix-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_CHECKED_IN_PREFIX_OMISSION_MUTANT
+  if flag(validation-document-retired-comment-line-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_COMMENT_LINE_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-retired-committed-prefix-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_COMMITTED_PREFIX_OMISSION_MUTANT
+  if flag(validation-document-retired-exact-path-alphanumeric-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXACT_PATH_ALPHANUMERIC_OMISSION_MUTANT
+  if flag(validation-document-retired-exact-path-current-segment-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXACT_PATH_CURRENT_SEGMENT_BYPASS_MUTANT
+  if flag(validation-document-retired-exact-path-dot-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXACT_PATH_DOT_OMISSION_MUTANT
+  if flag(validation-document-retired-exact-path-empty-segment-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXACT_PATH_EMPTY_SEGMENT_BYPASS_MUTANT
+  if flag(validation-document-retired-exact-path-empty-stem-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXACT_PATH_EMPTY_STEM_BYPASS_MUTANT
+  if flag(validation-document-retired-exact-path-hyphen-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXACT_PATH_HYPHEN_OMISSION_MUTANT
+  if flag(validation-document-retired-exact-path-parent-segment-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXACT_PATH_PARENT_SEGMENT_BYPASS_MUTANT
+  if flag(validation-document-retired-exact-path-slash-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXACT_PATH_SLASH_OMISSION_MUTANT
+  if flag(validation-document-retired-exact-path-suffix-bypass-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXACT_PATH_SUFFIX_BYPASS_MUTANT
+  if flag(validation-document-retired-exact-path-underscore-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXACT_PATH_UNDERSCORE_OMISSION_MUTANT
+  if flag(validation-document-retired-exclamation-clause-boundary-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_EXCLAMATION_CLAUSE_BOUNDARY_OMISSION_MUTANT
+  if flag(validation-document-retired-fixtures-root-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_FIXTURES_ROOT_OMISSION_MUTANT
+  if flag(validation-document-retired-fixtures-word-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_FIXTURES_WORD_OMISSION_MUTANT
+  if flag(validation-document-retired-fixture-root-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_FIXTURE_ROOT_OMISSION_MUTANT
+  if flag(validation-document-retired-fixture-word-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_FIXTURE_WORD_OMISSION_MUTANT
+  if flag(validation-document-retired-goldens-root-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_GOLDENS_ROOT_OMISSION_MUTANT
+  if flag(validation-document-retired-goldens-word-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_GOLDENS_WORD_OMISSION_MUTANT
+  if flag(validation-document-retired-golden-root-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_GOLDEN_ROOT_OMISSION_MUTANT
+  if flag(validation-document-retired-golden-word-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_GOLDEN_WORD_OMISSION_MUTANT
+  if flag(validation-document-retired-mutants-root-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_MUTANTS_ROOT_OMISSION_MUTANT
+  if flag(validation-document-retired-mutants-word-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_MUTANTS_WORD_OMISSION_MUTANT
+  if flag(validation-document-retired-mutant-root-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_MUTANT_ROOT_OMISSION_MUTANT
+  if flag(validation-document-retired-mutant-word-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_MUTANT_WORD_OMISSION_MUTANT
+  if flag(validation-document-retired-negative-root-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_NEGATIVE_ROOT_OMISSION_MUTANT
+  if flag(validation-document-retired-oracles-root-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_ORACLES_ROOT_OMISSION_MUTANT
+  if flag(validation-document-retired-oracles-word-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_ORACLES_WORD_OMISSION_MUTANT
+  if flag(validation-document-retired-oracle-root-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_ORACLE_ROOT_OMISSION_MUTANT
+  if flag(validation-document-retired-oracle-word-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_ORACLE_WORD_OMISSION_MUTANT
+  if flag(validation-document-retired-period-clause-boundary-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_PERIOD_CLAUSE_BOUNDARY_OMISSION_MUTANT
+  if flag(validation-document-retired-phrase-comment-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_PHRASE_COMMENT_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-retired-phrase-raw-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_PHRASE_RAW_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-retired-question-clause-boundary-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_QUESTION_CLAUSE_BOUNDARY_OMISSION_MUTANT
+  if flag(validation-document-retired-raw-line-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_RAW_LINE_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-retired-root-case-fold-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_ROOT_CASE_FOLD_OMISSION_MUTANT
+  if flag(validation-document-retired-semicolon-clause-boundary-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_SEMICOLON_CLAUSE_BOUNDARY_OMISSION_MUTANT
+  if flag(validation-document-retired-wrapped-comment-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_WRAPPED_COMMENT_ROUTE_OMISSION_MUTANT
+  if flag(validation-document-retired-wrapped-raw-route-omission-mutant)
+    cpp-options: -DVALIDATION_DOCUMENT_RETIRED_WRAPPED_RAW_ROUTE_OMISSION_MUTANT
   if flag(validation-document-inventory-baseline-mutant)
     cpp-options: -DVALIDATION_DOCUMENT_INVENTORY_BASELINE_MUTANT
   if flag(validation-document-input-document-limit-bypass-mutant)
@@ -35958,6 +36916,8 @@ library validation-kernel
     cpp-options: -DVALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_194_RETENTION_MUTANT
   if flag(validation-source-closure-document-path-195-retention-mutant)
     cpp-options: -DVALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_195_RETENTION_MUTANT
+  if flag(validation-source-closure-document-path-196-retention-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CLOSURE_DOCUMENT_PATH_196_RETENTION_MUTANT
   if flag(validation-source-closure-semantic-blob-within-limit-mutant)
     cpp-options: -DVALIDATION_SOURCE_CLOSURE_SEMANTIC_BLOB_WITHIN_LIMIT_MUTANT
   if flag(validation-source-closure-semantic-cr-bypass-mutant)
@@ -37086,8 +38046,8 @@ library validation-kernel
     cpp-options: -DVALIDATION_SOURCE_DEBT_TRAVERSAL_LIMIT_WIDEN_MUTANT
   if flag(validation-source-debt-problem-limit-widen-mutant)
     cpp-options: -DVALIDATION_SOURCE_DEBT_PROBLEM_LIMIT_WIDEN_MUTANT
-  if flag(validation-source-debt-observation-limit-widen-mutant)
-    cpp-options: -DVALIDATION_SOURCE_DEBT_OBSERVATION_LIMIT_WIDEN_MUTANT
+  if flag(validation-source-debt-observation-limit-narrow-mutant)
+    cpp-options: -DVALIDATION_SOURCE_DEBT_OBSERVATION_LIMIT_NARROW_MUTANT
   if flag(validation-source-debt-path-utf8-limit-widen-mutant)
     cpp-options: -DVALIDATION_SOURCE_DEBT_PATH_UTF8_LIMIT_WIDEN_MUTANT
   if flag(validation-source-debt-object-id-limit-widen-mutant)
@@ -44556,6 +45516,7 @@ test-suite validation-kernel-component
       SourceClosureOracle
       SourceConsumerGraphOracle
       SourceDebtBaselineOracle
+      StatusFrontierOracle
   hs-source-dirs:
       test/validation-kernel
   build-depends:
@@ -44594,21 +45555,37 @@ test-suite validation-phase-contract-component
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns -threaded
 
--- Direct-source full-mode PhaseContract diagnostic for the package-hidden
--- semantic carriers and duplicate-path decisions.
+-- Direct-source full-mode diagnostics for package-hidden PhaseContract,
+-- published-evidence, and status-projection/recovery decisions.
 test-suite validation-phase-contract-internal-component
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
       SelectorCli
+      EvidenceGatePassInternalOracle
       PhaseContractInternalOracle
       PhaseContractOracle
+      PhaseRunnerInternalOracle
+      StatusProjectionInternalOracle
+      Amoebius.Validation.CapabilityGraph
+      Amoebius.Validation.CompilerExpectationAuthority.Internal
       Amoebius.Validation.CompilerSourceGraph.Internal
+      Amoebius.Validation.CompilerSubjectRegistry.Internal
+      Amoebius.Validation.Documentation.Internal
+      Amoebius.Validation.Evidence.Internal
+      Amoebius.Validation.Gate.Internal
+      Amoebius.Validation.GatePass
+      Amoebius.Validation.GatePass.Internal
       Amoebius.Validation.Legacy.Internal
+      Amoebius.Validation.MutationCoverage
       Amoebius.Validation.PbBootstrapGrammar
+      Amoebius.Validation.PbBootstrapGrammar.Internal
       Amoebius.Validation.PhaseContract
+      Amoebius.Validation.PhaseContract.Evidence.Internal
       Amoebius.Validation.PhaseContract.Internal
       Amoebius.Validation.PhaseIdentity
+      Amoebius.Validation.PhaseRunner.Internal
+      Amoebius.Validation.PhaseZeroRun.Internal
       Amoebius.Validation.PhaseSemanticContract
       Amoebius.Validation.PhaseSemanticJoin
       Amoebius.Validation.PolicyContract.Internal
@@ -44617,12 +45594,16 @@ test-suite validation-phase-contract-internal-component
       Amoebius.Validation.SourceConsumerGraph.Internal
       Amoebius.Validation.SourceDebtBaseline.Internal
       Amoebius.Validation.SourceSnapshot.Internal
+      Amoebius.Validation.StatusFrontier
+      Amoebius.Validation.StatusProjection.Internal
       Amoebius.Validation.Types
   hs-source-dirs:
       test/validation-kernel/phase-contract-internal
       test/validation-kernel
       src/validation-kernel
   build-depends:
+      Cabal-syntax ==3.16.1.0,
+      aeson ==2.2.5.0,
       base >=4.21 && <4.22,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
@@ -44631,12 +45612,14 @@ test-suite validation-phase-contract-internal-component
       directory >=1.3 && <1.4,
       filepath >=1.5 && <1.6,
       process >=1.6 && <1.7,
+      temporary ==1.3,
       text >=2.1 && <2.2
   if !os(windows)
     build-depends:
         unix >=2.8.6 && <2.9
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  cpp-options: -DVALIDATION_SOURCE_CLOSURE_INTERNAL_TEST_ACQUIRE
   if flag(validation-phase-contract-semantic-observation-composition-bypass-mutant)
     cpp-options: -DVALIDATION_PHASE_CONTRACT_SEMANTIC_OBSERVATION_COMPOSITION_BYPASS_MUTANT
   if flag(validation-phase-contract-semantic-finding-composition-bypass-mutant)
@@ -44662,6 +45645,7 @@ test-suite validation-source-debt-internal-component
       SelectorCli
       SourceDebtBaselineInternalOracle
       Amoebius.Validation.PbBootstrapGrammar
+      Amoebius.Validation.PbBootstrapGrammar.Internal
       Amoebius.Validation.PolicyContract.Internal
       Amoebius.Validation.SourceClosure.Internal
       Amoebius.Validation.SourceDebtBaseline.Internal
@@ -44848,8 +45832,12 @@ test-suite validation-compiler-source-graph-acquired-component
   other-modules:
       SelectorCli
       CompilerSourceGraphAcquiredOracle
+      CompilerSubjectRegistryOracle
+      Amoebius.Validation.CompilerExpectationAuthority.Internal
       Amoebius.Validation.CompilerSourceGraph.Internal
+      Amoebius.Validation.CompilerSubjectRegistry.Internal
       Amoebius.Validation.PbBootstrapGrammar
+      Amoebius.Validation.PbBootstrapGrammar.Internal
       Amoebius.Validation.PolicyContract.Internal
       Amoebius.Validation.SourceClosure.Internal
       Amoebius.Validation.SourceConsumerGraph.Internal
@@ -44859,6 +45847,7 @@ test-suite validation-compiler-source-graph-acquired-component
       test/validation-kernel
       src/validation-kernel
   build-depends:
+      Cabal-syntax ==3.16.1.0,
       base >=4.21 && <4.22,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
@@ -45026,6 +46015,7 @@ test-suite validation-compiler-component-plan-component
       Amoebius.Validation.CompilerComponentPlan
       Amoebius.Validation.CompilerComponentPlan.Internal
       Amoebius.Validation.PbBootstrapGrammar
+      Amoebius.Validation.PbBootstrapGrammar.Internal
       Amoebius.Validation.PolicyContract.Internal
       Amoebius.Validation.SourceClosure.Internal
       Amoebius.Validation.SourceConsumerGraph.Internal
@@ -46378,6 +47368,7 @@ test-suite validation-pb-bootstrap-grammar-component
       SelectorCli
       PbBootstrapGrammarOracle
       Amoebius.Validation.PbBootstrapGrammar
+      Amoebius.Validation.PbBootstrapGrammar.Internal
       Amoebius.Validation.Types
   hs-source-dirs:
       test/validation-kernel/pb-bootstrap-grammar
@@ -47147,6 +48138,800 @@ test-suite validation-pb-bootstrap-grammar-component
     cpp-options: -DVALIDATION_PB_GRAMMAR_RUNTIME_BOUNDARY_MAPPING_MUTANT
   if flag(validation-pb-grammar-windows-platform-limitation-mapping-mutant)
     cpp-options: -DVALIDATION_PB_GRAMMAR_WINDOWS_PLATFORM_LIMITATION_MAPPING_MUTANT
+
+common validation-public-selector-suite
+  hs-source-dirs:
+      test/validation-kernel
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:validation-kernel,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      crypton ==1.0.6,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      memory ==0.18.0,
+      process >=1.6 && <1.7,
+      temporary >=1.3 && <1.4,
+      text >=2.1 && <2.2
+  if !os(windows)
+    build-depends:
+        unix >=2.8.6 && <2.9
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite validation-policy-contract-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: policy-contract-selector/Main.hs
+  other-modules:
+      PolicyContractOracle
+      SelectorCli
+
+test-suite validation-legacy-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: legacy-selector/Main.hs
+  other-modules:
+      LegacyOracle
+      SelectorCli
+
+test-suite validation-source-closure-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: source-closure-selector/Main.hs
+  other-modules:
+      SelectorCli
+      SourceClosureOracle
+
+test-suite validation-source-consumer-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: source-consumer-selector/Main.hs
+  other-modules:
+      SelectorCli
+      SourceConsumerGraphOracle
+
+test-suite validation-documentation-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: documentation-selector/Main.hs
+  other-modules:
+      DocumentationOracle
+      DocumentationRetiredOracle
+      SelectorCli
+
+test-suite validation-dispatch-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: dispatch-selector/Main.hs
+  other-modules:
+      DispatchOracle
+      SelectorCli
+
+test-suite validation-compiler-buildinfo-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: compiler-buildinfo-selector/Main.hs
+  other-modules:
+      CompilerBuildInfoOracle
+      SelectorCli
+
+test-suite validation-compiler-elaborated-plan-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: compiler-elaborated-plan-selector/Main.hs
+  other-modules:
+      CompilerElaboratedPlanOracle
+      SelectorCli
+
+test-suite validation-compiler-source-graph-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: compiler-source-graph-selector/Main.hs
+  other-modules:
+      CompilerSourceGraphOracle
+      SelectorCli
+
+test-suite validation-source-debt-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: source-debt-selector/Main.hs
+  other-modules:
+      SelectorCli
+      SourceDebtBaselineOracle
+
+test-suite validation-phase-semantic-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: phase-semantic-selector/Main.hs
+  other-modules:
+      PhaseSemanticContractOracle
+      PolicyContractOracle
+      SelectorCli
+
+test-suite validation-qualification-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: qualification-selector/Main.hs
+  other-modules:
+      PolicyContractOracle
+      QualificationOracle
+      SelectorCli
+
+-- Direct-source diagnostic for the package-hidden execution-derived
+-- qualification authority boundary. It does not execute or qualify the
+-- sabotage corpus.
+test-suite validation-qualification-internal-component
+  type: exitcode-stdio-1.0
+  main-is: qualification-internal/Main.hs
+  other-modules:
+      QualificationInternalOracle
+      Amoebius.Validation.CompilerExpectationAuthority.Internal
+      Amoebius.Validation.CompilerSourceGraph.Internal
+      Amoebius.Validation.CompilerSubjectRegistry.Internal
+      Amoebius.Validation.Gate
+      Amoebius.Validation.Gate.Internal
+      Amoebius.Validation.PbBootstrapGrammar
+      Amoebius.Validation.PbBootstrapGrammar.Internal
+      Amoebius.Validation.PolicyContract.Internal
+      Amoebius.Validation.SourceClosure.Internal
+      Amoebius.Validation.SourceConsumerGraph.Internal
+      Amoebius.Validation.SourceSnapshot.Internal
+      Amoebius.Validation.Types
+  hs-source-dirs:
+      test/validation-kernel
+      src/validation-kernel
+  build-depends:
+      Cabal-syntax ==3.16.1.0,
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      crypton ==1.0.6,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      time >=1.14 && <1.15,
+      text >=2.1 && <2.2
+  if !os(windows)
+    build-depends:
+        unix >=2.8.6 && <2.9
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  cpp-options: -DVALIDATION_QUALIFICATION_INTERNAL_TEST_HOOKS
+
+test-suite validation-documentation-internal-selector-component
+  import: validation-public-selector-suite
+  type: exitcode-stdio-1.0
+  main-is: documentation-internal-selector/Main.hs
+  other-modules:
+      DocumentationOracle
+      DocumentationRetiredOracle
+      PolicyContractOracle
+      SelectorCli
+
+-- Direct-source selector for package-hidden source-consumer semantics. It owns
+-- one home-module universe so a selected CPP mutation cannot be masked by the
+-- unmutated validation-kernel library.
+test-suite validation-source-consumer-internal-selector-component
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      SelectorCli
+      SourceConsumerGraphInternalOracle
+      Amoebius.Validation.PbBootstrapGrammar
+      Amoebius.Validation.PbBootstrapGrammar.Internal
+      Amoebius.Validation.PolicyContract.Internal
+      Amoebius.Validation.SourceClosure.Internal
+      Amoebius.Validation.SourceConsumerGraph.Internal
+      Amoebius.Validation.SourceSnapshot.Internal
+      Amoebius.Validation.Types
+  hs-source-dirs:
+      test/validation-kernel/source-consumer-internal-selector
+      test/validation-kernel
+      src/validation-kernel
+  build-depends:
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      crypton ==1.0.6,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      memory ==0.18.0,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  if !os(windows)
+    build-depends:
+        unix >=2.8.6 && <2.9
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  -- SOURCE_CONSUMER_INTERNAL_SELECTOR_CPP_OPTIONS
+  if flag(validation-source-consumer-internal-admitted-content-route-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_ADMITTED_CONTENT_ROUTE_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-bind-admitted-role-route-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BIND_ADMITTED_ROLE_ROUTE_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-bounded-prefix-observed-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BOUNDED_PREFIX_OBSERVED_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-bounded-prefix-transition-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BOUNDED_PREFIX_TRANSITION_MUTANT
+  if flag(validation-source-consumer-compiler-residue-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_COMPILER_RESIDUE_BYPASS_MUTANT
+  if flag(validation-source-consumer-dynamic-target-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_DYNAMIC_TARGET_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-amoebius-cabal-build-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_AMOEBIUS_CABAL_BUILD_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-amoebius-cabal-consumer-route-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_AMOEBIUS_CABAL_CONSUMER_ROUTE_MUTANT
+  if flag(validation-source-consumer-internal-amoebius-cabal-role-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_AMOEBIUS_CABAL_ROLE_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-amoebius-cabal-root-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_AMOEBIUS_CABAL_ROOT_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-amoebius-root-path-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_AMOEBIUS_ROOT_PATH_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-analysis-problem-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_ANALYSIS_PROBLEM_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-audit-problem-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_AUDIT_PROBLEM_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-authorized-consumer-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_AUTHORIZED_CONSUMER_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-behavioural-authorization-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BEHAVIOURAL_AUTHORIZATION_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-behavioural-authorization-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BEHAVIOURAL_AUTHORIZATION_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-behavioural-authorization-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BEHAVIOURAL_AUTHORIZATION_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-behavioural-consumer-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BEHAVIOURAL_CONSUMER_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-behavioural-invariant-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BEHAVIOURAL_INVARIANT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-behavioural-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BEHAVIOURAL_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-binding-consumers-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_CONSUMERS_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-binding-consumer-separator-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_CONSUMER_SEPARATOR_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-binding-observation-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_OBSERVATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-binding-observation-key-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_OBSERVATION_KEY_MUTANT
+  if flag(validation-source-consumer-internal-binding-observation-path-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_OBSERVATION_PATH_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-binding-observation-prefix-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_OBSERVATION_PREFIX_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-binding-observation-role-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_OBSERVATION_ROLE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-binding-observation-separator-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_OBSERVATION_SEPARATOR_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-binding-observation-value-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_OBSERVATION_VALUE_MUTANT
+  if flag(validation-source-consumer-internal-binding-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-binding-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-binding-role-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_BINDING_ROLE_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-cabal-build-tool-consumer-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CABAL_BUILD_TOOL_CONSUMER_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-cabal-package-description-role-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CABAL_PACKAGE_DESCRIPTION_ROLE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-cabal-project-build-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CABAL_PROJECT_BUILD_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-cabal-project-description-role-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CABAL_PROJECT_DESCRIPTION_ROLE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-cabal-project-role-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CABAL_PROJECT_ROLE_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-cabal-project-root-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CABAL_PROJECT_ROOT_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-cabal-project-root-path-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CABAL_PROJECT_ROOT_PATH_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-calls-resolved-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CALLS_RESOLVED_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-calls-resolved-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CALLS_RESOLVED_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-calls-resolved-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CALLS_RESOLVED_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-common-source-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMMON_SOURCE_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-compiler-count-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_COUNT_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compiler-facts-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_FACTS_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compiler-graph-unavailable-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_GRAPH_UNAVAILABLE_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compiler-graph-unavailable-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_GRAPH_UNAVAILABLE_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compiler-graph-unavailable-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_GRAPH_UNAVAILABLE_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compiler-identity-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_IDENTITY_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compiler-parse-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_PARSE_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-compiler-parse-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_PARSE_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compiler-parse-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_PARSE_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compiler-problem-count-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_PROBLEM_COUNT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compiler-problem-fact-separator-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_PROBLEM_FACT_SEPARATOR_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compiler-problem-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILER_PROBLEM_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compile-time-execution-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILE_TIME_EXECUTION_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-compile-time-execution-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILE_TIME_EXECUTION_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-compile-time-execution-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPILE_TIME_EXECUTION_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-composed-base-problem-carrier-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPOSED_BASE_PROBLEM_CARRIER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-composed-binding-carrier-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPOSED_BINDING_CARRIER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-composed-effect-problem-carrier-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPOSED_EFFECT_PROBLEM_CARRIER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-composed-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPOSED_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-composed-problem-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPOSED_PROBLEM_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-composed-residue-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COMPOSED_RESIDUE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-conditional-preprocessing-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONDITIONAL_PREPROCESSING_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-conditional-preprocessing-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONDITIONAL_PREPROCESSING_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-conditional-preprocessing-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONDITIONAL_PREPROCESSING_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-container-context-builder-consumer-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONTAINER_CONTEXT_BUILDER_CONSUMER_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-content-mode-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONTENT_MODE_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-content-mode-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONTENT_MODE_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-content-mode-mode-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONTENT_MODE_MODE_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-content-mode-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONTENT_MODE_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-content-mode-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONTENT_MODE_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-control-flow-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONTROL_FLOW_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-control-flow-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONTROL_FLOW_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-control-flow-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_CONTROL_FLOW_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-copying-stem-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_COPYING_STEM_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-detail-observation-composition-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DETAIL_OBSERVATION_COMPOSITION_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-direct-behaviour-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DIRECT_BEHAVIOUR_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-direct-behaviour-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DIRECT_BEHAVIOUR_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-direct-behaviour-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DIRECT_BEHAVIOUR_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-direct-module-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DIRECT_MODULE_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-direct-name-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DIRECT_NAME_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-direct-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DIRECT_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-direct-problem-name-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DIRECT_PROBLEM_NAME_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-direct-problem-path-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DIRECT_PROBLEM_PATH_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-dockerignore-builder-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCKERIGNORE_BUILDER_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-dockerignore-contract-role-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCKERIGNORE_CONTRACT_ROLE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-dockerignore-role-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCKERIGNORE_ROLE_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-documentation-acceptance-refusal-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_ACCEPTANCE_REFUSAL_MUTANT
+  if flag(validation-source-consumer-internal-documentation-binding-role-conjunct-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_BINDING_ROLE_CONJUNCT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-documentation-class-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_CLASS_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-documentation-reader-binding-conjunct-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_READER_BINDING_CONJUNCT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-documentation-reader-module-conjunct-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_READER_MODULE_CONJUNCT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-documentation-reader-path-conjunct-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_READER_PATH_CONJUNCT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-documentation-source-class-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_SOURCE_CLASS_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-documentation-structure-checker-consumer-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_STRUCTURE_CHECKER_CONSUMER_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-documentation-suffix-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_SUFFIX_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-documentation-use-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DOCUMENTATION_USE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-duplicate-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DUPLICATE_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-duplicate-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DUPLICATE_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-duplicate-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DUPLICATE_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-duplicate-problem-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DUPLICATE_PROBLEM_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-duplicate-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DUPLICATE_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-dynamic-detail-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DYNAMIC_DETAIL_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-dynamic-loading-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DYNAMIC_LOADING_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-dynamic-loading-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DYNAMIC_LOADING_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-dynamic-loading-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DYNAMIC_LOADING_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-dynamic-module-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DYNAMIC_MODULE_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-dynamic-problem-detail-value-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DYNAMIC_PROBLEM_DETAIL_VALUE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-dynamic-target-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DYNAMIC_TARGET_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-dynamic-target-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DYNAMIC_TARGET_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-dynamic-target-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_DYNAMIC_TARGET_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-editorconfig-role-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EDITORCONFIG_ROLE_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-editorconfig-tool-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EDITORCONFIG_TOOL_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-editor-configuration-role-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EDITOR_CONFIGURATION_ROLE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-editor-tool-consumer-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EDITOR_TOOL_CONSUMER_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-effect-limit-route-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EFFECT_LIMIT_ROUTE_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-effect-limit-widen-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EFFECT_LIMIT_WIDEN_MUTANT
+  if flag(validation-source-consumer-internal-effect-target-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EFFECT_TARGET_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-effect-target-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EFFECT_TARGET_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-effect-target-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EFFECT_TARGET_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-effect-target-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EFFECT_TARGET_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-empty-haskell-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EMPTY_HASKELL_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-empty-haskell-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EMPTY_HASKELL_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-empty-haskell-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EMPTY_HASKELL_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-empty-haskell-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EMPTY_HASKELL_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-exact-target-problem-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EXACT_TARGET_PROBLEM_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-executable-mode-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EXECUTABLE_MODE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-external-effects-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EXTERNAL_EFFECTS_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-external-effects-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EXTERNAL_EFFECTS_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-external-effects-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_EXTERNAL_EFFECTS_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-filesystem-effects-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_FILESYSTEM_EFFECTS_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-filesystem-effects-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_FILESYSTEM_EFFECTS_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-filesystem-effects-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_FILESYSTEM_EFFECTS_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-finding-limit-narrow-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_FINDING_LIMIT_NARROW_MUTANT
+  if flag(validation-source-consumer-internal-finding-limit-route-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_FINDING_LIMIT_ROUTE_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-gitattributes-client-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GITATTRIBUTES_CLIENT_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-gitattributes-contract-role-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GITATTRIBUTES_CONTRACT_ROLE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-gitattributes-role-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GITATTRIBUTES_ROLE_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-gitignore-client-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GITIGNORE_CLIENT_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-gitignore-contract-role-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GITIGNORE_CONTRACT_ROLE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-gitignore-role-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GITIGNORE_ROLE_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-git-client-consumer-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GIT_CLIENT_CONSUMER_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-governance-documentation-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GOVERNANCE_DOCUMENTATION_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-governance-documentation-role-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GOVERNANCE_DOCUMENTATION_ROLE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-governance-human-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GOVERNANCE_HUMAN_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-graph-bindings-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GRAPH_BINDINGS_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-graph-binding-carrier-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GRAPH_BINDING_CARRIER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-graph-identity-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GRAPH_IDENTITY_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-graph-identity-projection-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GRAPH_IDENTITY_PROJECTION_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-graph-problems-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GRAPH_PROBLEMS_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-graph-problem-carrier-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GRAPH_PROBLEM_CARRIER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-graph-residue-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GRAPH_RESIDUE_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-graph-residue-projection-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_GRAPH_RESIDUE_PROJECTION_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-haskell-extension-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_HASKELL_EXTENSION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-human-reader-consumer-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_HUMAN_READER_CONSUMER_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-imports-renamed-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_IMPORTS_RENAMED_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-imports-renamed-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_IMPORTS_RENAMED_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-imports-renamed-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_IMPORTS_RENAMED_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-indirect-calls-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_INDIRECT_CALLS_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-indirect-calls-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_INDIRECT_CALLS_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-indirect-calls-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_INDIRECT_CALLS_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-legal-case-normalization-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LEGAL_CASE_NORMALIZATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-legal-exact-match-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LEGAL_EXACT_MATCH_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-legal-filename-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LEGAL_FILENAME_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-legal-name-refusal-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LEGAL_NAME_REFUSAL_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-legal-suffix-match-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LEGAL_SUFFIX_MATCH_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-licence-stem-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LICENCE_STEM_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-license-stem-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LICENSE_STEM_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-limit-effects-observation-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_EFFECTS_OBSERVATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-limit-effects-observation-key-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_EFFECTS_OBSERVATION_KEY_MUTANT
+  if flag(validation-source-consumer-internal-limit-effects-observation-value-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_EFFECTS_OBSERVATION_VALUE_MUTANT
+  if flag(validation-source-consumer-internal-limit-problems-observation-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_PROBLEMS_OBSERVATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-limit-problems-observation-key-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_PROBLEMS_OBSERVATION_KEY_MUTANT
+  if flag(validation-source-consumer-internal-limit-problems-observation-value-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_PROBLEMS_OBSERVATION_VALUE_MUTANT
+  if flag(validation-source-consumer-internal-limit-result-findings-observation-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_RESULT_FINDINGS_OBSERVATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-limit-result-findings-observation-key-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_RESULT_FINDINGS_OBSERVATION_KEY_MUTANT
+  if flag(validation-source-consumer-internal-limit-result-findings-observation-value-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_RESULT_FINDINGS_OBSERVATION_VALUE_MUTANT
+  if flag(validation-source-consumer-internal-limit-result-observations-observation-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_RESULT_OBSERVATIONS_OBSERVATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-limit-result-observations-observation-key-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_RESULT_OBSERVATIONS_OBSERVATION_KEY_MUTANT
+  if flag(validation-source-consumer-internal-limit-result-observations-observation-value-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_RESULT_OBSERVATIONS_OBSERVATION_VALUE_MUTANT
+  if flag(validation-source-consumer-internal-limit-snapshot-observation-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_SNAPSHOT_OBSERVATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-limit-snapshot-observation-key-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_SNAPSHOT_OBSERVATION_KEY_MUTANT
+  if flag(validation-source-consumer-internal-limit-snapshot-observation-value-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_LIMIT_SNAPSHOT_OBSERVATION_VALUE_MUTANT
+  if flag(validation-source-consumer-internal-mandatory-residue-classification-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_MANDATORY_RESIDUE_CLASSIFICATION_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-notice-stem-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_NOTICE_STEM_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-observation-limit-narrow-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_OBSERVATION_LIMIT_NARROW_MUTANT
+  if flag(validation-source-consumer-internal-observation-limit-route-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_OBSERVATION_LIMIT_ROUTE_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-probe-cabal-build-consumer-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PROBE_CABAL_BUILD_CONSUMER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-probe-cabal-role-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PROBE_CABAL_ROLE_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-problem-limit-route-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PROBLEM_LIMIT_ROUTE_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-problem-limit-widen-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PROBLEM_LIMIT_WIDEN_MUTANT
+  if flag(validation-source-consumer-internal-product-behaviour-use-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PRODUCT_BEHAVIOUR_USE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-product-runtime-consumer-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PRODUCT_RUNTIME_CONSUMER_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-product-sinks-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PRODUCT_SINKS_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-product-sinks-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PRODUCT_SINKS_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-product-sinks-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PRODUCT_SINKS_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-project-class-alternative-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PROJECT_CLASS_ALTERNATIVE_DROP_MUTANT
+  if flag(validation-source-consumer-internal-project-source-class-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PROJECT_SOURCE_CLASS_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-provenance-flows-fact-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PROVENANCE_FLOWS_FACT_DROP_MUTANT
+  if flag(validation-source-consumer-internal-provenance-flows-fact-identity-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PROVENANCE_FLOWS_FACT_IDENTITY_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-provenance-flows-fact-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_PROVENANCE_FLOWS_FACT_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-regular-mode-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_REGULAR_MODE_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-regular-mode-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_REGULAR_MODE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-repository-root-locator-consumer-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_REPOSITORY_ROOT_LOCATOR_CONSUMER_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-required-fact-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_REQUIRED_FACT_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-residue-facts-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESIDUE_FACTS_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-residue-fact-carrier-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESIDUE_FACT_CARRIER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-residue-identity-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESIDUE_IDENTITY_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-residue-identity-projection-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESIDUE_IDENTITY_PROJECTION_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-residue-subjects-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESIDUE_SUBJECTS_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-residue-subject-carrier-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESIDUE_SUBJECT_CARRIER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-resolved-effect-name-binding-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOLVED_EFFECT_NAME_BINDING_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resolved-effect-name-module-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOLVED_EFFECT_NAME_MODULE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resolved-effect-name-separator-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOLVED_EFFECT_NAME_SEPARATOR_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resource-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOURCE_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resource-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOURCE_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resource-limit-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOURCE_LIMIT_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resource-name-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOURCE_NAME_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resource-observed-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOURCE_OBSERVED_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resource-problem-limit-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOURCE_PROBLEM_LIMIT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resource-problem-name-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOURCE_PROBLEM_NAME_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resource-problem-observed-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOURCE_PROBLEM_OBSERVED_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-resource-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESOURCE_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-result-finding-carrier-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESULT_FINDING_CARRIER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-result-finding-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESULT_FINDING_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-result-name-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESULT_NAME_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-result-observation-carrier-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESULT_OBSERVATION_CARRIER_DROP_MUTANT
+  if flag(validation-source-consumer-internal-result-observation-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESULT_OBSERVATION_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-result-problem-composition-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_RESULT_PROBLEM_COMPOSITION_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-role-default-authorization-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_ROLE_DEFAULT_AUTHORIZATION_MUTANT
+  if flag(validation-source-consumer-internal-root-acceptance-refusal-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_ROOT_ACCEPTANCE_REFUSAL_MUTANT
+  if flag(validation-source-consumer-internal-root-reader-binding-conjunct-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_ROOT_READER_BINDING_CONJUNCT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-root-reader-module-conjunct-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_ROOT_READER_MODULE_CONJUNCT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-root-reader-path-conjunct-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_ROOT_READER_PATH_CONJUNCT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-root-sentinel-use-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_ROOT_SENTINEL_USE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-snapshot-limit-route-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SNAPSHOT_LIMIT_ROUTE_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-snapshot-limit-widen-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SNAPSHOT_LIMIT_WIDEN_MUTANT
+  if flag(validation-source-consumer-internal-snapshot-refusal-empty-haskell-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SNAPSHOT_REFUSAL_EMPTY_HASKELL_DROP_MUTANT
+  if flag(validation-source-consumer-internal-source-boundary-acceptance-refusal-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SOURCE_BOUNDARY_ACCEPTANCE_REFUSAL_MUTANT
+  if flag(validation-source-consumer-internal-source-boundary-checker-consumer-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SOURCE_BOUNDARY_CHECKER_CONSUMER_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-source-boundary-use-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SOURCE_BOUNDARY_USE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-source-reader-binding-conjunct-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SOURCE_READER_BINDING_CONJUNCT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-source-reader-module-conjunct-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SOURCE_READER_MODULE_CONJUNCT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-source-reader-path-conjunct-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SOURCE_READER_PATH_CONJUNCT_BYPASS_MUTANT
+  if flag(validation-source-consumer-internal-subject-mode-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_MODE_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-subject-object-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_OBJECT_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-subject-observation-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_OBSERVATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-subject-observation-key-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_OBSERVATION_KEY_MUTANT
+  if flag(validation-source-consumer-internal-subject-observation-mode-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_OBSERVATION_MODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-subject-observation-object-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_OBSERVATION_OBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-subject-observation-path-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_OBSERVATION_PATH_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-subject-observation-prefix-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_OBSERVATION_PREFIX_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-subject-observation-separator-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_OBSERVATION_SEPARATOR_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-subject-observation-value-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_OBSERVATION_VALUE_MUTANT
+  if flag(validation-source-consumer-internal-subject-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-subject-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUBJECT_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-summary-binding-count-observation-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUMMARY_BINDING_COUNT_OBSERVATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-summary-binding-count-observation-key-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUMMARY_BINDING_COUNT_OBSERVATION_KEY_MUTANT
+  if flag(validation-source-consumer-internal-summary-binding-count-observation-value-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUMMARY_BINDING_COUNT_OBSERVATION_VALUE_MUTANT
+  if flag(validation-source-consumer-internal-summary-haskell-count-observation-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUMMARY_HASKELL_COUNT_OBSERVATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-summary-haskell-count-observation-key-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUMMARY_HASKELL_COUNT_OBSERVATION_KEY_MUTANT
+  if flag(validation-source-consumer-internal-summary-haskell-count-observation-value-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUMMARY_HASKELL_COUNT_OBSERVATION_VALUE_MUTANT
+  if flag(validation-source-consumer-internal-summary-observation-order-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUMMARY_OBSERVATION_ORDER_MUTANT
+  if flag(validation-source-consumer-internal-summary-snapshot-observation-drop-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUMMARY_SNAPSHOT_OBSERVATION_DROP_MUTANT
+  if flag(validation-source-consumer-internal-summary-snapshot-observation-key-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUMMARY_SNAPSHOT_OBSERVATION_KEY_MUTANT
+  if flag(validation-source-consumer-internal-summary-snapshot-observation-value-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SUMMARY_SNAPSHOT_OBSERVATION_VALUE_MUTANT
+  if flag(validation-source-consumer-internal-symlink-mode-render-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_SYMLINK_MODE_RENDER_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unauthorized-effect-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNAUTHORIZED_EFFECT_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unauthorized-effect-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNAUTHORIZED_EFFECT_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unauthorized-effect-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNAUTHORIZED_EFFECT_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unauthorized-module-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNAUTHORIZED_MODULE_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unauthorized-name-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNAUTHORIZED_NAME_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unauthorized-problem-name-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNAUTHORIZED_PROBLEM_NAME_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unauthorized-problem-path-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNAUTHORIZED_PROBLEM_PATH_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unauthorized-target-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNAUTHORIZED_TARGET_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unauthorized-use-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNAUTHORIZED_USE_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unbound-class-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNBOUND_CLASS_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unbound-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNBOUND_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unbound-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNBOUND_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unbound-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNBOUND_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unbound-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNBOUND_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unresolved-detail-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNRESOLVED_DETAIL_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unresolved-effect-code-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNRESOLVED_EFFECT_CODE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unresolved-effect-detail-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNRESOLVED_EFFECT_DETAIL_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unresolved-effect-subject-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNRESOLVED_EFFECT_SUBJECT_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unresolved-module-path-field-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNRESOLVED_MODULE_PATH_FIELD_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unresolved-problem-detail-value-mapping-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNRESOLVED_PROBLEM_DETAIL_VALUE_MAPPING_MUTANT
+  if flag(validation-source-consumer-internal-unresolved-target-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_CONSUMER_INTERNAL_UNRESOLVED_TARGET_BYPASS_MUTANT
+  if flag(validation-source-role-behavioral-authorization-mutant)
+    cpp-options: -DVALIDATION_SOURCE_ROLE_BEHAVIORAL_AUTHORIZATION_MUTANT
+  if flag(validation-source-direct-behavioral-effect-bypass-mutant)
+    cpp-options: -DVALIDATION_SOURCE_DIRECT_BEHAVIORAL_EFFECT_BYPASS_MUTANT
 
 test-suite validation-source-consumer-analyze-effects-opacity-attack
   type: exitcode-stdio-1.0
@@ -52951,6 +54736,71 @@ test-suite validation-dispatch-command-public-control
       amoebius:validation-kernel
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+test-suite validation-evidence-finalized-dispatch-candidate-opacity-attack
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs:
+      test/compile-negative/evidence-finalized-dispatch-candidate-opacity
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:validation-kernel
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+  if !flag(validation-evidence-finalized-dispatch-candidate-opacity-attack)
+    buildable: False
+
+test-suite validation-evidence-pass-criterion-evidence-opacity-attack
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs:
+      test/compile-negative/evidence-pass-criterion-evidence-opacity
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:validation-kernel
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+  if !flag(validation-evidence-pass-criterion-evidence-opacity-attack)
+    buildable: False
+
+test-suite validation-legacy-gate-completion-premises-opacity-attack
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs:
+      test/compile-negative/legacy-gate-completion-premises-opacity
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:validation-kernel
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+  if !flag(validation-legacy-gate-completion-premises-opacity-attack)
+    buildable: False
+
+test-suite validation-legacy-gate-prerequisite-construction-opacity-attack
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs:
+      test/compile-negative/legacy-gate-prerequisite-construction-opacity
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:validation-kernel
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+  if !flag(validation-legacy-gate-prerequisite-construction-opacity-attack)
+    buildable: False
+
+test-suite validation-legacy-legacy-closure-opacity-attack
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs:
+      test/compile-negative/legacy-legacy-closure-opacity
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:validation-kernel
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+  if !flag(validation-legacy-legacy-closure-opacity-attack)
+    buildable: False
 
 test-suite validation-legacy-internal-module-opacity-attack
   type: exitcode-stdio-1.0

@@ -28,9 +28,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 16.1: Polymorphic environment and interpreters ⏸️](#sprint-161-polymorphic-environment-and-interpreters-)
-- [Sprint 16.2: Modeled contracts and semantic schedules ⏸️](#sprint-162-modeled-contracts-and-semantic-schedules-)
-- [Sprint 16.3: Determinism, exploration, and mutation ⏸️](#sprint-163-determinism-exploration-and-mutation-)
+- [Sprint 16.1: Polymorphic environment and interpreters](#sprint-161-polymorphic-environment-and-interpreters-)
+- [Sprint 16.2: Modeled contracts and semantic schedules](#sprint-162-modeled-contracts-and-semantic-schedules-)
+- [Sprint 16.3: Determinism, exploration, and mutation](#sprint-163-determinism-exploration-and-mutation-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -74,7 +74,7 @@ NOT VALIDATED.
 **Register:** 2 — Haskell behavior against modeled boundaries only; no live correspondence claim. NOT VALIDATED.
 
 **Depends on:** [Phase 15](phase_15_compile_fail_harness.md)
-**Gate:** `pb validate phase 16`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 16`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

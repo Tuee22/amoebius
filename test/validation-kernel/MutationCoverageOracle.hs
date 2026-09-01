@@ -3,14 +3,9 @@
 -- | Independent expectations for the mutation-coverage count.
 --
 -- The numbers here are restated from the corpus, not read back from the
--- module. The kernel declares 5,712 guarded mutation loci; five selector
--- suites between them can execute 1,184; the remaining 4,528 change production
--- under a flag with nothing observing the change.
---
--- Two of the five suites are new. Before they existed the drivers for a
--- 659-locus registry and a 374-locus registry were exported and never called,
--- so the executable corpus was 151 loci and every inventory that counted flag
--- declarations reported thousands.
+-- module. The kernel declares 5,844 Cabal mutation flags; twenty selector
+-- suites between them can execute all 5,844 declared loci; no declared flag remains
+-- unwired and no guarded selector identity is absent from the Cabal corpus.
 module MutationCoverageOracle
   ( runMutationCoverageOracle
   ) where
@@ -23,7 +18,6 @@ import Amoebius.Validation.MutationCoverage
   )
 import Amoebius.Validation.Types (CheckResult (..), Finding (..), Observation (..))
 import Control.Monad (unless)
-import Data.List (sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
 
@@ -33,9 +27,9 @@ runMutationCoverageOracle = do
   unless (null problems) $
     fail (unlines ("MutationCoverageOracle component diagnostics failed:" : map ("  " <>) problems))
   putStrLn
-    ( "MutationCoverageOracle: the declared mutation corpus, the five driving suites, and the "
-        <> "unwired remainder agree with an independently stated count; the milestone set and its "
-        <> "selection modes agree with an independently restated list. A standing gap, not a gate result."
+    ( "MutationCoverageOracle: the declared mutation corpus, the twenty driving suites, the "
+        <> "unwired remainder, and the selector-only residue agree with independently stated counts; the milestone set and its "
+        <> "selection modes agree with an independently restated list. An inventory check, not a mutation matrix or gate result."
     )
 
 -- | The thirteen capabilities whose gates run the complete corpus, restated
@@ -118,19 +112,35 @@ policyProblems =
   mutate transform = [(path, transform contents) | (path, contents) <- syntheticRulebook]
 
 
--- | Restated from the corpus. 73 + 70 + 8 + 659 + 374 = 1,184 driven;
--- 5,712 - 1,184 = 4,528 unwired.
+-- | Restated from the corpus. The twenty independently named executable
+-- suites drive all 5,844 declared loci.
 expectedObservations :: [(Text, Text)]
 expectedObservations =
-  [ ("mutation.declared-loci", "5712")
-  , ("mutation.driven-loci", "1184")
-  , ("mutation.unwired-loci", "4528")
-  , ("mutation.driving-suite-count", "5")
-  , ("mutation.suite.VALIDATION_SOURCE_DEBT", "validation-source-debt-internal-component=73")
-  , ("mutation.suite.VALIDATION_COMPILER_GRAPH", "validation-compiler-source-graph-acquired-component=70")
-  , ("mutation.suite.VALIDATION_PHASE_CONTRACT", "validation-phase-contract-component=8")
+  [ ("mutation.declared-loci", "5844")
+  , ("mutation.driven-loci", "5844")
+  , ("mutation.unwired-loci", "0")
+  , ("mutation.selector-only-loci", "0")
+  , ("mutation.driving-suite-count", "20")
+  , ("mutation.suite.VALIDATION_SOURCE_DEBT_PUBLIC", "validation-source-debt-selector-component=188")
+  , ("mutation.suite.VALIDATION_SOURCE_DEBT_INTERNAL", "validation-source-debt-internal-component=73")
+  , ("mutation.suite.VALIDATION_COMPILER_GRAPH_PUBLIC", "validation-compiler-source-graph-selector-component=275")
+  , ("mutation.suite.VALIDATION_COMPILER_GRAPH_ACQUIRED", "validation-compiler-source-graph-acquired-component=70")
+  , ("mutation.suite.VALIDATION_PHASE_CONTRACT_PUBLIC", "validation-phase-contract-component=134")
+  , ("mutation.suite.VALIDATION_PHASE_CONTRACT_INTERNAL", "validation-phase-contract-internal-component=8")
   , ("mutation.suite.VALIDATION_COMPILER_PLAN", "validation-compiler-component-plan-component=659")
   , ("mutation.suite.VALIDATION_PB_GRAMMAR", "validation-pb-bootstrap-grammar-component=374")
+  , ("mutation.suite.VALIDATION_POLICY", "validation-policy-contract-selector-component=194")
+  , ("mutation.suite.VALIDATION_LEGACY", "validation-legacy-selector-component=1320")
+  , ("mutation.suite.VALIDATION_PHASE_SEMANTIC", "validation-phase-semantic-selector-component=36")
+  , ("mutation.suite.VALIDATION_QUALIFICATION", "validation-qualification-selector-component=1")
+  , ("mutation.suite.VALIDATION_SOURCE_CLOSURE", "validation-source-closure-selector-component=607")
+  , ("mutation.suite.VALIDATION_SOURCE_CONSUMER_PUBLIC", "validation-source-consumer-selector-component=476")
+  , ("mutation.suite.VALIDATION_SOURCE_CONSUMER_INTERNAL", "validation-source-consumer-internal-selector-component=292")
+  , ("mutation.suite.VALIDATION_DOCUMENTATION", "validation-documentation-selector-component=64")
+  , ("mutation.suite.VALIDATION_DOCUMENTATION_INTERNAL", "validation-documentation-internal-selector-component=91")
+  , ("mutation.suite.VALIDATION_DISPATCH", "validation-dispatch-selector-component=26")
+  , ("mutation.suite.VALIDATION_COMPILER_BUILDINFO", "validation-compiler-buildinfo-selector-component=614")
+  , ("mutation.suite.VALIDATION_COMPILER_ELABORATED", "validation-compiler-elaborated-plan-selector-component=342")
   ]
 
 observationProblems :: [String]
@@ -149,19 +159,12 @@ observationProblems =
   observed =
     [(observationKey item, observationValue item) | item <- checkObservations mutationCoverageCheck]
 
--- | Exactly one standing refusal, against the capability that owns the kernel.
--- An integrity code here would mean the two authored counts disagree.
+-- | Complete selector wiring produces no coverage refusal.
 findingProblems :: [String]
 findingProblems =
-  [ "expected the unwired-mutant refusal alone, observed "
+  [ "expected no mutation-coverage refusal, observed "
       <> show (map (Text.unpack . findingCode) findings)
-  | sort (map findingCode findings) /= ["MUTANT-UNWIRED"]
+  | not (null findings)
   ]
-    <> [ "the unwired refusal must name its owning capability and the locus count"
-       | finding <- findings
-       , findingCode finding == "MUTANT-UNWIRED"
-       , not ("capability=documentation_suite" `Text.isInfixOf` findingDetail finding)
-           || not ("4528" `Text.isInfixOf` findingDetail finding)
-       ]
  where
   findings = checkFindings mutationCoverageCheck

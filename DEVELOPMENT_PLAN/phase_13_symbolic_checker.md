@@ -29,8 +29,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 13.1: Total symbolic boundary and inductive obligations ⏸️](#sprint-131-total-symbolic-boundary-and-inductive-obligations-)
-- [Sprint 13.2: Solver differential and mutation evidence ⏸️](#sprint-132-solver-differential-and-mutation-evidence-)
+- [Sprint 13.1: Total symbolic boundary and inductive obligations](#sprint-131-total-symbolic-boundary-and-inductive-obligations-)
+- [Sprint 13.2: Solver differential and mutation evidence](#sprint-132-solver-differential-and-mutation-evidence-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -75,7 +75,7 @@ only beneath `.build/**` and no shell or Python verdict. NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 12](phase_12_explicit_state_checker.md)
-**Gate:** `pb validate phase 13`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 13`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

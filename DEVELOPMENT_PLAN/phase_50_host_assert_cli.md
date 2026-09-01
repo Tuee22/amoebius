@@ -29,10 +29,10 @@ version logic into Python.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 50.1: Bind the already-bounded bootstrap surface ⏸️](#sprint-501-bind-the-already-bounded-bootstrap-surface-)
-- [Sprint 50.2: Ensure and build in the contained root ⏸️](#sprint-502-ensure-and-build-in-the-contained-root-)
-- [Sprint 50.3: Exec-only validation handoff ⏸️](#sprint-503-exec-only-validation-handoff-)
-- [Sprint 50.4: Bounded-bootstrap candidate ⏸️](#sprint-504-bounded-bootstrap-candidate-)
+- [Sprint 50.1: Bind the already-bounded bootstrap surface](#sprint-501-bind-the-already-bounded-bootstrap-surface-)
+- [Sprint 50.2: Ensure and build in the contained root](#sprint-502-ensure-and-build-in-the-contained-root-)
+- [Sprint 50.3: Exec-only validation handoff](#sprint-503-exec-only-validation-handoff-)
+- [Sprint 50.4: Bounded-bootstrap candidate](#sprint-504-bounded-bootstrap-candidate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -72,7 +72,7 @@ satisfy this contract.
 **Lane:** `none`
 **Register:** 2
 **Depends on:** [Phase 49](phase_49_self_referential_gates.md)
-**Gate:** `pb validate phase 50`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 50`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

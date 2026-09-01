@@ -298,7 +298,7 @@ expectedStateResults =
   , "zero"
   , "refused:bounded pb source debt is not zero"
   , "refused:missing acquired source-debt observation for LTD-SRC-001"
-  , "open:237:6a370eba5fefa423d19fe03b62a4bb0d1a42f081276c92edef9b8799b6202bdc"
+  , "open:237:669f28af21b8b592018a0d5a4c789aa8b6f561f60a2b772caf1aef35b7199b5f"
   , "refused:source-debt baseline mismatch for LTD-SRC-001"
   , "refused:source-debt baseline mismatch for LTD-SRC-001"
   , "refused:source-debt baseline mismatch for LTD-SRC-001"

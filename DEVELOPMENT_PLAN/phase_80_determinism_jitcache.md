@@ -31,14 +31,14 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 80.1: `ContentAddress` typeclass kernel primitive ⏸️](#sprint-801-contentaddress-typeclass-kernel-primitive-)
-- [Sprint 80.2: `experimentHash` identity over the live substrate fingerprint ⏸️](#sprint-802-experimenthash-identity-over-the-live-substrate-fingerprint-)
-- [Sprint 80.3: SplitMix seed derivation, worker-count-independent ⏸️](#sprint-803-splitmix-seed-derivation-worker-count-independent-)
-- [Sprint 80.4: The live same-substrate reproducibility gate ⏸️](#sprint-804-the-live-same-substrate-reproducibility-gate-)
-- [Sprint 80.5: The `CacheBudget`-bounded content-addressed cache + peak-occupancy provision fold ⏸️](#sprint-805-the-cachebudget-bounded-content-addressed-cache--peak-occupancy-provision-fold-)
-- [Sprint 80.6: The jit-build resolver — `resolve = {download | build}` on first miss, no URL arm ⏸️](#sprint-806-the-jit-build-resolver--resolve--download--build-on-first-miss-no-url-arm-)
-- [Sprint 80.7: Per-node cache-owner reuse across client pods ⏸️](#sprint-807-per-node-cache-owner-reuse-across-client-pods-)
-- [Sprint 80.8: The live first-miss / reuse / resource-admission gate + Register-3 ledger ⏸️](#sprint-808-the-live-first-miss--reuse--resource-admission-gate--register-3-ledger-)
+- [Sprint 80.1: `ContentAddress` typeclass kernel primitive](#sprint-801-contentaddress-typeclass-kernel-primitive-)
+- [Sprint 80.2: `experimentHash` identity over the live substrate fingerprint](#sprint-802-experimenthash-identity-over-the-live-substrate-fingerprint-)
+- [Sprint 80.3: SplitMix seed derivation, worker-count-independent](#sprint-803-splitmix-seed-derivation-worker-count-independent-)
+- [Sprint 80.4: The live same-substrate reproducibility gate](#sprint-804-the-live-same-substrate-reproducibility-gate-)
+- [Sprint 80.5: The `CacheBudget`-bounded content-addressed cache + peak-occupancy provision fold](#sprint-805-the-cachebudget-bounded-content-addressed-cache--peak-occupancy-provision-fold-)
+- [Sprint 80.6: The jit-build resolver — `resolve = {download | build}` on first miss, no URL arm](#sprint-806-the-jit-build-resolver--resolve--download--build-on-first-miss-no-url-arm-)
+- [Sprint 80.7: Per-node cache-owner reuse across client pods](#sprint-807-per-node-cache-owner-reuse-across-client-pods-)
+- [Sprint 80.8: The live first-miss / reuse / resource-admission gate + Register-3 ledger](#sprint-808-the-live-first-miss--reuse--resource-admission-gate--register-3-ledger-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -151,7 +151,7 @@ the future contract must independently observe recomputation, first-miss materia
 against real pods. Its candidate ledger names the bounded register and has no pass criterion.
 
 **Depends on:** [Phase 79](phase_79_provider_dynamic_nodes.md)
-**Gate:** `pb validate phase 80`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 80`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

@@ -8,11 +8,11 @@
 -- coverage it does not carry, which is the exact failure
 -- @DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md@ records as @LTD-VAL-002@.
 --
--- The kernel declares thousands of mutation loci and, until the two dead
--- selector drivers were given suites, could execute 151 of them. This module
--- states the corpus and the suites that drive it as typed values and refuses
--- the difference, so the gap is a standing refusal attributed to an owner
--- rather than a silent absence.
+-- The kernel declares thousands of mutation loci and, until the exported
+-- selector registries were given suites, could execute only a small fraction
+-- of them. This module states the corpus and the suites that drive it as typed
+-- values and refuses the difference, so the gap is a standing refusal
+-- attributed to an owner rather than a silent absence.
 --
 -- Both numbers are authored here and independently restated by
 -- @test/validation-kernel/MutationCoverageOracle.hs@. Neither side derives the
@@ -28,6 +28,7 @@ module Amoebius.Validation.MutationCoverage
   , mutationCoverageCheck
   , mutationPolicyCheck
   , mutationSelectionMode
+  , selectorOnlyMutationLoci
   , unwiredMutationLoci
   ) where
 
@@ -57,25 +58,46 @@ data DrivenSuite = DrivenSuite
 -- production module gains or loses a guarded locus, which is exactly when a
 -- human should have to restate it.
 declaredMutationLoci :: Int
-declaredMutationLoci = 5712
+declaredMutationLoci = 5844
 
 -- | The suites that can execute part of the corpus.
 --
--- The first four existed. The last two are the drivers that were written,
--- exported, and never called from any @Main.hs@: a 659-locus registry and a
--- 374-locus registry that no Cabal stanza could reach.
+-- Every row names a Cabal component with a real @Main.hs@ that reaches the
+-- oracle-owned selector registry. A registry exported only from an oracle does
+-- not belong here: without this executable component it remains unwired.
 drivenSuites :: [DrivenSuite]
 drivenSuites =
-  [ DrivenSuite "validation-source-debt-internal-component" "VALIDATION_SOURCE_DEBT" "documentation_suite" 73
-  , DrivenSuite "validation-compiler-source-graph-acquired-component" "VALIDATION_COMPILER_GRAPH" "documentation_suite" 70
-  , DrivenSuite "validation-phase-contract-component" "VALIDATION_PHASE_CONTRACT" "documentation_suite" 8
+  [ DrivenSuite "validation-source-debt-selector-component" "VALIDATION_SOURCE_DEBT_PUBLIC" "documentation_suite" 188
+  , DrivenSuite "validation-source-debt-internal-component" "VALIDATION_SOURCE_DEBT_INTERNAL" "documentation_suite" 73
+  , DrivenSuite "validation-compiler-source-graph-selector-component" "VALIDATION_COMPILER_GRAPH_PUBLIC" "documentation_suite" 275
+  , DrivenSuite "validation-compiler-source-graph-acquired-component" "VALIDATION_COMPILER_GRAPH_ACQUIRED" "documentation_suite" 70
+  , DrivenSuite "validation-phase-contract-component" "VALIDATION_PHASE_CONTRACT_PUBLIC" "documentation_suite" 134
+  , DrivenSuite "validation-phase-contract-internal-component" "VALIDATION_PHASE_CONTRACT_INTERNAL" "documentation_suite" 8
   , DrivenSuite "validation-compiler-component-plan-component" "VALIDATION_COMPILER_PLAN" "documentation_suite" 659
   , DrivenSuite "validation-pb-bootstrap-grammar-component" "VALIDATION_PB_GRAMMAR" "documentation_suite" 374
+  , DrivenSuite "validation-policy-contract-selector-component" "VALIDATION_POLICY" "documentation_suite" 194
+  , DrivenSuite "validation-legacy-selector-component" "VALIDATION_LEGACY" "documentation_suite" 1320
+  , DrivenSuite "validation-phase-semantic-selector-component" "VALIDATION_PHASE_SEMANTIC" "documentation_suite" 36
+  , DrivenSuite "validation-qualification-selector-component" "VALIDATION_QUALIFICATION" "documentation_suite" 1
+  , DrivenSuite "validation-source-closure-selector-component" "VALIDATION_SOURCE_CLOSURE" "documentation_suite" 607
+  , DrivenSuite "validation-source-consumer-selector-component" "VALIDATION_SOURCE_CONSUMER_PUBLIC" "documentation_suite" 476
+  , DrivenSuite "validation-source-consumer-internal-selector-component" "VALIDATION_SOURCE_CONSUMER_INTERNAL" "documentation_suite" 292
+  , DrivenSuite "validation-documentation-selector-component" "VALIDATION_DOCUMENTATION" "documentation_suite" 64
+  , DrivenSuite "validation-documentation-internal-selector-component" "VALIDATION_DOCUMENTATION_INTERNAL" "documentation_suite" 91
+  , DrivenSuite "validation-dispatch-selector-component" "VALIDATION_DISPATCH" "documentation_suite" 26
+  , DrivenSuite "validation-compiler-buildinfo-selector-component" "VALIDATION_COMPILER_BUILDINFO" "documentation_suite" 614
+  , DrivenSuite "validation-compiler-elaborated-plan-selector-component" "VALIDATION_COMPILER_ELABORATED" "documentation_suite" 342
   ]
 
 -- | Declared loci that no suite can select.
 unwiredMutationLoci :: Int
 unwiredMutationLoci = declaredMutationLoci - sum (map drivenSuiteLoci drivenSuites)
+
+-- | Selectors backed by guarded production loci but absent from the Cabal flag
+-- corpus. The value is retained as an explicit closed-boundary observation:
+-- adding a guarded selector without its build mapping must make it non-zero.
+selectorOnlyMutationLoci :: Int
+selectorOnlyMutationLoci = 0
 
 -- | The standing count, attributed to the capability that owns each gap.
 mutationCoverageCheck :: CheckResult
@@ -86,6 +108,7 @@ mutationCoverageCheck =
         [ observation "mutation.declared-loci" (showText declaredMutationLoci)
         , observation "mutation.driven-loci" (showText drivenLoci)
         , observation "mutation.unwired-loci" (showText unwiredMutationLoci)
+        , observation "mutation.selector-only-loci" (showText selectorOnlyMutationLoci)
         , observation "mutation.driving-suite-count" (showText (length drivenSuites))
         ]
           <> [ observation
@@ -93,7 +116,7 @@ mutationCoverageCheck =
                  (drivenSuiteName suite <> "=" <> showText (drivenSuiteLoci suite))
              | suite <- drivenSuites
              ]
-    , checkFindings = integrityFindings <> unwiredFindings
+    , checkFindings = integrityFindings <> selectorOnlyFindings <> unwiredFindings
     }
  where
   drivenLoci = sum (map drivenSuiteLoci drivenSuites)
@@ -112,6 +135,16 @@ mutationCoverageCheck =
          | suite <- drivenSuites
          , drivenSuiteLoci suite <= 0
          ]
+
+  selectorOnlyFindings =
+    [ finding
+        "MUTANT-SELECTOR-UNDECLARED"
+        "amoebius.cabal"
+        ( showText selectorOnlyMutationLoci
+            <> " selector identities name guarded production loci that have no Cabal flag; no build can select them"
+        )
+    | selectorOnlyMutationLoci > 0
+    ]
 
   -- An unwired locus is reported against the capability that owns it, so the
   -- count is a per-phase obligation rather than one corpus-wide number nobody

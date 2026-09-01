@@ -28,10 +28,10 @@ separate gate passs.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 55.1: Substrate observation and classification ⏸️](#sprint-551-substrate-observation-and-classification-)
-- [Sprint 55.2: Pure kind preflight and reconcile plan ⏸️](#sprint-552-pure-kind-preflight-and-reconcile-plan-)
-- [Sprint 55.3: Live single-node reconciliation ⏸️](#sprint-553-live-single-node-reconciliation-)
-- [Sprint 55.4: Independent observation, replay, and teardown ⏸️](#sprint-554-independent-observation-replay-and-teardown-)
+- [Sprint 55.1: Substrate observation and classification](#sprint-551-substrate-observation-and-classification-)
+- [Sprint 55.2: Pure kind preflight and reconcile plan](#sprint-552-pure-kind-preflight-and-reconcile-plan-)
+- [Sprint 55.3: Live single-node reconciliation](#sprint-553-live-single-node-reconciliation-)
+- [Sprint 55.4: Independent observation, replay, and teardown](#sprint-554-independent-observation-replay-and-teardown-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -61,7 +61,7 @@ service, secret service, GPU claim, or provider deployment is in scope.
 **Lane:** `linux-cpu/amd64`
 **Register:** 3
 **Depends on:** [Phase 54](phase_54_windows_engine_bringup.md)
-**Gate:** `pb validate phase 55`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 55`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

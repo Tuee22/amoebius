@@ -28,8 +28,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 12.1: Independent bounded checker and replayable verdicts ⏸️](#sprint-121-independent-bounded-checker-and-replayable-verdicts-)
-- [Sprint 12.2: Differential oracle and mutation evidence ⏸️](#sprint-122-differential-oracle-and-mutation-evidence-)
+- [Sprint 12.1: Independent bounded checker and replayable verdicts](#sprint-121-independent-bounded-checker-and-replayable-verdicts-)
+- [Sprint 12.2: Differential oracle and mutation evidence](#sprint-122-differential-oracle-and-mutation-evidence-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -73,7 +73,7 @@ Haskell model with deterministic replay and counterexample products generated on
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 11](phase_11_formal_model_kernel.md)
-**Gate:** `pb validate phase 12`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 12`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

@@ -27,9 +27,9 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 57.1: The complementary-architecture bake on its own hardware ⏸️](#sprint-571-the-complementary-architecture-bake-on-its-own-hardware-)
-- [Sprint 57.2: The architecture-qualified publication and its atomic advertisement ⏸️](#sprint-572-the-architecture-qualified-publication-and-its-atomic-advertisement-)
-- [Sprint 57.3: The no-emulation and untested-child negatives ⏸️](#sprint-573-the-no-emulation-and-untested-child-negatives-)
+- [Sprint 57.1: The complementary-architecture bake on its own hardware](#sprint-571-the-complementary-architecture-bake-on-its-own-hardware-)
+- [Sprint 57.2: The architecture-qualified publication and its atomic advertisement](#sprint-572-the-architecture-qualified-publication-and-its-atomic-advertisement-)
+- [Sprint 57.3: The no-emulation and untested-child negatives](#sprint-573-the-no-emulation-and-untested-child-negatives-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -97,7 +97,7 @@ the host, not the accelerator. Any host natively running `arm64` Linux satisfies
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 56](phase_56_base_image_registry.md)
-**Gate:** `pb validate phase 57`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 57`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

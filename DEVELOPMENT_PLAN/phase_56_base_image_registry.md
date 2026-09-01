@@ -29,10 +29,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 56.1: Native-architecture base image bake — services + jit-build resolver/toolchain, not engine payloads ⏸️](#sprint-561-native-architecture-base-image-bake--services--jit-build-resolvertoolchain-not-engine-payloads-)
-- [Sprint 56.2: Node side-load + Distribution `registry:2` standup ⏸️](#sprint-562-node-side-load--distribution-registry2-standup-)
-- [Sprint 56.3: Atomic publication + immutable digest-pinned refs ⏸️](#sprint-563-atomic-publication--immutable-digest-pinned-refs-)
-- [Sprint 56.4: The no-public-registry-pull gate ⏸️](#sprint-564-the-no-public-registry-pull-gate-)
+- [Sprint 56.1: Native-architecture base image bake — services + jit-build resolver/toolchain, not engine payloads](#sprint-561-native-architecture-base-image-bake--services--jit-build-resolvertoolchain-not-engine-payloads-)
+- [Sprint 56.2: Node side-load + Distribution `registry:2` standup](#sprint-562-node-side-load--distribution-registry2-standup-)
+- [Sprint 56.3: Atomic publication + immutable digest-pinned refs](#sprint-563-atomic-publication--immutable-digest-pinned-refs-)
+- [Sprint 56.4: The no-public-registry-pull gate](#sprint-564-the-no-public-registry-pull-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -144,7 +144,7 @@ pulls. Its complementary architecture is owned by [Phase 57](phase_57_complement
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 55](phase_55_bootstrap_coordinator_kind.md)
-**Gate:** `pb validate phase 56`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 56`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

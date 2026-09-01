@@ -27,10 +27,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 36.1: Row declarations drive schema and policy ⏸️](#sprint-361-row-declarations-drive-schema-and-policy-)
-- [Sprint 36.2: The closed request-scoped transaction GADT ⏸️](#sprint-362-the-closed-request-scoped-transaction-gadt-)
-- [Sprint 36.3: Additive schema generations ⏸️](#sprint-363-additive-schema-generations-)
-- [Sprint 36.4: Compile barriers, semantic mutants, and calculus evidence ⏸️](#sprint-364-compile-barriers-semantic-mutants-and-calculus-evidence-)
+- [Sprint 36.1: Row declarations drive schema and policy](#sprint-361-row-declarations-drive-schema-and-policy-)
+- [Sprint 36.2: The closed request-scoped transaction GADT](#sprint-362-the-closed-request-scoped-transaction-gadt-)
+- [Sprint 36.3: Additive schema generations](#sprint-363-additive-schema-generations-)
+- [Sprint 36.4: Compile barriers, semantic mutants, and calculus evidence](#sprint-364-compile-barriers-semantic-mutants-and-calculus-evidence-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -79,7 +79,7 @@ values; no database is contacted ([§L](development_plan_phase_model.md#l-one-su
 generated SQL remains an output rather than authority ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 35](phase_35_image_recipe_generation.md)
-**Gate:** `pb validate phase 36`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 36`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

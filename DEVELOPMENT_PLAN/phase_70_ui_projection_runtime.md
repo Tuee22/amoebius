@@ -28,7 +28,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 70.1: Build and independently verify the owner-scoped live projection ⏸️](#sprint-701-build-and-independently-verify-the-owner-scoped-live-projection-)
+- [Sprint 70.1: Build and independently verify the owner-scoped live projection](#sprint-701-build-and-independently-verify-the-owner-scoped-live-projection-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -83,7 +83,7 @@ substrate, HA fault, or a second independently useful claim.
 **Register:** 3 — live Pulsar/provider projection and independent readback; NOT VALIDATED.
 
 **Depends on:** [Phase 69](phase_69_content_store_workflow.md)
-**Gate:** `pb validate phase 70`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 70`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

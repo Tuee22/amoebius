@@ -2347,7 +2347,7 @@ limitObservations =
 compilerFacts :: [Text]
 compilerFacts =
   [ "CompilerParseSucceeded"
-  , "ConditionalPreprocessingAbsent"
+  , "ConditionalPreprocessingClosed"
   , "CompileTimeExecutionFeaturesAbsent"
   , "ImportsRenamed"
   , "CallsResolved"

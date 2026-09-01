@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 9.1: Base capacity and topology witness ⏸️](#sprint-91-base-capacity-and-topology-witness-)
+- [Sprint 9.1: Base capacity and topology witness](#sprint-91-base-capacity-and-topology-witness-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -72,7 +72,7 @@ consulting a host or cluster. NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 8](phase_08_scope_index.md)
-**Gate:** `pb validate phase 09`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 09`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
@@ -152,13 +152,11 @@ and [`cluster_topology_doctrine.md` §5 — the compatibility relation](../docum
    each with its own independently authored expectation; join every test surface, keep output generated, and
    bind the result to the natural architecture and snapshot.
 
-**The classification is not this phase's to make.** The eight-discharged/three-deferred split was a query over
-`owner_phase`, and those Haskell-declared rows are built at
-[Phase 27](phase_27_illegal_state_covering.md) Sprint 27.1 — which additionally forbids reading the Markdown
-catalogue as a registry, so at Phase 9 the only implementable form was a local literal whose author also wrote
-the expectation it was checked against. This phase therefore lists its own subcases and settles them. The
-`owner_phase` classification and the Phase-25 deferral attribution are explicit `UNVERIFIED` residue here,
-owned by Phase 27 Sprint 27.4, which reconciles its registry against this list in both directions.
+Phase 9 owns and validates its exact literal subcase list and independently authored expectations.
+[Phase 27](phase_27_illegal_state_covering.md) later consumes that completed Phase-9 artefact; the later work is
+neither Phase-9 residue nor a prerequisite of this gate. Phase 9 therefore settles its
+own capacity/topology claim without reading a later-owned registry or interpreting this Markdown catalogue as
+behavioral input.
 
 ### Remaining Work
 

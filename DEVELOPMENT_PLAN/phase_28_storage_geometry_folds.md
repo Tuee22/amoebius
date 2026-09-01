@@ -32,10 +32,10 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ⏸️](#sprint-281-the-storagebudgetgrowable-arithmetic--logicalphysical-geometry-fold-)
-- [Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ⏸️](#sprint-282-the-policy-only-storage-scaling-fold--provisionedstoragescalingenvelope--planstoragescaling-)
-- [Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ⏸️](#sprint-283-quickcheck-properties--storage-accepts--in-envelope-pulsar-two-ceiling-uniform-claim-)
-- [Sprint 28.4: The storage-geometry fold-negative corpus + the gate ⏸️](#sprint-284-the-storage-geometry-fold-negative-corpus--the-gate-)
+- [Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold](#sprint-281-the-storagebudgetgrowable-arithmetic--logicalphysical-geometry-fold-)
+- [Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling`](#sprint-282-the-policy-only-storage-scaling-fold--provisionedstoragescalingenvelope--planstoragescaling-)
+- [Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim](#sprint-283-quickcheck-properties--storage-accepts--in-envelope-pulsar-two-ceiling-uniform-claim-)
+- [Sprint 28.4: The storage-geometry fold-negative corpus + the gate](#sprint-284-the-storage-geometry-fold-negative-corpus--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -124,7 +124,7 @@ and the candidate verdict.
 **Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 27](phase_27_illegal_state_covering.md)
-**Gate:** `pb validate phase 28`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 28`; see [Gate integrity](#gate-integrity).
 
 <a id="n-gate-integrity-refinements"></a>
 

@@ -30,8 +30,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ⏸️](#sprint-321-the-inferenceengine-capability--target-offering-selected-runtime--accelerator-provision-)
-- [Sprint 32.2: The accelerator-provision corpus + the Register-1 gate ⏸️](#sprint-322-the-accelerator-provision-corpus--the-register-1-gate-)
+- [Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision](#sprint-321-the-inferenceengine-capability--target-offering-selected-runtime--accelerator-provision-)
+- [Sprint 32.2: The accelerator-provision corpus + the Register-1 gate](#sprint-322-the-accelerator-provision-corpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -103,7 +103,7 @@ offering has no deployable value. No device is queried and no runtime behavior i
 **Register:** 1 — pure/semantic-oracle, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Depends on:** [Phase 31](phase_31_provision_seal.md)
-**Gate:** `pb validate phase 32`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 32`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

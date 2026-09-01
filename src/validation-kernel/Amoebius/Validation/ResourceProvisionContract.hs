@@ -2,7 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Validation.ResourceProvisionContract
-  ( resourceProvisionContractDiagnostic
+  ( resourceProvisionContractCheck
+  , resourceProvisionContractDiagnostic
+  , resourceProvisionProjectionCheck
   , resourceProvisionProjectionDiagnostic
   ) where
 
@@ -98,7 +100,16 @@ expectedResourceSlots ordinal =
   [ResourceContractGap (ResourceGapId ordinal field) | field <- resourceFields]
 
 resourceProvisionContractDiagnostic :: CheckResult
-resourceProvisionContractDiagnostic =
+resourceProvisionContractDiagnostic = resourceProvisionRegistryCheck Nothing
+
+-- | Gate-scoped resource-contract check. A gap belonging to a strictly later
+-- phase is retained as deferred debt rather than made fatal to the current
+-- phase. The nullary diagnostic above still exposes the entire reset corpus.
+resourceProvisionContractCheck :: Int -> CheckResult
+resourceProvisionContractCheck = resourceProvisionRegistryCheck . Just
+
+resourceProvisionRegistryCheck :: Maybe Int -> CheckResult
+resourceProvisionRegistryCheck target =
   CheckResult
     { checkName = "resource-provision-contract-diagnostic"
     , checkObservations =
@@ -108,6 +119,8 @@ resourceProvisionContractDiagnostic =
         , observation "resource.gap-count" (showText (length resourceGaps))
         , observation "resource.draft-count" (showText (length resourceDrafts))
         , observation "resource.gate-ready-count" (showText (length resourceGateReady))
+        , observation "resource.target-phase" (maybe "none" renderOrdinal target)
+        , observation "resource.deferred-gap-count" (showText (length deferredGaps))
         ]
           <> [ observation
                  "resource.phase"
@@ -121,14 +134,25 @@ resourceProvisionContractDiagnostic =
              ]
     , checkFindings =
         resourceIntegrityFindings
-          <> concatMap resourceSlotFindings canonicalResourceContracts
-          <> [resourcePermanentRefusal]
+          <> concatMap (resourceSlotFindings target) canonicalResourceContracts
+          <> [resourcePermanentRefusal | target == Nothing]
     }
  where
   allSlots = concatMap resourceSlots canonicalResourceContracts
   resourceGaps = [gapIdentifier | ResourceContractGap gapIdentifier <- allSlots]
   resourceDrafts = [draftIdentifier | ResourceDrafted draftIdentifier <- allSlots]
   resourceGateReady = [draftIdentifier | ResourceGateReady draftIdentifier <- allSlots]
+  deferredGaps =
+    [ gapIdentifier
+    | contract <- canonicalResourceContracts
+    , ResourceContractGap gapIdentifier <- resourceSlots contract
+    , resourceGapIsDeferred target (resourcePhaseOrdinal contract)
+    ]
+
+resourceGapIsDeferred :: Maybe Int -> Int -> Bool
+resourceGapIsDeferred target ordinal = case target of
+  Nothing -> False
+  Just phaseUnderValidation -> ordinal > phaseUnderValidation
 
 resourcePermanentRefusal :: Finding
 resourcePermanentRefusal =
@@ -190,23 +214,30 @@ integrityFinding :: Bool -> Text -> [Finding]
 integrityFinding condition detail =
   [finding "PLAN-RESOURCE-REGISTRY-INTEGRITY" "DEVELOPMENT_PLAN/" detail | not condition]
 
-resourceSlotFindings :: ResourceProvisionContract -> [Finding]
-resourceSlotFindings contract = concatMap findingFor (resourceSlots contract)
+resourceSlotFindings :: Maybe Int -> ResourceProvisionContract -> [Finding]
+resourceSlotFindings target contract = concatMap findingFor (resourceSlots contract)
  where
+  deferred = resourceGapIsDeferred target (resourcePhaseOrdinal contract)
   findingFor slot = case slot of
-    ResourceContractGap gapIdentifier ->
+    ResourceContractGap gapIdentifier
+      | deferred -> []
+      | otherwise ->
       [ finding
           "PLAN-RESOURCE-CONTRACT-GAP"
           (phaseSubject (resourcePhaseOrdinal contract))
           ("gap=" <> renderResourceGapId gapIdentifier)
       ]
-    ResourceDrafted draftIdentifier ->
+    ResourceDrafted draftIdentifier
+      | deferred -> []
+      | otherwise ->
       [ finding
           "PLAN-RESOURCE-GATE-EVIDENCE-MISSING"
           (phaseSubject (resourcePhaseOrdinal contract))
           ("draft=" <> renderResourceDraft draftIdentifier <> " gate-evidence=missing")
       ]
-    ResourceGateReady draftIdentifier ->
+    ResourceGateReady draftIdentifier
+      | deferred -> []
+      | otherwise ->
       [ finding
           "PLAN-RESOURCE-GATE-READY-UNAVAILABLE"
           (phaseSubject (resourcePhaseOrdinal contract))
@@ -217,7 +248,16 @@ resourceSlotFindings contract = concatMap findingFor (resourceSlots contract)
 -- first blockquote carries the mandatory unresolved/no-mutation prefix.  The
 -- function always refuses and exposes no resource contract value.
 resourceProvisionProjectionDiagnostic :: [(Int, Text, Bool)] -> CheckResult
-resourceProvisionProjectionDiagnostic supplied =
+resourceProvisionProjectionDiagnostic = resourceProvisionProjectionWithAuthority False
+
+-- | Integrated structural correspondence check. It compares Markdown's
+-- narrow heading projection with the typed registry but cannot construct or
+-- alter a resource contract.
+resourceProvisionProjectionCheck :: [(Int, Text, Bool)] -> CheckResult
+resourceProvisionProjectionCheck = resourceProvisionProjectionWithAuthority True
+
+resourceProvisionProjectionWithAuthority :: Bool -> [(Int, Text, Bool)] -> CheckResult
+resourceProvisionProjectionWithAuthority integrated supplied =
   CheckResult
     { checkName = "resource-provision-structural-projection-diagnostic"
     , checkObservations =
@@ -230,7 +270,7 @@ resourceProvisionProjectionDiagnostic supplied =
           <> missingFindings
           <> extraFindings
           <> concatMap compareProjection supplied
-          <> resourceStructuralDiagnosticRefusal
+          <> [item | item <- resourceStructuralDiagnosticRefusal, not integrated]
     }
  where
   grouped = Map.fromListWith (<>) [(ordinal, [(heading, blocker)]) | (ordinal, heading, blocker) <- supplied]

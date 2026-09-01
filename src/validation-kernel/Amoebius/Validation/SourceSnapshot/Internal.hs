@@ -1,18 +1,15 @@
 -- | Package-hidden source snapshot representation.
 --
 -- The public and exposed validation modules re-export only the diagnostic
--- snapshot shapes they need. The acquired wrapper constructor is available
--- solely inside this package so the local snapshot loader can mint it after
--- capturing the exact candidate bytes. Production use of the constructor is
--- kept to that loader and audited as a closed call graph.
+-- snapshot shapes they need. The acquired wrapper itself lives in the
+-- acquisition-owning SourceClosure module so this representation module
+-- cannot provide a package-internal forging route.
 module Amoebius.Validation.SourceSnapshot.Internal
-  ( AcquiredSourceSnapshot (..)
-  , GitObjectFormat (..)
+  ( GitObjectFormat (..)
   , IndexEntry (..)
   , IndexMode (..)
   , SourceSnapshot (..)
   , TrackedEntry (..)
-  , acquiredSourceSnapshot
   ) where
 
 import Data.ByteString (ByteString)
@@ -51,10 +48,3 @@ data SourceSnapshot = SourceSnapshot
   , snapshotEntries :: [TrackedEntry]
   }
   deriving (Eq, Show)
-
--- | Package-hidden marker for a locally captured candidate snapshot.
-newtype AcquiredSourceSnapshot = AcquiredSourceSnapshot SourceSnapshot
-  deriving (Eq, Show)
-
-acquiredSourceSnapshot :: AcquiredSourceSnapshot -> SourceSnapshot
-acquiredSourceSnapshot (AcquiredSourceSnapshot snapshot) = snapshot

@@ -28,8 +28,8 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 11.1: Reifiable kernel and semantic expectations ⏸️](#sprint-111-reifiable-kernel-and-semantic-expectations-)
-- [Sprint 11.2: Explorer/TLC differential and contained evidence ⏸️](#sprint-112-explorertlc-differential-and-contained-evidence-)
+- [Sprint 11.1: Reifiable kernel and semantic expectations](#sprint-111-reifiable-kernel-and-semantic-expectations-)
+- [Sprint 11.2: Explorer/TLC differential and contained evidence](#sprint-112-explorertlc-differential-and-contained-evidence-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -74,7 +74,7 @@ interpret and explore it in-process, and lazily render any TLA+/CFG representati
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 10](phase_10_calculus_composition.md)
-**Gate:** `pb validate phase 11`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 11`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

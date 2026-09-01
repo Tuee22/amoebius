@@ -11,30 +11,49 @@ module Amoebius.Validation.Dispatch.Internal
   ) where
 
 import Amoebius.Validation.CompilerSourceGraph.Internal
-  ( AcquiredCompilerSourceGraph
-  , acquiredCompilerSourceCheck
-  , analyzeAcquiredCompilerSourceGraph
+  ( acquireCompilerSourceGraph
   )
-import Amoebius.Validation.CapabilityGraph (capabilityGraphDiagnosticWith)
-import Amoebius.Validation.Documentation.Internal (checkDocuments, forwardDeferredDeclarations)
-import Amoebius.Validation.MutationCoverage (mutationCoverageCheck, mutationPolicyCheck)
-import Amoebius.Validation.Legacy.Internal (legacyCheck, legacyCheckAcquired)
+import Amoebius.Validation.Documentation.Internal (checkDocuments)
+import Amoebius.Validation.Evidence.Internal
+  ( PublishedCandidateEvidence
+  , acquiredCandidateDigest
+  , acquiredCandidateLegacyClosureCheck
+  , acquiredCandidatePassCriterionCheck
+  , captureDispatchCandidateEvidence
+  , captureFinalizedDispatchCandidateEvidence
+  , publishedCandidatePath
+  , writeAcquiredCandidateEvidence
+  )
+import Amoebius.Validation.GatePass.Internal (verifyPublishedGatePass)
+import Amoebius.Validation.Gate.Internal qualified as Gate
+import Amoebius.Validation.Legacy.Internal (legacyCheck)
 import Amoebius.Validation.PhaseContract.Internal (checkPhaseContracts)
+import Amoebius.Validation.PhaseRunner.Internal
+  ( PhaseRunner (DocumentationSuiteRunner)
+  , selectPhaseRunner
+  )
+import Amoebius.Validation.PhaseZeroRun.Internal
+  ( AcquiredPhaseZeroRun
+  , acquiredPhaseZeroRunCheck
+  , assembleAcquiredPhaseZeroRun
+  , phaseZeroQualificationAuthorityCheck
+  , phaseZeroReadinessBlockers
+  , phaseZeroSnapshotDocuments
+  , phaseZeroUnavailablePhaseContractCheck
+  )
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
 import Amoebius.Validation.SourceClosure.Internal
   ( AcquiredSourceSnapshot
-  , IndexEntry (indexPath)
+  , GitExecutable
   , SnapshotProblem (..)
   , SourceClosure
-  , SourceSnapshot (snapshotEntries, snapshotIdentity)
-  , TrackedEntry (trackedBytes, trackedIndex)
+  , SourceSnapshot (snapshotIdentity)
   , acquiredSourceSnapshot
   , classifySnapshot
   , loadGitSnapshot
   , mkGitExecutable
   , renderSnapshotProblem
   , sourceClosureCheck
-  , sourceClosureCheckAcquired
   )
 import Amoebius.Validation.SourceConsumerGraph.Internal
   ( analyzeSourceConsumerGraph
@@ -43,7 +62,16 @@ import Amoebius.Validation.SourceConsumerGraph.Internal
 import Amoebius.Validation.SourceDebtBaseline.Internal
   ( analyzeAcquiredSourceDebt
   , sourceDebtClosureDiagnosticCheck
-  , sourceDebtEvidenceCheck
+  )
+import Amoebius.Validation.StatusProjection.Internal
+  ( ProposedStatusProjection
+  , applyAuthorizedStatusProjection
+  , authorizeStatusProjection
+  , prepareStatusProjection
+  , projectionDigest
+  , projectionPostimageDigest
+  , recoverPendingStatusProjections
+  , withStatusProjectionLock
   )
 import Amoebius.Validation.Types
 import Control.Exception (IOException, try)
@@ -65,9 +93,9 @@ import System.Directory
   , findExecutable
   , getCurrentDirectory
   )
-import System.Environment (getExecutablePath)
+import System.Environment (getArgs, getExecutablePath)
 import System.Exit (ExitCode (ExitFailure, ExitSuccess))
-import System.FilePath ((</>), isAbsolute, takeDirectory, takeExtension)
+import System.FilePath ((</>), isAbsolute, takeDirectory)
 import Text.Read (readMaybe)
 
 maximumDispatchPhaseBytes, maximumDispatchComponents :: Int
@@ -651,13 +679,168 @@ validatePhase gitPath root phase
       case mkGitExecutable gitPath of
         Left problem -> pure (snapshotFailure [problem])
         Right git -> do
-          snapshotResult <- loadGitSnapshot git root
-          case snapshotResult of
-            Left problems -> pure (snapshotFailure problems)
-            Right acquired -> do
-              result <- checkAcquiredPhaseChain acquired phase
-              finalSnapshot <- loadGitSnapshot git root
-              pure (bindFinalSourceSnapshot acquired finalSnapshot result)
+          locked <- withStatusProjectionLock root (validatePhaseLocked git root phase)
+          pure $ case locked of
+            Left problems -> statusLifecycleFailure phase problems
+            Right result -> result
+
+validatePhaseLocked :: GitExecutable -> FilePath -> Int -> IO CheckResult
+validatePhaseLocked git root phase = do
+  recoveryResult <- recoverPendingStatusProjections git root
+  case recoveryResult of
+    Left problems -> pure (statusLifecycleFailure phase problems)
+    Right recovered -> do
+      snapshotResult <- loadGitSnapshot git root
+      case snapshotResult of
+        Left problems -> pure (snapshotFailure problems)
+        Right acquired -> do
+          compilerAttempt <- acquireCompilerSourceGraph acquired
+          qualificationAuthority <- Gate.acquireQualifiedValidationProtocol acquired compilerAttempt
+          let projectionResult = prepareStatusProjection phase acquired
+              debtEvidence = analyzeAcquiredSourceDebt acquired
+              phaseZeroRun = assembleAcquiredPhaseZeroRun acquired compilerAttempt qualificationAuthority debtEvidence
+              result = checkAcquiredPhaseChain phaseZeroRun phase
+          finalSnapshot <- loadGitSnapshot git root
+          completed <-
+            finishGateLifecycle
+              git
+              root
+              phase
+              acquired
+              phaseZeroRun
+              finalSnapshot
+              projectionResult
+              (bindFinalSourceSnapshot acquired finalSnapshot result)
+          pure
+            completed
+              { checkObservations =
+                  [ observation
+                      "status.projection.recovered"
+                      (Text.pack (show recovered))
+                  ]
+                    <> checkObservations completed
+              }
+
+statusLifecycleFailure :: Int -> [Finding] -> CheckResult
+statusLifecycleFailure phase problems =
+  CheckResult
+    { checkName = "validation-phase-status-lifecycle"
+    , checkObservations =
+        [ observation
+            "validation.requested-phase"
+            (formatOrdinal phase)
+        ]
+    , checkFindings = problems
+    }
+
+finishGateLifecycle
+  :: GitExecutable
+  -> FilePath
+  -> Int
+  -> AcquiredSourceSnapshot
+  -> AcquiredPhaseZeroRun
+  -> Either [SnapshotProblem] AcquiredSourceSnapshot
+  -> Either [Finding] ProposedStatusProjection
+  -> CheckResult
+  -> IO CheckResult
+finishGateLifecycle git root phase opening phaseZeroRun closing projectionResult gateResult = do
+  executablePath <- getExecutablePath
+  processArgv <- map Text.pack <$> getArgs
+  executableDigestResult <- try (ByteString.readFile executablePath) :: IO (Either IOException ByteString)
+  let executableDigest = either (const Nothing) (Just . dispatchSha256) executableDigestResult
+      openingDigest = snapshotIdentity (acquiredSourceSnapshot opening)
+      projectionFindings = either id (const []) projectionResult
+      subjectResult =
+        gateResult
+          { checkFindings = checkFindings gateResult <> projectionFindings
+          }
+      candidate =
+        if phase == policyDomainLower
+          then
+            captureFinalizedDispatchCandidateEvidence
+              phaseZeroRun
+              closing
+              (either (const Nothing) (Just . projectionDigest) projectionResult)
+              (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)
+              executablePath
+              executableDigest
+              processArgv
+          else
+            captureDispatchCandidateEvidence
+              phase
+              openingDigest
+              (case closing of
+                Left _ -> ""
+                Right acquired -> snapshotIdentity (acquiredSourceSnapshot acquired))
+              (either (const Nothing) (Just . projectionDigest) projectionResult)
+              (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)
+              executablePath
+              executableDigest
+              processArgv
+              subjectResult
+      lifecycleResult =
+        mergeChecks
+          (checkName subjectResult)
+          [ subjectResult
+          , acquiredCandidateLegacyClosureCheck candidate
+          , acquiredCandidatePassCriterionCheck candidate
+          ]
+  writeResult <- try (writeAcquiredCandidateEvidence root candidate) :: IO (Either IOException PublishedCandidateEvidence)
+  case writeResult of
+    Left problem ->
+      pure
+        lifecycleResult
+          { checkFindings =
+              checkFindings lifecycleResult
+                <> [ finding
+                       "EVIDENCE-CANDIDATE-WRITE"
+                       "<candidate-evidence>"
+                       (Text.pack (show problem))
+                   ]
+          }
+    Right published -> do
+      let writeObservations =
+            [ observation "evidence.candidate.path" (Text.pack (publishedCandidatePath published))
+            , observation "evidence.candidate.sha256" (acquiredCandidateDigest candidate)
+            ]
+      passResult <- verifyPublishedGatePass published
+      case passResult of
+        Left passFindings ->
+          pure
+            lifecycleResult
+              { checkObservations = checkObservations lifecycleResult <> writeObservations
+              , checkFindings = checkFindings lifecycleResult <> passFindings
+              }
+        Right verified -> case projectionResult of
+          Left problems ->
+            pure
+              lifecycleResult
+                { checkObservations = checkObservations lifecycleResult <> writeObservations
+                , checkFindings = checkFindings lifecycleResult <> problems
+                }
+          Right projection -> case authorizeStatusProjection verified projection of
+            Left problems ->
+              pure
+                lifecycleResult
+                  { checkObservations = checkObservations lifecycleResult <> writeObservations
+                  , checkFindings = checkFindings lifecycleResult <> problems
+                  }
+            Right authorized -> do
+              applied <- applyAuthorizedStatusProjection git authorized
+              pure $ case applied of
+                Left problems ->
+                  lifecycleResult
+                    { checkObservations = checkObservations lifecycleResult <> writeObservations
+                    , checkFindings = checkFindings lifecycleResult <> problems
+                    }
+                Right _ ->
+                  lifecycleResult
+                    { checkObservations =
+                        checkObservations lifecycleResult
+                          <> writeObservations
+                          <> [observation "status.projection" "applied and confirmed against a fresh whole-source postimage"]
+                    , checkFindings = checkFindings lifecycleResult
+                    }
 
 -- | Pure diagnostic seam. A caller-constructed snapshot can exercise
 -- composition, but always carries an explicit refusal and can never represent
@@ -678,45 +861,38 @@ checkPhaseZeroSnapshot snapshot =
 -- phase that weakens an earlier phase's subject reddens that earlier phase
 -- inside this same run.  The compiler source graph is analyzed once and
 -- shared, because every phase in the chain observes the one snapshot.
-checkAcquiredPhaseChain :: AcquiredSourceSnapshot -> Int -> IO CheckResult
-checkAcquiredPhaseChain acquired target = do
-  compilerEvidence <- analyzeAcquiredCompilerSourceGraph acquired
-  pure
-    ( mergeChecks
-        ("phase-" <> formatOrdinal target)
-        [ checkAcquiredPhaseInChain acquired compilerEvidence ordinal
-        | ordinal <- [policyDomainLower .. target]
-        ]
-    )
-
-checkAcquiredPhaseInChain
-  :: AcquiredSourceSnapshot
-  -> AcquiredCompilerSourceGraph
+checkAcquiredPhaseChain
+  :: AcquiredPhaseZeroRun
   -> Int
   -> CheckResult
-checkAcquiredPhaseInChain acquired compilerEvidence ordinal
-  | ordinal == policyDomainLower = checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence
-  | otherwise = phaseSubjectAbsent ordinal
+checkAcquiredPhaseChain phaseZeroRun target =
+  mergeChecks
+    ("phase-" <> formatOrdinal target)
+    [ checkAcquiredPhaseInChain phaseZeroRun ordinal
+    | ordinal <- [policyDomainLower .. target]
+    ]
+
+checkAcquiredPhaseInChain
+  :: AcquiredPhaseZeroRun
+  -> Int
+  -> CheckResult
+checkAcquiredPhaseInChain phaseZeroRun ordinal
+  = case selectPhaseRunner ordinal of
+      Right DocumentationSuiteRunner ->
+        acquiredPhaseZeroRunCheck phaseZeroRun
+      Left problem ->
+        CheckResult
+          { checkName = "phase-" <> formatOrdinal ordinal
+          , checkObservations =
+              [ observation "phase.ordinal" (formatOrdinal ordinal)
+              , observation "phase.runner" "absent or ambiguous"
+              ]
+          , checkFindings = [problem]
+          }
 
 -- | A phase whose production subject has not been implemented.  This is an
 -- observed absence at the current snapshot, not a policy statement that the
 -- phase may never run: it retires when the phase's subject and oracle exist.
-phaseSubjectAbsent :: Int -> CheckResult
-phaseSubjectAbsent ordinal =
-  CheckResult
-    { checkName = "phase-" <> formatOrdinal ordinal
-    , checkObservations =
-        [ observation "phase.ordinal" (formatOrdinal ordinal)
-        , observation "phase.subject" "no production subject is implemented for this phase"
-        ]
-    , checkFindings =
-        [ finding
-            "DISPATCH-PHASE-SUBJECT-ABSENT"
-            ("phase-" <> Text.unpack (formatOrdinal ordinal))
-            "this phase has no implemented production subject, independent oracle, or gate rows to re-derive at the current snapshot"
-        ]
-    }
-
 bindFinalSourceSnapshot
   :: AcquiredSourceSnapshot
   -> Either [SnapshotProblem] AcquiredSourceSnapshot
@@ -748,60 +924,16 @@ bindFinalSourceSnapshot initial final result = case final of
                    ]
           }
 
-checkAcquiredPhaseZeroSnapshotCore
-  :: AcquiredSourceSnapshot
-  -> AcquiredCompilerSourceGraph
-  -> CheckResult
-checkAcquiredPhaseZeroSnapshotCore acquired compilerEvidence =
-  case snapshotDocuments snapshot of
-    Left decodeFindings ->
-      mergeChecks
-        "phase-00"
-        ( acquiredSourceChecks
-            <> [ legacyCheckAcquired (Policy.phaseDomainLower policyOrdering) acquired compilerEvidence debtEvidence
-               , Policy.checkPolicyContract Policy.canonicalPolicyContract
-               , CheckResult "documentation-snapshot" [] decodeFindings
-               , unavailablePhaseContractCheck decodeFindings
-               , capabilityGraphDiagnosticWith []
-               , mutationCoverageCheck
-               , mutationPolicyCheck []
-               , phaseZeroReadinessBlockers
-               ]
-        )
-    Right documents ->
-      mergeChecks
-        "phase-00"
-        ( acquiredSourceChecks
-            <> [ legacyCheckAcquired (Policy.phaseDomainLower policyOrdering) acquired compilerEvidence debtEvidence
-               , Policy.checkPolicyContract Policy.canonicalPolicyContract
-               , checkDocuments documents
-               , checkPhaseContracts documents
-               , capabilityGraphDiagnosticWith (forwardDeferredDeclarations documents)
-               , mutationCoverageCheck
-               , mutationPolicyCheck documents
-               , phaseZeroReadinessBlockers
-               ]
-        )
- where
-  snapshot = acquiredSourceSnapshot acquired
-  debtEvidence = analyzeAcquiredSourceDebt acquired
-  acquiredSourceChecks =
-    [ sourceClosureCheckAcquired acquired
-    , sourceDebtEvidenceCheck acquired debtEvidence
-    , acquiredCompilerSourceCheck compilerEvidence
-    , acquiredCompilerDispatchQualificationResidue
-    ]
-
 checkPhaseZeroSnapshotCore :: SourceSnapshot -> CheckResult
 checkPhaseZeroSnapshotCore snapshot =
   mergeChecks
     "phase-00"
     ( map (rawPhaseZeroComponentCheck snapshot closure decodedDocuments) rawPhaseZeroComponentUniverse
-        <> [phaseZeroReadinessBlockers]
+        <> [phaseZeroQualificationAuthorityCheck Gate.currentQualifiedValidationProtocol, phaseZeroReadinessBlockers]
     )
  where
   closure = classifySnapshot snapshot
-  decodedDocuments = snapshotDocuments snapshot
+  decodedDocuments = phaseZeroSnapshotDocuments snapshot
 
 -- | The raw diagnostic composition has one closed selection locus. Every
 -- component occurs exactly once here, and each omission mutant changes only
@@ -901,45 +1033,8 @@ rawPhaseZeroComponentCheck snapshot closure decodedDocuments component = case co
     Left decodeFindings -> CheckResult "documentation-snapshot" [] decodeFindings
     Right documents -> checkDocuments documents
   RawPhaseContract -> case decodedDocuments of
-    Left decodeFindings -> unavailablePhaseContractCheck decodeFindings
+    Left decodeFindings -> phaseZeroUnavailablePhaseContractCheck decodeFindings
     Right documents -> checkPhaseContracts documents
-
-unavailablePhaseContractCheck :: [Finding] -> CheckResult
-unavailablePhaseContractCheck decodeFindings =
-  CheckResult
-    { checkName = "phase-contract-snapshot"
-    , checkObservations =
-        [ observation
-            "phase-contract.snapshot-input"
-            "unavailable because the tracked Markdown snapshot did not decode"
-        ]
-    , checkFindings =
-        [ finding
-            "PHASE-CONTRACT-SNAPSHOT-UNAVAILABLE"
-            "DEVELOPMENT_PLAN/"
-            ( "phase-contract analysis did not run because "
-                <> Text.pack (show (length decodeFindings))
-                <> " tracked Markdown document(s) failed UTF-8 decoding"
-            )
-        ]
-    }
-
-acquiredCompilerDispatchQualificationResidue :: CheckResult
-acquiredCompilerDispatchQualificationResidue =
-  CheckResult
-    { checkName = "acquired-compiler-dispatch-qualification"
-    , checkObservations =
-        [ observation
-            "compiler-dispatch.local-source"
-            "captured; changed-subject qualification remains open"
-        ]
-    , checkFindings =
-        [ finding
-            "ACQUIRED-COMPILER-DISPATCH-UNQUALIFIED"
-            "Amoebius.Validation.Dispatch"
-            "the acquired compiler-dispatch branch has not passed its changed-subject qualification matrix"
-        ]
-    }
 
 syntheticSnapshotRefusal :: CheckResult
 syntheticSnapshotRefusal =
@@ -960,167 +1055,6 @@ syntheticSnapshotFindings =
       "<caller-supplied-snapshot>"
       "a pure SourceSnapshot has not crossed the package-hidden local capture boundary and cannot be candidate evidence"
   ]
-
--- These are deliberate, executable refusal rows.  They prevent structural
--- component checks from being mislabeled as a qualified Phase-0 candidate.
--- Each row retires only when its separately authored implementation supplies
--- the raw evidence named here; no caller flag can turn it green.  In
--- particular, Gate.checkQualificationReportDiagnostic is a pure consistency check over
--- caller-supplied values and cannot retire the execution blocker.
--- | The evidence each Phase-0 readiness row consumes.
---
--- Every field is 'Nothing' until its separately authored implementation
--- supplies the raw evidence named in the corresponding finding, so today this
--- record is uniformly unobserved and the emitted findings are byte-identical
--- to the former constant.  The difference is that each row is now a predicate
--- over evidence rather than a literal: implementing the work retires the row.
--- No caller flag can turn a row green, because the only constructor of a
--- present field is the module that performs the observation.
-data PhaseReadiness = PhaseReadiness
-  { readinessQualification :: Maybe Text
-  , readinessPolicyContract :: Maybe Text
-  , readinessPbGrammar :: Maybe Text
-  , readinessPhaseContractSemantics :: Maybe Text
-  , readinessLegacyAnalyzers :: Maybe Text
-  , readinessOracleIndependence :: Maybe Text
-  , readinessCleanroomObserver :: Maybe Text
-  , readinessCandidateIntegration :: Maybe Text
-  , readinessEvidenceSchema :: Maybe Text
-  }
-  deriving (Eq, Show)
-
--- | No readiness evidence has been observed.  This is the current state of
--- every Phase-0 code path.
-unobservedPhaseReadiness :: PhaseReadiness
-unobservedPhaseReadiness =
-  PhaseReadiness
-    { readinessQualification = Nothing
-    , readinessPolicyContract = Nothing
-    , readinessPbGrammar = Nothing
-    , readinessPhaseContractSemantics = Nothing
-    , readinessLegacyAnalyzers = Nothing
-    , readinessOracleIndependence = Nothing
-    , readinessCleanroomObserver = Nothing
-    , readinessCandidateIntegration = Nothing
-    , readinessEvidenceSchema = Nothing
-    }
-
--- | One readiness row: the observation key, the absent-evidence text, the
--- finding it raises while unobserved, and the field it reads.
-data ReadinessRow = ReadinessRow
-  { readinessKey :: Text
-  , readinessAbsentDetail :: Text
-  , readinessCode :: Text
-  , readinessSubject :: FilePath
-  , readinessRefusal :: Text
-  , readinessEvidence :: PhaseReadiness -> Maybe Text
-  }
-
-readinessRows :: [ReadinessRow]
-readinessRows =
-  [ ReadinessRow
-      "readiness.harness-qualification"
-      "report consistency checker present; execution not implemented"
-      "QUALIFICATION-NOT-EXECUTED"
-      "Amoebius.Validation.Gate"
-      "the fixed sabotage corpus has not been executed against the exact dispatcher/harness build"
-      readinessQualification
-  , ReadinessRow
-      "readiness.policy-contract"
-      "typed contract is integrated; changed-subject qualification and documentation correspondence check are absent"
-      "POLICY-CONTRACT-UNQUALIFIED"
-      "Amoebius.Validation.PolicyContract"
-      "the typed cross-cutting contract is integrated, but its Registry-provider, owner-map, and pb-transport changed-subject mutants have not been qualified and the documentation correspondence gate has not passed"
-      readinessPolicyContract
-  , ReadinessRow
-      "readiness.pb-source-grammar"
-      "the static source-bound grammar is integrated; changed-subject qualification and the separately authored oracle are absent"
-      "PB-GRAMMAR-UNQUALIFIED"
-      "Amoebius.Validation.PbBootstrapGrammar"
-      "the versioned static AST/import/resolved-call/control-flow/potential-effect analyzer is integrated, but its changed-subject qualification and separately authored oracle remain open; Phase 50 alone owns external runtime handoff observation"
-      readinessPbGrammar
-  , ReadinessRow
-      "readiness.phase-contract-semantics"
-      "the closed typed registry, structural joins, and phase-scoped gap rule are integrated; the phase-under-validation slots are not yet bound"
-      "PHASE-CONTRACT-SEMANTIC-GAPS"
-      "Amoebius.Validation.PhaseContract"
-      "the closed typed 96-phase registry and structural joins are integrated, but the slots owned by the phase under validation are still ContractGap"
-      readinessPhaseContractSemantics
-  , ReadinessRow
-      "readiness.legacy-owner-analyzers"
-      "closed typed inventory and fail-closed dispatch are integrated; LTD-SRC-000 and LTD-SRC-008 source analyzers are present but unqualified, while LTD-VAL-001 through LTD-VAL-004 owner analyzers remain unavailable"
-      "LEGACY-VALIDATION-ANALYZERS-MISSING"
-      "Amoebius.Validation.Legacy"
-      "the closed legacy inventory dispatches every ID and the LTD-SRC-000 and LTD-SRC-008 source analyzers are integrated but unqualified; the LTD-VAL-001 through LTD-VAL-004 owner analyzers and their independently authored reintroduction executions remain unavailable"
-      readinessLegacyAnalyzers
-  , ReadinessRow
-      "readiness.oracle-independence"
-      "complete gate result absent"
-      "ORACLE-INDEPENDENCE-MISSING"
-      "phase-00-oracles"
-      "component diagnostics are not a complete qualified gate"
-      readinessOracleIndependence
-  , ReadinessRow
-      "readiness.cleanroom-residue"
-      "external observer absent"
-      "CLEANROOM-OBSERVER-MISSING"
-      "phase-00-cleanroom"
-      "fresh-run input closure and external residue have no implemented independent observer"
-      readinessCleanroomObserver
-  , ReadinessRow
-      "readiness.candidate-integration"
-      "evidence writer not connected to dispatcher"
-      "EVIDENCE-INTEGRATION-MISSING"
-      "Amoebius.Validation.Dispatch"
-      "the dispatcher cannot emit candidate evidence until qualification and cleanroom checks are connected"
-      readinessCandidateIntegration
-  , ReadinessRow
-      "readiness.evidence-schema"
-      "command, toolchain, substrate, run, and cleanup fields are not represented by a closed typed schema"
-      "EVIDENCE-SCHEMA-INCOMPLETE"
-      "Amoebius.Validation.Evidence"
-      "the candidate schema does not yet require typed exact-command, toolchain, substrate/lane/architecture, run-identity, or cleanup observations"
-      readinessEvidenceSchema
-  ]
-
--- | Phase-0 readiness as a predicate over observed evidence.
-phaseReadinessCheck :: PhaseReadiness -> CheckResult
-phaseReadinessCheck readiness =
-  CheckResult
-    { checkName = "phase-00-readiness"
-    , checkObservations =
-        [ observation
-            (readinessKey row)
-            (maybe (readinessAbsentDetail row) ("observed=" <>) (readinessEvidence row readiness))
-        | row <- readinessRows
-        ]
-          <> [observation "readiness.local-source-capture" "opening and closing exact local snapshots are integrated"]
-    , checkFindings =
-        [ finding (readinessCode row) (readinessSubject row) (readinessRefusal row)
-        | row <- readinessRows
-        , readinessEvidence row readiness == Nothing
-        ]
-    }
-
-phaseZeroReadinessBlockers :: CheckResult
-phaseZeroReadinessBlockers = phaseReadinessCheck unobservedPhaseReadiness
-snapshotDocuments :: SourceSnapshot -> Either [Finding] [(FilePath, Text)]
-snapshotDocuments snapshot =
-  if null problems then Right documents else Left problems
- where
-  markdownEntries =
-    [ entry
-    | entry <- snapshotEntries snapshot
-    , takeExtension (indexPath (trackedIndex entry)) == ".md"
-    ]
-  decoded = fmap decodeEntry markdownEntries
-  documents = [document | Right document <- decoded]
-  problems = [problem | Left problem <- decoded]
-  decodeEntry entry =
-    let path = indexPath (trackedIndex entry)
-     in case TextEncoding.decodeUtf8' (trackedBytes entry) of
-          Left _ -> Left (finding "DOC-SNAPSHOT-UTF8" path "tracked Markdown blob is not UTF-8")
-          Right contents -> Right (path, contents)
 
 snapshotFailure :: [SnapshotProblem] -> CheckResult
 snapshotFailure problems =

@@ -1375,6 +1375,20 @@ legacySelectorIntents =
   , ("VALIDATION_LEGACY_TEXT_LIMIT_ROUTE_MUTANT", "Legacy Text limit route locus", "stable ID bytes maximum plus one")
   , ("VALIDATION_LEGACY_TEXT_PREFIX_RETENTION_ORDER_MUTANT", "Legacy Text prefix retention order locus", "stable ID bytes maximum plus one")
   , ("VALIDATION_LEGACY_TEXT_PREFIX_THRESHOLD_MUTANT", "Legacy Text prefix threshold locus", "stable ID bytes maximum")
+  , ("VALIDATION_LEGACY_INTERNAL_DECODER_LTD_BOOT001_TARGET_MUTANT", "LTD-BOOT-001 internal decoder target", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_INTERNAL_NON_SOURCE_LTD_BOOT001_DROP_MUTANT", "LTD-BOOT-001 internal non-source universe membership", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_ANALYZER_MUTANT", "LTD-BOOT-001 internal analyzer rendering", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_CLOSURE_MUTANT", "LTD-BOOT-001 internal closure rendering", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_OBSERVATION_MUTANT", "LTD-BOOT-001 internal observation rendering", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_REINTRODUCTION_MUTANT", "LTD-BOOT-001 internal reintroduction rendering", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_INTERNAL_UNIVERSE_LTD_BOOT001_DROP_MUTANT", "LTD-BOOT-001 internal universe membership", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_LTD_BOOT001_ANALYZER_MUTANT", "LTD-BOOT-001 analyzer cell", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_LTD_BOOT001_CLOSURE_MUTANT", "LTD-BOOT-001 closure cell", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_LTD_BOOT001_DISPOSITION_MUTANT", "LTD-BOOT-001 disposition cell", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_LTD_BOOT001_ID_MUTANT", "LTD-BOOT-001 stable ID cell", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_LTD_BOOT001_OBSERVATION_MUTANT", "LTD-BOOT-001 observation cell", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_LTD_BOOT001_OWNER_MUTANT", "LTD-BOOT-001 owner cell", "canonical legacy wire")
+  , ("VALIDATION_LEGACY_LTD_BOOT001_REINTRODUCTION_MUTANT", "LTD-BOOT-001 reintroduction cell", "canonical legacy wire")
   ]
 
 legacySelectorNames :: [String]
@@ -1500,8 +1514,8 @@ sequenceDifferences label expected actual =
 
 literalIntegrityProblems :: [String]
 literalIntegrityProblems =
-  [ "selector intent cardinality changed: expected=1306; observed=" <> show (length legacySelectorIntents)
-  | length legacySelectorIntents /= 1306
+  [ "selector intent cardinality changed: expected=1320; observed=" <> show (length legacySelectorIntents)
+  | length legacySelectorIntents /= 1320
   ]
     <> ["duplicate selector intent: " <> value | value <- duplicateStrings legacySelectorNames]
     <> ["duplicate atomic requirement: " <> value | value <- duplicateStrings requirements]

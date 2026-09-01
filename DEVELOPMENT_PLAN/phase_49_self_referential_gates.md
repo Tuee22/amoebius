@@ -29,10 +29,10 @@ The target pipeline is defined by
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 49.1: Freeze the complete semantic surface ⏸️](#sprint-491-freeze-the-complete-semantic-surface-)
-- [Sprint 49.2: Compose the production pipeline ⏸️](#sprint-492-compose-the-production-pipeline-)
-- [Sprint 49.3: Qualify self-reference and fake apply ⏸️](#sprint-493-qualify-self-reference-and-fake-apply-)
-- [Sprint 49.4: Produce the documentation-gate candidate ⏸️](#sprint-494-produce-the-documentation-gate-candidate-)
+- [Sprint 49.1: Freeze the complete semantic surface](#sprint-491-freeze-the-complete-semantic-surface-)
+- [Sprint 49.2: Compose the production pipeline](#sprint-492-compose-the-production-pipeline-)
+- [Sprint 49.3: Qualify self-reference and fake apply](#sprint-493-qualify-self-reference-and-fake-apply-)
+- [Sprint 49.4: Produce the documentation-gate candidate](#sprint-494-produce-the-documentation-gate-candidate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -73,7 +73,7 @@ sabotage. The complete qualified Haskell gate pass is sufficient for the barrier
 **Lane:** `none`
 **Register:** 2
 **Depends on:** [Phase 48](phase_48_test_workflow_algebra.md)
-**Gate:** `pb validate phase 49`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 49`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

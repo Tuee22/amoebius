@@ -30,7 +30,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 22.1: The compositional laws C1-C7 ⏸️](#sprint-221-the-compositional-laws-c1-c7-)
+- [Sprint 22.1: The compositional laws C1-C7](#sprint-221-the-compositional-laws-c1-c7-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -75,7 +75,7 @@ negatives, and mutants. NOT VALIDATED.
 **Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
 
 **Depends on:** [Phase 21](phase_21_extension_laws_per_extension.md)
-**Gate:** `pb validate phase 22`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 22`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

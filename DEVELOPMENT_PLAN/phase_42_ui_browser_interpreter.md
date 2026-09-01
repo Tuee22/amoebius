@@ -27,7 +27,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 42.1: Generic `ClientPlan` interpreter and Haskell semantic boundary ⏸️](#sprint-421-generic-clientplan-interpreter-and-haskell-semantic-boundary-)
+- [Sprint 42.1: Generic `ClientPlan` interpreter and Haskell semantic boundary](#sprint-421-generic-clientplan-interpreter-and-haskell-semantic-boundary-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -63,7 +63,7 @@ or a network service. Browser execution belongs to the post-Phase-49 live UI ban
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 **Register:** 1 — pure Haskell semantic and generator checks.
 **Depends on:** [Phase 41](phase_41_offline_language_plan.md)
-**Gate:** `pb validate phase 42`; see [Gate integrity](#gate-integrity). NOT VALIDATED.
+**Gate:** `pb validate phase 42`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
