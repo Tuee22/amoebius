@@ -25,6 +25,7 @@ module Amoebius.Validation.Legacy.Internal
   , gatePrerequisiteUnverified
   , legacyCheck
   , legacyCheckAcquired
+  , legacyBootstrapClosureAcquired
   , legacyClosureAcquired
   , legacyClosureResult
   , legacyInventoryDiagnostic
@@ -44,6 +45,10 @@ module Amoebius.Validation.Legacy.Internal
   , renderLegacyId
   , renderRegisterProblem
   , sourceDebtLegacyId
+#if defined(VALIDATION_LEGACY_INTERNAL_TEST_HOOKS)
+  , legacyBootstrapDueInternalTestCheck
+  , legacyBootstrapPrerequisiteInternalTestObservation
+#endif
   ) where
 
 import Amoebius.Validation.PhaseIdentity qualified as PhaseIdentity
@@ -1016,7 +1021,7 @@ legacyIdOwnerCapability LtdSrc000 =
 #if defined(VALIDATION_LEGACY_LTD_SRC000_OWNER_MUTANT)
   "toolchain_spike"
 #else
-  "documentation_suite"
+  "repository_layout_conformance"
 #endif
 legacyIdOwnerCapability LtdSrc001 =
 #if defined(VALIDATION_LEGACY_LTD_SRC001_OWNER_MUTANT)
@@ -1064,7 +1069,7 @@ legacyIdOwnerCapability LtdSrc008 =
 #if defined(VALIDATION_LEGACY_LTD_SRC008_OWNER_MUTANT)
   "toolchain_spike"
 #else
-  "documentation_suite"
+  "repository_layout_conformance"
 #endif
 legacyIdOwnerCapability LtdSrc009 =
 #if defined(VALIDATION_LEGACY_LTD_SRC009_OWNER_MUTANT)
@@ -1082,25 +1087,25 @@ legacyIdOwnerCapability LtdVal001 =
 #if defined(VALIDATION_LEGACY_LTD_VAL001_OWNER_MUTANT)
   "toolchain_spike"
 #else
-  "documentation_suite"
+  "self_referential_gates"
 #endif
 legacyIdOwnerCapability LtdVal002 =
 #if defined(VALIDATION_LEGACY_LTD_VAL002_OWNER_MUTANT)
   "toolchain_spike"
 #else
-  "documentation_suite"
+  "self_referential_gates"
 #endif
 legacyIdOwnerCapability LtdVal003 =
 #if defined(VALIDATION_LEGACY_LTD_VAL003_OWNER_MUTANT)
   "toolchain_spike"
 #else
-  "documentation_suite"
+  "self_referential_gates"
 #endif
 legacyIdOwnerCapability LtdVal004 =
 #if defined(VALIDATION_LEGACY_LTD_VAL004_OWNER_MUTANT)
   "toolchain_spike"
 #else
-  "documentation_suite"
+  "self_referential_gates"
 #endif
 legacyIdOwnerCapability LtdVal005 =
 #if defined(VALIDATION_LEGACY_LTD_VAL005_OWNER_MUTANT)
@@ -1108,14 +1113,14 @@ legacyIdOwnerCapability LtdVal005 =
 #else
   "self_referential_gates"
 #endif
--- Cleanroom and freshness are properties of the run harness, not of tool
--- generation: every phase's gate inherits both rows, so an owner later than the
--- first phase makes every earlier phase depend on a capability it cannot have.
+-- Every phase enforces its own scoped cleanroom and freshness rows. The
+-- universal run-input-closure debt and its reintroduction proof belong to the
+-- complete self-referential gate rather than tool generation.
 legacyIdOwnerCapability LtdVal006 =
 #if defined(VALIDATION_LEGACY_LTD_VAL006_OWNER_MUTANT)
   "tool_and_mutant_generation"
 #else
-  "documentation_suite"
+  "self_referential_gates"
 #endif
 legacyIdOwnerCapability LtdDoc001 =
 #if defined(VALIDATION_LEGACY_LTD_DOC001_OWNER_MUTANT)
@@ -1165,13 +1170,13 @@ legacyIdOwnerCapability LtdSeed002 =
 #else
   "jitml_rederivation"
 #endif
--- The bootstrap belongs to the first phase: the toolchain that builds the
--- ordinal-0 candidate is the one thing that phase cannot verify with itself.
+-- Phase 0 records its irreducible GenesisTrust input. Phase 1 owns the
+-- separately falsifiable acquisition and reproducibility debt.
 legacyIdOwnerCapability LtdBoot001 =
 #if defined(VALIDATION_LEGACY_LTD_BOOT001_OWNER_MUTANT)
-  "toolchain_spike"
-#else
   "documentation_suite"
+#else
+  "toolchain_spike"
 #endif
 
 legacyIdDisposition :: LegacyId -> LegacyDisposition
@@ -5816,6 +5821,124 @@ legacyClosureAcquired candidatePhase acquired compilerAttempt debtEvidence contr
         contractEvidence
         (Just premises)
     )
+
+-- | Phase 0 closes only the structural register and the fact that no active
+-- legacy debt is owned by the bootstrap phase.  It deliberately does not run
+-- later-owned compiler, universal-gate, or reproducibility analyzers and it
+-- cannot turn their unavailable observations into a Phase-0 pass.
+legacyBootstrapClosureAcquired
+  :: Policy.PhaseOrdinal
+  -> AcquiredSourceSnapshot
+  -> GateCompletionPremises
+  -> LegacyClosure
+legacyBootstrapClosureAcquired candidatePhase acquired premises =
+  LegacyClosure
+    CheckResult
+      { checkName = "legacy-bootstrap-closure"
+      , checkObservations =
+          legacyInventoryFixedObservations candidatePhase
+            <> [ observation "legacy.bootstrap.due-count" (showText (length dueIdentifiers))
+               , observation "legacy.bootstrap.snapshot" (snapshotIdentity snapshot)
+               , legacyBootstrapPrerequisiteObservation prerequisiteState
+               ]
+            <> structuralObservations
+      , checkFindings =
+          universeIntegrityFindings
+            <> candidatePhaseFindings
+            <> dueFindings
+            <> premiseFindings
+            <> structuralFindings
+      }
+ where
+  snapshot = acquiredSourceSnapshot acquired
+  dueIdentifiers = legacyBootstrapDueIdentifiers legacyIdOwner candidatePhase
+  candidatePhaseFindings =
+    [ finding
+        "LEGACY-BOOTSTRAP-PHASE"
+        legacySemanticSubject
+        "the finite bootstrap closure can be evaluated only for the policy-domain genesis phase"
+    | candidatePhase /= legacyBootstrapPhase
+    ]
+  dueFindings = legacyBootstrapDueFindings dueIdentifiers
+  prerequisiteState = gateCompletionObservedState premises
+  premiseFindings = legacyBootstrapPrerequisiteFindings prerequisiteState
+  (structuralObservations, structuralFindings) =
+    case activeRegisterFromSnapshot snapshot of
+      Left problems -> ([], map registerFinding problems)
+      Right register ->
+        ( legacyStructuralRegisterObservations register snapshot
+        , []
+        )
+
+legacyBootstrapPhase :: Policy.PhaseOrdinal
+legacyBootstrapPhase =
+  Policy.phaseDomainLower
+    (Policy.orderingContract Policy.canonicalPolicyContract)
+
+legacyBootstrapDueIdentifiers
+  :: (LegacyId -> Policy.PhaseOrdinal)
+  -> Policy.PhaseOrdinal
+  -> [LegacyId]
+legacyBootstrapDueIdentifiers owner candidatePhase =
+  [ identifier
+  | identifier <- allLegacyIds
+  , legacyIdDisposition identifier == LegacyActive
+  , owner identifier == candidatePhase
+  ]
+
+legacyBootstrapDueFindings :: [LegacyId] -> [Finding]
+legacyBootstrapDueFindings dueIdentifiers =
+  [ finding
+      "LEGACY-BOOTSTRAP-DUE"
+      (legacySubject identifier)
+      (renderLegacyId identifier <> " is still assigned to Phase 0 instead of its falsifiable capability owner")
+  | identifier <- dueIdentifiers
+  ]
+
+legacyBootstrapPrerequisiteObservation :: LegacyObservedState -> Observation
+legacyBootstrapPrerequisiteObservation state =
+  observation "legacy.bootstrap.prerequisites" (renderObservedState state)
+
+legacyBootstrapPrerequisiteFindings :: LegacyObservedState -> [Finding]
+legacyBootstrapPrerequisiteFindings state = case state of
+    LegacyObservedZero -> []
+    LegacyObservedOpen count digest ->
+      [ finding
+          "LEGACY-BOOTSTRAP-PREREQUISITES"
+          legacySemanticSubject
+          ("gate prerequisites remain open: count=" <> showText count <> ", digest=" <> digest)
+      ]
+    LegacyObservationRefused detail ->
+      [ finding "LEGACY-BOOTSTRAP-PREREQUISITES" legacySemanticSubject detail ]
+
+#if defined(VALIDATION_LEGACY_INTERNAL_TEST_HOOKS)
+-- | Direct-source-only diagnostic seam for the Phase-0 owner negative.  It
+-- exercises the same active-owner selection and finding projection as the
+-- acquired closure, but cannot construct a 'LegacyClosure'.
+legacyBootstrapDueInternalTestCheck :: LegacyId -> CheckResult
+legacyBootstrapDueInternalTestCheck forcedDueIdentifier =
+  CheckResult
+    { checkName = "legacy-bootstrap-due-internal-test"
+    , checkObservations =
+        [ observation "legacy.bootstrap.due-count" (showText (length dueIdentifiers))
+        ]
+    , checkFindings = legacyBootstrapDueFindings dueIdentifiers
+    }
+ where
+  dueIdentifiers =
+    legacyBootstrapDueIdentifiers forcedOwner legacyBootstrapPhase
+  forcedOwner identifier
+    | identifier == forcedDueIdentifier = legacyBootstrapPhase
+    | otherwise = legacyIdOwner identifier
+
+-- | Direct-source-only projection of the production prerequisite observation.
+-- It exposes no gate premise or closure constructor.
+legacyBootstrapPrerequisiteInternalTestObservation
+  :: LegacyObservedState
+  -> Observation
+legacyBootstrapPrerequisiteInternalTestObservation =
+  legacyBootstrapPrerequisiteObservation
+#endif
 
 legacyClosureResult :: LegacyClosure -> CheckResult
 legacyClosureResult (LegacyClosure result) = result

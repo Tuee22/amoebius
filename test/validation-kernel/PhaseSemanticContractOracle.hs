@@ -702,17 +702,17 @@ expectedPhaseZeroBoundSlots =
   , "phase-00-oracle=independent-phase-zero-oracle-set"
   , "phase-00-positive-controls=closed-phase-zero-positive-corpus"
   , "phase-00-paired-negatives=minimally-different-phase-zero-negatives"
-  , "phase-00-mutants=changed-production-mutation-matrix"
+  , "phase-00-mutants=finite-bootstrap-changed-production-matrix"
   , "phase-00-discovery=complete-runtime-discovery-equality"
   , "phase-00-challenge=freshness-and-independent-challenge"
   , "phase-00-observer=raw-independent-observation"
   , "phase-00-authority-bypass=authority-and-bypass-rejection"
   , "phase-00-freshness=start-end-source-and-run-freshness"
-  , "phase-00-qualification=fixed-harness-qualification-corpus"
+  , "phase-00-qualification=finite-bootstrap-qualification-sequence"
   , "phase-00-cleanroom=run-scoped-cleanroom-and-residue-containment"
-  , "phase-00-legacy-closure=due-legacy-closure-and-reintroduction-negatives"
+  , "phase-00-legacy-closure=structural-legacy-inventory-with-no-phase-zero-owner"
   , "phase-00-predecessor=genesis-predecessor"
-  , "phase-00-residue=explicit-unverified-later-residue"
+  , "phase-00-residue=no-phase-zero-residue-and-typed-forward-deferrals"
   , "phase-00-pass-criterion=qualified-gate-pass"
   ]
 
@@ -795,15 +795,14 @@ localLegacyIds ordinal = Map.findWithDefault [] ordinal localLegacyReverseMap
 localLegacyReverseMap :: Map.Map Int [Text]
 localLegacyReverseMap =
   Map.fromList
-    [ (0, ["LTD-SRC-000", "LTD-SRC-008", "LTD-VAL-001", "LTD-VAL-002", "LTD-VAL-003", "LTD-VAL-004", "LTD-VAL-006", "LTD-BOOT-001"])
-    , (1, ["LTD-SRC-007", "LTD-SRC-009"])
-    , (2, ["LTD-META-001", "LTD-NAME-001"])
+    [ (1, ["LTD-SRC-007", "LTD-SRC-009", "LTD-BOOT-001"])
+    , (2, ["LTD-SRC-000", "LTD-SRC-008", "LTD-META-001", "LTD-NAME-001"])
     , (25, ["LTD-SRC-002"])
     , (26, ["LTD-SRC-003"])
     , (27, ["LTD-DOC-001"])
     , (46, ["LTD-SRC-004"])
     , (47, ["LTD-SRC-001", "LTD-SRC-005", "LTD-SRC-006"])
-    , (49, ["LTD-VAL-005"])
+    , (49, ["LTD-VAL-001", "LTD-VAL-002", "LTD-VAL-003", "LTD-VAL-004", "LTD-VAL-005", "LTD-VAL-006"])
     , (51, ["LTD-HOST-001", "LTD-HOST-002"])
     , (55, ["LTD-RUN-001"])
     , (56, ["LTD-IMG-001"])

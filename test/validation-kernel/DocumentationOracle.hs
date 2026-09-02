@@ -783,9 +783,13 @@ productionCorpusProblems = do
                | "DOC-INVENTORY-COUNT" `elem` observedCodes
                ]
             <> [ "the live corpus reported a finding outside the admitted residue classes: "
-                   <> Text.unpack code
-               | code <- observedCodes
-               , code `notElem` admittedLiveResidueCodes
+                   <> Text.unpack (findingCode item)
+                   <> "; subject="
+                   <> findingSubject item
+                   <> "; detail="
+                   <> Text.unpack (findingDetail item)
+               | item <- checkFindings result
+               , findingCode item `notElem` admittedLiveResidueCodes
                ]
         )
  where

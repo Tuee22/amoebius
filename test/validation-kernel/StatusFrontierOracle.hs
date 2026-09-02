@@ -19,7 +19,14 @@ runStatusFrontierOracle :: IO ()
 runStatusFrontierOracle =
     finishDiagnostics
         "StatusFrontierOracle"
-        (openAtZeroProblems <> midFrontierProblems <> postPassProblems <> allDoneProblems <> invalidFrontierProblems <> refusalProblems)
+        ( openAtZeroProblems
+            <> midFrontierProblems
+            <> postPassProblems
+            <> allDoneProblems
+            <> recognitionProblems
+            <> invalidFrontierProblems
+            <> refusalProblems
+        )
 
 openAtZeroProblems :: [String]
 openAtZeroProblems =
@@ -94,6 +101,33 @@ allDoneProblems =
     allDone = requiredAdvance (requiredFrontier phaseUpper) phaseUpper
     terminalStatus = phaseStatusAt allDone phaseUpper
 
+recognitionProblems :: [String]
+recognitionProblems =
+    concat
+        [ expectEqual "recognize initial complete vector" (Just initialFrontier) (recognizeStatusFrontier initialStatuses)
+        , expectEqual "recognize mid complete vector" (Just midFrontier) (recognizeStatusFrontier midStatuses)
+        , expectEqual "recognize terminal complete vector" (Just allDone) (recognizeStatusFrontier allDoneStatuses)
+        , expectEqual "reject two active phases" Nothing (recognizeStatusFrontier (replaceAt 1 ActiveNotValidated initialStatuses))
+        , expectEqual "reject a Done-prefix hole" Nothing (recognizeStatusFrontier (replaceAt 12 BlockedNotValidated midStatuses))
+        , expectEqual "reject a premature no-Active vector" Nothing (recognizeStatusFrontier prematureNoActiveStatuses)
+        , expectEqual "reject a truncated vector" Nothing (recognizeStatusFrontier (drop 1 initialStatuses))
+        , expectEqual "initial semantic due ordinal remains the seed" 0 (completedPrefixDueOrdinal initialFrontier)
+        , expectEqual "mid semantic due ordinal is the completed prefix" 46 (completedPrefixDueOrdinal midFrontier)
+        , expectEqual "terminal semantic due ordinal reaches the domain end" phaseUpper (completedPrefixDueOrdinal allDone)
+        , expectEqual "parse Done tracker status" (Just Done) (parseTrackerStatus "✅ Done")
+        , expectEqual "parse Active tracker status" (Just ActiveNotValidated) (parseTrackerStatus "🔄 Active — NOT VALIDATED")
+        , expectEqual "parse Blocked tracker status" (Just BlockedNotValidated) (parseTrackerStatus "⏸️ Blocked — NOT VALIDATED")
+        , expectEqual "reject non-canonical tracker status" Nothing (parseTrackerStatus "Done")
+        ]
+  where
+    ordinals = [0 .. phaseUpper]
+    midFrontier = requiredFrontier 47
+    allDone = requiredAdvance (requiredFrontier phaseUpper) phaseUpper
+    initialStatuses = phaseStatuses initialFrontier ordinals
+    midStatuses = phaseStatuses midFrontier ordinals
+    allDoneStatuses = phaseStatuses allDone ordinals
+    prematureNoActiveStatuses = replicate 47 Done <> replicate (phaseUpper + 1 - 47) BlockedNotValidated
+
 invalidFrontierProblems :: [String]
 invalidFrontierProblems =
     concat
@@ -157,6 +191,10 @@ requiredAdvance :: StatusFrontier -> Int -> StatusFrontier
 requiredAdvance frontier phase = case frontierAfterPass frontier phase of
     Just advanced -> advanced
     Nothing -> frontier
+
+replaceAt :: Int -> value -> [value] -> [value]
+replaceAt index replacement values =
+    take index values <> [replacement] <> drop (index + 1) values
 
 replaceIn :: FilePath -> Text -> Text -> [(FilePath, Text)] -> [(FilePath, Text)]
 replaceIn target before after = fmap replaceOne

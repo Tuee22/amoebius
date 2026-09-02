@@ -42,9 +42,9 @@ row, expanded into a candidate pool.
 Read it as a **backlog of confirmed-but-unscheduled work**, governed by the same disciplines as the rest of
 the suite:
 
-- **Frozen behind the numbered plan.** Phase 0 is Active — NOT VALIDATED and Phases 1–95 are Blocked — NOT
-  VALIDATED. No candidate may be promoted, implemented, or hardware-validated until Phase 95 and every
-  predecessor have passed their redesigned complete qualified gates.
+- **Frozen behind the numbered plan.** No candidate may be promoted into the numbered sequence or
+  hardware-validated until Phase 95 and every predecessor have passed their complete qualified gates. The live
+  numbered status projection is owned by [README.md](README.md), not restated here.
 - **Haskell source boundary.** A promoted candidate may add only Haskell behavioral source. Python beneath
   `pb/**` remains the sole bootstrap exception; every foreign-language artifact or serialized oracle is
   generated lazily from Haskell beneath `.build/**`.

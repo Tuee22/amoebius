@@ -1,4 +1,0 @@
-operator=schedule-perturbation
-invocation=python3 probe/oracle/check-sim-terminal --cabal=<resolved> --with-compiler=<resolved> --builddir=<build-root> --store-dir=<store> --perturbed
-change=drop the second writer's fairness step
-expected=terminal-state mismatch: expected terminal=3, actual terminal=1

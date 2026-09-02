@@ -122,13 +122,14 @@ The five markers and their mandatory wording are defined in
 phase and sprint says `NOT VALIDATED`. A complete qualified phase-gate pass is sufficient for ✅ Done. Digests
 and generated evidence remain inputs to the test rather than substitutes for running it.
 
-At this reset, Phase 0 is `🔄 Active — NOT VALIDATED`; every later numbered phase is
-`⏸️ Blocked — NOT VALIDATED` pending its immediate predecessor's gate pass. No prior completion claim or
-earlier status survives as a current result.
+The 2026-08-22 reset initialized Phase 0 as `🔄 Active — NOT VALIDATED` and every later numbered phase as
+`⏸️ Blocked — NOT VALIDATED`; no pre-reset completion claim survived. Current status is read only from the
+canonical tracker/phase/sprint projection, whose complete vector must be one Done prefix, exactly one Active
+phase, and one Blocked suffix (or the terminal all-Done state).
 
 The current phase-status line is a raw, one-line, exact field and occurs once. The `**Gate:**` summary is a
 separate immutable command/link field: it never carries status or result prose, so recording a pass cannot make
-the summary contradict the phase status or require it to join the status projection. A substring such as
+the summary contradict the phase status or require it to join the status patch. A substring such as
 `Validated — NOT VALIDATED`, a second bare status marker, another `**Status**:` field, or a canonical-looking
 copy supplied through a fence, HTML comment, or physical line wrap is a defect. Sprint sections likewise
 contain exactly one current `**Status**:` field and no additional bare current-status marker. Historical status
@@ -142,12 +143,13 @@ specifies the typed `ImmediatePredecessorPass` requirement, while a later candid
 named residue layer in candidate evidence; it cannot satisfy a contract slot. Markdown words never transition
 among these states: the compiled Haskell registry and captured observations do.
 
-A status update is the mechanical status-only projection produced after the exact current phase gate passes. The
+A status update is the mechanical status-only patch produced after the exact current phase gate passes. The
 gate binds the source snapshot it tested and permits only the tracker, phase, and sprint status fields named by
 that result to change. The one contiguous frontier advances with the pass: the closing phase and all of its
 sprints become Done, and its immediate successor plus that successor's first sprint become Active when one
-exists; every later phase remains Blocked. A human, agent, or CI job may apply that projection. Any other byte
-change creates a new candidate and requires the gate to run again.
+exists; every later phase remains Blocked. The validator emits the verified patch only beneath `.build/**` and
+never changes a tracked file. After that process exits, a human, agent, or CI job may recheck the bound preimage
+and apply the exact patch. Any other byte change creates a new candidate and requires the gate to run again.
 
 ---
 
@@ -173,7 +175,7 @@ Every `phase_NN_<slug>.md` uses this order:
 **Lane:** <none | linux-cpu/amd64 | linux-cpu/arm64 | metal | cuda | provider>
 **Register:** <— | 1 | 2 | 3>
 **Depends on:** <the exact linked immediate numeric predecessor only, or genesis for Phase 0; additional earlier dependencies belong in typed contract/prose rather than this structural field>
-**Forward-deferred:** <conditional; each later-owned capability this phase names, with its owner and residue tag>
+**Forward-deferred:** <conditional; each later-owned capability this phase names, with its owner and forward-deferral tag>
 **Gate:** `pb validate phase NN`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
@@ -188,23 +190,29 @@ Every `phase_NN_<slug>.md` uses this order:
 ## Related Documents
 ```
 
-The six unconditional Phase Summary fields are required, closed, and ordered exactly as shown. The immutable
+The six unconditional Phase Summary fields are required, closed, and ordered exactly as shown. Phase 0's
+literal `genesis` dependency denotes the explicit irreducible, non-numbered `GenesisTrust`/`BootstrapRoot`
+input; it is neither a hidden phase nor a capability Phase 0 can prove with the compiler being checked. The immutable
 Gate line is a future public-command target, not an assertion that it exists, runs, or passes; status belongs
 only to the tracker, phase-status line, sprint headings, and sprint status fields.
 
 `Forward-deferred:` is the one conditional field, placed exactly between `Depends on:` and `Gate:`. It is
 present when and only when the phase names an artefact a later phase owns, and it carries that owner's
-capability plus the residue tag under which the reach is recorded. `Depends on:` is structurally restricted to
+capability plus the contract-level forward-deferral tag under which the reach is recorded. That tag is not an
+entry in the earlier candidate's `captureResidue`. `Depends on:` is structurally restricted to
 the immediate predecessor and
 [`development_plan_phase_model.md` §E](development_plan_phase_model.md#e-one-canonical-phase-model) routes
 additional dependencies to prose only when they run backwards in the plan's order, so without this field a
 forward reach has nowhere to be stated and is invisible to every checker. Naming one is not permission to
-consume it: the reach is residue the later owner discharges, and a phase whose claim cannot be settled without
+consume it: the reach is an excluded forward deferral the later owner discharges, and a phase whose claim cannot be settled without
 the later artefact is mis-ordered rather than forward-deferred.
 
 Until Phase 50's qualified gate passes,
-`pb` is an inadmissible validation transport: Phase 0 through Phase 49 build and invoke the exact
-source-bound Haskell executable directly from an pinned, network-independent toolchain input. Phase 50
+`pb` is an inadmissible validation transport: Phase 0 through Phase 49 invoke the exact source-bound Haskell
+executable directly. Phase 0 carries only the narrow `GenesisTrust` local-custody and compile-time/platform
+assumption; it does not authenticate the actual compiler executable bytes or derivation. Phase 1 owns the
+authenticated, reproducible toolchain acquisition bound by subsequent builds without retroactively providing
+Phase 0's compiler. Phase 50
 alone places the already source-bounded `pb` ensure/build/unchanged-argv/exec handoff under external runtime
 observation: its candidate starts the exact source-built Haskell supervisor directly, and that supervisor
 invokes `pb` as the child subject. The future public spelling cannot supervise its own handoff. Phase 51 and
@@ -272,7 +280,7 @@ Each sprint uses this exact header and field set:
 **Status**: Blocked — NOT VALIDATED
 **Implementation**: <authored .hs path, documentation path, or pb/** bootstrap path>
 **Blocked by**: <immediate prior sprint or earlier phase gate pass; genesis only where true>
-**Forward-deferred**: <conditional; later-owned capability this sprint names, with owner and residue tag; omit if none>
+**Forward-deferred**: <conditional; later-owned capability this sprint names, with owner and forward-deferral tag; omit if none>
 **Requires**: <`natural-linux-cpu-amd64-host` | `disposable-linux-cpu-amd64-host`; omit if none>
 **Independent Validation**: <one falsifiable seam; never merely the parent gate>
 **Oracle**: <separate .hs module and independence boundary>
@@ -310,8 +318,8 @@ red outside the assigned case is inadmissible under
 [`testing_spoof_resistance.md` §12.4](../documents/engineering/testing_spoof_resistance.md#124-subject-change-witnesses).
 
 `Forward-deferred` is present when and only when the sprint's deliverables or validation name an artefact a
-later phase owns. It records the reach as residue with its owner; it never authorises consuming that artefact
-to settle this sprint's claim.
+later phase owns. It records an excluded reach with its owner and never enters the earlier candidate's
+`captureResidue`; it never authorises consuming that artefact to settle this sprint's claim.
 
 `Blocked by` names plan work. `Requires` names only an environmental fact no phase can build. Its current
 closed vocabulary is `natural-linux-cpu-amd64-host` and `disposable-linux-cpu-amd64-host`; a new fact requires
@@ -323,11 +331,19 @@ toolchain needed to build and replace itself with that binary; it cannot resolve
 No sprint is Done merely because its isolated check runs. Its candidate must be retained by the complete
 qualified parent gate; that passing parent gate makes the sprint eligible for the mechanical status update.
 
-`Blocked by` orders implementation; it is not a request for confirmation between sprints. A downstream
+Within one phase, `Blocked by` orders implementation; it is not a request for confirmation between sprints. A downstream
 sprint in the same phase may begin when the predecessor's deliverables exist and its declared component
 diagnostics have produced the observations needed to expose any remaining work. This readiness decision
 changes no status, is not candidate evidence, and is not validation. If the predecessor's implementation,
 contract, oracle, or observations change, its diagnostics rerun before their result is relied on again.
+
+For the first sprint of a later phase, the cross-phase `Blocked by` edge orders gate execution and status rather
+than prohibiting all source preparation. A sprint with `Substrate: none` may be implemented ahead of the
+validation frontier only after its exact typed contract and separately authored oracle have replaced the reset
+inventory. That work may run bounded component diagnostics, but it cannot run the phase gate, mint candidate
+evidence, use `pb` before `BOOTSTRAP_HANDOFF`, consume an absent predecessor, or create, change, or discover a
+host, image, container, cluster, accelerator, provider, or other live resource. Its phase and sprint remain
+Blocked — NOT VALIDATED until the immediate predecessor gate passes.
 
 The raw blocker value is closed: Phase 0 Sprint 0.1 uses only `` `genesis` ``; a first sprint in every later
 phase uses only `[Phase N](phase_NN_<slug>.md) gate pass` for the immediate predecessor; and every later
@@ -335,7 +351,8 @@ sprint uses only `Sprint N.(Y-1)`. Appended candidate, confirmation, earlier-pha
 is a second edge and refuses the schema even when the immediate edge also appears.
 
 Validation is consolidated at the phase gate. The qualified parent gate must rerun and retain every sprint
-seam in one complete candidate run. When that gate passes, its status projection may be applied immediately.
+seam in one complete candidate run. When that gate passes, its emitted status patch may be applied by a human,
+agent, or CI job after the validator exits and the bound preimage is rechecked.
 Where `Blocked by` names an earlier phase rather than an earlier sprint, that dependency is the earlier gate
 pass. An agent may validate, record, and continue across multiple phases in one run, but each phase still
 receives its own candidate and ordered gate execution.
@@ -356,8 +373,10 @@ every command and validation item is non-operative, every result is inadmissible
 format that conflicts with the current Haskell/`.build/**` rules is condemned rather than grandfathered. The
 phase gate must refuse while any retained body has not been replaced wholesale with the exact sprint schema;
 no line may be copied out, selectively reactivated, or used as an implementation instruction. Once rewritten,
-the inventory is deleted—Git history is its only archive. Phase 0 Sprint 0.7 owns this check across all
-numbered phases, so a generic reset banner can block validation but can never count as the completed check.
+the inventory is deleted—Git history is its only archive. Each numbered phase owns this replacement for its own
+contract. Phase 0 checks the closed document inventory, required structure, and typed owner assignment, but it
+does not have to implement or semantically resolve later-phase cells. A generic reset banner can block that
+phase's validation but can never count as the completed phase-specific check.
 
 ---
 
@@ -455,13 +474,19 @@ claim, subject, command, oracle, positive controls, paired negatives, mutants, d
 authority/bypass, freshness, qualification, cleanroom, legacy closure, predecessor, residue, and pass
 criterion.
 
-A candidate is inadmissible unless the harness first rejects the qualification sabotage corpus, each mutant
-is observed to change the intended production locus and redden the intended oracle, discovery is non-empty and
-two-way complete, stale evidence and self-reporting fail, and cleanup leaves no residue. Once the complete
-gate passes, the status update is mechanical.
+A candidate is inadmissible unless the harness first rejects its phase-owned qualification corpus, required
+mutants visibly change production and are rejected by their independent oracle, discovery is non-empty and
+two-way complete, required freshness/authority checks fail closed, and cleanup leaves no forbidden residue.
+Phase 0 has the closed finite exception in gate-integrity §M.4: its three changed sources and binaries must
+differ from clean; its v2 transcript must retain a silent successful clean run and, for every mutant, exact
+`ExitFailure 1`, empty stdout, and canonical case-label-plus-newline stderr.
+Its `captureResidue` is empty; later-owned work is an exclusion/forward deferral, not an `UNVERIFIED` candidate
+entry. Later phases retain their applicable `UNVERIFIED` layers. Once the complete gate passes, the status
+update is mechanical.
 
-Mutation scope is bounded by the claim. The complete selector corpus runs only at the milestone capabilities
-named in [`development_plan_gate_integrity.md` §M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject).
+Mutation scope is bounded by the claim and typed owner frontier. A milestone runs the cumulative selector
+corpus owned at or before that capability; Phase 49 is the first complete hardware-free universal corpus. The
+milestones are named in [`development_plan_gate_integrity.md` §M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject).
 An ordinary gate runs exactly those selectors whose declared impact set intersects its own `Claim`,
 `Positive controls`, and `Paired negatives` rows, subject to the per-deliverable and foreclosure floor. A
 milestone is named as a capability, never as an ordinal.
@@ -528,7 +553,7 @@ Plan documents inherit the shape, orientation, prose, and diagram rules in
 A long phase may use at most two diagrams:
 
 1. a gate apparatus showing subject, independent oracle, changed-subject mutant, external observer,
-   qualification refusal, candidate evidence, and the passing status projection; and
+   qualification refusal, candidate evidence, and the passing status patch; and
 2. a sprint seam map showing what each sprint hands to the next.
 
 Diagrams orient; the fixed table and sprint fields carry the enforceable rules.
@@ -555,7 +580,8 @@ bindings, zero findings for the candidate phase's due bindings, predecessor gate
 partial evidence is not a gate pass. A later-owned binding records temporary observed debt; it is not permission to add
 or consume that source. The reader-facing register explains those bindings but supplies no executable value.
 The transition expires before the gate cut: Phase 49 requires every `LTD-SRC-*` query, including
-Phase-0-owned `LTD-SRC-008`, to be zero. The only non-Haskell behavioral source then remaining is `pb/**`
+Phase-2-owned `LTD-SRC-008`, to be zero. Phase 0 first requires a scoped `SourcePb` zero for its captured
+bootstrap source without retiring that binding. The only non-Haskell behavioral source then remaining is `pb/**`
 Python positively classified by the deny-by-default Haskell grammar as minimal platform discrimination,
 contained toolchain establishment, source-bound build, and opaque exec handoff. Phase 50 validates that
 already-bounded runtime handoff and owns no source-migration binding; Phase 51 onward retains the same grammar.

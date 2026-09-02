@@ -26,7 +26,7 @@ document each invariant cites. It presumes nothing.
 - [2. The seed projects: reference implementations amoebius re-derives from](#2-the-seed-projects-reference-implementations-amoebius-re-derives-from)
 - [3. The hard constraints (cross-cutting invariants)](#3-the-hard-constraints-cross-cutting-invariants)
 - [4. The phase index (one line per phase)](#4-the-phase-index-one-line-per-phase)
-- [5. Current baseline — NOT VALIDATED](#5-current-baseline--not-validated)
+- [5. Reset baseline and live status authority](#5-reset-baseline-and-live-status-authority)
 - [Related Documents](#related-documents)
 
 ---
@@ -355,9 +355,9 @@ fidelity remain explicitly unverified
 
 ---
 
-## 5. Current baseline — NOT VALIDATED
+## 5. Reset baseline and live status authority
 
-- **Implementation footprints exist, but none is validated.** The repository contains Haskell plus tracked
+- **Implementation footprints do not imply validation.** The repository contains Haskell plus tracked
   Python, PureScript, Dhall, protocol, test, gate, mutant, and live-harness violations. Except for the bounded
   `pb/**` bootstrap, every non-Haskell behavioral source is condemned migration input.
   Typed Haskell legacy bindings must account bijectively for every observed violation until their numerical
@@ -366,8 +366,8 @@ fidelity remain explicitly unverified
   [system_components.md](system_components.md) remains target-only.
 - **Every prior result is invalidated.** Earlier gates used repository-resident enumeration and ledgers, wrote run
   evidence beneath `DEVELOPMENT_PLAN/`, or depended on tracked resolver output and host-specific paths.
-- **Status posture:** Phase 0 is Active — NOT VALIDATED; Phases 1–95 are Blocked — NOT VALIDATED. The
-  authoritative per-phase projection lives only in [README.md](README.md); this summary cannot promote it.
+- **Status posture:** the authoritative live per-phase projection lives only in [README.md](README.md) and its
+  mechanically joined phase/sprint fields. This summary cannot restate or promote it.
 - **Artifact posture:** only Haskell behavioral source and the bounded Python `pb/**` bootstrap may be
   version-controlled. The
   complete repository and generated-output structure is owned by

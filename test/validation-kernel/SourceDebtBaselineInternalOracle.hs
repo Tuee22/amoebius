@@ -23,11 +23,15 @@ import Amoebius.Validation.SourceClosure.Internal
   , TrackedEntry (..)
   , sourceClosureInternalTestAcquire
   )
+import Amoebius.Validation.PbBootstrapGrammar.Internal
+  ( pbBootstrapInternalTestCanonicalBytes
+  )
 import Amoebius.Validation.SourceDebtBaseline.Internal
   ( SourceDebtEvidence
   , analyzeAcquiredSourceDebt
   , foldAcquiredSourceDebtState
   , sourceDebtEvidenceCheck
+  , sourceDebtEvidenceCheckForPhaseZero
   , sourceDebtInternalTestIntegrityFindings
   , sourceDebtInternalTestProblemFindings
   , sourceDebtInternalTestStateResults
@@ -125,6 +129,10 @@ evidenceProblems :: [String]
 evidenceProblems =
   expectExact "same-snapshot evidence result" expectedEmptyAcquired (sourceDebtEvidenceCheck acquiredA evidenceA)
     <> expectExact "cross-snapshot evidence result" expectedMismatchedEvidence (sourceDebtEvidenceCheck acquiredB evidenceA)
+    <> expectExact "an absent pb inventory refuses the Phase-0 scoped result" expectedPhaseZeroRefused (sourceDebtEvidenceCheckForPhaseZero acquiredA evidenceA)
+    <> expectExact "the canonical pb inventory passes the Phase-0 scoped result" expectedPhaseZeroCanonical (sourceDebtEvidenceCheckForPhaseZero acquiredPbCanonical evidencePbCanonical)
+    <> expectExact "a widened pb inventory refuses the Phase-0 scoped result" expectedPhaseZeroRefused (sourceDebtEvidenceCheckForPhaseZero acquiredPbWidened evidencePbWidened)
+    <> expectExact "cross-snapshot Phase-0 scoped result" expectedPhaseZeroMismatchedEvidence (sourceDebtEvidenceCheckForPhaseZero acquiredB evidenceA)
     <> concatMap exactClosedFold expectedEmptyAcquiredFolds
     <> expectExact
       "cross-snapshot lifecycle fold"
@@ -132,6 +140,8 @@ evidenceProblems =
       (renderFold acquiredB evidenceA SourcePb)
  where
   evidenceA = analyzeAcquiredSourceDebt acquiredA
+  evidencePbCanonical = analyzeAcquiredSourceDebt acquiredPbCanonical
+  evidencePbWidened = analyzeAcquiredSourceDebt acquiredPbWidened
   exactClosedFold (identifier, expected) =
     expectExact
       ("closed lifecycle fold " <> show identifier)
@@ -147,7 +157,7 @@ expectedEmptyAcquiredFolds =
   , (SourcePulumi, "zero")
   , (SourceTest, "zero")
   , (SourceProbe, "zero")
-  , (SourcePb, "zero")
+  , (SourcePb, "refused:bounded pb grammar did not admit the exact acquired source")
   , (SourceVendor, "zero")
   ]
 
@@ -196,6 +206,59 @@ expectedMismatchedEvidence =
                  "expected=snapshot-b, actual=snapshot-a"
              ]
     }
+
+expectedPhaseZeroCanonical :: CheckResult
+expectedPhaseZeroCanonical =
+  CheckResult
+    { checkName = "phase-00-source-debt"
+    , checkObservations =
+        [ Observation "source-debt.phase-00.scope" "bounded-pb-current-state"
+        , Observation "source-debt.phase-00.pb" "zero"
+        ]
+    , checkFindings = []
+    }
+
+expectedPhaseZeroRefused :: CheckResult
+expectedPhaseZeroRefused =
+  CheckResult
+    { checkName = "phase-00-source-debt"
+    , checkObservations = [Observation "source-debt.phase-00.pb" "refused"]
+    , checkFindings =
+        [ Finding
+            "SOURCE-DEBT-PHASE-00-PB"
+            "pb/**"
+            "bounded pb grammar did not admit the exact acquired source"
+        ]
+    }
+
+expectedPhaseZeroMismatchedEvidence :: CheckResult
+expectedPhaseZeroMismatchedEvidence =
+  CheckResult
+    { checkName = "phase-00-source-debt"
+    , checkObservations = []
+    , checkFindings =
+        [ Finding
+            "SOURCE-DEBT-EVIDENCE-SNAPSHOT-MISMATCH"
+            "source-debt-baseline"
+            "expected=snapshot-b, actual=snapshot-a"
+        ]
+    }
+
+acquiredPbCanonical, acquiredPbWidened :: AcquiredSourceSnapshot
+acquiredPbCanonical =
+  sourceClosureInternalTestAcquire
+    ( SourceSnapshot
+        "/immutable/pb-canonical"
+        "snapshot-pb-canonical"
+        [trackedEntry "pb/__main__.py" validObjectId pbBootstrapInternalTestCanonicalBytes]
+    )
+acquiredPbWidened =
+  sourceClosureInternalTestAcquire
+    ( SourceSnapshot
+        "/immutable/pb-widened"
+        "snapshot-pb-widened"
+        [trackedEntry "pb/extra.py" validObjectId pbBootstrapInternalTestCanonicalBytes]
+    )
 
 acquiredCheck :: [TrackedEntry] -> CheckResult
 acquiredCheck entries =

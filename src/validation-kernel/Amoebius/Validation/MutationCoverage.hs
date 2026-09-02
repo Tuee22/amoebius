@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | How much of the declared mutation corpus can actually be executed.
+-- | Which capability owns making each mutation family executable.
 --
 -- A mutation macro that no suite drives is not a test. Setting its flag changes
 -- production, nothing observes the change, and the macro still appears in every
@@ -8,17 +8,15 @@
 -- coverage it does not carry, which is the exact failure
 -- @DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md@ records as @LTD-VAL-002@.
 --
--- The kernel declares thousands of mutation loci and, until the exported
--- selector registries were given suites, could execute only a small fraction
--- of them. This module states the corpus and the suites that drive it as typed
--- values and refuses the difference, so the gap is a standing refusal
--- attributed to an owner rather than a silent absence.
+-- The kernel declares thousands of mutation loci spanning several capability
+-- phases. This module names each family, its diagnostic driver, and the
+-- capability that must acquire and reconcile its exact selector and execution
+-- sets. It deliberately does not claim a corpus or family cardinality.
 --
--- Both numbers are authored here and independently restated by
--- @test/validation-kernel/MutationCoverageOracle.hs@. Neither side derives the
--- other, and neither reads @amoebius.cabal@: parsing the build description is
--- a separate capability whose own parser is not yet validated, so consuming it
--- here would rest this count on an unvalidated subject.
+-- Ownership is independently restated by
+-- @test/validation-kernel/MutationCoverageOracle.hs@. Neither side reads
+-- @amoebius.cabal@: parsing and validating the execution mapping belongs to
+-- the owning capability rather than to this Phase-0 inventory seam.
 module Amoebius.Validation.MutationCoverage
   ( DrivenSuite (..)
   , SelectionMode (..)
@@ -37,16 +35,15 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 
--- | One selector suite that can execute a named part of the corpus.
+-- | One selector family and the capability that owes its executable proof.
 data DrivenSuite = DrivenSuite
   { drivenSuiteName :: Text
   -- ^ The Cabal test-suite that owns the driver.
   , drivenSuiteFamily :: Text
   -- ^ The macro prefix whose loci the suite can reach.
   , drivenSuiteOwnerCapability :: Text
-  -- ^ The plan capability that owns closing this family's gap.
-  , drivenSuiteLoci :: Int
-  -- ^ Loci the suite can select, each with an intent and an impact row.
+  -- ^ The plan capability that owns this family's cardinality, executable
+  -- mapping, applied-change witnesses, and any unwired residue.
   }
   deriving (Eq, Show)
 
@@ -65,37 +62,40 @@ data DrivenSuite = DrivenSuite
 -- declared total could only ever be a restated literal, and a literal compared
 -- against another literal authored to agree with it refuses nothing.
 --
--- What this module owns instead is inventory well-formedness, which does not
--- move when a corpus grows.  Each family's cardinality and its unwired
--- remainder are owed by the capability named in 'drivenSuiteOwnerCapability',
--- and belong in that phase's own @Residue@ row.
+-- What this module owns instead is inventory well-formedness and explicit
+-- ownership, neither of which requires a selector count.  Each family's exact
+-- selector set, cardinality, executable mapping, and unwired remainder are
+-- acquired and checked by the capability named in
+-- 'drivenSuiteOwnerCapability', and belong in that phase's own evidence and
+-- @Residue@ row.
 -- | The suites that can execute part of the corpus.
 --
 -- Every row names a Cabal component with a real @Main.hs@ that reaches the
--- oracle-owned selector registry. A registry exported only from an oracle does
--- not belong here: without this executable component it remains unwired.
+-- oracle-owned selector registry. The row does not claim that every selector
+-- has an acquired execution mapping or applied-change witness; its owner must
+-- establish those in the owner's gate.
 drivenSuites :: [DrivenSuite]
 drivenSuites =
-  [ DrivenSuite "validation-source-debt-selector-component" "VALIDATION_SOURCE_DEBT_PUBLIC" "documentation_suite" 188
-  , DrivenSuite "validation-source-debt-internal-component" "VALIDATION_SOURCE_DEBT_INTERNAL" "documentation_suite" 73
-  , DrivenSuite "validation-compiler-source-graph-selector-component" "VALIDATION_COMPILER_GRAPH_PUBLIC" "documentation_suite" 275
-  , DrivenSuite "validation-compiler-source-graph-acquired-component" "VALIDATION_COMPILER_GRAPH_ACQUIRED" "documentation_suite" 70
-  , DrivenSuite "validation-phase-contract-component" "VALIDATION_PHASE_CONTRACT_PUBLIC" "documentation_suite" 134
-  , DrivenSuite "validation-phase-contract-internal-component" "VALIDATION_PHASE_CONTRACT_INTERNAL" "documentation_suite" 8
-  , DrivenSuite "validation-compiler-component-plan-component" "VALIDATION_COMPILER_PLAN" "documentation_suite" 659
-  , DrivenSuite "validation-pb-bootstrap-grammar-component" "VALIDATION_PB_GRAMMAR" "documentation_suite" 374
-  , DrivenSuite "validation-policy-contract-selector-component" "VALIDATION_POLICY" "documentation_suite" 194
-  , DrivenSuite "validation-legacy-selector-component" "VALIDATION_LEGACY" "documentation_suite" 1320
-  , DrivenSuite "validation-phase-semantic-selector-component" "VALIDATION_PHASE_SEMANTIC" "documentation_suite" 36
-  , DrivenSuite "validation-qualification-selector-component" "VALIDATION_QUALIFICATION" "documentation_suite" 1
-  , DrivenSuite "validation-source-closure-selector-component" "VALIDATION_SOURCE_CLOSURE" "documentation_suite" 607
-  , DrivenSuite "validation-source-consumer-selector-component" "VALIDATION_SOURCE_CONSUMER_PUBLIC" "documentation_suite" 476
-  , DrivenSuite "validation-source-consumer-internal-selector-component" "VALIDATION_SOURCE_CONSUMER_INTERNAL" "documentation_suite" 292
-  , DrivenSuite "validation-documentation-selector-component" "VALIDATION_DOCUMENTATION" "documentation_suite" 64
-  , DrivenSuite "validation-documentation-internal-selector-component" "VALIDATION_DOCUMENTATION_INTERNAL" "documentation_suite" 91
-  , DrivenSuite "validation-dispatch-selector-component" "VALIDATION_DISPATCH" "documentation_suite" 26
-  , DrivenSuite "validation-compiler-buildinfo-selector-component" "VALIDATION_COMPILER_BUILDINFO" "documentation_suite" 614
-  , DrivenSuite "validation-compiler-elaborated-plan-selector-component" "VALIDATION_COMPILER_ELABORATED" "documentation_suite" 342
+  [ DrivenSuite "validation-source-debt-selector-component" "VALIDATION_SOURCE_DEBT_PUBLIC" "repository_layout_conformance"
+  , DrivenSuite "validation-source-debt-internal-component" "VALIDATION_SOURCE_DEBT_INTERNAL" "repository_layout_conformance"
+  , DrivenSuite "validation-compiler-source-graph-selector-component" "VALIDATION_COMPILER_GRAPH_PUBLIC" "toolchain_spike"
+  , DrivenSuite "validation-compiler-source-graph-acquired-component" "VALIDATION_COMPILER_GRAPH_ACQUIRED" "toolchain_spike"
+  , DrivenSuite "validation-phase-contract-component" "VALIDATION_PHASE_CONTRACT_PUBLIC" "self_referential_gates"
+  , DrivenSuite "validation-phase-contract-internal-component" "VALIDATION_PHASE_CONTRACT_INTERNAL" "self_referential_gates"
+  , DrivenSuite "validation-compiler-component-plan-component" "VALIDATION_COMPILER_PLAN" "toolchain_spike"
+  , DrivenSuite "validation-pb-bootstrap-grammar-component" "VALIDATION_PB_GRAMMAR" "repository_layout_conformance"
+  , DrivenSuite "validation-policy-contract-selector-component" "VALIDATION_POLICY" "self_referential_gates"
+  , DrivenSuite "validation-legacy-selector-component" "VALIDATION_LEGACY" "self_referential_gates"
+  , DrivenSuite "validation-phase-semantic-selector-component" "VALIDATION_PHASE_SEMANTIC" "self_referential_gates"
+  , DrivenSuite "validation-qualification-selector-component" "VALIDATION_QUALIFICATION" "self_referential_gates"
+  , DrivenSuite "validation-source-closure-selector-component" "VALIDATION_SOURCE_CLOSURE" "repository_layout_conformance"
+  , DrivenSuite "validation-source-consumer-selector-component" "VALIDATION_SOURCE_CONSUMER_PUBLIC" "repository_layout_conformance"
+  , DrivenSuite "validation-source-consumer-internal-selector-component" "VALIDATION_SOURCE_CONSUMER_INTERNAL" "repository_layout_conformance"
+  , DrivenSuite "validation-documentation-selector-component" "VALIDATION_DOCUMENTATION" "self_referential_gates"
+  , DrivenSuite "validation-documentation-internal-selector-component" "VALIDATION_DOCUMENTATION_INTERNAL" "self_referential_gates"
+  , DrivenSuite "validation-dispatch-selector-component" "VALIDATION_DISPATCH" "self_referential_gates"
+  , DrivenSuite "validation-compiler-buildinfo-selector-component" "VALIDATION_COMPILER_BUILDINFO" "toolchain_spike"
+  , DrivenSuite "validation-compiler-elaborated-plan-selector-component" "VALIDATION_COMPILER_ELABORATED" "toolchain_spike"
   ]
 
 
@@ -119,31 +119,23 @@ mutationCoverageCheckFor suites =
   CheckResult
     { checkName = "mutation-coverage"
     , checkObservations =
-        [ observation "mutation.driving-suite-count" (showText (length suites))
-        , observation "mutation.driven-loci" (showText (sum (map drivenSuiteLoci suites)))
+        [ observation
+            ("mutation.suite." <> drivenSuiteFamily suite)
+            (drivenSuiteName suite)
+        | suite <- suites
         ]
-          <> [ observation ("mutation.owner." <> owner) (showText total)
-             | (owner, total) <- ownerTotals
-             ]
           <> [ observation
-                 ("mutation.suite." <> drivenSuiteFamily suite)
-                 (drivenSuiteName suite <> "=" <> showText (drivenSuiteLoci suite))
+                ("mutation.owner." <> drivenSuiteFamily suite)
+                (drivenSuiteOwnerCapability suite)
              | suite <- suites
              ]
     , checkFindings =
         emptyInventoryFindings
           <> duplicateSuiteFindings
           <> duplicateFamilyFindings
-          <> nonPositiveFindings
           <> unknownOwnerFindings
     }
  where
-  owners = nub (map drivenSuiteOwnerCapability suites)
-  ownerTotals =
-    [ (owner, sum [drivenSuiteLoci suite | suite <- suites, drivenSuiteOwnerCapability suite == owner])
-    | owner <- sort owners
-    ]
-
   emptyInventoryFindings =
     [ finding
         "MUTANT-COVERAGE-INVENTORY-EMPTY"
@@ -166,15 +158,6 @@ mutationCoverageCheckFor suites =
         "amoebius.cabal"
         ("a macro family names more than one driver, so a red result cannot be attributed: " <> family)
     | family <- repeated (map drivenSuiteFamily suites)
-    ]
-
-  nonPositiveFindings =
-    [ finding
-        "MUTANT-COVERAGE-INTEGRITY"
-        "amoebius.cabal"
-        ("a driving suite declares a non-positive locus count: " <> drivenSuiteName suite)
-    | suite <- suites
-    , drivenSuiteLoci suite <= 0
     ]
 
   -- An owner outside the compiled phase-identity table cannot carry the

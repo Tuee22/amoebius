@@ -4,7 +4,14 @@ module EvidenceGatePassInternalOracle (
     runEvidenceGatePassInternalOracle,
 ) where
 
-import Amoebius.Validation.CompilerSourceGraph.Internal (acquireCompilerSourceGraph)
+import Amoebius.Validation.BootstrapQualification.Internal
+  ( bootstrapQualificationInternalTestProtocol
+  )
+import Amoebius.Validation.BootstrapTrust.Internal
+  ( GenesisTrust
+  , genesisTrustInternalTestAcquire
+  , genesisTrustInternalTestExpectedInputs
+  )
 import Amoebius.Validation.Evidence.Internal (
     AcquiredCandidateEvidence,
     GateRow (..),
@@ -24,8 +31,13 @@ import Amoebius.Validation.Evidence.Internal (
     recheckPublishedCandidateEvidence,
     writeAcquiredCandidateEvidence,
  )
-import Amoebius.Validation.Gate.Internal qualified as Gate
 import Amoebius.Validation.GatePass.Internal (verifyPublishedGatePass)
+import Amoebius.Validation.Legacy.Internal
+  ( LegacyId (LtdBoot001)
+  , LegacyObservedState (..)
+  , legacyBootstrapDueInternalTestCheck
+  , legacyBootstrapPrerequisiteInternalTestObservation
+  )
 import Amoebius.Validation.PhaseZeroRun.Internal (
     acquiredPhaseZeroRunCheck,
     assembleAcquiredPhaseZeroRun,
@@ -42,6 +54,7 @@ import Amoebius.Validation.SourceDebtBaseline.Internal (analyzeAcquiredSourceDeb
 import Amoebius.Validation.Types (
     CheckResult (..),
     Finding (..),
+    Observation (..),
     observation,
  )
 import Control.Monad (unless)
@@ -52,7 +65,20 @@ import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 
 runEvidenceGatePassInternalOracle :: IO ()
-runEvidenceGatePassInternalOracle =
+runEvidenceGatePassInternalOracle = case (genesisTrustFixture, mismatchedCompilerTrustFixture) of
+    (Left findings, _) ->
+        finishDiagnostics
+            "EvidenceGatePassInternalOracle"
+            ["the exact internal GenesisTrust fixture refused: " <> show findings]
+    (_, Left findings) ->
+        finishDiagnostics
+            "EvidenceGatePassInternalOracle"
+            ["the mismatched-compiler GenesisTrust fixture refused before the intended binding check: " <> show findings]
+    (Right trust, Right mismatchedCompilerTrust) ->
+        runWithGenesisTrust trust mismatchedCompilerTrust
+
+runWithGenesisTrust :: GenesisTrust -> GenesisTrust -> IO ()
+runWithGenesisTrust trust mismatchedCompilerTrust =
     withSystemTempDirectory "amoebius-published-gate-evidence" $ \root -> do
         let evidence =
                 captureDispatchCandidateEvidence
@@ -64,7 +90,7 @@ runEvidenceGatePassInternalOracle =
                     (root </> "source-bound-validator")
                     (Just digest)
                     ["validate", "phase", "00"]
-                    (CheckResult "phase-00" [observation "subject" "observed"] [])
+                    (CheckResult "phase-00" [observation "subject" "raw\tcolumns"] [])
         firstPublication <- writeAcquiredCandidateEvidence root evidence
         firstReadback <- recheckPublishedCandidateEvidence firstPublication
         verification <- verifyPublishedGatePass firstPublication
@@ -91,6 +117,17 @@ runEvidenceGatePassInternalOracle =
                     (CheckResult "phase-00" [observation "subject" "observed"] [])
         wrongArgvPublication <- writeAcquiredCandidateEvidence root wrongArgvEvidence
         wrongArgvVerification <- verifyPublishedGatePass wrongArgvPublication
+        let newlineObservationEvidence =
+                captureDispatchCandidateEvidence
+                    0
+                    digest
+                    digest
+                    (Just digest)
+                    (Just digest)
+                    (root </> "source-bound-validator")
+                    (Just digest)
+                    ["validate", "phase", "00"]
+                    (CheckResult "phase-00" [observation "subject" "two\nrecords"] [])
         let acquireFixture identity =
                 sourceClosureInternalTestAcquire
                     SourceSnapshot
@@ -109,13 +146,19 @@ runEvidenceGatePassInternalOracle =
                             ]
                         }
             acquired = acquireFixture digest
-        compilerAttempt <- acquireCompilerSourceGraph acquired
         let debtEvidence = analyzeAcquiredSourceDebt acquired
+            qualification = bootstrapQualificationInternalTestProtocol digest
             phaseZeroRun =
                 assembleAcquiredPhaseZeroRun
                     acquired
-                    compilerAttempt
-                    Gate.currentQualifiedValidationProtocol
+                    trust
+                    qualification
+                    debtEvidence
+            mismatchedCompilerRun =
+                assembleAcquiredPhaseZeroRun
+                    acquired
+                    mismatchedCompilerTrust
+                    qualification
                     debtEvidence
             finalizedEvidence =
                 captureFinalizedDispatchCandidateEvidence
@@ -131,6 +174,8 @@ runEvidenceGatePassInternalOracle =
             finalizedPassCheck = acquiredCandidatePassCriterionCheck finalizedEvidence
             finalizedQualificationCheck = acquiredCandidateQualificationCheck finalizedEvidence
             finalizedSubjectCheck = acquiredCandidateSubjectCheck finalizedEvidence
+            baseQualificationCheck = acquiredCandidateQualificationCheck evidence
+            forcedDueLegacyCheck = legacyBootstrapDueInternalTestCheck LtdBoot001
             changedClosingDigest = Text.replicate 64 "b"
             changedClosingEvidence =
                 captureFinalizedDispatchCandidateEvidence
@@ -145,6 +190,15 @@ runEvidenceGatePassInternalOracle =
                 captureFinalizedDispatchCandidateEvidence
                     phaseZeroRun
                     (Left [EmptyIndex])
+                    (Just digest)
+                    (Just digest)
+                    (root </> "source-bound-validator")
+                    (Just digest)
+                    ["validate", "phase", "00"]
+            mismatchedCompilerEvidence =
+                captureFinalizedDispatchCandidateEvidence
+                    mismatchedCompilerRun
+                    (Right acquired)
                     (Just digest)
                     (Just digest)
                     (root </> "source-bound-validator")
@@ -190,10 +244,24 @@ runEvidenceGatePassInternalOracle =
                     "the verifier independently rejects the wrapper's observed argv"
                     "GATE-PASS-COMMAND"
                     wrongArgvVerification
+                <> expectRowPassed
+                    "a tab-framed raw Subject value remains one well-formed observation record"
+                    SubjectRow
+                    True
+                    evidence
+                <> expectRowPassed
+                    "a newline-bearing Subject value cannot inject a second observation record"
+                    SubjectRow
+                    False
+                    newlineObservationEvidence
                 <> expectCheckFindingCode
                     "the incomplete capture API cannot manufacture legacy-closure authority"
                     "GATE-LEGACY-CLOSURE-UNVERIFIED"
                     baseLegacyCheck
+                <> expectCheckFindingCode
+                    "the incomplete capture API cannot manufacture finite qualification authority"
+                    "GATE-QUALIFICATION-UNVERIFIED"
+                    baseQualificationCheck
                 <> expectRowPassed
                     "the finalized Subject is recomputed from the opaque acquired Phase-0 run"
                     SubjectRow
@@ -216,18 +284,42 @@ runEvidenceGatePassInternalOracle =
                     ""
                     (acquiredCandidateSourceClosing unavailableClosingEvidence)
                 <> expectRowPassed
-                    "the still-open legacy inventory refuses its own row"
+                    "the same acquired closing snapshot passes freshness"
+                    FreshnessRow
+                    True
+                    finalizedEvidence
+                <> expectRowPassed
+                    "a different closing snapshot refuses freshness"
+                    FreshnessRow
+                    False
+                    changedClosingEvidence
+                <> expectRowPassed
+                    "an unavailable closing snapshot refuses freshness"
+                    FreshnessRow
+                    False
+                    unavailableClosingEvidence
+                <> expectRowPassed
+                    "the refusing Subject keeps bootstrap legacy closure red"
                     LegacyClosureRow
                     False
                     finalizedEvidence
                 <> expectRowPassed
-                    "qualification refusal is retained in its own finalized gate row"
+                    "the sealed finite bootstrap qualification passes its finalized row"
+                    QualificationRow
+                    True
+                    finalizedEvidence
+                <> expectRowPassed
+                    "a qualification receipt from a different compiler path refuses"
                     QualificationRow
                     False
-                    finalizedEvidence
-                <> expectCheckFindingCode
-                    "the finalized candidate consumes the package-hidden qualification authority"
-                    "QUALIFICATION-NOT-EXECUTED"
+                    mismatchedCompilerEvidence
+                <> expectEqual
+                    "the finalized candidate projects the sealed qualification transcript exactly"
+                    ( CheckResult
+                        "gate-qualification"
+                        [observation "qualification.protocol.sha256" expectedQualificationDigest]
+                        []
+                    )
                     finalizedQualificationCheck
                 <> expectRowPassed
                     "pass criterion is derived after and refuses with legacy closure"
@@ -244,36 +336,62 @@ runEvidenceGatePassInternalOracle =
                     "<gate-finalization>"
                     ["Legacy closure"]
                     finalizedPassCheck
-                <> expectFindingContains
-                    "LTD-VAL-004 observes the exact non-circular prerequisite inventory"
-                    "LEGACY-OBSERVATION-REFUSED"
-                    "Amoebius.Validation.Legacy/LTD-VAL-004"
-                    gateCompletionPremiseFragments
+                <> expectFindingDetailEqual
+                    "the derived pass criterion preserves the exact refusing-row order"
+                    "GATE-PASS-CRITERION-REFUSED"
+                    "<gate-finalization>"
+                    "one or more prerequisite rows refused: Subject,Legacy closure"
+                    finalizedPassCheck
+                <> expectCheckFindingCode
+                    "bootstrap legacy closure refuses when a non-circular prerequisite is red"
+                    "LEGACY-BOOTSTRAP-PREREQUISITES"
                     finalizedLegacyCheck
                 <> expectFindingDetailEqual
-                    "LTD-VAL-004 retains the exact prerequisite order and every status"
-                    "LEGACY-OBSERVATION-REFUSED"
-                    "Amoebius.Validation.Legacy/LTD-VAL-004"
-                    expectedGateCompletionDetail
+                    "bootstrap legacy closure retains the exact prerequisite order and every status"
+                    "LEGACY-BOOTSTRAP-PREREQUISITES"
+                    "Amoebius.Validation.Legacy"
+                    expectedBootstrapPremiseDetail
                     finalizedLegacyCheck
-                <> expectFindingExcludes
-                    "LTD-VAL-004 no longer reports an unimplemented owner analyzer"
-                    "LEGACY-OBSERVATION-REFUSED"
-                    "Amoebius.Validation.Legacy/LTD-VAL-004"
-                    "the closed owner-domain analyzer has not been implemented"
+                <> expectObservation
+                    "the bootstrap prerequisite observation reports its refusal instead of a pass"
+                    "legacy.bootstrap.prerequisites"
+                    ("refused:" <> expectedBootstrapPremiseDetail)
                     finalizedLegacyCheck
-                <> expectFindingContains
-                    "a static owner-domain zero cannot bypass its executed reintroduction negative"
-                    "LEGACY-OBSERVATION-REFUSED"
-                    "Amoebius.Validation.Legacy/LTD-SRC-008"
-                    ["no executed reintroduction witness"]
+                <> expectEqual
+                    "the bootstrap prerequisite projection distinguishes zero, open, and refused states"
+                    [ observation "legacy.bootstrap.prerequisites" "zero"
+                    , observation "legacy.bootstrap.prerequisites" "open:2:open-digest"
+                    , observation "legacy.bootstrap.prerequisites" "refused:refusal-detail"
+                    ]
+                    [ legacyBootstrapPrerequisiteInternalTestObservation LegacyObservedZero
+                    , legacyBootstrapPrerequisiteInternalTestObservation (LegacyObservedOpen 2 "open-digest")
+                    , legacyBootstrapPrerequisiteInternalTestObservation (LegacyObservationRefused "refusal-detail")
+                    ]
+                <> expectObservation
+                    "the finite bootstrap has no Phase-0-owned legacy debt"
+                    "legacy.bootstrap.due-count"
+                    "0"
                     finalizedLegacyCheck
-                <> expectFindingContains
-                    "still-unimplemented owner analyzers remain fail-closed"
+                <> expectNoFindingCode
+                    "the finite bootstrap does not execute later owner-domain analyzers"
                     "LEGACY-OBSERVATION-REFUSED"
-                    "Amoebius.Validation.Legacy/LTD-VAL-001"
-                    ["the closed owner-domain analyzer has not been implemented"]
                     finalizedLegacyCheck
+                <> expectNoFindingCode
+                    "later-owned legacy debt is not reported as due at Phase 0"
+                    "LEGACY-BOOTSTRAP-DUE"
+                    finalizedLegacyCheck
+                <> expectEqual
+                    "a Phase-0-owned active ID increments the due count and refuses with the exact finding"
+                    ( CheckResult
+                        "legacy-bootstrap-due-internal-test"
+                        [observation "legacy.bootstrap.due-count" "1"]
+                        [ Finding
+                            "LEGACY-BOOTSTRAP-DUE"
+                            "Amoebius.Validation.Legacy/LTD-BOOT-001"
+                            "LTD-BOOT-001 is still assigned to Phase 0 instead of its falsifiable capability owner"
+                        ]
+                    )
+                    forcedDueLegacyCheck
                 <> expectFindingCode
                     "a finalized current candidate with open prerequisites still cannot mint a pass"
                     "GATE-PASS-ROW-NOT-GREEN"
@@ -282,30 +400,53 @@ runEvidenceGatePassInternalOracle =
   where
     digest = Text.replicate 64 "a"
 
-gateCompletionPremiseFragments :: [Text.Text]
-gateCompletionPremiseFragments =
-    [ "Claim=unverified"
+genesisTrustFixture :: Either [Finding] GenesisTrust
+genesisTrustFixture =
+    genesisTrustInternalTestAcquire
+        "9.12.4"
+        "/genesis/bin/ghc"
+        "/genesis/lib/ghc-9.12.4"
+        "linux"
+        "x86_64"
+        genesisTrustInternalTestExpectedInputs
+
+mismatchedCompilerTrustFixture :: Either [Finding] GenesisTrust
+mismatchedCompilerTrustFixture =
+    genesisTrustInternalTestAcquire
+        "9.12.4"
+        "/different-genesis/bin/ghc"
+        "/genesis/lib/ghc-9.12.4"
+        "linux"
+        "x86_64"
+        genesisTrustInternalTestExpectedInputs
+
+expectedQualificationDigest :: Text.Text
+expectedQualificationDigest = "54e6289e14c7b0e7ad9acc2dfc4c1e3d027d0eef7f5c4c3fe7c292761d0e06a6"
+
+bootstrapPremiseFragments :: [Text.Text]
+bootstrapPremiseFragments =
+    [ "Claim=passed"
     , "Subject=refused"
-    , "Command=unverified"
-    , "Oracle=unverified"
-    , "Positive controls=unverified"
-    , "Paired negatives=unverified"
-    , "Mutants=unverified"
-    , "Discovery=unverified"
-    , "Challenge=unverified"
-    , "Observer=unverified"
-    , "Authority/bypass=unverified"
-    , "Freshness=unverified"
-    , "Qualification=refused"
-    , "Cleanroom=unverified"
+    , "Command=passed"
+    , "Oracle=passed"
+    , "Positive controls=passed"
+    , "Paired negatives=passed"
+    , "Mutants=passed"
+    , "Discovery=passed"
+    , "Challenge=passed"
+    , "Observer=passed"
+    , "Authority/bypass=passed"
+    , "Freshness=passed"
+    , "Qualification=passed"
+    , "Cleanroom=passed"
     , "Predecessor=passed"
-    , "Residue=unverified"
+    , "Residue=passed"
     ]
 
-expectedGateCompletionDetail :: Text.Text
-expectedGateCompletionDetail =
-    "LTD-VAL-004: gate-completion prerequisites are not all execution-derived green: "
-        <> Text.intercalate "," gateCompletionPremiseFragments
+expectedBootstrapPremiseDetail :: Text.Text
+expectedBootstrapPremiseDetail =
+    "gate-completion prerequisites are not all execution-derived green: "
+        <> Text.intercalate "," bootstrapPremiseFragments
 
 expectFindingCode :: String -> Text.Text -> Either [Finding] value -> [String]
 expectFindingCode label code result = case result of
@@ -318,6 +459,20 @@ expectCheckFindingCode :: String -> Text.Text -> CheckResult -> [String]
 expectCheckFindingCode label code result
     | any ((== code) . findingCode) (checkFindings result) = []
     | otherwise = [label <> ": expected " <> Text.unpack code <> ", observed " <> show (checkFindings result)]
+
+expectNoFindingCode :: String -> Text.Text -> CheckResult -> [String]
+expectNoFindingCode label code result
+    | any ((== code) . findingCode) (checkFindings result) =
+        [label <> ": unexpectedly observed " <> Text.unpack code <> " in " <> show (checkFindings result)]
+    | otherwise = []
+
+expectObservation :: String -> Text.Text -> Text.Text -> CheckResult -> [String]
+expectObservation label key expected result =
+    case [observationValue item | item <- checkObservations result, observationKey item == key] of
+        [actual]
+            | actual == expected -> []
+            | otherwise -> [label <> ": expected=" <> Text.unpack expected <> "; observed=" <> Text.unpack actual]
+        observed -> [label <> ": expected one observation, observed=" <> show observed]
 
 expectRowPassed :: String -> GateRow -> Bool -> AcquiredCandidateEvidence -> [String]
 expectRowPassed label row expected evidence =
@@ -336,14 +491,6 @@ expectFindingContains label code subject fragments result =
         [item]
             | all (`Text.isInfixOf` findingDetail item) fragments -> []
             | otherwise -> [label <> ": detail did not contain every expected fragment; observed=" <> Text.unpack (findingDetail item)]
-        observed -> [label <> ": expected one matching finding, observed=" <> show observed]
-
-expectFindingExcludes :: String -> Text.Text -> FilePath -> Text.Text -> CheckResult -> [String]
-expectFindingExcludes label code subject fragment result =
-    case matchingFindings code subject result of
-        [item]
-            | not (fragment `Text.isInfixOf` findingDetail item) -> []
-            | otherwise -> [label <> ": forbidden fragment remained in detail=" <> Text.unpack (findingDetail item)]
         observed -> [label <> ": expected one matching finding, observed=" <> show observed]
 
 expectFindingDetailEqual :: String -> Text.Text -> FilePath -> Text.Text -> CheckResult -> [String]

@@ -104,17 +104,17 @@ data GateRequirement
   | RequireIndependentPhaseZeroOracleSet
   | RequireClosedPhaseZeroPositiveCorpus
   | RequireMinimallyDifferentPhaseZeroNegatives
-  | RequireChangedProductionMutationMatrix
+  | RequireFiniteBootstrapChangedProductionMatrix
   | RequireCompleteRuntimeDiscoveryEquality
   | RequireFreshnessAndIndependentChallenge
   | RequireRawIndependentObservation
   | RequireAuthorityAndBypassRejection
   | RequireStartEndSourceAndRunFreshness
-  | RequireFixedHarnessQualificationCorpus
+  | RequireFiniteBootstrapQualificationSequence
   | RequireRunScopedCleanroomAndResidueContainment
-  | RequireDueLegacyClosureAndReintroductionNegatives
+  | RequireStructuralLegacyInventoryWithNoPhaseZeroOwner
   | RequireGenesisPredecessor
-  | RequireExplicitUnverifiedLaterResidue
+  | RequireNoPhaseZeroResidueAndTypedForwardDeferrals
   | RequireQualifiedGatePass
   deriving (Eq, Ord, Show)
 
@@ -599,17 +599,17 @@ phaseZeroRequirement category = case category of
   Oracle -> RequireIndependentPhaseZeroOracleSet
   PositiveControls -> RequireClosedPhaseZeroPositiveCorpus
   PairedNegatives -> RequireMinimallyDifferentPhaseZeroNegatives
-  Mutants -> RequireChangedProductionMutationMatrix
+  Mutants -> RequireFiniteBootstrapChangedProductionMatrix
   Discovery -> RequireCompleteRuntimeDiscoveryEquality
   Challenge -> RequireFreshnessAndIndependentChallenge
   Observer -> RequireRawIndependentObservation
   AuthorityBypass -> RequireAuthorityAndBypassRejection
   Freshness -> RequireStartEndSourceAndRunFreshness
-  Qualification -> RequireFixedHarnessQualificationCorpus
+  Qualification -> RequireFiniteBootstrapQualificationSequence
   Cleanroom -> RequireRunScopedCleanroomAndResidueContainment
-  LegacyClosure -> RequireDueLegacyClosureAndReintroductionNegatives
+  LegacyClosure -> RequireStructuralLegacyInventoryWithNoPhaseZeroOwner
   PredecessorCategory -> RequireGenesisPredecessor
-  Residue -> RequireExplicitUnverifiedLaterResidue
+  Residue -> RequireNoPhaseZeroResidueAndTypedForwardDeferrals
   PassCriterion -> RequireQualifiedGatePass
 
 gateSlotsFor :: Int -> Map GateCategory (ContractSlot GateSpecification)
@@ -665,7 +665,7 @@ semanticLegacyOwner identifier =
 -- function used to build the semantic phase projection above.
 expectedLegacyOwnerRelation :: [(Text, Int)]
 expectedLegacyOwnerRelation =
-  [ ("LTD-SRC-000", 0)
+  [ ("LTD-SRC-000", 2)
   , ("LTD-SRC-001", 47)
   , ("LTD-SRC-002", 25)
   , ("LTD-SRC-003", 26)
@@ -673,15 +673,15 @@ expectedLegacyOwnerRelation =
   , ("LTD-SRC-005", 47)
   , ("LTD-SRC-006", 47)
   , ("LTD-SRC-007", 1)
-  , ("LTD-SRC-008", 0)
+  , ("LTD-SRC-008", 2)
   , ("LTD-SRC-009", 1)
   , ("LTD-META-001", 2)
-  , ("LTD-VAL-001", 0)
-  , ("LTD-VAL-002", 0)
-  , ("LTD-VAL-003", 0)
-  , ("LTD-VAL-004", 0)
+  , ("LTD-VAL-001", 49)
+  , ("LTD-VAL-002", 49)
+  , ("LTD-VAL-003", 49)
+  , ("LTD-VAL-004", 49)
   , ("LTD-VAL-005", 49)
-  , ("LTD-VAL-006", 0)
+  , ("LTD-VAL-006", 49)
   , ("LTD-DOC-001", 27)
   , ("LTD-NAME-001", 2)
   , ("LTD-HOST-001", 51)
@@ -690,7 +690,7 @@ expectedLegacyOwnerRelation =
   , ("LTD-RUN-001", 55)
   , ("LTD-SEED-001", 91)
   , ("LTD-SEED-002", 93)
-  , ("LTD-BOOT-001", 0)
+  , ("LTD-BOOT-001", 1)
   ]
 
 guardsFor :: Int -> [CriticalGuard]
@@ -935,17 +935,17 @@ requirementCategory requirement = case requirement of
   RequireIndependentPhaseZeroOracleSet -> Oracle
   RequireClosedPhaseZeroPositiveCorpus -> PositiveControls
   RequireMinimallyDifferentPhaseZeroNegatives -> PairedNegatives
-  RequireChangedProductionMutationMatrix -> Mutants
+  RequireFiniteBootstrapChangedProductionMatrix -> Mutants
   RequireCompleteRuntimeDiscoveryEquality -> Discovery
   RequireFreshnessAndIndependentChallenge -> Challenge
   RequireRawIndependentObservation -> Observer
   RequireAuthorityAndBypassRejection -> AuthorityBypass
   RequireStartEndSourceAndRunFreshness -> Freshness
-  RequireFixedHarnessQualificationCorpus -> Qualification
+  RequireFiniteBootstrapQualificationSequence -> Qualification
   RequireRunScopedCleanroomAndResidueContainment -> Cleanroom
-  RequireDueLegacyClosureAndReintroductionNegatives -> LegacyClosure
+  RequireStructuralLegacyInventoryWithNoPhaseZeroOwner -> LegacyClosure
   RequireGenesisPredecessor -> PredecessorCategory
-  RequireExplicitUnverifiedLaterResidue -> Residue
+  RequireNoPhaseZeroResidueAndTypedForwardDeferrals -> Residue
   RequireQualifiedGatePass -> PassCriterion
 
 pathMatchesCapability :: PhaseSemanticContract -> Bool
@@ -1010,17 +1010,17 @@ gateRequirementSlug requirement = case requirement of
   RequireIndependentPhaseZeroOracleSet -> "independent-phase-zero-oracle-set"
   RequireClosedPhaseZeroPositiveCorpus -> "closed-phase-zero-positive-corpus"
   RequireMinimallyDifferentPhaseZeroNegatives -> "minimally-different-phase-zero-negatives"
-  RequireChangedProductionMutationMatrix -> "changed-production-mutation-matrix"
+  RequireFiniteBootstrapChangedProductionMatrix -> "finite-bootstrap-changed-production-matrix"
   RequireCompleteRuntimeDiscoveryEquality -> "complete-runtime-discovery-equality"
   RequireFreshnessAndIndependentChallenge -> "freshness-and-independent-challenge"
   RequireRawIndependentObservation -> "raw-independent-observation"
   RequireAuthorityAndBypassRejection -> "authority-and-bypass-rejection"
   RequireStartEndSourceAndRunFreshness -> "start-end-source-and-run-freshness"
-  RequireFixedHarnessQualificationCorpus -> "fixed-harness-qualification-corpus"
+  RequireFiniteBootstrapQualificationSequence -> "finite-bootstrap-qualification-sequence"
   RequireRunScopedCleanroomAndResidueContainment -> "run-scoped-cleanroom-and-residue-containment"
-  RequireDueLegacyClosureAndReintroductionNegatives -> "due-legacy-closure-and-reintroduction-negatives"
+  RequireStructuralLegacyInventoryWithNoPhaseZeroOwner -> "structural-legacy-inventory-with-no-phase-zero-owner"
   RequireGenesisPredecessor -> "genesis-predecessor"
-  RequireExplicitUnverifiedLaterResidue -> "explicit-unverified-later-residue"
+  RequireNoPhaseZeroResidueAndTypedForwardDeferrals -> "no-phase-zero-residue-and-typed-forward-deferrals"
   RequireQualifiedGatePass -> "qualified-gate-pass"
 
 renderGateCategory :: GateCategory -> Text

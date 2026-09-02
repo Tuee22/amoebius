@@ -2,14 +2,15 @@
 
 {- | The typed capability graph.
 
-The plan's declared dependency graph is clean: all 96 @Depends on@ fields and
-all 270 sprint @Blocked by@ fields name only an immediate predecessor, with
-no forward edge anywhere. The real dependencies are not there. They live in
+The plan's declared gate-dependency graph is clean: all 96 @Depends on@ fields
+and all 270 sprint @Blocked by@ fields name only an immediate predecessor.
+Later-owned work excluded from an earlier finite gate is declared separately
+through @Forward-deferred:@. Capability requirements otherwise live in
 @### Deliverables@, @### Validation@ and gate-row prose, which
 @development_plan_gate_integrity.md@ section M.1 forbids any checker from
 interpreting: /"It may not infer any row's semantic adequacy ... from
-natural-language wording."/ So the plan's own forward-dependency check is
-structurally incapable of finding them.
+natural-language wording."/ So the ordinal fields alone cannot establish the
+capability relation.
 
 The cause is a modelling error. Dependency is modelled as "the immediate
 predecessor ordinal" when the relation that actually binds is "this phase
@@ -25,13 +26,13 @@ prerequisite: an essential capability provided at or after its consumer is a
 misordering finding whether or not the plan declares the reach. A declaration
 matching no edge is also a finding.
 
-Bootstrap inputs are not phase provisions. In particular, the authenticated
-compiler used to build the Phase-0 validator is a non-numbered root. Phase 1
-separately provides probe-source closure; making Phase 1 the provider of the
-compiler that Phase 0 needs would create a false phase cycle.
+Bootstrap inputs are not phase provisions. The compiler and prepared bytes
+used to build the Phase-0 validator form an explicit GenesisTrust assumption,
+not an authenticated result Phase 0 can prove about itself. Phase 1 separately
+owns authenticated/reproducible acquisition.
 
 'capabilityGraphDiagnostic' remains the no-declaration projection, so the raw
-backward-edge set stays observable on its own.
+forward-residue set stays observable on its own.
 -}
 module Amoebius.Validation.CapabilityGraph (
     capabilityGraphDiagnostic,
@@ -53,11 +54,11 @@ import Data.Text qualified as Text
 
 {- | A capability one phase provides and others consume.
 
-Twenty-five phase-provided members correspond to the phase-owned legacy
+Twenty-six phase-provided members correspond to the phase-owned legacy
 bindings, so their provider is read from the typed owner map rather than
-authored again here. @LTD-BOOT-001@ instead witnesses the non-numbered
-bootstrap edge below. The remainder are capabilities the ordering defects
-revealed that no legacy binding names.
+authored again here. The separate Genesis compiler assumption witnesses the
+non-numbered bootstrap edge below. The remainder are capabilities the ordering
+defects revealed that no legacy binding names.
 -}
 data Provision
     = SourceGrammarClosure
@@ -85,9 +86,10 @@ data Provision
     | ExecutableIdentity
     | InfernixSeedFreedom
     | JitMlSeedFreedom
+    | AuthenticatedToolchainAcquisition
     | CompileFailHarness
     | CompileFailCorpus
-    | AuthenticatedBootstrapCompiler
+    | GenesisCompilerAssumption
     | GeneratedFakeExecutables
     deriving (Bounded, Enum, Eq, Ord, Show)
 
@@ -102,15 +104,16 @@ data RequirementKind
     deriving (Eq, Ord, Show)
 
 {- | The compiler used to establish the source-bound Phase-0 validator is an
-authenticated input below the numbered plan. It has no phase ordinal.
+explicit GenesisTrust/local-custody input below the numbered plan. It has no
+phase ordinal.
 -}
 data BootstrapInput
-    = AuthenticatedCompilerInput
+    = GenesisCompilerInput
     deriving (Eq, Ord, Show)
 
-{- | A provision comes either from a numbered phase or from an irreducible,
-authenticated bootstrap input. Only the former participates in phase order
-and phase-cycle checks.
+{- | A provision comes either from a numbered phase or from an irreducible
+GenesisTrust/local-custody assumption. Only the former participates in phase
+order and phase-cycle checks.
 -}
 data Provider
     = PhaseProvider Text
@@ -134,6 +137,7 @@ edge count suggests.
 -}
 data EdgeWitness
     = LegacyOwnerBinding Legacy.LegacyId
+    | GenesisTrustBinding
     | GeneratedRootConsumption FilePath
     | ProposedFromPlanText FilePath
     deriving (Eq, Ord, Show)
@@ -141,6 +145,7 @@ data EdgeWitness
 edgeWitnessConfirmed :: EdgeWitness -> Bool
 edgeWitnessConfirmed witness = case witness of
     LegacyOwnerBinding _ -> True
+    GenesisTrustBinding -> True
     GeneratedRootConsumption _ -> True
     ProposedFromPlanText _ -> False
 
@@ -172,9 +177,10 @@ provisionLegacyBinding provision = case provision of
     ExecutableIdentity -> Just Legacy.LtdRun001
     InfernixSeedFreedom -> Just Legacy.LtdSeed001
     JitMlSeedFreedom -> Just Legacy.LtdSeed002
+    AuthenticatedToolchainAcquisition -> Just Legacy.LtdBoot001
     CompileFailHarness -> Nothing
     CompileFailCorpus -> Nothing
-    AuthenticatedBootstrapCompiler -> Nothing
+    GenesisCompilerAssumption -> Nothing
     GeneratedFakeExecutables -> Nothing
 
 -- | The phase or bootstrap root that provides a provision.
@@ -184,7 +190,7 @@ provisionProvider provision = case provisionLegacyBinding provision of
     Nothing -> case provision of
         CompileFailHarness -> PhaseProvider "compile_fail_harness"
         CompileFailCorpus -> PhaseProvider "compile_fail_harness"
-        AuthenticatedBootstrapCompiler -> BootstrapRoot AuthenticatedCompilerInput
+        GenesisCompilerAssumption -> BootstrapRoot GenesisCompilerInput
         GeneratedFakeExecutables -> PhaseProvider "tool_and_mutant_generation"
         -- A newly added provision without a provider remains fail-closed through
         -- CAPABILITY-PROVIDER-UNKNOWN below.
@@ -223,14 +229,63 @@ explicitEdges =
     -- products either. It observes that no newly tracked non-Haskell source
     -- appears and that every existing one joins a later-owned binding, which is
     -- decidable at its own ordinal; absolute absence remains the barrier's claim.
-    -- The documentation phase requires an authenticated compiler input. That
-    -- input is a non-numbered bootstrap root, not a Phase-1 provision. Phase 1's
-    -- distinct numbered output remains ProbeSourceClosure through LTD-SRC-007.
+    -- The documentation phase records an explicit compiler/local-custody
+    -- assumption. It is a non-numbered trust root, not Phase-1 evidence. Its
+    -- finite gate also records three typed residue reaches for the work it
+    -- deliberately excludes: authenticated acquisition, compiler-semantic
+    -- source closure, and universal validation closure. These are not gate
+    -- prerequisites and therefore cannot make their later providers necessary
+    -- to pass Phase 0.
     [ RequirementEdge
         "documentation_suite"
         GatePrerequisite
-        AuthenticatedBootstrapCompiler
+        GenesisCompilerAssumption
+        GenesisTrustBinding
+    , RequirementEdge
+        "documentation_suite"
+        DeferredResidue
+        AuthenticatedToolchainAcquisition
         (LegacyOwnerBinding Legacy.LtdBoot001)
+    , RequirementEdge
+        "documentation_suite"
+        DeferredResidue
+        SourceGrammarClosure
+        (LegacyOwnerBinding Legacy.LtdSrc000)
+    , RequirementEdge
+        "documentation_suite"
+        DeferredResidue
+        PbSourceAdmission
+        (LegacyOwnerBinding Legacy.LtdSrc008)
+    , RequirementEdge
+        "documentation_suite"
+        DeferredResidue
+        ValidationProtocol
+        (LegacyOwnerBinding Legacy.LtdVal001)
+    , RequirementEdge
+        "documentation_suite"
+        DeferredResidue
+        PhaseContractBinding
+        (LegacyOwnerBinding Legacy.LtdVal002)
+    , RequirementEdge
+        "documentation_suite"
+        DeferredResidue
+        StatusEvidence
+        (LegacyOwnerBinding Legacy.LtdVal003)
+    , RequirementEdge
+        "documentation_suite"
+        DeferredResidue
+        GateCompletion
+        (LegacyOwnerBinding Legacy.LtdVal004)
+    , RequirementEdge
+        "documentation_suite"
+        DeferredResidue
+        HardwareFreeDslBarrierPass
+        (LegacyOwnerBinding Legacy.LtdVal005)
+    , RequirementEdge
+        "documentation_suite"
+        DeferredResidue
+        RunInputClosure
+        (LegacyOwnerBinding Legacy.LtdVal006)
     ]
         -- Correctly ordered edges, so the relation is not made only of defects. The
         -- barrier consumes the source-closure results it requires to be zero, and
@@ -242,9 +297,10 @@ explicitEdges =
            , RequirementEdge "linux_engine_bringup" GatePrerequisite HostEnsureKernel (LegacyOwnerBinding Legacy.LtdHost001)
            ]
 
-{- | Cleanroom and freshness are properties of the run harness, and every phase
-inherits both rows. The capability is owned late, so every earlier phase
-carries the same edge.
+{- | The self-reference phase establishes the general run-input closure used
+by every later gate. Earlier finite gates retain their capability-local input
+boundaries instead of claiming this later provision, so only successors of the
+typed owner carry the edge.
 -}
 systemicRunInputEdges :: [RequirementEdge]
 systemicRunInputEdges =
@@ -252,12 +308,15 @@ systemicRunInputEdges =
     | identityRow <- PhaseIdentity.allPhaseIdentities
     , let capability = PhaseIdentity.phaseIdentityCapability identityRow
     , Just capability /= provisionPhaseProvider RunInputClosure
+    , Just owner <- [provisionPhaseProvider RunInputClosure]
+    , Just ownerOrdinal <- [capabilityOrdinal owner]
+    , PhaseIdentity.phaseIdentityOrdinal identityRow > ownerOrdinal
     ]
 
 capabilityOrdinal :: Text -> Maybe Int
 capabilityOrdinal = PhaseIdentity.lookupCapabilityOrdinal
 
--- | The relation with no declared reaches: every backward edge is a finding.
+-- | The relation with no declared reaches: every forward residue edge is a finding.
 capabilityGraphDiagnostic :: CheckResult
 capabilityGraphDiagnostic = capabilityGraphDiagnosticWith []
 
@@ -454,6 +513,7 @@ findings; it never suppresses one.
 edgeWitnessLegacyOwned :: EdgeWitness -> Bool
 edgeWitnessLegacyOwned witness = case witness of
     LegacyOwnerBinding _ -> True
+    GenesisTrustBinding -> False
     GeneratedRootConsumption _ -> False
     ProposedFromPlanText _ -> False
 
@@ -463,6 +523,7 @@ renderProvision = Text.pack . show
 renderWitness :: EdgeWitness -> Text
 renderWitness witness = case witness of
     LegacyOwnerBinding identifier -> "legacy-owner:" <> Legacy.renderLegacyId identifier
+    GenesisTrustBinding -> "genesis-trust:local-custody"
     GeneratedRootConsumption root -> "generated-root:" <> Text.pack root
     ProposedFromPlanText path -> "proposed-from-plan-text:" <> Text.pack path
 

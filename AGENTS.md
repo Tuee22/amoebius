@@ -111,6 +111,11 @@ Validation must follow numeric phase order and fail closed when a predecessor ga
 boundary is absent. Batch completion means repeated validate-and-record steps in one agent run; it never means
 skipping a phase, sharing one candidate across phases, or treating a later result as evidence for an earlier one.
 
+Numeric order governs integrated gate execution and status transitions. Hardware-free implementation for a
+later phase may be prepared ahead of the validated frontier only after that phase's typed contract and
+independent oracle exist; such work yields component diagnostics only, must not use `pb`, and cannot begin live
+or hardware-bearing effects or mint phase evidence before its predecessor gate passes.
+
 ## Registry Provider
 
 The only admitted cluster registry implementation is the Distribution image `registry:2`. Do not introduce

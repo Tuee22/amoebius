@@ -5,13 +5,16 @@ module Amoebius.Validation.Dispatch.Internal
   ( dispatchDiagnostic
   , checkPhaseZeroSnapshot
   , discoverRepositoryRoot
-  , phaseZeroReadinessBlockers
   , runValidateCommand
   , validatePhase
   ) where
 
-import Amoebius.Validation.CompilerSourceGraph.Internal
-  ( acquireCompilerSourceGraph
+import Amoebius.Validation.BootstrapQualification.Internal
+  ( acquireQualifiedBootstrapProtocol
+  , bootstrapQualificationCheck
+  )
+import Amoebius.Validation.BootstrapTrust.Internal
+  ( acquireGenesisTrust
   )
 import Amoebius.Validation.Documentation.Internal (checkDocuments)
 import Amoebius.Validation.Evidence.Internal
@@ -25,9 +28,8 @@ import Amoebius.Validation.Evidence.Internal
   , writeAcquiredCandidateEvidence
   )
 import Amoebius.Validation.GatePass.Internal (verifyPublishedGatePass)
-import Amoebius.Validation.Gate.Internal qualified as Gate
 import Amoebius.Validation.Legacy.Internal (legacyCheck)
-import Amoebius.Validation.PhaseContract.Internal (checkPhaseContracts)
+import Amoebius.Validation.PhaseContract.Internal (checkPhaseContractsForPhase)
 import Amoebius.Validation.PhaseRunner.Internal
   ( PhaseRunner (DocumentationSuiteRunner, ToolchainSpikeRunner, RepositoryLayoutRunner)
   , selectPhaseRunner
@@ -35,10 +37,7 @@ import Amoebius.Validation.PhaseRunner.Internal
 import Amoebius.Validation.PhaseZeroRun.Internal
   ( AcquiredPhaseZeroRun
   , acquiredPhaseZeroRunCheck
-  , foldAcquiredPhaseZeroRun
   , assembleAcquiredPhaseZeroRun
-  , phaseZeroQualificationAuthorityCheck
-  , phaseZeroReadinessBlockers
   , phaseZeroSnapshotDocuments
   , phaseZeroUnavailablePhaseContractCheck
   )
@@ -66,13 +65,11 @@ import Amoebius.Validation.SourceDebtBaseline.Internal
   )
 import Amoebius.Validation.StatusProjection.Internal
   ( ProposedStatusProjection
-  , applyAuthorizedStatusProjection
   , authorizeStatusProjection
   , prepareStatusProjection
   , projectionDigest
   , projectionPostimageDigest
-  , recoverPendingStatusProjections
-  , withStatusProjectionLock
+  , writeAuthorizedStatusProjection
   )
 import Amoebius.Validation.RepositoryLayoutRun (repositoryLayoutRunCheck)
 import Amoebius.Validation.ToolchainSpikeRun (toolchainSpikeRunCheck)
@@ -681,48 +678,55 @@ validatePhase gitPath root phase
   | otherwise =
       case mkGitExecutable gitPath of
         Left problem -> pure (snapshotFailure [problem])
-        Right git -> do
-          locked <- withStatusProjectionLock root (validatePhaseLocked git root phase)
-          pure $ case locked of
-            Left problems -> statusLifecycleFailure phase problems
-            Right result -> result
+        Right git -> validatePhaseLocked git root phase
 
 validatePhaseLocked :: GitExecutable -> FilePath -> Int -> IO CheckResult
 validatePhaseLocked git root phase = do
-  recoveryResult <- recoverPendingStatusProjections git root
-  case recoveryResult of
-    Left problems -> pure (statusLifecycleFailure phase problems)
-    Right recovered -> do
-      snapshotResult <- loadGitSnapshot git root
-      case snapshotResult of
-        Left problems -> pure (snapshotFailure problems)
-        Right acquired -> do
-          compilerAttempt <- acquireCompilerSourceGraph acquired
-          qualificationAuthority <- Gate.acquireQualifiedValidationProtocol acquired compilerAttempt
-          let projectionResult = prepareStatusProjection phase acquired
-              debtEvidence = analyzeAcquiredSourceDebt acquired
-              phaseZeroRun = assembleAcquiredPhaseZeroRun acquired compilerAttempt qualificationAuthority debtEvidence
-              result = checkAcquiredPhaseChain phaseZeroRun phase
-          finalSnapshot <- loadGitSnapshot git root
-          completed <-
+  snapshotResult <- loadGitSnapshot git root
+  case snapshotResult of
+    Left problems -> pure (snapshotFailure problems)
+    Right acquired ->
+      case selectPhaseRunner phase of
+        Left problem -> finalizeGeneric acquired (CheckResult "phase-runner" [] [problem])
+        Right DocumentationSuiteRunner -> validateBootstrap acquired
+        Right ToolchainSpikeRunner -> finalizeGeneric acquired (toolchainSpikeRunCheck acquired)
+        Right RepositoryLayoutRunner -> finalizeGeneric acquired (repositoryLayoutRunCheck acquired)
+ where
+  validateBootstrap acquired = do
+    trustResult <- acquireGenesisTrust root
+    case trustResult of
+      Left problems -> pure (statusLifecycleFailure phase problems)
+      Right trust -> do
+        qualificationResult <- acquireQualifiedBootstrapProtocol root trust acquired
+        case qualificationResult of
+          Left problems -> pure (bootstrapQualificationCheck (Left problems))
+          Right qualification -> do
+            let projectionResult = prepareStatusProjection phase acquired
+                debtEvidence = analyzeAcquiredSourceDebt acquired
+                phaseZeroRun = assembleAcquiredPhaseZeroRun acquired trust qualification debtEvidence
+                result = acquiredPhaseZeroRunCheck phaseZeroRun
+            finalSnapshot <- loadGitSnapshot git root
             finishGateLifecycle
               git
               root
               phase
               acquired
-              phaseZeroRun
+              (Just phaseZeroRun)
               finalSnapshot
               projectionResult
               (bindFinalSourceSnapshot acquired finalSnapshot result)
-          pure
-            completed
-              { checkObservations =
-                  [ observation
-                      "status.projection.recovered"
-                      (Text.pack (show recovered))
-                  ]
-                    <> checkObservations completed
-              }
+  finalizeGeneric acquired result = do
+    let projectionResult = prepareStatusProjection phase acquired
+    finalSnapshot <- loadGitSnapshot git root
+    finishGateLifecycle
+      git
+      root
+      phase
+      acquired
+      Nothing
+      finalSnapshot
+      projectionResult
+      (bindFinalSourceSnapshot acquired finalSnapshot result)
 
 statusLifecycleFailure :: Int -> [Finding] -> CheckResult
 statusLifecycleFailure phase problems =
@@ -741,7 +745,7 @@ finishGateLifecycle
   -> FilePath
   -> Int
   -> AcquiredSourceSnapshot
-  -> AcquiredPhaseZeroRun
+  -> Maybe AcquiredPhaseZeroRun
   -> Either [SnapshotProblem] AcquiredSourceSnapshot
   -> Either [Finding] ProposedStatusProjection
   -> CheckResult
@@ -757,18 +761,18 @@ finishGateLifecycle git root phase opening phaseZeroRun closing projectionResult
         gateResult
           { checkFindings = checkFindings gateResult <> projectionFindings
           }
-      candidate =
-        if phase == policyDomainLower
-          then
+      candidate = case phaseZeroRun of
+        Just acquiredRun
+          | phase == policyDomainLower ->
             captureFinalizedDispatchCandidateEvidence
-              phaseZeroRun
+              acquiredRun
               closing
               (either (const Nothing) (Just . projectionDigest) projectionResult)
               (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)
               executablePath
               executableDigest
               processArgv
-          else
+        _ ->
             captureDispatchCandidateEvidence
               phase
               openingDigest
@@ -829,21 +833,66 @@ finishGateLifecycle git root phase opening phaseZeroRun closing projectionResult
                   , checkFindings = checkFindings lifecycleResult <> problems
                   }
             Right authorized -> do
-              applied <- applyAuthorizedStatusProjection git authorized
-              pure $ case applied of
+              projectionPublication <- writeAuthorizedStatusProjection authorized
+              case projectionPublication of
                 Left problems ->
-                  lifecycleResult
-                    { checkObservations = checkObservations lifecycleResult <> writeObservations
-                    , checkFindings = checkFindings lifecycleResult <> problems
-                    }
-                Right _ ->
-                  lifecycleResult
-                    { checkObservations =
-                        checkObservations lifecycleResult
-                          <> writeObservations
-                          <> [observation "status.projection" "applied and confirmed against a fresh whole-source postimage"]
-                    , checkFindings = checkFindings lifecycleResult
-                    }
+                  pure
+                    lifecycleResult
+                      { checkObservations = checkObservations lifecycleResult <> writeObservations
+                      , checkFindings = checkFindings lifecycleResult <> problems
+                      }
+                Right projectionPath -> do
+                  postEmission <- loadGitSnapshot git root
+                  pure
+                    ( bindPostEmissionSourceSnapshot
+                        opening
+                        postEmission
+                        lifecycleResult
+                          { checkObservations =
+                              checkObservations lifecycleResult
+                                <> writeObservations
+                                <> [ observation "status.projection.path" (Text.pack projectionPath)
+                                   , observation
+                                       "status.projection"
+                                       "authorized-not-applied; a human, agent, or CI job may apply the exact verified status-only projection"
+                                   ]
+                          , checkFindings = checkFindings lifecycleResult
+                          }
+                    )
+
+bindPostEmissionSourceSnapshot
+  :: AcquiredSourceSnapshot
+  -> Either [SnapshotProblem] AcquiredSourceSnapshot
+  -> CheckResult
+  -> CheckResult
+bindPostEmissionSourceSnapshot opening observed result = case observed of
+  Left problems ->
+    result
+      { checkFindings =
+          checkFindings result
+            <> map snapshotProblemFinding problems
+      }
+  Right closing
+    | snapshotIdentity (acquiredSourceSnapshot opening)
+        == snapshotIdentity (acquiredSourceSnapshot closing) ->
+        result
+          { checkObservations =
+              checkObservations result
+                <> [ observation
+                       "source.snapshot.after-status-projection"
+                       (snapshotIdentity (acquiredSourceSnapshot closing))
+                   ]
+          }
+    | otherwise ->
+        result
+          { checkFindings =
+              checkFindings result
+                <> [ finding
+                       "SOURCE-SNAPSHOT-CHANGED-DURING-STATUS-PROJECTION"
+                       "<local-source-snapshot>"
+                       "the authored source changed while the emitted-only status projection was written"
+                   ]
+          }
 
 -- | Pure diagnostic seam. A caller-constructed snapshot can exercise
 -- composition, but always carries an explicit refusal and can never represent
@@ -855,49 +904,6 @@ checkPhaseZeroSnapshot snapshot =
     [ checkPhaseZeroSnapshotCore snapshot
     , syntheticSnapshotRefusal
     ]
-
--- | Gate N is the conjunction of gates 0..N re-derived at the current
--- snapshot.
---
--- Nothing durable is stored, so a predecessor result cannot be replayed from
--- a receipt, cache, or Markdown status marker, and work done for a later
--- phase that weakens an earlier phase's subject reddens that earlier phase
--- inside this same run.  The compiler source graph is analyzed once and
--- shared, because every phase in the chain observes the one snapshot.
-checkAcquiredPhaseChain
-  :: AcquiredPhaseZeroRun
-  -> Int
-  -> CheckResult
-checkAcquiredPhaseChain phaseZeroRun target =
-  mergeChecks
-    ("phase-" <> formatOrdinal target)
-    [ checkAcquiredPhaseInChain phaseZeroRun ordinal
-    | ordinal <- [policyDomainLower .. target]
-    ]
-
-checkAcquiredPhaseInChain
-  :: AcquiredPhaseZeroRun
-  -> Int
-  -> CheckResult
-checkAcquiredPhaseInChain phaseZeroRun ordinal
-  = case selectPhaseRunner ordinal of
-      Right DocumentationSuiteRunner ->
-        acquiredPhaseZeroRunCheck phaseZeroRun
-      Right ToolchainSpikeRunner ->
-        toolchainSpikeRunCheck
-          (foldAcquiredPhaseZeroRun (\acquired _ _ _ _ _ -> acquired) phaseZeroRun)
-      Right RepositoryLayoutRunner ->
-        repositoryLayoutRunCheck
-          (foldAcquiredPhaseZeroRun (\acquired _ _ _ _ _ -> acquired) phaseZeroRun)
-      Left problem ->
-        CheckResult
-          { checkName = "phase-" <> formatOrdinal ordinal
-          , checkObservations =
-              [ observation "phase.ordinal" (formatOrdinal ordinal)
-              , observation "phase.runner" "absent or ambiguous"
-              ]
-          , checkFindings = [problem]
-          }
 
 -- | A phase whose production subject has not been implemented.  This is an
 -- observed absence at the current snapshot, not a policy statement that the
@@ -937,9 +943,7 @@ checkPhaseZeroSnapshotCore :: SourceSnapshot -> CheckResult
 checkPhaseZeroSnapshotCore snapshot =
   mergeChecks
     "phase-00"
-    ( map (rawPhaseZeroComponentCheck snapshot closure decodedDocuments) rawPhaseZeroComponentUniverse
-        <> [phaseZeroQualificationAuthorityCheck Gate.currentQualifiedValidationProtocol, phaseZeroReadinessBlockers]
-    )
+    (map (rawPhaseZeroComponentCheck snapshot closure decodedDocuments) rawPhaseZeroComponentUniverse)
  where
   closure = classifySnapshot snapshot
   decodedDocuments = phaseZeroSnapshotDocuments snapshot
@@ -1043,7 +1047,7 @@ rawPhaseZeroComponentCheck snapshot closure decodedDocuments component = case co
     Right documents -> checkDocuments documents
   RawPhaseContract -> case decodedDocuments of
     Left decodeFindings -> phaseZeroUnavailablePhaseContractCheck decodeFindings
-    Right documents -> checkPhaseContracts documents
+    Right documents -> checkPhaseContractsForPhase (Policy.phaseOrdinalNumber (Policy.phaseDomainLower policyOrdering)) documents
 
 syntheticSnapshotRefusal :: CheckResult
 syntheticSnapshotRefusal =

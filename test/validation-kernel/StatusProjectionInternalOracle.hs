@@ -33,6 +33,7 @@ import Amoebius.Validation.StatusProjection.Internal (
     statusProjectionInternalTestRecoveryClassification,
     statusProjectionInternalTestRecoveryRebind,
     statusProjectionInternalTestRecoveryStates,
+    statusProjectionInternalTestWritePlan,
  )
 import Control.Monad (forM_, unless)
 import Data.ByteString (ByteString)
@@ -45,7 +46,7 @@ import Data.Text.Encoding qualified as TextEncoding
 import Numeric (showHex)
 import PhaseContractOracle (phaseContractValidCorpus)
 import System.Directory (createDirectory, createDirectoryLink, listDirectory)
-import System.FilePath (takeExtension, takeFileName, (</>))
+import System.FilePath (takeDirectory, takeExtension, takeFileName, (</>))
 import System.IO.Temp (withSystemTempDirectory)
 
 runStatusProjectionInternalOracle :: IO ()
@@ -68,6 +69,7 @@ runStatusProjectionInternalOracle =
         journalReplacementProblems <- runJournalReplacement root
         journalFinalizationProblems <- runJournalFinalizationFailure root
         directoryAdversaryProblems <- runDirectoryAdversaries root
+        emittedPlanProblems <- runEmittedPlanChecks root
         finishDiagnostics
             "StatusProjectionInternalOracle"
             ( problems
@@ -91,6 +93,7 @@ runStatusProjectionInternalOracle =
                 <> journalReplacementProblems
                 <> journalFinalizationProblems
                 <> directoryAdversaryProblems
+                <> emittedPlanProblems
                 <> journalNameProblems
             )
   where
@@ -152,6 +155,43 @@ runStatusProjectionInternalOracle =
                         (not (null (classificationFailures conflictClassification)))
                     <> invalidUtf8RecoveryProblems preimage
     preimage = snapshotFromDocuments "/synthetic/status-projection" canonicalCorpus
+
+runEmittedPlanChecks :: FilePath -> IO [String]
+runEmittedPlanChecks root = do
+    let sentinel = root </> "tracked-sentinel.md"
+        snapshot = snapshotFromDocuments root canonicalCorpus
+    ByteString.writeFile sentinel "tracked-before"
+    first <- statusProjectionInternalTestWritePlan 0 snapshot
+    case first of
+        Left findings -> pure ["the emitted-only canonical projection was refused: " <> show findings]
+        Right path -> do
+            bytes <- ByteString.readFile path
+            second <- statusProjectionInternalTestWritePlan 0 snapshot
+            sentinelAfter <- ByteString.readFile sentinel
+            ByteString.writeFile path "tampered-plan"
+            collision <- statusProjectionInternalTestWritePlan 0 snapshot
+            tampered <- ByteString.readFile path
+            pure
+                ( expectEqual
+                    "the emitted plan uses the exact ignored phase directory"
+                    (root </> ".build" </> "runs" </> "phase-00" </> "status-projection-plans")
+                    (takeDirectory path)
+                    <> expectEqual
+                        "the emitted plan uses a content-addressed projection leaf"
+                        (64 + length (".projection" :: String))
+                        (length (takeFileName path))
+                    <> [ "the emitted plan does not use the canonical schema frame"
+                       | not ("34:amoebius-status-projection-plan-v1" `ByteString.isPrefixOf` bytes)
+                       ]
+                    <> [ "the emitted plan omits a projected status target: " <> expected
+                       | expected <- expectedPaths
+                       , not (TextEncoding.encodeUtf8 (Text.pack expected) `ByteString.isInfixOf` bytes)
+                       ]
+                    <> expectEqual "identical plan emission is idempotent" (Right path) second
+                    <> expectEqual "plan emission leaves a tracked sentinel unchanged" "tracked-before" sentinelAfter
+                    <> expectLeft "a changed file at the content address refuses replacement" collision
+                    <> expectEqual "a refused collision preserves the independently changed plan" "tampered-plan" tampered
+                )
 
 journalNameProblems :: [String]
 journalNameProblems =

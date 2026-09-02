@@ -72,7 +72,7 @@ acquirePhaseContractEvidence acquired =
   documents = [document | Right document <- decoded]
   decodeFindings = [problem | Left problem <- decoded]
   result
-    | null decodeFindings = checkPhaseContracts documents
+    | null decodeFindings = checkPhaseContractsForPhase phaseDomainLowerNumber documents
     | otherwise =
         CheckResult
           { checkName = "phase-contract-snapshot"
@@ -160,11 +160,23 @@ data TrackerScan = TrackerScan
   }
   deriving (Eq, Show)
 
--- | Pure phase/tracker check. The supplied paths are repository-relative and
--- the caller controls every byte, which lets independent oracle tests construct
--- minimal positive and paired-negative corpora without filesystem effects.
+-- | Pure worktree phase/tracker check. The complete tracker vector must encode
+-- exactly one typed canonical frontier. That recorded frontier governs all
+-- status projections, while semantic obligations extend through its completed
+-- prefix. This is a structural diagnostic, not evidence that the recorded
+-- transitions occurred; candidate paths use 'checkPhaseContractsForPhase'.
 checkPhaseContracts :: [(FilePath, Text)] -> CheckResult
-checkPhaseContracts = checkPhaseContractsForPhase phaseDomainLowerNumber
+checkPhaseContracts supplied =
+  case phaseContractInputEnvelopeFindings supplied of
+    [] -> case recordedStatusFrontier supplied of
+      Just frontier ->
+        checkPhaseContractsWithSemanticBarrier
+          (RecordedScope (Status.completedPrefixDueOrdinal frontier) frontier)
+          supplied
+      Nothing ->
+        addRecordedFrontierRefusal
+          (checkPhaseContractsWithSemanticBarrier (RecordedScope phaseDomainLowerNumber Status.initialFrontier) supplied)
+    _ -> checkPhaseContractsWithSemanticBarrier (RecordedScope phaseDomainLowerNumber Status.initialFrontier) supplied
 
 -- | The gate-path entry, scoped to the phase under validation.  A semantic
 -- contract gap at a strictly later phase is that phase's obligation, not this
@@ -214,6 +226,7 @@ data SemanticScope
   = StructuralOnly
   | GateScope Int Status.StatusFrontier
   | PostPassScope Int Status.StatusFrontier
+  | RecordedScope Int Status.StatusFrontier
   deriving (Eq, Show)
 
 semanticAuditRequired :: SemanticScope -> Bool
@@ -221,6 +234,7 @@ semanticAuditRequired scope = case scope of
   StructuralOnly -> False
   GateScope _ _ -> True
   PostPassScope _ _ -> True
+  RecordedScope _ _ -> True
 
 checkPhaseContractsWithSemanticBarrier :: SemanticScope -> [(FilePath, Text)] -> CheckResult
 checkPhaseContractsWithSemanticBarrier scope supplied =
@@ -438,6 +452,36 @@ trackerFrameFindings frame =
     [ finding "PLAN-TRACKER-TABLE-FRAME" trackerPath problem
     | problem <- trackerFrameProblems frame
     ]
+
+recordedStatusFrontier :: [(FilePath, Text)] -> Maybe Status.StatusFrontier
+recordedStatusFrontier supplied = case trackerCandidates of
+  [contents]
+    | null (trackerFrameProblems frame)
+        && map trackerNumber rows == [phaseDomainLowerNumber .. phaseDomainUpperNumber] -> do
+        statuses <- traverse (Status.parseTrackerStatus . Text.strip . trackerStatus) rows
+        Status.recognizeStatusFrontier statuses
+    | otherwise -> Nothing
+    where
+      frame = parseTrackerDocument contents
+      rows = trackerFrameRows frame
+  _ -> Nothing
+ where
+  trackerCandidates =
+    [ contents
+    | (path, contents) <- supplied
+    , normalizePath path == trackerPath
+    ]
+
+addRecordedFrontierRefusal :: CheckResult -> CheckResult
+addRecordedFrontierRefusal result =
+  result
+    { checkFindings =
+        finding
+          "PLAN-STATUS-FRONTIER-RECORDED"
+          trackerPath
+          "the complete tracker status vector must encode exactly one canonical ordered frontier"
+          : checkFindings result
+    }
 
 phaseContractCheckName :: Text
 #if defined(VALIDATION_PHASE_CONTRACT_CHECK_NAME_BYPASS_MUTANT)
@@ -1497,6 +1541,7 @@ unresolvedContractIsDue scope ordinal = case scope of
   StructuralOnly -> True
   GateScope phaseUnderValidation _ -> ordinal <= phaseUnderValidation
   PostPassScope passedPhase _ -> ordinal <= passedPhase
+  RecordedScope completedPrefix _ -> ordinal <= completedPrefix
 
 gateCommandCountMismatch :: Text -> Text -> Bool
 #if defined(VALIDATION_PHASE_CONTRACT_GATE_COMMAND_COUNT_BYPASS_MUTANT)
@@ -1752,6 +1797,7 @@ sprintFieldNames =
   [ "Status"
   , "Implementation"
   , "Blocked by"
+  , "Forward-deferred"
   , "Requires"
   , "Independent Validation"
   , "Oracle"
@@ -1759,8 +1805,8 @@ sprintFieldNames =
   , "Docs to update"
   ]
 
-requiredSprintFieldNames :: [Text]
-requiredSprintFieldNames = filter (/= "Requires") sprintFieldNames
+optionalSprintFieldNames :: [Text]
+optionalSprintFieldNames = ["Forward-deferred", "Requires"]
 
 sprintSubsectionNames :: [Text]
 sprintSubsectionNames = ["Objective", "Deliverables", "Validation", "Remaining Work"]
@@ -1804,9 +1850,10 @@ sprintSchemaFindings phase heading body =
     ]
   observedFieldNames = [name | (_, name, _) <- preambleEntries]
   expectedFieldNames =
-    if "Requires" `elem` observedFieldNames
-      then sprintFieldNames
-      else requiredSprintFieldNames
+    [ name
+    | name <- sprintFieldNames
+    , name `notElem` optionalSprintFieldNames || name `elem` observedFieldNames
+    ]
   nonEmptyFields = all (not . Text.null . third) preambleEntries
   observedSubsections = [Text.strip line | (_, line) <- body, isH3 line]
   expectedSubsections = map ("### " <>) sprintSubsectionNames
@@ -3092,12 +3139,14 @@ statusFrontier scope = case scope of
   StructuralOnly -> Status.initialFrontier
   GateScope _ frontier -> frontier
   PostPassScope _ frontier -> frontier
+  RecordedScope _ frontier -> frontier
 
 semanticDueOrdinal :: SemanticScope -> Int
 semanticDueOrdinal scope = case scope of
   StructuralOnly -> phaseDomainLowerNumber
   GateScope phaseUnderValidation _ -> phaseUnderValidation
   PostPassScope passedPhase _ -> passedPhase
+  RecordedScope completedPrefix _ -> completedPrefix
 
 phaseDomainLowerNumber :: Int
 phaseDomainLowerNumber = Policy.phaseOrdinalNumber (Policy.phaseDomainLower policyOrdering)

@@ -2,18 +2,18 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-{- | Package-hidden construction and application of the status-only phase
-projection.  Paths, line numbers, and before/after bytes are derived from an
-acquired snapshot; no caller supplies an edit or widens the target set.
+{- | Package-hidden construction and emission of the status-only phase
+projection. Paths, line numbers, and before/after bytes are derived from an
+acquired snapshot; no caller supplies an edit or widens the target set. The
+older application primitives remain private implementation residue and are
+not an authority exposed to the production dispatcher.
 -}
 module Amoebius.Validation.StatusProjection.Internal (
-    AppliedStatusProjection,
     AuthorizedStatusProjection,
     ProposedStatusProjection,
     StatusAtomicCutpoint (..),
     JournalCutpoint (..),
     StatusTarget (..),
-    applyAuthorizedStatusProjection,
     authorizeStatusProjection,
     prepareStatusProjection,
     projectionDigest,
@@ -21,7 +21,7 @@ module Amoebius.Validation.StatusProjection.Internal (
     projectionPostimageDigest,
     projectionPreimageDigest,
     projectionTargets,
-    recoverPendingStatusProjections,
+    writeAuthorizedStatusProjection,
     statusProjectionInternalTestAtomicReplaceAtCutpoint,
     statusProjectionInternalTestAtomicReplaceExact,
     statusProjectionInternalTestDiscoverJournal,
@@ -34,7 +34,7 @@ module Amoebius.Validation.StatusProjection.Internal (
     statusProjectionInternalTestMixedPhases,
     statusProjectionInternalTestPrepare,
     statusProjectionInternalTestRecoveryStates,
-    withStatusProjectionLock,
+    statusProjectionInternalTestWritePlan,
 ) where
 
 import Amoebius.Validation.GatePass.Internal (
@@ -335,6 +335,144 @@ projectionDigest = proposedDigest
 
 projectionTargets :: ProposedStatusProjection -> [StatusTarget]
 projectionTargets = map editTarget . proposedEdits
+
+-- | Publish the gate-authorized exact preimages and postimages as an ignored,
+-- content-addressed plan. This function never writes a tracked path and does
+-- not apply the projection it describes. Requiring the sealed authorization
+-- keeps an unverified proposal out of the production emission boundary.
+writeAuthorizedStatusProjection :: AuthorizedStatusProjection -> IO (Either [Finding] FilePath)
+writeAuthorizedStatusProjection authorized = do
+    publication <- recheckVerifiedGatePassPublication (authorizedPassValue authorized)
+    case publication of
+        Left problems -> pure (Left problems)
+        Right () -> writeProjectionPlan (authorizedProjectionValue authorized)
+
+writeProjectionPlan :: ProposedStatusProjection -> IO (Either [Finding] FilePath)
+writeProjectionPlan projection = do
+    result <- try $ do
+        let components =
+                [ ".build"
+                , "runs"
+                , "phase-" <> formatOrdinal (proposedPhase projection)
+                , "status-projection-plans"
+                ]
+            directory = foldl (</>) (proposedRoot projection) components
+            destination = directory </> Text.unpack (proposedDigest projection) <> ".projection"
+            leaf = takeFileName destination
+            bytes = projectionPlanBytes projection
+        writeProjectionPlanPrepared
+            (proposedRoot projection)
+            components
+            directory
+            leaf
+            bytes
+        pure destination
+    pure $ case result of
+        Left problem ->
+            Left
+                [ projectionFinding
+                    "STATUS-PROJECTION-PLAN-WRITE"
+                    "<status-projection-plan>"
+                    (Text.take 512 (Text.pack (show (problem :: IOException))))
+                ]
+        Right path -> Right path
+
+writeProjectionPlanPrepared :: FilePath -> [FilePath] -> FilePath -> FilePath -> ByteString -> IO ()
+#if defined(mingw32_HOST_OS)
+writeProjectionPlanPrepared root components directory leaf bytes = do
+    validateProjectionPlanLeaf leaf
+    ensureDirectoryChain root components
+    let destination = directory </> leaf
+    present <- doesFileExist destination
+    if present
+        then validateExistingProjectionPlanPath destination bytes
+        else do
+            (temporary, handle) <- openBinaryTempFile directory ".amoebius-status-projection-plan"
+            let cleanup = do
+                    ignoreIOException (hClose handle)
+                    temporaryPresent <- doesFileExist temporary
+                    when temporaryPresent (removeFile temporary)
+            ( do
+                    ByteString.hPut handle bytes
+                    durableClose handle
+                    raced <- doesFileExist destination
+                    if raced
+                        then cleanup >> validateExistingProjectionPlanPath destination bytes
+                        else renameFile temporary destination
+                    synchroniseDirectory directory
+                )
+                `onException` cleanup
+    validateExistingProjectionPlanPath destination bytes
+#else
+writeProjectionPlanPrepared root components _directory leaf bytes =
+    withEnsuredDirectoryChain root components $ \directoryFd -> do
+        validateProjectionPlanLeaf leaf
+        temporary <-
+            createStatusTemporaryAt
+                directoryFd
+                leaf
+                (ownerReadMode `unionFileModes` ownerWriteMode)
+                bytes
+        let cleanup = removeStatusTemporaryIfExact directoryFd temporary bytes
+        ( do
+                linked <-
+                    try
+                        (linkJournalNoReplaceAt directoryFd temporary directoryFd leaf) :: IO (Either IOException ())
+                case linked of
+                    Left problem
+                        | isAlreadyExistsError problem -> do
+                            validateExistingProjectionPlanAt directoryFd leaf bytes
+                            cleanup
+                    Left problem -> cleanup >> ioError problem
+                    Right () -> cleanup
+                fileSynchronise directoryFd
+                validateExistingProjectionPlanAt directoryFd leaf bytes
+            )
+            `onException` cleanup
+#endif
+
+validateProjectionPlanLeaf :: FilePath -> IO ()
+validateProjectionPlanLeaf leaf = do
+    validateJournalLeaf leaf
+    case Text.stripSuffix ".projection" (Text.pack leaf) of
+        Just stem
+            | Text.length stem == 64
+                && Text.all
+                    (\character -> character >= '0' && character <= '9' || character >= 'a' && character <= 'f')
+                    stem -> pure ()
+        _ -> fail "status-projection-plan-leaf-is-not-canonical"
+
+#if defined(mingw32_HOST_OS)
+validateExistingProjectionPlanPath :: FilePath -> ByteString -> IO ()
+validateExistingProjectionPlanPath path expected = do
+    observed <- readBoundedRegularPathNoFollow path (ByteString.length expected + 1)
+    unless (observed == expected) (fail "status-projection-plan-content-address-collision")
+#else
+validateExistingProjectionPlanAt :: Fd -> FilePath -> ByteString -> IO ()
+validateExistingProjectionPlanAt directoryFd leaf expected = do
+    (_, observed) <- readRegularStatusAt directoryFd leaf (ByteString.length expected + 1)
+    unless (observed == expected) (fail "status-projection-plan-content-address-collision")
+#endif
+
+projectionPlanBytes :: ProposedStatusProjection -> ByteString
+projectionPlanBytes projection =
+    encodeFields
+        ( [ "amoebius-status-projection-plan-v1"
+          , encode (proposedDigest projection)
+          , encode (showText (proposedPhase projection))
+          , encode (Text.pack (proposedRoot projection))
+          , encode (proposedPreimageDigest projection)
+          , encode (proposedPostimageDigest projection)
+          , encode (showText (length (proposedFiles projection)))
+          ]
+            <> concatMap encodeFile (proposedFiles projection)
+        )
+  where
+    encodeFile item =
+        [ encode (Text.pack (projectionFilePath item))
+        , projectionFileBefore item
+        , projectionFileAfter item
+        ]
 
 authorizeStatusProjection ::
     VerifiedGatePass ->
@@ -2142,6 +2280,18 @@ statusProjectionInternalTestJournalAtCutpoint selected directory = do
 statusProjectionInternalTestJournalName :: FilePath -> (Bool, Bool)
 statusProjectionInternalTestJournalName leaf =
     (isPendingJournalLeaf leaf, isFinalizedJournalLeaf leaf)
+
+-- | Direct-source oracle seam for the emitted-only byte-publication path. It
+-- uses structural fixture preparation and the same content-addressed writer
+-- beneath the production-only authorization boundary.
+statusProjectionInternalTestWritePlan ::
+    Int ->
+    SourceSnapshot ->
+    IO (Either [Finding] FilePath)
+statusProjectionInternalTestWritePlan phase snapshot =
+    case prepareStatusProjectionStructurally phase snapshot of
+        Left problems -> pure (Left problems)
+        Right projection -> writeProjectionPlan projection
 
 statusProjectionInternalTestDiscoverJournal :: FilePath -> IO (Either [Finding] [FilePath])
 statusProjectionInternalTestDiscoverJournal directory = do

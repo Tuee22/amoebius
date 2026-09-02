@@ -142,7 +142,7 @@ verifyAcquiredGatePass published evidence =
                ]
             <> [ gateFinding
                     "GATE-PASS-COMMAND"
-                    "the executable path is not absolute or argv is not the exact source-bound phase command"
+                    "the executable path is not absolute or argv is not the exact phase command"
                | not (isAbsolute (captureExecutablePath captured))
                     || captureArgv captured /= ["validate", "phase", formatOrdinal phase]
                     || any unsafeText (captureArgv captured)

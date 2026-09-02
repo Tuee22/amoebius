@@ -10,7 +10,7 @@ module PhaseContractInternalOracle
   , runPhaseContractInternalUnaffectedControl
   ) where
 
-import Amoebius.Validation.PhaseContract.Internal (checkPhaseContracts)
+import Amoebius.Validation.PhaseContract.Internal (checkPhaseContracts, checkPhaseContractsForPhase)
 import Amoebius.Validation.Types (CheckResult (..), Finding (..), Observation (..))
 import Control.Monad (unless)
 import Data.List (nub, sort)
@@ -90,7 +90,7 @@ runPhaseContractInternalOracle :: IO ()
 runPhaseContractInternalOracle =
   finishDiagnostics
     "PhaseContractInternalOracle"
-    (selectorIntegrityProblems <> concatMap exactCaseProblems phaseContractInternalExactCaseNames)
+    (selectorIntegrityProblems <> concatMap exactCaseProblems phaseContractInternalExactCaseNames <> recordedFrontierProblems)
 
 runPhaseContractInternalExactCase :: String -> IO ()
 runPhaseContractInternalExactCase exactCase =
@@ -187,6 +187,122 @@ cleanResult = checkPhaseContracts phaseContractValidCorpus
 duplicateResult :: CheckResult
 duplicateResult = checkPhaseContracts duplicateCorpus
 
+recordedFrontierProblems :: [String]
+recordedFrontierProblems =
+  concat
+    [ expectFindingCount "post-Phase-0 phase statuses" "PLAN-PHASE-STATUS" 0 postPhaseZeroResult
+    , expectFindingCount "post-Phase-0 sprint statuses" "PLAN-SPRINT-STATUS" 0 postPhaseZeroResult
+    , expectFindingCount "post-Phase-0 tracker statuses" "PLAN-TRACKER-STATUS" 0 postPhaseZeroResult
+    , expectFindingCount "post-Phase-0 frontier recognition" "PLAN-STATUS-FRONTIER-RECORDED" 0 postPhaseZeroResult
+    , expectObservation "post-Phase-0 completed-prefix semantic target" "semantic.target-phase" "00" postPhaseZeroResult
+    , expectAtLeastOneFinding "phase/tracker disagreement" "PLAN-PHASE-STATUS" phaseDisagreementResult
+    , expectAtLeastOneFinding "sprint/tracker disagreement" "PLAN-SPRINT-STATUS" phaseDisagreementResult
+    , expectAtLeastOneFinding "two Active tracker rows" "PLAN-STATUS-FRONTIER-RECORDED" twoActiveResult
+    , expectAtLeastOneFinding "Done-prefix hole" "PLAN-STATUS-FRONTIER-RECORDED" doneHoleResult
+    , expectAtLeastOneFinding "premature no-Active tracker" "PLAN-STATUS-FRONTIER-RECORDED" prematureNoActiveResult
+    , expectFindingCount "terminal frontier recognition" "PLAN-STATUS-FRONTIER-RECORDED" 0 allDoneResult
+    , expectFindingCount "terminal phase statuses" "PLAN-PHASE-STATUS" 0 allDoneResult
+    , expectFindingCount "terminal sprint statuses" "PLAN-SPRINT-STATUS" 0 allDoneResult
+    , expectFindingCount "terminal tracker statuses" "PLAN-TRACKER-STATUS" 0 allDoneResult
+    , expectObservation "terminal completed-prefix semantic target" "semantic.target-phase" "95" allDoneResult
+    , expectFindingCount "terminal unresolved contracts remain fail-closed" "PLAN-SEMANTIC-CONTRACT-GAP" 1710 allDoneResult
+    , expectObservation "explicit Phase-1 gate semantic target" "semantic.target-phase" "01" phaseOneGateResult
+    , expectFindingCount "explicit Phase-1 gate rejects Phase-1 semantic gaps" "PLAN-SEMANTIC-CONTRACT-GAP" 18 phaseOneGateResult
+    ]
+
+postPhaseZeroResult :: CheckResult
+postPhaseZeroResult = checkPhaseContracts postPhaseZeroCorpus
+
+phaseDisagreementResult :: CheckResult
+phaseDisagreementResult = checkPhaseContracts phaseDisagreementCorpus
+
+twoActiveResult :: CheckResult
+twoActiveResult = checkPhaseContracts (rewriteTrackerStatus 2 "⏸️ Blocked — NOT VALIDATED" "🔄 Active — NOT VALIDATED" postPhaseZeroCorpus)
+
+doneHoleResult :: CheckResult
+doneHoleResult = checkPhaseContracts (rewriteTrackerStatus 0 "✅ Done" "⏸️ Blocked — NOT VALIDATED" postPhaseZeroCorpus)
+
+prematureNoActiveResult :: CheckResult
+prematureNoActiveResult = checkPhaseContracts (rewriteTrackerStatus 1 "🔄 Active — NOT VALIDATED" "⏸️ Blocked — NOT VALIDATED" postPhaseZeroCorpus)
+
+allDoneResult :: CheckResult
+allDoneResult = checkPhaseContracts (fmap makeAllDone postPhaseZeroCorpus)
+
+phaseOneGateResult :: CheckResult
+phaseOneGateResult = checkPhaseContractsForPhase 1 postPhaseZeroCorpus
+
+postPhaseZeroCorpus :: [(FilePath, Text)]
+postPhaseZeroCorpus =
+  rewriteTrackerStatus 1 "⏸️ Blocked — NOT VALIDATED" "🔄 Active — NOT VALIDATED"
+    ( rewriteTrackerStatus 0 "🔄 Active — NOT VALIDATED" "✅ Done"
+        ( fmap advancePhaseDocument phaseContractValidCorpus
+        )
+    )
+
+phaseDisagreementCorpus :: [(FilePath, Text)]
+phaseDisagreementCorpus =
+  [ if path == phaseOneSyntheticPath
+      then (path, phaseOneBeforeAdvance)
+      else entry
+  | entry@(path, _) <- postPhaseZeroCorpus
+  ]
+ where
+  phaseOneBeforeAdvance = case lookup phaseOneSyntheticPath phaseContractValidCorpus of
+    Just contents -> contents
+    Nothing -> ""
+
+advancePhaseDocument :: (FilePath, Text) -> (FilePath, Text)
+advancePhaseDocument entry@(path, contents)
+  | path == phaseZeroSyntheticPath =
+      ( path
+      , Text.replace "**Status**: Active — NOT VALIDATED" "**Status**: Done"
+          ( Text.replace "## Sprint 0.1: Synthetic seam 🔄" "## Sprint 0.1: Synthetic seam ✅"
+              (Text.replace "🔄 Active — NOT VALIDATED." "✅ Done." contents)
+          )
+      )
+  | path == phaseOneSyntheticPath =
+      ( path
+      , Text.replace "**Status**: Blocked — NOT VALIDATED" "**Status**: Active — NOT VALIDATED"
+          ( Text.replace "## Sprint 1.1: Synthetic seam ⏸️" "## Sprint 1.1: Synthetic seam 🔄"
+              (Text.replace "⏸️ Blocked — NOT VALIDATED." "🔄 Active — NOT VALIDATED." contents)
+          )
+      )
+  | otherwise = entry
+
+rewriteTrackerStatus :: Int -> Text -> Text -> [(FilePath, Text)] -> [(FilePath, Text)]
+rewriteTrackerStatus number before after = fmap rewriteEntry
+ where
+  rowPrefix = "| " <> Text.pack (show number) <> " | "
+  rewriteEntry entry@(path, contents)
+    | path == trackerSyntheticPath =
+        (path, Text.unlines (fmap rewriteLine (Text.lines contents)))
+    | otherwise = entry
+  rewriteLine line
+    | rowPrefix `Text.isPrefixOf` line = Text.replace ("| " <> before <> " |") ("| " <> after <> " |") line
+    | otherwise = line
+
+makeAllDone :: (FilePath, Text) -> (FilePath, Text)
+makeAllDone (path, contents) = (path, Text.unlines (fmap rewriteLine (Text.lines contents)))
+ where
+  rewriteLine line
+    | path == trackerSyntheticPath && "| " `Text.isPrefixOf` line =
+        Text.replace "| 🔄 Active — NOT VALIDATED |" "| ✅ Done |"
+          (Text.replace "| ⏸️ Blocked — NOT VALIDATED |" "| ✅ Done |" line)
+    | line == "🔄 Active — NOT VALIDATED." || line == "⏸️ Blocked — NOT VALIDATED." = "✅ Done."
+    | "## Sprint " `Text.isPrefixOf` line =
+        Text.replace " 🔄" " ✅" (Text.replace " ⏸️" " ✅" line)
+    | line == "**Status**: Active — NOT VALIDATED" || line == "**Status**: Blocked — NOT VALIDATED" = "**Status**: Done"
+    | otherwise = line
+
+phaseZeroSyntheticPath :: FilePath
+phaseZeroSyntheticPath = "DEVELOPMENT_PLAN/phase_00_synthetic_capability.md"
+
+phaseOneSyntheticPath :: FilePath
+phaseOneSyntheticPath = "DEVELOPMENT_PLAN/phase_01_synthetic_capability.md"
+
+trackerSyntheticPath :: FilePath
+trackerSyntheticPath = "DEVELOPMENT_PLAN/README.md"
+
 -- | The valid corpus with Phase 0's single sprint renumbered from one to two.
 nonContiguousSprintCorpus :: [(FilePath, Text)]
 nonContiguousSprintCorpus =
@@ -226,6 +342,11 @@ expectObservation label key expected result =
 expectFindingCount :: String -> Text -> Int -> CheckResult -> [String]
 expectFindingCount label code expected result =
   expectCount label expected (length [() | item <- checkFindings result, findingCode item == code])
+
+expectAtLeastOneFinding :: String -> Text -> CheckResult -> [String]
+expectAtLeastOneFinding label code result
+  | any ((== code) . findingCode) (checkFindings result) = []
+  | otherwise = [label <> ": expected at least one " <> Text.unpack code <> " finding"]
 
 expectCount :: String -> Int -> Int -> [String]
 expectCount label expected actual

@@ -44,8 +44,12 @@ behaviours rather than separate products.
 
 ## Phase discipline
 
-1. Phases close strictly in numeric order. Phase N+1 cannot close or begin new implementation work before
-   Phase N satisfies its redesigned gate.
+1. Phase gates execute and statuses close strictly in numeric order. A later `Substrate: none` phase may have
+   its typed contract, independent oracle, and hardware-free implementation prepared ahead of the validation
+   frontier, but that work is only an implementation observation: it cannot run the later phase gate, mint
+   candidate evidence, consume an unavailable predecessor, or change status before every numerical predecessor
+   passes. Live, host, image, container, cluster, accelerator, and other hardware-bearing work remains closed by
+   the barrier in item 8.
 2. Each phase document owns one cohesive capability claim and one acceptance command.
 3. Every gate inherits the artifact-hygiene postcondition in
    [development_plan_standards.md §S](development_plan_standards.md#s-universal-artifact-hygiene-gate).
@@ -61,15 +65,18 @@ behaviours rather than separate products.
    deterministic-simulation activity, never a phase-gate register.
 7. Missing prerequisites fail; they never skip to green. Unreached applicable layers remain UNVERIFIED.
 8. Phase 49 is the complete no-hardware DSL gate barrier and requires every `LTD-SRC-*` query,
-   including the Phase-0-owned `LTD-SRC-008` boundary, to be zero. Phase 50 owns no migration and validates
-   only the runtime behavior of that already-bounded handoff. Phase 0 through Phase 49 invoke the exact
-   source-built Haskell validator directly from a pinned offline toolchain input; `pb` is unavailable
-   as validation transport until Phase 50 proves it. Phase 51 remains a hardware-free Haskell host-ensure
+   including the Phase-2-owned `LTD-SRC-008` boundary, to be zero. Phase 0 first requires a scoped `SourcePb`
+   zero for its captured bootstrap source without retiring that binding. Phase 50 owns no migration and validates
+   only the runtime behavior of that already-bounded handoff. Phase 0 invokes its Haskell validator directly
+   under the narrow GenesisTrust assumption; Phase 1 through Phase 49 bind the authenticated acquisition and
+   source-built executable identity. `pb` is unavailable as validation transport until Phase 50 proves it.
+   Phase 51 remains a hardware-free Haskell host-ensure
    kernel. Phase 52 is the first hardware-bearing gate. No host, image, registry, cluster, accelerator, or
    cloud validation work may begin before the Phase-49 gate and every intervening numerical predecessor gate
    pass.
 9. A complete qualified phase-gate pass is sufficient for Done. A human, agent, or CI job may record the
-   narrow status-only transition.
+   narrow status-only transition by applying the exact verified patch emitted by the validator. The validator
+   never edits a tracked file itself.
 
 ## Repository and evidence discipline
 
@@ -91,6 +98,14 @@ are owned by
 [repository_layout_doctrine.md](../documents/engineering/repository_layout_doctrine.md).
 
 ## Toolchain
+
+`GenesisTrust` is the irreducible, non-numbered `BootstrapRoot` beneath the plan. It states only local custody
+of the seven exact prepared archive/signature files pinned in the Phase-0 plan, compile-time GHC version
+`9.12.4`, absolute reported `ghc` and library-directory paths, and Linux/`x86_64`. The signature files are
+opaque pinned bytes. GenesisTrust does not authenticate a publisher, the actual compiler executable bytes or
+their derivation, the loader, the broader host, or reproducibility, and the Phase-0 binary cannot prove those
+facts about itself. Phase 1 owns those acquisition/provenance claims; Phase 2 owns the compiler-backed semantic
+source graph.
 
 Compilers, package tools, libraries, code generators, browsers, and transitive dependencies resolve
 dynamically from authored compatibility requirements. Every clean run records the selected versions,
@@ -123,10 +138,11 @@ substitution.
 
 ## Status vocabulary
 
-The validation reset uses only two current phase states: **🔄 Active — NOT VALIDATED** for Phase 0 and
-**⏸️ Blocked — NOT VALIDATED** for Phases 1–95. `Validated` and `Done` require the redesigned complete
-qualified phase gate to pass; neither is a current status. Historical status words and symbols cannot
-reactivate themselves.
+The numbered plan uses exactly three phase states: **✅ Done**, **🔄 Active — NOT VALIDATED**, and
+**⏸️ Blocked — NOT VALIDATED**. At a non-terminal frontier, the tracker contains one contiguous Done
+prefix, exactly one Active phase, and one Blocked suffix; at the terminal frontier every phase is Done. A
+complete qualified gate pass and its exact emitted status patch are the only way to advance that projection.
+Historical status words and symbols cannot reactivate themselves.
 
 ## Implementation-progress vocabulary
 
@@ -140,24 +156,37 @@ classification.
 A phase is Done only after all of the following occur in order:
 
 1. Its fixed eighteen-row Gate-integrity contract has no `UNRESOLVED`, `MISSING`, skipped, implicit, or empty
-   required field and every independently authored oracle is part of the qualified run.
-2. Phase 0 satisfies the explicit genesis-predecessor contract declared in its phase document; every later
-   phase binds the exact current gate-pass result of its immediate predecessor.
-3. The semantic source scan accounts for every tracked path and admits behavioural source only as `.hs`, with
-   the bounded `pb/**` minimal-platform-discrimination, contained-toolchain-establishment,
-   source-bound-build, and opaque-exec exception.
-4. A fresh cleanroom run starts without generated/state roots or condemned legacy copies and lazily derives
-   every required non-Haskell product beneath `.build/**`.
-5. The exact Haskell harness build first rejects every qualification sabotage, then runs the clean candidate.
-6. Discovery is non-empty and joins in both directions; positive controls, paired specific-reason negatives,
-   applied changed-subject mutants, freshness, external observers, authority/bypass probes, and cleanup all
-   produce their explicit expected observations.
+   required field and every independently authored oracle required by that phase's typed qualification is part
+   of the run. Phase 0's exact independent candidate oracle is the finite `BootstrapMutationDriver`; broader
+   component-oracle integration belongs to the Phase-49 universal owner.
+2. Phase 0 binds its explicit `GenesisTrust` root rather than pretending to prove an earlier numbered result;
+   every later phase binds the exact current gate-pass result of its immediate predecessor.
+3. The phase-scoped source check accounts for every tracked path. Phase 0 owns the finite exact-snapshot,
+   path/mode/shebang classification and admission of the exact current captured `pb/**` bytes; Phase 2 owns the
+   complete `VALIDATION_PB_GRAMMAR` selector/oracle suite and compiler-backed semantic source-graph closure.
+   Until that later owner closes, the missing qualification and semantic layers remain exact typed, later-owned
+   findings rather than becoming implicit Phase-0 prerequisites.
+4. A fresh cleanroom run ordinarily starts without current-run generated/state roots or condemned legacy copies
+   and lazily derives every required non-Haskell product beneath `.build/**`. Its sole retained generated input
+   is the exact read-only immediate-predecessor receipt. Phase 0 instead consumes its seven GenesisTrust files,
+   uses one unique serial qualification leaf, and proves that exact leaf absent afterward; it makes no
+   whole-`.build/**` absent-before claim.
+5. The exact Haskell harness build first rejects every qualification sabotage assigned to the phase, then runs
+   the clean candidate. Phase 0 qualifies the finite seed kernel; Phase 49 owns the complete hardware-free,
+   universal self-referential corpus.
+6. Discovery is non-empty and joins in both directions; positive controls, paired negatives, applied
+   changed-subject mutants, freshness, observers, authority/bypass probes, and cleanup produce the observations
+   required by the typed phase contract. Phase 0's v2 transcript retains exact exits and streams for its clean
+   plus three cases: clean is silent `ExitSuccess`; every mutant is `ExitFailure 1`, empty stdout, and its
+   canonical case label plus one newline on stderr.
 7. Every typed Haskell legacy binding owned by the phase returns zero findings and its independently authored
    reintroduction negative turns red; Markdown row content is not an input.
-8. The candidate bundle contains raw per-row observations and explicit `UNVERIFIED` residue. The complete
-   qualified bundle passes only when every required row succeeds for the exact current source.
-9. The gate verifies the narrow proposed tracker and phase/sprint status projection. After the gate passes, a
-   human, agent, or CI job may apply that projection.
+8. The candidate bundle contains raw per-row observations. Phase 0 requires `captureResidue` to be empty and
+   expresses later capabilities only as typed exclusions/forward deferrals; later phases retain applicable
+   `UNVERIFIED` residue. A bundle passes only when every required row succeeds for the exact current source.
+9. The gate verifies and emits the narrow proposed tracker and phase/sprint status patch beneath `.build/**`
+   without changing the tracked tree. After the gate process exits successfully, a human, agent, or CI job may
+   recheck its bound preimage and apply that exact patch.
 
 Markdown never embeds or manufactures generated evidence, a hash, a transcript, or dependency resolution. A
 complete qualified gate pass is sufficient; a partial script, digest, component diagnostic, or pre-reset result
@@ -166,16 +195,20 @@ cannot satisfy Done. Commit timing is not a gate input
 
 ## Reopened numeric sequence
 
-**Validation reset — 2026-08-22.** Every prior phase and sprint validation claim is invalidated. Phase 0 is
-**🔄 Active — NOT VALIDATED** solely for the documentation, validation, and tracked-source-boundary
-redesign. Phases 1–95 are **⏸️ Blocked — NOT VALIDATED** and may advance only after their immediate
-numerical predecessor's complete gate passes.
+**Validation reset — 2026-08-22.** Every prior phase and sprint validation claim was invalidated. The reset
+initialized Phase 0 as Active and Phases 1–95 as Blocked. The live status authority is the phase-overview table
+and its joined phase/sprint fields below; it advances only after the immediate numerical predecessor's complete
+gate passes.
 
-Existing source and historical results are retained only as **Observed footprint / Known partial** migration
-input. They cannot satisfy an acceptance condition, and historical prose cannot become current through a
-status change. Phase 0 now has a Haskell dispatcher whose explicit readiness findings force refusal; later
-phase-specific gate commands remain planned contracts pending comprehensive anti-spoof gate tests. This reset
-makes no claim that any gate has run or passed.
+Here, `Blocked` governs candidate execution and status, not the existence of source. Once a later
+hardware-free sprint has a complete typed contract and separately authored oracle, its implementation may be
+prepared and component-diagnosed ahead of the frontier. Such work remains NOT VALIDATED and cannot use `pb`,
+live resources, hardware, or a missing predecessor result. This lets the implementation be ready before the
+short, serial validate-and-record sequence without weakening numerical validation order.
+
+Existing source and historical results are retained only as implementation or migration observations. They
+cannot satisfy an acceptance condition, and historical prose cannot become current through a status change.
+Only the live typed frontier and the exact phase/sprint status fields report which gates have passed.
 
 Hardware validation is frozen. No phase at or above Phase 52 may run as phase-gate evidence until the hardware-free
 DSL gate barrier and every preceding redesigned phase gate have passed.
@@ -186,8 +219,8 @@ The current audit makes no validation attribution.
 
 | Phase(s) | Current classification | Meaning |
 |---|---|---|
-| 0 | **Observed footprint / Known partial — NOT VALIDATED** | Haskell validation-kernel modules and component oracles exist. The typed policy contract, closed legacy lifecycle/analyzer dispatch with fail-closed reintroduction-witness binding, exact local snapshot capture/recheck, one-file static `pb` grammar, branch-specific compiler success/refusal/fixture evidence schema, closed qualification case/control contract, closed runner selection, opaque acquired Phase-0 subject, snapshot-bound phase-contract evidence, durable acquired-evidence publication/recheck, hidden gate-pass authority, recoverable status projection, and typed phase/resource registries are present. The structural and component brackets remain diagnostic-only; authenticated compiler/elaboration/process producers, execution-derived qualification and legacy witnesses, clean-room execution, complete row-specific evidence, legacy closure, integrated lifecycle qualification, and the complete gate run remain open. |
-| 1–95 | **Observed footprint / Known partial — NOT VALIDATED** | Existing files and historical run material are migration input only; each phase is blocked behind its numerical predecessor's gate pass. |
+| 0 | **Finite seed implementation** | The bounded Haskell dispatcher, GenesisTrust input, static source/document checks, finite changed-subject qualification, evidence verifier, and emitted-only status projection form the Phase-0 subject. Its validation state is reported only by the phase-overview row and joined Phase-0 status fields. |
+| 1–95 | **Staged implementation inventory** | Existing files and historical run material remain implementation or migration observations until their own gates pass. Hardware-free implementation may be prepared under complete typed contracts and oracles; gate execution and status still follow the numerical frontier. |
 
 The dated 2026-08-23 and 2026-08-26 component runs remain historical diagnostics and are invalid wherever their
 production or oracle subjects changed. The aggregate runner source now names twenty-one component oracles; the
@@ -197,26 +230,27 @@ descriptor-bounded readback and synchronization; repository/directory/file ident
 replacement-inode refusal; source-derived frontier classification; and fd-relative atomic leaf exchange with
 independent-byte preservation. Status diagnostics also cover bounded descriptor-relative journal discovery,
 finalization, pruning, replacement/symlink/rebinding adversaries, and injected finalization/recovery cutpoints.
-They do not establish a complete green token or qualified phase gate.
+They do not establish a complete green token or qualified phase gate. The lock, journal, recovery, atomic-
+exchange, and tracked-file application branches are an observed footprint to remove, not Phase-0 completion
+requirements: the conforming validator emits a verified status patch and leaves the tracked tree unchanged.
 
 A dirty worktree is admissible only when the gate captures and tests its exact bytes and rejects any mid-run
 change. The dispatcher provides that local capture/recheck path, closed runner selection, durable publication,
-hidden verification/authorization, one repository lock, startup recovery, and a journaled serial status
-projection. The three-file transition is recoverable rather than atomic, Windows mutation fails closed, and the
-real lock-contention, receipt-through-application, and actually interrupted full-projection recovery lifecycle is
-not yet qualified. The dispatcher deliberately
-records absent contract/subject/oracle/harness/observer/qualification and execution-context identities, mostly
-unverified rows, and explicit residue, so no verified token can currently be minted. The compiled semantic
-corpus has 1,728 total slots: Phase 0 has eighteen bound specifications and Phases 1–95 retain 1,710 exact-prefix
-`UNRESOLVED`/`ContractGap` cells. All 270 sprint sections carry the ordered reset schema and immediate blocker
-edge. Every remaining gap and missing complete gate result keeps Phase 0 refusing; no status changed.
+and hidden verification/authorization. Its current repository-lock, startup-recovery, journal, atomic-exchange,
+and tracked-file application branches are superseded implementation, not unfinished qualification work; the
+finite seed replaces them with deterministic patch emission and tests that the validator leaves tracked bytes
+unchanged. The finite dispatcher binds the eighteen Phase-0 rows without enumerating later semantic gaps as
+Phase-0 evidence or residue. Later contracts remain fail-closed at their own validation frontier, while their
+hardware-free implementations may be prepared under exact typed contracts and separate oracles. This
+separation prevents a new later requirement from reopening the finite bootstrap seed.
 
 On 2026-08-31 the exact source-bound Haskell dispatcher was invoked directly with `validate phase 00`. It
-durably published and reacquired a candidate and then refused it, with genesis present, because authenticated
+durably published and reacquired a candidate and then refused it, with the old bare `genesis` marker present
+rather than a digest-bound `GenesisTrust` input, because authenticated
 compiler/toolchain/process producers, execution-derived qualification and legacy witnesses, independent
-oracle/clean-room observation, complete identities/context and rows, and residue cleanup are still absent. This
-was the complete current gate attempt, not a pass or a status transition; Phase 0 remains NOT VALIDATED and
-Phase 1 remains blocked.
+oracle/clean-room observation, complete identities/context and rows, and residue cleanup were absent. At that
+time this was the complete gate attempt, not a pass or a status transition; Phase 0 remained NOT VALIDATED and
+Phase 1 remained blocked.
 
 The 2026-08-26 serialized diagnostic restored the two exact pinned source-repository inputs beneath ignored
 `.build/**`, built `lib:validation-kernel` and `test:validation-kernel-component` with one Cabal job, repaired
@@ -244,8 +278,9 @@ standing property of the authored package. That inspection then replaced the gat
 refusals with predicates over evidence: the `PhaseSemanticContract` registry no longer both requires and
 forbids an unbound slot, `ContractSlot` is the `ContractGap`/`BoundSpecification` pair, a contract gap is fatal
 only at or below the phase under validation, the nine constant Phase-0 readiness findings became a predicate
-over a typed all-unobserved `PhaseReadiness` record, and `validatePhase` re-derives gates 0..N at the current
-snapshot instead of refusing every later phase by constant. The seventeen-oracle aggregate and the
+over a typed all-unobserved `PhaseReadiness` record, and the current `validatePhase` footprint re-derives gates
+0..N at one snapshot. The redesign replaces that coupling with one selected phase and the exact verified
+immediate-predecessor receipt. The seventeen-oracle aggregate and the
 phase-contract, phase-contract-internal, source-debt-internal, and compiler-source-graph-acquired suites all
 report their bounded expectations met after their independent expectations were re-authored. This changes what
 the kernel can express, not what has been observed: it is not qualification, clean-room observation, candidate
@@ -266,8 +301,8 @@ inherits the universal postcondition above.
 
 | Phase | Name | Substrate | Lane | Register | Status | Validation contract |
 |---|---|---|---|---|---|---|
-| 0 | Documentation, source policy, and validation baseline | none | `none` | — | 🔄 Active — NOT VALIDATED | [Contract](phase_00_documentation_suite.md) |
-| 1 | Haskell toolchain and probe-source closure | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_01_toolchain_spike.md) |
+| 0 | Documentation, source policy, and validation baseline | none | `none` | — | ✅ Done | [Contract](phase_00_documentation_suite.md) |
+| 1 | Haskell toolchain and probe-source closure | none | `none` | 1 | 🔄 Active — NOT VALIDATED | [Contract](phase_01_toolchain_spike.md) |
 | 2 | Repository layout conformance and de-phased naming | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_02_repository_layout_conformance.md) |
 | 3 | The artifact calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_03_artifact_calculus.md) |
 | 4 | The budget calculus | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_04_budget_calculus.md) |

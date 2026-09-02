@@ -8,6 +8,9 @@
 module Amoebius.Validation.PbBootstrapGrammar.Internal
   ( pbBootstrapGrammarCandidate
   , pbBootstrapGrammarDiagnostic
+#if defined(VALIDATION_PB_GRAMMAR_INTERNAL_TEST_HOOKS)
+  , pbBootstrapInternalTestCanonicalBytes
+#endif
   ) where
 
 import Amoebius.Validation.Types
@@ -2783,6 +2786,13 @@ canonicalBootstrapBytes =
     , "if __name__ == \"__main__\":"
     , "    main()"
     ]
+
+#if defined(VALIDATION_PB_GRAMMAR_INTERNAL_TEST_HOOKS)
+-- | Direct-source-only fixture bytes for callers testing a composed opaque
+-- admission boundary. Packaged code cannot project the private expectation.
+pbBootstrapInternalTestCanonicalBytes :: ByteString
+pbBootstrapInternalTestCanonicalBytes = canonicalBootstrapBytes
+#endif
 
 canonicalArtifacts :: [PlatformArtifact]
 canonicalArtifacts =

@@ -39,7 +39,7 @@ The marker and phrase in the tracker, phase status block, and each sprint must a
 | ✅ **Done** | The complete qualified gate passed for the exact current contract and its status-only result was recorded. |
 | 🔄 **Active — NOT VALIDATED** | Work is in progress. No current validation claim is permitted. |
 | 📋 **Planned — NOT VALIDATED** | The contract is specified but work has not begun. |
-| ⏸️ **Blocked — NOT VALIDATED** | Work is held shut by a named predecessor or external prerequisite. |
+| ⏸️ **Blocked — NOT VALIDATED** | Gate execution and status are held shut by a named predecessor or external prerequisite. Hardware-free implementation may exist under the separate rules in §O. |
 | 🧪 **Live-proof pending — NOT VALIDATED** | Candidate code exists, but the required live gate has not passed. |
 
 The literal `NOT VALIDATED` is mandatory on every non-Done current status. It is deliberately redundant: a
@@ -47,13 +47,13 @@ reader must not have to infer that Active or Blocked invalidates historical comp
 a large phase document.
 
 A complete qualified phase-gate pass is sufficient to change a phase and its sprints to ✅ Done. A human,
-agent, or CI job may record the narrow status projection. The gate-pass contract is defined by
+agent, or CI job may record the narrow status patch after the validator exits. The gate-pass contract is defined by
 [`development_plan_gate_integrity.md` §M.6](development_plan_gate_integrity.md#m6-candidate-evidence-and-gate-pass).
 
 The pass result binds two explicit source identities: the tested candidate and one exact
-status-only projection. The projection may change only the tracker plus the named phase and
+status-only patch. The patch may change only the tracker plus the named phase and
 sprint status fields for the closing phase and its successor activation. The immutable Gate summary and
-status-free Contents navigation never join that projection. This prevents unrelated edits from borrowing a
+status-free Contents navigation never join that patch. This prevents unrelated edits from borrowing a
 prior pass while keeping status recording mechanical. Any other change requires another gate run.
 
 Status and implementation progress are separate axes. A dated inspection uses only these terms:
@@ -93,6 +93,11 @@ automated gate frontier until a typed transition contract defines it.
   and updates its reader explanation in
   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 - A band is a reading aid over a contiguous ordinal range, never a second identifier.
+- `GenesisTrust` is the irreducible, non-numbered `BootstrapRoot`: an explicit local-custody assumption over
+  seven exact prepared archive/signature files, compile-time GHC `9.12.4`, absolute reported `ghc` and library
+  paths, and Linux/`x86_64`. It does not authenticate publisher identity, actual compiler executable bytes or
+  derivation, the loader, the broader host, or reproducibility. It has no phase ordinal, does not advance
+  status, and cannot be proved by the Phase-0 binary it compiled; Phase 1 owns those broader claims.
 - `pb/**` is a pre-phase bootstrap boundary, not a delivered language, test framework, or source of validation
   verdicts. It may ensure the Haskell toolchain, build the binary, and hand off; the Haskell binary owns all
   numbered-phase behaviour and verdicts.
@@ -100,7 +105,10 @@ automated gate frontier until a typed transition contract defines it.
 The ordering has one non-negotiable semantic cut:
 
 ```text
-Haskell source closure
+GenesisTrust (non-numbered root)
+  → Phase 0 finite governance/source/gate seed
+  → Phase 1 authenticated and reproducible toolchain acquisition
+  → Phase 2 compiler-backed source closure
   → calculi and proof stack
   → DSL, binders, planners, and lazy generators
   → test-workflow algebra
@@ -117,7 +125,8 @@ blocked until that barrier gate passes. This ordering prevents a working contain
 GPU, cluster, or cloud resource from being used as proxy evidence that the DSL itself is sound.
 
 “Haskell source closure” is literal at the cut. Phase 49 requires every `LTD-SRC-*` query, including
-Phase-0-owned `LTD-SRC-008`, to be zero. The sole remaining non-Haskell behavioral source is the `pb/**`
+Phase-2-owned `LTD-SRC-008`, to be zero. Phase 0 first requires a scoped `SourcePb` zero for its captured
+bootstrap source without retiring that binding. The sole remaining non-Haskell behavioral source is the `pb/**`
 Python positively accepted by the deny-by-default Haskell grammar as minimal platform discrimination,
 contained toolchain establishment, source-bound build, and opaque exec handoff. Phase 50 validates that
 already-bounded runtime behavior and owns no source-migration binding. Phase 51 validates the Haskell host-ensure
@@ -151,7 +160,8 @@ The register vocabulary is:
 | **2.5** | Deterministic simulation activity; never a phase's final gate register | Real concurrent code against a modeled environment; environment fidelity remains assumed |
 | **3** | Live infrastructure on one declared substrate/lane | Only the live effects and residue actually observed |
 
-Phase 0 is documentation/source-policy validation and declares no behavioural register. A phase gate otherwise
+Phase 0 is the finite governance, source-policy, and gate seed and declares no behavioural register. It binds
+`GenesisTrust` as an assumption instead of claiming to prove the compiler that built it. A phase gate otherwise
 uses one final register. Supporting lower-register checks remain explicit rows; they do not turn a live gate
 into several interchangeable gates.
 
@@ -160,18 +170,21 @@ attestations, “built”, “validated”, “policy-conformant”, scoped-inst
 when explicitly labelled `Invalidated historical record`; they cannot be reactivated or cited as a current
 candidate. Every phase must satisfy its rewritten gate in numerical order.
 
-A gate writes a generated candidate ledger beneath `.build/runs/**`. The ledger records source, contract,
-harness qualification, observations, residue, and the complete pass/fail result. A passing ledger for the
-exact current source is sufficient for the status-only transition. The tracker never embeds or manufactures a
-run transcript.
+A gate writes a generated candidate ledger and verified status patch beneath `.build/runs/**`. The ledger
+records source, contract, harness qualification, observations, residue, and the complete pass/fail result. A
+passing ledger for the exact current source is sufficient for the status-only transition, but the validator
+never performs that tracked edit. After it exits, a human, agent, or CI job may recheck the bound preimage and
+apply the exact emitted patch. The tracker never embeds or manufactures a run transcript.
 
 ---
 
 ## L. One-substrate discipline
 
 `Substrate: none` means the claim is decidable without hardware-specific or live infrastructure. It does not
-mean “validated inside a container.” Before the Phase-50 gate passes, a pure candidate builds and invokes
-the exact source-bound Haskell binary directly from an pinned, network-independent toolchain input;
+mean “validated inside a container.” Before the Phase-50 gate passes, a pure candidate invokes the exact
+source-bound Haskell binary directly. Phase 0 carries its narrow `GenesisTrust` local-custody and
+compile-time/platform assumption; subsequent builds bind the authenticated, network-independent Phase-1
+acquisition derived from that root;
 it does not trust `pb` as transport. The Phase-50 candidate likewise starts the exact Haskell OS supervisor
 directly; the supervisor invokes `pb` as its observed child, so the public target cannot validate itself. After
 Phase 50 gate pass, later pure work may use that bounded handoff.
@@ -250,12 +263,15 @@ Every sprint has:
 - named legacy IDs it must reduce to zero; and
 - explicit `UNVERIFIED` residue.
 
-Same-phase implementation readiness and sprint status are separate. As defined by
+Implementation readiness and sprint status are separate. As defined by
 [`development_plan_standards.md` §F](development_plan_standards.md#f-the-sprint-block-format), observed
 deliverables and component diagnostics may unblock the next implementation seam without changing status. They
-change no status and cannot substitute for the complete candidate run or parent-gate qualification. Once a
-complete phase candidate passes, a human, agent, or CI job may record the narrow status projection and continue
-through additional numerically ordered phases without pausing for user confirmation.
+change no status and cannot substitute for the complete candidate run or parent-gate qualification. A later
+`Substrate: none` sprint may likewise be prepared ahead of the gate frontier after its exact typed contract and
+independent oracle exist. It may perform only hardware-free implementation and component diagnostics: no later
+gate, candidate evidence, predecessor consumption, pre-handoff `pb` transport, or live-resource interaction is
+admissible. Once a complete phase candidate passes, a human, agent, or CI job may apply the emitted narrow
+status patch and continue through additional numerically ordered phases without pausing for user confirmation.
 
 A large file is not automatically a large phase, and many files are not automatically several phases. The
 unit is the falsifiable seam and its final register.

@@ -4,6 +4,7 @@ module Main (main) where
 -- gate, phase validation, or status evidence.
 
 import GatePassOracle (runGatePassOracle)
+import BootstrapPredicateOracle (runBootstrapPredicateOracle)
 import Control.Exception (SomeException, displayException, try)
 import Control.Monad (forM)
 import CompilerBuildInfoOracle (runCompilerBuildInfoOracle)
@@ -44,7 +45,8 @@ main = do
 
 componentOracles :: [(String, IO ())]
 componentOracles =
-  [ ("GatePassOracle", runGatePassOracle)
+  [ ("BootstrapPredicateOracle", runBootstrapPredicateOracle)
+  , ("GatePassOracle", runGatePassOracle)
   , ("DispatchOracle", runDispatchOracle)
   , ("EvidenceOracle", runEvidenceOracle)
   , ("SourceClosureOracle", runSourceClosureOracle)

@@ -1803,6 +1803,7 @@ flag validation-compiler-buildinfo-internal-module-opacity-attack
 library validation-kernel
   visibility: public
   exposed-modules:
+      Amoebius.Validation.BootstrapPredicate
       Amoebius.Validation.GatePass
       Amoebius.Validation.CapabilityGraph
       Amoebius.Validation.MutationCoverage
@@ -1830,6 +1831,8 @@ library validation-kernel
       Amoebius.Validation.ToolchainSpikeRun
       Amoebius.Validation.Types
   other-modules:
+      Amoebius.Validation.BootstrapQualification.Internal
+      Amoebius.Validation.BootstrapTrust.Internal
       Amoebius.Validation.CompilerBuildInfo.Internal
       Amoebius.Validation.CompilerElaboratedPlan.Internal
       Amoebius.Validation.CompilerExpectationAuthority.Internal
@@ -2872,6 +2875,8 @@ test-suite validation-kernel-component
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
+      BootstrapMutationDriver
+      BootstrapPredicateOracle
       CapabilityGraphOracle
       MutationCoverageOracle
       PlanRevisionOracle
@@ -2914,6 +2919,30 @@ test-suite validation-kernel-component
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns -threaded
 
+-- Direct-source oracle for the opaque GenesisTrust constructor boundary.
+test-suite validation-bootstrap-trust-internal-component
+  type: exitcode-stdio-1.0
+  main-is: bootstrap-trust-internal/Main.hs
+  other-modules:
+      BootstrapTrustInternalOracle
+      Amoebius.Validation.BootstrapPredicate
+      Amoebius.Validation.BootstrapTrust.Internal
+      Amoebius.Validation.Types
+  hs-source-dirs:
+      test/validation-kernel
+      src/validation-kernel
+  build-depends:
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      crypton ==1.0.6,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      ghc-paths ==0.1.0.12,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  cpp-options: -DVALIDATION_BOOTSTRAP_TRUST_INTERNAL_TEST_HOOKS
+
 -- Package-built refusal-only PhaseContract component diagnostic.
 test-suite validation-phase-contract-component
   type: exitcode-stdio-1.0
@@ -2944,6 +2973,9 @@ test-suite validation-phase-contract-internal-component
       PhaseContractOracle
       PhaseRunnerInternalOracle
       StatusProjectionInternalOracle
+      Amoebius.Validation.BootstrapPredicate
+      Amoebius.Validation.BootstrapQualification.Internal
+      Amoebius.Validation.BootstrapTrust.Internal
       Amoebius.Validation.CapabilityGraph
       Amoebius.Validation.CompilerExpectationAuthority.Internal
       Amoebius.Validation.CompilerSourceGraph.Internal
@@ -2988,6 +3020,7 @@ test-suite validation-phase-contract-internal-component
       crypton ==1.0.6,
       directory >=1.3 && <1.4,
       filepath >=1.5 && <1.6,
+      ghc-paths ==0.1.0.12,
       process >=1.6 && <1.7,
       temporary ==1.3,
       text >=2.1 && <2.2
@@ -2996,7 +3029,11 @@ test-suite validation-phase-contract-internal-component
         unix >=2.8.6 && <2.9
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
-  cpp-options: -DVALIDATION_SOURCE_CLOSURE_INTERNAL_TEST_ACQUIRE
+  cpp-options:
+      -DVALIDATION_SOURCE_CLOSURE_INTERNAL_TEST_ACQUIRE
+      -DVALIDATION_BOOTSTRAP_TRUST_INTERNAL_TEST_HOOKS
+      -DVALIDATION_BOOTSTRAP_QUALIFICATION_INTERNAL_TEST_HOOKS
+      -DVALIDATION_LEGACY_INTERNAL_TEST_HOOKS
 
 -- Package-hidden acquired source-debt diagnostics and test-only private folds.
 test-suite validation-source-debt-internal-component
@@ -3010,6 +3047,7 @@ test-suite validation-source-debt-internal-component
       Amoebius.Validation.PolicyContract.Internal
       Amoebius.Validation.SourceClosure.Internal
       Amoebius.Validation.SourceDebtBaseline.Internal
+      Amoebius.Validation.SourceSnapshot.Internal
       Amoebius.Validation.Types
   hs-source-dirs:
       test/validation-kernel/source-debt-internal
@@ -3035,6 +3073,7 @@ test-suite validation-source-debt-internal-component
   cpp-options:
       -DVALIDATION_SOURCE_CLOSURE_INTERNAL_TEST_ACQUIRE
       -DVALIDATION_SOURCE_DEBT_INTERNAL_TEST_HOOKS
+      -DVALIDATION_PB_GRAMMAR_INTERNAL_TEST_HOOKS
 
 
 -- Package-hidden acquired compiler/source-graph diagnostic.  This component

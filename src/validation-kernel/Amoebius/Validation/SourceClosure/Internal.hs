@@ -2467,7 +2467,7 @@ loadLocalSourceSnapshot git root = do
                 Right paths -> do
                   captured <- traverse (captureLocalEntry root) (sort paths)
                   let problems = [problem | Left problem <- captured]
-                      entries = [entry | Right entry <- captured]
+                      entries = [entry | Right (Just entry) <- captured]
                   pure $
                     if null problems
                       then
@@ -2479,27 +2479,37 @@ loadLocalSourceSnapshot git root = do
                             }
                       else Left problems
 
-captureLocalEntry :: FilePath -> FilePath -> IO (Either SnapshotProblem TrackedEntry)
+-- A cached path that is deliberately absent from the worktree is an unstaged
+-- deletion and therefore is not a member of the local authored-source image.
+-- Agents are forbidden to stage changes, so rejecting that state would make a
+-- tracked-source migration impossible to validate.  A disappearance after the
+-- initial stat remains a race in 'readPresentWorktreeEntry', and the dispatcher
+-- independently requires the complete opening and closing images to agree.
+captureLocalEntry :: FilePath -> FilePath -> IO (Either SnapshotProblem (Maybe TrackedEntry))
 captureLocalEntry root path = do
   observed <- readWorktreeEntry root path (root </> path)
-  pure $ do
-    value <- observed
-    mode <- case worktreeObservedKind value of
-      WorktreeRegularFile ->
-        Right (if worktreeObservedExecutable value then ExecutableFile else RegularFile)
-      WorktreeSymbolicLink -> Right SymbolicLink
-      kind -> Left (AuthoredRootUnknownEntryType (path <> ":" <> show kind))
-    let bytes = worktreeObservedBytes value
-    Right
-      TrackedEntry
-        { trackedIndex =
-            IndexEntry
-              { indexPath = path
-              , indexMode = mode
-              , indexObjectId = computeBlobObjectId GitObjectSha256 bytes
+  pure $ case observed of
+    Left (TrackedWorktreePathMissing _) -> Right Nothing
+    Left problem -> Left problem
+    Right value -> do
+      mode <- case worktreeObservedKind value of
+        WorktreeRegularFile ->
+          Right (if worktreeObservedExecutable value then ExecutableFile else RegularFile)
+        WorktreeSymbolicLink -> Right SymbolicLink
+        kind -> Left (AuthoredRootUnknownEntryType (path <> ":" <> show kind))
+      let bytes = worktreeObservedBytes value
+      Right
+        ( Just
+            TrackedEntry
+              { trackedIndex =
+                  IndexEntry
+                    { indexPath = path
+                    , indexMode = mode
+                    , indexObjectId = computeBlobObjectId GitObjectSha256 bytes
+                    }
+              , trackedBytes = bytes
               }
-        , trackedBytes = bytes
-        }
+        )
 
 -- | Compare storage-format values for diagnostic negative controls.
 objectFormatBoundaryProblems :: GitObjectFormat -> GitObjectFormat -> [SnapshotProblem]

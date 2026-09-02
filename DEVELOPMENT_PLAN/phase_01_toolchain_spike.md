@@ -1,7 +1,7 @@
 # Phase 1: Haskell toolchain and probe-source closure
 
-> **Purpose**: Specify the target Haskell capability to derive a compatible dependency graph from
-> pinned, network-independent toolchain inputs
+> **Purpose**: Consume the explicit non-numbered `GenesisTrust` root, authenticate and reproduce the contained
+> Haskell toolchain acquisition, derive a compatible dependency graph from its pinned, network-independent inputs,
 > and build the required decoder, simulator, resolver, browser-contract, and protocol-codegen probes
 > without committing resolution output, integrity pins, generated code, or host-specific paths.
 > **Read this if**: phase 1 is next in the queue, or a later phase depends on what its gate establishes.
@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/engineering/content_addressing_determinism.md, documents/engineering/pulsar_client_doctrine.md, vendor/dual/PROVENANCE.md, vendor/supernova/PROVENANCE.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, documents/engineering/content_addressing_determinism.md, documents/engineering/pulsar_client_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -28,7 +28,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 1.1: Historical shared-resolution spike](#sprint-11-historical-shared-resolution-spike-)
+- [Sprint 1.1: GenesisTrust-bound toolchain acquisition](#sprint-11-genesistrust-bound-toolchain-acquisition-)
 - [Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency)](#sprint-12-dhall-in-process-decoder-build-probe-gadt-decode-dependency-)
 - [Sprint 1.3: `io-sim` + `io-classes` simulation build probe](#sprint-13-io-sim--io-classes-simulation-build-probe-)
 - [Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe](#sprint-14-supernova-fork--proto-lens-codegen-build-probe-)
@@ -43,19 +43,25 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+🔄 Active — NOT VALIDATED.
 
-Blocked by redesigned Phase 0, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+The exact Phase-0 gate result is this phase's required immediate predecessor; every earlier gate barrier must
+also be satisfied in numerical order. Earlier completion claims and implementation results in this document
+remain historical rather than current gate results unless this phase's own status records a qualified pass.
+Existing implementation alone is an **Observed footprint / Known partial**.
 
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. This phase owns replacing its retained inventory with exact typed contracts and independent oracles. Hardware-free implementation may be prepared ahead of the validation frontier, but gate execution, candidate evidence, predecessor consumption, and status require the exact Phase-0 pass. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
 This phase specifies a Haskell target capability; it does not report a current implementation or
-result. The target is to derive a compatible dependency graph from pinned, network-independent toolchain inputs and build the required decoder,
+result. `GenesisTrust` is the explicit irreducible `BootstrapRoot`, not a numbered provision and not a claim
+Phase 0 can prove with the compiler that built it. It supplies only the narrow local-custody file and
+compile-time/platform facts defined by Phase 0. This phase independently authenticates the pinned files against
+its publisher policy, proves the actual compiler/package-tool executable bytes, derivation, loader and host
+closure, and reproduces the contained compiler/package-tool acquisition and the
+source-bound validator build, records the executable/dependency identities, and derives a compatible dependency
+graph. It then builds the required decoder,
 simulator, resolver, browser-contract, and protocol-codegen probes without committing resolution
 output, integrity pins, generated code, or host-specific paths.
 
@@ -68,10 +74,11 @@ evidence contract remain UNRESOLVED and block validation.
 
 This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
 behavior only. It cannot use network, host, hardware, live-service, or cluster observations to make its claim pass; every build input must already be present through the authenticated, network-independent
-toolchain input.
+toolchain input. Its `LTD-BOOT-001` closure establishes repeatable acquisition from `GenesisTrust`; it does not
+retroactively provide or remove the root Phase 0 assumed.
 
-**Phase scope:** Target capability only — derive a compatible dependency graph from authenticated,
-network-independent toolchain inputs and build the
+**Phase scope:** Target capability only — authenticate and reproduce the toolchain acquisition derived from
+`GenesisTrust`, bind the source-built executable and elaborated dependency graph, and build the
 required decoder, simulator, resolver, browser-contract, and protocol-codegen probes without
 committing resolution output, integrity pins, generated code, or host-specific paths. NOT VALIDATED.
 
@@ -90,9 +97,9 @@ committing resolution output, integrity pins, generated code, or host-specific p
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — derive a compatible dependency graph from pinned, network-independent toolchain inputs and build the required decoder, simulator, resolver, browser-contract, and protocol-codegen probes without committing resolution output, integrity pins, generated code, or host-specific paths. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 01` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
+| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; target claim: starting from the narrow local-custody facts carried by `GenesisTrust` and a network-independent input cache, independently authenticate publisher/content identities, prove actual compiler/package-tool executable derivation plus loader/host closure, and reproduce the contained GHC/Cabal acquisition, source-bound validator build, elaborated dependency graph, and representative probe set without committing resolution output or host-specific paths. GenesisTrust itself and every layer named in `Residue` remain assumptions or UNVERIFIED rather than products of this phase. |
+| `Subject` | UNRESOLVED — blocks validation: target production entries are `Amoebius.Validation.ToolchainSpikeRun`, `CompilerBuildInfo`, and `CompilerElaboratedPlan`; their exact acquired-authority composition and independent oracle remain to be bound. |
+| `Command` | UNRESOLVED — blocks validation: `pb validate phase 01` is future public spelling only. Before `BOOTSTRAP_HANDOFF`, invoke the exact absolute source-bound Haskell executable directly; bind the narrow GenesisTrust token separately from the freshly authenticated Phase-1 acquisition and executable identity. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
 | `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
 | `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
 | `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
@@ -104,9 +111,9 @@ committing resolution output, integrity pins, generated code, or host-specific p
 | `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
 | `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
 | `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: Phase-1-owned `LTD-SRC-007` and `LTD-SRC-009` remain active; their exact zero-finding checks, reintroduction negatives, and separately authored Haskell bindings have not yet been demonstrated by a passing gate. Sprint 1.7 names `LTD-SRC-009`, but no rewritten sprint owns `LTD-SRC-007`; that missing assignment is itself blocking. |
+| `Legacy closure` | UNRESOLVED — blocks validation: Phase-1-owned `LTD-BOOT-001`, `LTD-SRC-007`, and `LTD-SRC-009` remain active. Sprint 1.1 owns authenticated/reproducible acquisition, Sprint 1.5 owns generated probe-source closure, and Sprint 1.7 owns top-level vendor closure; each still needs its exact zero-finding analyzer, reintroduction negative, and complete gate evidence. GenesisTrust itself is not a legacy binding. |
 | `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 00; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
+| `Residue` | UNRESOLVED — blocks validation: `UNVERIFIED` includes the irreducible narrow local-custody facts represented by GenesisTrust, Phase-2 compiler-backed source semantics, every later product/runtime/hardware claim, and every still-unbound Phase-1 evidence row. Publisher authentication, actual executable derivation, and loader/host closure are Phase-1 claim rows and cannot be left here by a passing candidate. |
 | `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
 
 ## Resource provision — UNRESOLVED
@@ -135,38 +142,52 @@ committing resolution output, integrity pins, generated code, or host-specific p
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+> **Reset validation check.** A sprint whose required fields still say `UNRESOLVED` retains its pre-reset
+> `Independent Validation` and `### Validation` only as historical capability inventory. A wholly replaced
+> sprint contract may guide hardware-free implementation, but cannot run this phase gate or change status before
+> the Phase-0 predecessor pass.
 
-> **Permanent sprint reset.** Every pre-reset sprint result below is historical context. The retained body is non-operative capability inventory only. Current acceptance requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-predecessor gate pass, owned legacy closure, and a complete gate pass.
+> **Permanent sprint reset.** Every pre-reset sprint result below remains historical context. Current acceptance
+> requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-
+> predecessor gate pass, owned legacy closure, and a complete gate pass.
 
-## Sprint 1.1: Historical shared-resolution spike ⏸️
+## Sprint 1.1: GenesisTrust-bound toolchain acquisition 🔄
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Active — NOT VALIDATED
+**Implementation**: `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun.hs`, `src/validation-kernel/Amoebius/Validation/CompilerBuildInfo.hs`, and `src/validation-kernel/Amoebius/Validation/CompilerElaboratedPlan.hs`; exact acquired authority remains UNRESOLVED and blocks validation.
 **Blocked by**: [Phase 0](phase_00_documentation_suite.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: From the narrow GenesisTrust local-custody facts and immutable offline files, independently verify publisher/content identities, actual compiler/package-tool executable derivation, and loader/host closure; acquire twice into distinct contained roots, build the same source snapshot, and require plans and executable identities to agree. A missing/mutable input, digest/signature mismatch, ambient-network read, self-reported identity, replay, or disagreement is an exact negative; GenesisTrust itself remains assumed.
+**Oracle**: planned separate Haskell `test/validation-kernel/ToolchainAcquisitionOracle.hs`, authored from the declared root and expected acquisition relation rather than subject output; provenance remains UNRESOLVED.
+**Legacy IDs**: `LTD-BOOT-001`
+**Docs to update**: `DEVELOPMENT_PLAN/README.md`, `documents/engineering/validation_frame_doctrine.md`, `documents/engineering/repository_layout_doctrine.md`
 
 ### Objective
-Adopt the shared-pin discipline recorded in the tracker's Toolchain note — one **GHC 9.12.4 / Cabal 3.16.1.0**
-pin across every package, and a single `index-state` that fixes the Hackage snapshot — so every later sprint in
-this phase resolves against one dependency universe rather than a drifting one.
+Turn the irreducible GenesisTrust input into a reproducible, authenticated contained toolchain acquisition and
+source-bound build without pretending that the resulting binary proves its own compiler.
 
 ### Deliverables
-- A `cabal.project` naming the compiler and freezing an `index-state`, plus a trivial library that compiles
-  clean against a stock package set — the baseline, with **no** `allow-newer` yet.
+- A typed acquired authority that consumes GenesisTrust's seven pinned local-custody files and independently
+  adds publisher identity, actual compiler/package-tool executable bytes and derivation, loader/host closure,
+  and reproducibility evidence.
+- Two distinct contained acquisitions from the same immutable offline input with exact process, plan, and
+  executable receipts beneath `.build/**`.
+- One compatible dependency universe used by every later sprint in this phase; no resolved lock or identity is
+  copied into Git.
 
 ### Validation
-1. `cabal build` is green on the pin with a stock package set, run from a clean `.build/**` root. The checked
-   Haskell toolchain declaration fixes the compatibility requirement, while the selected `index-state`,
-   executable identities, and transcript are fresh run-local observations beneath `.build/runs/phase_1/**`.
+1. Recheck the offline bytes against the GenesisTrust pins, then independently authenticate their publisher
+   relation before either acquisition and build the same exact source under both contained roots with
+   compiler-bearing commands serialized.
+2. Require the compiler/package-tool identities, elaborated plan, produced executable identity, and observed
+   command boundary to agree; each missing, mutable, replayed, network-assisted, or disagreeing case fails at
+   its assigned locus.
+3. Preserve GenesisTrust as an explicit assumption in residue; agreement closes `LTD-BOOT-001` but does not
+   turn the root into a theorem.
 
 ### Remaining Work
-The pre-reset record said `None` and claimed validation by a consolidated Phase-1 gate on 2026-08-08; both
-statements cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING`
-contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Implement the acquired authority and independent oracle, qualify its changed-subject selectors, bind the exact
+Phase-0 predecessor receipt, close `LTD-BOOT-001`, and retain the result in the complete Phase-1 gate. Historical
+toolchain transcripts cannot support this candidate.
 
 ## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ⏸️
 
@@ -189,7 +210,7 @@ buildable on the pin before Phase 26 promises an executable decoder. `dhall` his
 - A recorded resolution: the concrete `allow-newer`/patch/fork/pin that makes `dhall` build on GHC 9.12.4,
   with fresh `cabal build` + `cabal run probe:decode` transcripts beneath `.build/runs/phase_1/**` produced
   under exactly that set. There is no failing-transcript alternative: a dependency universe that does not
-  resolve leaves the phase `⏸️ Blocked — NOT VALIDATED` with the blocker recorded as explicit `UNVERIFIED`
+  resolve prevents the status frontier from advancing and records the blocker as explicit `UNVERIFIED`
   residue. That is a recorded blocker, not a gate pass.
 - Haskell-declared positive and bad-type probe cases plus separately authored Haskell expected decoded value
   and rejection tag; any Dhall form is generated beneath `.build/probe/**` and is never tracked source.
@@ -307,7 +328,7 @@ maintained `.hs` modules under `src/vendor/**` and lazy upstream material beneat
 **Blocked by**: Sprint 1.4
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
 **Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
+**Legacy IDs**: `LTD-SRC-007`
 **Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
 
 ### Objective
@@ -348,7 +369,10 @@ The pre-reset record said `None`; that statement cannot support a gate pass. Cur
 includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and
 phase-specific obligation in the redesigned gate. The target must replace the condemned pin/patch inputs with
 checked Haskell compatibility declarations, confine every resolved product to `.build/**`, and independently
-demonstrate clean-source repeatability without network or outside-host observation.
+demonstrate clean-source repeatability without network or outside-host observation. The current working source
+image has removed the nine tracked probe fixtures/mutants/oracle files, and the Phase-1 runner observes
+`toolchain-spike.probe-foreign-count = 0`; the Haskell generator, separately authored expectations, applied
+reintroduction negatives, and integrated evidence remain outstanding, so `LTD-SRC-007` stays active.
 
 ## Sprint 1.6: Pure discovery/ensure planning over injected inputs ⏸️
 
@@ -448,10 +472,12 @@ declared in Haskell.
 
 ### Remaining Work
 
-`LTD-SRC-009` remains open: the top-level vendor tree is still tracked and the Haskell provenance,
-materialization, independent oracle, and generated reintroduction corpus do not yet exist. This sprint cannot
-become a candidate until Phase 0 is gate-passed and the typed Haskell closure binding explained to readers
-as `LTD-SRC-009` is green.
+`LTD-SRC-009` remains active but its tracked-path analyzer now observes zero top-level `vendor/**` paths: the
+17 maintained library modules have moved to `src/vendor/**/*.hs`, and the foreign package descriptions,
+Proto schema, licences, and prose inventory have left the current working source image. The Haskell
+provenance declaration, immutable offline materialization, generated Proto/package inputs, maintained-fork
+build, independent oracle, and generated reintroduction corpus still do not exist, so this implementation
+progress cannot close the sprint or support a candidate.
 
 ## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️
 

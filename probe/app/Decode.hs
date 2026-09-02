@@ -23,9 +23,8 @@ main :: IO ()
 main = do
   arguments <- getArgs
   let fixture = case arguments of
-        [] -> "probe/fixtures/ok.dhall"
         [path] -> path
-        _ -> error "usage: decode [fixture.dhall]"
+        _ -> error "usage: decode fixture.dhall"
   decoded <- try (Dhall.inputFile Dhall.auto fixture)
   case decoded of
     Right value -> print (value :: ProbeConfig)

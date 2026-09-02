@@ -134,8 +134,8 @@ policyProblems =
 -- names a defect from one that merely fails.
 wellFormedInventory :: [DrivenSuite]
 wellFormedInventory =
-  [ DrivenSuite "alpha-selector-component" "ORACLE_FAMILY_ALPHA" "documentation_suite" 3
-  , DrivenSuite "beta-selector-component" "ORACLE_FAMILY_BETA" "documentation_suite" 5
+  [ DrivenSuite "alpha-selector-component" "ORACLE_FAMILY_ALPHA" "documentation_suite"
+  , DrivenSuite "beta-selector-component" "ORACLE_FAMILY_BETA" "repository_layout_conformance"
   ]
 
 inventoryProblems :: [String]
@@ -155,10 +155,6 @@ inventoryProblems =
       ]
       ["MUTANT-COVERAGE-DUPLICATE-FAMILY"]
     <> exactly
-      "a non-positive locus count"
-      [head wellFormedInventory, (wellFormedInventory !! 1) {drivenSuiteLoci = 0}]
-      ["MUTANT-COVERAGE-INTEGRITY"]
-    <> exactly
       "an owner outside the phase-identity table"
       [head wellFormedInventory, (wellFormedInventory !! 1) {drivenSuiteOwnerCapability = "no_such_capability"}]
       ["MUTANT-COVERAGE-OWNER-UNKNOWN"]
@@ -169,17 +165,60 @@ inventoryProblems =
     | codesFor suites /= expected
     ]
 
--- | The live inventory must be well formed.  Its cardinality is not asserted:
--- each family's count and unwired remainder are owed by the capability named in
--- its owner field, in that phase's own residue.
+-- | The live inventory must be well formed and publish the independently
+-- assigned owner for every current family.  It deliberately publishes no
+-- selector or locus counts: exact family membership and unwired residue are
+-- acquired by the owning capability's gate.
 findingProblems :: [String]
 findingProblems =
   [ "expected no mutation-coverage refusal for the live inventory, observed "
       <> show (map (Text.unpack . findingCode) findings)
   | not (null findings)
   ]
-    <> [ "the live inventory published no per-owner total"
-       | not (any (Text.isPrefixOf "mutation.owner." . observationKey) (checkObservations mutationCoverageCheck))
+    <> [ "deprecated corpus cardinality observation remains published: " <> Text.unpack key
+       | item <- checkObservations mutationCoverageCheck
+       , let key = observationKey item
+       , key == "mutation.driven-loci" || key == "mutation.driving-suite-count"
+       ]
+    <> [ "missing or wrong live owner assignment: "
+           <> Text.unpack family
+           <> " -> "
+           <> Text.unpack owner
+       | (family, owner) <- expectedOwnerAssignments
+       , observationsFor ("mutation.owner." <> family) /= [owner]
        ]
  where
   findings = checkFindings mutationCoverageCheck
+  observationsFor key =
+    [ observationValue item
+    | item <- checkObservations mutationCoverageCheck
+    , observationKey item == key
+    ]
+
+-- | Responsibility follows capability boundaries rather than the phase that
+-- happened to introduce the first selector harness.  Later selector additions
+-- do not change this assignment or a Phase-0 corpus total because there is no
+-- such total.
+expectedOwnerAssignments :: [(Text, Text)]
+expectedOwnerAssignments =
+  [ ("VALIDATION_SOURCE_DEBT_PUBLIC", "repository_layout_conformance")
+  , ("VALIDATION_SOURCE_DEBT_INTERNAL", "repository_layout_conformance")
+  , ("VALIDATION_COMPILER_GRAPH_PUBLIC", "toolchain_spike")
+  , ("VALIDATION_COMPILER_GRAPH_ACQUIRED", "toolchain_spike")
+  , ("VALIDATION_PHASE_CONTRACT_PUBLIC", "self_referential_gates")
+  , ("VALIDATION_PHASE_CONTRACT_INTERNAL", "self_referential_gates")
+  , ("VALIDATION_COMPILER_PLAN", "toolchain_spike")
+  , ("VALIDATION_PB_GRAMMAR", "repository_layout_conformance")
+  , ("VALIDATION_POLICY", "self_referential_gates")
+  , ("VALIDATION_LEGACY", "self_referential_gates")
+  , ("VALIDATION_PHASE_SEMANTIC", "self_referential_gates")
+  , ("VALIDATION_QUALIFICATION", "self_referential_gates")
+  , ("VALIDATION_SOURCE_CLOSURE", "repository_layout_conformance")
+  , ("VALIDATION_SOURCE_CONSUMER_PUBLIC", "repository_layout_conformance")
+  , ("VALIDATION_SOURCE_CONSUMER_INTERNAL", "repository_layout_conformance")
+  , ("VALIDATION_DOCUMENTATION", "self_referential_gates")
+  , ("VALIDATION_DOCUMENTATION_INTERNAL", "self_referential_gates")
+  , ("VALIDATION_DISPATCH", "self_referential_gates")
+  , ("VALIDATION_COMPILER_BUILDINFO", "toolchain_spike")
+  , ("VALIDATION_COMPILER_ELABORATED", "toolchain_spike")
+  ]

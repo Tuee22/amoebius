@@ -7,6 +7,7 @@ module Amoebius.Validation.SourceDebtBaseline.Internal
   , foldAcquiredSourceDebtState
   , sourceDebtClosureDiagnosticCheck
   , sourceDebtEvidenceCheck
+  , sourceDebtEvidenceCheckForPhaseZero
   , sourceDebtRawDiagnosticCheck
 #if defined(VALIDATION_SOURCE_DEBT_INTERNAL_TEST_HOOKS)
   , sourceDebtInternalTestIntegrityFindings
@@ -262,8 +263,9 @@ laterOwnedSourceDebtBaselines =
     , Just baseline <- [sourceDebtBaseline identifier]
     ]
 
--- Total over the closed SourceDebtId universe. Pb is Phase-0-owned and has no
--- later-owned baseline; every other constructor has one exact frozen row.
+-- Total over the closed SourceDebtId universe. Pb uses the exact bounded
+-- grammar rather than a count ratchet; its legacy owner remains repository-
+-- layout conformance. Every other constructor has one exact frozen row.
 sourceDebtBaseline :: SourceDebtId -> Maybe SourceDebtBaseline
 sourceDebtBaseline SourceTools =
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_TOOLS_OMISSION_MUTANT)
@@ -401,7 +403,11 @@ analyzeAcquiredSourceDebt acquired =
     | otherwise = result
   admittedStates
     | pbAdmitted = Map.insert SourcePb SourceDebtStateZero states
-    | otherwise = states
+    | otherwise =
+        Map.insert
+          SourcePb
+          (SourceDebtStateRefused "bounded pb grammar did not admit the exact acquired source")
+          states
 
 isPbDebtPresenceFinding :: Finding -> Bool
 isPbDebtPresenceFinding item =
@@ -433,6 +439,57 @@ sourceDebtEvidenceCheck acquired (SourceDebtEvidence evidenceAcquired result _)
  where
   expectedIdentity = snapshotIdentity (acquiredSourceSnapshot acquired)
   evidenceIdentity = snapshotIdentity (acquiredSourceSnapshot evidenceAcquired)
+
+-- | Phase 0 requires the current bounded @pb@ subtree state to be zero as a
+-- finite bootstrap precondition. This does not retire @LTD-SRC-008@: its full
+-- analyzer and reintroduction proof remain with repository-layout
+-- conformance. Other source families likewise cannot reopen the bootstrap
+-- merely because their later-owner counts change.
+sourceDebtEvidenceCheckForPhaseZero
+  :: AcquiredSourceSnapshot
+  -> SourceDebtEvidence
+  -> CheckResult
+sourceDebtEvidenceCheckForPhaseZero acquired (SourceDebtEvidence evidenceAcquired _ states)
+  | acquired /= evidenceAcquired =
+      CheckResult
+        { checkName = "phase-00-source-debt"
+        , checkObservations = []
+        , checkFindings = [sourceDebtEvidenceMismatchFinding expectedIdentity evidenceIdentity]
+        }
+  | otherwise =
+      case Map.lookup SourcePb states of
+        Just SourceDebtStateZero ->
+          CheckResult
+            { checkName = "phase-00-source-debt"
+            , checkObservations =
+                [ observation "source-debt.phase-00.scope" "bounded-pb-current-state"
+                , observation "source-debt.phase-00.pb" "zero"
+                ]
+            , checkFindings = []
+            }
+        Just (SourceDebtStateRefused detail) -> refused detail
+        Just (SourceDebtStateOpen count digest) ->
+          refused
+            ( "bounded pb source debt remains open: count="
+                <> Text.pack (show count)
+                <> ", digest="
+                <> digest
+            )
+        Nothing -> refused "closed source-debt evidence is missing pb"
+ where
+  expectedIdentity = snapshotIdentity (acquiredSourceSnapshot acquired)
+  evidenceIdentity = snapshotIdentity (acquiredSourceSnapshot evidenceAcquired)
+  refused detail =
+    CheckResult
+      { checkName = "phase-00-source-debt"
+      , checkObservations = [observation "source-debt.phase-00.pb" "refused"]
+      , checkFindings =
+          [ finding
+              "SOURCE-DEBT-PHASE-00-PB"
+              "pb/**"
+              detail
+          ]
+      }
 
 -- | The only source-debt state eliminator used by Legacy. Callers choose how
 -- to represent open/zero/refused states, but cannot construct the state being

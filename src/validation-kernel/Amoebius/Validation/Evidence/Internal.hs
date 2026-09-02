@@ -61,7 +61,20 @@ module Amoebius.Validation.Evidence.Internal (
     writeAcquiredCandidateEvidence,
 ) where
 
-import Amoebius.Validation.Gate.Internal qualified as Gate
+import Amoebius.Validation.BootstrapPredicate (bootstrapDigestMatches, bootstrapSnapshotMatches)
+import Amoebius.Validation.BootstrapQualification.Internal
+  ( BootstrapCase
+  , foldQualifiedBootstrapProtocol
+  , renderBootstrapCase
+  )
+import Amoebius.Validation.BootstrapTrust.Internal
+  ( GenesisTrust
+  , genesisTrustArchitecture
+  , genesisTrustAssumptionLabel
+  , genesisTrustCompilerExecutable
+  , genesisTrustDigest
+  , genesisTrustToolchainIdentity
+  )
 import Amoebius.Validation.Legacy.Internal (
     GateCompletionPremises,
     GatePrerequisiteObservation,
@@ -70,13 +83,16 @@ import Amoebius.Validation.Legacy.Internal (
     gatePrerequisitePassed,
     gatePrerequisiteRefused,
     gatePrerequisiteUnverified,
-    legacyClosureAcquired,
+    legacyBootstrapClosureAcquired,
     legacyClosureResult,
  )
 import Amoebius.Validation.PhaseZeroRun.Internal (
     AcquiredPhaseZeroRun,
     foldAcquiredPhaseZeroRun,
  )
+import Amoebius.Validation.PhaseContract.Evidence.Internal
+  ( acquiredPhaseContractEvidenceCheck
+  )
 import Amoebius.Validation.PolicyContract.Internal qualified as Policy
 import Amoebius.Validation.SourceClosure.Internal (
     AcquiredSourceSnapshot,
@@ -99,10 +115,13 @@ import Crypto.Hash.SHA256 qualified as SHA256
 import Data.Aeson (ToJSON (toJSON), Value, encode, object, (.=))
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as ByteString
+import Data.ByteString.Char8 qualified as ByteString8
 import Data.ByteString.Lazy qualified as LazyByteString
 import Data.Char (intToDigit)
 import Data.Text (Text)
 import Data.Text qualified as Text
+import Data.Text.Encoding qualified as TextEncoding
+import System.Exit (ExitCode (..))
 import System.Directory (
     canonicalizePath,
     createDirectory,
@@ -221,14 +240,14 @@ gateRowEvidencePassed evidence = case capturedOutcome evidence of
     RowUnverified _ _ -> False
 
 data PredecessorEvidence
-    = GenesisPredecessor
+    = GenesisPredecessor Text
     | ImmediatePredecessor Int Text
     | UnverifiedPredecessor Text
     deriving (Eq, Show)
 
 predecessorEvidenceMatchesPhase :: Int -> PredecessorEvidence -> Bool
 predecessorEvidenceMatchesPhase phase predecessor = case (phase, predecessor) of
-    (0, GenesisPredecessor) -> True
+    (0, GenesisPredecessor digest) -> sha256Text digest
     (_, ImmediatePredecessor predecessorPhase digest) ->
         predecessorPhase == phase - 1 && sha256Text digest
     _ -> False
@@ -343,7 +362,7 @@ captureCandidateEvidence :: CandidateCapture -> AcquiredCandidateEvidence
 captureCandidateEvidence captured =
     AcquiredCandidateEvidence
         { acquiredCapture = captured
-        , acquiredSchema = "amoebius-validation-candidate-v2"
+        , acquiredSchema = "amoebius-validation-candidate-v3"
         }
 
 {- | The current production dispatcher can capture an honest red candidate,
@@ -381,7 +400,7 @@ captureDispatchCandidateEvidence phase opening closing projectionDigest projecti
             , candidateCaptureProjectionPostimageDigest = projectionPostimageDigest
             , candidateCapturePredecessor =
                 if phase == policyDomainLower
-                    then GenesisPredecessor
+                    then GenesisPredecessor ""
                     else UnverifiedPredecessor "the immediate predecessor evidence digest is not yet carried by the dispatcher"
             , candidateCaptureExecutablePath = executablePath
             , candidateCaptureExecutableDigest = executableDigest
@@ -399,19 +418,16 @@ captureDispatchCandidateEvidence phase opening closing projectionDigest projecti
                 , "UNVERIFIED: oracle identity is not yet acquired"
                 , "UNVERIFIED: harness identity is not yet acquired"
                 , "UNVERIFIED: observer identity is not yet acquired"
-                , qualificationResidue
+                , "UNVERIFIED: qualification identity is not yet acquired"
                 , "UNVERIFIED: toolchain, substrate, lane, architecture, run identity, and cleanup observation are not yet acquired"
                 ]
                     <> ["UNVERIFIED: status projection could not be prepared" | projectionDigest == Nothing || projectionPostimageDigest == Nothing]
             }
 
-{- | Production Phase-0 finalization accepts one opaque acquired run.  That
-product binds its source/compiler/qualification/debt inputs to a subject
-recomputed by their package-hidden owner, so neither the subject nor its
-opening identity can be supplied by this function's caller.  Finalization
-seals the actual outcomes of the sixteen non-circular rows into
-@GateCompletionPremises@, runs the legacy inventory once, and derives @Pass
-criterion@ from the resulting seventeen rows.
+{- | Finalize the finite Phase-0 bootstrap from opaque acquired products.
+Every green row below is derived from the acquired snapshot, GenesisTrust, or
+the executed clean-plus-mutant protocol; the generic capture API remains
+refusal-only.
 -}
 captureFinalizedDispatchCandidateEvidence ::
     AcquiredPhaseZeroRun ->
@@ -425,11 +441,11 @@ captureFinalizedDispatchCandidateEvidence ::
 captureFinalizedDispatchCandidateEvidence acquiredRun closing projectionDigest projectionPostimageDigest executablePath executableDigest argv =
     foldAcquiredPhaseZeroRun finalize acquiredRun
   where
-    finalize acquired compilerAttempt qualificationAuthority debtEvidence contractEvidence subjectResult =
+    finalize acquired trust qualification _debtEvidence contractEvidence subjectResult =
         case Policy.mkPhaseOrdinal phase of
             Nothing ->
                 finalizeCandidateRows
-                    qualifiedBaseCandidate
+                    bootstrapCandidate
                     CheckResult
                         { checkName = "legacy-closure"
                         , checkObservations = []
@@ -441,127 +457,270 @@ captureFinalizedDispatchCandidateEvidence acquiredRun closing projectionDigest p
                             ]
                         }
             Just candidatePhase ->
-                let premises = gateCompletionPremisesFromRows (captureRows (acquiredCapture qualifiedBaseCandidate))
+                let premises = gateCompletionPremisesFromRows (captureRows (acquiredCapture bootstrapCandidate))
                     closure =
-                        legacyClosureAcquired
+                        legacyBootstrapClosureAcquired
                             candidatePhase
                             acquired
-                            compilerAttempt
-                            debtEvidence
-                            contractEvidence
                             premises
                     closureCheck =
                         bindLegacyClosureToCandidateSource
                             opening
                             (snapshotIdentity (acquiredSourceSnapshot acquired))
                             closure
-                 in finalizeCandidateRows qualifiedBaseCandidate closureCheck
+                 in finalizeCandidateRows bootstrapCandidate closureCheck
       where
         opening = snapshotIdentity (acquiredSourceSnapshot acquired)
         closingIdentity = case closing of
             Left _ -> ""
             Right observed -> snapshotIdentity (acquiredSourceSnapshot observed)
-        baseCandidate =
-            captureDispatchCandidateEvidence
-                phase
-                opening
-                closingIdentity
-                projectionDigest
-                projectionPostimageDigest
-                executablePath
-                executableDigest
-                argv
-                subjectResult
-        qualifiedBaseCandidate =
-            applyQualificationAuthority
-                qualificationAuthority
-                (applyClosingSnapshotOutcome closing baseCandidate)
+        contractDigest = checkResultDigest (acquiredPhaseContractEvidenceCheck contractEvidence)
+        bootstrapCandidate =
+            foldQualifiedBootstrapProtocol
+                (buildCandidate opening closingIdentity contractDigest trust subjectResult)
+                qualification
+        buildCandidate openingDigest closingDigest compiledContractDigest genesis subject snapshotDigest subjectSourceDigest oracleDigest harnessDigest transcriptDigest compilerPath runLeaf receipts =
+            captureCandidateEvidence
+                CandidateCapture
+                    { candidateCapturePhase = phase
+                    , candidateCaptureSourceOpening = openingDigest
+                    , candidateCaptureSourceClosing = closingDigest
+                    , candidateCaptureContractDigest = Just compiledContractDigest
+                    , candidateCaptureSubjectDigest = Just (checkResultDigest subject)
+                    , candidateCaptureOracleDigest = Just oracleDigest
+                    , candidateCaptureHarnessDigest = Just harnessDigest
+                    , candidateCaptureObserverDigest = Just (digestTexts ["bootstrap-observer", oracleDigest, transcriptDigest])
+                    , candidateCaptureQualificationDigest = Just transcriptDigest
+                    , candidateCaptureProjectionDigest = projectionDigest
+                    , candidateCaptureProjectionPostimageDigest = projectionPostimageDigest
+                    , candidateCapturePredecessor = GenesisPredecessor (genesisTrustDigest genesis)
+                    , candidateCaptureExecutablePath = executablePath
+                    , candidateCaptureExecutableDigest = executableDigest
+                    , candidateCaptureArgv = argv
+                    , candidateCaptureToolchainIdentity = Just (genesisTrustToolchainIdentity genesis)
+                    , candidateCaptureSubstrate = Just "none"
+                    , candidateCaptureLane = Just "none"
+                    , candidateCaptureArchitecture = Just (genesisTrustArchitecture genesis)
+                    , candidateCaptureRunIdentity = Just transcriptDigest
+                    , candidateCaptureCleanupObservation = Just ("absent=" <> Text.pack runLeaf)
+                    , candidateCaptureRows =
+                        bootstrapGateRows
+                            phase
+                            openingDigest
+                            closing
+                            compiledContractDigest
+                            genesis
+                            subject
+                            snapshotDigest
+                            subjectSourceDigest
+                            oracleDigest
+                            harnessDigest
+                            transcriptDigest
+                            compilerPath
+                            runLeaf
+                            receipts
+                            projectionDigest
+                            projectionPostimageDigest
+                            executableDigest
+                            argv
+                    , candidateCaptureResidue =
+                        [ "status projection identity is absent"
+                        | projectionDigest == Nothing || projectionPostimageDigest == Nothing
+                        ]
+                    }
     phase = policyDomainLower
 
-applyClosingSnapshotOutcome ::
-    Either [SnapshotProblem] AcquiredSourceSnapshot ->
-    AcquiredCandidateEvidence ->
-    AcquiredCandidateEvidence
-applyClosingSnapshotOutcome closing candidate =
-    case closing of
-        Right _ -> candidate
-        Left problems ->
-            candidate
-                { acquiredCapture =
-                    captured
-                        { candidateCaptureRows =
-                            map
-                                (replaceGateRow FreshnessRow refusedFreshness)
-                                (captureRows captured)
-                        }
-                }
-          where
-            captured = acquiredCapture candidate
-            refusedFreshness =
-                GateRowEvidence
-                    FreshnessRow
-                    (RowRefused [] closingFindings)
-            closingFindings =
-                case problems of
-                    [] ->
-                        [ finding
-                            "SOURCE-SNAPSHOT-CLOSING-UNAVAILABLE"
-                            "<local-source-snapshot>"
-                            "the closing source-snapshot acquisition refused without a diagnostic"
-                        ]
-                    _ ->
-                        [ finding
-                            "SOURCE-SNAPSHOT-CLOSING-UNAVAILABLE"
-                            "<local-source-snapshot>"
-                            (renderSnapshotProblem problem)
-                        | problem <- problems
-                        ]
-qualificationResidue :: Text
-qualificationResidue = "UNVERIFIED: qualification identity is not yet acquired"
-
-applyQualificationAuthority ::
-    Either Gate.QualificationProblem Gate.QualifiedValidationProtocol ->
-    AcquiredCandidateEvidence ->
-    AcquiredCandidateEvidence
-applyQualificationAuthority authority candidate =
-    candidate
-        { acquiredCapture =
-            captured
-                { candidateCaptureQualificationDigest = qualificationDigest
-                , candidateCaptureRows = map (replaceGateRow QualificationRow qualificationRow) (captureRows captured)
-                , candidateCaptureResidue = filter (/= qualificationResidue) (captureResidue captured)
-                }
-        }
+bootstrapGateRows
+    :: Int
+    -> Text
+    -> Either [SnapshotProblem] AcquiredSourceSnapshot
+    -> Text
+    -> GenesisTrust
+    -> CheckResult
+    -> Text
+    -> Text
+    -> Text
+    -> Text
+    -> Text
+    -> FilePath
+    -> FilePath
+    -> [(Maybe BootstrapCase, Text, Text, ExitCode, ExitCode, Text, Text)]
+    -> Maybe Text
+    -> Maybe Text
+    -> Maybe Text
+    -> [Text]
+    -> [GateRowEvidence]
+bootstrapGateRows phase opening closing contractDigest trust subject snapshotDigest subjectSourceDigest oracleDigest harnessDigest transcriptDigest compilerPath runLeaf receipts projectionDigest projectionPostimageDigest executableDigest argv =
+    [GateRowEvidence row (outcome row) | row <- allGateRows]
   where
-    captured = acquiredCapture candidate
-    (qualificationDigest, qualificationRow) = case authority of
-        Left problem -> refusedQualification problem
-        Right protocol ->
-            case Gate.bindQualifiedValidationProtocolToCandidate
-                (captureSourceOpening captured)
-                (captureExecutablePath captured)
-                (captureExecutableDigest captured)
-                protocol of
-                Left problem -> refusedQualification problem
-                Right digest ->
-                    ( Just digest
-                    , GateRowEvidence
-                        QualificationRow
-                        (RowPassed [observation "qualification.protocol.sha256" digest])
-                    )
-    refusedQualification problem =
-        ( Nothing
-        , GateRowEvidence
-            QualificationRow
-            ( RowRefused
-                []
-                [ finding
-                    (Gate.qualificationProblemCode problem)
-                    (Gate.qualificationProblemSubject problem)
-                    (Gate.qualificationProblemDetail problem)
+    expectedArgv = ["validate", "phase", formatOrdinal phase]
+    cleanReceipts = [receipt | receipt@(Nothing, _, _, _, _, _, _) <- receipts]
+    mutantReceipts = [receipt | receipt@(Just _, _, _, _, _, _, _) <- receipts]
+    qualificationInventory = map (fmap renderBootstrapCase . receiptCaseOf) receipts
+    expectedInventory = Nothing : map Just ["digest-equality-bypass", "snapshot-freshness-bypass", "bootstrap-path-bypass"]
+    qualificationGreen =
+        qualificationInventory == expectedInventory
+            && compilerPath == genesisTrustCompilerExecutable trust
+            && all receiptCompiled receipts
+            && all receiptCleanPassed cleanReceipts
+            && all receiptMutantKilled mutantReceipts
+    projectionPresent = projectionDigest /= Nothing && projectionPostimageDigest /= Nothing
+    outcome row = case row of
+        ClaimRow ->
+            RowPassed
+                [ observation "claim.capability" "documentation_suite"
+                , observation "claim.scope" "finite-bootstrap-seed"
+                , observation "claim.contract.sha256" contractDigest
                 ]
-            )
+        SubjectRow -> rowOutcomeFromCheck "GATE-BOOTSTRAP-SUBJECT" subject
+        CommandRow
+            | Just digest <- executableDigest
+            , bootstrapDigestMatches (Text.unpack digest) (Text.unpack digest)
+            , argv == expectedArgv ->
+                RowPassed
+                    [ observation "command.executable.sha256" digest
+                    , observation "command.argv" (Text.unwords argv)
+                    , observation "command.genesis-trust.sha256" (genesisTrustDigest trust)
+                    ]
+            | otherwise ->
+                RowRefused
+                    [observation "command.argv" (Text.unwords argv)]
+                    [bootstrapRowFinding "GATE-COMMAND" "the running executable digest or exact process argv is invalid"]
+        OracleRow ->
+            RowPassed
+                [ observation "oracle.source.sha256" oracleDigest
+                , observation "oracle.independence" "tracked BootstrapMutationDriver source is distinct from the production predicate and harness"
+                ]
+        PositiveControlsRow
+            | length cleanReceipts == 1 && all receiptCleanPassed cleanReceipts ->
+                RowPassed [observation "bootstrap.control.clean" "compiled-and-passed"]
+            | otherwise -> RowRefused [] [bootstrapRowFinding "BOOTSTRAP-CONTROL" "the exact clean control did not compile and pass"]
+        PairedNegativesRow
+            | length mutantReceipts == 3 && all receiptMutantKilled mutantReceipts ->
+                RowPassed
+                    [ observation
+                        ("bootstrap.negative." <> maybe "missing" renderBootstrapCase selected)
+                        (Text.pack (show runExit) <> ":" <> Text.stripEnd runStderr)
+                    | (selected, _, _, _, runExit, _, runStderr) <- mutantReceipts
+                    ]
+            | otherwise -> RowRefused [] [bootstrapRowFinding "BOOTSTRAP-NEGATIVES" "one or more paired negative executions was absent or passed"]
+        MutantsRow
+            | qualificationGreen && all mutantChanged mutantReceipts ->
+                RowPassed
+                    [ observation ("bootstrap.mutant." <> maybe "missing" renderBootstrapCase selected) (sourceDigest <> ":" <> binaryDigest)
+                    | (selected, sourceDigest, binaryDigest, _, _, _, _) <- mutantReceipts
+                    ]
+            | otherwise -> RowRefused [] [bootstrapRowFinding "BOOTSTRAP-MUTANTS" "the exact changed-production source/binary matrix did not kill every mutant"]
+        DiscoveryRow
+            | qualificationInventory == expectedInventory && snapshotDigest == opening ->
+                RowPassed
+                    [ observation "bootstrap.discovery.inventory" "clean,digest-equality-bypass,snapshot-freshness-bypass,bootstrap-path-bypass"
+                    , observation "bootstrap.discovery.snapshot.sha256" snapshotDigest
+                    ]
+            | otherwise -> RowRefused [] [bootstrapRowFinding "BOOTSTRAP-DISCOVERY" "the executed case inventory or acquired snapshot binding is incomplete"]
+        ChallengeRow
+            | qualificationGreen ->
+                RowPassed [observation "bootstrap.challenge" "three independently expected bypass attempts were rejected"]
+            | otherwise -> RowRefused [] [bootstrapRowFinding "BOOTSTRAP-CHALLENGE" "the independent challenge did not reject every bypass"]
+        ObserverRow ->
+            RowPassed
+                [ observation "bootstrap.observer.sha256" (digestTexts ["bootstrap-observer", oracleDigest, transcriptDigest])
+                , observation "bootstrap.transcript.sha256" transcriptDigest
+                ]
+        AuthorityBypassRow
+            | not (bootstrapDigestMatches (replicate 64 'a') (replicate 64 'b'))
+            , not (bootstrapSnapshotMatches (replicate 64 'a') (replicate 64 'b')) ->
+                RowPassed
+                    [ observation "bootstrap.authority" (genesisTrustAssumptionLabel trust)
+                    , observation "bootstrap.authority-bypass" "digest-and-snapshot-forgery-rejected"
+                    ]
+            | otherwise -> RowRefused [] [bootstrapRowFinding "BOOTSTRAP-AUTHORITY" "a direct digest or snapshot forgery was accepted"]
+        FreshnessRow -> case closing of
+            Right observed
+                | bootstrapSnapshotMatches
+                    (Text.unpack opening)
+                    (Text.unpack (snapshotIdentity (acquiredSourceSnapshot observed))) ->
+                    RowPassed
+                        [ observation "source.snapshot.opening" opening
+                        , observation "source.snapshot.closing" (snapshotIdentity (acquiredSourceSnapshot observed))
+                        ]
+                | otherwise -> RowRefused [] [bootstrapRowFinding "SOURCE-SNAPSHOT-CHANGED-DURING-GATE" "opening and closing source identities differ"]
+            Left problems ->
+                RowRefused
+                    []
+                    [ finding
+                        "SOURCE-SNAPSHOT-CLOSING-UNAVAILABLE"
+                        "<local-source-snapshot>"
+                        (renderSnapshotProblem problem)
+                    | problem <- problems
+                    ]
+        QualificationRow
+            | qualificationGreen -> RowPassed [observation "qualification.protocol.sha256" transcriptDigest]
+            | otherwise -> RowRefused [] [bootstrapRowFinding "BOOTSTRAP-QUALIFICATION" "the finite qualification protocol is not green"]
+        CleanroomRow ->
+            RowPassed
+                [ observation "bootstrap.cleanroom" ("generated-leaf-absent=" <> Text.pack runLeaf)
+                , observation "bootstrap.harness.sha256" harnessDigest
+                ]
+        LegacyClosureRow -> RowUnverified [] "legacy closure is derived after the sixteen non-circular rows"
+        PredecessorRow ->
+            RowPassed
+                [ observation "predecessor" "genesis-trust-root"
+                , observation "predecessor.genesis-trust.sha256" (genesisTrustDigest trust)
+                ]
+        ResidueRow
+            | projectionPresent ->
+                RowPassed [observation "phase-00.residue" "none; later obligations are explicitly owner-scoped"]
+            | otherwise -> RowRefused [] [bootstrapRowFinding "BOOTSTRAP-RESIDUE" "the verified status projection identities are absent"]
+        PassCriterionRow -> RowUnverified [] "the pass criterion is derived after legacy closure"
+
+    receiptCaseOf (selected, _, _, _, _, _, _) = selected
+    receiptCompiled (_, _, binaryDigest, compileExit, _, _, _) = compileExit == ExitSuccess && sha256Text binaryDigest
+    receiptCleanPassed receipt@(_, _, _, _, runExit, runStdout, runStderr) =
+        receiptCompiled receipt
+            && runExit == ExitSuccess
+            && Text.null runStdout
+            && Text.null runStderr
+    receiptMutantKilled receipt@(selected, _, _, _, runExit, runStdout, runStderr) =
+        receiptCompiled receipt
+            && runExit == ExitFailure 1
+            && Text.null runStdout
+            && runStderr == maybe "" ((<> "\n") . renderBootstrapCase) selected
+    mutantChanged (_, sourceDigest, binaryDigest, _, _, _, _) =
+        sourceDigest /= subjectSourceDigest
+            && sha256Text sourceDigest
+            && sha256Text binaryDigest
+
+rowOutcomeFromCheck :: Text -> CheckResult -> RowOutcome
+rowOutcomeFromCheck code result
+    | checkPassed result && not (null (checkObservations result)) = RowPassed (checkObservations result)
+    | checkPassed result = RowRefused [] [bootstrapRowFinding code "a passing check supplied no observation"]
+    | otherwise = RowRefused (checkObservations result) (checkFindings result)
+
+bootstrapRowFinding :: Text -> Text -> Finding
+bootstrapRowFinding code = finding code "<finite-bootstrap-gate>"
+
+checkResultDigest :: CheckResult -> Text
+checkResultDigest result =
+    digestTexts
+        ( ["check", checkName result]
+            <> concatMap observationFields (checkObservations result)
+            <> concatMap findingFields (checkFindings result)
         )
+  where
+    observationFields item = ["observation", observationKey item, observationValue item]
+    findingFields item = ["finding", findingCode item, Text.pack (findingSubject item), findingDetail item]
+
+digestTexts :: [Text] -> Text
+digestTexts fields =
+    hex
+        ( SHA256.hash
+            (ByteString.concat (map frame fields))
+        )
+  where
+    frame field =
+        let bytes = TextEncoding.encodeUtf8 field
+         in ByteString8.pack (show (ByteString.length bytes)) <> ":" <> bytes <> ";"
 
 bindLegacyClosureToCandidateSource :: Text -> Text -> LegacyClosure -> CheckResult
 bindLegacyClosureToCandidateSource candidateSource acquiredSource closure =
@@ -733,7 +892,7 @@ dispatchGateRow phase result opening closing executableDigest argv row =
                     [ finding
                         "GATE-COMMAND-ARGV"
                         "<process-argv>"
-                        "the observed process argv is not the exact source-bound validation command"
+                        "the observed process argv is not the exact validation command"
                     ]
         FreshnessRow
             | opening == closing ->
@@ -897,7 +1056,11 @@ outcomeResidue outcome = case outcome of
 
 predecessorJson :: PredecessorEvidence -> Value
 predecessorJson predecessor = case predecessor of
-    GenesisPredecessor -> object ["kind" .= ("genesis" :: Text)]
+    GenesisPredecessor digest ->
+        object
+            [ "kind" .= ("genesis-trust" :: Text)
+            , "trustDigest" .= digest
+            ]
     ImmediatePredecessor phase digest ->
         object
             [ "kind" .= ("immediate-predecessor" :: Text)
@@ -1268,7 +1431,16 @@ hex = Text.pack . concatMap byteHex . ByteString.unpack
 validObservation :: Observation -> Bool
 validObservation item =
     not (unsafeText (observationKey item))
-        && not (unsafeText (observationValue item))
+        && not (unsafeObservationValue (observationValue item))
+
+-- | Observation keys occupy one TSV field. Values are the raw payload and may
+-- deliberately contain tabs (for example, the source-snapshot path rows), but
+-- they may not terminate/inject a record or carry an empty/NUL payload. JSON
+-- publication escapes the admitted tabs without changing their bytes.
+unsafeObservationValue :: Text -> Bool
+unsafeObservationValue value =
+    Text.null (Text.strip value)
+        || Text.any (`elem` ['\r', '\n', '\0']) value
 
 unsafeText :: Text -> Bool
 unsafeText value =
