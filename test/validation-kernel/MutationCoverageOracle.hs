@@ -1,20 +1,26 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | Independent expectations for the mutation-coverage count.
+-- | Independent expectations for the mutation-coverage inventory.
 --
--- The numbers here are restated from the corpus, not read back from the
--- module. The kernel declares 5,844 Cabal mutation flags; twenty selector
--- suites between them can execute all 5,844 declared loci; no declared flag remains
--- unwired and no guarded selector identity is absent from the Cabal corpus.
+-- This oracle asserts properties authored from the requirement, never a corpus
+-- cardinality restated from the subject.  A restated total is a change
+-- tripwire rather than an expectation, and because the coverage check runs
+-- inside the documentation-suite gate — which every later phase re-derives — a
+-- total here would redden Phase 0 for work Phase 0 does not own.
+--
+-- It also does not call the subject's decision function.  M.2 forbids an
+-- oracle importing or calling the decision it checks, so the milestone
+-- classification is compared against an authored literal through the
+-- observation the policy check publishes.
 module MutationCoverageOracle
   ( runMutationCoverageOracle
   ) where
 
 import Amoebius.Validation.MutationCoverage
-  ( SelectionMode (..)
+  ( DrivenSuite (..)
   , mutationCoverageCheck
+  , mutationCoverageCheckFor
   , mutationPolicyCheck
-  , mutationSelectionMode
   )
 import Amoebius.Validation.Types (CheckResult (..), Finding (..), Observation (..))
 import Control.Monad (unless)
@@ -23,13 +29,13 @@ import Data.Text qualified as Text
 
 runMutationCoverageOracle :: IO ()
 runMutationCoverageOracle = do
-  let problems = observationProblems <> findingProblems <> policyProblems
+  let problems = inventoryProblems <> findingProblems <> policyProblems
   unless (null problems) $
     fail (unlines ("MutationCoverageOracle component diagnostics failed:" : map ("  " <>) problems))
   putStrLn
-    ( "MutationCoverageOracle: the declared mutation corpus, the twenty driving suites, the "
-        <> "unwired remainder, and the selector-only residue agree with independently stated counts; the milestone set and its "
-        <> "selection modes agree with an independently restated list. An inventory check, not a mutation matrix or gate result."
+    ( "MutationCoverageOracle: the selector inventory is well formed, each malformation is refused at its "
+        <> "exact code, and the published milestone set agrees with an independently authored list. An inventory "
+        <> "check, not a mutation matrix or gate result; family cardinality is owed by each owning capability."
     )
 
 -- | The thirteen capabilities whose gates run the complete corpus, restated
@@ -82,13 +88,13 @@ syntheticRulebook =
 
 policyProblems :: [String]
 policyProblems =
-  [ "selection mode for milestone " <> Text.unpack capability <> " must be MatrixAll"
-  | capability <- expectedMilestones
-  , mutationSelectionMode capability /= MatrixAll
+  [ "published milestone set does not match the independently authored list, observed "
+      <> show (Text.unpack observedMilestones)
+  | observedMilestones /= Text.intercalate "," expectedMilestones
   ]
-    <> [ "selection mode for ordinary gate " <> Text.unpack capability <> " must be Impacted"
+    <> [ "an ordinary capability was published as a milestone: " <> Text.unpack capability
        | capability <- expectedOrdinary
-       , mutationSelectionMode capability /= Impacted
+       , capability `elem` Text.splitOn "," observedMilestones
        ]
     <> [ "against a rulebook naming exactly the expected milestones the policy check must be clean, observed "
            <> show (map (Text.unpack . findingCode) (checkFindings (mutationPolicyCheck syntheticRulebook)))
@@ -110,61 +116,70 @@ policyProblems =
     map (Text.unpack . findingCode) (checkFindings (mutationPolicyCheck (mutate (Text.replace "- `live_dsl_deploy`;" "- `live_dsl_deploy`;\n- `app_tenancy`;"))))
   observedAbsent = map (Text.unpack . findingCode) (checkFindings (mutationPolicyCheck []))
   mutate transform = [(path, transform contents) | (path, contents) <- syntheticRulebook]
+  observedMilestones =
+    head
+      ( [ observationValue item
+        | item <- checkObservations (mutationPolicyCheck syntheticRulebook)
+        , observationKey item == "mutation.milestone-capabilities"
+        ]
+          <> ["<absent>"]
+      )
 
 
--- | Restated from the corpus. The twenty independently named executable
--- suites drive all 5,844 declared loci.
-expectedObservations :: [(Text, Text)]
-expectedObservations =
-  [ ("mutation.declared-loci", "5844")
-  , ("mutation.driven-loci", "5844")
-  , ("mutation.unwired-loci", "0")
-  , ("mutation.selector-only-loci", "0")
-  , ("mutation.driving-suite-count", "20")
-  , ("mutation.suite.VALIDATION_SOURCE_DEBT_PUBLIC", "validation-source-debt-selector-component=188")
-  , ("mutation.suite.VALIDATION_SOURCE_DEBT_INTERNAL", "validation-source-debt-internal-component=73")
-  , ("mutation.suite.VALIDATION_COMPILER_GRAPH_PUBLIC", "validation-compiler-source-graph-selector-component=275")
-  , ("mutation.suite.VALIDATION_COMPILER_GRAPH_ACQUIRED", "validation-compiler-source-graph-acquired-component=70")
-  , ("mutation.suite.VALIDATION_PHASE_CONTRACT_PUBLIC", "validation-phase-contract-component=134")
-  , ("mutation.suite.VALIDATION_PHASE_CONTRACT_INTERNAL", "validation-phase-contract-internal-component=8")
-  , ("mutation.suite.VALIDATION_COMPILER_PLAN", "validation-compiler-component-plan-component=659")
-  , ("mutation.suite.VALIDATION_PB_GRAMMAR", "validation-pb-bootstrap-grammar-component=374")
-  , ("mutation.suite.VALIDATION_POLICY", "validation-policy-contract-selector-component=194")
-  , ("mutation.suite.VALIDATION_LEGACY", "validation-legacy-selector-component=1320")
-  , ("mutation.suite.VALIDATION_PHASE_SEMANTIC", "validation-phase-semantic-selector-component=36")
-  , ("mutation.suite.VALIDATION_QUALIFICATION", "validation-qualification-selector-component=1")
-  , ("mutation.suite.VALIDATION_SOURCE_CLOSURE", "validation-source-closure-selector-component=607")
-  , ("mutation.suite.VALIDATION_SOURCE_CONSUMER_PUBLIC", "validation-source-consumer-selector-component=476")
-  , ("mutation.suite.VALIDATION_SOURCE_CONSUMER_INTERNAL", "validation-source-consumer-internal-selector-component=292")
-  , ("mutation.suite.VALIDATION_DOCUMENTATION", "validation-documentation-selector-component=64")
-  , ("mutation.suite.VALIDATION_DOCUMENTATION_INTERNAL", "validation-documentation-internal-selector-component=91")
-  , ("mutation.suite.VALIDATION_DISPATCH", "validation-dispatch-selector-component=26")
-  , ("mutation.suite.VALIDATION_COMPILER_BUILDINFO", "validation-compiler-buildinfo-selector-component=614")
-  , ("mutation.suite.VALIDATION_COMPILER_ELABORATED", "validation-compiler-elaborated-plan-selector-component=342")
+-- | A well-formed two-row inventory, authored here rather than taken from the
+-- subject, and the minimally different malformations of it.
+--
+-- Each negative differs from 'wellFormedInventory' in exactly one dimension and
+-- must be refused with one exact code, which is what separates a refusal that
+-- names a defect from one that merely fails.
+wellFormedInventory :: [DrivenSuite]
+wellFormedInventory =
+  [ DrivenSuite "alpha-selector-component" "ORACLE_FAMILY_ALPHA" "documentation_suite" 3
+  , DrivenSuite "beta-selector-component" "ORACLE_FAMILY_BETA" "documentation_suite" 5
   ]
 
-observationProblems :: [String]
-observationProblems =
-  [ "missing or wrong observation: " <> Text.unpack key <> "=" <> Text.unpack value
-  | (key, value) <- expectedObservations
-  , (key, value) `notElem` observed
+inventoryProblems :: [String]
+inventoryProblems =
+  [ "a well-formed inventory must produce no coverage refusal, observed " <> show (codesFor wellFormedInventory)
+  | not (null (codesFor wellFormedInventory))
   ]
-    <> [ "unexpected observation count: expected "
-           <> show (length expectedObservations)
-           <> ", observed "
-           <> show (length observed)
-       | length observed /= length expectedObservations
-       ]
+    <> exactly "an empty inventory" [] ["MUTANT-COVERAGE-INVENTORY-EMPTY"]
+    <> exactly
+      "a duplicated driving suite"
+      [head wellFormedInventory, head wellFormedInventory]
+      ["MUTANT-COVERAGE-DUPLICATE-SUITE", "MUTANT-COVERAGE-DUPLICATE-FAMILY"]
+    <> exactly
+      "two drivers for one family"
+      [ head wellFormedInventory
+      , (wellFormedInventory !! 1) {drivenSuiteFamily = "ORACLE_FAMILY_ALPHA"}
+      ]
+      ["MUTANT-COVERAGE-DUPLICATE-FAMILY"]
+    <> exactly
+      "a non-positive locus count"
+      [head wellFormedInventory, (wellFormedInventory !! 1) {drivenSuiteLoci = 0}]
+      ["MUTANT-COVERAGE-INTEGRITY"]
+    <> exactly
+      "an owner outside the phase-identity table"
+      [head wellFormedInventory, (wellFormedInventory !! 1) {drivenSuiteOwnerCapability = "no_such_capability"}]
+      ["MUTANT-COVERAGE-OWNER-UNKNOWN"]
  where
-  observed =
-    [(observationKey item, observationValue item) | item <- checkObservations mutationCoverageCheck]
+  codesFor suites = map findingCode (checkFindings (mutationCoverageCheckFor suites))
+  exactly label suites expected =
+    [ label <> " must be refused with exactly " <> show (map Text.unpack expected) <> ", observed " <> show (map Text.unpack (codesFor suites))
+    | codesFor suites /= expected
+    ]
 
--- | Complete selector wiring produces no coverage refusal.
+-- | The live inventory must be well formed.  Its cardinality is not asserted:
+-- each family's count and unwired remainder are owed by the capability named in
+-- its owner field, in that phase's own residue.
 findingProblems :: [String]
 findingProblems =
-  [ "expected no mutation-coverage refusal, observed "
+  [ "expected no mutation-coverage refusal for the live inventory, observed "
       <> show (map (Text.unpack . findingCode) findings)
   | not (null findings)
   ]
+    <> [ "the live inventory published no per-owner total"
+       | not (any (Text.isPrefixOf "mutation.owner." . observationKey) (checkObservations mutationCoverageCheck))
+       ]
  where
   findings = checkFindings mutationCoverageCheck

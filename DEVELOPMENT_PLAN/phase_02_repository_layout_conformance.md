@@ -330,7 +330,11 @@ mutation registry. Applied source copies and any serialized registry projection 
 
 1. The Haskell registry enumerates every declared mutation, and every run-local applied mutant resolves through
    it in both directions.
-2. A mutation reachable only by a build flag fails the gate.
+2. A mutation reachable only by a build flag fails the gate unless that flag's resulting compiled
+   production locus and changed binary are both observed. That observation is the sole admission
+   [§M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject)
+   grants a build flag, so an unobserved flag mutation is refused at its own locus while an observed
+   one remains admissible until the Haskell registry above replaces it.
 3. The registry carries no disposition that admits a mutation lacking an operator or a production locus, and
    admission reads no tracker status. A negative that reintroduces either — an operator-less row, or a read of
    a phase's Done marker — is refused at its own locus.

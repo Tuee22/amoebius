@@ -364,34 +364,40 @@ parseCabalEntries entries = foldr parseOne ([], []) entries
     case runParseResult (parseGenericPackageDescription (trackedBytes entry)) of
       (_, Left _) -> (declarations, RegistryCabalParseFailure path : problems)
       (warnings, Right description) ->
-        ( declarationsFor path description <> declarations
-        , [RegistryCabalParseWarning path (length warnings) | not (null warnings)] <> problems
-        )
+        let (declared, declarationLimits) = declarationsFor path description
+         in ( declared <> declarations
+            , declarationLimits
+                <> [RegistryCabalParseWarning path (length warnings) | not (null warnings)]
+                <> problems
+            )
    where
     path = indexPath (trackedIndex entry)
 
-declarationsFor :: FilePath -> GenericPackageDescription -> [ComponentDeclaration]
+declarationsFor
+  :: FilePath
+  -> GenericPackageDescription
+  -> ([ComponentDeclaration], [RegistryProblem])
 declarationsFor cabalPath description =
-  concat
-    [ maybe [] (declarationsFromTree (libraryDeclaration "lib")) (condLibrary description)
-    , concat
-        [ declarationsFromTree (libraryDeclaration ("lib:" <> componentText name)) tree
+  (concat declaredPerComponent, concat problemsPerComponent)
+ where
+  (declaredPerComponent, problemsPerComponent) = unzip components
+  components =
+    concat
+      [ maybe [] (pure . declarationsFromTree (libraryDeclaration "lib")) (condLibrary description)
+      , [ declarationsFromTree (libraryDeclaration ("lib:" <> componentText name)) tree
         | (name, tree) <- condSubLibraries description
         ]
-    , concat
-        [ declarationsFromTree (executableDeclaration ("exe:" <> componentText name)) tree
+      , [ declarationsFromTree (executableDeclaration ("exe:" <> componentText name)) tree
         | (name, tree) <- condExecutables description
         ]
-    , concat
-        [ declarationsFromTree (testDeclaration ("test:" <> componentText name)) tree
+      , [ declarationsFromTree (testDeclaration ("test:" <> componentText name)) tree
         | (name, tree) <- condTestSuites description
         ]
-    , concat
-        [ declarationsFromTree (benchmarkDeclaration ("bench:" <> componentText name)) tree
+      , [ declarationsFromTree (benchmarkDeclaration ("bench:" <> componentText name)) tree
         | (name, tree) <- condBenchmarks description
         ]
-    ]
- where
+      ]
+
   root = packageRoot cabalPath
   qualify name = Text.pack cabalPath <> ":" <> name
   libraryDeclaration name branchIdentity library =
@@ -418,31 +424,116 @@ declarationsFromTree
   :: (Monoid component, Show variable)
   => (Text -> component -> ComponentDeclaration)
   -> CondTree variable [Dependency] component
-  -> [ComponentDeclaration]
-declarationsFromTree project tree =
-  [ project (renderBranchIdentity decisions) component
-  | (decisions, component) <- conditionalLeaves mempty [] tree
-  ]
+  -> ([ComponentDeclaration], [RegistryProblem])
+declarationsFromTree project tree
+  | configurations > maximumComponentConfigurations =
+      ( []
+      , [RegistryResourceLimit
+           "component-configurations"
+           maximumComponentConfigurations
+           configurations
+        ]
+      )
+  | otherwise =
+      ( [ project (renderBranchIdentity decisions) component
+        | (decisions, component) <- conditionalLeaves projectionOf mempty [] tree
+        ]
+      , []
+      )
+ where
+  projectionOf component = declarationProjection (project "" component)
+  configurations = configurationCount projectionOf mempty tree
+
+-- | Saturating count of the configurations a component tree describes, over
+-- exactly the branches 'conditionalLeaves' folds.
+--
+-- Addition and multiplication saturate one past the admitted maximum, so the
+-- count is decided before any leaf, decision path, rendered branch identity, or
+-- 'Set' is constructed.  A ceiling applied after construction is a diagnostic
+-- about allocation that already happened, not an admission bound.
+configurationCount
+  :: (Monoid component, Eq projection)
+  => (component -> projection)
+  -> component
+  -> CondTree variable constraints component
+  -> Int
+configurationCount projectionOf inherited (CondNode datum _ branches) =
+  foldl' multiplySaturating 1 (map branchFactor projectedBranches)
+ where
+  base = inherited <> datum
+  baseProjection = projectionOf base
+  projectedBranches =
+    filter (branchChangesProjection projectionOf base baseProjection) branches
+  branchFactor (CondBranch _ trueBranch falseBranch) =
+    addSaturating
+      (configurationCount projectionOf base trueBranch)
+      (maybe 1 (configurationCount projectionOf base) falseBranch)
+
+-- | One past the admitted configuration maximum; every saturating operation
+-- stops here, so an observed count never exceeds it and never overflows.
+configurationCeiling :: Int
+configurationCeiling = maximumComponentConfigurations + 1
+
+addSaturating :: Int -> Int -> Int
+addSaturating left right = min configurationCeiling (left + right)
+
+multiplySaturating :: Int -> Int -> Int
+multiplySaturating left right
+  | left >= configurationCeiling = configurationCeiling
+  | right >= configurationCeiling = configurationCeiling
+  | left == 0 || right == 0 = 0
+  | right > configurationCeiling `div` left = configurationCeiling
+  | otherwise = min configurationCeiling (left * right)
+
+-- | The fields a 'ComponentDeclaration' actually records, excluding the
+-- rendered branch identity.
+--
+-- Two leaves with the same projection describe the same subject assignment, so
+-- a branch that cannot change this value is invisible to the registry.
+declarationProjection
+  :: ComponentDeclaration
+  -> (Bool, [FilePath], [Text], [FilePath], Set Text)
+declarationProjection declaration =
+  ( declarationBuildable declaration
+  , declarationSourceDirectories declaration
+  , declarationModules declaration
+  , declarationMainPaths declaration
+  , declarationAutogenModules declaration
+  )
 
 -- Cabal condition trees describe configurations, not an inventory of every
 -- intermediate node.  Enumerate complete leaves and retain each predicate
 -- decision.  For an @if@ without @else@, the false branch inherits the
--- current component unchanged.  Folding the sibling branches forms their
--- Cartesian product, which avoids the old intermediate-node and branch-loss
--- behaviour.
+-- current component unchanged.
+--
+-- Only a branch that can change the projected declaration is folded.  A branch
+-- whose every reachable component projects exactly like the surrounding one
+-- records no subject, no module, and no buildability difference, so folding it
+-- would multiply the configuration count without changing any declaration the
+-- registry can observe.  That is what produced the sibling product: a stanza
+-- carrying thousands of @cpp-options@-only conditionals described 2^n complete
+-- leaves that were byte-identical apart from a rendered branch identity no
+-- consumer can accept, because 'expectationBranchIdentity' admits only an
+-- unconditional identity or a single decision.
 conditionalLeaves
-  :: (Monoid component, Show variable)
-  => component
+  :: (Monoid component, Show variable, Eq projection)
+  => (component -> projection)
+  -> component
   -> [(Text, Bool)]
   -> CondTree variable constraints component
   -> [([(Text, Bool)], component)]
-conditionalLeaves inherited inheritedDecisions (CondNode datum _ branches) =
-  foldl expandBranch [(inheritedDecisions, inherited <> datum)] branches
+conditionalLeaves projectionOf inherited inheritedDecisions (CondNode datum _ branches) =
+  foldl expandBranch [(inheritedDecisions, base)] projectedBranches
  where
+  base = inherited <> datum
+  baseProjection = projectionOf base
+  projectedBranches =
+    filter (branchChangesProjection projectionOf base baseProjection) branches
   expandBranch configurations (CondBranch condition trueBranch falseBranch) =
     concatMap (expandConfiguration condition trueBranch falseBranch) configurations
   expandConfiguration condition trueBranch falseBranch (decisions, component) =
     conditionalLeaves
+      projectionOf
       component
       (decisions <> [(conditionText, True)])
       trueBranch
@@ -450,11 +541,45 @@ conditionalLeaves inherited inheritedDecisions (CondNode datum _ branches) =
         Nothing -> [(decisions <> [(conditionText, False)], component)]
         Just branch ->
           conditionalLeaves
+            projectionOf
             component
             (decisions <> [(conditionText, False)])
             branch
    where
     conditionText = Text.pack (show condition)
+
+-- | Whether any component reachable through a branch projects differently from
+-- the component surrounding it.
+--
+-- The walk is additive over the subtree rather than a product across siblings,
+-- so deciding visibility is linear in condition nodes and can never reproduce
+-- the expansion it exists to prevent.
+branchChangesProjection
+  :: (Monoid component, Eq projection)
+  => (component -> projection)
+  -> component
+  -> projection
+  -> CondBranch variable constraints component
+  -> Bool
+branchChangesProjection projectionOf base baseProjection (CondBranch _ trueBranch falseBranch) =
+  differs trueBranch || maybe False differs falseBranch
+ where
+  differs subtree =
+    any ((/= baseProjection) . projectionOf) (subtreeComponents base subtree)
+
+-- | Every component a subtree can contribute, accumulated additively.
+subtreeComponents
+  :: Monoid component
+  => component
+  -> CondTree variable constraints component
+  -> [component]
+subtreeComponents inherited (CondNode datum _ branches) =
+  base : concatMap fromBranch branches
+ where
+  base = inherited <> datum
+  fromBranch (CondBranch _ trueBranch falseBranch) =
+    subtreeComponents base trueBranch
+      <> maybe [] (subtreeComponents base) falseBranch
 
 renderBranchIdentity :: [(Text, Bool)] -> Text
 renderBranchIdentity [] = "unconditional"

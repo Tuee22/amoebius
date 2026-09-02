@@ -5,8 +5,10 @@ module CompilerSubjectRegistryOracle
   ) where
 
 import Amoebius.Validation.CompilerExpectationAuthority.Internal
-  ( compilerExpectationAuthority
-  , compilerExpectationAuthorityDigest
+  ( CompilerExpectationOutcome (..)
+  , CompilerExpectationRow (..)
+  , compilerExpectationAuthority
+  , expectationProblemsFor
   , compilerExpectationAuthorityProblems
   , foldCompilerExpectationAuthority
   , foldCompilerExpectationOutcome
@@ -27,7 +29,7 @@ import Amoebius.Validation.SourceClosure.Internal
   , TrackedEntry (..)
   , sourceClosureInternalTestAcquire
   )
-import Amoebius.Validation.Types (CheckResult (..))
+import Amoebius.Validation.Types (CheckResult (..), Finding (..))
 import Control.Monad (unless)
 import Data.ByteString.Char8 qualified as ByteString8
 import Data.List (sort)
@@ -45,6 +47,11 @@ runCompilerSubjectRegistryOracle =
       <> precedenceProblems
       <> harnessProblems
       <> conditionalCompileNegativeProblems
+      <> siblingProductProblems
+      <> invisibleSiblingIdentityProblems
+      <> nestedInvisibleSiblingProblems
+      <> configurationCeilingProblems
+      <> authorityPropertyProblems
       <> compileNegativePublicControlProblems
       <> unknownCompileNegativeProblems
       <> acquiredCoverageProblems
@@ -55,16 +62,19 @@ authorityProblems =
   [ "compiled expectation authority reported internal problems"
   | not (null (compilerExpectationAuthorityProblems compilerExpectationAuthority))
   ]
-    <> [ "compiled expectation authority digest changed"
-       | compilerExpectationAuthorityDigest compilerExpectationAuthority
-          /= "7efa31beb982692484d1623a8582b5e7d005f9fa285454ac771320705a0f81db"
-       ]
-    <> [ "compiled expectation authority cardinality changed"
-       | length rows /= 369
-       ]
-    <> [ "compiled expectation authority outcome partition changed"
-       | (successCount, refusalCount, fixtureCount) /= (14, 355, 0)
-       ]
+    -- The authority's digest, its row count, and its outcome partition are not
+    -- asserted. Each was a measurement of an authored list restated as an
+    -- expectation, so adding one compile-negative subject — ordinary Phase-15
+    -- work — refused the documentation-suite gate, and the gate chain
+    -- re-derives gate 0 inside every later phase. They were also redundant: the
+    -- registry already refuses a row whose subject is absent
+    -- (RegistryExpectationBindingMissing) and a subject whose row is absent
+    -- (RegistryExpectedOutcomeMissing), in both directions.
+    --
+    -- The positive-control universe below is kept. It is not a magnitude but an
+    -- authored inventory of the exact subjects that must COMPILE rather than be
+    -- refused, which is the paired-positive half of the compile-fail corpus; a
+    -- control silently becoming a refusal is precisely what it exists to catch.
     <> [ "compiled expectation authority positive-control universe changed"
        | sort successBindings /= expectedSuccessBindings
        ]
@@ -75,9 +85,6 @@ authorityProblems =
       []
       compilerExpectationAuthority
   successBindings = [(path, component) | (path, component, "success") <- rows]
-  successCount = length [() | (_, _, "success") <- rows]
-  refusalCount = length [() | (_, _, "refusal") <- rows]
-  fixtureCount = length [() | (_, _, "fixture") <- rows]
   outcomeToken = foldCompilerExpectationOutcome "success" "refusal" "fixture"
   expectedSuccessBindings =
     sort
@@ -213,6 +220,304 @@ conditionalCompileNegativeProblems =
           ]
       )
   check = compilerSubjectRegistryCheck registry
+
+-- | Sibling conditions that cannot change a projected declaration field must
+-- not multiply the configuration count.
+--
+-- Twenty @cpp-options@-only siblings describe 2^20 complete leaves under a
+-- Cartesian sibling fold, every one of them byte-identical apart from a
+-- rendered branch identity no consumer can accept.  The registry must observe
+-- exactly one unconditional declaration instead.
+siblingProductProblems :: [String]
+siblingProductProblems =
+  [ "cpp-options-only sibling conditions did not collapse to one unconditional declaration"
+  | compilerSubjectBindingAssignments registry
+      /= [ ( "src/A.hs"
+           , objectA
+           , ProductSubject
+           , ExpectedCompileSuccess
+           , "fixture.cabal:lib"
+           , "unconditional"
+           )
+         ]
+  ]
+    <> [ "cpp-options-only sibling conditions produced registry findings"
+       | not (null (checkFindings check))
+       ]
+ where
+  siblings = [1 .. 20 :: Int]
+  flagName ordinal = "sibling-" <> show ordinal <> "-mutant"
+  registry =
+    deriveCompilerSubjectRegistry
+      ( snapshot
+          [ tracked
+              "fixture.cabal"
+              objectC
+              ( unlines
+                  ( [ "cabal-version: 3.0"
+                    , "name: fixture"
+                    , "version: 0"
+                    , "build-type: Simple"
+                    ]
+                      <> concat
+                        [ [ "flag " <> flagName ordinal
+                          , "  default: False"
+                          , "  manual: True"
+                          ]
+                        | ordinal <- siblings
+                        ]
+                      <> [ "library"
+                         , "  exposed-modules: A"
+                         , "  hs-source-dirs: src"
+                         , "  default-language: GHC2024"
+                         ]
+                      <> concat
+                        [ [ "  if flag(" <> flagName ordinal <> ")"
+                          , "    cpp-options: -DSIBLING_" <> show ordinal
+                          ]
+                        | ordinal <- siblings
+                        ]
+                  )
+              )
+          , haskell "src/A.hs" objectA
+          ]
+      )
+  check = compilerSubjectRegistryCheck registry
+
+-- | A projection-invisible sibling must not enter the branch identity of a
+-- sibling that is visible.
+--
+-- This is the conditional compile-negative fixture with one @cpp-options@-only
+-- condition added beside its @buildable@ guard.  The expectation authority
+-- admits an unconditional identity or a single decision, so a fold that
+-- recorded both siblings would make the exact refusal subject unassignable.
+invisibleSiblingIdentityProblems :: [String]
+invisibleSiblingIdentityProblems =
+  [ "an invisible sibling contaminated the exact compile-negative branch identity"
+  | compilerSubjectBindingAssignments registry
+      /= [ ( "test/compile-negative/compiler-component-plan-assignment-opacity/Main.hs"
+           , objectA
+           , CompileNegativeSubject
+           , ExpectedCompileRefusal
+           , "amoebius.cabal:test:validation-compiler-component-plan-assignment-opacity-attack"
+           , "false:CNot (Var (PackageFlag (FlagName \"validation-compiler-component-plan-assignment-opacity-attack\")))"
+           )
+         ]
+  ]
+    <> [ "an invisible sibling beside a buildable guard produced registry findings"
+       | not (null (checkFindings check))
+       ]
+ where
+  registry =
+    deriveCompilerSubjectRegistry
+      ( snapshot
+          [ tracked
+              "amoebius.cabal"
+              objectC
+              ( unlines
+                  [ "cabal-version: 3.0"
+                  , "name: amoebius"
+                  , "version: 0"
+                  , "build-type: Simple"
+                  , "flag validation-compiler-component-plan-assignment-opacity-attack"
+                  , "  default: False"
+                  , "  manual: True"
+                  , "flag invisible-sibling-mutant"
+                  , "  default: False"
+                  , "  manual: True"
+                  , "test-suite validation-compiler-component-plan-assignment-opacity-attack"
+                  , "  type: exitcode-stdio-1.0"
+                  , "  main-is: Main.hs"
+                  , "  hs-source-dirs: test/compile-negative/compiler-component-plan-assignment-opacity"
+                  , "  default-language: GHC2024"
+                  , "  if flag(invisible-sibling-mutant)"
+                  , "    cpp-options: -DINVISIBLE_SIBLING_MUTANT"
+                  , "  if !flag(validation-compiler-component-plan-assignment-opacity-attack)"
+                  , "    buildable: False"
+                  ]
+              )
+          , haskell "test/compile-negative/compiler-component-plan-assignment-opacity/Main.hs" objectA
+          ]
+      )
+  check = compilerSubjectRegistryCheck registry
+
+-- | Invisibility is decided through nesting, not only across flat siblings.
+nestedInvisibleSiblingProblems :: [String]
+nestedInvisibleSiblingProblems =
+  [ "nested cpp-options-only conditions did not collapse to one unconditional declaration"
+  | compilerSubjectBindingAssignments registry
+      /= [ ( "src/A.hs"
+           , objectA
+           , ProductSubject
+           , ExpectedCompileSuccess
+           , "fixture.cabal:lib"
+           , "unconditional"
+           )
+         ]
+  ]
+    <> [ "nested cpp-options-only conditions produced registry findings"
+       | not (null (checkFindings check))
+       ]
+ where
+  registry =
+    deriveCompilerSubjectRegistry
+      ( snapshot
+          [ tracked
+              "fixture.cabal"
+              objectC
+              ( unlines
+                  [ "cabal-version: 3.0"
+                  , "name: fixture"
+                  , "version: 0"
+                  , "build-type: Simple"
+                  , "flag outer-mutant"
+                  , "  default: False"
+                  , "  manual: True"
+                  , "flag inner-mutant"
+                  , "  default: False"
+                  , "  manual: True"
+                  , "library"
+                  , "  exposed-modules: A"
+                  , "  hs-source-dirs: src"
+                  , "  default-language: GHC2024"
+                  , "  if flag(outer-mutant)"
+                  , "    cpp-options: -DOUTER_MUTANT"
+                  , "    if flag(inner-mutant)"
+                  , "      cpp-options: -DINNER_MUTANT"
+                  ]
+              )
+          , haskell "src/A.hs" objectA
+          ]
+      )
+  check = compilerSubjectRegistryCheck registry
+
+-- | The configuration ceiling is an admission bound, not a diagnostic.
+--
+-- A minimally different pair around @maximumComponentConfigurations@: twelve
+-- visible binary siblings describe exactly 4,096 configurations and must be
+-- admitted, while thirteen describe 8,192 and must be refused by
+-- @component-configurations@ before any leaf is built.  The refusal must arrive
+-- with no declaration bound, because a partial declaration list presented as a
+-- complete registry is the failure the ceiling exists to prevent.
+configurationCeilingProblems :: [String]
+configurationCeilingProblems =
+  [ "twelve visible sibling conditions were refused at the configuration ceiling"
+  | not (null (ceilingFindings 12))
+  ]
+    <> [ "thirteen visible sibling conditions were admitted past the configuration ceiling"
+       | null (ceilingFindings 13)
+       ]
+    <> [ "the configuration ceiling refusal did not name component-configurations"
+       | not (any (Text.isInfixOf "component-configurations") (ceilingFindings 13))
+       ]
+    <> [ "a refused component still bound an exact subject"
+       | not (null (compilerSubjectBindingAssignments (ceilingRegistry 13)))
+       ]
+ where
+  ceilingFindings count = map findingDetail (checkFindings (compilerSubjectRegistryCheck (ceilingRegistry count)))
+  ceilingRegistry siblingCount =
+    deriveCompilerSubjectRegistry
+      ( snapshot
+          [ tracked
+              "fixture.cabal"
+              objectC
+              ( unlines
+                  ( [ "cabal-version: 3.0"
+                    , "name: fixture"
+                    , "version: 0"
+                    , "build-type: Simple"
+                    ]
+                      <> concat
+                        [ [ "flag guard-" <> show ordinal
+                          , "  default: False"
+                          , "  manual: True"
+                          ]
+                        | ordinal <- [1 .. siblingCount]
+                        ]
+                      <> [ "library"
+                         , "  exposed-modules: A"
+                         , "  hs-source-dirs: src"
+                         , "  default-language: GHC2024"
+                         ]
+                      <> concat
+                        [ [ "  if flag(guard-" <> show ordinal <> ")"
+                          , "    buildable: False"
+                          ]
+                        | ordinal <- [1 .. siblingCount :: Int]
+                        ]
+                  )
+              )
+          , haskell "src/A.hs" objectA
+          ]
+      )
+
+-- | Each property of the expectation registry, driven over a supplied row list.
+--
+-- The authority is one compiled constant, so before the 'expectationProblemsFor'
+-- seam existed an oracle could assert only that the live list is clean — never
+-- that a malformed one is refused. Every case below differs from
+-- 'wellFormedRows' in exactly one dimension and must produce exactly its own
+-- refusal.
+authorityPropertyProblems :: [String]
+authorityPropertyProblems =
+  exactlyTagged "a well-formed registry" wellFormedRows []
+    <> exactlyTagged
+      "a collapsed registry"
+      (take 3 wellFormedRows)
+      ["CompilerExpectationRegistryCollapsed"]
+    <> exactlyTagged
+      "a fixture outcome on a compile-negative subject"
+      (syntheticRow 1 FixtureObservation : drop 1 wellFormedRows)
+      ["CompilerExpectationFixtureOutcomeForbidden"]
+    <> exactlyTagged
+      "a duplicated row"
+      (syntheticRow 2 CompileRefusal : drop 1 wellFormedRows)
+      [ "CompilerExpectationDuplicateKey"
+      , "CompilerExpectationDuplicatePath"
+      , "CompilerExpectationDuplicateComponent"
+      ]
+    <> exactlyTagged
+      "an invalid subject path"
+      (CompilerExpectationRow "src/Elsewhere.hs" (syntheticComponent 1) CompileRefusal : drop 1 wellFormedRows)
+      ["CompilerExpectationInvalidPath"]
+    <> exactlyTagged
+      "an invalid component identity"
+      (CompilerExpectationRow (syntheticPath 1) "not-a-component" CompileRefusal : drop 1 wellFormedRows)
+      ["CompilerExpectationInvalidComponent"]
+    <> [ "the live expectation authority admits a fixture-observation row"
+       | not (null [() | item <- liveOutcomeTokens, item == "fixture"])
+       ]
+ where
+  exactlyTagged label rows expected =
+    [ label
+        <> " must be refused with exactly "
+        <> show expected
+        <> ", observed "
+        <> show (tagsFor rows)
+    | tagsFor rows /= expected
+    ]
+  tagsFor rows = map (head . words . show) (expectationProblemsFor rows)
+  liveOutcomeTokens =
+    foldCompilerExpectationAuthority
+      (\tokens _ _ outcome -> foldCompilerExpectationOutcome "success" "refusal" "fixture" outcome : tokens)
+      []
+      compilerExpectationAuthority
+
+-- | Two hundred and twenty distinct well-formed rows: above the authored floor,
+-- so a case that trips the floor is doing so for its own reason.
+wellFormedRows :: [CompilerExpectationRow]
+wellFormedRows = [syntheticRow ordinal CompileRefusal | ordinal <- [1 .. 220]]
+
+syntheticRow :: Int -> CompilerExpectationOutcome -> CompilerExpectationRow
+syntheticRow ordinal outcome =
+  CompilerExpectationRow (syntheticPath ordinal) (syntheticComponent ordinal) outcome
+
+syntheticPath :: Int -> FilePath
+syntheticPath ordinal = "test/compile-negative/synthetic-" <> show ordinal <> "-opacity/Main.hs"
+
+syntheticComponent :: Int -> Text
+syntheticComponent ordinal =
+  "amoebius.cabal:test:validation-synthetic-" <> Text.pack (show ordinal) <> "-opacity-attack"
 
 compileNegativePublicControlProblems :: [String]
 compileNegativePublicControlProblems =

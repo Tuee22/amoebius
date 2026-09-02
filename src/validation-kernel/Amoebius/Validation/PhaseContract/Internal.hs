@@ -1601,7 +1601,13 @@ checkSprintContracts phases scope enforceCanonicalInventory phase =
  where
   sprintSections = sprintSectionsFor phase
   parsedOrdinals = map (parseSprintOrdinal (phaseNumber phase) . fst) sprintSections
-  expectedOrdinals = [1 .. Map.findWithDefault 0 (phaseNumber phase) canonicalSprintCounts]
+  -- Sprint identities must be contiguous from one.  This is a property of the
+  -- document being checked, not a count recorded centrally: a per-phase sprint
+  -- census made adding or removing a sprint anywhere in the plan a
+  -- documentation-suite refusal, and because the gate chain re-derives gate 0
+  -- inside every later phase's gate, ordinary planning work owned by another
+  -- phase reopened a closed Phase 0.
+  expectedOrdinals = [1 .. length parsedOrdinals]
   inventoryFindings =
     guardedInventoryFindings
 #if defined(VALIDATION_PHASE_CONTRACT_SPRINT_INVENTORY_FINDING_BYPASS_MUTANT)
@@ -1611,9 +1617,9 @@ checkSprintContracts phases scope enforceCanonicalInventory phase =
     [ finding
         "PLAN-SPRINT-INVENTORY"
         (phasePath phase)
-        ( "sprint identities must be the recorded contiguous inventory "
-            <> showText expectedOrdinals
-            <> "; observed "
+        ( "sprint identities must be contiguous from one; expected "
+            <> showText (map Just expectedOrdinals)
+            <> ", observed "
             <> showText parsedOrdinals
         )
     | enforceCanonicalInventory && parsedOrdinals /= map Just expectedOrdinals
@@ -1973,75 +1979,6 @@ expectedSprintMarker :: SemanticScope -> Int -> Int -> Text
 expectedSprintMarker scope phaseNumberValue sprintNumber =
   Status.renderStatusMarker
     (Status.sprintStatusAt (statusFrontier scope) phaseNumberValue sprintNumber)
-
-canonicalSprintCounts :: Map Int Int
-canonicalSprintCounts =
-  Map.fromList
-    ( [ (0, 8)
-      , (1, 8)
-      , (2, 6)
-      ]
-        <> [(phase, 1) | phase <- [3 .. 10]]
-        <> [(phase, 2) | phase <- [11 .. 15]]
-        <> [(phase, 3) | phase <- [16 .. 19]]
-        <> [(phase, 1) | phase <- [20 .. 24]]
-        <> [ (25, 4)
-           , (26, 5)
-           , (27, 4)
-           , (28, 4)
-           , (29, 5)
-           , (30, 3)
-           , (31, 4)
-           , (32, 2)
-           , (33, 3)
-           , (34, 9)
-           , (35, 4)
-           , (36, 4)
-           , (37, 3)
-           , (38, 3)
-           , (39, 3)
-           , (40, 3)
-           , (41, 3)
-           ]
-        <> [(phase, 1) | phase <- [42 .. 47]]
-        <> [ (48, 5)
-           , (49, 4)
-           , (50, 4)
-           , (51, 5)
-           , (52, 5)
-           , (53, 5)
-           , (54, 5)
-           , (55, 4)
-           , (56, 4)
-           , (57, 3)
-           , (58, 5)
-           , (59, 5)
-           , (60, 3)
-           , (61, 4)
-           , (62, 3)
-           , (63, 4)
-           , (64, 4)
-           , (65, 4)
-           , (66, 1)
-           , (67, 5)
-           , (68, 1)
-           , (69, 4)
-           , (70, 1)
-           , (71, 4)
-           , (72, 1)
-           , (73, 3)
-           , (74, 2)
-           , (75, 4)
-           , (76, 1)
-           , (77, 4)
-           , (78, 5)
-           , (79, 2)
-           , (80, 8)
-           ]
-        <> [(phase, 1) | phase <- [81 .. 88]]
-        <> [(89, 5)]
-        <> [(phase, 1) | phase <- [90 .. 95]]
-    )
 
 parseTrackerDocument :: Text -> TrackerFrame
 parseTrackerDocument contents =

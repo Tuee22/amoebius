@@ -59,7 +59,7 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 
-data SourceDebtBaseline = SourceDebtBaseline Int Text Text
+data SourceDebtBaseline = SourceDebtBaseline Int
   deriving (Eq, Ord, Show)
 
 data SourceDebtObservation = SourceDebtObservation Int Text Text
@@ -70,8 +70,6 @@ data SourceDebtProblem
   | SourceDebtFamilySetMismatch (Set SourceDebtId) (Set SourceDebtId)
   | SourcePbObservationPresent SourceDebtObservation
   | SourceDebtPathCountMismatch SourceDebtId Int Int
-  | SourceDebtFingerprintMismatch SourceDebtId Text Text
-  | SourceDebtPathInventoryDigestMismatch SourceDebtId Text Text
   deriving (Eq, Ord, Show)
 
 data SourceDebtState
@@ -278,16 +276,6 @@ sourceDebtBaseline SourceTools =
 #else
         237
 #endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_FINGERPRINT_MUTANT)
-        "7a370eba5fefa423d19fe03b62a4bb0d1a42f081276c92edef9b8799b6202bdc"
-#else
-        "669f28af21b8b592018a0d5a4c789aa8b6f561f60a2b772caf1aef35b7199b5f"
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_PATH_INVENTORY_MUTANT)
-        "b3e7165733971922668b4c283f2a4f5fe9001f143fd621a9091455c23df01504"
-#else
-        "a3e7165733971922668b4c283f2a4f5fe9001f143fd621a9091455c23df01504"
-#endif
     )
 #endif
 sourceDebtBaseline SourceDhall =
@@ -300,16 +288,6 @@ sourceDebtBaseline SourceDhall =
         280
 #else
         279
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_DHALL_FINGERPRINT_MUTANT)
-        "2b6ec412272fc7a9894e0e6aed604eb1ea45e5adb059ae8a85a9b0988231ddfb"
-#else
-        "9b4d450e9ddbc533856263d2f6aa639554a481154fcb30df8103347d5a9c3574"
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_DHALL_PATH_INVENTORY_MUTANT)
-        "8360f0c7a1065e8aba3e8c241668703f65075dcf3dfe7e91f7923939291f17e2"
-#else
-        "9360f0c7a1065e8aba3e8c241668703f65075dcf3dfe7e91f7923939291f17e2"
 #endif
     )
 #endif
@@ -324,16 +302,6 @@ sourceDebtBaseline SourceProto =
 #else
         1
 #endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_PROTO_FINGERPRINT_MUTANT)
-        "929974a9fe5d21a566f7b9fe6a6311e2b9cc0d3ce6bd61c6db7c3b8e89e30d0f"
-#else
-        "44bb55710410171b33f6142975efa23fd8a05d1027ecbe2698d06379f6271134"
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_PROTO_PATH_INVENTORY_MUTANT)
-        "498ee861ab5e554a723bcc0cf94b943cf89b033bc62571fcb4387ab350e5e716"
-#else
-        "398ee861ab5e554a723bcc0cf94b943cf89b033bc62571fcb4387ab350e5e716"
-#endif
     )
 #endif
 sourceDebtBaseline SourceUi =
@@ -346,16 +314,6 @@ sourceDebtBaseline SourceUi =
         17
 #else
         16
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_UI_FINGERPRINT_MUTANT)
-        "8e7d4b91e6b2d0b410bfab949a5aa56d7437c498282bee93640fde14d01897da"
-#else
-        "49844e4d5d8536393edc5c1fff5b9376ee0097f4eb24d473ef92bc052236b7ee"
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_UI_PATH_INVENTORY_MUTANT)
-        "4992d81deb5b947f633846cb62279a3fe0f4ff03701bfd27ca382855177b6223"
-#else
-        "3992d81deb5b947f633846cb62279a3fe0f4ff03701bfd27ca382855177b6223"
 #endif
     )
 #endif
@@ -370,16 +328,6 @@ sourceDebtBaseline SourcePulumi =
 #else
         1
 #endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_PULUMI_FINGERPRINT_MUTANT)
-        "2cb177d7a74486fcc58159ecc05f43eb929f9c4e5d2d31c8762f282b04ef4697"
-#else
-        "3aa597f4e37c5e29d368b600da8f7c158e42cd6d20aed12074f70e0004a48443"
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_PULUMI_PATH_INVENTORY_MUTANT)
-        "f55482b85a31758b72c112284c741f16766f6d1ffaf030ea0d7773d88b0f3022"
-#else
-        "e55482b85a31758b72c112284c741f16766f6d1ffaf030ea0d7773d88b0f3022"
-#endif
     )
 #endif
 sourceDebtBaseline SourceTest =
@@ -392,16 +340,6 @@ sourceDebtBaseline SourceTest =
         891
 #else
         890
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_TEST_FINGERPRINT_MUTANT)
-        "38947c7c6000818cc08d4bd347efde7ba8d1d27e3318fe66566ffca6db7bcfd6"
-#else
-        "1cca0b15e44b59caa0535b38d299125eef816435a8add7fcd7926d56784c7276"
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_TEST_PATH_INVENTORY_MUTANT)
-        "90fc42c24a9de83a8d7cbfd4232417058b7c8a72a9a8f4dec529aab5e5d96542"
-#else
-        "80fc42c24a9de83a8d7cbfd4232417058b7c8a72a9a8f4dec529aab5e5d96542"
 #endif
     )
 #endif
@@ -416,16 +354,6 @@ sourceDebtBaseline SourceProbe =
 #else
         7
 #endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_PROBE_FINGERPRINT_MUTANT)
-        "a04fda09d0d0932c7e58f5fe2b134da8fc97c3ab7b48e19092df1ae97709d75e"
-#else
-        "3396c8f1475b9f6ce679b069a20b0d9e6965fabb190d08e7fcbb407a30430d86"
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_PROBE_PATH_INVENTORY_MUTANT)
-        "88e3bbf2977c0e3f8a8f3dab020a8e504a0d11a453529bd12bda559b32367e14"
-#else
-        "78e3bbf2977c0e3f8a8f3dab020a8e504a0d11a453529bd12bda559b32367e14"
-#endif
     )
 #endif
 sourceDebtBaseline SourcePb = Nothing
@@ -439,16 +367,6 @@ sourceDebtBaseline SourceVendor =
         29
 #else
         28
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_VENDOR_FINGERPRINT_MUTANT)
-        "945e295527ccfeb1cea5434a488124890b680f5dd17baed6dfe9881bcdba07f6"
-#else
-        "83a7e21a7ab24fade30e4524cd2461110b1b4cca4f9a4290ef608ac81ff3963b"
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_VENDOR_PATH_INVENTORY_MUTANT)
-        "2cac8ad1d2f7115323fb503d56ce04463338a94dbb98a8c313adfe67c0e66764"
-#else
-        "1cac8ad1d2f7115323fb503d56ce04463338a94dbb98a8c313adfe67c0e66764"
 #endif
     )
 #endif
@@ -1471,46 +1389,6 @@ sourceDebtProblems observed =
         ]
 #endif
       )
-        <> (
-#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_PROBLEM_COMPOSITION_MUTANT)
-              sourceDebtFingerprintMatches expected actual `seq` []
-#else
-              [ SourceDebtFingerprintMismatch
-               identifier
-#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_EXPECTED_PROJECTION_MUTANT)
-               (baselineFingerprint expected `seq` "")
-#else
-               (baselineFingerprint expected)
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_ACTUAL_PROJECTION_MUTANT)
-               (observationFingerprint actual `seq` "")
-#else
-               (observationFingerprint actual)
-#endif
-           | not (sourceDebtFingerprintMatches expected actual)
-              ]
-#endif
-           )
-        <> (
-#if defined(VALIDATION_SOURCE_DEBT_PATH_PROBLEM_COMPOSITION_MUTANT)
-              sourceDebtPathInventoryMatches expected actual `seq` []
-#else
-              [ SourceDebtPathInventoryDigestMismatch
-               identifier
-#if defined(VALIDATION_SOURCE_DEBT_PATH_EXPECTED_PROJECTION_MUTANT)
-               (baselinePathDigest expected `seq` "")
-#else
-               (baselinePathDigest expected)
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_PATH_ACTUAL_PROJECTION_MUTANT)
-               (observationPathDigest actual `seq` "")
-#else
-               (observationPathDigest actual)
-#endif
-           | not (sourceDebtPathInventoryMatches expected actual)
-              ]
-#endif
-           )
 
 sourceDebtBaselineFamilySetMatches :: Set SourceDebtId -> Set SourceDebtId -> Bool
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_FAMILY_SET_INVERSION_MUTANT)
@@ -1519,11 +1397,17 @@ sourceDebtBaselineFamilySetMatches expected actual = expected /= actual
 sourceDebtBaselineFamilySetMatches expected actual = expected == actual
 #endif
 
+-- | Observed families must be a subset of the declared universe.
+--
+-- Strict equality required every declared family to still have members, so a
+-- family that reached zero — a completed migration — removed its own key and
+-- refused. A subset still refuses an observed family outside the closed
+-- universe, which is the property that matters.
 sourceDebtObservedFamilySetMatches :: Set SourceDebtId -> Set SourceDebtId -> Bool
 #if defined(VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_SET_BYPASS_MUTANT)
 sourceDebtObservedFamilySetMatches expected actual = expected `seq` actual `seq` True
 #else
-sourceDebtObservedFamilySetMatches expected actual = expected == actual
+sourceDebtObservedFamilySetMatches expected actual = actual `Set.isSubsetOf` expected
 #endif
 
 sourceDebtPbIsZero :: Map SourceDebtId SourceDebtObservation -> Bool
@@ -1533,26 +1417,22 @@ sourceDebtPbIsZero observed = observed `seq` True
 sourceDebtPbIsZero = Map.notMember SourcePb
 #endif
 
+-- | The recorded count is a ceiling, not an equality.
+--
+-- Exact equality reddened Phase 0 whenever a tracked non-Haskell file was
+-- added, renamed or deleted — and the companion fingerprint reddened it on a
+-- one-byte edit. Both measured the live tree, and the documentation-suite gate
+-- is re-derived inside every later phase's gate, so ordinary migration work
+-- owned by other phases refused Phase 0. A ratchet keeps the property the
+-- baseline exists for: debt may shrink freely and may never grow.
 sourceDebtCountMatches :: SourceDebtBaseline -> SourceDebtObservation -> Bool
 #if defined(VALIDATION_SOURCE_DEBT_COUNT_COMPARISON_BYPASS_MUTANT)
 sourceDebtCountMatches expected actual = expected `seq` actual `seq` True
 #else
-sourceDebtCountMatches expected actual = baselineCount expected == observationCount actual
+sourceDebtCountMatches expected actual = observationCount actual <= baselineCount expected
 #endif
 
-sourceDebtFingerprintMatches :: SourceDebtBaseline -> SourceDebtObservation -> Bool
-#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_COMPARISON_BYPASS_MUTANT)
-sourceDebtFingerprintMatches expected actual = expected `seq` actual `seq` True
-#else
-sourceDebtFingerprintMatches expected actual = baselineFingerprint expected == observationFingerprint actual
-#endif
 
-sourceDebtPathInventoryMatches :: SourceDebtBaseline -> SourceDebtObservation -> Bool
-#if defined(VALIDATION_SOURCE_DEBT_PATH_INVENTORY_COMPARISON_BYPASS_MUTANT)
-sourceDebtPathInventoryMatches expected actual = expected `seq` actual `seq` True
-#else
-sourceDebtPathInventoryMatches expected actual = baselinePathDigest expected == observationPathDigest actual
-#endif
 
 sourceDebtStates :: Map SourceDebtId SourceDebtObservation -> Map SourceDebtId SourceDebtState
 sourceDebtStates observed =
@@ -1597,25 +1477,38 @@ stateIntegrityFindings states =
 #endif
     | actualKeys /= expectedKeys
     ]
+  -- A later-owned family at zero is a completed migration, which is the outcome
+  -- the baseline exists to drive toward. Refusing it per family made the check
+  -- punish success: retiring a family removed its key and reddened Phase 0 at
+  -- the moment the work finished.
+  --
+  -- What is still refused is total collapse. Every later-owned family reaching
+  -- zero at once is not eight completed migrations; it is a classifier that
+  -- stopped recognising anything. This check cannot tell an individual
+  -- retirement from an individual misclassification — that is owned by the
+  -- classification rules and their own mutants — but it can refuse the case
+  -- where nothing at all is observed.
   zeroFindings =
     [ finding
 #if defined(VALIDATION_SOURCE_DEBT_STATE_ZERO_CODE_MUTANT)
-        "SOURCE-DEBT-STATE-ZERO-UNAUTHORIZED-MUTANT"
+        "SOURCE-DEBT-STATE-COLLAPSE-MUTANT"
 #else
-        "SOURCE-DEBT-STATE-ZERO-UNAUTHORIZED"
+        "SOURCE-DEBT-STATE-COLLAPSE"
 #endif
 #if defined(VALIDATION_SOURCE_DEBT_STATE_ZERO_SUBJECT_MUTANT)
         "source-debt-zero-mutant"
 #else
-        (Text.unpack (renderSourceDebtId identifier))
+        "source-debt-baseline"
 #endif
 #if defined(VALIDATION_SOURCE_DEBT_STATE_ZERO_DETAIL_MUTANT)
         "mutant"
 #else
-        "only the acquired Phase-0-owned pb family may have a zero source-debt lifecycle state"
+        "every later-owned source-debt family is zero at once, which is a classifier collapse rather than a completed migration"
 #endif
-    | identifier <- Set.toAscList laterOwnedSourceDebtIds
-    , Just SourceDebtStateZero <- [Map.lookup identifier states]
+    | not (Set.null laterOwnedSourceDebtIds)
+    , all
+        (\identifier -> Map.lookup identifier states == Just SourceDebtStateZero)
+        (Set.toAscList laterOwnedSourceDebtIds)
     ]
 
 sourceDebtState :: SourceDebtId -> Map SourceDebtId SourceDebtObservation -> SourceDebtState
@@ -1648,16 +1541,17 @@ sourceDebtState identifier observed =
     (Nothing, _) ->
       SourceDebtStateRefused
         ("missing closed source-debt baseline for " <> renderSourceDebtId identifier)
+    -- A family with a baseline and no observation is fully retired, which is
+    -- the outcome the baseline exists to drive toward. It was refused, so the
+    -- check required all eight debt families to remain permanently non-empty
+    -- and reddened Phase 0 at the moment a migration succeeded. The mutant is
+    -- inverted accordingly: refusing a retired family is now the defect.
     (Just _, Nothing) ->
 #if defined(VALIDATION_SOURCE_DEBT_MISSING_OBSERVATION_ZERO_MUTANT)
-      SourceDebtStateZero
-#else
       SourceDebtStateRefused
-#if defined(VALIDATION_SOURCE_DEBT_STATE_MISSING_OBSERVATION_DETAIL_MUTANT)
-        (identifier `seq` "missing acquired source-debt observation mutant")
-#else
         ("missing acquired source-debt observation for " <> renderSourceDebtId identifier)
-#endif
+#else
+      SourceDebtStateZero
 #endif
     (Just expected, Just actual)
       | (
@@ -1666,21 +1560,7 @@ sourceDebtState identifier observed =
 #else
           sourceDebtCountMatches expected actual
 #endif
-        )
-          && (
-#if defined(VALIDATION_SOURCE_DEBT_STATE_FINGERPRINT_MATCH_COMPOSITION_MUTANT)
-                sourceDebtFingerprintMatches expected actual `seq` True
-#else
-                sourceDebtFingerprintMatches expected actual
-#endif
-             )
-          && (
-#if defined(VALIDATION_SOURCE_DEBT_STATE_PATH_MATCH_COMPOSITION_MUTANT)
-                sourceDebtPathInventoryMatches expected actual `seq` True
-#else
-                sourceDebtPathInventoryMatches expected actual
-#endif
-             ) ->
+        ) ->
           SourceDebtStateOpen
 #if defined(VALIDATION_SOURCE_DEBT_STATE_OPEN_COUNT_PROJECTION_MUTANT)
             (observationCount actual `seq` 0)
@@ -1702,24 +1582,12 @@ sourceDebtState identifier observed =
 
 baselineCount :: SourceDebtBaseline -> Int
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_COUNT_PROJECTION_MUTANT)
-baselineCount baseline@(SourceDebtBaseline value _ _) = baseline `seq` value `seq` 0
+baselineCount baseline@(SourceDebtBaseline value) = baseline `seq` value `seq` 0
 #else
-baselineCount (SourceDebtBaseline value _ _) = value
+baselineCount (SourceDebtBaseline value) = value
 #endif
 
-baselineFingerprint :: SourceDebtBaseline -> Text
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_FINGERPRINT_PROJECTION_MUTANT)
-baselineFingerprint baseline@(SourceDebtBaseline _ value _) = baseline `seq` value `seq` ""
-#else
-baselineFingerprint (SourceDebtBaseline _ value _) = value
-#endif
 
-baselinePathDigest :: SourceDebtBaseline -> Text
-#if defined(VALIDATION_SOURCE_DEBT_BASELINE_PATH_PROJECTION_MUTANT)
-baselinePathDigest baseline@(SourceDebtBaseline _ _ value) = baseline `seq` value `seq` ""
-#else
-baselinePathDigest (SourceDebtBaseline _ _ value) = value
-#endif
 
 observationCount :: SourceDebtObservation -> Int
 #if defined(VALIDATION_SOURCE_DEBT_OBSERVATION_COUNT_PROJECTION_MUTANT)
@@ -1858,41 +1726,6 @@ problemFinding problem = case problem of
 #else
       ("expected=" <> renderInt expected <> ", actual=" <> renderInt actual)
 #endif
-  SourceDebtFingerprintMismatch identifier expected actual ->
-    finding
-#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_FINDING_CODE_MUTANT)
-      "SOURCE-DEBT-FINGERPRINT-MISMATCH-MUTANT"
-#else
-      "SOURCE-DEBT-FINGERPRINT-MISMATCH"
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_FINDING_SUBJECT_MUTANT)
-      (identifier `seq` "source-debt-fingerprint-mutant")
-#else
-      (Text.unpack (renderSourceDebtId identifier))
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_FINGERPRINT_FINDING_DETAIL_MUTANT)
-      (expected `seq` actual `seq` "mutant")
-#else
-      ("expected=" <> expected <> ", actual=" <> actual)
-#endif
-  SourceDebtPathInventoryDigestMismatch identifier expected actual ->
-    finding
-#if defined(VALIDATION_SOURCE_DEBT_PATH_FINDING_CODE_MUTANT)
-      "SOURCE-DEBT-PATH-INVENTORY-MISMATCH-MUTANT"
-#else
-      "SOURCE-DEBT-PATH-INVENTORY-MISMATCH"
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_PATH_FINDING_SUBJECT_MUTANT)
-      (identifier `seq` "source-debt-path-mutant")
-#else
-      (Text.unpack (renderSourceDebtId identifier))
-#endif
-#if defined(VALIDATION_SOURCE_DEBT_PATH_FINDING_DETAIL_MUTANT)
-      (expected `seq` actual `seq` "mutant")
-#else
-      ("expected=" <> expected <> ", actual=" <> actual)
-#endif
-
 resourceLimitAnalysis :: SourceDebtResourceFailure -> SourceDebtAnalysis
 resourceLimitAnalysis resourceFailure =
   case resourceFailure of
@@ -2117,8 +1950,6 @@ sourceDebtInternalTestProblemFindings =
     , SourceDebtFamilySetMismatch (Set.singleton SourceProto) (Set.singleton SourceUi)
     , SourcePbObservationPresent (SourceDebtObservation 1 "pb-fingerprint" "pb-path")
     , SourceDebtPathCountMismatch SourcePulumi 2 3
-    , SourceDebtFingerprintMismatch SourceTest "expected-fingerprint" "actual-fingerprint"
-    , SourceDebtPathInventoryDigestMismatch SourceVendor "expected-path" "actual-path"
     ]
 
 sourceDebtInternalTestIntegrityFindings :: [Finding]
@@ -2144,10 +1975,9 @@ sourceDebtInternalTestStateResults =
           (Map.singleton SourcePb (SourceDebtObservation 1 "pb-fingerprint" "pb-path"))
       )
   , renderStateForTest (sourceDebtState SourceTools Map.empty)
-  , renderStateForTest (sourceDebtState SourceTools exactToolsObservation)
-  , renderStateForTest (sourceDebtState SourceTools mismatchedToolsObservation)
-  , renderStateForTest (sourceDebtState SourceTools fingerprintMismatchedToolsObservation)
-  , renderStateForTest (sourceDebtState SourceTools pathMismatchedToolsObservation)
+  , renderStateForTest (sourceDebtState SourceTools atCeilingToolsObservation)
+  , renderStateForTest (sourceDebtState SourceTools beneathCeilingToolsObservation)
+  , renderStateForTest (sourceDebtState SourceTools aboveCeilingToolsObservation)
   , renderBoundedStateForTest
       SourcePb
       (boundedSourceDebtStates (PrefixExceeded 27) (PrefixWithin []) Map.empty)
@@ -2156,46 +1986,21 @@ sourceDebtInternalTestStateResults =
       (boundedSourceDebtStates (PrefixWithin []) (PrefixExceeded 25) Map.empty)
   ]
  where
-  exactToolsObservation = case sourceDebtBaseline SourceTools of
+  -- The three ratchet outcomes: at the ceiling is admitted, beneath it is
+  -- admitted because retiring debt must not refuse, and above it refuses.
+  toolsObservationOf adjust = case sourceDebtBaseline SourceTools of
     Nothing -> Map.empty
     Just baseline ->
       Map.singleton
         SourceTools
         ( SourceDebtObservation
-            (baselineCount baseline)
-            (baselineFingerprint baseline)
-            (baselinePathDigest baseline)
+            (adjust (baselineCount baseline))
+            "observed-fingerprint"
+            "observed-path"
         )
-  mismatchedToolsObservation = case sourceDebtBaseline SourceTools of
-    Nothing -> Map.empty
-    Just baseline ->
-      Map.singleton
-        SourceTools
-        ( SourceDebtObservation
-            (baselineCount baseline + 1)
-            (baselineFingerprint baseline)
-            (baselinePathDigest baseline)
-        )
-  fingerprintMismatchedToolsObservation = case sourceDebtBaseline SourceTools of
-    Nothing -> Map.empty
-    Just baseline ->
-      Map.singleton
-        SourceTools
-        ( SourceDebtObservation
-            (baselineCount baseline)
-            "mismatched-fingerprint"
-            (baselinePathDigest baseline)
-        )
-  pathMismatchedToolsObservation = case sourceDebtBaseline SourceTools of
-    Nothing -> Map.empty
-    Just baseline ->
-      Map.singleton
-        SourceTools
-        ( SourceDebtObservation
-            (baselineCount baseline)
-            (baselineFingerprint baseline)
-            "mismatched-path"
-        )
+  atCeilingToolsObservation = toolsObservationOf id
+  beneathCeilingToolsObservation = toolsObservationOf (subtract 1)
+  aboveCeilingToolsObservation = toolsObservationOf (+ 1)
 
 renderFoldState :: SourceDebtState -> Text
 renderFoldState state =

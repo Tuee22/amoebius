@@ -29,12 +29,13 @@ import Amoebius.Validation.Gate.Internal qualified as Gate
 import Amoebius.Validation.Legacy.Internal (legacyCheck)
 import Amoebius.Validation.PhaseContract.Internal (checkPhaseContracts)
 import Amoebius.Validation.PhaseRunner.Internal
-  ( PhaseRunner (DocumentationSuiteRunner)
+  ( PhaseRunner (DocumentationSuiteRunner, ToolchainSpikeRunner, RepositoryLayoutRunner)
   , selectPhaseRunner
   )
 import Amoebius.Validation.PhaseZeroRun.Internal
   ( AcquiredPhaseZeroRun
   , acquiredPhaseZeroRunCheck
+  , foldAcquiredPhaseZeroRun
   , assembleAcquiredPhaseZeroRun
   , phaseZeroQualificationAuthorityCheck
   , phaseZeroReadinessBlockers
@@ -73,6 +74,8 @@ import Amoebius.Validation.StatusProjection.Internal
   , recoverPendingStatusProjections
   , withStatusProjectionLock
   )
+import Amoebius.Validation.RepositoryLayoutRun (repositoryLayoutRunCheck)
+import Amoebius.Validation.ToolchainSpikeRun (toolchainSpikeRunCheck)
 import Amoebius.Validation.Types
 import Control.Exception (IOException, try)
 import Control.Monad (filterM)
@@ -880,6 +883,12 @@ checkAcquiredPhaseInChain phaseZeroRun ordinal
   = case selectPhaseRunner ordinal of
       Right DocumentationSuiteRunner ->
         acquiredPhaseZeroRunCheck phaseZeroRun
+      Right ToolchainSpikeRunner ->
+        toolchainSpikeRunCheck
+          (foldAcquiredPhaseZeroRun (\acquired _ _ _ _ _ -> acquired) phaseZeroRun)
+      Right RepositoryLayoutRunner ->
+        repositoryLayoutRunCheck
+          (foldAcquiredPhaseZeroRun (\acquired _ _ _ _ _ -> acquired) phaseZeroRun)
       Left problem ->
         CheckResult
           { checkName = "phase-" <> formatOrdinal ordinal

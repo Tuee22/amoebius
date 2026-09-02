@@ -127,6 +127,23 @@ runPhaseZeroSubject acquired compilerAttempt qualificationAuthority debtEvidence
                 [ phaseRunnerRegistryCheck
                 , checkAcquiredPhaseZeroSnapshotCore acquired compilerAttempt qualificationAuthority debtEvidence contractEvidence
                 ]
+        -- The registry resolves a capability, not an ordinal, so a runner
+        -- registered for a different capability reaching this subject is a
+        -- registry defect rather than a documentation-suite result.
+        Right runner ->
+            CheckResult
+                { checkName = "phase-00"
+                , checkObservations =
+                    [ observation "phase.ordinal" "00"
+                    , observation "phase.runner" (Text.pack (show runner))
+                    ]
+                , checkFindings =
+                    [ finding
+                        "PHASE-RUNNER-CAPABILITY-MISMATCH"
+                        "phase-00"
+                        "the documentation-suite subject was reached by a runner registered for another capability"
+                    ]
+                }
         Left problem ->
             CheckResult
                 { checkName = "phase-00"

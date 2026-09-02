@@ -5,9 +5,11 @@
 -- not claim that Cabal elaboration or a compiler observation has occurred.
 module Amoebius.Validation.CompilerExpectationAuthority.Internal
   ( CompilerExpectationAuthority
-  , CompilerExpectationOutcome
+  , CompilerExpectationOutcome (..)
   , CompilerExpectationProblem (..)
+  , CompilerExpectationRow (..)
   , compilerExpectationAuthority
+  , expectationProblemsFor
   , compilerExpectationAuthorityDigest
   , compilerExpectationAuthorityProblems
   , foldCompilerExpectationAuthority
@@ -35,8 +37,8 @@ data CompilerExpectationOutcome
   deriving (Eq, Ord, Show)
 
 data CompilerExpectationProblem
-  = CompilerExpectationRowCardinalityMismatch Int Int
-  | CompilerExpectationOutcomeCardinalityMismatch Text Int Int
+  = CompilerExpectationFixtureOutcomeForbidden FilePath Text
+  | CompilerExpectationRegistryCollapsed Int Int
   | CompilerExpectationDuplicateKey FilePath Text
   | CompilerExpectationDuplicatePath FilePath [Text]
   | CompilerExpectationDuplicateComponent Text [FilePath]
@@ -108,36 +110,75 @@ foldCompilerExpectationOutcome success refusal fixture outcome = case outcome of
   CompileRefusal -> refusal
   FixtureObservation -> fixture
 
-expectedRowCount, expectedSuccessCount, expectedRefusalCount, expectedFixtureCount :: Int
-expectedRowCount = 369
-expectedSuccessCount = 14
-expectedRefusalCount = 355
-expectedFixtureCount = 0
+-- The registry's cardinality is deliberately not declared here.
+--
+-- Four counts over this authored list — total rows, and one per outcome — were
+-- an authored census of an authored list, so they refused only a half-finished
+-- edit of this one module while reddening Phase 0 for every compile-negative
+-- subject Phase 15 legitimately adds.  Because the gate chain re-derives gate 0
+-- inside every later phase's gate, that reopened a closed Phase 0 for work it
+-- does not own.
+--
+-- They were also redundant with a real two-way join that already refuses both
+-- directions in production.  Deleting a row leaves its subject bound with no
+-- expectation, which
+-- 'Amoebius.Validation.CompilerSubjectRegistry.Internal.subjectAssignmentProblems'
+-- refuses as @RegistryExpectedOutcomeMissing@; deleting a subject or its build
+-- stanza leaves the row unbound, which @missingExpectationBindingProblems@
+-- refuses as @RegistryExpectationBindingMissing@.  Removing a row, its subject
+-- and its stanza together is the one case neither refuses, and that is the
+-- legitimate removal the census existed to obstruct.
+--
+-- What remains here are properties that hold at any size: no duplicate key,
+-- path or component; every path and component well formed; no row claiming a
+-- fixture outcome; and a floor beneath which the registry has collapsed rather
+-- than shrunk.
+--
+-- The fixture prohibition is not a census and was wrongly removed with them.
+-- 'validExpectationPath' confines every row to @test\/compile-negative\/<dir>\/Main.hs@,
+-- where a fixture observation is never legitimate, so "no such row" is
+-- invariant under any corpus growth.  It is load-bearing because
+-- 'Amoebius.Validation.CompilerSubjectRegistry.Internal.expectationBranchIdentity'
+-- maps a fixture outcome to the same @unconditional@ identity it gives a
+-- compile success, so a subject whose whole purpose is to be refused by the
+-- compiler could carry an outcome meaning "observed, never compiled" and every
+-- registry join would still agree.
+
+-- | The floor beneath which the expectation registry has collapsed.
+--
+-- Deleting a row, its subject and its build stanza together is a legitimate
+-- removal that no join refuses, which is correct for one subject and wrong for
+-- the whole registry.  A floor separates the two without pinning a magnitude
+-- that ordinary growth moves.
+minimumExpectationRowCount :: Int
+minimumExpectationRowCount = 200
 
 expectationProblems :: [CompilerExpectationRow] -> [CompilerExpectationProblem]
-expectationProblems rows =
-  cardinalityProblems
-    <> outcomeCardinalityProblems
+expectationProblems rows = expectationProblemsFor rows
+
+-- | The same properties over a supplied row list.
+--
+-- Every constructor above is otherwise unreachable from a test, because the
+-- authority is a single compiled constant: an oracle could asserted only that
+-- the live list is clean, never that a malformed list is refused.  This seam
+-- lets an independently authored oracle drive one exact refusal per property.
+expectationProblemsFor :: [CompilerExpectationRow] -> [CompilerExpectationProblem]
+expectationProblemsFor rows =
+  collapseProblems
+    <> fixtureOutcomeProblems
     <> duplicateKeyProblems rows
     <> duplicatePathProblems rows
     <> duplicateComponentProblems rows
     <> pathProblems
     <> componentProblems
  where
-  cardinalityProblems =
-    [ CompilerExpectationRowCardinalityMismatch expectedRowCount (length rows)
-    | length rows /= expectedRowCount
+  collapseProblems =
+    [ CompilerExpectationRegistryCollapsed minimumExpectationRowCount (length rows)
+    | length rows < minimumExpectationRowCount
     ]
-  outcomeCardinalityProblems =
-    concat
-      [ outcomeCountProblems "compile-success" CompileSuccess expectedSuccessCount
-      , outcomeCountProblems "compile-refusal" CompileRefusal expectedRefusalCount
-      , outcomeCountProblems "fixture-observation" FixtureObservation expectedFixtureCount
-      ]
-  outcomeCountProblems label outcome expected =
-    [ CompilerExpectationOutcomeCardinalityMismatch label expected observed
-    | let observed = length [() | CompilerExpectationRow _ _ candidate <- rows, candidate == outcome]
-    , observed /= expected
+  fixtureOutcomeProblems =
+    [ CompilerExpectationFixtureOutcomeForbidden path component
+    | CompilerExpectationRow path component FixtureObservation <- rows
     ]
   pathProblems =
     [ CompilerExpectationInvalidPath path

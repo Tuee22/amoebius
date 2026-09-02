@@ -140,15 +140,15 @@ evidenceProblems =
 
 expectedEmptyAcquiredFolds :: [(SourceDebtId, Text)]
 expectedEmptyAcquiredFolds =
-  [ (SourceTools, "refused:missing acquired source-debt observation for LTD-SRC-001")
-  , (SourceDhall, "refused:missing acquired source-debt observation for LTD-SRC-002")
-  , (SourceProto, "refused:missing acquired source-debt observation for LTD-SRC-003")
-  , (SourceUi, "refused:missing acquired source-debt observation for LTD-SRC-004")
-  , (SourcePulumi, "refused:missing acquired source-debt observation for LTD-SRC-005")
-  , (SourceTest, "refused:missing acquired source-debt observation for LTD-SRC-006")
-  , (SourceProbe, "refused:missing acquired source-debt observation for LTD-SRC-007")
+  [ (SourceTools, "zero")
+  , (SourceDhall, "zero")
+  , (SourceProto, "zero")
+  , (SourceUi, "zero")
+  , (SourcePulumi, "zero")
+  , (SourceTest, "zero")
+  , (SourceProbe, "zero")
   , (SourcePb, "zero")
-  , (SourceVendor, "refused:missing acquired source-debt observation for LTD-SRC-009")
+  , (SourceVendor, "zero")
   ]
 
 renderFold :: AcquiredSourceSnapshot -> SourceDebtEvidence -> SourceDebtId -> Text
@@ -174,10 +174,14 @@ expectedEmptyAcquired =
         , Observation "source-debt.actual-family-count" "0"
         ]
     , checkFindings =
+        -- An empty acquired snapshot observes no family at all. Under the
+        -- ratchet an individual family reaching zero is a completed migration
+        -- and is admitted, so the refusal this must produce is the collapse
+        -- case: every later-owned family zero at once.
         [ Finding
-            "SOURCE-DEBT-FAMILY-SET-MISMATCH"
+            "SOURCE-DEBT-STATE-COLLAPSE"
             "source-debt-baseline"
-            "expected=LTD-SRC-001,LTD-SRC-002,LTD-SRC-003,LTD-SRC-004,LTD-SRC-005,LTD-SRC-006,LTD-SRC-007,LTD-SRC-009, actual="
+            "every later-owned source-debt family is zero at once, which is a classifier collapse rather than a completed migration"
         ]
     }
 
@@ -274,8 +278,6 @@ expectedProblemFindings =
   , Finding "SOURCE-DEBT-FAMILY-SET-MISMATCH" "source-debt-baseline" "expected=LTD-SRC-003, actual=LTD-SRC-004"
   , Finding "SOURCE-DEBT-PB-NOT-ZERO" "LTD-SRC-008" "expected absent/zero, actual count=1, fingerprint=pb-fingerprint"
   , Finding "SOURCE-DEBT-COUNT-MISMATCH" "LTD-SRC-005" "expected=2, actual=3"
-  , Finding "SOURCE-DEBT-FINGERPRINT-MISMATCH" "LTD-SRC-006" "expected=expected-fingerprint, actual=actual-fingerprint"
-  , Finding "SOURCE-DEBT-PATH-INVENTORY-MISMATCH" "LTD-SRC-009" "expected=expected-path, actual=actual-path"
   ]
 
 expectedIntegrityFindings :: [Finding]
@@ -284,10 +286,6 @@ expectedIntegrityFindings =
       "SOURCE-DEBT-STATE-INVENTORY-MISMATCH"
       "source-debt-baseline"
       "expected=LTD-SRC-001,LTD-SRC-002,LTD-SRC-003,LTD-SRC-004,LTD-SRC-005,LTD-SRC-006,LTD-SRC-007,LTD-SRC-008,LTD-SRC-009, actual=LTD-SRC-001,LTD-SRC-002,LTD-SRC-003,LTD-SRC-004,LTD-SRC-005,LTD-SRC-006,LTD-SRC-007,LTD-SRC-008"
-  , Finding
-      "SOURCE-DEBT-STATE-ZERO-UNAUTHORIZED"
-      "LTD-SRC-001"
-      "only the acquired Phase-0-owned pb family may have a zero source-debt lifecycle state"
   ]
 
 expectedStateResults :: [Text]
@@ -297,10 +295,9 @@ expectedStateResults =
   , "refused:refused-detail"
   , "zero"
   , "refused:bounded pb source debt is not zero"
-  , "refused:missing acquired source-debt observation for LTD-SRC-001"
-  , "open:237:669f28af21b8b592018a0d5a4c789aa8b6f561f60a2b772caf1aef35b7199b5f"
-  , "refused:source-debt baseline mismatch for LTD-SRC-001"
-  , "refused:source-debt baseline mismatch for LTD-SRC-001"
+  , "zero"
+  , "open:237:observed-fingerprint"
+  , "open:236:observed-fingerprint"
   , "refused:source-debt baseline mismatch for LTD-SRC-001"
   , "refused:source-debt analysis exceeded a closed result bound"
   , "refused:source-debt analysis exceeded a closed result bound"

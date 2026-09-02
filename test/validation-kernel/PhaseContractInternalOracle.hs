@@ -125,7 +125,7 @@ exactCaseProblems exactCase = case exactCase of
   "semantic-observation-composition" ->
     expectCount "full-mode observation carrier" 239 (length (checkObservations cleanResult))
   "semantic-finding-composition" ->
-    expectCount "full-mode finding carrier" 540 (length (checkFindings cleanResult))
+    expectCount "full-mode finding carrier" 482 (length (checkFindings cleanResult))
   "phase-semantic-contract-route" ->
     expectObservation "semantic phase count" "semantic.phase-count" "96" cleanResult
       <> expectObservation "semantic slot count" "semantic.slot-count" "1728" cleanResult
@@ -155,13 +155,17 @@ exactCaseProblems exactCase = case exactCase of
       <> expectFindingCount "semantic path unknown findings" "PLAN-SEMANTIC-PHASE-PATH-UNKNOWN" 96 cleanResult
       <> expectFindingCount "semantic Markdown refusal" "PLAN-SEMANTIC-MARKDOWN-DIAGNOSTIC-ONLY" 0 cleanResult
   "sprint-inventory-finding" ->
-    expectFindingCount "recorded canonical sprint inventory" "PLAN-SPRINT-INVENTORY" 58 cleanResult
+    -- The positive: every phase in the valid corpus numbers its sprints from
+    -- one, so a contiguous inventory is clean. The negative differs in exactly
+    -- one dimension — Phase 0's only sprint is numbered two instead of one —
+    -- and must be refused at that phase's own path.
+    expectFindingCount "contiguous sprint inventory" "PLAN-SPRINT-INVENTORY" 0 cleanResult
       <> expectExactFinding
-        "Phase 0 recorded sprint inventory"
+        "a sprint inventory that does not begin at one is refused"
         "PLAN-SPRINT-INVENTORY"
         "DEVELOPMENT_PLAN/phase_00_synthetic_capability.md"
-        "sprint identities must be the recorded contiguous inventory [1,2,3,4,5,6,7,8]; observed [Just 1]"
-        cleanResult
+        "sprint identities must be contiguous from one; expected [Just 1], observed [Just 2]"
+        nonContiguousResult
   "phase-duplicate-selection" ->
     expectNoFinding
       "lexically first duplicate is the selected phase contract"
@@ -182,6 +186,20 @@ cleanResult = checkPhaseContracts phaseContractValidCorpus
 
 duplicateResult :: CheckResult
 duplicateResult = checkPhaseContracts duplicateCorpus
+
+-- | The valid corpus with Phase 0's single sprint renumbered from one to two.
+nonContiguousSprintCorpus :: [(FilePath, Text)]
+nonContiguousSprintCorpus =
+  [ ( path
+    , if path == "DEVELOPMENT_PLAN/phase_00_synthetic_capability.md"
+        then Text.replace "## Sprint 0.1:" "## Sprint 0.2:" contents
+        else contents
+    )
+  | (path, contents) <- phaseContractValidCorpus
+  ]
+
+nonContiguousResult :: CheckResult
+nonContiguousResult = checkPhaseContracts nonContiguousSprintCorpus
 
 duplicateCorpus :: [(FilePath, Text)]
 duplicateCorpus =

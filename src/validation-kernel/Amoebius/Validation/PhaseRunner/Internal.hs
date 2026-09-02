@@ -31,6 +31,8 @@ import Data.Text qualified as Text
 
 data PhaseRunner
     = DocumentationSuiteRunner
+    | ToolchainSpikeRunner
+    | RepositoryLayoutRunner
     deriving (Eq, Ord, Show)
 
 data RegisteredRunner = RegisteredRunner
@@ -44,6 +46,14 @@ registeredRunners =
     [ RegisteredRunner
         { registeredCapability = "documentation_suite"
         , registeredRunner = DocumentationSuiteRunner
+        }
+    , RegisteredRunner
+        { registeredCapability = "toolchain_spike"
+        , registeredRunner = ToolchainSpikeRunner
+        }
+    , RegisteredRunner
+        { registeredCapability = "repository_layout_conformance"
+        , registeredRunner = RepositoryLayoutRunner
         }
     ]
 

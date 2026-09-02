@@ -8,6 +8,8 @@ import CompilerSourceGraphAcquiredOracle
   , runCompilerSourceGraphAcquiredSelectorProductControlOracle
   )
 import CompilerSubjectRegistryOracle (runCompilerSubjectRegistryOracle)
+import RepositoryLayoutRunOracle (runRepositoryLayoutRunOracle)
+import ToolchainSpikeRunOracle (runToolchainSpikeRunOracle)
 import SelectorCli
   ( SelectorSuite (..)
   , runSelectorCli
@@ -17,6 +19,8 @@ import SelectorCli
 main :: IO ()
 main = do
   runCompilerSubjectRegistryOracle
+  runToolchainSpikeRunOracle
+  runRepositoryLayoutRunOracle
   runSelectorCli
     (selectorSuite
       "CompilerSourceGraphAcquiredOracle"

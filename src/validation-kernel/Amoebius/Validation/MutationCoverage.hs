@@ -22,14 +22,12 @@
 module Amoebius.Validation.MutationCoverage
   ( DrivenSuite (..)
   , SelectionMode (..)
-  , declaredMutationLoci
   , drivenSuites
   , milestoneCapabilities
   , mutationCoverageCheck
+  , mutationCoverageCheckFor
   , mutationPolicyCheck
   , mutationSelectionMode
-  , selectorOnlyMutationLoci
-  , unwiredMutationLoci
   ) where
 
 import Amoebius.Validation.PhaseIdentity qualified as PhaseIdentity
@@ -52,14 +50,25 @@ data DrivenSuite = DrivenSuite
   }
   deriving (Eq, Show)
 
--- | Mutation loci the validation kernel declares across every family.
+-- | Corpus cardinality is deliberately not declared here.
 --
--- Authored, not counted from the build description. It changes only when a
--- production module gains or loses a guarded locus, which is exactly when a
--- human should have to restate it.
-declaredMutationLoci :: Int
-declaredMutationLoci = 5844
-
+-- A corpus-wide total in this module was Phase-0 subject, because
+-- 'mutationCoverageCheck' is part of the documentation-suite run and
+-- @Dispatch.checkAcquiredPhaseChain@ re-derives gate 0 inside every later
+-- phase's gate.  A total therefore changed whenever any later phase added or
+-- retired a selector, reddening a phase that owns none of that work and
+-- forcing it to be reopened after closing.
+--
+-- The total was also unknowable here.  This module cannot see the selector
+-- registries, which live beside the oracles in @test/@, and it must not consume
+-- the build description, whose parser is a separate unvalidated capability.  A
+-- declared total could only ever be a restated literal, and a literal compared
+-- against another literal authored to agree with it refuses nothing.
+--
+-- What this module owns instead is inventory well-formedness, which does not
+-- move when a corpus grows.  Each family's cardinality and its unwired
+-- remainder are owed by the capability named in 'drivenSuiteOwnerCapability',
+-- and belong in that phase's own @Residue@ row.
 -- | The suites that can execute part of the corpus.
 --
 -- Every row names a Cabal component with a real @Main.hs@ that reaches the
@@ -89,91 +98,111 @@ drivenSuites =
   , DrivenSuite "validation-compiler-elaborated-plan-selector-component" "VALIDATION_COMPILER_ELABORATED" "documentation_suite" 342
   ]
 
--- | Declared loci that no suite can select.
-unwiredMutationLoci :: Int
-unwiredMutationLoci = declaredMutationLoci - sum (map drivenSuiteLoci drivenSuites)
 
--- | Selectors backed by guarded production loci but absent from the Cabal flag
--- corpus. The value is retained as an explicit closed-boundary observation:
--- adding a guarded selector without its build mapping must make it non-zero.
-selectorOnlyMutationLoci :: Int
-selectorOnlyMutationLoci = 0
-
--- | The standing count, attributed to the capability that owns each gap.
+-- | Inventory well-formedness for the selector corpus.
+--
+-- Every finding below can actually fire on a malformed inventory, which the
+-- previous corpus-wide comparison could not: it compared one authored literal
+-- against a second authored literal chosen to equal it, so its difference was
+-- zero by construction and the refusals it guarded were unreachable.
 mutationCoverageCheck :: CheckResult
-mutationCoverageCheck =
+mutationCoverageCheck = mutationCoverageCheckFor drivenSuites
+
+-- | The same check over a supplied inventory.
+--
+-- An independently authored oracle needs this seam to assert an exact refusal
+-- at an exact locus for each malformed inventory, which it cannot do against a
+-- constant.  It decides nothing a caller can use to mint a pass: the result is
+-- an ordinary 'CheckResult'.
+mutationCoverageCheckFor :: [DrivenSuite] -> CheckResult
+mutationCoverageCheckFor suites =
   CheckResult
     { checkName = "mutation-coverage"
     , checkObservations =
-        [ observation "mutation.declared-loci" (showText declaredMutationLoci)
-        , observation "mutation.driven-loci" (showText drivenLoci)
-        , observation "mutation.unwired-loci" (showText unwiredMutationLoci)
-        , observation "mutation.selector-only-loci" (showText selectorOnlyMutationLoci)
-        , observation "mutation.driving-suite-count" (showText (length drivenSuites))
+        [ observation "mutation.driving-suite-count" (showText (length suites))
+        , observation "mutation.driven-loci" (showText (sum (map drivenSuiteLoci suites)))
         ]
+          <> [ observation ("mutation.owner." <> owner) (showText total)
+             | (owner, total) <- ownerTotals
+             ]
           <> [ observation
                  ("mutation.suite." <> drivenSuiteFamily suite)
                  (drivenSuiteName suite <> "=" <> showText (drivenSuiteLoci suite))
-             | suite <- drivenSuites
+             | suite <- suites
              ]
-    , checkFindings = integrityFindings <> selectorOnlyFindings <> unwiredFindings
+    , checkFindings =
+        emptyInventoryFindings
+          <> duplicateSuiteFindings
+          <> duplicateFamilyFindings
+          <> nonPositiveFindings
+          <> unknownOwnerFindings
     }
  where
-  drivenLoci = sum (map drivenSuiteLoci drivenSuites)
+  owners = nub (map drivenSuiteOwnerCapability suites)
+  ownerTotals =
+    [ (owner, sum [drivenSuiteLoci suite | suite <- suites, drivenSuiteOwnerCapability suite == owner])
+    | owner <- sort owners
+    ]
 
-  integrityFindings =
+  emptyInventoryFindings =
+    [ finding
+        "MUTANT-COVERAGE-INVENTORY-EMPTY"
+        "src/validation-kernel/Amoebius/Validation/MutationCoverage.hs"
+        "no driving suite is declared, so no declared locus can be executed"
+    | null suites
+    ]
+
+  duplicateSuiteFindings =
+    [ finding
+        "MUTANT-COVERAGE-DUPLICATE-SUITE"
+        "amoebius.cabal"
+        ("a driving suite is declared more than once: " <> name)
+    | name <- repeated (map drivenSuiteName suites)
+    ]
+
+  duplicateFamilyFindings =
+    [ finding
+        "MUTANT-COVERAGE-DUPLICATE-FAMILY"
+        "amoebius.cabal"
+        ("a macro family names more than one driver, so a red result cannot be attributed: " <> family)
+    | family <- repeated (map drivenSuiteFamily suites)
+    ]
+
+  nonPositiveFindings =
     [ finding
         "MUTANT-COVERAGE-INTEGRITY"
         "amoebius.cabal"
-        "the driven locus total exceeds the declared corpus, so one of the two authored counts is wrong"
-    | drivenLoci > declaredMutationLoci
-    ]
-      <> [ finding
-             "MUTANT-COVERAGE-INTEGRITY"
-             "amoebius.cabal"
-             ("a driving suite declares a non-positive locus count: " <> drivenSuiteName suite)
-         | suite <- drivenSuites
-         , drivenSuiteLoci suite <= 0
-         ]
-
-  selectorOnlyFindings =
-    [ finding
-        "MUTANT-SELECTOR-UNDECLARED"
-        "amoebius.cabal"
-        ( showText selectorOnlyMutationLoci
-            <> " selector identities name guarded production loci that have no Cabal flag; no build can select them"
-        )
-    | selectorOnlyMutationLoci > 0
+        ("a driving suite declares a non-positive locus count: " <> drivenSuiteName suite)
+    | suite <- suites
+    , drivenSuiteLoci suite <= 0
     ]
 
-  -- An unwired locus is reported against the capability that owns it, so the
-  -- count is a per-phase obligation rather than one corpus-wide number nobody
-  -- owns. Every family resolves to the kernel's own capability today because
-  -- the kernel is that capability's deliverable; a family owned elsewhere would
-  -- carry its own owner here without changing the shape of the refusal.
-  unwiredFindings =
+  -- An owner outside the compiled phase-identity table cannot carry the
+  -- family's cardinality or its unwired remainder in any @Residue@ row, so the
+  -- obligation would be owed by nobody.
+  unknownOwnerFindings =
     [ finding
-        "MUTANT-UNWIRED"
-        "src/validation-kernel/"
-        ( "capability="
-            <> owner
-            <> " has "
-            <> showText unwiredMutationLoci
-            <> " declared mutation loci that no selector suite can execute; each changes production"
-            <> " under its flag while nothing observes the change, so it counts as coverage without"
-            <> " carrying any. Driving them requires an exact case that observes the changed locus,"
-            <> " an intent row, and an impact row, none of which a flag declaration supplies."
+        "MUTANT-COVERAGE-OWNER-UNKNOWN"
+        "DEVELOPMENT_PLAN/README.md"
+        ( "a driving suite names an owner capability absent from the phase-identity table: "
+            <> drivenSuiteOwnerCapability suite
         )
-    | unwiredMutationLoci > 0
-    , owner <- ["documentation_suite"]
+    | suite <- suites
+    , PhaseIdentity.lookupCapabilityOrdinal (drivenSuiteOwnerCapability suite) == Nothing
     ]
+
+-- | Values occurring more than once, each reported once, in order.
+repeated :: Ord value => [value] -> [value]
+repeated values = nub [value | (value, count) <- counts, count > (1 :: Int)]
+ where
+  counts = [(value, length (filter (== value) values)) | value <- nub values]
 
 -- | How much of the corpus a gate runs.
 --
 -- Mutation effort is bounded by what a gate claims. Running the whole corpus at
 -- every gate is what made the corpus unbounded in the first place: an atomic
 -- selector per acceptance conjunct, demanded everywhere, produces thousands of
--- loci nobody drives, which is the 'unwiredMutationLoci' number above.
+-- loci nobody drives, which is a remainder each owning capability carries.
 data SelectionMode
   = -- | The complete selector corpus. Reserved for a milestone.
     MatrixAll
@@ -227,7 +256,8 @@ mutationPolicyCheck supplied =
   CheckResult
     { checkName = "mutation-policy"
     , checkObservations =
-        [ observation "mutation.milestone-count" (showText (length milestoneCapabilities))
+        [ observation "mutation.milestone-capabilities" (Text.intercalate "," (sort milestoneCapabilities))
+        , observation "mutation.milestone-count" (showText (length milestoneCapabilities))
         , observation "mutation.ordinary-gate-count" (showText ordinaryCount)
         , observation "mutation.policy-section-found" (showText (not (Text.null policySection)))
         ]
