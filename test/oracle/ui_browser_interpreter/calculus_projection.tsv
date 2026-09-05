@@ -1,5 +1,0 @@
-metric	value
-calculus-kinds	artifact,budget,lift,workflow,evidence
-component-names	browser-bundle-artifacts,closed-browser-budget,browser-boundary-corpus,differential-browser-workflow,mutant-evidence
-projection-counts	9,5,45,4,9
-resource-vector	5,72,0,0

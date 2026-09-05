@@ -1,3 +1,0 @@
-operator=guard-weakening
-change=omit the finite collection bound check
-expected=unbounded_collection.dhall is accepted and the gate fails

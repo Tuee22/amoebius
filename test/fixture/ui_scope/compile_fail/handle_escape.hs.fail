@@ -1,9 +1,0 @@
-{-# LANGUAGE RankNTypes #-}
-
-module HandleEscape where
-
-import Amoebius.Scope.Index
-
-bad tenant subject membership owner resource =
-  withRequestScope tenant subject membership $ \scope ->
-    resolveOwned scope owner resource

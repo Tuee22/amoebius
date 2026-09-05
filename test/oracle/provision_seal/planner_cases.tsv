@@ -1,3 +1,0 @@
-case	state	expected
-preexisting	InfrastructureAlreadyPresent	NoInfrastructureRequired
-creation	InfrastructureCreationRequired	InfrastructureRequired

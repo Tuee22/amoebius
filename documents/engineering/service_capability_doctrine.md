@@ -179,23 +179,24 @@ arm, `Sql` could admit a managed cloud Postgres — without any app spec changin
 the provider. But a union arm is not an adapter. amoebius **does not build a provider adapter it does not yet need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
 would be reporting a designed extension point as a built one.
 
-> **Target representation — NOT VALIDATED.** [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md)
-> owns the one-built-arm `CanonicalProvider` representation and the distinct rejection of an unbuilt alternate.
-> Existing source is an observed footprint only; no current evidence establishes binding composition or
-> provider realization.
+> **Bound implementation — NOT VALIDATED.** [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md)
+> owns the one-built-arm `CanonicalProvider` representation and the distinct rejection of an unbuilt alternate
+> in `src/capability-bind/Amoebius/Capability/{Types,Binding}.hs`. Its integrated gate remains the authority for
+> binding composition; provider realization remains later-owned.
 
 ---
 
 ## 4. Capability → provider → shape: the binding
 
 [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) owns this representational seam in
-`Amoebius.Capability.{Types,Binding}`. Its NOT-VALIDATED contract requires all nine arms under both shapes, 18
+`src/capability-bind/Amoebius/Capability/{Types,Binding}.hs`. Its NOT-VALIDATED contract requires all nine arms under both shapes, 18
 exact graph semantics, app-byte invariance, and an independent object-node-multiset oracle. Provision and
 runtime provider health remain outside that contract. [Phase 31](../../DEVELOPMENT_PLAN/phase_31_provision_seal.md)
-owns the post-bind planner/seal in `Amoebius.Capacity.{Provision,RuntimeStorage,RenderSource}`; its
+owns the post-bind planner/seal in `src/provision-seal/Amoebius/Capacity/{Provision,RenderSource}.hs` with
+runtime accounting supplied by `src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs`; its
 NOT-VALIDATED contract requires all 18 bound shapes, both planner arms, the opaque identity-keyed source set,
-four activation stages, and ten distinct seal-locus failures. Existing modules and tests are observed
-footprints, not current validation evidence.
+four activation stages, and ten distinct seal-locus failures. Four changed-production subjects cover replay,
+readback, execution-expansion, and runtime-accounting faults; live realization remains later-owned.
 
 A capability becomes a running service through a **three-part binding**, and the three parts live on different
 surfaces:

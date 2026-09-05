@@ -17,7 +17,7 @@ is an activity rather than a phase gate, and the registers that are gates are ow
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -82,21 +82,25 @@ carried to completion: not only the decision, but the whole concurrent program.
 
 The standing cost is named honestly: making the concurrency-touching signatures polymorphic in `m` is a **tax on all future change**, not a one-time edit. It is paid deliberately, in exchange for [§5](#5-what-dst-establishes-and-the-one-premise-it-buys).
 
-The first planned substrate instance belongs to
-[Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md), which is **NOT VALIDATED**. Its gate
-must run one reference reconciler under the injected real-client interface and `IOSim`, while a source gate
+The first substrate instance belongs to
+[Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md). Its source-bound gate runs one
+reference reconciler under the injected real-client interface and `IOSim`, while a source gate
 excludes bare `IO` signatures and raw concurrency primitives from the simulation surface. The gate must also
 construct the actual Phase-10 artifact/budget/lift/workflow/evidence `Composition`, project its ordered names
 and exact resource fold, and feed those names to the same reference reconciler under `IOSim`. An independently
-authored Haskell semantic oracle must check that projection; the adapter may not invent a parallel calculus
-vocabulary. Later phases must run their own production reconcilers on this interface; neither this target nor
-its later users have a current complete gate pass.
+authored Haskell semantic oracle checks that projection; the adapter does not invent a parallel calculus
+vocabulary. The schedule corpus and expectations are Haskell values, traces are dynamic run products rather
+than serialized behavioral expectations, and CPP-selected production mutations challenge stale-partition handling, seed
+sensitivity, and fault coverage. Later phases must run their own production reconcilers on this interface;
+Phase 16 cannot pre-claim any later production reconciler or live-substrate result.
 
 [Phase 19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md) owns the first amoebius pre-cluster
-subject rather than another substrate demonstration. Its standalone pure planner must run one
+subject rather than another substrate demonstration. Its bound standalone pure planner runs one
 three-action world under exactly four authored schedules: baseline, duplicate delivery, crash before apply,
 and stale snapshot. All four must converge to the authored inventory under `IOSim` and bounded `IOSimPOR`;
-four fresh same-seed encodings must agree and a changed seed must change semantic action order. This is a target Register-2 phase
+four fresh same-seed encodings must agree and a changed seed must change semantic action order. The schedules,
+expected counts, and core corpus are independent Haskell values; only the result is materialized below the
+run root. This is a Register-2 phase
 gate over a modeled versioned store, not a Register-2.5 production-daemon claim. Store fidelity is ASSUMED and
 effectful runtime fidelity is UNVERIFIED.
 

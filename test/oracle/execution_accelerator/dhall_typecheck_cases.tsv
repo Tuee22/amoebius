@@ -1,2 +1,0 @@
-entry	negative	legal	required
-3.28	dhall/examples/execution_accelerator/illegal_accelerator_owner_missing.dhall	dhall/examples/execution_accelerator/legal_accelerator_owner.dhall	owner

@@ -1,4 +1,0 @@
-phase=21
-name=visibility_is_authorization
-change=authorize-from-visibility
-expected-red-locus=authorization_matrix.tsv:hidden-invocable+stale

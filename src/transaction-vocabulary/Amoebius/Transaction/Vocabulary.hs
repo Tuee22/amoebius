@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -157,7 +158,12 @@ projectRow declaration =
     , projectedColumns = [(columnName column, columnKind column, True) | column <- rowColumns declaration]
     , projectedPrimaryKey = map columnName (rowPrimaryKey declaration)
     , projectedForeignKey = (columnName (rowScopeColumn declaration), "amoebius_scope", "tenant_id")
-    , projectedPolicyColumn = predicateColumn predicate
+    , projectedPolicyColumn =
+#ifdef TRANSACTION_VOCABULARY_WRONG_POLICY_COLUMN_MUTANT
+        "subject_id"
+#else
+        predicateColumn predicate
+#endif
     , projectedPolicyParameter = predicateParameter predicate
     }
  where
@@ -260,11 +266,20 @@ projectTransaction declaration =
     }
 
 scopePredicate :: RowDeclaration -> ScopePredicate
+#ifdef TRANSACTION_VOCABULARY_MATCH_ALL_MUTANT
+scopePredicate _ = ScopeEquals (Column "TRUE" TextColumn) "none"
+#else
 scopePredicate declaration = ScopeEquals (rowScopeColumn declaration) "scope_tenant"
+#endif
 
 projectPredicate :: ScopePredicate -> PredicateProjection
 projectPredicate (ScopeEquals column parameter) =
-  PredicateProjection (columnName column) parameter True
+  PredicateProjection (columnName column) parameter
+#ifdef TRANSACTION_VOCABULARY_OPTIONAL_SCOPE_MUTANT
+    False
+#else
+    True
+#endif
 
 data SchemaGeneration
   = Generation1

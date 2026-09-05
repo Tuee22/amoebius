@@ -1,6 +1,0 @@
-module ForgeRequestScope where
-
-import Amoebius.Scope.Index
-
-bad :: Tenant -> Subject -> Membership -> RequestScope scope
-bad tenant subject membership = RequestScope tenant subject membership

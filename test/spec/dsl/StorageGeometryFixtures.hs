@@ -165,8 +165,8 @@ allocationOver = volume "allocation" 65 allocationOverBacking (DirectGeometry 1)
 allocationFit = allocationOver {volumeBacking = allocationFitBacking}
 
 fsOverBacking, fsFitBacking :: StorageBacking
-fsOverBacking = StorageBacking (BackingId "filesystem") 127 (BackingAllocationPolicy 0 64)
-fsFitBacking = StorageBacking (BackingId "filesystem") 128 (BackingAllocationPolicy 0 64)
+fsOverBacking = StorageBacking (BackingId "filesystem") 109 (BackingAllocationPolicy 0 1)
+fsFitBacking = StorageBacking (BackingId "filesystem") 110 (BackingAllocationPolicy 0 1)
 
 allocationOverBacking, allocationFitBacking :: StorageBacking
 allocationOverBacking = StorageBacking (BackingId "allocation") 127 (BackingAllocationPolicy 0 64)

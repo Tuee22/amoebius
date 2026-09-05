@@ -1,1 +1,0 @@
-Disable the hardened pod security context; security-context must turn red.

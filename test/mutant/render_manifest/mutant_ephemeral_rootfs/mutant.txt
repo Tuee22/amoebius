@@ -1,1 +1,0 @@
-Make a rendered root filesystem writable; security-context must turn red.

@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | The Phase-4 suite: the budget calculus against its authored capacity table.
+-- | The Phase-4 suite: the budget calculus against its independently authored
+-- Haskell capacity relation.
 --
 -- The table is the independent side. It is written from
 -- 'jit_budget_doctrine.md' sections 2, 3 and 4 and never from 'admit', so every row is a
@@ -112,55 +113,36 @@ data Row = Row
   }
   deriving stock (Eq, Show)
 
-tablePath :: FilePath
-tablePath = "test/oracle/budget_calculus/admission_table.tsv"
-
-readTable :: IO [Row]
-readTable = do
-  contents <- readFile tablePath
-  pure [row | line <- lines contents, row <- parseRow line]
-
-parseRow :: String -> [Row]
-parseRow line = case splitTabs line of
-  fields@(first : _)
-    | take 1 first == "#" -> []
-    | length fields == 11 -> buildRow fields
-  _ -> []
-
-buildRow :: [String] -> [Row]
-buildRow fields = case fields of
-  [name, ceilingText, slotsText, perItemText, heldText, heldSlotsText, location, purpose, demandText, verdict, reason] ->
-    [ Row
-        { rowCase = Text.pack name
-        , rowCeiling = number ceilingText
-        , rowConcurrency = fromIntegral (number slotsText)
-        , rowPerItem = number perItemText
-        , rowHeldBytes = number heldText
-        , rowHeldSlots = fromIntegral (number heldSlotsText)
-        , rowLocation = Text.pack location
-        , rowPurpose = Text.pack purpose
-        , rowDemand = number demandText
-        , rowVerdict = Text.pack verdict
-        , rowReason = Text.pack reason
-        }
-    ]
-  _ -> []
-
--- | Decimal parsing without a partial call. A field the table does not spell as digits is
--- read as zero and the row it belongs to then disagrees with its own verdict, which is a
--- louder failure than a parse exception thrown from inside a check.
-number :: String -> Word64
-number = foldl step 0
-  where
-    step accumulator character = case lookup character digits of
-      Just value -> accumulator * 10 + value
-      Nothing -> accumulator
-    digits = zip ['0' .. '9'] [0 .. 9]
-
-splitTabs :: String -> [String]
-splitTabs text = case break (== '\t') text of
-  (field, []) -> [field]
-  (field, _ : rest) -> field : splitTabs rest
+independentAdmissionOracle :: [Row]
+independentAdmissionOracle =
+  [ row "fits-empty" 40 4 15 0 0 "cache-a" "build-cache" 10 "admitted" "-"
+  , row "fits-to-the-ceiling" 40 4 15 30 2 "cache-a" "build-cache" 10 "admitted" "-"
+  , row "fits-on-the-last-slot" 40 4 15 10 3 "cache-a" "build-cache" 10 "admitted" "-"
+  , row "fits-at-the-per-item-bound" 40 4 15 0 0 "cache-a" "build-cache" 15 "admitted" "-"
+  , row "fits-nothing-asked" 40 4 15 0 0 "cache-a" "build-cache" 0 "admitted" "-"
+  , row "narrow-grant-fits" 1 1 1 0 0 "cache-a" "build-cache" 1 "admitted" "-"
+  , row "ceiling-one-over" 40 4 15 31 1 "cache-a" "build-cache" 10 "refused" "ceiling-exceeded"
+  , row "ceiling-already-full" 40 4 15 40 1 "cache-a" "build-cache" 1 "refused" "ceiling-exceeded"
+  , row "ceiling-sum-overruns" 40 4 15 28 1 "cache-a" "build-cache" 15 "refused" "ceiling-exceeded"
+  , row "narrow-grant-ceiling" 1 1 1 1 0 "cache-a" "build-cache" 1 "refused" "ceiling-exceeded"
+  , row "concurrency-with-room-to-spare" 40 2 15 20 2 "cache-a" "build-cache" 10 "refused" "concurrency-exhausted"
+  , row "concurrency-single-slot" 40 1 15 5 1 "cache-a" "build-cache" 5 "refused" "concurrency-exhausted"
+  , row "concurrency-none-granted" 40 0 15 0 0 "cache-a" "build-cache" 1 "refused" "concurrency-exhausted"
+  , row "narrow-grant-concurrency" 1 1 1 0 1 "cache-a" "build-cache" 0 "refused" "concurrency-exhausted"
+  , row "per-item-one-over" 40 4 15 0 0 "cache-a" "build-cache" 16 "refused" "per-item-bound-exceeded"
+  , row "per-item-before-ceiling" 40 4 15 30 1 "cache-a" "build-cache" 16 "refused" "per-item-bound-exceeded"
+  , row "per-item-clamped" 40 4 60 0 0 "cache-a" "build-cache" 41 "refused" "per-item-bound-exceeded"
+  , row "wrong-location-empty" 40 4 15 0 0 "cache-b" "build-cache" 1 "refused" "wrong-location"
+  , row "wrong-location-would-fit" 40 4 15 0 0 "scratch" "build-cache" 10 "refused" "wrong-location"
+  , row "wrong-location-before-size" 40 4 15 0 0 "cache-b" "build-cache" 99 "refused" "wrong-location"
+  , row "wrong-purpose-checkpoint" 40 4 15 0 0 "cache-a" "model-checkpoint" 1 "refused" "wrong-purpose"
+  , row "wrong-purpose-artifact-store" 40 4 15 0 0 "cache-a" "artifact-store" 10 "refused" "wrong-purpose"
+  , row "wrong-purpose-working-directory" 40 4 15 0 0 "cache-a" "working-directory" 10 "refused" "wrong-purpose"
+  , row "wrong-purpose-before-size" 40 4 15 30 1 "cache-a" "model-checkpoint" 99 "refused" "wrong-purpose"
+  ]
+ where
+  row name ceilingBytes slots perItem held heldSlots location purpose demand verdict reason =
+    Row name ceilingBytes slots perItem held heldSlots location purpose demand verdict reason
 
 -- --------------------------------------------------------------------------
 -- the fixed grant every row is issued against
@@ -216,8 +198,8 @@ observed row = case (budgetFor row, demandFor row) of
 
 checks :: IO ()
 checks = do
-  table <- readTable
-  let results =
+  let table = independentAdmissionOracle
+      results =
         [ ("oracle-names-every-refusal", oracleNamesEveryRefusal table)
         , ("admission-matches-oracle", admissionMatchesOracle table)
         , ("pool-is-scarce", poolIsScarce)

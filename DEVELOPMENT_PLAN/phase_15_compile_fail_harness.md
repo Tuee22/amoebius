@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_artifact_calculus.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_artifact_calculus.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md
 **Generated sections**: none
 
 </details>
@@ -26,7 +26,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
+- [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 15.1: Structured diagnostic and twin contract](#sprint-151-structured-diagnostic-and-twin-contract-)
@@ -38,7 +38,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 Blocked by redesigned Phase 14, its independent validation, and gate pass; every earlier
 gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
@@ -78,33 +78,38 @@ must fail. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-15 semantic and resource payloads,
+package-hidden serial supervisor, typed Haskell diagnostic subject, independently authored ten-pair corpus,
+and three changed-production subjects are complete; only a fresh integrated run may authorize status.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — bind each compile-time unrepresentability claim to legal and illegal `.hs` source twins and the structured GHC diagnostic reason at which the illegal twin must fail. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 15` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 14; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | The Haskell harness binds ten type-level claims to legal/illegal `.hs` twins and accepts an illegal twin only for its exact structured GHC code, start, and message fragments. |
+| `Subject` | `Amoebius.Compiler.CompileFailHarness` is acquired only through package-hidden `Amoebius.Validation.CompileFailHarnessRun.Internal`. |
+| `Command` | Future public spelling is `pb validate phase 15`; before `BOOTSTRAP_HANDOFF`, the exact absolute Haskell executable and authenticated GHC 9.12.4 compiler run directly and synchronously. |
+| `Oracle` | `CompileFailHarnessSpec.hs` independently embeds the ten-pair/five-owner/four-code inventory and its exact diagnostic pins. |
+| `Positive controls` | Every legal twin compiles first and emits no structured Error before its corresponding illegal twin can be considered. |
+| `Paired negatives` | Every illegal twin fails at its exact code/start/message pin; wrong-reason parse failure, missing JSON diagnostic, and unbound-name failure are rejected. |
+| `Mutants` | Accept-any-failure, positive-counterpart deletion, and impossible-pin changed production subjects compile and turn their assigned loci red. |
+| `Discovery` | The production harness, Haskell oracle, and twenty Haskell twin sources equal the fixed 22-file inventory bidirectionally. |
+| `Challenge` | All three mutations execute after acquisition and must be distinguished at independent exact loci. |
+| `Observer` | The supervisor records absolute executable, argv, exit, transcript digest, and bounded failure text for each compiler and oracle process. |
+| `Authority/bypass` | `pb`, PATH compiler discovery, network, host/hardware effects, writes outside the run root, and compiler/linker overlap are forbidden. |
+| `Freshness` | Every run creates a fresh `.build/runs/phase-15/work/**` root and requires equal opening/closing source identities. |
+| `Qualification` | Exact inventory, clean legal/illegal corpus, three specific boundary refusals, artifact metrics, discovery, and all changed-production subjects pass together. |
+| `Cleanroom` | Binaries, objects, wrong-reason fixtures, transcripts, and results are generated lazily beneath the fresh run root. |
+| `Legacy closure` | Retired Phase-15 Python harness/gate and serialized behavioral manifest/surfaces are absent. |
+| `Predecessor` | Consume exactly one durable Phase-14 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Residue` | Deterministic simulation, concrete models, runtimes, live effects, and hardware remain explicitly later-owned. |
+| `Pass criterion` | `qualified-phase-fifteen-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
-## Resource provision — UNRESOLVED
+## Resource provision
 
-> **UNRESOLVED — blocks validation.** No live mutation may begin. The owner marker, preflight, complete
-> allowed/forbidden mutations, external observer, scoped cleanup, and zero-owned-residue contract are absent.
+Phase 15 owns serial GHC children and generated products beneath `.build/runs/phase-15/**`. Preflight requires
+an absolute authenticated compiler path and a fresh run root. Allowed mutations are source compilation and
+writes inside that root; PATH discovery, `pb`, network, host/hardware effects, writes elsewhere, and compiler
+overlap are forbidden. The package-hidden parent supervisor is the external observer, cleanup is run-root
+scoped, and no external owned residue is permitted.
 
 ## Doctrine adopted
 
@@ -115,15 +120,15 @@ must fail. NOT VALIDATED.
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 15.1: Structured diagnostic and twin contract ⏸️
+## Sprint 15.1: Structured diagnostic and twin contract ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/compile-fail-harness/Amoebius/Compiler/CompileFailHarness.hs` and the twenty Haskell twin fixtures
 **Blocked by**: [Phase 14](phase_14_refinement_checker.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: ten legal-green prerequisites, ten exact structured illegal pins, source digests, and three specific wrong-reason refusals
+**Oracle**: `test/spec/compile_fail_harness/CompileFailHarnessSpec.hs`
+**Legacy IDs**: none; retired Python and serialized Phase-15 behavioral sources are checked absent
+**Docs to update**: this phase file, `testing_doctrine.md`, and `system_components.md`
 
 ### Objective
 
@@ -149,15 +154,15 @@ claim names.
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 15.2: Claim inventory and mutation evidence ⏸️
+## Sprint 15.2: Claim inventory and mutation evidence ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/CompileFailHarnessRun/Internal.hs`
 **Blocked by**: Sprint 15.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: serial clean/three-mutant matrix, exact red loci, discovery, containment, metrics, and process receipts
+**Oracle**: the same independently authored Haskell corpus; generated result TSV is an observation only
+**Legacy IDs**: none; retired Python and serialized Phase-15 behavioral sources are checked absent
+**Docs to update**: this phase file, `testing_doctrine.md`, and `system_components.md`
 
 ### Objective
 

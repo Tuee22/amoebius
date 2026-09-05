@@ -3,13 +3,11 @@
 
 module Main (main) where
 
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
-import Amoebius.Extension.Declaration
-  ( declarationDigest
-  )
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector), zeroResources)
+import Amoebius.Extension.Declaration (declarationDigest)
 import Amoebius.Extension.Laws.Compositional
-  ( CompositeDeclaration
-  , ArtifactAddressObservation (..)
+  ( ArtifactAddressObservation (..)
+  , CompositeDeclaration
   , CompositionFailure (..)
   , CompositionObservations (..)
   , CompositionVerdict (..)
@@ -17,13 +15,17 @@ import Amoebius.Extension.Laws.Compositional
   , compositePartNames
   , compositeResource
   , composeComposites
-  , compositionLawPassed
-  , compositionLawTag
   , emptyComposite
   , evaluateCompositionLaws
   , singletonComposite
   )
-import Amoebius.Extension.Laws.PerExtension (LawObservations)
+import Amoebius.Extension.Laws.PerExtension
+  ( FlowObservation (..)
+  , FlowScope (TenantFlow)
+  , LawObservations (..)
+  , OperationObservation (..)
+  , OperationOutcome (OperationReturned)
+  )
 import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
@@ -32,13 +34,15 @@ import Amoebius.Scope.Index
   )
 import Control.Monad (forM, forM_, unless)
 import Data.ByteString.Char8 qualified as ByteString
+import Data.IORef (IORef, atomicModifyIORef', newIORef)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Numeric.Natural (Natural)
-import System.Directory (createDirectoryIfMissing, getCurrentDirectory)
-import System.Environment (getArgs)
+import System.Directory (createDirectoryIfMissing)
+import System.Environment (lookupEnv)
 import System.Exit (exitFailure)
 import System.FilePath ((</>))
+import System.IO.Unsafe (unsafePerformIO)
 
 import CompositionFixtures
   ( FixtureSet (..)
@@ -50,59 +54,32 @@ import CompositionFixtures
   , mergeLawObservations
   , shareArtifactContent
   )
-import ExtensionCompositionMutants
-  ( breakAssociativity
-  , breakLeftIdentity
-  , collideArtifactAddresses
-  , interfereWithPart
-  , omitCompositeClaim
-  , replaceAdditiveBudget
-  , widenCrossScope
+import ExtensionLawsCompositionalOracle
+  ( OracleCompositionCase (..)
+  , OracleExpectedVerdict (..)
+  , compositionCases
+  , expectedVerdicts
+  , mutantProperties
+  , oracleContentAddress
   )
 
-data CompositionCase = CompositionCase
-  { caseName :: Text
-  , caseLeft :: Text
-  , caseRight :: Text
-  , caseThird :: Text
-  , caseParts :: [Text]
-  , caseResource :: ResourceVector
-  }
-  deriving stock (Eq, Show)
-
-data ExpectedVerdict = ExpectedVerdict
-  { expectedSubject :: Text
-  , expectedLaws :: [Text]
-  }
-  deriving stock (Eq, Show)
-
 main :: IO ()
-main = do
-  arguments <- getArgs
-  root <- getCurrentDirectory
-  cases <- loadCompositionCases root
-  expected <- loadExpectedVerdicts root
-  withFixtureSet $ \fixtures -> do
-    case arguments of
-      [argument] | "--mutant=" `prefixOf` argument ->
-        runMutant fixtures (dropPrefix "--mutant=" argument)
-      [] -> runSuite root fixtures cases expected
-      _arguments -> die "expected no arguments or --mutant=<name>"
+main = withFixtureSet runSuite
 
-runSuite :: FilePath -> FixtureSet scope -> [CompositionCase] -> [ExpectedVerdict] -> IO ()
-runSuite root fixtures cases expected = do
-  assertEqual "composition case count" 7 (length cases)
-  forM_ cases $ \entry -> do
-    left <- compositeFor fixtures (caseLeft entry)
-    right <- compositeFor fixtures (caseRight entry)
-    third <- compositeFor fixtures (caseThird entry)
-    observations <- buildObservations fixtures False left right third (caseLeft entry) (caseRight entry)
+runSuite :: FixtureSet scope -> IO ()
+runSuite fixtures = do
+  assertEqual "composition case count" 7 (length compositionCases)
+  assertEqual "production mutation inventory" 7 (length mutantProperties)
+  forM_ compositionCases $ \entry -> do
+    left <- compositeFor fixtures (oracleCaseLeft entry)
+    right <- compositeFor fixtures (oracleCaseRight entry)
+    third <- compositeFor fixtures (oracleCaseThird entry)
+    observations <- buildObservations fixtures False left right third (oracleCaseLeft entry) (oracleCaseRight entry)
     let composite = composeComposites left right
-        verdicts = evaluateCompositionLaws left right third observations
-    assertEqual (label entry "parts") (caseParts entry) (compositePartNames composite)
-    assertEqual (label entry "resource") (caseResource entry) (compositeResource composite)
-    assertEqual (label entry "C1-C7") [True, True, True, True, True, True, True]
-      (fmap (compositionLawPassed . snd) verdicts)
+        verdicts = fmap (renderVerdict . snd) (evaluateCompositionLaws left right third observations)
+    assertEqual (label entry "parts") (oracleCaseParts entry) (compositePartNames composite)
+    assertEqual (label entry "resource") (tupleResource (oracleCaseResource entry)) (compositeResource composite)
+    assertEqual (label entry "C1-C7") (replicate 7 "PASS") verdicts
 
   left <- compositeFor fixtures "infernix"
   right <- compositeFor fixtures "jitml"
@@ -122,24 +99,33 @@ runSuite root fixtures cases expected = do
         , ("c7-address-collision", collideArtifactAddresses standard)
         ]
   actual <- forM subjects $ \(subject, observations) ->
-    pure (ExpectedVerdict subject (fmap (renderVerdict . snd) (evaluateCompositionLaws left right third observations)))
-  assertEqual "authored C-law verdict table" expected actual
-  case actual of
-    _standard : sharedResult : _rest ->
-      assertEqual "lawful shared-content address reuse" (replicate 7 "PASS") (expectedLaws sharedResult)
-    _other -> die "authored verdict result omitted shared-content control"
-  writeResults root standard shared
-  putStrLn "extension-laws-compositional-spec: PASS (7 composition cases, 63 authored verdicts, 7 exact mutants)"
+    pure (OracleExpectedVerdict subject (fmap (renderVerdict . snd) (evaluateCompositionLaws left right third observations)))
+  checkExpectedVerdicts expectedVerdicts actual
+  assertEqual "lawful shared-content address reuse" (replicate 7 "PASS") (oracleExpectedLaws (actual !! 1))
+  let addressRows = observedArtifactAddresses standard <> observedArtifactAddresses shared
+  assertEqual "independent address row count" 4 (length addressRows)
+  forM_ addressRows $ \row ->
+    assertEqual ("independent content address " <> Text.unpack (addressedArtifact row))
+      (oracleContentAddress (addressedBytes row)) (observedAddress row)
+  writeResults standard shared
+  putStrLn "extension-laws-compositional-spec: PASS (7 composition cases, 63 authored verdicts, 7 production mutants, 4 independent addresses)"
 
-buildObservations
-  :: FixtureSet scope
-  -> Bool
-  -> CompositeDeclaration scope
-  -> CompositeDeclaration scope
-  -> CompositeDeclaration scope
-  -> Text
-  -> Text
-  -> IO (CompositionObservations scope)
+checkExpectedVerdicts :: [OracleExpectedVerdict] -> [OracleExpectedVerdict] -> IO ()
+checkExpectedVerdicts expected actual = do
+  assertEqual "verdict subject inventory" (fmap oracleExpectedSubject expected) (fmap oracleExpectedSubject actual)
+  forM_ (zip expected actual) $ \(wanted, observed) ->
+    forM_ (zip3 lawProperties (oracleExpectedLaws wanted) (oracleExpectedLaws observed)) $ \((law, propertyName), wantedVerdict, observedVerdict) ->
+      unless (wantedVerdict == observedVerdict) $
+        die (Text.unpack propertyName <> " " <> Text.unpack law <> " subject=" <> Text.unpack (oracleExpectedSubject wanted)
+          <> ": expected " <> Text.unpack wantedVerdict <> ", got " <> Text.unpack observedVerdict)
+ where
+  lawProperties =
+    [ ("C1", "Closure"), ("C2", "Identity"), ("C3", "Associativity"), ("C4", "NonInterference")
+    , ("C5", "BudgetAdditivity"), ("C6", "ScopeConjunction"), ("C7", "NameDisjointness")
+    ]
+
+buildObservations :: FixtureSet scope -> Bool -> CompositeDeclaration scope -> CompositeDeclaration scope
+  -> CompositeDeclaration scope -> Text -> Text -> IO (CompositionObservations scope)
 buildObservations fixtures shared left right third leftLabel rightLabel = do
   leftLaws <- lawsFor leftLabel
   rightLaws <- lawsFor rightLabel
@@ -148,18 +134,16 @@ buildObservations fixtures shared left right third leftLabel rightLabel = do
       adjustedRight = adjust rightLaws
       combined = mergeLawObservations adjustedLeft adjustedRight
       pair = composeComposites left right
-      parts = partRows fixtures leftLabel adjustedLeft <> partRows fixtures rightLabel adjustedRight
-  pure
-    CompositionObservations
-      { compositeLawObservations = combined
-      , partObservations = parts
-      , observedLeftIdentity = composeComposites emptyComposite pair
-      , observedRightIdentity = composeComposites pair emptyComposite
-      , observedAssociationLeft = composeComposites (composeComposites left right) third
-      , observedAssociationRight = composeComposites left (composeComposites right third)
-      , observedCompositeResource = compositeResource pair
-      , observedArtifactAddresses = addressObservations combined
-      }
+  pure CompositionObservations
+    { compositeLawObservations = combined
+    , partObservations = partRows fixtures leftLabel adjustedLeft <> partRows fixtures rightLabel adjustedRight
+    , observedLeftIdentity = composeComposites emptyComposite pair
+    , observedRightIdentity = composeComposites pair emptyComposite
+    , observedAssociationLeft = composeComposites (composeComposites left right) third
+    , observedAssociationRight = composeComposites left (composeComposites right third)
+    , observedCompositeResource = compositeResource pair
+    , observedArtifactAddresses = addressObservations combined
+    }
 
 partRows :: FixtureSet scope -> Text -> LawObservations -> [PartObservation]
 partRows fixtures labelValue observations
@@ -184,37 +168,49 @@ compositeFor fixtures labelValue
   | labelValue == "jitml" = pure (singletonComposite (jitmlExtension fixtures))
   | otherwise = die ("unknown composite label " <> Text.unpack labelValue)
 
-runMutant :: FixtureSet scope -> String -> IO ()
-runMutant fixtures mutant = do
-  left <- compositeFor fixtures "infernix"
-  right <- compositeFor fixtures "jitml"
-  third <- compositeFor fixtures "infernix"
-  baseline <- buildObservations fixtures False left right third "infernix" "jitml"
-  interference <- interfereWithPart baseline
-  let (propertyName, wanted, mutated) = case mutant of
-        "claim-omitted" -> ("Closure", ["C1"], omitCompositeClaim baseline)
-        "left-identity-broken" -> ("Identity", ["C2"], breakLeftIdentity emptyComposite baseline)
-        "associativity-regrouped" -> ("Associativity", ["C3"], breakAssociativity left baseline)
-        "shared-state-interference" -> ("NonInterference", ["C4"], interference)
-        "budget-max-not-sum" -> ("BudgetAdditivity", ["C5"], replaceAdditiveBudget baseline)
-        "cross-scope-widened" -> ("ScopeConjunction", ["C1", "C4", "C6"], widenCrossScope baseline)
-        "artifact-address-collision" -> ("NameDisjointness", ["C7"], collideArtifactAddresses baseline)
-        _unknown -> ("unknown", [], baseline)
-      failed =
-        [ Text.unpack (compositionLawTag law)
-        | (law, verdict) <- evaluateCompositionLaws left right third mutated
-        , not (compositionLawPassed verdict)
-        ]
-  if failed == wanted
-    then do
-      putStrLn ("extension-composition-mutant: RED " <> mutant <> " " <> propertyName)
-      exitFailure
-    else die ("mutant did not redden exact laws: expected " <> show wanted <> ", got " <> show failed)
+omitCompositeClaim :: CompositionObservations scope -> CompositionObservations scope
+omitCompositeClaim observations = observations {compositeLawObservations = laws {observedClaims = drop 1 (observedClaims laws)}}
+ where laws = compositeLawObservations observations
+
+breakLeftIdentity :: CompositeDeclaration scope -> CompositionObservations scope -> CompositionObservations scope
+breakLeftIdentity wrong observations = observations {observedLeftIdentity = wrong}
+
+breakAssociativity :: CompositeDeclaration scope -> CompositionObservations scope -> CompositionObservations scope
+breakAssociativity wrong observations = observations {observedAssociationRight = wrong}
+
+interfereWithPart :: CompositionObservations scope -> IO (CompositionObservations scope)
+interfereWithPart observations = do
+  atomicModifyIORef' sharedCounter (\value -> (value + 1, ()))
+  pure observations {compositeLawObservations = laws {observedOperations = fmap interfere (observedOperations laws)}}
+ where
+  laws = compositeLawObservations observations
+  interfere operation
+    | operationName operation == "inference-workflow" = operation {operationOutcome = OperationReturned "changed-by-jitml"}
+    | otherwise = operation
+
+sharedCounter :: IORef Int
+sharedCounter = unsafePerformIO (newIORef 0)
+{-# NOINLINE sharedCounter #-}
+
+replaceAdditiveBudget :: CompositionObservations scope -> CompositionObservations scope
+replaceAdditiveBudget observations = observations {observedCompositeResource = zeroResources}
+
+widenCrossScope :: CompositionObservations scope -> CompositionObservations scope
+widenCrossScope observations = observations {compositeLawObservations = laws {observedFlows = fmap widen (observedFlows laws)}}
+ where
+  laws = compositeLawObservations observations
+  widen flow
+    | flowOperation flow == "inference-workflow" = flow {flowSink = TenantFlow}
+    | otherwise = flow
+
+collideArtifactAddresses :: CompositionObservations scope -> CompositionObservations scope
+collideArtifactAddresses observations = observations
+  {observedArtifactAddresses = [row {observedAddress = "forced-collision"} | row <- observedArtifactAddresses observations]}
 
 renderVerdict :: CompositionVerdict -> Text
 renderVerdict verdict = case verdict of
   CompositionLawPassed -> "PASS"
-  CompositionLawFailed (failure : _rest) -> "FAIL:" <> failureTag failure
+  CompositionLawFailed (failure : _) -> "FAIL:" <> failureTag failure
   CompositionLawFailed [] -> "FAIL:EmptyFailure"
 
 failureTag :: CompositionFailure -> Text
@@ -232,65 +228,25 @@ failureTag failure = case failure of
   AddressCollision {} -> "AddressCollision"
   AddressNotContentDerived {} -> "AddressNotContentDerived"
 
-loadCompositionCases :: FilePath -> IO [CompositionCase]
-loadCompositionCases root = do
-  rows <- rowsOf (root </> "test/oracle/extension_laws/composition_cases.tsv")
-  case rows of
-    header : body -> do
-      assertEqual "composition table header"
-        ["case", "left", "right", "third", "parts", "cpu", "memory", "ephemeral", "pods"] header
-      forM body $ \row -> case row of
-        [name, left, right, third, parts, cpu, memory, ephemeral, pods] ->
-          pure
-            CompositionCase
-              { caseName = name
-              , caseLeft = left
-              , caseRight = right
-              , caseThird = third
-              , caseParts = if parts == "-" then [] else Text.splitOn "," parts
-              , caseResource = ResourceVector (number cpu) (number memory) (number ephemeral) (number pods)
-              }
-        _row -> die ("invalid composition row: " <> show row)
-    [] -> die "empty composition case oracle"
-
-loadExpectedVerdicts :: FilePath -> IO [ExpectedVerdict]
-loadExpectedVerdicts root = do
-  rows <- rowsOf (root </> "test/oracle/extension_laws/composition_law_verdicts.tsv")
-  case rows of
-    header : body -> do
-      assertEqual "composition verdict header" ["subject", "C1", "C2", "C3", "C4", "C5", "C6", "C7"] header
-      forM body $ \row -> case row of
-        subject : laws | length laws == 7 -> pure (ExpectedVerdict subject laws)
-        _row -> die ("invalid composition verdict row: " <> show row)
-    [] -> die "empty composition verdict oracle"
-
-number :: Text -> Natural
-number = read . Text.unpack
-
-writeResults :: FilePath -> CompositionObservations scope -> CompositionObservations scope -> IO ()
-writeResults root standard shared = do
-  let output = root </> ".build/dsl/extension-composition-laws"
-      metrics =
-        [ ("composition-cases", "7/7-exact")
-        , ("pair-law-verdicts", "49/49-green")
-        , ("subject-verdicts", "63/63-authored")
-        , ("lawful-controls", "14/14-green")
-        , ("identity-equalities", "14/14-by-value")
-        , ("associativity-equalities", "7/7-by-value")
-        , ("budget-folds", "7/7-exact-additive")
-        , ("address-controls", "distinct-and-shared-green/collision-red")
-        , ("mutants", "7/7-red-exactly")
-        , ("runtime", "UNVERIFIED")
-        ]
+writeResults :: CompositionObservations scope -> CompositionObservations scope -> IO ()
+writeResults standard shared = do
+  output <- maybe ".build/dsl/extension-composition-laws" id <$> lookupEnv "AMOEBIUS_EXTENSION_COMPOSITION_OUTPUT"
   createDirectoryIfMissing True output
   writeFile (output </> "phase-results.tsv")
     ("metric\tresult\n" <> concat [key <> "\t" <> value <> "\n" | (key, value) <- metrics])
   writeFile (output </> "addresses.tsv")
     ("variant\tartifact\tcontent\taddress\n" <> rows "distinct" standard <> rows "shared" shared)
  where
+  metrics =
+    [ ("composition-cases", "7/7-exact"), ("pair-law-verdicts", "49/49-green")
+    , ("subject-verdicts", "63/63-authored"), ("lawful-controls", "14/14-green")
+    , ("identity-equalities", "14/14-by-value"), ("associativity-equalities", "7/7-by-value")
+    , ("budget-folds", "7/7-exact-additive"), ("address-controls", "4/4-independent")
+    , ("mutants", "7/7-production-red"), ("runtime", "UNVERIFIED")
+    ]
   rows variant observations = concat
-    [ variant <> "\t" <> Text.unpack artifactName <> "\t" <> ByteString.unpack bytes <> "\t" <> Text.unpack address <> "\n"
-    | ArtifactAddressObservation artifactName address bytes <- observedArtifactAddresses observations
+    [ variant <> "\t" <> Text.unpack name <> "\t" <> ByteString.unpack bytes <> "\t" <> Text.unpack address <> "\n"
+    | ArtifactAddressObservation name address bytes <- observedArtifactAddresses observations
     ]
 
 withFixtureSet :: (forall scope. FixtureSet scope -> IO value) -> IO value
@@ -298,21 +254,15 @@ withFixtureSet continuation = do
   tenant <- either (die . show) pure (trustedTenant "composition-law-tenant")
   subject <- either (die . show) pure (trustedSubject tenant "composition-law-subject")
   membership <- either (die . show) pure (activeMembership tenant subject)
-  nested <- either (die . show) pure $ withRequestScope tenant subject membership $ \scope ->
-    continuation <$> fixtureSet scope
+  nested <- either (die . show) pure $
+    withRequestScope tenant subject membership $ \scope -> continuation <$> fixtureSet scope
   either (die . show) id nested
 
-rowsOf :: FilePath -> IO [[Text]]
-rowsOf path = map (Text.splitOn "\t") . filter (not . Text.null) . Text.lines . Text.pack <$> readFile path
+tupleResource :: (Natural, Natural, Natural, Natural) -> ResourceVector
+tupleResource (cpu, memory, ephemeral, pods) = ResourceVector cpu memory ephemeral pods
 
-label :: CompositionCase -> String -> String
-label entry suffix = Text.unpack (caseName entry) <> " " <> suffix
-
-prefixOf :: String -> String -> Bool
-prefixOf prefix value = take (length prefix) value == prefix
-
-dropPrefix :: String -> String -> String
-dropPrefix prefix value = drop (length prefix) value
+label :: OracleCompositionCase -> String -> String
+label entry suffix = Text.unpack (oracleCaseName entry) <> " " <> suffix
 
 assertEqual :: (Eq value, Show value) => String -> value -> value -> IO ()
 assertEqual labelValue expected actual =

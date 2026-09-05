@@ -1,6 +1,0 @@
-module Declassify where
-
-import Amoebius.Scope.Flow
-
-bad :: FlowLabel scope -> FlowLabel scope
-bad privateValue = declassify privateValue

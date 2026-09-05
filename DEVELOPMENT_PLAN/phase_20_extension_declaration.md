@@ -36,28 +36,24 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 19, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+Phase 19 and every earlier gate have current passing receipts. The Phase-20 implementation and compiled
+semantic contract are bound below; completion still requires the exact integrated Phase-20 gate.
 
 > **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
-This phase specifies a Haskell target capability; it does not report a current implementation or
-result. The target is to represent an extension as one complete Haskell value with every
+This phase has a bound Haskell implementation but does not report a passing result until its complete gate
+runs. It represents an extension as one complete Haskell value with every
 core-calculus component, one request-scope index, exact resource accounting, and a content-derived
 identity.
 
-The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
-`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
-tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
-code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
-`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
-evidence contract remain UNRESOLVED and block validation.
+The production subject, behavioral controls, independent oracle, compile witnesses, and mutants are authored
+as `.hs`. The former Python gate, serialized declaration/mutation tables, and test-local mutant are retired.
+Derived result tables and compiler transcripts are created lazily beneath the acquired
+`.build/runs/phase-20/**` root and remain run-scoped evidence only.
 
 This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
 behavior only. It cannot use host, hardware, live-service, or cluster observations to make its claim pass.
@@ -77,28 +73,28 @@ content-derived identity. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — represent an extension as one complete Haskell value with every core-calculus component, one request-scope index, exact resource accounting, and a content-derived identity. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 20` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 19; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | One complete opaque declaration carries five mandatory calculus components at one generative request scope, preserves component resources, exposes five derived readers, and has a canonical content-derived identity. Later law and runtime claims are excluded. |
+| `Subject` | `src/extension-declaration/Amoebius/Extension/Declaration.hs`, acquired and exercised by the package-hidden Phase-20 supervisor. |
+| `Command` | `pb validate phase 20` is the future public spelling. This pre-handoff gate invokes the exact absolute source-bound Haskell executable as `validate phase 20`, then exact Cabal 3.16.1.0 and GHC 9.12.4 paths offline with `--jobs=1`; `pb` is not used. |
+| `Oracle` | `test/spec/extension/ExtensionDeclarationOracle.hs` independently owns two declarations, ten semantic component rows, exact resource vectors, and a separate length-framed SHA-256 calculation without importing the production declaration or composition module. |
+| `Positive controls` | Two declarations contain all ten mandatory components in closed calculus order; five readers each return one component; two natural-resource folds and two independently recomputed digests match; the legal five-component same-scope compile twin runs. |
+| `Paired negatives` | Correct/wrong calculus, nonempty/empty name, five/four components, and same/cross request scope are minimally different pairs; the latter two clean-production siblings must fail at exact arity and `RequestScope` type loci. |
+| `Mutants` | Three Cabal flags change the production declaration: optional evidence, erased request-scope equality, and omitted artifact reader. Their forbidden witnesses or red tests must identify `RequiredComponents`, `ScopeIndexPreserved`, and `ArtifactReaderComplete`. |
+| `Discovery` | The acquired source snapshot must equal the exact one production and three oracle/test `.hs` paths in both directions; empty, missing, or extra discovery fails. |
+| `Challenge` | All three production mutations are compiled and evaluated after source acquisition before the clean candidate; each exact property changes while the legal controls remain green. |
+| `Observer` | The supervisor retains absolute executable, argv, exit, stdout/stderr, and digest observations for Cabal version, three production mutants, two illegal siblings, the legal twin, and the clean run. |
+| `Authority/bypass` | Authority is limited to exact Cabal/compiler/store paths and the unique run root; every build is offline and serial. `pb`, network, host, container, cluster, service, and hardware arguments are forbidden. |
+| `Freshness` | One unique `.build/runs/phase-20/work/candidate-*` root is acquired; both clean products are regenerated there and opening/closing Git source identities must match. |
+| `Qualification` | The supervisor first kills all three changed-production mutations and checks both illegal compile siblings, then requires the legal twin and clean independent corpus to pass. |
+| `Cleanroom` | The authenticated source-repository cache is copied beneath the unique run root, Cabal builds there, and the two clean generated products must exist only below that root. |
+| `Legacy closure` | The Python declaration gate, two serialized declaration authorities, and test-local reader mutant are absent; reintroduction is an exact failure. |
+| `Predecessor` | Exact durable `ImmediatePredecessorPass` for Phase 19 on the current source snapshot; absent, stale, replayed, or different-source evidence fails. |
+| `Residue` | Extension laws, conformance verdicts, decoding, effects, runtimes, host, service, cluster, and hardware claims remain `UNVERIFIED` and later-phase-owned. |
+| `Pass criterion` | Every one of the eighteen rows passes in one qualified run for the exact source; that complete pass is sufficient for the mechanical status-only transition. |
 
 ## Doctrine adopted
 
@@ -110,15 +106,15 @@ content-derived identity. NOT VALIDATED.
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 20.1: Complete indexed declaration ⏸️
+## Sprint 20.1: Complete indexed declaration ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/extension-declaration/Amoebius/Extension/Declaration.hs`; package-hidden `Amoebius.Validation.ExtensionDeclarationRun.Internal`.
 **Blocked by**: [Phase 19](phase_19_reconcile_core_simulation.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Two declaration/ten reader rows, two independent digests, two exact resource folds, two semantic refusal pairs, two compile barriers, and three production mutants.
+**Oracle**: `test/spec/extension/ExtensionDeclarationOracle.hs`; compile siblings in `test/negative/compile_fail/extension_declaration/DeclarationCompile.hs`.
+**Legacy IDs**: Phase-local legacy closure for the retired Python gate, two TSV authorities, and test-local mutant.
+**Docs to update**: `extension_conformance_doctrine.md`; `system_components.md`.
 
 ### Objective
 
@@ -153,7 +149,7 @@ The pre-reset record said `None`; that statement cannot support a gate pass. Cur
 
 **Cross-references to add:**
 
-- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+- `DEVELOPMENT_PLAN/system_components.md` and `documents/engineering/extension_conformance_doctrine.md` — record the exact declaration boundary, oracle, and package-hidden Phase-20 supervisor.
 
 ## Related Documents
 

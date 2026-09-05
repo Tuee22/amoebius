@@ -26,7 +26,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
+- [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 14.1: Compiled-source refinement boundary](#sprint-141-compiled-source-refinement-boundary-)
@@ -38,7 +38,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 Blocked by redesigned Phase 13, its independent validation, and gate pass; every earlier
 gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
@@ -78,33 +78,38 @@ obligation. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-14 semantic and resource payloads,
+package-hidden serial supervisor, Haskell source/refinement oracle, compiled model projection, and three
+changed-production subjects are complete; only a fresh integrated run may authorize status.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — check a bounded GHC-compiled Haskell function fragment against source-local refinements and an explicit postcondition-to-model-invariant correspondence obligation. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 14` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 13; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | The Haskell checker compiles and checks a closed source-annotation fragment for postcondition preservation and explicit implementation-to-model correspondence. |
+| `Subject` | `Amoebius.Checker.Refinement` is acquired only through package-hidden `Amoebius.Validation.RefinementCheckerRun.Internal`. |
+| `Command` | Future public spelling is `pb validate phase 14`; before `BOOTSTRAP_HANDOFF`, the exact absolute Haskell executable and authenticated GHC 9.12.4 compiler run directly and synchronously. |
+| `Oracle` | `RefinementCheckerSpec.hs` embeds six exact outcomes and two correspondence predicates; `RefinementModelProjection.hs` independently projects the Phase-11 model expressions. |
+| `Positive controls` | Increment, decrement, and sum compile and prove with exact source line/digest identity and complete required-pair coverage. |
+| `Paired negatives` | Relative solver, unbound variable, ill-sorted precondition, counterexample, correspondence mismatch, and unknown invariant paths are exact refusals or classifications. |
+| `Mutants` | Precondition-conjunct deletion, correspondence omission, and postcondition weakening compile as changed production subjects and turn their assigned result loci red. |
+| `Discovery` | Production checker, two Haskell oracles, shared fake SMT boundary, and six compiled Haskell fixtures equal the fixed ten-file inventory bidirectionally. |
+| `Challenge` | All three mutations execute after acquisition and must be distinguished at their independent status observations. |
+| `Observer` | The supervisor records absolute executable, argv, exit, transcript digest, and bounded failure text for every compiler, projection, and oracle process. |
+| `Authority/bypass` | `pb`, PATH solver lookup, network, host/hardware effects, writes outside the run root, and compiler/linker overlap are forbidden. |
+| `Freshness` | Every run creates a fresh `.build/runs/phase-14/work/**` root and requires equal opening/closing source identities. |
+| `Qualification` | Model projection, six fixture compiles, clean classifications, exact discovery, and all three changed-production subjects pass together. |
+| `Cleanroom` | Fake solver, binaries, objects, projected invariants, transcripts, and results are generated lazily beneath the fresh run root. |
+| `Legacy closure` | Retired Phase-14 Python checker/gate and serialized behavioral oracles are absent. |
+| `Predecessor` | Consume exactly one durable Phase-13 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Residue` | Reusable compile-fail machinery, simulation, concrete models, runtimes, live effects, and hardware remain explicitly later-owned. |
+| `Pass criterion` | `qualified-phase-fourteen-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
-## Resource provision — UNRESOLVED
+## Resource provision
 
-> **UNRESOLVED — blocks validation.** No live mutation may begin. The owner marker, preflight, complete
-> allowed/forbidden mutations, external observer, scoped cleanup, and zero-owned-residue contract are absent.
+Phase 14 owns one run-local fake SMT process, serial GHC children, and generated products beneath
+`.build/runs/phase-14/**`. Preflight requires absolute authenticated compiler and freshly compiled solver paths.
+Allowed mutations are stdin SMT-LIB queries, fixture compilation, and writes inside the run root; PATH lookup,
+network, host/hardware effects, writes elsewhere, and compiler overlap are forbidden. The parent supervisor is
+the external observer, cleanup is run-root scoped, and no external owned residue is permitted.
 
 ## Doctrine adopted
 
@@ -115,15 +120,15 @@ obligation. NOT VALIDATED.
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 14.1: Compiled-source refinement boundary ⏸️
+## Sprint 14.1: Compiled-source refinement boundary ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/refinement-checker/Amoebius/Checker/Refinement.hs` and the six compiled Haskell fixture modules
 **Blocked by**: [Phase 13](phase_13_symbolic_checker.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: six exact outcomes, source identities, paired grammar/type refusals, and two required correspondence pairs
+**Oracle**: `test/spec/formal/refinement/RefinementCheckerSpec.hs` and compiled `RefinementModelProjection.hs`
+**Legacy IDs**: none; retired Python and serialized Phase-14 behavioral sources are checked absent
+**Docs to update**: this phase file, `formal_model_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
 
 ### Objective
 
@@ -151,15 +156,15 @@ while keeping compiler and solver responsibilities explicit.
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 14.2: Correspondence, negatives, and mutation evidence ⏸️
+## Sprint 14.2: Correspondence, negatives, and mutation evidence ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/RefinementCheckerRun/Internal.hs`
 **Blocked by**: Sprint 14.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: serial projection/fixture/clean/three-mutant matrix, exact red loci, discovery, containment, and process receipts
+**Oracle**: the same two independently authored Haskell oracles; generated projection and result bytes are observations only
+**Legacy IDs**: none; retired Python and serialized Phase-14 behavioral sources are checked absent
+**Docs to update**: this phase file, `formal_model_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
 
 ### Objective
 

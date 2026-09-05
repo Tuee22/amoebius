@@ -1,5 +1,7 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Kernel.Descent
   ( Plan (..)
@@ -39,9 +41,17 @@ foldLift _ = Plan . fmap toEntry
   toEntry step =
     PlanEntry
       { planEntryLabel = stepLabel step
-      , planEntryFrame = stepFrame step
+      , planEntryFrame = projectedFrame step
       , planEntryKind = stepKind step
       , planEntryObjectIdentities = fmap objectIdentityText (stepObjects step)
       }
   objectIdentityText object = case objectIdentity object of
     K8sObjectIdentity identity -> identity
+  projectedFrame step =
+#ifdef CHAIN_DESCENT_INFRAME_MUTANT
+    if stepLabel step == "global/managed-capacity-admission"
+      then AfterBootstrapAddonCutoverFrame
+      else stepFrame step
+#else
+    stepFrame step
+#endif

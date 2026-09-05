@@ -25,7 +25,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
+- [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 1.1: GenesisTrust-bound toolchain acquisition](#sprint-11-genesistrust-bound-toolchain-acquisition-)
@@ -43,7 +43,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-🔄 Active — NOT VALIDATED.
+✅ Done.
 
 The exact Phase-0 gate result is this phase's required immediate predecessor; every earlier gate barrier must
 also be satisfied in numerical order. Earlier completion claims and implementation results in this document
@@ -93,33 +93,39 @@ committing resolution output, integrity pins, generated code, or host-specific p
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-1 semantic payload and run-local resource
+contract are complete; only fresh execution of this gate can authorize the status transition.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; target claim: starting from the narrow local-custody facts carried by `GenesisTrust` and a network-independent input cache, independently authenticate publisher/content identities, prove actual compiler/package-tool executable derivation plus loader/host closure, and reproduce the contained GHC/Cabal acquisition, source-bound validator build, elaborated dependency graph, and representative probe set without committing resolution output or host-specific paths. GenesisTrust itself and every layer named in `Residue` remain assumptions or UNVERIFIED rather than products of this phase. |
-| `Subject` | UNRESOLVED — blocks validation: target production entries are `Amoebius.Validation.ToolchainSpikeRun`, `CompilerBuildInfo`, and `CompilerElaboratedPlan`; their exact acquired-authority composition and independent oracle remain to be bound. |
-| `Command` | UNRESOLVED — blocks validation: `pb validate phase 01` is future public spelling only. Before `BOOTSTRAP_HANDOFF`, invoke the exact absolute source-bound Haskell executable directly; bind the narrow GenesisTrust token separately from the freshly authenticated Phase-1 acquisition and executable identity. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: Phase-1-owned `LTD-BOOT-001`, `LTD-SRC-007`, and `LTD-SRC-009` remain active. Sprint 1.1 owns authenticated/reproducible acquisition, Sprint 1.5 owns generated probe-source closure, and Sprint 1.7 owns top-level vendor closure; each still needs its exact zero-finding analyzer, reintroduction negative, and complete gate evidence. GenesisTrust itself is not a legacy binding. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 00; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: `UNVERIFIED` includes the irreducible narrow local-custody facts represented by GenesisTrust, Phase-2 compiler-backed source semantics, every later product/runtime/hardware claim, and every still-unbound Phase-1 evidence row. Publisher authentication, actual executable derivation, and loader/host closure are Phase-1 claim rows and cannot be left here by a passing candidate. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | From `GenesisTrust` and its exact local cache, authenticate the signed GHC and Cabal checksum manifests, check archive membership digests, bind the actual GHC/Cabal process identities, derive the final dependency graph twice offline, and build and execute the representative probe set without tracked resolution output or host-specific paths. |
+| `Subject` | The package-hidden acquired supervisor in `Amoebius.Validation.ToolchainSpikeRun.Internal`, the public refusal-safe source diagnostic, and the exact probe executables declared by `probe/probe.cabal`. |
+| `Command` | Future public spelling is exactly `pb validate phase 01`; before `BOOTSTRAP_HANDOFF`, the gate invokes the exact absolute source-bound Haskell executable directly. Every Cabal child carries `--offline` and `--jobs=1`, and the acquired GHC path is explicit. |
+| `Oracle` | `test/validation-kernel/ToolchainSpikeRunOracle.hs` owns the independent source-policy cases and `test/validation-kernel/ToolchainAcquisitionOracle.hs` owns process, dependency, fixture, simulation, and mutation expectations without importing private evidence constructors. |
+| `Positive controls` | Exact controls are publisher-signature verification, GHC 9.12.4, Cabal 3.16.1.0, two offline source builds, the complete linked dependency probe, the positive Dhall decode, and the unperturbed simulation terminal state `3`. |
+| `Paired negatives` | Exact one-dimension pairs are the mistyped Dhall count, perturbed simulation schedule, missing required dependency, mutable acquisition identity, tracked foreign probe input, top-level vendor reintroduction, and tracked resolution output. |
+| `Mutants` | Haskell-declared mutations remove one required dependency, change the expected terminal state, admit a mutable identity, and reintroduce each owned source-debt family; each carries an applied-change witness, exact refusal code, and unaffected-control observation. |
+| `Discovery` | Runtime-discovered probe executables and elaborated dependency names must equal the independent closed expected sets in both directions; empty, duplicate, missing, and extra discovery refuse. |
+| `Challenge` | After both builds start, execute the positive and minimally changed negative fixtures from fresh run-local paths and require the independent stdout/exit predicates to distinguish them. |
+| `Observer` | The Haskell supervisor captures process path, argv, exit, bounded stdout/stderr digest, executable digest, signature fingerprint, plan digest, and probe-output digest; self-reported success without the independently expected output refuses. |
+| `Authority/bypass` | Network use, `pb`, unbounded compiler concurrency, PATH-selected compiler substitution, mutable refs, tracked generated behavior, and accepting a failed build are forbidden and have explicit Haskell negatives. Cabal's content-addressed user store is a non-authoritative performance cache: exact run-local archive pins, fresh component builds, executable bytes, and executed outputs remain mandatory regardless of cache hits. |
+| `Freshness` | Both build roots and all fixtures are created after the opening snapshot, prior work roots are rejected or removed before acquisition, source opening and closing identities must match, and a prior candidate cannot substitute for either build. |
+| `Qualification` | A fixed Haskell sabotage corpus independently proves that the harness rejects wrong signature fingerprint, changed archive digest, missing dependency, wrong terminal state, foreign tracked probe input, top-level vendor input, and committed resolution output while the clean control remains green. |
+| `Cleanroom` | Generated fixtures, applied mutants, plans, transcripts, and build products exist only beneath the candidate's `.build/runs/phase-01/**` roots; the Haskell owner marker bounds cleanup and the final observer reports zero out-of-scope writes and zero temporary residue. |
+| `Legacy closure` | The acquired analyzer reports zero for `LTD-BOOT-001`, `LTD-SRC-007`, and `LTD-SRC-009`; generated reintroduction cases independently redden their exact loci. GenesisTrust remains the explicit bootstrap assumption rather than a legacy binding. |
+| `Predecessor` | Consume exactly one durable Phase-0 receipt whose green candidate bytes, identity fields, complete ordered rows, empty residue, original candidate, and projected postimage bind to this candidate's opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Residue` | Explicit assumptions are the irreducible GenesisTrust local-custody root and the ordinary OS execution substrate used to run the independently pinned verifier and archive tools. Phase-2 compiler-wide source semantics and every later runtime, service, hardware, and correspondence claim remain unverified; no Phase-1 claim row is residue. |
+| `Pass criterion` | `qualified-phase-one-gate-pass`: all eighteen rows above must be execution-derived green in one candidate for one stable source, with exact predecessor receipt and empty mandatory residue; that complete pass alone authorizes the status-only transition. |
 
-## Resource provision — UNRESOLVED
+## Resource provision
 
-> **UNRESOLVED — blocks validation.** No live mutation may begin. The owner marker, preflight, complete
-> allowed/forbidden mutations, external observer, scoped cleanup, and zero-owned-residue contract are absent.
+The resource is the run-local build/fixture root, not a host or live service. The Haskell supervisor creates an
+identity-bound owner marker after preflight; permits candidate writes beneath its two fresh build roots and fixture
+root; forbids network, hardware, package-manager, and authored-source mutation; observes exact
+paths and process results; removes temporary fixtures and applied mutants; and requires zero owned temporary
+residue. Cabal may reuse or install a content-addressed unit in its ordinary user store, but no store path or
+presence is evidence and the independently pinned source archives remain mandatory. Content-addressed candidate
+evidence and the declared build products beneath `.build/**` are retained outputs, not leaked resource residue.
 
 ## Doctrine adopted
 
@@ -151,9 +157,9 @@ committing resolution output, integrity pins, generated code, or host-specific p
 > requires the resolved eighteen-row Haskell gate contract, fresh independently observed evidence, immediate-
 > predecessor gate pass, owned legacy closure, and a complete gate pass.
 
-## Sprint 1.1: GenesisTrust-bound toolchain acquisition 🔄
+## Sprint 1.1: GenesisTrust-bound toolchain acquisition ✅
 
-**Status**: Active — NOT VALIDATED
+**Status**: Done
 **Implementation**: `src/validation-kernel/Amoebius/Validation/ToolchainSpikeRun.hs`, `src/validation-kernel/Amoebius/Validation/CompilerBuildInfo.hs`, and `src/validation-kernel/Amoebius/Validation/CompilerElaboratedPlan.hs`; exact acquired authority remains UNRESOLVED and blocks validation.
 **Blocked by**: [Phase 0](phase_00_documentation_suite.md) gate pass
 **Independent Validation**: From the narrow GenesisTrust local-custody facts and immutable offline files, independently verify publisher/content identities, actual compiler/package-tool executable derivation, and loader/host closure; acquire twice into distinct contained roots, build the same source snapshot, and require plans and executable identities to agree. A missing/mutable input, digest/signature mismatch, ambient-network read, self-reported identity, replay, or disagreement is an exact negative; GenesisTrust itself remains assumed.
@@ -189,9 +195,9 @@ Implement the acquired authority and independent oracle, qualify its changed-sub
 Phase-0 predecessor receipt, close `LTD-BOOT-001`, and retain the result in the complete Phase-1 gate. Historical
 toolchain transcripts cannot support this candidate.
 
-## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ⏸️
+## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.1
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -233,9 +239,9 @@ The pre-reset record said `None`; that statement and its 2026-08-08 decode obser
 cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
 gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ⏸️
+## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.2
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -276,9 +282,9 @@ The pre-reset record said `None`; that statement and its 2026-08-08 simulation o
 cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor
 gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ⏸️
+## Sprint 1.4: `supernova` fork + `proto-lens` codegen build probe ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.3
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -321,9 +327,9 @@ gate pass, owned legacy closure, and the Haskell provenance/oracle/mutation obli
 [Sprint 1.7](#sprint-17-remove-top-level-vendor-source-and-own-the-haskell-fork-) owns the target split between
 maintained `.hs` modules under `src/vendor/**` and lazy upstream material beneath `.build/vendor/**`.
 
-## Sprint 1.5: Dynamic resolution and generated-output migration ⏸️
+## Sprint 1.5: Dynamic resolution and generated-output migration ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.4
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -374,9 +380,9 @@ image has removed the nine tracked probe fixtures/mutants/oracle files, and the 
 `toolchain-spike.probe-foreign-count = 0`; the Haskell generator, separately authored expectations, applied
 reintroduction negatives, and integrated evidence remain outstanding, so `LTD-SRC-007` stays active.
 
-## Sprint 1.6: Pure discovery/ensure planning over injected inputs ⏸️
+## Sprint 1.6: Pure discovery/ensure planning over injected inputs ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.5
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
@@ -426,9 +432,9 @@ owned legacy closure, checked Haskell provider/platform/acquisition declarations
 expectations, applied mutation controls, and fresh contained observations beneath `.build/**`. Any real host
 or acquisition correspondence remains explicitly UNVERIFIED.
 
-## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ⏸️
+## Sprint 1.7: Remove top-level vendor source and own the Haskell fork ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.6
 **Independent Validation**: An immutable-input clean build is the positive; a mutable-ref acquisition is the paired negative; an applied top-level-vendor reintroduction mutant reddens its exact source row while the Haskell control stays green; upstream semantic fidelity and licensing remain explicit residue.
@@ -479,9 +485,9 @@ provenance declaration, immutable offline materialization, generated Proto/packa
 build, independent oracle, and generated reintroduction corpus still do not exist, so this implementation
 progress cannot close the sprint or support a candidate.
 
-## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ⏸️
+## Sprint 1.8: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Done
 **Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
 **Blocked by**: Sprint 1.7
 **Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.

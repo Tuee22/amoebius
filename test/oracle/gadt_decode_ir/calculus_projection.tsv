@@ -1,4 +1,0 @@
-metric	value
-calculus-kinds	artifact,budget,lift,workflow,evidence
-component-names	decoded-artifact,decoded-budget,decoded-lift,decoded-workflow,decoded-evidence
-resource-vector	5,5527,0,0

@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -122,7 +123,11 @@ applyWithSnapshotToken (SnapshotStore variable) token@(SnapshotToken tokenVersio
   if token `Set.member` storeConsumed state
     then do
       writeTVar variable (record "token-rejected:reuse" state {storeReuseRejected = storeReuseRejected state + 1})
+#ifdef RECONCILE_CORE_TOKEN_GUARD_REMOVED_MUTANT
+      pure TokenApplied
+#else
       pure TokenRejectedReuse
+#endif
     else if tokenVersion /= storeVersion state
       then do
         writeTVar variable (record "token-rejected:stale" state {storeStaleRejected = storeStaleRejected state + 1})

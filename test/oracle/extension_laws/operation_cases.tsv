@@ -1,7 +1,0 @@
-extension	input	expected
-infernix	empty	infernix:empty
-infernix	known	infernix:known
-infernix	panic	infernix:panic
-jitml	empty	jitml:empty
-jitml	known	jitml:known
-jitml	panic	jitml:panic

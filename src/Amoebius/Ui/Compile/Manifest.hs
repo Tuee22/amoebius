@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Compile.Manifest
@@ -105,7 +106,12 @@ compileUiPlans program = do
       serverBytes = encodeServerPlan server
       contractBytes = encodeContracts program
       digests = PlanDigests
-        { authorityDigest = digestAuthoritySources authoritySources
+        {
+#ifdef UI_PLAN_CLIENT_ONLY_AUTHORITY_MUTANT
+          authorityDigest = digestBytes clientBytes
+#else
+          authorityDigest = digestAuthoritySources authoritySources
+#endif
         , clientDigest = digestBytes clientBytes
         , serverDigest = digestBytes serverBytes
         , contractsDigest = digestBytes contractBytes

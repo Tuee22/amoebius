@@ -107,6 +107,10 @@ diagnostic, or transport bytes are generated lazily beneath `.build/**`. A malfo
 
 ### 3.82 A browser effect or provider call escaping the server-mediated capability boundary
 
+Phase 42 forecloses the pure escape arms with typed stale-plan, hostile-text, foreign-origin, hardcoded-
+challenge, and unsafe-projection cases plus changed-production mutations. Browser packet observation and
+server/provider enforcement remain explicit post-barrier obligations.
+
 **Delivery-owner:** `Phase-39`
 
 **Case-family:** `ui`

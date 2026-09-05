@@ -131,8 +131,9 @@ The calculus makes claims reviewable and falsifiable; it does not make them true
   complete qualified gate.
 - It does not let prior evidence survive a changed contract, subject, oracle, source boundary, or predecessor.
 
-Every result names these limits as assumptions or `UNVERIFIED` residue. The present reset marks every numbered
-phase NOT VALIDATED, so this doctrine carries no current implementation-result instance.
+Every result names these limits as assumptions or `UNVERIFIED` residue. The evidence-calculus implementation
+is the four public Haskell modules under `Amoebius.Calculus.Evidence`; only a complete current Phase-7 gate
+result establishes its source-bound instance.
 
 ---
 

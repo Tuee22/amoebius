@@ -954,9 +954,9 @@ harnessSubjectAssignments = Map.fromList
         , "test/fixture/refinement_checker/Unknown.hs"
         ]
       <> harness "ui-program-schema" ExpectedCompileSuccess
-        ["test/fixture/ui_program_schema/compilefail/checked_ui_legal.hs"]
+        ["test/negative/compile_fail/ui_program_schema/checked_ui_legal.hs"]
       <> harness "ui-program-schema" ExpectedCompileRefusal
-        ["test/fixture/ui_program_schema/compilefail/checked_ui_illegal.hs"]
+        ["test/negative/compile_fail/ui_program_schema/checked_ui_illegal.hs"]
       <> harness "ui-scope" ExpectedCompileSuccess
         [ "test/fixture/ui_scope/compile_pass/declassify.hs"
         , "test/fixture/ui_scope/compile_pass/forge_request_scope.hs"

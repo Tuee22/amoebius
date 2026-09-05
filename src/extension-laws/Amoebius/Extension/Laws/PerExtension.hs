@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Mechanical observations and predicates for the five per-extension laws.
@@ -249,7 +250,11 @@ l1Failures vocabulary observations =
     (fmap operationName operations)
     <> [ OperationEscapedFailure (operationName operation) (operationInput operation)
        | operation <- operations
+#ifdef EXTENSION_LAWS_IGNORE_OPERATION_ESCAPE_MUTANT
+       , False
+#else
        , isEscape (operationOutcome operation)
+#endif
        ]
  where
   operations = observedOperations observations
@@ -264,7 +269,13 @@ l2Failures vocabulary observations =
     ArtifactCoverageMismatch
     (vocabularyArtifactNames vocabulary)
     (fmap artifactName artifacts)
-    <> [ArtifactBytesDiffer (artifactName artifact) | artifact <- artifacts, artifactFirstBytes artifact /= artifactSecondBytes artifact]
+    <> [ArtifactBytesDiffer (artifactName artifact) | artifact <- artifacts
+#ifdef EXTENSION_LAWS_IGNORE_ARTIFACT_DIFFERENCE_MUTANT
+       , False
+#else
+       , artifactFirstBytes artifact /= artifactSecondBytes artifact
+#endif
+       ]
  where
   artifacts = observedArtifacts observations
 
@@ -289,7 +300,11 @@ l3Failures vocabulary observations =
         EphemeralOutput -> []
         RetainedWithReaper condition | condition /= "" -> []
         RetainedWithReaper _ -> [RetainedOutputHasNoReaper (budgetArtifact budget)]
+#ifdef EXTENSION_LAWS_IGNORE_RETENTION_REAPER_MUTANT
+        RetainedWithoutReaper -> []
+#else
         RetainedWithoutReaper -> [RetainedOutputHasNoReaper (budgetArtifact budget)]
+#endif
 
 l4Failures :: LawVocabulary -> LawObservations -> [LawFailure]
 l4Failures vocabulary observations =
@@ -299,7 +314,11 @@ l4Failures vocabulary observations =
     (fmap flowOperation flows)
     <> [ ScopeWasWidened (flowOperation flow) (flowSource flow) (flowSink flow)
        | flow <- flows
+#ifdef EXTENSION_LAWS_IGNORE_SCOPE_WIDENING_MUTANT
+       , False
+#else
        , flowSink flow > flowSource flow
+#endif
        ]
  where
   flows = observedFlows observations
@@ -317,7 +336,11 @@ l5Failures vocabulary observations =
     FixturePassedAtPinnedReason path | path /= "" -> []
     FixturePassedAtPinnedReason _ -> [ClaimHasNoFixture (claimName claim)]
     FixtureFailedAtOtherReason _ -> [ClaimFixtureMissedPinnedReason (claimName claim)]
+#ifdef EXTENSION_LAWS_IGNORE_MISSING_FIXTURE_MUTANT
+    FixtureMissing -> []
+#else
     FixtureMissing -> [ClaimHasNoFixture (claimName claim)]
+#endif
 
 componentNames :: Set.Set DeclaredComponent -> [Text]
 componentNames = sort . fmap declaredName . Set.toList

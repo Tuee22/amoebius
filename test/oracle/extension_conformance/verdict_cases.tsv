@@ -1,7 +1,0 @@
-case	result	reason
-canonical-passing-run	sealed-and-admitted	-
-modified-suite	refused	GeneratedSuiteMismatch
-failed-case	refused	CasesFailed
-wrong-declaration	refused	PlanDeclarationMismatch
-changed-core	refused	VerdictDidNotVerify
-unsealed-extension	compile-refused	missing-ConformanceVerdict

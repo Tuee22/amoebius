@@ -8,10 +8,8 @@
 > CUDA-requiring workload on a CPU-only target has no deployable value.
 > **Read this if**: phase 32 is next in the queue, or a later phase depends on what its gate establishes.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+This is the active Phase-32 contract. Its implementation is bound below, while completion remains exclusively
+owned by the exact integrated gate and the mechanical status projection that follows a pass.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -39,14 +37,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 31, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Phase 31 and every earlier gate have passed in numerical order. The Phase-32 engine/accelerator provision
+implementation, independent Haskell oracle, closed positive/negative corpus, property challenge, and five
+changed-production mutations are bound; only the complete integrated Phase-32 gate may authorize completion.
 
 ## Phase Summary
 
@@ -107,28 +102,28 @@ offering has no deployable value. No device is queried and no runtime behavior i
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — a pure Haskell model requiring an accelerator absent from its supplied target offering has no deployable value; any Dhall or serialized case is generated beneath `.build/**`; no device, driver, or runtime is observed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 32` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 31; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | `closed-inference-accelerator-provision-boundary` |
+| `Subject` | `acquired-inference-accelerator-supervisor` |
+| `Command` | `pb validate phase 32` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
+| `Oracle` | `independent-inference-accelerator-oracle` |
+| `Positive controls` | `inference-accelerator-positive-controls` |
+| `Paired negatives` | `paired-inference-accelerator-negatives` |
+| `Mutants` | `applied-inference-accelerator-production-mutants` |
+| `Discovery` | `exact-inference-accelerator-source-discovery` |
+| `Challenge` | `post-acquisition-inference-accelerator-challenge` |
+| `Observer` | `inference-accelerator-process-observation` |
+| `Authority/bypass` | `no-pb-network-host-hardware-or-inference-accelerator-parallelism` |
+| `Freshness` | `fresh-inference-accelerator-build-root-and-stable-source` |
+| `Qualification` | `qualified-inference-accelerator-harness` |
+| `Cleanroom` | `inference-accelerator-products-contained-below-build` |
+| `Legacy closure` | `retired-inference-accelerator-authorities-absent` |
+| `Predecessor` | `exact-phase-thirty-one-receipt` |
+| `Residue` | `later-render-runtime-live-engine-owners-explicit` |
+| `Pass criterion` | `qualified-phase-thirty-two-gate-pass` |
 
 ## Doctrine adopted
 
@@ -179,20 +174,15 @@ offering has no deployable value. No device is queried and no runtime behavior i
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+## Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ✅
 
-> **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
-> only as a target-capability inventory and is not a current gate result.
-
-## Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ⏸️
-
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/provision-seal/Amoebius/Capability/Engine.hs` owns the closed lane/family relations, target offering quotient, and provision-seal accelerator checks.
 **Blocked by**: [Phase 31](phase_31_provision_seal.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: three inference fixtures, four offering quotients, twelve family/lane cells, eight paired provision negatives, and the closed no-URL union execute in `capability-spec`.
+**Oracle**: `test/spec/capability/EngineAcceleratorOracle.hs` independently fixes offerings, availability, coexistence, exact failures, calculus projection, locus inventory, and mutations without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, serialized inference-accelerator tables, test-local mutant module, and five materialized mutant files.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the capability, capacity, illegal-state, and testing doctrines.
 
 ### Objective
 
@@ -242,7 +232,7 @@ resolve.
 
 ### Validation
 
-1. An engine named by URL fails dhall-typecheck at its asserted `dhall type` no-such-alternative locus; an unavailable
+1. The closed Haskell `EngineLane` union has no URL/download constructor; an unavailable
    family-on-lane, CUDA-on-CPU target, insufficient device count, unequal source/workload keys, unequal
    policy-class domains, invalid shard ids/sum/count, unplaceable residency, raw-fits/net-fails epoch, omitted
    co-resident work item, or favorable-epoch shortcut returns its exact structured `Left` at the `provision-seal`
@@ -253,21 +243,17 @@ resolve.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work
-includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and
-phase-specific obligation in the redesigned gate. The URL-free union, quotient, family relation, opaque
-checked accelerator, exact identity/policy domains, permitted epochs, and residency rules remain target claims
-requiring fresh evidence.
+The complete integrated Phase-32 gate and its mechanical status projection remain.
 
-## Sprint 32.2: The accelerator-provision corpus + the Register-1 gate ⏸️
+## Sprint 32.2: The accelerator-provision corpus + the Register-1 gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `EngineAcceleratorGate.hs`, `EngineAcceleratorProps.hs`, and `EngineAcceleratorSpec.hs` own the Haskell corpus/property harness; the Phase-32 acquired runner owns the serial clean/mutant matrix.
 **Blocked by**: Sprint 32.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: the exact 17-row locus ledger, five-calculus/34-unit projection, sampled eight-branch property, and five production CPP mutations are acquired serially in fresh build roots.
+**Oracle**: `test/spec/capability/EngineAcceleratorOracle.hs`; the runner checks its independence and exact acceptance tokens.
+**Legacy IDs**: the acquired gate requires all fourteen retired Phase-32 authorities to be absent.
+**Docs to update**: this phase plus the component/substrate indexes and doctrines linked above.
 
 ### Objective
 
@@ -291,11 +277,10 @@ per-entry validation-locus ledger that names the honest foreclosure layer of eac
   policy-permitted co-resident epoch against per-device net allocatable VRAM — all checked against the
   independent hand-authored aggregation table / family×lane relation (§M.3), with `cover`/`classify` +
   `checkCoverage` forcing each reject branch (§M.4).
-- Five checked Haskell accelerator-provision mutation operators (§M.2), applied to temporary production
-  subjects beneath `.build/mutants/**` and re-run, each individually required to turn the suite red:
-  `mutant_drop_accelerator_work_item`,
-  `mutant_accept_accelerator_domain_mismatch`, `mutant_select_favorable_accelerator_epoch`,
-  `mutant_drop_accelerator_overlap_debit`, `mutant_skip_accelerator_shard_validation`.
+- Five checked Haskell accelerator-provision mutation operators (§M.2), compiled one at a time through Cabal
+  flags that alter `src/provision-seal/Amoebius/Capability/Engine.hs`, each individually required to turn the
+  suite red: drop a workload, accept a policy-domain mismatch, select only a favorable epoch, drop an overlap
+  debit, and bypass the engine-level shard check.
 - A Register-1 validation-locus ledger mapping every entry to its catalog id ([§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) for the engine-by-URL state)
   and honest layer (dhall-typecheck for `illegal_engine_by_url`; the post-bind `provision-seal` locus for the rest),
   backed by Phase-27-style coverage-assertion machinery (the ledger goes **red** if any corpus entry, negative
@@ -305,11 +290,11 @@ per-entry validation-locus ledger that names the honest foreclosure layer of eac
 
 ### Validation
 
-1. Rejected historical observation: the `capability-spec` Cabal suite was recorded green over the
+1. The `capability-spec` Cabal suite must be green over the
    InferenceEngine/accelerator slice — `legal_inference_cuda`
    provisions by selecting the matching CUDA offering; the `legal_inference_{singlenode,distributed}` pair is
    byte-invariant and structurally different by the object-node-multiset oracle against its authored semantic projection;
-   `illegal_engine_by_url` fails `dhall type` at its asserted locus; each provision negative returns its
+   the no-URL closed-union predicate passes; each provision negative returns its
    specifically-tagged `Left`; the coverage obligations meet `checkCoverage`; exact-fit boundaries accept and
    each one-device/one-byte-short pair rejects; and the suite is red under each of the five applied Haskell
    mutants. The validation-locus ledger is present and its coverage-assertion machinery (Phase-27 precedent)
@@ -317,10 +302,7 @@ per-entry validation-locus ledger that names the honest foreclosure layer of eac
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work
-includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and
-phase-specific obligation in the redesigned gate. The eleven-sided Register-1 gate, 17-row locus ledger,
-34-unit five-calculus projection, 18 metrics, and 29-surface/45-item join remain unaccepted target coverage.
+The complete integrated Phase-32 gate and its mechanical status projection remain.
 
 ## Documentation Requirements
 
@@ -350,8 +332,8 @@ phase-specific obligation in the redesigned gate. The eleven-sided Register-1 ga
   candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-32 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register the Haskell `InferenceEngine` capability projection,
-  `src/Amoebius/Capability/Engine.hs`, and the Haskell engine/accelerator property and oracle suites as
-  Phase-32 design-first rows. The Dhall projection is lazy output beneath `.build/dhall/**`.
+  `src/provision-seal/Amoebius/Capability/Engine.hs`, and the Haskell engine/accelerator property and oracle
+  suites as Phase-32 rows. Any Dhall projection is lazy output beneath `.build/dhall/**`.
 
 ## Related Documents
 

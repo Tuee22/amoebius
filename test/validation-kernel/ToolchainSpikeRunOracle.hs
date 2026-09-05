@@ -29,25 +29,24 @@ runToolchainSpikeRunOracle :: IO ()
 runToolchainSpikeRunOracle = do
   unless (null problems) (fail (unlines ("ToolchainSpikeRunOracle:" : map ("  " <>) problems)))
   putStrLn
-    ( "ToolchainSpikeRunOracle: the capability decides its two owned legacy families and the absence of "
-        <> "committed resolution output, and names every contract row it leaves unbound. An inventory and "
-        <> "refusal check, not a gate result."
+    ( "ToolchainSpikeRunOracle: the public diagnostic independently decides its two owned source-debt "
+        <> "families and committed resolution output. Process authority remains package-hidden."
     )
  where
   problems =
-    exactly "a snapshot with no open toolchain debt" cleanSnapshot unresolvedCodes
+    exactly "a snapshot with no open toolchain debt" cleanSnapshot []
       <> exactly
         "a tracked foreign probe input"
         (cleanSnapshot <> [entry "probe/cases/expected.txt"])
-        ("TOOLCHAIN-SPIKE-PROBE-DEBT-OPEN" : unresolvedCodes)
+        ["TOOLCHAIN-SPIKE-PROBE-DEBT-OPEN"]
       <> exactly
         "a tracked top-level vendor path"
         (cleanSnapshot <> [entry "vendor/dual/dual.cabal"])
-        ("TOOLCHAIN-SPIKE-VENDOR-DEBT-OPEN" : unresolvedCodes)
+        ["TOOLCHAIN-SPIKE-VENDOR-DEBT-OPEN"]
       <> exactly
         "committed resolution output"
         (cleanSnapshot <> [entry "cabal.project.freeze"])
-        ("TOOLCHAIN-SPIKE-RESOLUTION-OUTPUT-TRACKED" : unresolvedCodes)
+        ["TOOLCHAIN-SPIKE-RESOLUTION-OUTPUT-TRACKED"]
 
   exactly label entries expected =
     [ label
@@ -65,15 +64,6 @@ runToolchainSpikeRunOracle = do
               (sourceClosureInternalTestAcquire (SourceSnapshot "/fixture" snapshotIdentityValue entries))
           )
       )
-
--- | The rows the capability's contract leaves unbound. They are permanent
--- until their own artefacts exist, so every case carries them.
-unresolvedCodes :: [String]
-unresolvedCodes =
-  [ "TOOLCHAIN-SPIKE-SUBJECT-UNRESOLVED"
-  , "TOOLCHAIN-SPIKE-ORACLE-UNRESOLVED"
-  , "TOOLCHAIN-SPIKE-TOOLCHAIN-UNAUTHENTICATED"
-  ]
 
 -- | A probe root holding only Haskell and its Cabal declaration, no top-level
 -- vendor root, and no committed resolution output.

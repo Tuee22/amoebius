@@ -45,8 +45,6 @@ import Control.Monad (forM_, unless)
 import Data.List (nub, sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
-import Data.Text.IO qualified as Text
-import Numeric.Natural (Natural)
 import System.Exit (exitFailure)
 import Test.QuickCheck
   ( Arbitrary (arbitrary)
@@ -64,7 +62,6 @@ import Test.QuickCheck
   , (===)
   )
 import Test.QuickCheck.Test (Args (chatty, maxSuccess))
-import Text.Read (readMaybe)
 
 data PairRow = PairRow
   { pairLeft :: Calculus
@@ -94,8 +91,7 @@ resourceVector =
 
 main :: IO ()
 main = do
-  rows <- readPairOracle
-  result <- withFixtureScope $ \scope -> runChecks scope rows
+  result <- withFixtureScope $ \scope -> runChecks scope authoredPairRows
   case result of
     Left problem -> fail (show problem)
     Right () -> pure ()
@@ -264,34 +260,36 @@ componentFromSeed scope name seed = case seedCalculus seed of
  where
   resources = seedResource seed
 
-readPairOracle :: IO [PairRow]
-readPairOracle = do
-  contents <- Text.readFile "test/oracle/calculus_composition/pairs.tsv"
-  case Text.lines contents of
-    [] -> fail "calculus-composition pair oracle is empty"
-    header : rows -> do
-      unless (header == "left\tright\tcpu\tmemory\tephemeral\tpods")
-        (fail "calculus-composition pair oracle header drifted")
-      mapM parseRow rows
-
-parseRow :: Text -> IO PairRow
-parseRow row = case Text.splitOn "\t" row of
-  [leftText, rightText, cpuText, memoryText, ephemeralText, podsText] -> do
-    left <- parseCalculus leftText
-    right <- parseCalculus rightText
-    cpu <- parseNatural cpuText
-    memory <- parseNatural memoryText
-    ephemeral <- parseNatural ephemeralText
-    pods <- parseNatural podsText
-    pure (PairRow left right (ResourceVector cpu memory ephemeral pods))
-  _ -> fail ("malformed calculus-composition pair row: " <> Text.unpack row)
-
-parseCalculus :: Text -> IO Calculus
-parseCalculus value = case [calculus | calculus <- everyCalculus, calculusTag calculus == value] of
-  [calculus] -> pure calculus
-  _ -> fail ("unknown calculus tag: " <> Text.unpack value)
-
-parseNatural :: Text -> IO Natural
-parseNatural value = case readMaybe (Text.unpack value) of
-  Just number -> pure number
-  Nothing -> fail ("invalid natural in pair oracle: " <> Text.unpack value)
+-- Authored independently of 'compositionResource'.  This closed table is the
+-- behavioral oracle; Markdown and serialized data never supply expectations.
+authoredPairRows :: [PairRow]
+authoredPairRows =
+  [ row ArtifactCalculus ArtifactCalculus 2
+  , row ArtifactCalculus BudgetCalculus 3
+  , row ArtifactCalculus LiftCalculus 4
+  , row ArtifactCalculus WorkflowCalculus 5
+  , row ArtifactCalculus EvidenceCalculus 6
+  , row BudgetCalculus ArtifactCalculus 3
+  , row BudgetCalculus BudgetCalculus 4
+  , row BudgetCalculus LiftCalculus 5
+  , row BudgetCalculus WorkflowCalculus 6
+  , row BudgetCalculus EvidenceCalculus 7
+  , row LiftCalculus ArtifactCalculus 4
+  , row LiftCalculus BudgetCalculus 5
+  , row LiftCalculus LiftCalculus 6
+  , row LiftCalculus WorkflowCalculus 7
+  , row LiftCalculus EvidenceCalculus 8
+  , row WorkflowCalculus ArtifactCalculus 5
+  , row WorkflowCalculus BudgetCalculus 6
+  , row WorkflowCalculus LiftCalculus 7
+  , row WorkflowCalculus WorkflowCalculus 8
+  , row WorkflowCalculus EvidenceCalculus 9
+  , row EvidenceCalculus ArtifactCalculus 6
+  , row EvidenceCalculus BudgetCalculus 7
+  , row EvidenceCalculus LiftCalculus 8
+  , row EvidenceCalculus WorkflowCalculus 9
+  , row EvidenceCalculus EvidenceCalculus 10
+  ]
+ where
+  row left right units =
+    PairRow left right (ResourceVector units (units * 10) (units * 100) units)

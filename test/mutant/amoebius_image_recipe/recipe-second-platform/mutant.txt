@@ -1,1 +1,0 @@
-Append a second platform selector to a native invocation; only single-architecture may redden.

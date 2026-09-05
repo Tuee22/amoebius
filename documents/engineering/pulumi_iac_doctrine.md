@@ -599,7 +599,7 @@ one object, accounting-model version, and inventory pagination/version completen
 one-unit shortfall or a renderer/live value that differs from the witness refuses the next effect; it is never
 repaired by silently recomputing a smaller demand.
 
-Module ownership is explicit: `src/Amoebius/Capacity/RuntimeStorage.hs` owns the shared structural
+Module ownership is explicit: `src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs` owns the shared structural
 component-role/layout and node-aggregate fold; `src/Amoebius/Pulumi/Observed.hs` owns Pulumi
 executor/Job readback normalization; and `test/spec/provider/RuntimeStorageSpec.hs` owns the planned-slot→observed-Pod-UID,
 SplitRuntime backing, scope/domain/ownership, reservation/observed no-double-debit, and alias-control

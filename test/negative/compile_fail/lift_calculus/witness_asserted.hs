@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The illegal half of the witness pair: evidence written down rather than observed.
@@ -10,7 +11,12 @@
 module LiftCalculusWitnessAsserted where
 
 import Amoebius.Calculus.Lift.Layer (Layer (..))
-import Amoebius.Calculus.Lift.Witness (Witness)
+import Amoebius.Calculus.Lift.Witness
+#ifdef LIFT_CALCULUS_WITNESS_CONSTRUCTOR_EXPOSED_MUTANT
+  (Witness (..))
+#else
+  (Witness)
+#endif
 
 -- The rejected program: nothing was observed, and the witness exists anyway.
 entering :: Witness 'OnHost 'InFrame

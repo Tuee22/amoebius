@@ -1,2 +1,0 @@
-operator: render Always with <> instead of []
-expected: authored renderer semantic facts reject Eventually for AlwaysMutualExclusion

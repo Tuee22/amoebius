@@ -96,6 +96,18 @@ resourceSlotsFor ordinal = resourceFieldIdentityMutation (expectedResourceSlots 
 #endif
 
 expectedResourceSlots :: Int -> [ResourceSlot ResourceDraft]
+expectedResourceSlots 1 =
+  [ResourceGateReady (ResourceDraft 1 field) | field <- resourceFields]
+expectedResourceSlots 13 =
+  [ResourceGateReady (ResourceDraft 13 field) | field <- resourceFields]
+expectedResourceSlots 14 =
+  [ResourceGateReady (ResourceDraft 14 field) | field <- resourceFields]
+expectedResourceSlots 15 =
+  [ResourceGateReady (ResourceDraft 15 field) | field <- resourceFields]
+expectedResourceSlots 25 =
+  [ResourceGateReady (ResourceDraft 25 field) | field <- resourceFields]
+expectedResourceSlots 34 =
+  [ResourceGateReady (ResourceDraft 34 field) | field <- resourceFields]
 expectedResourceSlots ordinal =
   [ResourceContractGap (ResourceGapId ordinal field) | field <- resourceFields]
 
@@ -126,8 +138,8 @@ resourceProvisionRegistryCheck target =
                  "resource.phase"
                  ( renderOrdinal ordinal
                      <> "|"
-                     <> if Set.member ordinal resourceRequiredPhases
-                       then "required|UNRESOLVED"
+             <> if Set.member ordinal resourceRequiredPhases
+                       then if ordinal `elem` [1, 13, 14, 15, 25, 34] then "required|GATE-READY" else "required|UNRESOLVED"
                        else "not-required|ABSENT"
                  )
              | ordinal <- [0 .. 95]
@@ -159,7 +171,7 @@ resourcePermanentRefusal =
   finding
     "PLAN-RESOURCE-DIAGNOSTIC-ONLY"
     "DEVELOPMENT_PLAN/"
-    "all 55 phase-specific resource-provision contracts are unresolved; no live mutation may begin"
+    "the nullary resource view cannot authorize a run; Phases 1, 13, 14, 15, 25, and 34 are gate-ready and 47 later contracts remain unresolved"
 
 resourceIntegrityFindings :: [Finding]
 resourceIntegrityFindings =
@@ -167,7 +179,7 @@ resourceIntegrityFindings =
     [ identityIntegrityFindings
     , integrityFinding
         (resourceRequiredPhases == canonicalResourceRequiredPhases)
-        "the phase-specific resource-provision set must equal the exact canonical 55-phase set"
+        "the phase-specific resource-provision set must equal the exact canonical 53-phase set"
     , integrityFinding
         ( case (Set.lookupMin resourceRequiredPhases, Set.lookupMax resourceRequiredPhases) of
             (Just lower, Just upper) -> lower >= 0 && upper <= 95
@@ -182,20 +194,22 @@ resourceIntegrityFindings =
         "every required phase must retain exactly seven resource fields"
     , integrityFinding
         (all resourceSlotIdentitiesAreExact canonicalResourceContracts)
-        "every required phase must retain the exact ordered seven ResourceGapId identities"
+        "every required phase must retain the exact ordered seven typed resource-slot identities"
     , integrityFinding
-        (length allSlots == 385)
-        "the unresolved reset must retain exactly 385 resource ContractGap slots"
+        (length allSlots == 371)
+        "the resource registry must retain exactly 371 typed slots"
     , integrityFinding
-        (all isGap allSlots)
-        "no resource slot may be Drafted or GateReady while every resource section is UNRESOLVED"
+        (length [() | ResourceContractGap _ <- allSlots] == 329)
+        "exactly the 47 later required phases must retain their 329 unresolved slots"
+    , integrityFinding
+        (length [() | ResourceGateReady _ <- allSlots] == 42)
+        "Phases 1, 13, 14, 15, 25, and 34 must each own exactly seven gate-ready run-local resource slots"
+    , integrityFinding
+        (null [() | ResourceDrafted _ <- allSlots])
+        "no resource slot may remain merely drafted"
     ]
  where
   allSlots = concatMap resourceSlots canonicalResourceContracts
-  isGap slot = case slot of
-    ResourceContractGap _ -> True
-    ResourceDrafted _ -> False
-    ResourceGateReady _ -> False
 
 identityIntegrityFindings :: [Finding]
 identityIntegrityFindings =
@@ -235,14 +249,9 @@ resourceSlotFindings target contract = concatMap findingFor (resourceSlots contr
           (phaseSubject (resourcePhaseOrdinal contract))
           ("draft=" <> renderResourceDraft draftIdentifier <> " gate-evidence=missing")
       ]
-    ResourceGateReady draftIdentifier
+    ResourceGateReady _draftIdentifier
       | deferred -> []
-      | otherwise ->
-      [ finding
-          "PLAN-RESOURCE-GATE-READY-UNAVAILABLE"
-          (phaseSubject (resourcePhaseOrdinal contract))
-          ("a gate-ready resource slot is inadmissible in the reset registry: " <> renderResourceDraft draftIdentifier)
-      ]
+      | otherwise -> []
 
 -- Each projection is ordinal, exact heading (or ABSENT), and whether the
 -- first blockquote carries the mandatory unresolved/no-mutation prefix.  The
@@ -326,8 +335,11 @@ compareProjection (ordinal, actualHeading, actualBlocker)
         <> mismatch "unresolved-blocker" expectedBlocker actualBlocker
  where
   required = Set.member ordinal resourceRequiredPhases
-  expectedHeading = if required then "Resource provision — UNRESOLVED" else "ABSENT"
-  expectedBlocker = required
+  expectedHeading
+    | ordinal `elem` [1, 13, 14, 15, 25, 34] = "Resource provision"
+    | required = "Resource provision — UNRESOLVED"
+    | otherwise = "ABSENT"
+  expectedBlocker = required && ordinal `notElem` [1, 13, 14, 15, 25, 34]
   mismatch :: (Eq value, Show value) => Text -> value -> value -> [Finding]
   mismatch fieldName wanted observed =
     [ finding

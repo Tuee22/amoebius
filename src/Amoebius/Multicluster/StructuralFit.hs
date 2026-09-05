@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Amoebius.Multicluster.StructuralFit
   ( MigrationEdge (..)
   , FitClause (..)
@@ -59,11 +61,18 @@ checks edges =
   , (GraphIndependent, noDuplicates (map edgeDnsRecord edges))
   , (ResourceIndependent, resourcesIndependent edges)
   , (Acyclic, graphAcyclic edges)
-  , (BudgetWithinCap, all ((<= maxDataLoss) . edgeDataLossBudget) edges)
+  , (BudgetWithinCap, budgetWithinCap edges)
   , (TtlInRegime, all (\edge -> edgeTtl edge >= minTtl && edgeTtl edge <= maxTtl) edges)
   , (FreshnessInRegime, all ((<= maxFreshness) . edgeFreshnessBound) edges)
   , (OffsetDomainWithinConstants, all ((<= maxOffset) . edgeMaxOffset) edges)
   ]
+
+budgetWithinCap :: [MigrationEdge] -> Bool
+#ifdef GATEWAY_MIGRATION_CUTOFF_BUDGET_MUTANT
+budgetWithinCap _ = True
+#else
+budgetWithinCap = all ((<= maxDataLoss) . edgeDataLossBudget)
+#endif
 
 noDuplicates :: Ord value => [value] -> Bool
 noDuplicates values = all ((== 1) . length) (group (sort values))

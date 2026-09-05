@@ -11,6 +11,7 @@ import CalculusProjection
   , referenceCalculusModel
   , referenceCalculusProjection
   )
+import GatewayMigrationOracle
 import Control.Concurrent.Class.MonadSTM
   ( atomically
   , modifyTVar'
@@ -84,18 +85,19 @@ main = do
   root <- getCurrentDirectory >>= canonicalizePath
   java <- resolveTool root "AMOEBIUS_JAVA" ".build/toolchain/runtime/java/bin/java"
   jar <- resolveTool root "AMOEBIUS_TLA2TOOLS" ".build/toolchain/runtime/tla/tla2tools.jar"
-  let output = root </> ".build/tla/gateway-migration-model-spec"
+  configuredOutput <- lookupEnv "AMOEBIUS_GATEWAY_MODEL_OUTPUT"
+  output <- canonicalizePath (fromMaybe (root </> ".build/tla/gateway-migration-model-spec") configuredOutput)
   createDirectoryIfMissing True output
 
   putStrLn "gateway-migration-model-spec: pinned contract and reachability"
   assertEqual "GatewayMigration structural well-formedness" [] (modelProblems gatewayMigrationModel)
-  checkContract root
+  checkContract
   explorer <- requireRight "GatewayMigration explorer" (explore gatewayMigrationModel)
   assertEqual "GatewayMigration distinct-state oracle" 53 (Map.size (exploreStates explorer))
   assertEqual "GatewayMigration explorer safety" Nothing (exploreViolation explorer)
   checkReachability explorer
-  rendererMutants <- checkRendererSemantics root (emitTLA gatewayMigrationModel)
-  calculusProjection <- checkCalculusComposition root
+  rendererMutants <- checkRendererSemantics (emitTLA gatewayMigrationModel)
+  calculusProjection <- checkCalculusComposition
 
   putStrLn "gateway-migration-model-spec: TLC safety and liveness"
   safetyTlc <- runTlc java jar output "safety" True safetyModel
@@ -109,7 +111,7 @@ main = do
 
   putStrLn "gateway-migration-model-spec: per-invariant and mechanical mutants"
   let invariantMutants = seededInvariantMutants
-  checkMutantOracle root invariantMutants
+  checkMutantOracle invariantMutants
   forM_ invariantMutants $ \(name, expected, mutant) -> do
     violations <- requireRight (name <> " explorer violations") (allViolations mutant)
     assertEqual (name <> " exact invariant") (Set.singleton expected) violations
@@ -120,15 +122,15 @@ main = do
     assert (not (Set.null violations)) (name <> " survived explorer")
     mutantTlc <- runTlc java jar output ("operator-" <> name) False (safetyOnly mutant)
     assertTlcRed (name <> " TLC") mutantTlc
-  checkInvariantDelete root
+  checkInvariantDelete
 
   putStrLn "gateway-migration-model-spec: IOSimPOR bounded schedule agreement"
   iosimAgreement <- checkIOSimPOR explorer invariantMutants
 
   putStrLn "gateway-migration-model-spec: StructuralFit cutoff"
-  cutoffCases <- readCutoffCases root
+  let cutoffCases = readCutoffCases
   checkCutoffCorpus cutoffCases
-  cutoffMutants <- checkCutoffMutants root cutoffCases
+  cutoffMutants <- checkCutoffMutants cutoffCases
   checkCutoffQuickCheck
   checkCutoffTotality
 
@@ -144,7 +146,7 @@ main = do
   assertTlcRed "shared-resource mutant TLC" stressMutantTlc
 
   writeResults output safetyTlc fairnessDrops iosimAgreement cutoffMutants rendererMutants calculusProjection
-  putStrLn "gateway-migration-model-spec: PASS"
+  putStrLn "gateway-migration-model-spec: PASS (53 states, 5 invariants, 3 properties, 20 actions, IOSimPOR bound 20, 8 cutoff clauses)"
 
 safetyModel :: Model
 safetyModel = gatewayMigrationModel {modelFairness = [], modelProperties = []}
@@ -172,18 +174,13 @@ requireRight label result = case result of
   Left problem -> putStrLn ("FAIL: " <> label <> ": " <> problem) >> exitFailure
   Right value -> pure value
 
-checkContract :: FilePath -> IO ()
-checkContract root = do
-  rows <- readTsv (root </> "test/oracle/formal/gateway/model_contract.tsv")
-  let constants = [(name, value) | ["constant", name, value] <- rows]
-      actions = [name | ["action", name, _] <- rows]
-      invariants = [name | ["invariant", name, _] <- rows]
-      properties = [name | ["property", name, _] <- rows]
-      actualConstants = [(name, contractValue value) | (name, value) <- modelConstants gatewayMigrationModel]
-  assertEqual "contract constants" constants actualConstants
-  assertEqual "contract actions" actions (map actionName (modelActions gatewayMigrationModel))
-  assertEqual "contract invariants" invariants (map namedExprName (modelInvariants gatewayMigrationModel))
-  assertEqual "contract properties" properties (map propertyName (modelProperties gatewayMigrationModel))
+checkContract :: IO ()
+checkContract = do
+  let actualConstants = [(name, contractValue value) | (name, value) <- modelConstants gatewayMigrationModel]
+  assertEqual "contract constants" expectedConstants actualConstants
+  assertEqual "contract actions" expectedActions (map actionName (modelActions gatewayMigrationModel))
+  assertEqual "contract invariants" expectedInvariants (map namedExprName (modelInvariants gatewayMigrationModel))
+  assertEqual "contract properties" expectedProperties (map propertyName (modelProperties gatewayMigrationModel))
   where
     contractValue value = case value of
       SetValue values -> "{" <> intercalate "," (map renderContractAtom (sort values)) <> "}"
@@ -221,15 +218,14 @@ atomAt name state = case Map.lookup name state of
 boolAt :: Name -> State -> Bool
 boolAt name state = Map.lookup name state == Just (BoolValue True)
 
-checkRendererSemantics :: FilePath -> (Tla, Cfg) -> IO Int
-checkRendererSemantics root rendered@(Tla tla, Cfg cfg) = do
-  expected <- readMetricOracle (root </> "test/oracle/formal/gateway/renderer_semantics.tsv")
-  assertEqual "GatewayMigration renderer semantic facts" expected (rendererFacts gatewayMigrationModel rendered)
+checkRendererSemantics :: (Tla, Cfg) -> IO Int
+checkRendererSemantics rendered@(Tla tla, Cfg cfg) = do
+  assertEqual "GatewayMigration renderer semantic facts" expectedRendererFacts (rendererFacts gatewayMigrationModel rendered)
   let dropInvariant = (Tla tla, Cfg (rewriteLine "INVARIANT UniqueGatewayOwner" "" cfg))
       weakenFairness = (Tla (rewriteLine "  /\\ WF_vars(ClientWrite)" "  /\\ SF_vars(ClientWrite)" tla), Cfg cfg)
       mutants = [("drop-invariant", dropInvariant), ("weak-to-strong-fairness", weakenFairness)]
   forM_ mutants $ \(name, mutant) ->
-    assert (rendererFacts gatewayMigrationModel mutant /= expected) (name <> " survived renderer semantics")
+    assert (rendererFacts gatewayMigrationModel mutant /= expectedRendererFacts) (name <> " survived renderer semantics")
   pure (length mutants)
 
 rendererFacts :: Model -> (Tla, Cfg) -> Map.Map String String
@@ -264,9 +260,8 @@ lineAfter prefix contents = case find (prefix `isPrefixOf`) (lines contents) of
 rewriteLine :: String -> String -> String -> String
 rewriteLine old new = unlines . map (\line -> if line == old then new else line) . lines
 
-checkCalculusComposition :: FilePath -> IO Bool
-checkCalculusComposition root = do
-  expected <- readMetricOracle (root </> "test/oracle/formal/CalculusComposition.expected.tsv")
+checkCalculusComposition :: IO Bool
+checkCalculusComposition = do
   projection <- either (failCheck "calculus projection") pure referenceCalculusProjection
   model <- either (failCheck "calculus formal model") pure referenceCalculusModel
   assertEqual "calculus formal-model structural problems" [] (modelProblems model)
@@ -284,19 +279,10 @@ checkCalculusComposition root = do
           , ("formal-safety", if exploreViolation explored == Nothing then "green" else "red")
           ]
         _ -> Map.empty
-  assertEqual "gateway five-calculus semantic projection" expected actual
+  assertEqual "gateway five-calculus semantic projection" expectedCalculusFacts actual
   pure True
  where
   failCheck label problem = putStrLn ("FAIL: " <> label <> ": " <> problem) >> exitFailure
-
-readMetricOracle :: FilePath -> IO (Map.Map String String)
-readMetricOracle path = do
-  rows <- readTsv path
-  Map.fromList <$> forM rows (\row -> case row of
-    [name, value] -> pure (name, value)
-    _ -> failCheck ("malformed metric oracle row in " <> path <> ": " <> show row))
- where
-  failCheck message = putStrLn ("FAIL: " <> message) >> exitFailure
 
 runTlc :: FilePath -> FilePath -> FilePath -> String -> Bool -> Model -> IO TlcResult
 runTlc java jar output suffix dumpStates model = do
@@ -437,16 +423,13 @@ allViolations model = do
       valid <- evalExpr model Map.empty state (namedExprBody invariant) >>= valueAsBool
       pure [namedExprName invariant | not valid]
 
-checkMutantOracle :: FilePath -> [(String, Name, Model)] -> IO ()
-checkMutantOracle root mutants = do
-  rows <- readTsv (root </> "test/oracle/formal/gateway/invariant_mutants.tsv")
-  let expected = [(name, invariant) | [name, invariant, "green"] <- rows]
-  assertEqual "per-invariant mutant oracle" expected [(name, invariant) | (name, invariant, _) <- mutants]
+checkMutantOracle :: [(String, Name, Model)] -> IO ()
+checkMutantOracle mutants =
+  assertEqual "per-invariant mutant oracle" expectedInvariantMutants [(name, invariant) | (name, invariant, _) <- mutants]
 
-checkInvariantDelete :: FilePath -> IO ()
-checkInvariantDelete root = do
-  rows <- readTsv (root </> "test/oracle/formal/gateway/model_contract.tsv")
-  let required = Set.fromList [name | ["invariant", name, _] <- rows]
+checkInvariantDelete :: IO ()
+checkInvariantDelete = do
+  let required = Set.fromList expectedInvariants
       mutant = gatewayMigrationModel {modelInvariants = drop 1 (modelInvariants gatewayMigrationModel)}
       actual = Set.fromList (map namedExprName (modelInvariants mutant))
       (Tla correctTla, Cfg correctCfg) = emitTLA gatewayMigrationModel
@@ -490,26 +473,11 @@ stateSafe model state = all invariantHolds (modelInvariants model)
     invariantHolds invariant =
       (evalExpr model Map.empty state (namedExprBody invariant) >>= valueAsBool) == Right True
 
-readCutoffCases :: FilePath -> IO [CutoffCase]
-readCutoffCases root = do
-  rows <- readTsv (root </> "test/oracle/formal/gateway/cutoff_cases.tsv")
-  forM rows $ \row -> case row of
-    [name, expected, clause, active, standby, dns, budget, ttl, freshness, offset] -> do
-      let columns = map (splitOn ':') [active, standby, dns, budget, ttl, freshness, offset]
-      case columns of
-        [actives, standbys, records, budgets, ttls, fresh, offsets]
-          | all ((== length actives) . length) [standbys, records, budgets, ttls, fresh, offsets] ->
-              pure CutoffCase
-                { cutoffName = name
-                , cutoffAccept = expected == "accept"
-                , cutoffClause = clauseFromText clause
-                , cutoffEdges = zipWith7 edgeFromText actives standbys records budgets ttls fresh offsets
-                }
-        _ -> fail ("malformed cutoff row " <> show row)
-    _ -> fail ("malformed cutoff row " <> show row)
-  where
-    edgeFromText active standby dns budget ttl freshness offset = MigrationEdge
-      active standby dns (read budget) (read ttl) (read freshness) (read offset)
+readCutoffCases :: [CutoffCase]
+readCutoffCases =
+  [ CutoffCase name accept clause edges
+  | (name, accept, clause, edges) <- expectedCutoffCases
+  ]
 
 checkCutoffCorpus :: [CutoffCase] -> IO ()
 checkCutoffCorpus cases = forM_ cases $ \cutoffCase -> do
@@ -522,18 +490,15 @@ checkCutoffCorpus cases = forM_ cases $ \cutoffCase -> do
       _ -> assert False (cutoffName cutoffCase <> " unexpectedly accepted")
   assertEqual (cutoffName cutoffCase <> " independent reference") (referenceFit (cutoffEdges cutoffCase)) actual
 
-checkCutoffMutants :: FilePath -> [CutoffCase] -> IO Int
-checkCutoffMutants root cases = do
-  rows <- readTsv (root </> "test/oracle/formal/gateway/cutoff_mutants.tsv")
-  let oracle = [(name, clauseFromText clause) | [name, clause, "red"] <- rows]
-  assertEqual "cutoff mutant catalogue size" 8 (length oracle)
-  forM_ oracle $ \(name, maybeClause) -> case maybeClause of
-    Nothing -> assert False ("unknown cutoff mutant clause " <> name)
-    Just clause -> assert
+checkCutoffMutants :: [CutoffCase] -> IO Int
+checkCutoffMutants cases = do
+  assertEqual "cutoff mutant catalogue size" 8 (length expectedCutoffMutants)
+  forM_ expectedCutoffMutants $ \(name, clause) ->
+    assert
       (any (\cutoffCase -> structuralFitWith (DeleteClause clause) (cutoffEdges cutoffCase)
           /= referenceFit (cutoffEdges cutoffCase)) cases)
       (name <> " survived diagnostic equivalence")
-  pure (length oracle)
+  pure (length expectedCutoffMutants)
 
 checkCutoffQuickCheck :: IO ()
 checkCutoffQuickCheck = do
@@ -609,19 +574,6 @@ scenarioGraphs =
   where
     edge = MigrationEdge
 
-clauseFromText :: String -> Maybe FitClause
-clauseFromText text = lookup text
-  [ ("pairwise", Pairwise)
-  , ("graph-independent", GraphIndependent)
-  , ("resource-independent", ResourceIndependent)
-  , ("acyclic", Acyclic)
-  , ("budget", BudgetWithinCap)
-  , ("ttl", TtlInRegime)
-  , ("freshness", FreshnessInRegime)
-  , ("offset-domain", OffsetDomainWithinConstants)
-  , ("none", Pairwise)
-  ] >>= \clause -> if text == "none" then Nothing else Just clause
-
 sharedResourceModel :: Model
 sharedResourceModel = Model
   { modelName = "SharedResourceStress"
@@ -691,11 +643,6 @@ writeResults output safetyTlc fairnessDrops iosimAgreement cutoffMutants rendere
     , "calculus-composition-projection\t" <> if calculusProjection then "green" else "red"
     , "decomposition-lemma\tOPEN"
     ]
-
-readTsv :: FilePath -> IO [[String]]
-readTsv path = do
-  contents <- readFile path
-  pure [splitOn '\t' line | line <- drop 1 (lines contents), not (null line)]
 
 readFileIfPresent :: FilePath -> IO String
 readFileIfPresent path = do
@@ -788,17 +735,3 @@ findIndexPrefix needle = go 0
 
 trim :: String -> String
 trim = reverse . dropWhile isSpace . reverse . dropWhile isSpace
-
-splitOn :: Char -> String -> [String]
-splitOn delimiter text = case break (== delimiter) text of
-  (piece, []) -> [piece]
-  (piece, _ : rest) -> piece : splitOn delimiter rest
-
-zipWith7 :: (a -> b -> c -> d -> e -> f -> g -> h) -> [a] -> [b] -> [c] -> [d] -> [e] -> [f] -> [g] -> [h]
-zipWith7 function as bs cs ds es fs gs =
-  [function a b c d e f g | (a, b, c, d, e, f, g) <- zip7 as bs cs ds es fs gs]
-
-zip7 :: [a] -> [b] -> [c] -> [d] -> [e] -> [f] -> [g] -> [(a, b, c, d, e, f, g)]
-zip7 (a : as) (b : bs) (c : cs) (d : ds) (e : es) (f : fs) (g : gs) =
-  (a, b, c, d, e, f, g) : zip7 as bs cs ds es fs gs
-zip7 _ _ _ _ _ _ _ = []

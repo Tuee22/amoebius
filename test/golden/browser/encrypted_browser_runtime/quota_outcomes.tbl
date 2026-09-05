@@ -1,4 +1,0 @@
-condition outcome dependencies_preserved
-within-budget Stored true
-over-budget-independent RejectedQuota true
-over-budget-depended RejectedQuota true

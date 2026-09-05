@@ -123,26 +123,26 @@ selectorIntegrityProblems =
 exactCaseProblems :: String -> [String]
 exactCaseProblems exactCase = case exactCase of
   "semantic-observation-composition" ->
-    expectCount "full-mode observation carrier" 239 (length (checkObservations cleanResult))
+    expectCount "full-mode observation carrier" 1067 (length (checkObservations cleanResult))
   "semantic-finding-composition" ->
-    expectCount "full-mode finding carrier" 482 (length (checkFindings cleanResult))
+    expectCount "full-mode finding carrier" 446 (length (checkFindings cleanResult))
   "phase-semantic-contract-route" ->
     expectObservation "semantic phase count" "semantic.phase-count" "96" cleanResult
       <> expectObservation "semantic slot count" "semantic.slot-count" "1728" cleanResult
-      <> expectObservation "semantic gap count" "semantic.gap-count" "1710" cleanResult
-      <> expectObservation "semantic bound count" "semantic.bound-count" "18" cleanResult
+      <> expectObservation "semantic gap count" "semantic.gap-count" "882" cleanResult
+      <> expectObservation "semantic bound count" "semantic.bound-count" "846" cleanResult
       <> expectObservation "semantic target phase" "semantic.target-phase" "00" cleanResult
-      <> expectObservation "semantic deferred gap count" "semantic.deferred-gap-count" "1710" cleanResult
+      <> expectObservation "semantic deferred gap count" "semantic.deferred-gap-count" "882" cleanResult
       <> expectObservation "semantic legacy count" "semantic.legacy-count" "26" cleanResult
       <> expectFindingCount "semantic gap findings" "PLAN-SEMANTIC-CONTRACT-GAP" 0 cleanResult
       <> expectFindingCount "semantic diagnostic refusal" "PLAN-SEMANTIC-DIAGNOSTIC-ONLY" 0 cleanResult
   "resource-provision-contract-route" ->
     expectObservation "resource phase domain" "resource.phase-domain-count" "96" cleanResult
-      <> expectObservation "resource required phases" "resource.required-phase-count" "55" cleanResult
-      <> expectObservation "resource slot count" "resource.slot-count" "385" cleanResult
-      <> expectObservation "resource gap count" "resource.gap-count" "385" cleanResult
+      <> expectObservation "resource required phases" "resource.required-phase-count" "53" cleanResult
+      <> expectObservation "resource slot count" "resource.slot-count" "371" cleanResult
+      <> expectObservation "resource gap count" "resource.gap-count" "329" cleanResult
       <> expectObservation "resource draft count" "resource.draft-count" "0" cleanResult
-      <> expectObservation "resource gate-ready count" "resource.gate-ready-count" "0" cleanResult
+      <> expectObservation "resource gate-ready count" "resource.gate-ready-count" "42" cleanResult
       <> expectFindingCount "resource gap findings" "PLAN-RESOURCE-CONTRACT-GAP" 0 cleanResult
       <> expectFindingCount "resource diagnostic refusal" "PLAN-RESOURCE-DIAGNOSTIC-ONLY" 0 cleanResult
   "phase-semantic-join-route" ->
@@ -205,9 +205,9 @@ recordedFrontierProblems =
     , expectFindingCount "terminal sprint statuses" "PLAN-SPRINT-STATUS" 0 allDoneResult
     , expectFindingCount "terminal tracker statuses" "PLAN-TRACKER-STATUS" 0 allDoneResult
     , expectObservation "terminal completed-prefix semantic target" "semantic.target-phase" "95" allDoneResult
-    , expectFindingCount "terminal unresolved contracts remain fail-closed" "PLAN-SEMANTIC-CONTRACT-GAP" 1710 allDoneResult
+    , expectFindingCount "terminal unresolved contracts remain fail-closed" "PLAN-SEMANTIC-CONTRACT-GAP" 882 allDoneResult
     , expectObservation "explicit Phase-1 gate semantic target" "semantic.target-phase" "01" phaseOneGateResult
-    , expectFindingCount "explicit Phase-1 gate rejects Phase-1 semantic gaps" "PLAN-SEMANTIC-CONTRACT-GAP" 18 phaseOneGateResult
+    , expectFindingCount "explicit Phase-1 gate has no Phase-1 semantic gaps" "PLAN-SEMANTIC-CONTRACT-GAP" 0 phaseOneGateResult
     ]
 
 postPhaseZeroResult :: CheckResult

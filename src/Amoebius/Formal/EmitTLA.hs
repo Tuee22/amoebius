@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Amoebius.Formal.EmitTLA
   ( Tla (..)
   , Cfg (..)
@@ -26,7 +28,11 @@ data RenderMode
   deriving stock (Eq, Ord, Show)
 
 emitTLA :: Model -> (Tla, Cfg)
+#ifdef FORMAL_MODEL_DROPS_UNCHANGED_MUTANT
+emitTLA = emitTLAWith DropUnchanged
+#else
 emitTLA = emitTLAWith Correct
+#endif
 
 emitTLAWith :: RenderMode -> Model -> (Tla, Cfg)
 emitTLAWith mode model = (Tla (renderModule mode model), Cfg (renderCfg model))

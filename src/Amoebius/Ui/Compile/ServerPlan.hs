@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Compile.ServerPlan
@@ -27,11 +28,20 @@ import Data.Text (Text)
 newtype UiServerPlan = UiServerPlan [(PortId, HandlerId)]
 
 compileServerPlan :: BoundUiProgram -> UiServerPlan
-compileServerPlan program = UiServerPlan (sortOn fst (concatMap actionRow (boundUiProjection program)))
+compileServerPlan program = UiServerPlan (mutateActions (sortOn fst (concatMap actionRow (boundUiProjection program))))
   where
     actionRow row = case (compiledInstruction row, compiledHandler row) of
       (EmitEvent _ port, Just handler) -> [(port, handler)]
       _ -> []
+
+mutateActions :: [(PortId, HandlerId)] -> [(PortId, HandlerId)]
+#ifdef UI_PLAN_DROP_SERVER_ACTION_MUTANT
+mutateActions = filter ((/= "start") . portIdText . fst)
+#elif defined(UI_PLAN_SWAP_ACTION_TARGETS_MUTANT)
+mutateActions actions = zip (map fst actions) (reverse (map snd actions))
+#else
+mutateActions = id
+#endif
 
 encodeServerPlan :: UiServerPlan -> ByteString
 encodeServerPlan (UiServerPlan actions) = object

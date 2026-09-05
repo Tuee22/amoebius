@@ -176,6 +176,12 @@ passing ledger for the exact current source is sufficient for the status-only tr
 never performs that tracked edit. After it exits, a human, agent, or CI job may recheck the bound preimage and
 apply the exact emitted patch. The tracker never embeds or manufactures a run transcript.
 
+An already-Done phase may be executed again only as an explicit receipt refresh. The full gate must pass against
+the exact current source, but the generated status projection is an identity with no tracked targets. A refresh
+adds durable regression evidence and never alters the frontier. It is not induced recursively by later source
+changes: a verified predecessor receipt is monotonic, and the active gate owns current-source compatibility.
+This is the evolutionary predecessor rule defined by gate integrity §M.6.
+
 ---
 
 ## L. One-substrate discipline

@@ -1,6 +1,0 @@
-transaction	operation	table	scope_column	scope_parameter	result_shape
-insert-document	insert	documents	tenant_id	scope_tenant	scoped-inserted
-read-document	select-one	documents	tenant_id	scope_tenant	scoped-maybe-document
-list-subject-jobs	select-many	jobs	tenant_id	scope_tenant	scoped-job-list
-advance-job-status	update	jobs	tenant_id	scope_tenant	scoped-updated
-record-release	insert	releases	tenant_id	scope_tenant	scoped-inserted

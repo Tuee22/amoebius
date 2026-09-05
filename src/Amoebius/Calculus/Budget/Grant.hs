@@ -37,13 +37,21 @@ module Amoebius.Calculus.Budget.Grant
   , everyPurpose
   , purposeTag
     -- * The paired bound
+#ifdef BUDGET_CALCULUS_GRANT_CONSTRUCTORS_EXPOSED_MUTANT
+  , Allowance (..)
+#else
   , Allowance
+#endif
   , allowance
   , allowanceCeiling
   , allowanceConcurrency
   , allowancePerItem
     -- * The grant
+#ifdef BUDGET_CALCULUS_GRANT_CONSTRUCTORS_EXPOSED_MUTANT
+  , Grant (..)
+#else
   , Grant
+#endif
   , grantLocation
   , grantPurpose
   , grantAllowance

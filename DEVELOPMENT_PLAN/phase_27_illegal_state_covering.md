@@ -15,7 +15,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -25,7 +25,6 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus](#sprint-271-exhaustive-negativepositive-corpus-split-by-foreclosure-locus-)
@@ -39,12 +38,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 26, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+Phase 26 and every earlier gate have passed in numerical order. The Phase-27 implementation and its bounded
+contract are present; the complete integrated Phase-27 gate remains the only authority for the status
+transition below.
 
 > **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
@@ -73,33 +71,28 @@ invocation and the candidate verdict.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — every illegal-state catalog entry is a Haskell-owned case at its exact pure rejection locus or an exact-owner deferral; all non-Haskell case, compiler, oracle, and mutant bytes are generated beneath `.build/**`. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 27` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: `LTD-DOC-001` remains active; its exact zero-consumer input-closure check and Markdown/serialized-registry reintroduction negatives have not been implemented or qualified. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 26; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
-
-## Resource provision — UNRESOLVED
-
-> **UNRESOLVED — blocks validation.** No live mutation may begin. The owner marker, preflight, complete
-> allowed/forbidden mutations, external observer, scoped cleanup, and zero-owned-residue contract are absent.
+| `Claim` | `closed-haskell-illegal-state-coverage-ledger` |
+| `Subject` | `acquired-illegal-state-covering-supervisor` |
+| `Command` | `pb validate phase 27` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
+| `Oracle` | `independent-illegal-state-covering-oracle` |
+| `Positive controls` | `dhall-decode-compile-and-property-positive-controls` |
+| `Paired negatives` | `paired-illegal-state-foreclosure-negatives` |
+| `Mutants` | `applied-illegal-state-covering-production-mutants` |
+| `Discovery` | `exact-illegal-state-covering-source-discovery` |
+| `Challenge` | `post-acquisition-illegal-state-covering-challenge` |
+| `Observer` | `illegal-state-covering-process-observation` |
+| `Authority/bypass` | `no-pb-network-host-hardware-or-illegal-state-parallelism` |
+| `Freshness` | `fresh-illegal-state-build-root-and-stable-source` |
+| `Qualification` | `qualified-illegal-state-covering-harness` |
+| `Cleanroom` | `illegal-state-products-contained-below-build` |
+| `Legacy closure` | `retired-behavioral-document-authorities-absent` |
+| `Predecessor` | `exact-phase-twenty-six-receipt` |
+| `Residue` | `later-provision-render-runtime-owners-explicit` |
+| `Pass criterion` | `qualified-phase-twenty-seven-gate-pass` |
 
 ## Doctrine adopted
 
@@ -140,15 +133,15 @@ invocation and the candidate verdict.
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus ⏸️
+## Sprint 27.1: Exhaustive negative/positive corpus split by foreclosure locus ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/illegal-state-covering/Amoebius/Dsl/IllegalStateCovering.hs` owns the closed catalogue, structural and decode pairs, deferral disposition, and property subjects; `test/spec/dsl/IllegalStateCoveringSpec.hs` owns the executable battery.
 **Blocked by**: [Phase 26](phase_26_gadt_decode_ir.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: The suite joins all 121 catalogue rows to independent identities/counts, exercises seven structural and thirteen decode pairs, and requires the structural and decode production mutants to fail at their pinned loci.
+**Oracle**: `test/spec/dsl/IllegalStateCoveringOracle.hs` independently fixes the 121-row digest, counts, Phase-9 two-way join, pair identities, errors, and generated products without importing the production catalogue.
+**Legacy IDs**: `LTD-DOC-001`.
+**Docs to update**: this phase, `system_components.md`, DSL doctrine, testing doctrine, and the reader-facing illegal-state catalogue family.
 
 ### Objective
 
@@ -243,17 +236,17 @@ must pass `dhall type` and decode-reject — never billing a gadt-decode-only fo
 
 ### Remaining Work
 
-The pre-reset `None` claim is permanently invalid; Sprint 27.1 remains blocked and NOT VALIDATED.
+The implementation-ready seam is complete; only the complete integrated Phase-27 gate can validate it.
 
-## Sprint 27.2: GADT-index compile-refusal cases (type-foreclosed layer) ⏸️
+## Sprint 27.2: GADT-index compile-refusal cases (type-foreclosed layer) ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `Amoebius.Dsl.IllegalStateCovering` exports five indexed compile-refusal vocabularies; `IllegalStateCoveringSpec` generates their ten legal/illegal modules beneath the fresh run root and invokes the exact acquired GHC serially.
 **Blocked by**: Sprint 27.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Every legal twin compiles, every illegal twin yields structured GHC type diagnostics at its independent locus, and the GADT production mutant admits a negative and makes the suite red.
+**Oracle**: `IllegalStateCoveringOracle.compileCases` independently declares the five case identities, legal/illegal sources, and expected type-locus fragments.
+**Legacy IDs**: `LTD-DOC-001`.
+**Docs to update**: this phase, DSL doctrine, testing doctrine, and illegal-state catalogue pages.
 
 ### Objective
 
@@ -296,17 +289,17 @@ Phase-25 honesty caveat routed here, since Dhall has no opaque types.
 
 ### Remaining Work
 
-The pre-reset `None` claim is permanently invalid; Sprint 27.2 remains blocked and NOT VALIDATED.
+The implementation-ready seam is complete; only the complete integrated Phase-27 gate can validate it.
 
-## Sprint 27.3: QuickCheck property suite ⏸️
+## Sprint 27.3: QuickCheck property suite ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `Amoebius.Dsl.IllegalStateCovering` provides the closed smart-constructor, round-trip, fold, composition, and finite RKE2 subjects; `IllegalStateCoveringSpec` runs four covered 300-sample properties and exhausts all three RKE2 arms.
 **Blocked by**: Sprint 27.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Explicit QuickCheck coverage obligations prevent vacuous generators; the property mutant changes production behavior and makes the suite red while the clean subject retains four sampled and one exhausted-domain claim.
+**Oracle**: `IllegalStateCoveringOracle` fixes the property census and finite-domain size; property predicates remain test-authored and separate from the production operations they challenge.
+**Legacy IDs**: `LTD-DOC-001`.
+**Docs to update**: this phase and testing doctrine.
 
 ### Objective
 
@@ -349,17 +342,17 @@ exhausted (the three `Rke2Servers` arms).
 
 ### Remaining Work
 
-The pre-reset `None` claim is permanently invalid; Sprint 27.3 remains blocked and NOT VALIDATED.
+The implementation-ready seam is complete; only the complete integrated Phase-27 gate can validate it.
 
-## Sprint 27.4: The per-entry validation-locus ledger — the gate ⏸️
+## Sprint 27.4: The per-entry validation-locus ledger — the gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `Amoebius.Validation.IllegalStateCoveringRun.Internal` acquires the exact source set, executes four changed-production challenges and the clean suite, checks the 26 generated products, source stability, legacy closure, and zero external residue, then finalizes Phase-27 evidence through the dispatch kernel.
 **Blocked by**: Sprint 27.3
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: The package-hidden supervisor requires bidirectional three-source discovery, exact catalogue/ledger/product counts, four pinned red mutant loci, one exact clean token, stable source digests, predecessor evidence, and contained run-root writes.
+**Oracle**: `IllegalStateCoveringOracle.hs` plus the acquired-process and finalized-evidence checks in the package-hidden supervisor.
+**Legacy IDs**: `LTD-DOC-001`; closure requires the retired Python/TSV/serialized corpus and compiler-output authorities to be absent and rejects reintroduced behavioral document consumption.
+**Docs to update**: this phase, `system_components.md`, DSL doctrine, testing doctrine, and `documents/illegal_state/illegal_state_*.md`.
 
 ### Objective
 
@@ -434,7 +427,9 @@ its schema, linter, and path are centrally owned rather than re-derived here.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. Enumeration, ledgers, and run evidence remain generated beneath `.build/` and join to authored
+The implementation and documentation seams are complete. The remaining work is the exact clean component
+rerun followed by the complete integrated Phase-27 gate; only that result may authorize the mechanical status
+update. Enumeration, ledgers, and run evidence remain generated beneath `.build/` and join to authored
 expectations at gate time.
 
 ## Documentation Requirements

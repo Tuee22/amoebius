@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -33,6 +34,10 @@ import GHC.TypeLits (Symbol)
 -- | Discharge one obligation. A workflow that does not hold it does not typecheck, and the
 -- message says which one it was asked to discharge.
 type family Remove (r :: Symbol) (rs :: [Symbol]) :: [Symbol] where
+#ifdef WORKFLOW_CALCULUS_REMOVE_UNHELD_ALLOWED_MUTANT
+  Remove _r '[] = '[]
+  Remove _r (_s ': rest) = rest
+#else
   Remove r '[] =
     TypeError
       ( 'Text "the workflow holds no teardown obligation for "
@@ -41,6 +46,7 @@ type family Remove (r :: Symbol) (rs :: [Symbol]) :: [Symbol] where
       )
   Remove r (r ': rest) = rest
   Remove r (s ': rest) = s ': Remove r rest
+#endif
 
 -- | The obligations of two workflows run one after the other.
 type family Append (as :: [Symbol]) (bs :: [Symbol]) :: [Symbol] where

@@ -26,7 +26,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
+- [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 13.1: Total symbolic boundary and inductive obligations](#sprint-131-total-symbolic-boundary-and-inductive-obligations-)
@@ -38,7 +38,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 Blocked by redesigned Phase 12, its independent validation, and gate pass; every earlier
 gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
@@ -79,33 +79,39 @@ only beneath `.build/**` and no shell or Python verdict. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-13 semantic and resource payloads,
+package-hidden serial supervisor, Haskell semantic oracle, run-local fake SMT boundary, and three
+changed-production subjects are complete; only a fresh integrated run may authorize status.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — classify the supported Phase 11 model fragment through a Haskell-owned SMT translation and induction schema, with any SMT-LIB or solver products generated only beneath `.build/**` and no shell or Python verdict. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 13` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 12; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | The Haskell checker totally classifies the supported boolean/QF-LIA fragment through full-conjunction base/step induction and preserves unsupported or inconclusive outcomes. |
+| `Subject` | `Amoebius.Checker.Symbolic` is acquired only through package-hidden `Amoebius.Validation.SymbolicCheckerRun.Internal`. |
+| `Command` | Future public spelling is `pb validate phase 13`; before `BOOTSTRAP_HANDOFF`, the exact absolute Haskell executable and authenticated GHC 9.12.4 compiler run directly and synchronously. |
+| `Oracle` | `SymbolicCheckerSpec.hs` owns seven exact symbolic/explicit relation rows and drives a separately authored Haskell SMT semantic boundary without reading behavioral data. |
+| `Positive controls` | Seven fixtures cover inductive, base-failure, step-failure, conservative non-induction, coupled invariants, booleans, and unsupported theory. |
+| `Paired negatives` | Absolute solver injection is paired with relative-path refusal; positive induction is paired with base, step, conservative, and unsupported classifications. |
+| `Mutants` | Conjoined-hypothesis deletion, guard negation, and satisfiable-step acceptance compile as changed production subjects and turn assigned oracle loci red. |
+| `Discovery` | The production checker, independent oracle, and fake SMT boundary equal the fixed three-file source inventory bidirectionally. |
+| `Challenge` | All three mutations execute after acquisition and must be distinguished by independent status observations. |
+| `Observer` | The supervisor records absolute executable, exact argv, exit, transcript digest, and bounded failure text for every compiler and oracle process. |
+| `Authority/bypass` | `pb`, PATH solver lookup, host packages, network, hardware, live services, imports of other checker algorithms, and compiler/linker overlap are forbidden. |
+| `Freshness` | Every run creates a fresh `.build/runs/phase-13/work/**` root and requires equal opening/closing source identities. |
+| `Qualification` | Clean controls, result-class negatives, exact discovery, contained fake execution, and all three changed-production subjects pass together. |
+| `Cleanroom` | Fake solver, binaries, objects, transcripts, and results are generated lazily beneath the fresh run root. |
+| `Legacy closure` | Retired Phase-13 serialized behavioral oracles and Python verdict gate are absent. |
+| `Predecessor` | Consume exactly one durable Phase-12 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Residue` | Refinement, reusable compile-fail machinery, simulation, concrete models, runtimes, live effects, and hardware remain explicitly later-owned. |
+| `Pass criterion` | `qualified-phase-thirteen-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
-## Resource provision — UNRESOLVED
+## Resource provision
 
-> **UNRESOLVED — blocks validation.** No live mutation may begin. The owner marker, preflight, complete
-> allowed/forbidden mutations, external observer, scoped cleanup, and zero-owned-residue contract are absent.
+Phase 13 owns one run-local Haskell fake SMT process beneath `.build/runs/phase-13/**`. Preflight requires its
+fresh source-bound compilation and absolute executable path. Allowed mutations are stdin SMT-LIB queries and
+process execution inside that run root; network, package installation, PATH discovery, host tools, writes
+outside the run root, and compiler overlap are forbidden. The parent Haskell supervisor observes compiler and
+oracle process exits, argv, streams, and digests, retains only contained generated evidence, and reports zero
+owned external residue.
 
 ## Doctrine adopted
 
@@ -119,15 +125,15 @@ only beneath `.build/**` and no shell or Python verdict. NOT VALIDATED.
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 13.1: Total symbolic boundary and inductive obligations ⏸️
+## Sprint 13.1: Total symbolic boundary and inductive obligations ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/symbolic-checker/Amoebius/Checker/Symbolic.hs`
 **Blocked by**: [Phase 12](phase_12_explicit_state_checker.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: seven exact symbolic/explicit rows, fourteen obligations, three witnesses, three counterexamples, and unsupported classification
+**Oracle**: `test/spec/formal/symbolic/SymbolicCheckerSpec.hs` with `FakeSmtSolver.hs` as the independent run-local decision boundary
+**Legacy IDs**: none; retired Phase-13 serialized oracles and Python gate are checked absent
+**Docs to update**: this phase file, `formal_model_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
 
 ### Objective
 
@@ -155,15 +161,15 @@ dynamically resolved solver, and classify every input without promoting unsuppor
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 13.2: Solver differential and mutation evidence ⏸️
+## Sprint 13.2: Solver differential and mutation evidence ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: package-hidden `src/validation-kernel/Amoebius/Validation/SymbolicCheckerRun/Internal.hs`
 **Blocked by**: Sprint 13.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: serialized fake/clean/three-mutant compiler matrix, exact red loci, source discipline, discovery, and containment
+**Oracle**: the same Haskell semantic oracle; solver/result bytes are observations only
+**Legacy IDs**: none; retired Phase-13 serialized oracles and Python gate are checked absent
+**Docs to update**: this phase file, `formal_model_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
 
 ### Objective
 

@@ -133,8 +133,8 @@ region, no failover policy, no chaos knob, no substrate selector. The app author
 because the type does not have those fields.
 
 [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) owns the target capability test for this split:
-the app-facing `CapabilityNeed` has no product, provider, or shape field, while two distinct composed files
-normalize to identical app slices and bind to structurally different provider graphs whose product,
+the app-facing `CapabilityNeed` has no product, provider, or shape field, while one Haskell-owned app-surface
+projection remains byte-identical across two bindings and those bindings produce structurally different provider graphs whose product,
 object-role, controller, execution, and intent semantics match an independently authored projection.
 
 ---
@@ -429,11 +429,12 @@ the concentration principle intact: distribution behavior is still exercised and
 boundary rather than duplicated inside each application
 ([chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)).
 
-[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) owns the concrete local acceptance case for
-this split. Five application-authored interactions and four visible-state expectations must exact-join the generated
-workflow surface for single- and multi-tenant sources, while neither source contains a replica, topology,
-rollout, failover, or fault-schedule choice. The same expectations still require later operator-selected live
-topologies before any deployment, replica-loss, or HA claim becomes verified.
+[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) owns the concrete hardware-free acceptance
+case for this split. Its Haskell cases declare five application interactions and four visible-state
+expectations for single- and multi-tenant shapes, while the production composition exposes no replica,
+topology, rollout, failover, or fault-schedule choice. Five changed-production checks constrain scope,
+ready-receipt order, plan identity, and direct bypass. The complete integrated gate remains **NOT VALIDATED**;
+later operator-selected live topologies are still required for any deployment, replica-loss, or HA claim.
 
 Phase 79 owns the concrete provider-node classification boundary: workflow-completion and load may be
 inputs to a declared deployment `ScalingPolicy`, but application logic cannot request a node, select a provider

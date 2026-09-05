@@ -1,9 +1,0 @@
-{
-  "scheduleName": "duplicate-delivery",
-  "scheduleSeed": 13,
-  "scheduleBound": 8,
-  "scheduleDuplicateDelivery": true,
-  "scheduleCrashBeforeApply": false,
-  "scheduleStaleSnapshot": false,
-  "scheduleDelayMicros": 0
-}

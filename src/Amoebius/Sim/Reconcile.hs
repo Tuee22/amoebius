@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Sim.Reconcile
@@ -23,9 +24,19 @@ referenceReconcileCommands commands env = do
   publishers <- forM commands (async . envPublish env commandsTopic . ("activate:" <>))
   _ <- mapM wait publishers
   initial <- envConsume env commandsTopic
+#ifdef DETERMINISTIC_SIM_DROPPED_PARTITION_MUTANT
+  let messages = initial
+#else
   messages <- if null initial then envDelay env 10 >> envConsume env commandsTopic else pure initial
+#endif
   if null messages
+#ifdef DETERMINISTIC_SIM_DROPPED_PARTITION_MUTANT
+    then do
+      _ <- envApplyObject env (ObjectName "service") (ResourceVersion 0) "stale"
+      pure (Violated "NoActOnStaleRead")
+#else
     then pure (Violated "CommandEventuallyObserved")
+#endif
     else persistAndApply env
 
 persistAndApply :: Monad m => Env m -> m InvariantOutcome

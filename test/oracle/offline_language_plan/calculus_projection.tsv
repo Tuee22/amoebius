@@ -1,5 +1,0 @@
-metric	value
-calculus-kinds	artifact,budget,lift,workflow,evidence
-component-names	offline-plan-artifacts,bounded-queue-contract,language-and-refusal-corpus,paired-plan-workflow,mutant-evidence
-projection-counts	2,9,16,8,5
-resource-vector	5,40,0,0

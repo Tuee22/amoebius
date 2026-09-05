@@ -1,8 +1,0 @@
-subject	S1	S2	S3	S4	S5	S6
-lawful	PASS	PASS	PASS	PASS	PASS	PASS
-s1-tampered-accepted	FAIL:TamperedIdentityWasAccepted	PASS	PASS	PASS	PASS	PASS
-s2-caller-scope	PASS	FAIL:SkolemBarrierMissing	PASS	PASS	PASS	PASS
-s3-unscoped-arm	PASS	PASS	FAIL:UnscopedOperationArmExported	PASS	PASS	PASS
-s4-distinguishable	PASS	PASS	PASS	FAIL:RefusalBytesDiffer	PASS	PASS
-s5-key-collapse	PASS	PASS	PASS	PASS	FAIL:NamespaceCollision	PASS
-s6-policy-omitted	PASS	PASS	PASS	PASS	PASS	FAIL:RevocationPolicyMissing

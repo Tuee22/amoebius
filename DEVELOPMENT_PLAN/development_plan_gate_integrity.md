@@ -272,8 +272,23 @@ requested ordinal through the compiled phase-identity table and then requires ex
 that capability; an absent identity, absent runner, duplicate capability, or ambiguous selection refuses. A
 second ordinal switch or caller-supplied runner name is not an execution authority. A candidate runs that one
 selected phase; it does not re-run gates `0..N` as one expanding subject. Phase 0 binds `GenesisTrust`, and every
-later candidate binds the exact verified immediate-predecessor receipt whose projected postimage is its opening
-source image.
+later candidate binds an exact verified immediate-predecessor receipt. That receipt records the predecessor's
+completed frontier transition and is monotonic across later source snapshots. The active phase's exact
+current-source gate owns compatibility with the capabilities it consumes, including shared validation policy.
+A source change therefore cannot erase an earlier pass or force recursive prefix replay; malformed, detached,
+wrong-phase, or non-green predecessor evidence still refuses.
+
+A Done phase has one additional legal execution mode: **receipt refresh**. It reruns the complete
+qualified gate against the exact current source, changes no tracked status, emits an identity status projection,
+and installs a new content-addressed receipt. Receipt refresh cannot make a phase Done, skip a failed row, or
+advance the frontier. It is an explicit regression operation, never a prerequisite automatically induced by a
+later edit. Normal phase implementation therefore never recursively invalidates the completed prefix.
+
+Repeated qualified runs for the same phase form one receipt equivalence class; their
+run-specific identities may differ without creating competing predecessor meanings. Acquisition verifies every
+entry fail-closed, filters to the exact phase, and selects the lexicographically least content digest as the
+deterministic exact receipt. A malformed or detached entry still fails the whole acquisition. Thus refresh is
+idempotent while conflicting provenance cannot be silently selected.
 
 The dispatcher first constructs one opaque acquired run whose owner recomputes the selected Subject from the
 exact source/compiler/qualification/debt/contract products. Evidence cannot accept a caller-authored Subject or
@@ -321,6 +336,12 @@ The projected postimage must satisfy the compiled post-pass phase-contract check
 into candidate evidence. Authorization requires the hidden verified token to match phase, source preimage,
 patch digest, and projected whole-source postimage digest exactly, and retains the complete verified pass
 and receipt.
+
+For receipt refresh the exact target set is empty, the projection preimage and postimage are the same current
+source digest, and the phase must already be Done in one canonical frontier. The same hidden verifier, complete
+eighteen-row gate, opening/closing equality, qualification, cleanup, and durable-publication checks apply. A
+nonempty refresh projection, a refresh of an Active/Blocked phase, or use of refresh evidence to advance status
+is rejected.
 
 The production dispatcher gives the sealed `AuthorizedStatusProjection` to
 `writeAuthorizedStatusProjection`, which serializes the canonical patch, its preimage identity, exact target
@@ -448,9 +469,9 @@ Every phase inherits the following postconditions. They are part of the gate, no
    Phase 0 instead consumes its seven GenesisTrust files, binds exact opening/pre-publication-closing source
    identities, re-acquires Git source after status-projection emission, and proves its unique qualification leaf
    absent after the run; it does not claim whole-`.build/**` absent-before or universal replay detection. A
-   receipt whose projected postimage is not the current opening source,
-   ambiguous prior evidence, or any other ignored worktree input outside the declared Phase-0 exception makes
-   the gate fail.
+   Every later candidate projects the verified immediate-predecessor frontier fact onto its current opening
+   source; repeated valid receipts for that phase form the deterministic equivalence class defined in §M.6. Malformed or detached
+   evidence, or any other ignored worktree input outside the declared Phase-0 exception, makes the gate fail.
 8. **No condemned fallback.** The cleanroom run starts with every legacy path owned by the phase absent and
    proves no fallback, migration input, compatibility copy, or pre-generated substitute was read.
 9. **Tracked-tree immutability.** The gate does not change any tracked file and leaves no unignored output.
@@ -486,8 +507,8 @@ Every phase inherits the following postconditions. They are part of the gate, no
     Neither seam may interpret a row, table cell, ID
     spelling, owner phrase, predicate-shaped string, or row count as legacy semantics or use it to alter a
     closure verdict. The documentation gate owns correspondence between the Haskell bindings and that explanation.
-17. **Predecessor closure.** Except Phase 0, the immediately preceding phase has a valid gate-pass result for
-    the exact current contract. Hardware-specific work cannot run as a phase gate before the no-hardware DSL
+17. **Predecessor closure.** Except Phase 0, the immediately preceding phase has a valid durable gate-pass
+    result. The current phase owns compatibility with its exact opening source. Hardware-specific work cannot run as a phase gate before the no-hardware DSL
     gate barrier passes.
 18. **Complete gate pass.** Run bundles record the test. An isolated or partial check is insufficient, while
     the complete qualified phase-gate pass is sufficient for
@@ -553,9 +574,11 @@ normative tree and the mechanical file classification. The development plan adds
    and added to doctrine before implementation, never treated as temporary.
 2. Authored behavioural source is Haskell, with the sole bounded `pb/**` bootstrap exception in [§S](#s-universal-source-and-artifact-hygiene-gate).
    Reproducible non-Haskell material is a lazy product beneath `.build/**`, not repository source.
-3. No source, fixture, oracle, mutant, harness, build component, directory, or diagnostic filename contains a
-   phase ordinal. The only exceptions are `DEVELOPMENT_PLAN/phase_NN_<slug>.md` and generated `.build/**`
-   partitions keyed by phase.
+3. No product/runtime identity, authored product path, build component, or product diagnostic filename contains
+   a phase ordinal. Phase contracts and validation evidence may name the phase they validate: the
+   `DEVELOPMENT_PLAN/phase_NN_<slug>.md` contracts, source-bound validation-kernel/oracle identifiers, and
+   generated `.build/**` evidence partitions are necessarily phase-keyed. They must not be consumed as
+   product/runtime identities.
 4. Every root is justified by what its contents are and who consumes them, not by the phase or build target
    that first needed it.
 

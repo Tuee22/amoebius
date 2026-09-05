@@ -703,10 +703,11 @@ which forces a concrete divergence from prodbox's mechanics:
   recorded resolution is a resolution *this run* performed. It also stops the rendered recipe changing every
   time an upstream base is republished, which is a diff nobody reads and everybody approves.
 
-  [Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md) must eventually supply a complete
-  passing Register-1 gate for this pure boundary: the Haskell catalog has no authored digest field,
+  [Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md) binds the complete Register-1 gate
+  for this pure boundary: the Haskell catalog has no authored digest field,
   `BaseChannel` excludes digest syntax, and the lazy renderer emits one base argument and one matching
-  `FROM` while distinct run-local resolutions leave the recipe bytes unchanged. Phase 35 is **NOT VALIDATED**;
+  `FROM` while distinct run-local resolutions leave the recipe bytes unchanged. Completion remains owned by
+  the exact Phase-35 gate;
   registry resolution and use of an observed digest in a live build are later claims.
 - **No `DOCKER_CONFIG` environment variable — use `docker --config <dir>`.** prodbox isolated registry-push
   auth from public-pull auth with an **ephemeral `DOCKER_CONFIG`** (`local_registry_pipeline.md` §6.1).

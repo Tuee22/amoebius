@@ -1,1 +1,0 @@
-{"actions":["derive-partition","unlock","queue","inspect-ciphertext","restart","unlock","recover","claim-tab-a","refuse-tab-b","release-tab-a","claim-tab-b","upgrade-assets","switch-partition","quota-refusal"],"expected":"PASS"}

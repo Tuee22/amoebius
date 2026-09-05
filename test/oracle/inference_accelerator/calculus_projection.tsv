@@ -1,5 +1,0 @@
-metric	value
-calculus-kinds	artifact,budget,lift,workflow,evidence
-component-names	inference-positives,availability-cells,boundary-negatives,accelerator-property,mutant-evidence
-projection-counts	3,16,9,1,5
-resource-vector	5,34,0,0

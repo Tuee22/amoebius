@@ -99,7 +99,11 @@ admitsStrength kind strength = case (kind, strength) of
   (Property, ObservedOnce) -> False
   (Oracle, ThisExpressionRejected) -> False
   (Oracle, NoCounterexampleFound) -> False
+#ifdef EVIDENCE_CALCULUS_ORACLE_ADMITS_REJECTED_MUTANT
+  (Oracle, SatisfiesAuthoredPredicate) -> False
+#else
   (Oracle, SatisfiesAuthoredPredicate) -> True
+#endif
   (Oracle, ObservedOnce) -> False
   (LiveProbe, ThisExpressionRejected) -> False
   (LiveProbe, NoCounterexampleFound) -> False

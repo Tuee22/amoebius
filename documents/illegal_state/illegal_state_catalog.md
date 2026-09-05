@@ -55,26 +55,28 @@ entry uninhabitable.
 - The *normative rule* behind each catalog entry lives in that entry's owning doctrine
   (storage, gateway/ingress, secrets, …). The catalog names the owner and never restates its content.
 
-Phase 25 must validate the dhall-typecheck subset in-process: its eight canonical no-arm/required-field negatives,
+Phase 25 validates the bounded dhall-typecheck subset in-process: eight canonical no-arm/required-field negatives,
 three image/process negatives, one plaintext-secret negative, and two import-policy negatives fail at their
-authored reasons against the closed Dhall schema, while four paired positive surfaces pass. Independent shape
-oracles must catch 525 required-field deletions, 176 type substitutions, four special-resource mutations, and the
-extra capability arm. Its Phase-24 projection derives nineteen extension obligations but deliberately leaves
-all extension semantics UNVERIFIED; it is not catalog foreclosure evidence. Phase 26 must validate the focused
-gadt-decode subset: distinct schema/domain/unspellable/plaintext-secret refinement
-classes, tenant/state/owner compile indices, full positive-tree retention, a five-calculus composition
-projection, and fail-closed import/exception
-handling. Phase 27 must validate the exhaustive catalog projection: all 97 entries and 121 named subcases must
-reconcile, the 43 reached dhall-typecheck/gadt-decode subcases must discharge through direct and explicit
-Phase-8/9 predecessor obligations, and the remaining 78 subcases must retain exact later owners. The
-[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) must supply exact-locus evidence for
-eight of 11 Phase-9-owned subcases: seven compile-time index pairs and the direct base capacity/topology
-provision-seal fixtures; 15 negative/twin pairs, two positives, four sampled properties, and 19 mutants must
-distinguish the subject.
-mutants. The three Dhall-typecheck foreclosures remain deferred to Phase 25. The
-[Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) must supply exact-locus evidence for all
-five Phase-28-owned subcases: two dhall-typecheck bounded-training barriers and 27 storage-geometry variant/twin rows
-cover logical/physical fit, backup-medium fit, disjoint capacity pools, and restore-target fit; six sampled
+authored loci against the closed Haskell-derived schema, while four paired positive surfaces pass. Independent
+shape oracles kill four changed-production mutations spanning required-resource presence, resource type,
+plaintext-secret arm, and extra capability arm. This is an exact finite Gate-1 claim, not a statistical proxy
+for later schema growth. Phase 26 validates a focused bounded gadt-decode subset: five controller-indexed
+positive worlds, twelve schema/domain/identity/ownership/resource-arm/secret/import/exception refusals, three
+Haskell-owned protocol declarations, and four changed-production revision/ownership/resource/protocol
+mutants. The gate generates all Dhall and Proto products run-locally and leaves capacity arithmetic, binding,
+provisioning, rendering, and runtime enforcement to their numbered owners. The bounded Phase-27 catalogue and
+its independent Haskell oracle cover all 97 entries and 121 named subcases. Its complete gate must reconcile
+that closed inventory, discharge the 43 reached dhall-typecheck/gadt-decode subcases through direct and
+explicit Phase-8/9 predecessor obligations, and retain exact later owners for the remaining 78 subcases. The bound
+[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) supplies exact-locus evidence for
+eight current Phase-9 subcases and records binding, rendering, and runtime fidelity as three deferred loci;
+15 negative/twin pairs, two positives, four sampled properties, seven compiler pairs, and 19
+changed-production mutants distinguish the subject. The three Dhall-typecheck foreclosures remain deferred
+to Phase 25. The
+[Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) must supply exact-locus evidence for its
+five named storage families through 30 Haskell-owned storage-geometry variant/twin rows. They cover
+logical/physical fit, both Pulsar ceilings, cache geometry, backup-medium fit, disjoint capacity pools, and
+restore-target fit; six sampled
 properties and 31 mutants must distinguish the subject. The
 [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must supply the two owned
 accelerator loci plus 37 exact execution/runtime-storage/accelerator/provider-root negative/twin variants,
@@ -85,8 +87,8 @@ the added one-axis cases cover accelerator interconnect and the build, engine, m
 arms and both shapes: three dhall-typecheck and four gadt-decode cases must retain exact reasons, the 29-entry
 locus set must be exact, and four mutants must turn red.
 [Phase 31](../../DEVELOPMENT_PLAN/phase_31_provision_seal.md) must validate whole-deployment post-bind sealing:
-ten distinct provision errors must retain their exact reasons, both boundary properties and all ten paired
-mutants must distinguish the subject, and every entry in the 40-row provision-seal locus set must be observed.
+ten distinct provision errors must retain their exact reasons, both boundary properties and all four
+changed-production mutants must distinguish the subject, and every entry in the 34-row provision-seal locus set must be observed.
 Extension-astcheck, rendered output, and live-effect entries remain unverified at their later loci.
 Runtime enforcement remains a **live-cluster** concern (Register 3 — the orchestration DSL + the
 `replicas=1` control-plane daemon that renders and reconciles a live cluster). Status and gates live only in

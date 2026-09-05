@@ -1,2 +1,0 @@
-operator: drop UNCHANGED conjunct for variables outside an action effect set
-expected: explorer/TLC canonical state fingerprints diverge

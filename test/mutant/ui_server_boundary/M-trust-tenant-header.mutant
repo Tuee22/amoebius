@@ -1,2 +1,0 @@
-operator=provenance-guard-deletion
-expected=foreign authority with forged X-Tenant reaches the handler

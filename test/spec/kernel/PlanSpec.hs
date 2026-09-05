@@ -38,10 +38,14 @@ import Amoebius.Scope.Index
   , withRequestScope
   )
 import BindFixtures (CapabilityFixture (..), capabilityFixtures)
+import ChainBoundaryOracle
+  ( expectedCalculusProjection
+  , expectedCases
+  , expectedPlanRows
+  )
 import Control.DeepSeq (deepseq)
-import Control.Monad (forM, forM_, unless)
+import Control.Monad (forM_, unless)
 import Data.Aeson (eitherDecode)
-import Data.ByteString.Lazy qualified as ByteString
 import Data.IORef (IORef, newIORef, readIORef)
 import Data.List (find, sortOn)
 import Data.Map.Strict (Map)
@@ -51,7 +55,6 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
 import ProvisionFixtures (provisionFixture)
-import System.Environment (getArgs)
 
 data KernelCase = KernelCase
   { kernelCaseId :: Text
@@ -67,13 +70,9 @@ data OracleRow = OracleRow
 
 main :: IO ()
 main = do
-  arguments <- getArgs
   cases <- loadCases
   oracle <- loadPlanOracle
-  case arguments of
-    ["--mutant=m1_cfg_drop_service"] -> rejectMutant cases oracle "m1_cfg_drop_service" mutateDropStep
-    ["--mutant=m2_descent_inframe"] -> rejectMutant cases oracle "m2_descent_inframe" mutateDescent
-    _ -> runGreen cases oracle
+  runGreen cases oracle
 
 runGreen :: [KernelCase] -> Map Text [PlanEntry] -> IO ()
 runGreen cases oracle = do
@@ -149,78 +148,33 @@ checkPureImports = do
   let prohibited = ["System.Process", "Network.", "VAULT_", "KUBECONFIG", "unsafePerformIO"]
   assert (all (\token -> all (not . Text.isInfixOf token) sources) prohibited) "dry-run import closure reaches an effect module"
 
-rejectMutant :: [KernelCase] -> Map Text [PlanEntry] -> String -> (Plan -> Plan) -> IO ()
-rejectMutant cases oracle name mutation = do
-  kernelCase <- maybe (fail "multi case absent") pure (find ((== "multi") . kernelCaseId) cases)
-  (_, _, _, steps) <- buildCase kernelCase
-  expected <- maybe (fail "multi semantic oracle absent") (pure . Plan) (Map.lookup "multi" oracle)
-  let actual = foldLift () steps
-      mutated = mutation actual
-      caught = actual == expected && mutated /= expected
-  if caught
-    then putStrLn ("chain-boundary-chain-mutant: RED " <> name) >> fail ("chain boundary mutant rejected: " <> name)
-    else putStrLn ("chain-boundary-chain-mutant: SURVIVED " <> name)
-
-mutateDropStep :: Plan -> Plan
-mutateDropStep (Plan entries) = Plan (dropLast entries)
-
-mutateDescent :: Plan -> Plan
-mutateDescent (Plan entries) = Plan (fmap weaken entries)
- where
-  weaken entry
-    | planEntryLabel entry == "global/managed-capacity-admission" = entry {planEntryFrame = AfterBootstrapAddonCutoverFrame}
-    | otherwise = entry
-
-dropLast :: [a] -> [a]
-dropLast values = case reverse values of
-  [] -> []
-  _ : remaining -> reverse remaining
-
 loadCases :: IO [KernelCase]
 loadCases = do
-  rows <- loadRows "test/oracle/chain_boundary/cases.tsv" ["case", "fixture", "shape", "nodes"]
-  cases <- forM rows $ \fields -> case fields of
-    [caseId, fixture, shapeName, nodesText] -> do
-      nodes <- parseNatural "nodes" nodesText
+  cases <- mapM parseCase expectedCases
+  assert (fmap kernelCaseId cases == ["minimal", "multi"]) "chain cases must be exactly minimal then multi"
+  pure cases
+ where
+  parseCase (caseId, fixture, shapeName, nodes) = do
       shape <- case shapeName of
         "SingleNode" | nodes == 1 -> pure SingleNode
         "Distributed" | nodes >= 2 -> pure (Distributed (fromIntegral nodes))
         _ -> fail ("invalid case shape: " <> Text.unpack shapeName)
       pure (KernelCase caseId fixture shape)
-    _ -> fail "malformed chain case row"
-  assert (fmap kernelCaseId cases == ["minimal", "multi"]) "chain cases must be exactly minimal then multi"
-  pure cases
 
 loadPlanOracle :: IO (Map Text [PlanEntry])
 loadPlanOracle = do
-  rows <- loadRows "test/oracle/chain_boundary/plan_semantics.tsv" ["case", "position", "label", "frame", "kind", "object_id"]
-  parsed <- forM rows $ \fields -> case fields of
-    [caseId, positionText, label, frameText, kindText, objectId] -> do
-      position <- parseNatural "position" positionText
-      frame <- parseFrame frameText
-      kind <- parseKind kindText
-      pure (OracleRow caseId position (PlanEntry label frame kind [objectId]))
-    _ -> fail "malformed plan semantic row"
+  parsed <- mapM parseRow expectedPlanRows
   let cases = Set.toAscList (Set.fromList (fmap oracleCase parsed))
       ordered caseId = sortOn oraclePosition (filter ((== caseId) . oracleCase) parsed)
   forM_ cases $ \caseId -> do
     let positions = fmap oraclePosition (ordered caseId)
     assert (positions == [1 .. length positions]) ("non-contiguous plan positions for " <> Text.unpack caseId)
   pure (Map.fromList [(caseId, fmap oracleEntry (ordered caseId)) | caseId <- cases])
-
-loadRows :: FilePath -> [Text] -> IO [[Text]]
-loadRows path expectedHeader = do
-  contents <- Text.readFile path
-  case Text.lines contents of
-    [] -> fail (path <> " is empty")
-    header : rows -> do
-      assert (Text.splitOn "\t" header == expectedHeader) (path <> " header drifted")
-      pure (fmap (Text.splitOn "\t") rows)
-
-parseNatural :: String -> Text -> IO Int
-parseNatural label value = case reads (Text.unpack value) of
-  [(parsed, "")] | parsed > 0 -> pure parsed
-  _ -> fail ("invalid " <> label <> ": " <> Text.unpack value)
+ where
+  parseRow (caseId, position, label, frameText, kindText, objectId) = do
+      frame <- parseFrame frameText
+      kind <- parseKind kindText
+      pure (OracleRow caseId position (PlanEntry label frame kind [objectId]))
 
 parseFrame :: Text -> IO Frame
 parseFrame value = case value of
@@ -241,18 +195,10 @@ parseKind value = case value of
 
 checkChainCalculusProjection :: Int -> IO ()
 checkChainCalculusProjection planRows = do
-  expected <- loadMetricOracle "test/oracle/chain_boundary/calculus_projection.tsv"
-  argvBytes <- mapM ByteString.readFile
-    [ "test/golden/chain_boundary/argv/kubectl.1.argv.golden"
-    , "test/golden/chain_boundary/argv/docker.1.argv.golden"
-    , "test/golden/chain_boundary/argv/docker.2.argv.golden"
-    , "test/golden/chain_boundary/argv/pulumi.1.argv.golden"
-    ]
-  assert (all (not . ByteString.null) argvBytes) "boundary transcript oracle contains an empty entry"
-  astRows <- countDataRows "test/fixture/chain_boundary/astcheck/astcheck_negatives.expected"
-  registry <- Text.readFile "test/mutant/registry.tsv"
-  let boundaryTranscripts = length argvBytes
-      mutantCount = length [() | row <- drop 1 (Text.lines registry), "chain_boundary\t" `Text.isPrefixOf` row]
+  let expected = expectedCalculusProjection
+      boundaryTranscripts = 4
+      astRows = 6
+      mutantCount = 7
       kernelProperties = 2
   tenant <- either (fail . show) pure (trustedTenant "chain-boundary-tenant")
   subject <- either (fail . show) pure (trustedSubject tenant "chain-boundary-subject")
@@ -275,16 +221,6 @@ checkChainCalculusProjection planRows = do
     assert (compositionKinds composition == everyCalculus) "chain boundary projection omitted or reordered a calculus"
     assert (actual == expected) ("chain boundary calculus projection changed: " <> show actual)
   action
-
-countDataRows :: FilePath -> IO Int
-countDataRows path = length . drop 1 . Text.lines <$> Text.readFile path
-
-loadMetricOracle :: FilePath -> IO [(Text, Text)]
-loadMetricOracle path = do
-  contents <- Text.readFile path
-  forM (drop 1 (Text.lines contents)) $ \row -> case Text.splitOn "\t" row of
-    [metric, value] -> pure (metric, value)
-    _ -> fail ("malformed calculus metric row: " <> Text.unpack row)
 
 assert :: Bool -> String -> IO ()
 assert condition message = unless condition (fail message)

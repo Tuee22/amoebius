@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Amoebius.Formal.Dsl.Models
   ( dslModels
   , dslSafetyMutants
@@ -23,28 +25,24 @@ action name guard effects = Action name [] guard effects
 
 exactProjection :: Expr
 exactProjection = And
-  [ Equal (Ref "decoderPositives") (int 5)
-  , Equal (Ref "decoderNegatives") (int 4)
-  , Equal (Ref "capacityCases") (int 6561)
-  , Equal (Ref "renderObjects") (int 19)
-  , Equal (Ref "chainSteps") (int 19)
+  [ Equal (Ref "capacityCases") (int 6561)
   , Equal (Ref "calculusComponents") (int 5)
   ]
+
+projectionCapacityCases :: Expr
+#ifdef DSL_FORMAL_PROJECTION_COUNT_MUTANT
+projectionCapacityCases = int 0
+#else
+projectionCapacityCases = int 6561
+#endif
 
 projectionModel :: Model
 projectionModel = Model
   { modelName = "DslProjection"
   , modelConstants = []
-  , modelVariables =
-      [ "decoderPositives", "decoderNegatives", "capacityCases"
-      , "renderObjects", "chainSteps", "calculusComponents"
-      ]
+  , modelVariables = ["capacityCases", "calculusComponents"]
   , modelInit =
-      [ ("decoderPositives", int 5)
-      , ("decoderNegatives", int 4)
-      , ("capacityCases", int 6561)
-      , ("renderObjects", int 19)
-      , ("chainSteps", int 19)
+      [ ("capacityCases", projectionCapacityCases)
       , ("calculusComponents", int 5)
       ]
   , modelActions = [action "ObserveProjection" (bool True) []]
@@ -74,8 +72,7 @@ tokenModel = Model
   , modelInit = [("tokenState", atom "unissued"), ("writes", int 0)]
   , modelActions =
       [ action "Mint" (tokenState "unissued") [("tokenState", atom "ready")]
-      , action "Consume" (tokenState "ready")
-          [("tokenState", atom "used"), ("writes", Add (Ref "writes") (int 1))]
+      , action "Consume" consumeGuard consumeEffects
       ]
   , modelInvariants = [named "NoTokenReuse" tokenInvariant]
   , modelConstraint = Nothing
@@ -85,6 +82,19 @@ tokenModel = Model
       [Property "IssuedTokenEventuallyConsumed" (LeadsTo (tokenState "ready") (tokenState "used"))]
   , modelCheckDeadlock = False
   }
+
+consumeGuard :: Expr
+#ifdef DSL_FORMAL_TOKEN_REUSE_MUTANT
+consumeGuard = And
+  [ NotEqual (Ref "tokenState") (atom "unissued")
+  , ArithmeticComparison LessThan (Ref "writes") (int 2)
+  ]
+#else
+consumeGuard = tokenState "ready"
+#endif
+
+consumeEffects :: [(Name, Expr)]
+consumeEffects = [("tokenState", atom "used"), ("writes", Add (Ref "writes") (int 1))]
 
 reservationPhase :: String -> Expr
 reservationPhase value = Equal (Ref "phase") (atom value)
@@ -173,6 +183,10 @@ reconcileActions =
   , action "MarkAbsentConverged" (And [observation "absent", Not (Ref "converged")])
       [("converged", bool True)]
   ]
+#ifdef DSL_FORMAL_RECONCILE_UNREACHABLE_MUTANT
+  <> [action "DeleteWhileUnreachable" (observation "unreachable")
+        [("replacement", atom "boundready"), ("oldDeleted", bool True)]]
+#endif
 
 reconcileModel :: Model
 reconcileModel = Model

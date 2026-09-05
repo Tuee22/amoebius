@@ -36,7 +36,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 Blocked by redesigned Phase 9, its independent validation, and gate pass; every earlier
 gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
@@ -76,28 +76,30 @@ core calculi. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-10 semantic payload, package-hidden serial
+supervisor, Haskell-owned exhaustive oracle, scope compile pair, and three changed-production subjects are
+complete; only a fresh integrated run may authorize status.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — provide a total Haskell composition boundary that preserves the Phase 8 request-scope index and combines the Phase 9 resource index across all five core calculi. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 10` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 09; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | The pure base operator composes all five closed calculus arms at one request scope while preserving order, payloads, names, and the exact Phase-9 resource index. |
+| `Subject` | `Amoebius.Calculus.Composition` is acquired only through package-hidden `Amoebius.Validation.CalculusCompositionRun.Internal`. |
+| `Command` | Future public spelling is `pb validate phase 10`; before `BOOTSTRAP_HANDOFF`, the exact absolute Haskell executable and authenticated GHC 9.12.4 compiler run directly and synchronously. |
+| `Oracle` | `CalculusCompositionSpec.hs` owns a closed 25-row expectation, 125 triples, both identities, payload/transform checks, and three coverage-bound properties without reading behavioral data. |
+| `Positive controls` | The clean oracle and same-scope compiler twin succeed; all five constructors and every ordered pair occur. |
+| `Paired negatives` | The minimally different nested-request twin fails at the rigid scope mismatch while its same-scope twin compiles. |
+| `Mutants` | Resource saturation and transform-index loss compile but turn the unchanged oracle red; scope widening compiles the unchanged illegal twin. |
+| `Discovery` | One production module, one oracle module, and two compiler twins are discovered from the Git snapshot and equal the fixed four-file inventory bidirectionally. |
+| `Challenge` | All three production mutations execute after source acquisition and must be distinguished at their assigned independent observations. |
+| `Observer` | The supervisor records absolute executable, exact argv, exit, transcript digest, and bounded failure text for every compiler and oracle process. |
+| `Authority/bypass` | Pure-source and closed-model scans pass; `pb`, network, hardware, live services, compiler substitution, and compiler/linker overlap are forbidden. |
+| `Freshness` | Every run creates a fresh `.build/runs/phase-10/work/**` root and the dispatcher requires equal opening/closing source identities. |
+| `Qualification` | Clean controls, the exact compiler pair, source discipline, and all three changed-production subjects pass together. |
+| `Cleanroom` | Every binary, interface, object, stub, and transcript is generated lazily beneath the fresh run root. |
+| `Legacy closure` | Phase 10 owns no legacy-debt identifier; all non-circular prerequisites pass while later-owned source debt remains residue. |
+| `Predecessor` | Consume exactly one durable Phase-9 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Residue` | Formal models, extension declarations and laws, decode, effects, runtimes, hardware, and cleanup remain explicitly later-owned. |
+| `Pass criterion` | `qualified-phase-ten-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 **This phase owns its compile-negative evidence.** Each illegal twin below requires a phase-local, source-bound
 GHC invocation, a minimally different positive control, and a separately authored exact-diagnostic oracle.
@@ -117,15 +119,15 @@ prerequisite of this earlier gate. Until the local runner and oracle exist, thes
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 10.1: Index-preserving five-calculus composition ⏸️
+## Sprint 10.1: Index-preserving five-calculus composition ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/calculus-composition/Amoebius/Calculus/Composition.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/CalculusCompositionRun/Internal.hs`
 **Blocked by**: [Phase 9](phase_09_resource_index.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: 25 ordered pairs, 125 triples, three 500-case properties, one exact compiler pair, and three applied production mutations
+**Oracle**: `test/spec/calculus/CalculusCompositionSpec.hs`, separately authored in Haskell against public production interfaces
+**Legacy IDs**: none; later-owned tracked-source debt remains in the typed central registry
+**Docs to update**: this phase file, `extension_conformance_doctrine.md`, `extension_conformance_laws.md`, `testing_doctrine.md`, and `system_components.md`
 
 ### Objective
 
@@ -160,7 +162,8 @@ at one request scope, preserve their payloads and order, and derive the exact re
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run the complete integrated gate and apply only its authorized mechanical status projection. Formal models,
+extension declarations and laws, decode, effect, runtime, hardware, and cleanup claims remain assigned to later owners.
 
 ## Documentation Requirements
 

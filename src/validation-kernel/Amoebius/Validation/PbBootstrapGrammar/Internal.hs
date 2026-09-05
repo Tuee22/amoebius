@@ -1149,7 +1149,7 @@ platformLabelSeparator = ","
 #if defined(VALIDATION_PB_GRAMMAR_PROOF_STATIC_CLAIM_SEPARATOR_MUTANT)
 staticClaimSeparator = ";"
 #else
-staticClaimSeparator = "\n"
+staticClaimSeparator = "\\n"
 #endif
 #if defined(VALIDATION_PB_GRAMMAR_PROOF_RUNTIME_RESIDUE_SEPARATOR_MUTANT)
 runtimeResidueSeparator = ";"

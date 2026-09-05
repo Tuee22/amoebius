@@ -1,5 +1,0 @@
-case	method	origin	path	body_contains	decision
-single-submit	POST	same-origin	/ui/action/submit	fresh-challenge	allow
-named-link	NAVIGATE	https://docs.example.invalid	/amoebius	-	allow
-provider-fetch	GET	https://provider.invalid	/api	-	deny
-canary	GET	https://canary.invalid	/	-	deny

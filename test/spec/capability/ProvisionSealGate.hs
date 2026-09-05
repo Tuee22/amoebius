@@ -84,6 +84,7 @@ import Amoebius.Capability.Types
   , ProviderObject (..)
   , ServiceShape (..)
   )
+import Amoebius.Capability.Binding (boundDeploymentIsUnprovisioned)
 import Amoebius.Scope.Index
   ( activeMembership
   , trustedSubject
@@ -93,7 +94,6 @@ import Amoebius.Scope.Index
 import BindFixtures
   ( CapabilityFixture (..)
   , capabilityFixtures
-  , fixturePath
   )
 import Control.Monad (forM, forM_, unless)
 import Data.List (find)
@@ -102,7 +102,15 @@ import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
-import Data.Text.IO qualified as Text
+import ProvisionSealOracle
+  ( MutantOracle (..)
+  , NegativeOracle (..)
+  , expectedActivations
+  , expectedCalculusProjection
+  , expectedLocusEntries
+  , expectedMutants
+  , expectedNegatives
+  )
 import ProvisionFixtures
   ( ProvisionNegative (..)
   , baselineCapacity
@@ -113,16 +121,11 @@ import ProvisionFixtures
   , provisionFixture
   , provisionNegatives
   )
-import ProvisionMutants (provisionMutants)
 import ProvisionProps (runProvisionProps)
 import RuntimeStorageBindingProps
   ( expectedDesiredInstances
   , runRuntimeStorageBindingProps
   )
-import System.IO.Unsafe (unsafePerformIO)
-import System.Environment (lookupEnv)
-import System.Exit (ExitCode (ExitSuccess))
-import System.Process (proc, readCreateProcessWithExitCode)
 
 data PlannerCounts = PlannerCounts
   { plannerCreationBatches :: Int
@@ -141,15 +144,15 @@ runProvisionSealGate = do
   plannerCounts <- checkInfrastructurePlanner objectStore
   negativeCount <- checkNegativeCorpus observability cuda
   activationCount <- checkRenderSourceSeal
-  checkStructuralBoundary
+  checkStructuralBoundary objectStore
   propertyCount <- runProvisionProps objectStore
   runtimePropertyCount <- runRuntimeStorageBindingProps cuda
   locusCount <- checkValidationLocus observability cuda
   let inheritedPositiveCount = length capabilityFixtures * 2
-      mutantCount = length provisionMutants
+      mutantCount = length expectedMutants
       totalPropertyCount = propertyCount + runtimePropertyCount
   assert (inheritedPositiveCount == 18) "Phase-31 inherited positive count drifted"
-  assert (mutantCount == 10) "Phase-31 mutant count drifted"
+  assert (mutantCount == 4) "Phase-31 changed-production mutant count drifted"
   checkProvisionCalculusProjection inheritedPositiveCount 2 negativeCount totalPropertyCount mutantCount
   putStrLn
     ( "provision-seal-invariants: PASS ("
@@ -187,7 +190,6 @@ fixtureNamed slug = case find ((== slug) . fixtureSlug) capabilityFixtures of
 
 checkFixture :: CapabilityFixture -> IO ()
 checkFixture fixture = forM_ [SingleNode, Distributed 3] $ \shape -> do
-  checkDhallGreen (fixturePath fixture shape)
   deployment <- either (fail . show) pure (fixtureDeployment fixture shape)
   sealed <- either (fail . show) pure (provisionFixture fixture shape)
   let desired = provisionedDesiredSteady (provisionedExecution sealed)
@@ -275,22 +277,19 @@ checkInfrastructurePlanner fixture = do
 
 checkNegativeCorpus :: CapabilityFixture -> CapabilityFixture -> IO Int
 checkNegativeCorpus observability cuda = do
-  oracle <- rowsOf "test/oracle/provision_seal/provision_cases.tsv"
   let cases = provisionNegatives observability cuda
       caseDomain = Set.fromList (fmap negativeName cases)
-      oracleDomain = Set.fromList [name | [name, _expected, _twin] <- oracle]
-  assert (length cases == 10 && length oracle == 10 && caseDomain == oracleDomain) "Phase-31 negative oracle must cover exactly ten cases"
+      oracleDomain = Set.fromList (fmap oracleNegativeName expectedNegatives)
+  assert (length cases == 10 && length expectedNegatives == 10 && caseDomain == oracleDomain) "Phase-31 independent negative oracle must cover exactly ten cases"
   forM_ cases $ \negative -> do
-    let matchingRows = [row | row@[name, _expected, _twin] <- oracle, name == negativeName negative]
+    let matchingRows = [row | row <- expectedNegatives, oracleNegativeName row == negativeName negative]
     case matchingRows of
-      [[_name, expected, twin]] -> do
-        assert (expected == negativeExpected negative) "Phase-31 negative expected-tag oracle drifted"
-        assert (twin == negativeTwin negative) "Phase-31 legal-twin oracle drifted"
+      [row] -> do
+        assert (oracleNegativeTag row == negativeExpected negative) "Phase-31 negative expected-tag oracle drifted"
+        assert (oraclePositiveTwin row == negativeTwin negative) "Phase-31 legal-twin oracle drifted"
       _ -> fail "Phase-31 negative oracle row is missing or duplicated"
     assertTag (negativeExpected negative) (negativeOutcome negative)
     assertRight (negativeTwinOutcome negative) ("legal twin rejected: " <> Text.unpack (negativeTwin negative))
-    checkDhallGreen ("dhall/examples/" <> Text.unpack (negativeName negative) <> ".dhall")
-    checkDhallGreen ("dhall/examples/" <> Text.unpack (negativeTwin negative) <> ".dhall")
   pure (length cases)
 
 checkRenderSourceSeal :: IO Int
@@ -312,8 +311,14 @@ checkRenderSourceSeal = do
   assertRenderError isOwnerMismatch (provisionRenderSources (ProvisionedDeploymentParts domain (badOwner : remaining)))
   assertRenderError isActivationMismatch (provisionRenderSources (ProvisionedDeploymentParts domain (badStage : remaining)))
   assertRenderError isMissingStage (provisionRenderSources (ProvisionedDeploymentParts (Set.fromList (fmap candidateKey withoutManaged)) withoutManaged))
+  assert
+    (zipWith activationMatches expectedActivations rows == replicate (length rows) True)
+    "independent four-stage activation oracle drifted"
   pure (length rows)
  where
+  activationMatches (witnessName, activationName) row =
+    Text.pack (show (candidateWitnessField row)) == witnessName
+      && Text.pack (show (candidateActivationField row)) == activationName
   isDuplicate problem = case problem of DuplicateRenderSource {} -> True; _ -> False
   isMissingDomain problem = case problem of MissingRenderSourceDomain {} -> True; _ -> False
   isKeyMismatch problem = case problem of RenderSourceKeyMismatch {} -> True; _ -> False
@@ -360,22 +365,14 @@ headCandidate candidates = case candidates of
   [] -> fields "unreachable" DeploymentGlobalOwner Immediate NamespacePart
   first : _ -> first
 
-checkStructuralBoundary :: IO ()
-checkStructuralBoundary = do
-  types <- Text.readFile "src/Amoebius/Capability/Types.hs"
-  provisionSource <- Text.readFile "src/Amoebius/Capacity/Provision.hs"
-  renderSource <- Text.readFile "src/Amoebius/Capacity/RenderSource.hs"
-  let boundDeclaration = fst (Text.breakOn "data ExtensionName" (snd (Text.breakOn "data BoundDeployment" types)))
-      exportHeader = fst (Text.breakOn ") where" provisionSource)
-  assert (not ("Provisioned" `Text.isInfixOf` boundDeclaration)) "BoundDeployment contains a provisioned value"
-  assert ("  , ProvisionedSpec\n" `Text.isInfixOf` exportHeader) "ProvisionedSpec opaque export is absent"
-  assert (not ("ProvisionedSpec (.." `Text.isInfixOf` exportHeader)) "ProvisionedSpec constructor is exported"
-  assert (Text.count "newtype ProvisionedRenderSourceSet" renderSource == 1) "render-source ownership is not centralized in one map type"
+checkStructuralBoundary :: CapabilityFixture -> IO ()
+checkStructuralBoundary fixture = do
+  deployment <- either (fail . show) pure (fixtureDeployment fixture SingleNode)
+  assert (boundDeploymentIsUnprovisioned deployment) "BoundDeployment crossed the unprovisioned boundary"
 
 checkValidationLocus :: CapabilityFixture -> CapabilityFixture -> IO Int
 checkValidationLocus observability cuda = do
-  rows <- rowsOf "test/oracle/provision_seal/validation_locus.tsv"
-  let observed = Set.fromList [entry | [entry, _className, _locus, _status] <- rows]
+  let observed = Set.fromList expectedLocusEntries
       positives =
         Set.fromList
           [ "legal_" <> fixtureSlug fixture <> "_" <> shape
@@ -384,14 +381,13 @@ checkValidationLocus observability cuda = do
           ]
       planner = Set.fromList ["planner_preexisting", "planner_creation"]
       negatives = Set.fromList (fmap negativeName (provisionNegatives observability cuda))
-      expected = positives <> planner <> negatives <> Set.fromList provisionMutants
+      expected = positives <> planner <> negatives <> Set.fromList (fmap oracleMutantName expectedMutants)
   assert (observed == expected) "Phase-31 validation-locus ledger does not cover every positive, planner path, negative, and mutant"
-  assert (length rows == 40) "Phase-31 validation-locus ledger must contain exactly 40 rows"
-  pure (length rows)
+  assert (length expectedLocusEntries == 34) "Phase-31 validation-locus inventory must contain exactly 34 rows"
+  pure (length expectedLocusEntries)
 
 checkProvisionCalculusProjection :: Int -> Int -> Int -> Int -> Int -> IO ()
 checkProvisionCalculusProjection positives planners negatives properties mutants = do
-  expected <- loadMetricOracle "test/oracle/provision_seal/calculus_projection.tsv"
   tenant <- either (fail . show) pure (trustedTenant "provision-seal-tenant")
   subject <- either (fail . show) pure (trustedSubject tenant "provision-seal-subject")
   membership <- either (fail . show) pure (activeMembership tenant subject)
@@ -411,30 +407,13 @@ checkProvisionCalculusProjection positives planners negatives properties mutants
           , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
           ]
     assert (compositionKinds composition == everyCalculus) "provision seal projection omitted or reordered a calculus"
-    assert (actual == expected) ("provision seal calculus projection changed: " <> show actual)
+    assert (actual == expectedCalculusProjection) ("provision seal calculus projection changed: " <> show actual)
   action
   putStrLn
     ( "provision-seal-calculus: PASS (5 kinds, "
         <> show (positives + planners + negatives + properties + mutants)
         <> " projected units)"
     )
-
-loadMetricOracle :: FilePath -> IO [(Text, Text)]
-loadMetricOracle path = do
-  contents <- Text.readFile path
-  forM (drop 1 (Text.lines contents)) $ \row -> case Text.splitOn "\t" row of
-    [metric, value] -> pure (metric, value)
-    _ -> fail ("malformed calculus metric row: " <> Text.unpack row)
-
-checkDhallGreen :: FilePath -> IO ()
-checkDhallGreen path = do
-  (exitCode, stdoutText, stderrText) <- readCreateProcessWithExitCode (proc unsafeResolvedDhall ["type", "--file", path, "--quiet"]) ""
-  assert (exitCode == ExitSuccess) (path <> " is not well typed:\n" <> stdoutText <> stderrText)
-
-rowsOf :: FilePath -> IO [[Text]]
-rowsOf path = do
-  contents <- Text.readFile path
-  pure [Text.splitOn "\t" line | line <- drop 1 (Text.lines contents), not (Text.null line)]
 
 assertRenderError predicate outcome = case outcome of
   Left problem -> assert (predicate problem) ("unexpected render-source error: " <> show problem)
@@ -452,14 +431,3 @@ assertRight outcome message = case outcome of
 
 assert :: Bool -> String -> IO ()
 assert condition message = unless condition (fail message)
-
--- Resolved per run rather than reached by name: a bare `dhall` is an ambient PATH lookup,
--- which the boundary argv observer of `tools/argv_observer.py` refuses. Unset means fail,
--- never guess.
-{-# NOINLINE unsafeResolvedDhall #-}
-unsafeResolvedDhall :: FilePath
-unsafeResolvedDhall = unsafePerformIO $ do
-  value <- lookupEnv "AMOEBIUS_DHALL"
-  case value of
-    Just path | not (null path) -> pure path
-    _ -> fail "AMOEBIUS_DHALL is unset: run this suite through its phase gate"

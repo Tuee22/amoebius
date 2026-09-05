@@ -1,3 +1,0 @@
-case	left	right	expected_error
-same-tenant-owner-swap	t-a/alice-a	t-a/bob-a	OwnerMismatch
-cross-tenant-owner-swap	t-a/alice-a	t-b/alice-a	TenantMismatch

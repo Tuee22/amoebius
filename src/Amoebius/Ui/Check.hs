@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Check
@@ -63,9 +64,13 @@ buildNodeTable source = do
         , node <- nodes uiModule
         ]
       duplicate = findDuplicate (map fst rows)
+#ifdef UI_PROGRAM_SCHEMA_FIRST_ID_WINS_MUTANT
+  pure (Map.fromList rows)
+#else
   case duplicate of
     Just qualified -> Left (DuplicateQualifiedId qualified "ui.module:1")
     Nothing -> pure (Map.fromList rows)
+#endif
 
 checkCycles :: Map Text UiNode -> Either UiCheckError ()
 checkCycles table = foldM visitRoot () (Map.keys table)
@@ -85,6 +90,9 @@ checkReferences table = case find (`Map.notMember` table) targets of
     targets = concat [qualifyEdges qualified node | (qualified, node) <- Map.toList table]
 
 checkBounds :: Map Text UiNode -> Either UiCheckError ()
+#ifdef UI_PROGRAM_SCHEMA_DROP_BOUND_CHECK_MUTANT
+checkBounds _ = pure ()
+#else
 checkBounds table = case find invalid (Map.toAscList table) of
   Just (qualified, _) -> Left (UnboundedCollection qualified "ui.collection:1")
   Nothing -> pure ()
@@ -92,6 +100,7 @@ checkBounds table = case find invalid (Map.toAscList table) of
     invalid (_, node) = case maxItems node of
       Nothing -> True
       Just bound -> bound == 0 || bound > 64
+#endif
 
 checkLinks :: [ExternalLinkRequirement] -> Either UiCheckError ()
 checkLinks requirements = case findDuplicate (map name requirements) of
@@ -99,6 +108,9 @@ checkLinks requirements = case findDuplicate (map name requirements) of
   Nothing -> pure ()
 
 checkPorts :: Map Text UiNode -> Either UiCheckError ()
+#ifdef UI_PROGRAM_SCHEMA_SWAP_PORT_CONTRACT_MUTANT
+checkPorts _ = pure ()
+#else
 checkPorts table = case find invalid (Map.toAscList table) of
   Just (qualified, _) -> Left (PortTypeMismatch qualified "ui.port:1")
   Nothing -> pure ()
@@ -106,13 +118,18 @@ checkPorts table = case find invalid (Map.toAscList table) of
     invalid (_, node) = case nodeKind node of
       Port -> portType node /= Just (valueType node)
       _ -> portType node /= Nothing
+#endif
 
 checkEvents :: Map Text UiNode -> Either UiCheckError ()
+#ifdef UI_PROGRAM_SCHEMA_SKIP_EXHAUSTIVENESS_MUTANT
+checkEvents _ = pure ()
+#else
 checkEvents table = case find invalid (Map.toAscList table) of
   Just (qualified, _) -> Left (NonExhaustiveEvent qualified "ui.event:1")
   Nothing -> pure ()
   where
     invalid (_, node) = sort (events node) /= sort (branches node)
+#endif
 
 checkPublicProjection :: Map Text UiNode -> Either UiCheckError ()
 checkPublicProjection table = case find invalid (Map.toAscList table) of

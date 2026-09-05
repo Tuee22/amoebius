@@ -1,7 +1,0 @@
-source	model	invariant	function	expected	reason	required	line
-test/fixture/refinement_checker/Increment.hs	Counter	NonNegative	increment	proved	postcondition preserved and correspondence established	yes	13
-test/fixture/refinement_checker/Decrement.hs	Counter	NonNegative	decrement	proved	postcondition preserved and correspondence established	yes	13
-test/fixture/refinement_checker/Sum.hs	Pair	NonNegativeSum	sumNonNegative	proved	postcondition preserved and correspondence established	yes	13
-test/fixture/refinement_checker/Broken.hs	Counter	NonNegative	brokenDecrement	postcondition-counterexample	function body does not establish its postcondition	no	13
-test/fixture/refinement_checker/Mismatch.hs	Counter	NonNegative	negativeIdentity	correspondence-mismatch	postcondition does not imply the registered model invariant	no	13
-test/fixture/refinement_checker/Unknown.hs	Counter	MissingInvariant	unknownMapping	unknown-invariant	annotation names no registered model invariant	no	13

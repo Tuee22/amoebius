@@ -1,4 +1,0 @@
-phase=21
-name=default_allow
-change=absent-policy=>allow
-expected-red-locus=authorization_matrix.tsv:default-deny

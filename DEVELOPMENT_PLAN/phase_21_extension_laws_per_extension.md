@@ -6,10 +6,9 @@
 > **Read this if**: the per-extension law evaluator, its finite evidence boundary, or any L1–L5 gate claim must
 > change.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+This document specifies the bound Phase-21 capability. A pass, seal, receipt, or status transition exists only
+after the exact integrated gate succeeds for the current source. Current status is owned by
+[the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -38,27 +37,23 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 20, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+Phase 20 and every earlier gate have current passing receipts. The Phase-21 implementation and compiled
+semantic contract are bound below; completion still requires the exact integrated Phase-21 gate.
 
 > **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
-This phase specifies a Haskell target capability; it does not report a current implementation or
-result. The target is to evaluate L1–L5 over bounded Haskell extension declarations using
-independently authored `.hs` controls, oracles, paired negatives, and mutants.
+This phase has a bound Haskell implementation but does not report a passing result until its complete gate
+runs. It evaluates L1–L5 over bounded Haskell extension declarations using independently authored `.hs`
+controls, oracles, paired negatives, and changed-production mutants.
 
-The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
-`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
-tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
-code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
-`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
-evidence contract remain UNRESOLVED and block validation.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants are authored as `.hs`.
+The former Python gate, serialized law/case/mutation authorities, and test-local mutant module are retired.
+Derived result tables and compiler transcripts are created lazily beneath the acquired
+`.build/runs/phase-21/**` root and remain run-scoped evidence only.
 
 This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
 behavior only. It cannot use host, hardware, live-service, or cluster observations to make its claim pass.
@@ -77,28 +72,28 @@ using independently authored `.hs` controls, oracles, paired negatives, and muta
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — evaluate L1–L5 over bounded Haskell extension declarations using independently authored `.hs` controls, oracles, paired negatives, and mutants. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 21` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 20; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | One pure evaluator returns separate typed L1 totality, L2 determinism, L3 budget-honesty, L4 scope-propagation, and L5 evidence verdicts over observations joined to a complete Phase-20 declaration. Later composition, security, conformance, and runtime claims are excluded. |
+| `Subject` | `src/extension-laws/Amoebius/Extension/Laws/PerExtension.hs`, acquired and exercised by the package-hidden Phase-21 supervisor. |
+| `Command` | `pb validate phase 21` is the future public spelling. This pre-handoff gate invokes the exact absolute source-bound Haskell executable as `validate phase 21`, then exact Cabal 3.16.1.0 and GHC 9.12.4 paths offline with `--jobs=1`; `pb` is not used. |
+| `Oracle` | `test/spec/extension/ExtensionLawsPerExtensionOracle.hs` independently owns six operation cases, 35 law verdicts, and five mutation loci without importing the production evaluator. |
+| `Positive controls` | Two lawful declarations yield ten green law verdicts; six authored operations, isolated deterministic renders, refusal-before-materialization budgets with reapers, closed request-flow values, and bound evidence fixtures are observed. |
+| `Paired negatives` | Five lawful/one-defect subject pairs fail separately at `Totality`, `Determinism`, `BudgetHonesty`, `ScopePropagation`, and `EvidenceBinding`; the Phase-15 legal/missing-fixture compile pair must retain its pinned diagnostic. |
+| `Mutants` | Five Cabal flags change the production evaluator by suppressing exactly one L1–L5 failure. Each changed subject must turn red at its named property. |
+| `Discovery` | The acquired source snapshot must equal the exact production evaluator, spec, independent oracle, and law-fixture `.hs` paths in both directions; empty, missing, or extra discovery fails. |
+| `Challenge` | All five production mutations are compiled and evaluated after source acquisition before the clean candidate; each exact property changes while the clean corpus remains green. |
+| `Observer` | The supervisor retains absolute executable, argv, exit, stdout/stderr, and digest observations for Cabal version, five production mutants, the compile pair, and the clean run. |
+| `Authority/bypass` | Authority is limited to exact Cabal/compiler/store paths and the unique run root; every build is offline and serial. `pb`, network, host, container, cluster, service, and hardware arguments are forbidden. |
+| `Freshness` | One unique `.build/runs/phase-21/work/candidate-*` root is acquired; clean products are regenerated there and opening/closing Git source identities must match. |
+| `Qualification` | The supervisor first kills all five changed-production mutations and verifies the claim/fixture compile pair, then requires the clean independent corpus to pass. |
+| `Cleanroom` | The authenticated source-repository cache is copied beneath the unique run root, Cabal builds there, and the clean generated result must exist only below that root. |
+| `Legacy closure` | The Python law gate, three serialized law authorities, serialized surface inventory, and test-local mutant module are absent; reintroduction is an exact failure. |
+| `Predecessor` | Exact durable `ImmediatePredecessorPass` for Phase 20, projected monotonically onto this candidate's opening source; absent, malformed, wrong-phase, or non-green evidence fails. |
+| `Residue` | Compositional and security laws, generated conformance verdicts, decoding, effects, runtimes, host, service, cluster, and hardware claims remain `UNVERIFIED` and later-phase-owned. |
+| `Pass criterion` | Every one of the eighteen rows passes in one qualified run for the exact source; that complete pass is sufficient for the mechanical status-only transition. |
 
 ## Doctrine adopted
 
@@ -108,15 +103,15 @@ using independently authored `.hs` controls, oracles, paired negatives, and muta
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 21.1: The per-extension laws L1-L5 ⏸️
+## Sprint 21.1: The per-extension laws L1-L5 ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/extension-laws/Amoebius/Extension/Laws/PerExtension.hs`; package-hidden `Amoebius.Validation.ExtensionLawsRun.Internal`.
 **Blocked by**: [Phase 20](phase_20_extension_declaration.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Two lawful controls, five single-law negatives, six generated-operation cases, 35 exact verdicts, the Phase-15 compile pair, and five changed-production mutants.
+**Oracle**: `test/spec/extension/ExtensionLawsPerExtensionOracle.hs`; compile fixtures owned by `test/harness/extension_laws/LawFixtures.hs` and the Phase-15 compile-fail harness.
+**Legacy IDs**: Phase-local legacy closure for the retired Python gate, four serialized behavioral authorities, and test-local mutant module.
+**Docs to update**: `extension_conformance_laws.md`; `system_components.md`.
 
 ### Objective
 
@@ -156,7 +151,7 @@ The pre-reset record said `None`; that statement cannot support a gate pass. Cur
 
 **Cross-references to add:**
 
-- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+- `DEVELOPMENT_PLAN/system_components.md` and `documents/engineering/extension_conformance_laws.md` — record the exact evaluator, independent oracle, finite residue, and package-hidden Phase-21 supervisor.
 
 ## Related Documents
 

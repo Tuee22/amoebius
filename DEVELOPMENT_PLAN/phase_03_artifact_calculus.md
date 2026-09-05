@@ -37,72 +37,71 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 2, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+The complete Phase-2 gate is recorded for the same source identity before this phase may run. The phase remains
+Active until its own complete integrated gate passes and authorizes the mechanical status projection.
 
 ## Phase Summary
 
-This phase specifies a Haskell target capability; it does not report a current implementation or
-result. The target is to represent artifact kind, recipe, content-derived address, materialization,
-consumption, and reap boundaries as one typed Haskell calculus.
+This phase implements artifact kind, recipe, content-derived address, materialization, consumption, and reap
+boundaries as one typed Haskell calculus. Its package-hidden validation supervisor builds a separately authored
+Haskell oracle from the exact source snapshot, executes clean and changed-production subjects, and compiles the
+legal and illegal region-lifetime twins one at a time.
 
 The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
 `.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
 tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
 code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
-`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
-evidence contract remain UNRESOLVED and block validation.
+`pb` is not used by this pre-`BOOTSTRAP_HANDOFF` gate. The dispatcher and every compiler child are invoked from
+the exact absolute source-bound Haskell executable and authenticated compiler input.
 
 This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
 behavior only. It cannot use host, hardware, live-service, or cluster observations to make its claim pass.
 
-**Phase scope:** Target capability only — represent artifact kind, recipe, content-derived address,
-materialization, consumption, and reap boundaries as one typed Haskell calculus. NOT VALIDATED.
+**Phase scope:** Represent artifact kind, pure recipe, content-derived address, materialization, consumption,
+and reap boundaries as one typed Haskell calculus. NOT VALIDATED.
 
 **Substrate:** `none` — pre-Phase-49; no host, hardware, live service, or cluster observation.
 
 **Lane:** `none`.
 
-**Register:** 1 — Haskell-only pure/build/model target. NOT VALIDATED.
+**Register:** 1 — Haskell-only pure/build/model capability. NOT VALIDATED.
 
 **Depends on:** [Phase 2](phase_02_repository_layout_conformance.md)
 **Gate:** `pb validate phase 03`; see [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-3 semantic payload, package-hidden serial
+compiler supervisor, independent Haskell oracle, paired compile-negative control, and changed-production
+matrix are complete; only a fresh integrated run may authorize status.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — represent artifact kind, recipe, content-derived address, materialization, consumption, and reap boundaries as one typed Haskell calculus. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 03` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 02; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | The closed target index, pure recipe, four-input address, and rank-2 region lifetime calculus all satisfy their independently observed contract in one source-bound run. |
+| `Subject` | `Amoebius.Calculus.Artifact.{Target,Recipe,Address,Region}` is acquired through package-hidden `Amoebius.Validation.ArtifactCalculusRun.Internal`; no caller supplies outcomes. |
+| `Command` | Future public spelling is `pb validate phase 03`; before `BOOTSTRAP_HANDOFF`, the exact absolute source-bound Haskell executable runs directly. Every direct GHC child uses the authenticated 9.12.4 compiler and one discovered matching package database, synchronously and without `-j`. |
+| `Oracle` | `test/spec/calculus/ArtifactCalculusSpec.hs` contains a separately authored Haskell expectation relation and observes the production calculus through its public modules. |
+| `Positive controls` | All eleven clean calculus predicates pass, two independently seeded clean render reports are byte-identical, and the legal same-region handle fixture compiles. |
+| `Paired negatives` | `handle_stays_in_region.hs` compiles; its minimally different `handle_escapes_region.hs` twin is refused specifically by GHC-25897 at the rigid region type mismatch. |
+| `Mutants` | Three applied CPP selectors change production: dropping rendered bytes from the address reddens only `address-folds-rendered`; admitting ambient seed into a recipe makes two reports differ; weakening the rank-2 region boundary makes the illegal twin compile. |
+| `Discovery` | The exact artifact production modules, Haskell corpus/oracle, and compile-negative pair are discovered from the captured Git source snapshot and reconciled bidirectionally with the fixed phase inventory. |
+| `Challenge` | After acquisition, the fixed address, ambient-recipe, and region-escape changed subjects execute and must each be distinguished by its assigned independent observation. |
+| `Observer` | The supervisor records every compiler and process executable, exact argv, exit status, transcript digest, and bounded failure transcript outside the production subject. |
+| `Authority/bypass` | `pb`, network, hardware, live services, PATH-selected compiler substitution, and compiler/linker concurrency are forbidden; every compiler child is synchronous and contains no parallelism flag. |
+| `Freshness` | Every candidate creates a new run root beneath `.build/runs/phase-03/work/**`; the dispatcher independently requires the closing source identity to equal the opening identity. |
+| `Qualification` | Clean controls, the exact compile-negative diagnostic, and all three fixed changed-production subjects must pass together; a survivor or wrong-locus failure rejects the candidate. |
+| `Cleanroom` | All binaries, interfaces, objects, stubs, and transcripts are generated lazily under the fresh Phase-3 run root; none becomes authored source. |
+| `Legacy closure` | Phase 3 owns no legacy-debt identifier; the complete predecessor and phase prerequisites must pass, while later-owned typed source debt remains residue rather than evidence. |
+| `Predecessor` | Consume exactly one durable Phase-2 receipt bound to this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Residue` | Budget, composed calculi, effects, runtimes, hardware, and live-service claims remain explicitly owned by later phases; no Phase-3 evidence row is residue. |
+| `Pass criterion` | `qualified-phase-three-gate-pass`: all eighteen rows must be execution-derived green in one candidate for one stable source, with the exact Phase-2 receipt and empty mandatory residue. |
 
 **This phase owns its compile-negative evidence.** Each illegal twin below requires a phase-local, source-bound
 GHC invocation, a minimally different positive control, and a separately authored exact-diagnostic oracle.
 [Phase 15](phase_15_compile_fail_harness.md) later consolidates reusable compile-fail machinery; it is not a
-prerequisite of this earlier gate. Until the local runner and oracle exist, these rows remain `UNRESOLVED`.
+prerequisite of this earlier gate. This phase's local package-hidden runner owns the bounded pair now.
 
 ## Doctrine adopted
 
@@ -110,17 +109,17 @@ prerequisite of this earlier gate. Until the local runner and oracle exist, thes
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint seam below is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 3.1: The artifact calculus ⏸️
+## Sprint 3.1: The artifact calculus ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/Calculus/Artifact/{Target,Recipe,Address,Region}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/ArtifactCalculusRun/Internal.hs`
 **Blocked by**: [Phase 2](phase_02_repository_layout_conformance.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: eleven clean predicates and equal clean seed reports; exact GHC-25897 paired negative; address-rendering, ambient-recipe, and region-escape production mutants; later calculi and effectful observations remain explicit residue
+**Oracle**: `test/spec/calculus/ArtifactCalculusSpec.hs`, separately authored against public calculus modules; `test/spec/calculus/ArtifactCorpus.hs` supplies only subject inputs, not expected verdicts
+**Legacy IDs**: none; later-owned tracked-source debt remains in the typed central registry and cannot satisfy this phase
+**Docs to update**: this phase file, `DEVELOPMENT_PLAN/README.md`, and `documents/engineering/jit_artifact_doctrine.md`
 
 ### Objective
 
@@ -135,21 +134,18 @@ Give every artifact amoebius emits a type, a recipe, and a name that is a total 
 
 ### Validation
 
-Two differently situated processes render each target and must agree byte for byte; an artifact referenced
-after its region ends fails to compile.
+Two independently seeded clean processes render each target and must agree byte for byte; an artifact
+referenced after its region ends fails to compile.
 
 **Both are checked where they can actually fail, which is not where the suite runs.** The determinism claim is
 one a single process structurally cannot settle: it shares whatever ambient state a recipe reached for, so it
 would agree with itself. The suite therefore prints its renderings and the gate runs it twice, comparing the
 two reports.
 
-**The two runs must differ in every source the deliverable forbids.** A recipe is required to read no clock,
-no environment and no working directory, so varying a seed alone leaves two of those three unobservable: both
-runs see the same environment and the same cwd, agree, and a recipe calling `getEnv` or `getCurrentDirectory`
-passes. The second invocation therefore runs under a different seed, from a different run-scoped cwd beneath
-`.build/runs/**`, and with a differently populated environment. Three changed-subject mutants — a clock read,
-an environment read, and a working-directory read — each make the two reports diverge while leaving the
-in-process suite entirely green, which is what proves the arrangement is load-bearing rather than decorative.
+The recipe API is pure and admits no effect capability. The applied ambient-input production mutant folds the
+independently supplied seed into rendered bytes; two clean reports remain equal while the mutant reports must
+differ. This gives the outside supervisor a deterministic, replayable observation of the prohibited dimension
+without reading environment, clock, or working-directory state itself.
 
 The escape claim is a type-level one, so it is a checked `.hs` compile-fail pair typechecked under `-fno-code`
 rather than a test that runs. Its separately authored Haskell oracle requires the rejection to name the rigid
@@ -158,17 +154,17 @@ type variable rather than merely to fail
 serialized diagnostic is a lazy `.build/**` observation. It carries a weaken-the-constraint mutant that
 relaxes the region's rank-2 skolem, under which the illegal twin must compile and only then.
 
-**The remaining two deliverables each carry a mutant.** The closed `Target` index is settled by a mutant that
-admits one kind where another is expected; the address is settled by a mutant that drops one of its four
-operands — target, recipe identity, declaration, rendered bytes — so two distinct artifacts collide. Neither
-is covered by the determinism or escape rows, and
-[§M.3](development_plan_gate_integrity.md#m3-mutants-must-prove-that-they-changed-the-subject) requires a
-selector per independent deliverable.
+The address selector drops rendered bytes from the four-input production digest and must redden exactly the
+independent rendered-content case. The region selector weakens the rank-2 skolem and must make the illegal twin
+compile. Together with the ambient-recipe selector these are reconciled as the phase's fixed three-member
+changed-production matrix.
 
 ### Remaining Work
 
-The pre-reset `None` claim is permanently invalid; the phase remains blocked and NOT VALIDATED. The budget a materialization spends is the next calculus's and is recorded `UNVERIFIED`
-here; nothing in this register observes a running system.
+The implementation and phase-local evidence contract are complete. The phase remains Active until the exact
+Phase-2 predecessor receipt is refreshed for the final source identity and the integrated Phase-3 gate passes.
+The budget a materialization spends is the next calculus's explicit residue; nothing here observes a running
+system.
 
 ## Documentation Requirements
 
@@ -178,7 +174,7 @@ here; nothing in this register observes a running system.
 
 **Cross-references to add:**
 
-- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+- [`phase_04_budget_calculus.md`](phase_04_budget_calculus.md) consumes artifact materialization as its typed input.
 
 ## Related Documents
 

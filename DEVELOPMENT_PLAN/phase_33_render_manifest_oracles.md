@@ -6,10 +6,8 @@
 > the emitted objects in-process, before any cluster exists.
 > **Read this if**: phase 33 is next in the queue, or a later phase depends on what its gate establishes.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+This is the active Phase-33 contract. Its implementation is bound below, while completion remains exclusively
+owned by the exact integrated gate and the mechanical status projection that follows a pass.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -38,14 +36,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 32, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Phase 32 and every earlier gate have passed in numerical order. The pure renderer, independent Haskell
+semantic oracle, property battery, Aeson round-trip corpus, and twelve changed-production challenges are
+bound; only the complete integrated Phase-33 gate may authorize completion.
 
 ## Phase Summary
 
@@ -112,28 +107,28 @@ separately authored Haskell predicate. Renderer output is never its own expectat
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — pure total Haskell rendering must satisfy a separately authored Haskell semantic projection; any serialized manifest bytes are lazy `.build/**` output and never authority. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 33` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 32; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | `pure-total-render-all-boundary` |
+| `Subject` | `acquired-render-manifest-supervisor` |
+| `Command` | `pb validate phase 33` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
+| `Oracle` | `independent-render-manifest-oracle` |
+| `Positive controls` | `render-manifest-positive-controls` |
+| `Paired negatives` | `paired-render-manifest-negatives` |
+| `Mutants` | `applied-render-manifest-production-mutants` |
+| `Discovery` | `exact-render-manifest-source-discovery` |
+| `Challenge` | `post-acquisition-render-manifest-challenge` |
+| `Observer` | `render-manifest-process-observation` |
+| `Authority/bypass` | `no-pb-network-host-hardware-or-render-manifest-parallelism` |
+| `Freshness` | `fresh-render-manifest-build-root-and-stable-source` |
+| `Qualification` | `qualified-render-manifest-harness` |
+| `Cleanroom` | `render-manifest-products-contained-below-build` |
+| `Legacy closure` | `retired-render-manifest-authorities-absent` |
+| `Predecessor` | `exact-phase-thirty-two-receipt` |
+| `Residue` | `later-actions-dry-run-runtime-live-owners-explicit` |
+| `Pass criterion` | `qualified-phase-thirty-three-gate-pass` |
 
 ## Doctrine adopted
 
@@ -188,20 +183,15 @@ separately authored Haskell predicate. Renderer output is never its own expectat
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+## Sprint 33.1: The typed `K8sObject` model + Aeson serialization ✅
 
-> **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
-> only as a target-capability inventory and is not a current gate result.
-
-## Sprint 33.1: The typed `K8sObject` model + Aeson serialization ⏸️
-
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: the private `manifest-render` library at `src/manifest-render/Amoebius/Manifest/{Types,K8sObject}.hs` owns the closed typed object model and canonical Aeson encoding.
 **Blocked by**: [Phase 32](phase_32_inference_accelerator_provision.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: 164 exact typed objects round-trip through canonical Aeson bytes without changing value or encoding.
+**Oracle**: `test/spec/manifest/RenderGoldenOracle.hs` independently fixes all eighteen semantic projections without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, serialized render tables/surface registry, test-local mutant module, and twelve materialized mutants.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the manifest, generated-artifact, security, and testing doctrines.
 
 ### Objective
 
@@ -224,20 +214,18 @@ text.
 
 ### Remaining Work
 
-The pre-reset completion claim cannot support a gate pass. Current remaining work includes every
-`UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and the typed-object,
-serialization, round-trip, and independent Haskell-oracle obligations above. Live Kubernetes decoding and
-apiserver correspondence remain UNVERIFIED.
+The complete integrated Phase-33 gate and its mechanical status projection remain. Live Kubernetes decoding
+and apiserver correspondence remain later-owned residue.
 
-## Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ⏸️
+## Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/manifest-render/Amoebius/Manifest/{Render,RenderAll}.hs` and the `Amoebius.Manifest` facade own the sole pure total render path.
 **Blocked by**: Sprint 33.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: eighteen capability/shape domains, nine object variants, deterministic identity ordering, four activation stages, reconcile modes, and three non-vacuous safety predicates execute in `render-golden`.
+**Oracle**: `RenderGoldenOracle.hs` plus the independently authored dependency-edge predicate in `DepGraphOracle.hs`.
+**Legacy IDs**: the acquired runner requires all eighteen retired Phase-33 authorities to be absent.
+**Docs to update**: this phase and the component/substrate indexes plus linked doctrines.
 
 ### Objective
 
@@ -353,20 +341,18 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
 
 ### Remaining Work
 
-The pre-reset completion claim cannot support a gate pass. Current remaining work includes every
-`UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and the pure-render,
-totality, coverage, negative-control, and Haskell mutation obligations above. SSA, ApplySet pruning, readiness,
-and live convergence remain Phase-58 work.
+The complete integrated Phase-33 gate and its mechanical status projection remain. SSA, ApplySet pruning,
+readiness, and live convergence remain Phase-58 work.
 
-## Sprint 33.3: The rendered-output semantic-oracle battery (`render-oracle`) — the gate ⏸️
+## Sprint 33.3: The rendered-output semantic-oracle battery (`render-oracle`) — the gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `test/spec/manifest/RenderGolden{Gate,Props,Spec}.hs` and the package-hidden Phase-33 supervisor own the clean and mutation matrix.
 **Blocked by**: Sprint 33.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: the exact 33-entry locus inventory, five-calculus/198-unit projection, covered nine-arm/two-shape property, and twelve production CPP mutations are acquired serially in a fresh build root.
+**Oracle**: `RenderGoldenOracle.hs`; the supervisor checks source independence and exact acceptance tokens.
+**Legacy IDs**: the acquired gate joins the Haskell source closure and requires the old serialized/tool-local authorities absent.
+**Docs to update**: this phase and every documentation owner listed below.
 
 ### Objective
 
@@ -390,7 +376,8 @@ states — directly on the emitted objects, all without a cluster.
 
 #### Twelve checked Haskell mutation operators
 
-Each operator is applied to a temporary production-source copy beneath `.build/mutants/**`. It must turn
+Each operator is enabled as an isolated CPP branch in the private production `manifest-render` library and
+built beneath a fresh `.build/**` run root. It must turn
 exactly its targeted semantic property red while its unmutated twin stays green and the changed-subject witness
 confirms the intended production locus changed:
 
@@ -409,7 +396,7 @@ confirms the intended production locus changed:
 
 ### Validation
 
-1. Rejected historical observation: the `render-oracle` Cabal suite was recorded green — output matches the
+1. The `render-golden` Cabal suite must be green — output matches the
    independently authored semantic projection across
    the concrete corpus, canonical round-trip stability holds, shape-completeness and corpus-wide non-zero counts hold (no vacuous
    universal), and every rendered-output invariant holds — the NetworkPolicy check by allow-edge set equality
@@ -422,10 +409,8 @@ confirms the intended production locus changed:
 
 ### Remaining Work
 
-The pre-reset completion claim cannot support a gate pass. Current remaining work includes every
-`UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and the independently authored
-Haskell semantic-oracle, changed-production-subject mutation, discovery, and non-vacuity obligations above.
-Live enforcement remains UNVERIFIED at Phase 58.
+The complete integrated Phase-33 gate and its mechanical status projection remain. Live enforcement remains
+UNVERIFIED at Phase 58.
 
 ## Documentation Requirements
 
@@ -451,7 +436,7 @@ Live enforcement remains UNVERIFIED at Phase 58.
 - `DEVELOPMENT_PLAN/README.md` — only the pass criterion may change Phase 33 after checking a qualified
   candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-33 `none` gate row.
-- `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Manifest/{K8sObject,Types,Render}.hs` and
+- `DEVELOPMENT_PLAN/system_components.md` — register `src/manifest-render/Amoebius/Manifest/{K8sObject,Types,Render}.hs` and
   the `render-oracle` Haskell test suite as Phase-33 design-first rows.
 
 ## Related Documents

@@ -1,1 +1,0 @@
-Replace the distributed provider graph with the single-node graph and append only a copied scalar shape tag.

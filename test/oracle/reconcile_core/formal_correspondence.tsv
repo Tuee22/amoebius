@@ -1,5 +1,0 @@
-property	model	invariant	evidence
-token-no-reuse	SnapshotToken	NoTokenReuse	concurrent-snapshot-token-race
-reservation-one-debit	ReservationProtocol	OneDebitPerReservation	concurrent-reservation-cas
-unreachable-refusal	ReconcileProtocol	RefuseOnUnreachable	core-corpus-adjacent-refusal
-fixed-point-stability	ReconcileProtocol	ConvergedIsStable	converged-corpus-and-simulation

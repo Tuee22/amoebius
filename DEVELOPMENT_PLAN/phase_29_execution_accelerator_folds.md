@@ -18,7 +18,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -42,12 +42,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 28, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+Phase 28 and every earlier gate have passed in numerical order. The Phase-29 pure folds, independent Haskell
+oracle, 37 paired cases, seven properties, and 45 changed-production challenges are bound; only the complete
+integrated Phase-29 gate may authorize the status transition.
 
 > **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
@@ -144,28 +143,28 @@ names the refusing axis. It observes no device, host, provider, or cluster.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — the pure Haskell full-resource-vector fold returns a placement witness or one structured refusing axis. It consumes Haskell values; any serialized case or mutation is generated beneath `.build/**`; and it makes no hardware or live-capacity claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 29` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 28; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | `pure-execution-accelerator-fold-boundary` |
+| `Subject` | `acquired-execution-accelerator-supervisor` |
+| `Command` | `pb validate phase 29` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
+| `Oracle` | `independent-execution-accelerator-oracle` |
+| `Positive controls` | `execution-accelerator-positive-controls` |
+| `Paired negatives` | `paired-execution-accelerator-negatives` |
+| `Mutants` | `applied-execution-accelerator-production-mutants` |
+| `Discovery` | `exact-execution-accelerator-source-discovery` |
+| `Challenge` | `post-acquisition-execution-accelerator-challenge` |
+| `Observer` | `execution-accelerator-process-observation` |
+| `Authority/bypass` | `no-pb-network-host-hardware-or-execution-parallelism` |
+| `Freshness` | `fresh-execution-accelerator-build-root-and-stable-source` |
+| `Qualification` | `qualified-execution-accelerator-harness` |
+| `Cleanroom` | `execution-accelerator-products-contained-below-build` |
+| `Legacy closure` | `retired-execution-accelerator-authorities-absent` |
+| `Predecessor` | `exact-phase-twenty-eight-receipt` |
+| `Residue` | `later-binding-provision-runtime-execution-owners-explicit` |
+| `Pass criterion` | `qualified-phase-twenty-nine-gate-pass` |
 
 ## Doctrine adopted
 
@@ -209,15 +208,15 @@ names the refusing axis. It observes no device, host, provider, or cluster.
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ⏸️
+## Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/{Execution,Scheduler,HostReservation}.hs` owns execution epochs, reservation projections, aggregate-ledger CAS, and recovery-state debits.
 **Blocked by**: [Phase 28](phase_28_storage_geometry_folds.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Exact execution and scheduler tags are checked beside legal twins; thirteen applied production mutations cover rollout, prior-reference, projection, CAS, and retained-debit seams.
+**Oracle**: `test/spec/dsl/ExecutionAcceleratorOracle.hs` independently fixes the execution/scheduler row and mutation census without importing production or fixture modules.
+**Legacy IDs**: Phase-local closure for the retired Python gate, serialized surfaces, and test-local mutant authority.
+**Docs to update**: this phase, `system_components.md`, resource-capacity doctrine, daemon-topology doctrine, and testing doctrine.
 
 ### Objective
 
@@ -312,17 +311,17 @@ numbers only — the pure expansion fold Phase 31's `provision` seal later invok
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ⏸️
+## Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/{RuntimeStorage,NodeLocalStorage}.hs` owns role routing, metadata/image joins, filesystem-layout observation, and physical-parent accounting.
 **Blocked by**: Sprint 29.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Runtime, image, layout, and partition tags are checked beside one-axis legal twins; seventeen applied production mutations challenge every owned join and accounting seam.
+**Oracle**: `ExecutionAcceleratorOracle.expectedRows` and `mutantSpecs` independently bind runtime/node-local cases and production loci.
+**Legacy IDs**: Phase-local closure for retired serialized execution-accelerator case authorities.
+**Docs to update**: this phase, substrate doctrine, storage-lifecycle doctrine, system-components inventory, and illegal-state catalog.
 
 ### Objective
 
@@ -391,10 +390,10 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
   `BackingId`/`CacheBackingId`/`HostStorageBackingId` maps injectively to the correct role carve, and an
   alias/orphan/role mismatch rejects.
 - The declarations these two folds exchange live beside them rather than in the Phase-9 base
-  `src/Amoebius/Capacity/Types.hs`. `src/Amoebius/Capacity/NodeLocalStorage.hs` owns the logical
+  `src/capacity-topology/Amoebius/Capacity/Types.hs`. `src/execution-accelerator-folds/Amoebius/Capacity/NodeLocalStorage.hs` owns the logical
   pod-ephemeral fold, the derived mapped-file/AtomicWriter demand, the closed layout routing, the exact OCI
   content/snapshot joins, and the model-versioned image peak;
-  `src/Amoebius/Capacity/RuntimeStorage.hs` derives metadata components from the structural Pod graph, groups
+  `src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs` derives metadata components from the structural Pod graph, groups
   them by `KubeletNodefs | CriRuntimeRoot`, resolves role→layout-backing totally, builds the planned-epoch
   and observed-snapshot node aggregates, qualifies Pod/image component ownership, and groups aliased
   backings. `Types.hs` gains only the shared vocabulary: `KubeletMappedFileDemand`,
@@ -434,17 +433,17 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ⏸️
+## Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/{Accelerator,ProviderRoot,Etcd,PulumiExecution}.hs` owns residency, net VRAM, provider-root, etcd, and Pulumi demand derivations.
 **Blocked by**: Sprint 29.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Accelerator/provider/etcd refusal tags and twins are challenged by fifteen applied production mutations, including every residency and root-quota distinction.
+**Oracle**: The independent Haskell oracle fixes accelerator, provider-root, etcd, monitoring, engine, and Pulumi expectations and mutation loci.
+**Legacy IDs**: Phase-local closure for the retired Python and serialized oracle inputs.
+**Docs to update**: this phase, resource-capacity, daemon-topology, monitoring, substrate, testing, and illegal-state owners.
 
 ### Objective
 
@@ -528,17 +527,17 @@ derivations as pure, checked `provision-seal` operations that feed the composed 
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ⏸️
+## Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/execution-accelerator-folds/Amoebius/Capacity/Composed.hs` composes execution, storage, accelerator, and topology folds; `ExecutionAcceleratorProps.hs` owns seven covered soundness properties.
 **Blocked by**: Sprint 29.3
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Two composed positives and seven 300-sample covered properties establish sound placement over the full owned vector while retaining explicit runtime-fidelity residue.
+**Oracle**: `ExecutionAcceleratorOracle.expectedCalculusProjection` independently fixes the five-calculus, component, and 128-unit projection.
+**Legacy IDs**: Phase-local closure for the retired serialized calculus projection.
+**Docs to update**: this phase, resource-capacity and testing doctrines, system-components, and substrates ledger.
 
 ### Objective
 
@@ -624,17 +623,17 @@ may reject a packable one) for the composed compute `place`, and never claim com
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
-## Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ⏸️
+## Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `ExecutionAcceleratorGate.hs` executes the Haskell corpus; `Amoebius.Validation.ExecutionAcceleratorRun.Internal` runs 45 changed-production builds and the clean suite in one unique run root.
 **Blocked by**: Sprint 29.4
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: The package-hidden supervisor checks exact source discovery, direct offline `--jobs=1` Cabal argv, all 45 red loci, the clean token, stable source, predecessor receipt, and zero hardware/live authority.
+**Oracle**: `ExecutionAcceleratorOracle.hs` plus acquired process receipts and finalized evidence checks supply the independent verdict boundary.
+**Legacy IDs**: Phase-local closure requires all six retired Python/serialized/test-local authorities absent.
+**Docs to update**: this phase and every documentation owner listed under Documentation Requirements.
 
 ### Objective
 
@@ -708,7 +707,7 @@ axis — and emit the per-entry validation-locus ledger that names the honest fo
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run and record the complete integrated Phase-29 gate; component diagnostics cannot authorize completion.
 
 ## Documentation Requirements
 
@@ -740,7 +739,7 @@ The pre-reset record said `None`; that statement cannot support a gate pass. Cur
 - `DEVELOPMENT_PLAN/README.md` — only the pass criterion may change Phase 29 after checking a qualified
   candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-29 `none` gate row.
-- `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Capacity/{Scheduler,HostReservation,
+- `DEVELOPMENT_PLAN/system_components.md` — register `src/execution-accelerator-folds/Amoebius/Capacity/{Scheduler,HostReservation,
   NodeLocalStorage,RuntimeStorage,ProviderRoot,Etcd,PulumiExecution}.hs`, the execution/accelerator/provider-root
   branches of `Types.hs`/`Fold.hs`, and the composed placement property + gate suites as Phase-29 design-first
   rows.

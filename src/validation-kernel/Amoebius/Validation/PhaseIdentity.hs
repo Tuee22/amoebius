@@ -79,11 +79,11 @@ phaseIdentityIntegrityProblems =
     <> [ "every phase path must be the exact ordinal/capability projection"
        | not (all phasePathMatchesIdentity allPhaseIdentities)
        ]
-    <> [ "resource provision requirement literals must contain exactly 55 unique ordinals"
-       | length expectedResourceRequiredOrdinalLiterals /= 55
-           || Set.size expectedResourceRequiredOrdinals /= 55
+    <> [ "resource provision requirement literals must contain exactly 53 unique ordinals"
+       | length expectedResourceRequiredOrdinalLiterals /= 53
+           || Set.size expectedResourceRequiredOrdinals /= 53
        ]
-    <> [ "resource provision membership must equal the exact canonical 55-phase set"
+    <> [ "resource provision membership must equal the exact canonical 53-phase set"
        | actualResourceRequiredOrdinals /= expectedResourceRequiredOrdinals
        ]
  where
@@ -148,9 +148,7 @@ expectedResourceRequiredCapabilities =
     "refinement_checker",
     "compile_fail_harness",
     "dhall_schema_generation",
-    "illegal_state_covering",
     "chain_kernel_boundary",
-    "ui_server_boundary",
     "self_referential_gates",
     "host_assert_cli",
     "host_ensure_kernel",
@@ -243,7 +241,7 @@ canonicalPhaseIdentities =
   , identity 24 "conformance_gate_generator" ResourceProvisionAbsent
   , identity 25 "dhall_schema_generation" ResourceProvisionRequired
   , identity 26 "gadt_decode_ir" ResourceProvisionAbsent
-  , identity 27 "illegal_state_covering" ResourceProvisionRequired
+  , identity 27 "illegal_state_covering" ResourceProvisionAbsent
   , identity 28 "storage_geometry_folds" ResourceProvisionAbsent
   , identity 29 "execution_accelerator_folds" ResourceProvisionAbsent
   , identity 30 "capability_bind" ResourceProvisionAbsent
@@ -259,7 +257,7 @@ canonicalPhaseIdentities =
   , identity 40 "ui_plan_compiler" ResourceProvisionAbsent
   , identity 41 "offline_language_plan" ResourceProvisionAbsent
   , identity 42 "ui_browser_interpreter" ResourceProvisionAbsent
-  , identity 43 "ui_server_boundary" ResourceProvisionRequired
+  , identity 43 "ui_server_boundary" ResourceProvisionAbsent
   , identity 44 "ui_local_composition" ResourceProvisionAbsent
   , identity 45 "encrypted_browser_runtime" ResourceProvisionAbsent
   , identity 46 "ui_contract_generation" ResourceProvisionAbsent

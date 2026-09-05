@@ -1,2 +1,0 @@
-operator: render StrongFair with WF_vars instead of SF_vars
-expected: authored renderer semantic facts reject weak fairness for Enter

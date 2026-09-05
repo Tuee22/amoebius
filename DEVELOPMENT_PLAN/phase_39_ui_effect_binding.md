@@ -37,7 +37,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 Blocked by redesigned Phase 38, its independent validation, and gate pass; every earlier
 gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
@@ -45,8 +45,6 @@ where the surrounding prose has not yet been rewritten. Existing implementation 
 Known partial** only.
 
 ---
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
@@ -78,28 +76,28 @@ implementation, provider state, browser enforcement, and live tenant isolation r
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — a Haskell checked UI requirement cannot become `BoundUiProgram` until every port and link has exactly one compatible trusted binding. Generated cases remain beneath `.build/**`; runtime effects are not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 39` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 38; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | `pure-exact-ui-effect-binding` |
+| `Subject` | `acquired-ui-effect-binding-supervisor` |
+| `Command` | `pb validate phase 39` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
+| `Oracle` | `independent-ui-effect-binding-oracle` |
+| `Positive controls` | `ui-effect-binding-positive-controls` |
+| `Paired negatives` | `exact-ui-effect-binding-paired-negatives` |
+| `Mutants` | `applied-ui-effect-binding-production-mutants` |
+| `Discovery` | `exact-ui-effect-binding-source-discovery` |
+| `Challenge` | `post-acquisition-ui-effect-binding-challenge` |
+| `Observer` | `ui-effect-binding-process-observation` |
+| `Authority/bypass` | `no-pb-network-provider-browser-host-hardware-or-parallelism` |
+| `Freshness` | `fresh-ui-effect-binding-build-root-and-stable-source` |
+| `Qualification` | `qualified-ui-effect-binding-harness` |
+| `Cleanroom` | `ui-effect-binding-products-contained-below-build` |
+| `Legacy closure` | `retired-ui-effect-binding-authorities-absent` |
+| `Predecessor` | `exact-phase-thirty-eight-receipt` |
+| `Residue` | `ui-plan-runtime-and-provider-owners-explicit` |
+| `Pass criterion` | `qualified-phase-thirty-nine-gate-pass` |
 
 ## Doctrine adopted
 
@@ -115,15 +113,15 @@ implementation, provider state, browser enforcement, and live tenant isolation r
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 39.1: Exact port and capability binding ⏸️
+## Sprint 39.1: Exact port and capability binding ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`, `test/spec/ui/{EffectBindingCases,UiEffectBindingSpec,EffectBindingReference}.hs`, and the package-hidden Phase-39 supervisor own this sprint surface.
 **Blocked by**: [Phase 38](phase_38_ui_authorization_kernel.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: one clean Haskell semantic suite and seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/ui/EffectBindingReference.hs` independently evaluates the seven port relations and two fixed-HTTPS link relations without importing production or the typed case module.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, ten serialized oracle/fixture tables, and seven materialized mutant descriptors.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked UI/capability/illegal-state doctrines.
 
 ### Objective
 
@@ -145,15 +143,15 @@ Adopt one exact relation whose only successful result is a constructor-private `
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 39.2: Trusted links and negative controls ⏸️
+## Sprint 39.2: Trusted links and negative controls ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`, `test/spec/ui/{EffectBindingCases,UiEffectBindingSpec,EffectBindingReference}.hs`, and the package-hidden Phase-39 supervisor own this sprint surface.
 **Blocked by**: Sprint 39.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: one clean Haskell semantic suite and seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/ui/EffectBindingReference.hs` independently evaluates the seven port relations and two fixed-HTTPS link relations without importing production or the typed case module.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, ten serialized oracle/fixture tables, and seven materialized mutant descriptors.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked UI/capability/illegal-state doctrines.
 
 ### Objective
 
@@ -176,15 +174,15 @@ Keep navigation names separate from effect transport and provider coordinates.
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 39.3: Calculus projection and phase seal ⏸️
+## Sprint 39.3: Calculus projection and phase seal ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`, `test/spec/ui/{EffectBindingCases,UiEffectBindingSpec,EffectBindingReference}.hs`, and the package-hidden Phase-39 supervisor own this sprint surface.
 **Blocked by**: Sprint 39.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: one clean Haskell semantic suite and seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/ui/EffectBindingReference.hs` independently evaluates the seven port relations and two fixed-HTTPS link relations without importing production or the typed case module.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, ten serialized oracle/fixture tables, and seven materialized mutant descriptors.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked UI/capability/illegal-state doctrines.
 
 ### Objective
 

@@ -36,9 +36,6 @@
 #
 # capability<TAB>mutant<TAB>body<TAB>flag<TAB>detail
 
-amoebius_image_recipe	recipe-authored-base-digest	test/mutant/amoebius_image_recipe/recipe-authored-base-digest/mutant.txt	—	operator=field-alteration;expected_locus=digest-free-base
-amoebius_image_recipe	recipe-buildx-subcommand	test/mutant/amoebius_image_recipe/recipe-buildx-subcommand/mutant.txt	—	operator=union-arm-addition;expected_locus=plain-build
-amoebius_image_recipe	recipe-second-platform	test/mutant/amoebius_image_recipe/recipe-second-platform/mutant.txt	—	operator=field-addition;expected_locus=single-architecture
 app_tenancy	collapse-tenant-key	—	app-tenancy-collapse-tenant-key-mutant	—
 app_tenancy	drop-provider-arm	—	app-tenancy-drop-provider-arm-mutant	—
 apple_metal_host_daemon	const_output	test/mutant/apple_metal_host_daemon/const_output.patch	apple-metal-host-daemon-const-output-mutant	—
@@ -126,9 +123,6 @@ extension_security_laws	revocation-policy-omitted	test/mutant/extension_security
 extension_conformance	law-instance-omitted	test/mutant/extension_conformance/ConformanceGateMutants.hs	—	mode=law-instance-omitted;expected_red_locus=GeneratedInventoryComplete
 extension_conformance	suite-digest-ignored	test/mutant/extension_conformance/ConformanceGateMutants.hs	—	mode=suite-digest-ignored;expected_red_locus=SuiteDigestBinding
 extension_conformance	unsealed-extension-admitted	test/mutant/extension_conformance/ConformanceGateMutants.hs	—	mode=unsealed-extension-admitted;expected_red_locus=VerdictRequiredForAdmission
-compile_fail_harness	accept-any-failure	tools/compile_fail_harness.py	—	mode=accept-any-failure;operator=diagnostic-check-deletion;expected_red_locus=accept-any-failure-locus
-compile_fail_harness	drop-positive-counterpart	tools/compile_fail_harness.py	—	mode=drop-positive-counterpart;operator=positive-check-deletion;expected_red_locus=drop-positive-counterpart-locus
-compile_fail_harness	impossible-diagnostic-pin	tools/compile_fail_harness.py	—	mode=impossible-diagnostic-pin;operator=diagnostic-pin-substitution;expected_red_locus=impossible-diagnostic-pin-locus
 capability_bind	mutant_catchall_arm	test/mutant/capability_bind/mutant_catchall_arm/mutant.txt	—	operator=union-arm-addition;expected_locus=arm-golden-exhaustiveness
 capability_bind	mutant_copy_shape_tag	test/mutant/capability_bind/mutant_copy_shape_tag/mutant.txt	—	operator=effect-swap;expected_locus=object-node-multiset-oracle
 capability_bind	mutant_provisioned_value_in_bound_deployment	test/mutant/capability_bind/mutant_provisioned_value_in_bound_deployment/mutant.txt	—	operator=effect-swap;expected_locus=bound-structural-inventory
@@ -159,13 +153,6 @@ capacity_topology	validator-drop-csi-dedup	gate:tools/capacity_topology_gate.py	
 capacity_topology	validator-drop-ephemeral	gate:tools/capacity_topology_gate.py	—	operator=oracle-axis-deletion;expected_red_locus=independent witness validator
 capacity_topology	validator-drop-memory	gate:tools/capacity_topology_gate.py	—	operator=oracle-axis-deletion;expected_red_locus=independent witness validator
 capacity_topology	validator-drop-slots	gate:tools/capacity_topology_gate.py	—	operator=oracle-axis-deletion;expected_red_locus=independent witness validator
-chain_boundary	astcheck-allow-rawio	gate:tools/chain_boundary_gate.py	—	operator=guard-delete;expected_locus=RawIO
-chain_boundary	astcheck-export-ctor	gate:tools/chain_boundary_gate.py	—	operator=export-widening;expected_locus=compile-fail-link-seal
-chain_boundary	m1_cfg_drop_service	test/mutant/chain_boundary/m1_cfg_drop_service/mutant.txt	—	operator=dropped-input;expected_locus=semantic-plan-oracle
-chain_boundary	m2_descent_inframe	test/mutant/chain_boundary/m2_descent_inframe/mutant.txt	—	operator=guard-weakening;expected_locus=semantic-frame-oracle
-chain_boundary	mB1_argv	test/mutant/chain_boundary/boundary/mB1_argv/mutant.txt	—	operator=field-alteration;expected_locus=argv-transcript
-chain_boundary	mB2_byte	test/mutant/chain_boundary/boundary/mB2_byte/mutant.txt	—	operator=field-alteration;expected_locus=applied-bytes
-chain_boundary	mB3_path_resolve	test/mutant/chain_boundary/boundary/mB3_path_resolve/mutant.txt	—	operator=boundary-weakening;expected_locus=hostile-path
 content_store_workflow	ack_before_store_write	test/mutant/content_store_workflow/ack_before_store_write.mutant	content-store-workflow-ack-before-store-write-mutant	—
 content_store_workflow	cleanup_on_job_status	test/mutant/content_store_workflow/cleanup_on_job_status.mutant	content-store-workflow-cleanup-on-job-status-mutant	—
 content_store_workflow	double_apply_on_redelivery	test/mutant/content_store_workflow/double_apply_on_redelivery.mutant	content-store-workflow-double-apply-on-redelivery-mutant	—
@@ -197,7 +184,6 @@ determinism_jitcache	prune_noop	test/mutant/determinism_jitcache/cache/prune_noo
 determinism_jitcache	resolve_fixed_marker	test/mutant/determinism_jitcache/cache/resolve_fixed_marker.hs	—	—
 determinism_jitcache	rng_workerid	test/mutant/determinism_jitcache/rng_workerid.hs	determinism-jitcache-rng-workerid-mutant	—
 determinism_jitcache	store_one_byte_short	test/mutant/determinism_jitcache/cache/store_one_byte_short.hs	—	—
-deterministic_simulation	m1-dropped-partition-handling	test/mutant/deterministic_simulation/dropped_partition_handling/DroppedPartitionMutant.hs,test/mutant/deterministic_simulation/dropped_partition_handling/README.md	—	surface=test/mutant/deterministic_simulation/dropped_partition_handling/DroppedPartitionMutant.hs;expected=Violated:NoActOnStaleRead
 dhall_typecheck_schema	dhall_typecheck_capability_custom_arm	test/mutant/dhall_typecheck_schema/dhall_typecheck_capability_custom_arm.dhall	—	—
 dhall_typecheck_schema	dhall_typecheck_duplicate_event_authority	test/mutant/dhall_typecheck_schema/dhall_typecheck_duplicate_event_authority.dhall	—	—
 dhall_typecheck_schema	dhall_typecheck_implicit_latest_transition	test/mutant/dhall_typecheck_schema/dhall_typecheck_implicit_latest_transition.dhall	—	—
@@ -332,11 +318,6 @@ live_dsl_deploy	effect-swap	—	live-dsl-deploy-effect-swap-mutant	—
 live_dsl_deploy	enact-noop	—	live-dsl-deploy-enact-noop-mutant	—
 live_dsl_deploy	persist-password	—	live-dsl-deploy-persist-password-mutant	—
 live_dsl_deploy	reach-any	—	live-dsl-deploy-reach-any-mutant	—
-local_ui_composition	M-direct-workflow-fetch	test/mutant/local_ui_composition/M-direct-workflow-fetch.mutant	—	locus=browser-backend-edge;fixture=test/mutant/local_ui_composition/M-direct-workflow-fetch.mutant
-local_ui_composition	M-drop-handle-tenant	test/mutant/local_ui_composition/M-drop-handle-tenant.mutant	—	locus=copied-handle-scope;fixture=test/mutant/local_ui_composition/M-drop-handle-tenant.mutant
-local_ui_composition	M-mix-client-server-plan	test/mutant/local_ui_composition/M-mix-client-server-plan.mutant	—	locus=plan-pair-digest;fixture=test/mutant/local_ui_composition/M-mix-client-server-plan.mutant
-local_ui_composition	M-ready-before-receipt	test/mutant/local_ui_composition/M-ready-before-receipt.mutant	—	locus=ready-order;fixture=test/mutant/local_ui_composition/M-ready-before-receipt.mutant
-local_ui_composition	owner_key_swap	test/mutant/local_ui_composition/owner_key_swap.mutant	—	locus=owner-key-dom;fixture=test/mutant/local_ui_composition/owner_key_swap.mutant
 multicluster_spawn_georepl	classifier-default-confluent	test/mutant/multicluster_spawn_georepl/classifier-default-confluent.patch	multicluster-spawn-georepl-classifier-default-confluent-mutant	—
 multicluster_spawn_georepl	drop-parallel-executor	test/mutant/multicluster_spawn_georepl/drop-parallel-executor.patch	multicluster-spawn-georepl-drop-parallel-executor-mutant	—
 multicluster_spawn_georepl	project-identity	test/mutant/multicluster_spawn_georepl/project-identity.patch	multicluster-spawn-georepl-project-identity-mutant	—
@@ -357,11 +338,6 @@ offline_blobs_isolation	replay_before_verification	test/mutant/offline_blobs_iso
 offline_blobs_isolation	silent_blob_eviction	test/mutant/offline_blobs_isolation/silent_blob_eviction.patch	offline-blobs-isolation-silent-blob-eviction-mutant	—
 offline_blobs_isolation	store_plaintext	test/mutant/offline_blobs_isolation/store_plaintext.patch	offline-blobs-isolation-store-plaintext-mutant	—
 offline_blobs_isolation	trust_caller_digest	test/mutant/offline_blobs_isolation/trust_caller_digest.patch	offline-blobs-isolation-trust-caller-digest-mutant	—
-offline_language_plan	browser_redis_constructor	test/mutant/offline_language_plan/browser_redis_constructor.patch	offline-language-plan-browser-redis-constructor-mutant	—
-offline_language_plan	drop_queue_bound	test/mutant/offline_language_plan/drop_queue_bound.patch	offline-language-plan-drop-queue-bound-mutant	—
-offline_language_plan	omit_server_handler	test/mutant/offline_language_plan/omit_server_handler.patch	offline-language-plan-omit-server-handler-mutant	—
-offline_language_plan	persist_private_field	test/mutant/offline_language_plan/persist_private_field.patch	offline-language-plan-persist-private-field-mutant	—
-offline_language_plan	queue_model_invocation	test/mutant/offline_language_plan/queue_model_invocation.patch	offline-language-plan-queue-model-invocation-mutant	—
 offline_multizone_continuity	clear_state_release	test/mutant/offline_multizone_continuity/clear_state_release.patch	offline-multizone-continuity-clear-state-release-mutant	—
 offline_multizone_continuity	drop_outbox_scope	test/mutant/offline_multizone_continuity/drop_outbox_scope.patch	offline-multizone-continuity-drop-outbox-scope-mutant	—
 offline_multizone_continuity	duplicate_blob_dependency	test/mutant/offline_multizone_continuity/duplicate_blob_dependency.patch	offline-multizone-continuity-duplicate-blob-dependency-mutant	—
@@ -532,27 +508,6 @@ test_topology_dsl	resource_overcommit_cpu	test/mutant/test_topology_dsl/resource
 test_topology_dsl	skip_teardown	test/mutant/test_topology_dsl/skip_teardown.patch	test-topology-dsl-skip-teardown-mutant	—
 test_topology_dsl	tag-query	—	test-topology-dsl-tag-query-mutant	—
 test_topology_dsl	wrong-subscription	—	test-topology-dsl-wrong-subscription-mutant	—
-transaction_vocabulary	transaction-match-all	test/mutant/transaction_vocabulary/transaction-match-all/mutant.txt	—	operator=predicate-replacement;expected_locus=exact-scope-predicate
-transaction_vocabulary	transaction-optional-scope	test/mutant/transaction_vocabulary/transaction-optional-scope/mutant.txt	—	operator=field-optionality;expected_locus=required-scope
-transaction_vocabulary	transaction-wrong-policy-column	test/mutant/transaction_vocabulary/transaction-wrong-policy-column/mutant.txt	—	operator=field-alteration;expected_locus=shared-declaration
-ui_authorization	default_allow	test/mutant/ui_authorization/default_allow.mutant	—	target=authorization_matrix.tsv;expected=default-deny
-ui_authorization	visibility_is_authorization	test/mutant/ui_authorization/visibility_is_authorization.mutant	—	target=authorization_matrix.tsv;expected=hidden-invocable+stale
-ui_browser_interpreter	M-accept-stale-plan	test/mutant/ui_browser_interpreter/M-accept-stale-plan.mutant	—	target=plans/minimal_single_tenant.json;expected=ReloadRequired
-ui_browser_interpreter	M-break-focus-return	test/mutant/ui_browser_interpreter/M-break-focus-return.mutant	—	target=expected_keyboard_focus.tsv:modal-3;expected=modal-opener
-ui_browser_interpreter	M-direct-provider-fetch	test/mutant/ui_browser_interpreter/M-direct-provider-fetch.mutant	—	target=expected_transport.tsv:provider-fetch;expected=zero-provider-connection
-ui_browser_interpreter	M-drop-event-effect	test/mutant/ui_browser_interpreter/M-drop-event-effect.mutant	—	target=reference-trace:single-submit-2;expected=submit-effect
-ui_browser_interpreter	M-hardcoded-response	test/mutant/ui_browser_interpreter/M-hardcoded-response.mutant	—	target=expected_transport.tsv:single-submit;expected=fresh-nonce
-ui_browser_interpreter	M-raw-html-sink	test/mutant/ui_browser_interpreter/M-raw-html-sink.mutant	—	target=expected_dom/single-submit.txt;expected=hostile-text-dom
-ui_browser_interpreter	M-sequential-state-writes	test/mutant/ui_browser_interpreter/M-sequential-state-writes.mutant	—	target=reference-trace:single-submit;expected=atomic-trace
-ui_browser_interpreter	M-swap-route-target	test/mutant/ui_browser_interpreter/M-swap-route-target.mutant	—	target=expected_keyboard_focus.tsv:route;expected=route-focus
-ui_browser_interpreter	M-unsafe-inline-build	test/mutant/ui_browser_interpreter/M-unsafe-inline-build.mutant	—	target=production_headers.tsv;expected=csp-canary
-ui_effect_binding	M-drop-capability	test/mutant/ui_effect_binding/M-drop-capability.mutant	—	target=bind_errors.tsv:missing-capability;expected=MissingCapability
-ui_effect_binding	M-erase-handler-scope	test/mutant/ui_effect_binding/M-erase-handler-scope.mutant	—	target=bind_errors.tsv:scope-mismatch;expected=ScopeMismatch
-ui_effect_binding	M-first-handler-wins	test/mutant/ui_effect_binding/M-first-handler-wins.mutant	—	target=bind_errors.tsv:duplicate-handler;expected=DuplicateHandler
-ui_effect_binding	M-link-id-as-url	test/mutant/ui_effect_binding/M-link-id-as-url.mutant	—	target=bind_errors.tsv:link-as-url;expected=ExternalLinkNotAnEffect
-ui_effect_binding	M-retry-without-idempotency	test/mutant/ui_effect_binding/M-retry-without-idempotency.mutant	—	target=bind_errors.tsv:unsafe-retry;expected=IdempotencyRequired
-ui_effect_binding	M-swap-response-codec	test/mutant/ui_effect_binding/M-swap-response-codec.mutant	—	target=bind_errors.tsv:codec-mismatch;expected=ContractMismatch
-ui_effect_binding	export_raw_topic	test/mutant/ui_effect_binding/export_raw_topic.mutant	—	target=bind_errors.tsv:raw-topic;expected=ProviderCoordinateForbidden
 ui_ha_multizone	drop_keycloak_zone_spread	test/mutant/ui_ha_multizone/drop_keycloak_zone_spread.dhall	ui-ha-multizone-drop-keycloak-zone-spread-mutant	—
 ui_ha_multizone	drop_pdb	test/mutant/ui_ha_multizone/drop_pdb.dhall	ui-ha-multizone-drop-pdb-mutant	—
 ui_ha_multizone	drop_tenant_cursor_key	test/mutant/ui_ha_multizone/drop_tenant_cursor_key.patch	ui-ha-multizone-drop-tenant-cursor-key-mutant	—
@@ -569,24 +524,12 @@ ui_multi_tenant_live	drop-scope-epoch	—	ui-multi-tenant-live-drop-scope-epoch-
 ui_multi_tenant_live	drop_scope_epoch_from_realtime_route	test/mutant/ui_multi_tenant_live/drop_scope_epoch_from_realtime_route.mutant	—	—
 ui_multi_tenant_live	drop_tenant_key	test/mutant/ui_multi_tenant_live/drop_tenant_key.mutant	ui-multi-tenant-live-drop-tenant-key-mutant	—
 ui_multi_tenant_live	drop_user_key	test/mutant/ui_multi_tenant_live/drop_user_key.mutant	ui-multi-tenant-live-drop-user-key-mutant	—
-ui_plan_compiler	M-client-only-authority-digest	test/mutant/ui_plan_compiler/M-client-only-authority-digest.mutant	—	target=derived-digests:authority;expected=digest-mismatch
-ui_plan_compiler	M-drop-server-action	test/mutant/ui_plan_compiler/M-drop-server-action.mutant	—	target=projection_rows.tsv:workflow.start;expected=server-action-mismatch
-ui_plan_compiler	M-emit-private-field	test/mutant/ui_plan_compiler/M-emit-private-field.mutant	—	target=client_plan.golden.json;expected=PrivateFieldForbidden
-ui_plan_compiler	M-link-navigation-as-fetch	test/mutant/ui_plan_compiler/M-link-navigation-as-fetch.mutant	—	target=projection_rows.tsv:docs.link;expected=LinkNavigationAsEffect
-ui_plan_compiler	M-preserve-map-insertion-order	test/mutant/ui_plan_compiler/M-preserve-map-insertion-order.mutant	—	target=client_plan.golden.json;expected=fresh-process-byte-mismatch
-ui_plan_compiler	M-swap-action-targets	test/mutant/ui_plan_compiler/M-swap-action-targets.mutant	—	target=ui_server_plan.golden.json;expected=handler-projection-mismatch
 ui_program_release	accept-stale-authority-digest	—	ui-program-release-accept-stale-authority-digest-mutant	—
 ui_program_release	mut-40-accept-stale-authority-digest	test/mutant/ui_program_release/mut-40-accept-stale-authority-digest.patch	—	—
 ui_program_release	mut-40-publish-mixed-plan-pair	test/mutant/ui_program_release/mut-40-publish-mixed-plan-pair.patch	—	—
 ui_program_release	mut-40-rebuild-runtime-per-program	test/mutant/ui_program_release/mut-40-rebuild-runtime-per-program.patch	—	—
 ui_program_release	publish-mixed-plan-pair	—	ui-program-release-publish-mixed-plan-pair-mutant	—
 ui_program_release	rebuild-runtime-per-program	—	ui-program-release-rebuild-runtime-per-program-mutant	—
-ui_program_schema	M-drop-bound-check	test/mutant/ui_program_schema/M-drop-bound-check.mutant	—	target=unbounded_collection.dhall;token=UnboundedCollection
-ui_program_schema	M-first-id-wins	test/mutant/ui_program_schema/M-first-id-wins.mutant	—	target=duplicate_qualified_id.dhall;token=DuplicateQualifiedId
-ui_program_schema	M-skip-exhaustiveness	test/mutant/ui_program_schema/M-skip-exhaustiveness.mutant	—	target=non_exhaustive_event.dhall;token=NonExhaustiveEvent
-ui_program_schema	M-swap-port-contract	test/mutant/ui_program_schema/M-swap-port-contract.mutant	—	target=port_type_mismatch.dhall;token=PortTypeMismatch
-ui_program_schema	add_raw_js_arm	test/mutant/ui_program_schema/add_raw_js_arm.mutant	—	target=raw_browser_escape.dhall;token=RawBrowserEscape
-ui_program_schema	add_raw_url_arm	test/mutant/ui_program_schema/add_raw_url_arm.mutant	—	target=raw_external_link_url.dhall;token=RawExternalLinkUrl
 ui_projection_runtime	drop_owner_key	test/mutant/ui_projection_runtime/drop_owner_key.mutant	ui-projection-runtime-drop-owner-key-mutant	—
 ui_projection_runtime	drop_owner_subscription	test/mutant/ui_projection_runtime/drop_owner_subscription.mutant	ui-projection-runtime-drop-owner-subscription-mutant	—
 ui_projection_runtime	drop_receipt_command_id	test/mutant/ui_projection_runtime/drop_receipt_command_id.mutant	ui-projection-runtime-drop-receipt-command-id-mutant	—
@@ -596,15 +539,6 @@ ui_rollout_reconnect	drop_tenant_cursor_key	test/mutant/ui_rollout_reconnect/dro
 ui_rollout_reconnect	shift_before_watermark	test/mutant/ui_rollout_reconnect/shift_before_watermark.dhall	ui-rollout-reconnect-shift-before-watermark-mutant	—
 ui_rollout_reconnect	stale-registration	—	ui-rollout-reconnect-stale-registration-mutant	—
 ui_rollout_reconnect	stale_redis_registration	test/mutant/ui_rollout_reconnect/stale_redis_registration.patch	—	—
-ui_server_boundary	M-disable-origin-check	test/mutant/ui_server_boundary/M-disable-origin-check.mutant	—	locus=origin-denial;fixture=test/mutant/ui_server_boundary/M-disable-origin-check.mutant
-ui_server_boundary	M-dispatch-before-authorize	test/mutant/ui_server_boundary/M-dispatch-before-authorize.mutant	—	locus=zero-denied-handler-bytes;fixture=test/mutant/ui_server_boundary/M-dispatch-before-authorize.mutant
-ui_server_boundary	M-drop-csp-header	test/mutant/ui_server_boundary/M-drop-csp-header.mutant	—	locus=security-header;fixture=test/mutant/ui_server_boundary/M-drop-csp-header.mutant
-ui_server_boundary	M-new-idempotency-key-on-retry	test/mutant/ui_server_boundary/M-new-idempotency-key-on-retry.mutant	—	locus=idempotent-replay;fixture=test/mutant/ui_server_boundary/M-new-idempotency-key-on-retry.mutant
-ui_server_boundary	M-ready-with-unresolved-handler	test/mutant/ui_server_boundary/M-ready-with-unresolved-handler.mutant	—	locus=missing-handler-readiness;fixture=test/mutant/ui_server_boundary/M-ready-with-unresolved-handler.mutant
-ui_server_boundary	M-serve-server-plan-as-client-asset	test/mutant/ui_server_boundary/M-serve-server-plan-as-client-asset.mutant	—	locus=private-plan-probe;fixture=test/mutant/ui_server_boundary/M-serve-server-plan-as-client-asset.mutant
-ui_server_boundary	M-server-first-handler-wins	test/mutant/ui_server_boundary/M-server-first-handler-wins.mutant	—	locus=duplicate-handler-readiness;fixture=test/mutant/ui_server_boundary/M-server-first-handler-wins.mutant
-ui_server_boundary	M-skip-current-epoch	test/mutant/ui_server_boundary/M-skip-current-epoch.mutant	—	locus=stale-epoch;fixture=test/mutant/ui_server_boundary/M-skip-current-epoch.mutant
-ui_server_boundary	M-trust-tenant-header	test/mutant/ui_server_boundary/M-trust-tenant-header.mutant	—	locus=foreign-token-spoof;fixture=test/mutant/ui_server_boundary/M-trust-tenant-header.mutant
 ui_single_tenant_live	canned-response	—	ui-single-tenant-live-canned-response-mutant	—
 ui_single_tenant_live	canned_ui_response	test/mutant/ui_single_tenant_live/canned_ui_response.dhall	—	—
 ui_single_tenant_live	disable-csrf	—	ui-single-tenant-live-disable-csrf-mutant	—

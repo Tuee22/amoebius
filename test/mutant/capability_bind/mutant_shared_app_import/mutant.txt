@@ -1,1 +1,0 @@
-Point both shape fixtures at the same composed file, making app-byte equality reflexive.

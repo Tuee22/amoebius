@@ -1,4 +1,0 @@
-program	node	kind	type	edges	events
-minimal_single_tenant	app.main.home	route	View	app.main.submit	submit
-minimal_multi_tenant	app.main.tenant	route	TenantChoice	app.main.home	choose-tenant
-composed_workflow_ui	app.workflow.start	port	WorkflowStart	app.workflow.progress	start,cancel

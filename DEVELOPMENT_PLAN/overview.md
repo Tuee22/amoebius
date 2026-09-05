@@ -230,7 +230,7 @@ fidelity remain explicitly unverified
 - **Phase 5 — The lift calculus** → [phase_5](phase_05_lift_calculus.md).
 - **Phase 6 — The workflow calculus** → [phase_6](phase_06_workflow_calculus.md).
 - **Phase 7 — The evidence calculus** → [phase_7](phase_07_evidence_calculus.md).
-- **Phase 8 — Scope index / scoped identity kernel** → [phase_8](phase_08_scope_index.md).
+- **Phase 8 — Scope index / scoped identity kernel** (`Amoebius.Scope.Index` and `Amoebius.Scope.Flow`) → [phase_8](phase_08_scope_index.md).
 - **Phase 9 — Capacity core fold + topology relation** → [phase_9](phase_09_resource_index.md).
 - **Phase 10 — Composition across the five calculi** → [phase_10](phase_10_calculus_composition.md).
 

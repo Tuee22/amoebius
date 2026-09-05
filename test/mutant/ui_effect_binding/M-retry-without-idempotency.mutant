@@ -1,3 +1,0 @@
-operator=invariant-clause-delete
-change=allow mutation retry without idempotency
-expected=unsafe-retry fails

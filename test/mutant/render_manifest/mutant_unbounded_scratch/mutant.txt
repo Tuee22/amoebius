@@ -1,1 +1,0 @@
-Remove the rendered bounded-volume witness; bounded-volumes must turn red.

@@ -1,1 +1,0 @@
-Drop the last multi-case step; the independently authored semantic Plan oracle must diverge.

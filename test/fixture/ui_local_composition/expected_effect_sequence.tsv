@@ -1,5 +1,0 @@
-case	ordinal	boundary	effect
-single	1	ui-server	workflow-start:fresh-challenge
-single	2	fake-workflow	workflow-ready:fresh-challenge
-single	3	ui-server	artifact-use:fresh-challenge
-multi-foreign	-	-	zero-effects

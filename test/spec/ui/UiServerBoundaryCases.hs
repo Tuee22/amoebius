@@ -1,0 +1,8 @@
+module UiServerBoundaryCases (calculusRows) where
+calculusRows :: [[String]]
+calculusRows =
+  [ ["calculus-kinds", "artifact,budget,lift,workflow,evidence"]
+  , ["component-names", "public-boundary-artifacts,closed-authority-budget,server-boundary-corpus,startup-admission-workflow,mutant-evidence"]
+  , ["projection-counts", "5,5,55,6,9"]
+  , ["resource-vector", "5,80,0,0"]
+  ]

@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Amoebius.Formal.GatewayMigration
   ( gatewayMigrationModel
   , gatewayActionNames
@@ -139,11 +141,18 @@ promotePlanned = action "PromotePlanned"
     , FiniteQuantifier ForAll "cluster" (Ref "Clusters")
         (anyOf [NotEqual (Ref "cluster") (atom "target"), Ref "targetUp"])
     ])
-  [ assign "sourceOwns" (bool False)
+  [ assign "sourceOwns" plannedSourceOwnership
   , assign "targetOwns" (bool True)
   , assign "divergence" (int 0)
   , assign "phase" (atom "PRepoint")
   ]
+
+plannedSourceOwnership :: Expr
+#ifdef GATEWAY_MIGRATION_DUAL_OWNER_MUTANT
+plannedSourceOwnership = bool True
+#else
+plannedSourceOwnership = bool False
+#endif
 
 repointPlannedDns :: Action
 repointPlannedDns = action "RepointPlannedDns"
@@ -324,7 +333,7 @@ gatewayMigrationModel = Model
       ]
   , modelConstraint = Just (NamedExpr "StateBound" stateBound)
   , modelExpansionLimit = Nothing
-  , modelFairness = [Fairness WeakFair name | name <- gatewayActionNames]
+  , modelFairness = gatewayFairness
   , modelProperties =
       [ Property "MergeConverges" (LeadsTo (is "branch" "failover") (Equal ownerCount (int 1)))
       , Property "SessionEventuallyRebinds" (LeadsTo (is "branch" "failover") (Ref "rebound"))
@@ -332,3 +341,10 @@ gatewayMigrationModel = Model
       ]
   , modelCheckDeadlock = False
   }
+
+gatewayFairness :: [Fairness]
+#ifdef GATEWAY_MIGRATION_DROP_FAIRNESS_MUTANT
+gatewayFairness = []
+#else
+gatewayFairness = [Fairness WeakFair name | name <- gatewayActionNames]
+#endif

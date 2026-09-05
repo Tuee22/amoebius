@@ -7,17 +7,15 @@
 > four-stage activation — or return exactly one structured `ProvisionError` at the `provision-seal` locus.
 > **Read this if**: phase 31 is next in the queue, or a later phase depends on what its gate establishes.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+This is the active Phase-31 contract. Its implementation is bound below, while completion remains exclusively
+owned by the exact integrated gate and the mechanical status projection that follows a pass.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -40,14 +38,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 30, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Phase 30 and every earlier gate have passed in numerical order. The Phase-31 provision-seal library,
+independent Haskell oracle, positive and negative corpus, properties, and four changed-production challenges
+are bound; only the complete integrated Phase-31 gate may authorize the status transition.
 
 ## Phase Summary
 
@@ -116,28 +111,28 @@ inventory, provider realization, and engine resolution remain UNVERIFIED live-ba
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — pure Haskell may seal a deployment exactly once against an explicit typed observation-shaped value; any serialized plan or case is generated beneath `.build/**`; authenticity of any live inventory is not claimed here. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 31` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 30; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | `complete-provision-seal-boundary` |
+| `Subject` | `acquired-provision-seal-supervisor` |
+| `Command` | `pb validate phase 31` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
+| `Oracle` | `independent-provision-seal-oracle` |
+| `Positive controls` | `provision-seal-positive-controls` |
+| `Paired negatives` | `paired-provision-seal-negatives` |
+| `Mutants` | `applied-provision-seal-production-mutants` |
+| `Discovery` | `exact-provision-seal-source-discovery` |
+| `Challenge` | `post-acquisition-provision-seal-challenge` |
+| `Observer` | `provision-seal-process-observation` |
+| `Authority/bypass` | `no-pb-network-host-hardware-or-provision-seal-parallelism` |
+| `Freshness` | `fresh-provision-seal-build-root-and-stable-source` |
+| `Qualification` | `qualified-provision-seal-harness` |
+| `Cleanroom` | `provision-seal-products-contained-below-build` |
+| `Legacy closure` | `retired-provision-seal-authorities-absent` |
+| `Predecessor` | `exact-phase-thirty-receipt` |
+| `Residue` | `later-render-runtime-live-provision-owners-explicit` |
+| `Pass criterion` | `qualified-phase-thirty-one-gate-pass` |
 
 ## Doctrine adopted
 
@@ -187,20 +182,15 @@ inventory, provider realization, and engine resolution remain UNVERIFIED live-ba
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+## Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ✅
 
-> **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
-> only as a target-capability inventory and is not a current gate result.
-
-## Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ⏸️
-
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/provision-seal/Amoebius/Capacity/Provision.hs` owns demand derivation, both planner arms, validation, readback enactment, replay protection, and the provision context.
 **Blocked by**: [Phase 30](phase_30_capability_bind.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Both planner paths, replay/readback negatives, exact receipt classifications, and two planner changed-production challenges execute in the Phase-31 matrix.
+**Oracle**: `test/spec/capability/ProvisionSealOracle.hs` independently fixes negative tags, activation stages, mutant flags/loci, calculus projection, and the 34-row locus inventory without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, serialized provision-seal tables, and materialized/test-local mutant sources.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the resource, manifest, capability, illegal-state, and testing doctrines.
 
 ### Objective
 
@@ -233,21 +223,17 @@ already materialized or returns exactly one non-renderable plan owning the close
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work
-includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and
-phase-specific obligation in the redesigned gate. Both planner arms, the exact action batch, separate
-plan/action replay refusals, receipt-bound readback, and promised-identity refusals remain target obligations
-requiring fresh evidence.
+Integrated Phase-31 gate execution and its mechanical status projection remain.
 
-## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️
+## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/provision-seal/Amoebius/Capacity/Provision.hs` and `src/provision-seal/Amoebius/Capability/{Engine,Provisioned}.hs` own the whole-deployment fold and opaque successful result.
 **Blocked by**: Sprint 31.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Eighteen inherited positive deployments, ten exact negatives, two properties, exact instance/runtime joins, and drop-execution/drop-runtime mutations execute in the matrix.
+**Oracle**: `test/spec/capability/ProvisionSealOracle.hs` independently fixes the corpus, failures, mutant loci, and calculus resource vector.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, serialized provision-seal tables, and materialized/test-local mutant sources.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the resource, manifest, capability, illegal-state, and testing doctrines.
 
 ### Objective
 
@@ -288,7 +274,7 @@ and an impossible target has no deployable value.
   Deployment/StatefulSet replicas and Job waves yield exact finite slot sets, a DaemonSet derives exactly one
   slot per selected node, and a HostProcess derives its exact host→slot map; a missing constraint target or
   missing/extra/ineligible slot rejects.
-- The runtime-storage fold (`src/Amoebius/Capacity/RuntimeStorage.hs`) derives every metadata component's bytes
+- The runtime-storage fold (`src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs`) derives every metadata component's bytes
   and `KubeletNodefs | CriRuntimeRoot` role, proves the role sums, resolves roles through `Unified |
   SplitRuntime | SplitImage`, groups aliases by physical carve once, and builds one
   `ProvisionedNodeRuntimeStorageAccounting` per node and planned-epoch fingerprint with disjoint-and-exhaustive
@@ -340,25 +326,21 @@ and an impossible target has no deployable value.
    alias-double-debit, or dropped-largest-row cases. `illegal_monitoring_work_over_budget` returns
    `Left MonitoringBudgetExceeded` without retaining fixed Prometheus requests, and each
    `illegal_prior_provision_ref_*` returns its structured `ProvisionError` before any transition execution. The
-   suite goes **red** under each of the ten inherited seeded mutants.
+   suite goes **red** under each of the four Phase-31 changed-production mutants.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work
-includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and
-phase-specific obligation in the redesigned gate. The 18 inherited deployments, ten exact negatives, two
-boundary properties, and ten paired Haskell mutation operators remain unaccepted target coverage for the
-post-bind provision fold and its expansion boundary.
+Integrated Phase-31 gate execution and its mechanical status projection remain.
 
-## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️
+## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/provision-seal/Amoebius/Capacity/RenderSource.hs` owns the identity-keyed render-source seal and activation discipline; `Provision.hs` alone inserts it into `ProvisionedSpec`.
 **Blocked by**: Sprint 31.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Exact key/domain/owner correspondence and all four independently classified activation stages execute in the clean Haskell candidate.
+**Oracle**: `test/spec/capability/ProvisionSealOracle.hs` independently fixes the four stage/witness pairs and refuses missing or misclassified stages through the gate.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, serialized provision-seal tables, and materialized/test-local mutant sources.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the resource, manifest, capability, illegal-state, and testing doctrines.
 
 ### Objective
 
@@ -395,20 +377,17 @@ identity-keyed render-source set with per-field ownership and a four-stage activ
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work
-includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and
-phase-specific obligation in the redesigned gate. The opaque source set, exact domain/key/owner
-correspondence, and all four activation stages remain target claims requiring fresh evidence.
+Integrated Phase-31 gate execution and its mechanical status projection remain.
 
-## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ⏸️
+## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `test/spec/capability/{ProvisionSealGate,ProvisionSealSpec,ProvisionFixtures,ProvisionProps,RuntimeStorageBindingProps}.hs` and `Amoebius.Validation.ProvisionSealRun.Internal` own the serial qualified gate.
 **Blocked by**: Sprint 31.3
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: The acquired runner builds four changed production subjects and one clean subject serially in a unique run root, observes exact failures/tokens, and proves exact 11-source discovery.
+**Oracle**: `test/spec/capability/ProvisionSealOracle.hs` is the separately authored literal oracle; the runner checks its import independence before trusting the clean result.
+**Legacy IDs**: Eighteen exact retired paths are checked absent and all generated products remain below `.build/**`.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the resource, manifest, capability, illegal-state, and testing doctrines.
 
 ### Objective
 
@@ -441,13 +420,10 @@ UNVERIFIED.
   wrong_generation,wrong_arm}` — each asserting its specific post-bind `ProvisionError` tag (§M.8) and each
   paired with a positive differing only in the foreclosed dimension. The CUDA-on-CPU, VRAM, and overcommit
   negatives fail after binding but **before** `renderAll` with zero provisioned values.
-- **GateReady Haskell mutation operators (§M.2)** — the ten inherited deliberately broken production
-  transformations, applied beneath `.build/mutants/**` and re-run, that the gate MUST turn red:
-  `mutant_fixed_prometheus_requests`,
-  `mutant_provisioned_value_in_bound_deployment`, `mutant_unchecked_prior_ref`, `mutant_drop_execution_replica`,
-  `mutant_drop_execution_surge`, `mutant_drop_execution_old_revision`, `mutant_wrong_execution_revision_join`,
-  `mutant_double_debit_controller_child`, `mutant_drop_largest_kubelet_metadata`, and
-  `mutant_missing_kubelet_metadata_model`. The gate re-runs each and asserts red.
+- **GateReady Haskell mutation operators (§M.2)** — four deliberately broken production transformations,
+  selected by closed Cabal flags and rebuilt serially in the acquired run root: accept a replayed plan,
+  accept missing promised readback, drop one desired execution replica, and drop one runtime-accounting row.
+  The gate requires each changed subject to exit red at its independently fixed failure locus.
 - Its Register-1 ledger is generated from this sprint's executed cases. Coverage assertions require every corpus
   entry, negative reason, and seeded mutant above to contribute a row naming its catalog id and foreclosure
   layer; provider bring-up and bounded-cache resolution remain explicitly deferred live residues, never proof
@@ -455,7 +431,7 @@ UNVERIFIED.
 
 ### Validation
 
-1. Rejected historical observation: the `provision-seal-spec` Cabal suite was recorded green — each of the
+1. The `provision-seal-spec` Cabal suite must be green — each of the
    nine per-arm positives provisions (both shapes) to
    an opaque `ProvisionedSpec` on its positive topology satisfying the three independent reference predicates;
    the two boundary fixtures exercise both planner arms; each seal-locus negative returns its specifically-tagged
@@ -467,10 +443,7 @@ UNVERIFIED.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work
-includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and
-phase-specific obligation in the redesigned gate. The eleven-sided Register-1 gate, 40-row locus ledger,
-42-unit five-calculus projection, 25 metrics, and 37-surface/55-item join remain unaccepted target coverage.
+Integrated Phase-31 gate execution and its mechanical status projection remain.
 
 ## Documentation Requirements
 
@@ -498,7 +471,7 @@ phase-specific obligation in the redesigned gate. The eleven-sided Register-1 ga
   candidate; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-31 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register the `planInfrastructure`/`provision`/`provisionRenderSources`
-  additions to `src/Amoebius/Capacity/{Provision,RuntimeStorage,RenderSource}.hs` and the provision-seal
+  additions to `src/provision-seal/Amoebius/Capacity/{Provision,RenderSource}.hs`, `src/execution-accelerator-folds/Amoebius/Capacity/RuntimeStorage.hs`, and the provision-seal
   property + gate suites as Phase-31 design-first rows.
 
 ## Related Documents

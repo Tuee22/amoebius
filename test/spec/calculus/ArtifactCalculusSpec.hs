@@ -77,11 +77,10 @@ pairs :: Seed -> [(RecipeUnder, Declared)]
 pairs seed = zip (corpusRecipes seed) declaredCorpus
 
 checks :: IO ()
-checks = do
-  oracle <- readOracle
+checks =
   let results =
         [ ("target-set-closed", targetSetClosed)
-        , ("oracle-names-every-input", oracleNamesEveryInput oracle)
+        , ("oracle-names-every-input", oracleNamesEveryInput independentAddressOracle)
         , ("address-folds-target", addressFoldsTarget)
         , ("address-folds-recipe-identity", perturbationMoves bumpRevision)
         , ("address-folds-declaration", perturbationMoves renameDeclaration)
@@ -93,21 +92,22 @@ checks = do
         , ("consume-returns-rendered", consumeReturnsRendered)
         ]
       failures = [name | (name, verdict) <- results, not verdict]
-  mapM_ (\(name, verdict) -> putStrLn ((if verdict then "  ok   " else "  FAIL ") <> name)) results
-  if null failures
-    then
-      putStrLn
-        ( "artifact-calculus-spec: PASS ("
-            <> show (length everyTarget)
-            <> " targets, "
-            <> show (length addressInputs)
-            <> " address inputs, "
-            <> show (length results)
-            <> " checks)"
-        )
-    else do
-      putStrLn ("artifact-calculus-spec: FAIL " <> unwords failures)
-      exitFailure
+   in do
+        mapM_ (\(name, verdict) -> putStrLn ((if verdict then "  ok   " else "  FAIL ") <> name)) results
+        if null failures
+          then
+            putStrLn
+              ( "artifact-calculus-spec: PASS ("
+                  <> show (length everyTarget)
+                  <> " targets, "
+                  <> show (length addressInputs)
+                  <> " address inputs, "
+                  <> show (length results)
+                  <> " checks)"
+              )
+          else do
+            putStrLn ("artifact-calculus-spec: FAIL " <> unwords failures)
+            exitFailure
 
 -- | Every declared kind has a target constructor, and the corpus covers each exactly once.
 targetSetClosed :: Bool
@@ -244,16 +244,19 @@ oracleName = \case
   DeclarationContent -> "declaration"
   RenderedContent -> "rendered"
 
-readOracle :: IO [(Text, Text)]
-readOracle = do
-  contents <- readFile "test/oracle/artifact_calculus/address_inputs.tsv"
-  pure [row | line <- lines contents, row <- parse line]
-  where
-    parse line = case splitTabs line of
-      target : input : _ | take 1 line /= "#" && not (null target) -> [(Text.pack target, Text.pack input)]
-      _ -> []
-
-splitTabs :: String -> [String]
-splitTabs value = case break (== '\t') value of
-  (front, []) -> [front]
-  (front, _ : rest) -> front : splitTabs rest
+-- | Independently authored expectation relation. It is Haskell data in the
+-- oracle component, not a serialized behavioral fixture, and therefore cannot
+-- be altered by editing a TSV beside the production calculus.
+independentAddressOracle :: [(Text, Text)]
+independentAddressOracle =
+  [ (target, input)
+  | target <-
+      [ "dhall-schema"
+      , "container-recipe"
+      , "object-manifest"
+      , "sql-schema"
+      , "purescript-contract"
+      , "build-mutant"
+      ]
+  , input <- ["target", "recipe-identity", "declaration", "rendered"]
+  ]

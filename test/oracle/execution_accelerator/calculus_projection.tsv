@@ -1,5 +1,0 @@
-metric	value
-calculus-kinds	artifact,budget,lift,workflow,evidence
-component-names	execution-negatives,execution-twins,composed-positives,placement-properties,mutant-evidence
-projection-counts	37,37,2,7,45
-resource-vector	5,128,0,0

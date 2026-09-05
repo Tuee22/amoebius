@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -76,7 +77,11 @@ fits (Demand required) capacity = Headroom <$> subtractResources required capaci
 
 carve :: AvailableCapacity -> Demand -> Either Overcommit AvailableCapacity
 carve (AvailableCapacity capacity) (Demand required) =
+#if defined(CAPACITY_CARVE_SKIP_SUBTRACTION_MUTANT)
+  AvailableCapacity capacity <$ subtractResources required capacity
+#else
   AvailableCapacity <$> subtractResources required capacity
+#endif
 
 podFits :: Workload -> Node -> Either PlacementError PodFitWitness
 podFits workload node = do
@@ -94,12 +99,29 @@ effectiveReserved envelope = addResources (envelopeRequests envelope) (envelopeH
 storageReservation :: StorageDemand -> (Natural, Natural)
 storageReservation storage =
   ( storageDiskBackedBytes storage + storagePrivateEphemeralBytes storage
+#if defined(CAPACITY_MEMORY_BACKED_DROP_MUTANT)
+  , max (storageTmpfsInitBytes storage) (storageTmpfsAppBytes storage)
+#elif defined(CAPACITY_TMPFS_PERSISTENCE_DROP_MUTANT)
+  , storageTmpfsAppBytes storage
+#else
   , if storageTmpfsPersistsIntoApp storage
       then storageTmpfsInitBytes storage + storageTmpfsAppBytes storage
       else max (storageTmpfsInitBytes storage) (storageTmpfsAppBytes storage)
+#endif
   )
 
 placeFixed :: [Node] -> [Workload] -> Either PlacementError Placement
+#if defined(CAPACITY_FIXED_ADMIT_OVERCOMMIT_MUTANT)
+placeFixed nodes _ =
+  Right
+    Placement
+      { placementKind = FixedPlacement
+      , placementNodes = fmap (\node -> MaterializedNode node Nothing) nodes
+      , placementAssignments = []
+      , placementInstances = fromIntegral (length nodes)
+      , placementVcpu = sum [resourceCpu (nodeAllocatable (nodeCapacity node)) | node <- nodes]
+      }
+#else
 placeFixed nodes workloads = do
   final <- placeOnExisting (fmap (initialLedger . (`MaterializedNode` Nothing)) nodes) (decreasing workloads)
   pure
@@ -110,8 +132,20 @@ placeFixed nodes workloads = do
       , placementInstances = fromIntegral (length final)
       , placementVcpu = sum [resourceCpu (nodeAllocatable (nodeCapacity node)) | node <- nodes]
       }
+#endif
 
 placeElastic :: [Node] -> [CandidateNodeClass] -> GrowthQuota -> [Workload] -> Either PlacementError Placement
+#if defined(CAPACITY_ELASTIC_UNCONDITIONAL_RIGHT_MUTANT)
+placeElastic floorNodes _ _ _ =
+  Right
+    Placement
+      { placementKind = ElasticPlacement
+      , placementNodes = fmap (\node -> MaterializedNode node Nothing) floorNodes
+      , placementAssignments = []
+      , placementInstances = fromIntegral (length floorNodes)
+      , placementVcpu = sum [resourceCpu (nodeAllocatable (nodeCapacity node)) | node <- floorNodes]
+      }
+#else
 placeElastic floorNodes candidates quota workloads = do
   let initial = fmap (initialLedger . (`MaterializedNode` Nothing)) floorNodes
       baseInstances = sum (fmap candidateBaseCount candidates)
@@ -125,6 +159,7 @@ placeElastic floorNodes candidates quota workloads = do
       , placementInstances = instances
       , placementVcpu = vcpu
       }
+#endif
 
 placeOnExisting :: [NodeLedger] -> [Workload] -> Either PlacementError [NodeLedger]
 placeOnExisting ledgers workloads = case workloads of
@@ -181,7 +216,9 @@ selectCandidate candidates existing workload =
   available =
     [ (candidate, placed)
     | candidate <- fitting
+#if !defined(CAPACITY_ELASTIC_IGNORE_CLASS_MAX_MUTANT)
     , classCount (candidateName candidate) existing < candidateMaxCount candidate
+#endif
     , Right placed <- [debitWorkload workload (candidateLedger candidate (classCount (candidateName candidate) existing + 1))]
     ]
 
@@ -208,9 +245,13 @@ candidateLedger candidate ordinal =
 effectiveCandidateCapacity :: CandidateNodeClass -> NodeCapacity
 effectiveCandidateCapacity candidate =
   let capacity = candidateCapacity candidate
+#if defined(CAPACITY_ELASTIC_DROP_PER_NODE_MUTANT)
+      residual = nodeAllocatable capacity
+#else
       residual = case subtractResources (candidatePerNodeDemand candidate) (nodeAllocatable capacity) of
         Left _ -> ResourceVector 0 0 0 0
         Right available -> available
+#endif
    in capacity {nodeAllocatable = residual}
 
 classCount :: Text -> [NodeLedger] -> Natural
@@ -247,7 +288,11 @@ debitWorkload workload ledger = do
   reserved <- firstPlacement (carve (ledgerReserved ledger) (Demand (normalizedReserved workload)))
   cpuLimit <- debitScalar CpuAxis (resourceCpu limits) (ledgerCpuLimitRemaining ledger)
   memoryLimit <- debitScalar MemoryAxis (resourceMemory limits) (ledgerMemoryLimitRemaining ledger)
+#if defined(CAPACITY_POD_DROP_EPHEMERAL_MUTANT) || defined(CAPACITY_VALIDATOR_DROP_EPHEMERAL_MUTANT)
+  let ephemeralLimit = ledgerEphemeralLimitRemaining ledger
+#else
   ephemeralLimit <- debitScalar EphemeralStorageAxis (resourceEphemeralStorage limits) (ledgerEphemeralLimitRemaining ledger)
+#endif
   claims <- debitClaims (workloadAttachments workload) capacity (ledgerClaims ledger)
   pure
     ledger
@@ -286,8 +331,16 @@ initialLedger materialized =
 
 normalizedReserved :: Workload -> ResourceVector
 normalizedReserved workload =
+#if defined(CAPACITY_HEADROOM_PAD_DROP_MUTANT)
+  let reserved = envelopeRequests (workloadEnvelope workload)
+#else
   let reserved = effectiveReserved (workloadEnvelope workload)
+#endif
+#if defined(CAPACITY_POD_DROP_EPHEMERAL_MUTANT)
+   in reserved {resourceEphemeralStorage = 0, resourcePodSlots = 1}
+#else
    in reserved {resourcePodSlots = 1}
+#endif
 
 validateStorage :: Workload -> Either PlacementError ()
 validateStorage workload =
@@ -301,9 +354,13 @@ validateStorage workload =
             else Right ()
 
 validateEligibility :: Workload -> Node -> Either PlacementError ()
+#if defined(CAPACITY_TAINT_IGNORE_MUTANT)
+validateEligibility _ _ = Right ()
+#else
 validateEligibility workload node
   | nodeTaints node `Set.isSubsetOf` workloadTolerations workload = Right ()
   | otherwise = Left (IneligibleNode (workloadId workload) (nodeId node))
+#endif
 
 validateAntiAffinity :: Workload -> NodeLedger -> Either PlacementError ()
 validateAntiAffinity workload ledger = case workloadAntiAffinity workload of
@@ -321,7 +378,12 @@ debitClaims attachments capacity used = go grouped used
     Just ((driver, claims), remaining) ->
       let already = Map.findWithDefault Set.empty driver current
           combined = already `Set.union` claims
-          required = fromIntegral (Set.size combined)
+          required =
+#if defined(CAPACITY_VALIDATOR_DROP_CSI_MUTANT)
+            0
+#else
+            fromIntegral (Set.size combined)
+#endif
           available = Map.findWithDefault 0 driver (nodeCsiAttachCapacity capacity)
        in if required > available
             then Left (CapacityOvercommit (Overcommit (CsiAttachmentsAxis driver) required available))
@@ -340,26 +402,43 @@ firstPlacement value = case value of
 
 subtractResources :: ResourceVector -> ResourceVector -> Either Overcommit ResourceVector
 subtractResources required available
+#if !defined(CAPACITY_VALIDATOR_DROP_CPU_MUTANT)
   | resourceCpu required > resourceCpu available =
       Left (Overcommit CpuAxis (resourceCpu required) (resourceCpu available))
+#endif
+#if !defined(CAPACITY_FITS_DROP_MEMORY_MUTANT) && !defined(CAPACITY_VALIDATOR_DROP_MEMORY_MUTANT)
   | resourceMemory required > resourceMemory available =
       Left (Overcommit MemoryAxis (resourceMemory required) (resourceMemory available))
+#endif
+#if !defined(CAPACITY_VALIDATOR_DROP_EPHEMERAL_MUTANT)
   | resourceEphemeralStorage required > resourceEphemeralStorage available =
       Left (Overcommit EphemeralStorageAxis (resourceEphemeralStorage required) (resourceEphemeralStorage available))
+#endif
+#if !defined(CAPACITY_VALIDATOR_DROP_SLOTS_MUTANT)
   | resourcePodSlots required > resourcePodSlots available =
       Left (Overcommit PodSlotsAxis (resourcePodSlots required) (resourcePodSlots available))
+#endif
   | otherwise =
       Right
         ResourceVector
-          { resourceCpu = resourceCpu available - resourceCpu required
-          , resourceMemory = resourceMemory available - resourceMemory required
-          , resourceEphemeralStorage = resourceEphemeralStorage available - resourceEphemeralStorage required
-          , resourcePodSlots = resourcePodSlots available - resourcePodSlots required
+          { resourceCpu = naturalDifference (resourceCpu available) (resourceCpu required)
+          , resourceMemory = naturalDifference (resourceMemory available) (resourceMemory required)
+          , resourceEphemeralStorage = naturalDifference (resourceEphemeralStorage available) (resourceEphemeralStorage required)
+          , resourcePodSlots = naturalDifference (resourcePodSlots available) (resourcePodSlots required)
           }
+
+naturalDifference :: Natural -> Natural -> Natural
+naturalDifference available required
+  | available >= required = available - required
+  | otherwise = 0
 
 cpuLimitBudget :: CpuOvercommitPolicy -> Natural -> Natural
 cpuLimitBudget policy allocatable = case policy of
+#if defined(CAPACITY_CPU_POLICY_IGNORE_MUTANT)
+  NoCpuOvercommit -> allocatable * 1024
+#else
   NoCpuOvercommit -> allocatable
+#endif
   BoundedCpuOvercommit ratio -> allocatable * max 1 ratio
 
 decreasing :: [Workload] -> [Workload]

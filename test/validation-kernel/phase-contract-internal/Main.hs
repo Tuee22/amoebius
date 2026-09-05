@@ -17,13 +17,14 @@ import SelectorCli (
     selectorSuite,
  )
 import StatusProjectionInternalOracle (runStatusProjectionInternalOracle)
+import ToolchainAcquisitionOracle (runToolchainAcquisitionOracle)
 
 main :: IO ()
 main =
     runSelectorCli
         ( selectorSuite
             "PhaseContractInternalOracle"
-            (runEvidenceGatePassInternalOracle >> runPhaseRunnerInternalOracle >> runStatusProjectionInternalOracle >> runPhaseContractInternalOracle)
+            (runEvidenceGatePassInternalOracle >> runPhaseRunnerInternalOracle >> runStatusProjectionInternalOracle >> runToolchainAcquisitionOracle >> runPhaseContractInternalOracle)
             runPhaseContractInternalSelectorOracle
         )
             { suiteSelectorNames = phaseContractInternalSelectorNames

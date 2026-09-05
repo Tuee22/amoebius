@@ -1,4 +1,0 @@
-record_partition requester_partition expected
-tenant-a/alice/device-1/program-1/epoch-1 tenant-a/alice/device-1/program-1/epoch-1 allow
-tenant-a/alice/device-1/program-1/epoch-1 tenant-a/bob/device-1/program-1/epoch-1 deny
-tenant-a/alice/device-1/program-1/epoch-1 tenant-b/alice/device-1/program-1/epoch-1 deny

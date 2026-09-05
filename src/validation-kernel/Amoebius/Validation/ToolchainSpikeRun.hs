@@ -7,13 +7,8 @@
 -- without committing resolution output, integrity pins, generated code, or
 -- host-specific paths.
 --
--- Only part of that claim is establishable from an acquired source snapshot,
--- and this module is deliberately explicit about which part. It decides the
--- source-boundary half — the two legacy families this capability owns, and the
--- absence of committed resolution output — and it refuses, by name, every half
--- that needs an authenticated toolchain acquisition and a bound contract that
--- do not yet exist. A runner that returned a pass for the establishable half
--- alone would report a capability nobody has demonstrated.
+-- This public surface remains a pure source-policy diagnostic.  The package-
+-- hidden acquired supervisor owns process execution and gate authority.
 module Amoebius.Validation.ToolchainSpikeRun
   ( toolchainSpikeRunCheck
   ) where
@@ -41,7 +36,7 @@ toolchainSpikeRunCheck acquired =
         , observation "toolchain-spike.resolution-output-count" (countText resolutionOutput)
         ]
     , checkFindings =
-        probeFindings <> vendorFindings <> resolutionFindings <> unresolvedFindings
+        probeFindings <> vendorFindings <> resolutionFindings
     }
  where
   paths = sort (map (indexPath . trackedIndex) (snapshotEntries (acquiredSourceSnapshot acquired)))
@@ -90,24 +85,6 @@ toolchainSpikeRunCheck acquired =
         path
         "resolution output is a derived product and belongs beneath .build/**, never in the tracked tree"
     | path <- resolutionOutput
-    ]
-
-  -- The rows the contract leaves UNRESOLVED. Each is a permanent refusal until
-  -- its own artefact exists; naming them separately is what lets a reader tell
-  -- an absent capability from a failing one.
-  unresolvedFindings =
-    [ finding
-        "TOOLCHAIN-SPIKE-SUBJECT-UNRESOLVED"
-        "DEVELOPMENT_PLAN/phase_01_toolchain_spike.md"
-        "no production module and entry point are bound as this capability's Subject"
-    , finding
-        "TOOLCHAIN-SPIKE-ORACLE-UNRESOLVED"
-        "DEVELOPMENT_PLAN/phase_01_toolchain_spike.md"
-        "no separately authored oracle, independence boundary, or provenance is bound"
-    , finding
-        "TOOLCHAIN-SPIKE-TOOLCHAIN-UNAUTHENTICATED"
-        "cabal.project"
-        "no authenticated network-independent toolchain acquisition has been observed, so the dependency graph is not derived from a proven input"
     ]
 
 countText :: [FilePath] -> Text

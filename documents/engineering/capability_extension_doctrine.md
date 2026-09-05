@@ -135,7 +135,7 @@ wired by the same graph every other extension is wired by.
 ## 3. The PROVIDE and REQUIRE contract
 
 [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) owns the target two-member link set of `{infernix, jitML}`
-provide/require refinement in `Amoebius.Capability.Binding`: requirements must resolve, duplicate providers
+provide/require refinement in `src/capability-bind/Amoebius/Capability/Binding.hs`: requirements must resolve, duplicate providers
 are rejected as anti-shadow violations, and provider edges must be acyclic. Its paired legal/cyclic/shadowing
 fixtures plus a direct missing-requirement/closed-graph pair establish totality only for the pure gadt-decode
 model; linked runtime behavior remains unverified.

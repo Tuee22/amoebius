@@ -1,8 +1,0 @@
-case	left	right	third	parts	cpu	memory	ephemeral	pods
-empty-empty	none	none	infernix	-	0	0	0	0
-left-identity	none	infernix	jitml	infernix	4	1792	26	3
-right-identity	infernix	none	jitml	infernix	4	1792	26	3
-left-identity-jitml	none	jitml	infernix	jitml	7	3584	52	3
-right-identity-jitml	jitml	none	infernix	jitml	7	3584	52	3
-infernix-jitml	infernix	jitml	infernix	infernix,jitml	11	5376	78	6
-jitml-infernix	jitml	infernix	jitml	infernix,jitml	11	5376	78	6

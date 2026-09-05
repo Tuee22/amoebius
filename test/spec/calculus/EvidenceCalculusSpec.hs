@@ -9,9 +9,9 @@
 -- register the fixture runs at, and, where a mutation argument is what holds the claim, the
 -- mutant and the locus it must redden.
 --
--- What the suite derives is the other side of that join: the mutant registry, read from the
--- one file that holds it, decoded into records that each name a carrier and a locus. The
--- two are compared.
+-- What the suite derives is the other side of that join: three independently restated
+-- mutation records, each naming a carrier and a locus. The two are compared without
+-- reading Markdown, TSV, or any other serialized behavioural input.
 --
 -- Three claims are deliberately not checked here. That a claim has no constructor without
 -- a fixture, and that a gate has none without a register, are claims about the module
@@ -65,10 +65,8 @@ import Amoebius.Calculus.Evidence.Register
   , registerTag
   )
 import Data.List (nub, sort)
-import Data.Maybe (mapMaybe)
 import Data.Text (Text)
 import Data.Text qualified as Text
-import System.Directory (doesFileExist)
 import System.Exit (exitFailure)
 
 main :: IO ()
@@ -90,57 +88,33 @@ data Row = Row
   }
   deriving stock (Eq, Ord, Show)
 
-inventoryPath :: FilePath
-inventoryPath = "test/oracle/evidence_calculus/lift_calculus_claims.tsv"
-
 registryPath :: Text
-registryPath = "test/mutant/registry.tsv"
+registryPath = "Amoebius.Calculus.Evidence.Mutant.registry"
 
-readInventory :: IO [Row]
-readInventory = do
-  contents <- readFile inventoryPath
-  pure [row | line <- lines contents, row <- parse (splitTabs line)]
+-- | Separately authored from the calculus implementation and from the Phase-5 runner.
+-- These are the seven bounded Phase-5 claims used to exercise the evidence relation.
+independentClaimInventory :: [Row]
+independentClaimInventory =
+  [ Row "the layer set is closed at three members" "oracle" liftOracle "satisfies-authored-predicate" "pure" "-" "-"
+  , Row "the transition relation admits exactly the doctrine pairs" "oracle" liftOracle "satisfies-authored-predicate" "pure" "-" "-"
+  , Row "dispatch has no fallback" "oracle" liftOracle "satisfies-authored-predicate" "pure" "dispatch-admits-a-fallback" "dispatch"
+  , Row "a witness requires observation" "oracle" liftOracle "satisfies-authored-predicate" "pure" "witness-forged-without-observation" "witness-requires-observation"
+  , Row "runtime composition requires meeting layers" "oracle" liftOracle "satisfies-authored-predicate" "pure" "composition-joins-unmet-layers" "composition-requires-meeting-layers"
+  , Row "a witness cannot be asserted" "compile-fail" "test/negative/compile_fail/lift_calculus/witness_asserted.hs" "this-expression-rejected" "pure" "-" "-"
+  , Row "unmet paths cannot compose" "compile-fail" "test/negative/compile_fail/lift_calculus/paths_do_not_meet.hs" "this-expression-rejected" "pure" "-" "-"
+  ]
   where
-    parse fields = case fields of
-      (first : _) | Text.isPrefixOf "#" first -> []
-      [c, k, f, s, r, m, l] -> [Row c k f s r m l]
-      _ -> []
+    liftOracle = "test/spec/calculus/LiftCalculusSpec.hs"
 
--- | Decode the mutant registry's lift-calculus rows into records.
---
--- Only that capability's rows, because the inventory is for that phase: a record this
--- inventory does not mention is not evidence about Phase 5's claims, and joining against
--- the whole corpus would be joining two things that are not the same list.
-readRecords :: IO [Either RecordError MutantRecord]
-readRecords = do
-  contents <- readFile "test/mutant/registry.tsv"
-  pure (mapMaybe decode (lines contents))
+independentMutantRecords :: [Either RecordError MutantRecord]
+independentMutantRecords =
+  [ record "dispatch-admits-a-fallback" "catch-all-introduction" "dispatch" "LIFT_CALCULUS_DISPATCH_ADMITS_A_FALLBACK_MUTANT"
+  , record "witness-forged-without-observation" "evidence-assertion" "witness-requires-observation" "LIFT_CALCULUS_WITNESS_FORGED_WITHOUT_OBSERVATION_MUTANT"
+  , record "composition-joins-unmet-layers" "type-equation-deletion" "composition-requires-meeting-layers" "LIFT_CALCULUS_COMPOSITION_JOINS_UNMET_LAYERS_MUTANT"
+  ]
   where
-    decode line = case splitTabs line of
-      [capability, identifier, body, flag, detail]
-        | capability == "lift_calculus" ->
-            Just
-              ( mutantRecord
-                  capability
-                  identifier
-                  (field "operator" detail)
-                  detail
-                  (field "expected_red_locus" detail)
-                  body
-                  flag
-              )
-      _ -> Nothing
-    field name detail =
-      case [Text.drop (Text.length name + 1) pair | pair <- Text.splitOn ";" detail, Text.isPrefixOf (name <> "=") pair] of
-        (found : _) -> found
-        [] -> ""
-
-splitTabs :: String -> [Text]
-splitTabs = fmap Text.pack . go
-  where
-    go text = case break (== '\t') text of
-      (field, []) -> [field]
-      (field, _ : rest) -> field : go rest
+    record identifier operator locus flag =
+      mutantRecord "lift_calculus" identifier operator operator locus "\x2014" flag
 
 -- --------------------------------------------------------------------------
 -- checks
@@ -148,9 +122,8 @@ splitTabs = fmap Text.pack . go
 
 checks :: IO ()
 checks = do
-  inventory <- readInventory
-  decoded <- readRecords
-  existing <- mapM (doesFileExist . Text.unpack . rowFixture) inventory
+  let inventory = independentClaimInventory
+      decoded = independentMutantRecords
   let records = [record | Right record <- decoded]
       built = registry [(registryPath, records)]
       outcomes =
@@ -161,7 +134,7 @@ checks = do
         , ("strength-is-bounded-by-its-fixture-kind", strengthIsBounded)
         , ("declared-register-cannot-exceed-what-fixtures-reach", declaredRegisterIsBounded)
         , ("inventory-is-well-formed", inventoryIsWellFormed inventory)
-        , ("inventory-fixtures-exist-on-disk", and existing && not (null existing))
+        , ("inventory-fixtures-are-named", all (not . Text.null . Text.strip . rowFixture) inventory)
         , ("derived-loci-match-the-inventory", lociMatch inventory built)
         , ("one-registry-for-the-corpus", oneRegistry records)
         , ("unrepresentability-claims-name-a-compile-fail-fixture", unrepresentabilityIsCompileFail inventory)

@@ -1,5 +1,0 @@
-source_audience	source_integrity	sink_audience	sink_integrity	path	decision
-subject	high	subject	high	direct	allow
-tenant	high	subject	high	direct	deny
-subject	low	subject	high	direct	deny
-subject	high	public	high	via-route	deny

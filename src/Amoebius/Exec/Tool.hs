@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Amoebius.Exec.Tool
   ( ToolPath
   , ToolError (..)
@@ -10,6 +12,10 @@ module Amoebius.Exec.Tool
 import Amoebius.Host.Ensure qualified as Ensure
 import Data.ByteString.Lazy (ByteString)
 import System.Exit (ExitCode)
+#ifdef BOUNDARY_PATH_RESOLVE_MUTANT
+import System.FilePath (takeFileName)
+import System.Process.Typed (byteStringInput, proc, readProcess, setStdin)
+#endif
 
 data ToolPath = ToolPath
   { toolPath :: FilePath
@@ -34,5 +40,11 @@ mkToolPath path = case Ensure.mkAbsExe path of
 
 runTool :: ToolPath -> [String] -> ByteString -> IO ToolResult
 runTool resolved arguments stdinBytes = do
+#ifdef BOUNDARY_PATH_RESOLVE_MUTANT
+  (exitCode, stdoutBytes, stderrBytes) <-
+    readProcess (setStdin (byteStringInput stdinBytes) (proc (takeFileName (toolPath resolved)) arguments))
+  pure (ToolResult exitCode stdoutBytes stderrBytes)
+#else
   result <- Ensure.runToolWithStdin (toolAbsExe resolved) arguments stdinBytes
   pure (ToolResult (Ensure.toolExitCode result) (Ensure.toolStdout result) (Ensure.toolStderr result))
+#endif

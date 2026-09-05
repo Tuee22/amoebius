@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Mechanical observations and predicates for the seven compositional laws.
@@ -179,16 +180,51 @@ evaluateCompositionLaws
   -> CompositionObservations scope
   -> [(CompositionLaw, CompositionVerdict)]
 evaluateCompositionLaws left right _third observations =
-  [ (C1, verdict (closureFailures pair observations))
-  , (C2, verdict (identityFailures pair observations))
-  , (C3, verdict (associativityFailures observations))
-  , (C4, verdict (nonInterferenceFailures pair observations))
-  , (C5, verdict (budgetFailures left right observations))
-  , (C6, verdict (scopeFailures observations))
-  , (C7, verdict (addressFailures pair observations))
+  [ (C1, verdict c1Failures)
+  , (C2, verdict c2Failures)
+  , (C3, verdict c3Failures)
+  , (C4, verdict c4Failures)
+  , (C5, verdict c5Failures)
+  , (C6, verdict c6Failures)
+  , (C7, verdict c7Failures)
   ]
  where
   pair = composeComposites left right
+#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_CLOSURE_MUTANT
+  c1Failures = []
+#else
+  c1Failures = closureFailures pair observations
+#endif
+#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_IDENTITY_MUTANT
+  c2Failures = []
+#else
+  c2Failures = identityFailures pair observations
+#endif
+#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_ASSOCIATIVITY_MUTANT
+  c3Failures = []
+#else
+  c3Failures = associativityFailures observations
+#endif
+#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_NON_INTERFERENCE_MUTANT
+  c4Failures = []
+#else
+  c4Failures = nonInterferenceFailures pair observations
+#endif
+#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_BUDGET_ADDITIVITY_MUTANT
+  c5Failures = []
+#else
+  c5Failures = budgetFailures left right observations
+#endif
+#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_SCOPE_CONJUNCTION_MUTANT
+  c6Failures = []
+#else
+  c6Failures = scopeFailures observations
+#endif
+#ifdef EXTENSION_LAWS_COMPOSITIONAL_IGNORE_NAME_DISJOINTNESS_MUTANT
+  c7Failures = []
+#else
+  c7Failures = addressFailures pair observations
+#endif
 
 compositionLawPassed :: CompositionVerdict -> Bool
 compositionLawPassed lawVerdict = case lawVerdict of

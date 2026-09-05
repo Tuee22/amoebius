@@ -1,3 +1,0 @@
-operator=escape-arm-addition
-change=reuse a named external link as effect transport
-expected=link-as-url fails

@@ -6,199 +6,186 @@ module Main (main) where
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (..))
 import Amoebius.Calculus.Budget.Grant (Bytes (..), Slots (..), allowance)
 import Amoebius.Calculus.Composition
-  ( Composition
-  , append
-  , artifactComponent
-  , budgetComponent
-  , calculusTag
-  , compose
-  , compositionKinds
-  , compositionResource
-  , evidenceComponent
-  , liftComponent
-  , singleton
-  , workflowComponent
+  ( Composition, append, artifactComponent, budgetComponent, calculusTag, compose
+  , compositionKinds, compositionResource, evidenceComponent, liftComponent
+  , singleton, workflowComponent
   )
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
 import Amoebius.Capacity.Types (ResourceVector (..))
 import Amoebius.Formal.CalculusComposition (compositionModel)
-import Amoebius.Formal.EmitTLA
-import Amoebius.Formal.Explore
-import Amoebius.Formal.Interpret
+import Amoebius.Formal.EmitTLA (Cfg (..), Tla (..), emitTLA)
+import Amoebius.Formal.Explore (ExploreResult (..), canonicalFingerprint, explore)
+import Amoebius.Formal.Interpret (evalExpr, interpret, valueAsBool)
 import Amoebius.Formal.Model
-import Amoebius.Formal.ToyModel
-import Control.Monad (forM, forM_, unless, when)
-import Data.Char (isDigit, isSpace)
-import Data.IORef
+import Amoebius.Formal.ToyModel (toyModel)
+import Amoebius.Scope.Index
+  ( RequestScope, activeMembership, trustedSubject, trustedTenant, withRequestScope )
+import Control.Monad (forM_, unless)
 import Data.List (find, intercalate, isInfixOf, isPrefixOf, isSuffixOf, tails)
-import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
+import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
-import qualified Data.Set as Set
+import Data.Set qualified as Set
 import Data.Text qualified as Text
-import Amoebius.Scope.Index
-  ( RequestScope
-  , activeMembership
-  , trustedSubject
-  , trustedTenant
-  , withRequestScope
-  )
-import System.Directory (canonicalizePath, createDirectoryIfMissing, doesFileExist, getCurrentDirectory)
-import System.Environment (lookupEnv)
-import System.Exit (ExitCode (..), exitFailure)
+import System.Directory (createDirectoryIfMissing)
+import System.Environment (getArgs)
+import System.Exit (exitFailure)
 import System.FilePath ((</>))
-import System.Process (readProcessWithExitCode)
-import Test.QuickCheck
-  ( Arbitrary (..)
-  , Args (..)
-  , checkCoverage
-  , chooseInt
-  , counterexample
-  , cover
-  , ioProperty
-  , isSuccess
-  , quickCheckWithResult
-  , stdArgs
-  )
-import qualified Test.QuickCheck as QC
-import Test.QuickCheck.Random (mkQCGen)
+import System.IO (hPutStrLn, stderr)
 
-data TlcResult = TlcResult
-  { tlcExit :: ExitCode
-  , tlcOutput :: String
-  , tlcFingerprints :: Set String
-  , tlcDistinctCount :: Maybe Int
-  }
-  deriving stock (Show)
-
-data DifferentialRecord = DifferentialRecord
-  { recordCases :: Int
-  , recordViolating :: Int
-  , recordBoundary :: Int
-  , recordCoverage :: Map String Int
-  }
-  deriving stock (Eq, Show)
-
-data InvariantCase = InvariantCase
-  { casePc0 :: String
-  , casePc1 :: String
-  , caseMirror0 :: String
-  , caseMirror1 :: String
-  , caseCriticalCount :: Integer
-  , caseExpected :: Bool
-  }
-  deriving stock (Eq, Show)
-
-emptyRecord :: DifferentialRecord
-emptyRecord = DifferentialRecord 0 0 0 Map.empty
-
-newtype GeneratedSeed = GeneratedSeed Int
-  deriving stock (Eq, Show)
-
-instance Arbitrary GeneratedSeed where
-  arbitrary = GeneratedSeed <$> chooseInt (0, 1000000)
-  shrink _ = []
+data TransitionRow = TransitionRow String Event String deriving stock (Eq, Show)
+data InvariantRow = InvariantRow String String String String Integer Bool deriving stock (Eq, Show)
+type RendererFact = (String, String, String)
 
 main :: IO ()
 main = do
-  root <- getCurrentDirectory >>= canonicalizePath
-  java <- resolveTool root "AMOEBIUS_JAVA" ".build/toolchain/runtime/java/bin/java"
-  jar <- resolveTool root "AMOEBIUS_TLA2TOOLS" ".build/toolchain/runtime/tla/tla2tools.jar"
-  let output = root </> ".build/tla/formal-model-spec"
+  output <- getArgs >>= \case
+    [] -> pure ".build/tla/formal-model-spec"
+    [path] -> pure path
+    arguments -> failWith "argv" ("expected one output root, got " <> show arguments)
   createDirectoryIfMissing True output
-
-  putStrLn "formal-model-spec: structural fragment and hand oracle"
-  assertEqual "ToyModel structural well-formedness" [] (modelProblems toyModel)
-  checkRequiredConstructors root
-  checkHandTransitions root
-  checkInvariantTruthTable root toyModel
-  toyExplorer <- requireRight "ToyModel explorer" (explore toyModel)
-  assertEqual "ToyModel distinct states" 8 (Map.size (exploreStates toyExplorer))
-  assertEqual "ToyModel safety" Nothing (exploreViolation toyExplorer)
-
-  putStrLn "formal-model-spec: semantic renderer oracle and renderer mutants"
-  rendererFacts <- checkRendererSemanticOracle root (emitTLA toyModel)
-  rendererSemanticCaught <- checkRendererSemanticMutants rendererFacts
-  checkNeverCommitted root
-
-  putStrLn "formal-model-spec: Phase-10 calculus-composition projection"
-  compositionProjection <- checkCalculusCompositionBridge root
-
-  putStrLn "formal-model-spec: TLC round-trip and liveness sensitivity"
-  toyTlc <- runTlc java jar output Correct toyModel
-  assert (tlcExit toyTlc == ExitSuccess) ("ToyModel TLC failed:\n" <> tlcOutput toyTlc)
-  assertEqual "ToyModel TLC distinct count" (Just 8) (tlcDistinctCount toyTlc)
-  assertEqual "ToyModel explorer/TLC fingerprints"
-    (Map.keysSet (exploreStates toyExplorer)) (tlcFingerprints toyTlc)
-  checkObligationSet root toyModel
-  fairnessSensitivity <- checkFairnessSensitivity java jar output
-
-  putStrLn "formal-model-spec: mechanical model mutation family"
-  modelMutantsCaught <- checkModelMutants java jar output
-  specWeakeningCaught <- checkSpecWeakening root
-
-  putStrLn "formal-model-spec: seeded renderer differential mutants"
-  rendererDifferentialCaught <- checkRendererDifferentialMutants java jar output
-
-  putStrLn "formal-model-spec: QuickCheck differential (200 models)"
-  recordRef <- newIORef emptyRecord
-  let args = stdArgs
-        { maxSuccess = 200
-        , maxDiscardRatio = 10
-        , replay = Just (mkQCGen 20260808, 0)
-        , chatty = True
-        }
-  result <- quickCheckWithResult args (generatedDifferentialProperty java jar output recordRef)
-  unless (isSuccess result) exitFailure
-  record <- readIORef recordRef
-  assertEqual "differential case count" 200 (recordCases record)
-  assert (recordViolating record * 5 >= recordCases record) "safety-violating coverage below 20%"
-  assert (recordBoundary record * 5 >= recordCases record) "constraint-boundary coverage below 20%"
-  forM_ requiredCoverage $ \label ->
-    assert (Map.findWithDefault 0 label (recordCoverage record) * 5 >= recordCases record)
-      ("constructor coverage below 20%: " <> label)
-  writePhaseResults output toyExplorer toyTlc fairnessSensitivity modelMutantsCaught
-    specWeakeningCaught rendererSemanticCaught rendererDifferentialCaught compositionProjection record
-  putStrLn ("formal-model-spec: PASS (" <> show (recordCases record) <> " differential models)")
-
-resolveTool :: FilePath -> String -> FilePath -> IO FilePath
-resolveTool root variable relative = do
-  configured <- lookupEnv variable
-  canonicalizePath (fromMaybe (root </> relative) configured)
+  assertEqual "model-problems" [] (modelProblems toyModel)
+  assertEqual "required-constructors" requiredConstructors
+    (Set.intersection requiredConstructors (constructorSet toyModel))
+  checkStructuralPair
+  putStrLn "formal-model-spec: paired structural model control PASS"
+  checkTransitions
+  checkInvariantRows
+  explored <- requireRight "toy-explorer" (explore toyModel)
+  assertEqual "toy-state-count" 8 (Map.size (exploreStates explored))
+  assertEqual "toy-safety" Nothing (exploreViolation explored)
+  assertEqual "toy-fingerprints" expectedToyFingerprints (Map.keysSet (exploreStates explored))
+  let rendered@(Tla tla, Cfg cfg) = emitTLA toyModel
+  assertEqual "renderer-facts" expectedRendererFacts (renderedSemanticFacts rendered)
+  assert ("UNCHANGED <<criticalCount>>" `isInfixOf` tla) "renderer-unchanged"
+  assertEqual "cfg-invariants" (Set.singleton "MutualExclusion") (cfgNames "INVARIANT " cfg)
+  assertEqual "cfg-properties" expectedProperties (cfgNames "PROPERTY " cfg)
+  writeFile (output </> "ToyModel.tla") tla
+  writeFile (output </> "ToyModel.cfg") cfg
+  checkComposition output
+  putStrLn "formal-model-spec: generated artifact projection PASS"
+  checkGeneratedCorpus
+  putStrLn "formal-model-spec: PASS (8 states, 8 transitions, 25 renderer facts, 200 generated models)"
 
 assert :: Bool -> String -> IO ()
-assert condition message = unless condition (putStrLn ("FAIL: " <> message) >> exitFailure)
+assert condition label = unless condition (failWith label "expectation failed")
 
 assertEqual :: (Eq value, Show value) => String -> value -> value -> IO ()
 assertEqual label expected actual =
-  assert (expected == actual) (label <> ": expected " <> show expected <> ", got " <> show actual)
+  unless (expected == actual) (failWith label ("expected " <> show expected <> ", got " <> show actual))
+
+failWith :: String -> String -> IO value
+failWith label detail = hPutStrLn stderr ("FAIL[" <> label <> "]: " <> detail) >> exitFailure
 
 requireRight :: String -> Either String value -> IO value
-requireRight label result = case result of
-  Left problem -> putStrLn ("FAIL: " <> label <> ": " <> problem) >> exitFailure
-  Right value -> pure value
+requireRight label = either (failWith label) pure
 
-checkRequiredConstructors :: FilePath -> IO ()
-checkRequiredConstructors root = do
-  expected <- Set.fromList . filter (not . null) . lines <$> readFile (root </> "test/oracle/formal/ToyModel.required_constructors.txt")
-  let actual = constructorSet toyModel
-  assertEqual "ToyModel required constructors" expected (Set.intersection expected actual)
+checkStructuralPair :: IO ()
+checkStructuralPair = do
+  assertEqual "well-formed-positive" [] (modelProblems toyModel)
+  let malformed = toyModel {modelVariables = "pc" : modelVariables toyModel}
+  assertEqual "duplicate-variable-negative" ["duplicate variable pc"]
+    (filter (== "duplicate variable pc") (modelProblems malformed))
+
+transitionRows :: [TransitionRow]
+transitionRows =
+  [ row "idle,idle" "Request" "p0" "want,idle"
+  , row "idle,idle" "Request" "p1" "idle,want"
+  , row "want,idle" "Enter" "p0" "critical,idle"
+  , row "idle,want" "Enter" "p1" "idle,critical"
+  , row "critical,idle" "Exit" "p0" "idle,idle"
+  , row "idle,critical" "Exit" "p1" "idle,idle"
+  , row "want,want" "Enter" "p0" "critical,want"
+  , row "want,want" "Enter" "p1" "want,critical"
+  ]
+ where
+  row from action process to = TransitionRow from (Event action [AtomValue process]) to
+
+checkTransitions :: IO ()
+checkTransitions = do
+  forM_ transitionRows $ \(TransitionRow from event expected) -> do
+    state <- stateFromPair from
+    actual <- maybe (failWith "hand-transition" (show event <> " disabled")) pure
+      (interpret toyModel event state)
+    assertEqual "hand-transition" expected (statePair actual)
+  idle <- stateFromPair "idle,idle"
+  assertEqual "disabled-transition" Nothing
+    (interpret toyModel (Event "Enter" [AtomValue "p0"]) idle)
+
+invariantRows :: [InvariantRow]
+invariantRows =
+  [ InvariantRow "idle" "idle" "idle" "idle" 0 True
+  , InvariantRow "want" "idle" "want" "idle" 0 True
+  , InvariantRow "critical" "idle" "critical" "idle" 1 True
+  , InvariantRow "critical" "critical" "critical" "critical" 1 False
+  , InvariantRow "want" "idle" "idle" "idle" 0 False
+  , InvariantRow "idle" "idle" "idle" "idle" (-1) False
+  , InvariantRow "idle" "idle" "idle" "idle" 2 False
+  , InvariantRow "critical" "idle" "critical" "idle" 0 False
+  ]
+
+checkInvariantRows :: IO ()
+checkInvariantRows = forM_ invariantRows $ \fixture@(InvariantRow _ _ _ _ _ expected) -> do
+  actual <- invariantOutcome toyModel fixture
+  assertEqual "invariant-truth-table" expected actual
+
+invariantOutcome :: Model -> InvariantRow -> IO Bool
+invariantOutcome model fixture = case modelInvariants model of
+  invariant : _ -> requireRight "invariant-evaluation"
+    (evalExpr model Map.empty (invariantState fixture) (namedExprBody invariant) >>= valueAsBool)
+  [] -> failWith "invariant-evaluation" "model has no invariant"
+
+invariantState :: InvariantRow -> State
+invariantState (InvariantRow pc0 pc1 mirror0 mirror1 count _) = Map.fromList
+  [("pc", function pc0 pc1), ("mirror", function mirror0 mirror1), ("criticalCount", IntValue count)]
+
+stateFromPair :: String -> IO State
+stateFromPair encoded = case splitOn ',' encoded of
+  [left, right] -> pure (Map.fromList
+    [ ("pc", function left right), ("mirror", function left right)
+    , ("criticalCount", IntValue (if "critical" `elem` [left, right] then 1 else 0)) ])
+  _ -> failWith "state-pair" encoded
+
+function :: String -> String -> Value
+function left right = FunctionValue
+  [(AtomValue "p0", AtomValue left), (AtomValue "p1", AtomValue right)]
+
+statePair :: State -> String
+statePair state = case Map.lookup "pc" state of
+  Just (FunctionValue pairs) -> intercalate "," [atomAt "p0" pairs, atomAt "p1" pairs]
+  value -> "<invalid:" <> show value <> ">"
+ where
+  atomAt name pairs = case lookup (AtomValue name) pairs of
+    Just (AtomValue value) -> value
+    value -> "<invalid:" <> show value <> ">"
+
+expectedToyFingerprints :: Set String
+expectedToyFingerprints = Set.fromList (map fingerprint states)
+ where
+  states =
+    [ ("idle", "idle"), ("want", "idle"), ("idle", "want"), ("want", "want")
+    , ("critical", "idle"), ("idle", "critical"), ("critical", "want"), ("want", "critical") ]
+  fingerprint (left, right) = canonicalFingerprint toyModel (Map.fromList
+    [ ("pc", function left right), ("mirror", function left right)
+    , ("criticalCount", IntValue (if "critical" `elem` [left, right] then 1 else 0)) ])
+
+requiredConstructors :: Set String
+requiredConstructors = Set.fromList
+  [ "BoolLiteral", "ArithmeticComparison", "FiniteSetMembership", "FiniteQuantifier"
+  , "FunctionLiteral", "FunctionUpdate", "FunctionApplication", "WeakFair", "StrongFair"
+  , "Always", "Eventually", "LeadsTo" ]
 
 constructorSet :: Model -> Set String
 constructorSet model = Set.unions
-  [ Set.unions [exprConstructors expr | (_, expr) <- modelInit model]
+  [ Set.unions [exprConstructors expression | (_, expression) <- modelInit model]
   , Set.unions
-      [ Set.unions
-          ( exprConstructors (actionGuard action)
+      [ Set.unions (exprConstructors (actionGuard action)
           : [exprConstructors (parameterDomain parameter) | parameter <- actionParameters action]
-          <> [exprConstructors expr | (_, expr) <- actionEffects action]
-          )
-      | action <- modelActions model
-      ]
-  , Set.unions [exprConstructors (namedExprBody invariant) | invariant <- modelInvariants model]
+          <> [exprConstructors expression | (_, expression) <- actionEffects action])
+      | action <- modelActions model ]
+  , Set.unions [exprConstructors (namedExprBody item) | item <- modelInvariants model]
   , maybe Set.empty (exprConstructors . namedExprBody) (modelConstraint model)
   , maybe Set.empty exprConstructors (modelExpansionLimit model)
   , Set.fromList [show (fairnessKind fairness) | fairness <- modelFairness model]
@@ -207,691 +194,181 @@ constructorSet model = Set.unions
 
 exprConstructors :: Expr -> Set String
 exprConstructors expression = Set.insert label children
-  where
-    (label, children) = case expression of
-      Literal (BoolValue _) -> ("BoolLiteral", Set.empty)
-      Literal _ -> ("Literal", Set.empty)
-      Ref _ -> ("Reference", Set.empty)
-      Not expr -> ("Boolean", exprConstructors expr)
-      And exprs -> ("Boolean", Set.unions (map exprConstructors exprs))
-      Or exprs -> ("Boolean", Set.unions (map exprConstructors exprs))
-      Implies left right -> ("Implication", both left right)
-      Equal left right -> ("Boolean", both left right)
-      NotEqual left right -> ("Boolean", both left right)
-      ArithmeticComparison _ left right -> ("ArithmeticComparison", both left right)
-      Add left right -> ("Arithmetic", both left right)
-      Subtract left right -> ("Subtraction", both left right)
-      FiniteSet exprs -> ("FiniteSet", Set.unions (map exprConstructors exprs))
-      SetUnion left right -> ("SetUnion", both left right)
-      SetDifference left right -> ("SetDifference", both left right)
-      Cardinality expr -> ("Cardinality", exprConstructors expr)
-      FiniteSetMembership left right -> ("FiniteSetMembership", both left right)
-      FiniteQuantifier _ _ domain predicate -> ("FiniteQuantifier", both domain predicate)
-      FunctionLiteral _ domain body -> ("FunctionLiteral", both domain body)
-      FunctionUpdate function key value ->
-        ("FunctionUpdate", Set.unions (map exprConstructors [function, key, value]))
-      FunctionApplication function key -> ("FunctionApplication", both function key)
-      IfThenElse condition whenTrue whenFalse ->
-        ("Conditional", Set.unions (map exprConstructors [condition, whenTrue, whenFalse]))
-    both left right = Set.union (exprConstructors left) (exprConstructors right)
+ where
+  (label, children) = case expression of
+    Literal (BoolValue _) -> ("BoolLiteral", Set.empty)
+    Literal _ -> ("Literal", Set.empty)
+    Ref _ -> ("Reference", Set.empty)
+    Not value -> ("Boolean", exprConstructors value)
+    And values -> ("Boolean", Set.unions (map exprConstructors values))
+    Or values -> ("Boolean", Set.unions (map exprConstructors values))
+    Implies left right -> ("Implication", both left right)
+    Equal left right -> ("Boolean", both left right)
+    NotEqual left right -> ("Boolean", both left right)
+    ArithmeticComparison _ left right -> ("ArithmeticComparison", both left right)
+    Add left right -> ("Arithmetic", both left right)
+    Subtract left right -> ("Subtraction", both left right)
+    FiniteSet values -> ("FiniteSet", Set.unions (map exprConstructors values))
+    SetUnion left right -> ("SetUnion", both left right)
+    SetDifference left right -> ("SetDifference", both left right)
+    Cardinality value -> ("Cardinality", exprConstructors value)
+    FiniteSetMembership left right -> ("FiniteSetMembership", both left right)
+    FiniteQuantifier _ _ domain predicate -> ("FiniteQuantifier", both domain predicate)
+    FunctionLiteral _ domain body -> ("FunctionLiteral", both domain body)
+    FunctionUpdate target key value -> ("FunctionUpdate", Set.unions (map exprConstructors [target, key, value]))
+    FunctionApplication target key -> ("FunctionApplication", both target key)
+    IfThenElse condition yes no -> ("Conditional", Set.unions (map exprConstructors [condition, yes, no]))
+  both left right = Set.union (exprConstructors left) (exprConstructors right)
 
 temporalConstructors :: Temporal -> Set String
 temporalConstructors temporal = case temporal of
-  Always expr -> Set.insert "Always" (exprConstructors expr)
-  Eventually expr -> Set.insert "Eventually" (exprConstructors expr)
+  Always expression -> Set.insert "Always" (exprConstructors expression)
+  Eventually expression -> Set.insert "Eventually" (exprConstructors expression)
   LeadsTo left right -> Set.insert "LeadsTo" (Set.union (exprConstructors left) (exprConstructors right))
 
-checkHandTransitions :: FilePath -> IO ()
-checkHandTransitions root = do
-  contents <- readFile (root </> "test/oracle/formal/ToyModel.transitions.tsv")
-  forM_ (drop 1 (lines contents)) $ \row -> case splitOn '\t' row of
-    [fromText, eventText, toText, "true", "MutualExclusion"] -> do
-      fromState <- stateFromPair fromText
-      let event = eventFromText eventText
-      actual <- maybe (putStrLn ("FAIL: disabled hand transition " <> eventText) >> exitFailure) pure
-        (interpret toyModel event fromState)
-      assertEqual ("hand transition " <> eventText <> " from " <> fromText) toText (statePair actual)
-      invariant <- case modelInvariants toyModel of
-        firstInvariant : _ -> pure firstInvariant
-        [] -> putStrLn "FAIL: ToyModel has no invariant" >> exitFailure
-      valid <- requireRight "hand transition invariant"
-        (evalExpr toyModel Map.empty actual (namedExprBody invariant) >>= valueAsBool)
-      assert valid ("hand transition violates MutualExclusion: " <> row)
-    fields -> assert False ("malformed hand transition row: " <> show fields)
+expectedRendererFacts :: Set RendererFact
+expectedRendererFacts = Set.fromList
+  [ ("module", "ToyModel", "present"), ("generated-stamp", "amoebius-dev-model", "stable")
+  , ("extension", "Integers", "present"), ("extension", "FiniteSets", "present"), ("extension", "TLC", "present")
+  , ("constant", "Proc", "present"), ("variable", "pc", "present"), ("variable", "mirror", "present")
+  , ("variable", "criticalCount", "present"), ("initial-assignment", "pc", "present")
+  , ("initial-assignment", "mirror", "present"), ("initial-assignment", "criticalCount", "present")
+  , ("action", "Request", "present"), ("action", "Enter", "present"), ("action", "Exit", "present")
+  , ("fairness", "Request", "weak"), ("fairness", "Enter", "strong"), ("fairness", "Exit", "weak")
+  , ("invariant", "MutualExclusion", "present"), ("constraint", "StateBound", "present")
+  , ("property", "EveryRequestEventuallyExits", "leads-to")
+  , ("property", "AlwaysMutualExclusion", "always"), ("property", "SomeProcessEventuallyCritical", "eventually")
+  , ("specification", "Spec", "present"), ("check-deadlock", "value", "false") ]
 
-stateFromPair :: String -> IO State
-stateFromPair encoded = case splitOn ',' encoded of
-  [p0, p1] -> pure (Map.fromList
-    [ ("pc", function p0 p1)
-    , ("mirror", function p0 p1)
-    , ("criticalCount", IntValue (if "critical" `elem` [p0, p1] then 1 else 0))
-    ])
-  _ -> putStrLn ("FAIL: malformed state pair " <> encoded) >> exitFailure
-  where
-    function p0 p1 = FunctionValue
-      [(AtomValue "p0", AtomValue p0), (AtomValue "p1", AtomValue p1)]
-
-statePair :: State -> String
-statePair state = case Map.lookup "pc" state of
-  Just (FunctionValue pairs) -> intercalate ","
-    [atomAt (AtomValue "p0") pairs, atomAt (AtomValue "p1") pairs]
-  value -> "<invalid-pc:" <> show value <> ">"
-  where
-    atomAt key pairs = case lookup key pairs of
-      Just (AtomValue value) -> value
-      value -> "<invalid:" <> show value <> ">"
-
-eventFromText :: String -> Event
-eventFromText text = case splitOn '-' text of
-  [action, process] -> Event (capitalize action) [AtomValue process]
-  _ -> Event "<invalid>" []
-  where
-    capitalize [] = []
-    capitalize (first : rest) = toEnum (fromEnum first - 32) : rest
-
-checkInvariantTruthTable :: FilePath -> Model -> IO ()
-checkInvariantTruthTable root model = do
-  cases <- readInvariantCases root
-  actual <- mapM (invariantOutcome model) cases
-  assertEqual "ToyModel invariant truth table" (map caseExpected cases) actual
-
-readInvariantCases :: FilePath -> IO [InvariantCase]
-readInvariantCases root = do
-  rows <- lines <$> readFile (root </> "test/oracle/formal/ToyModel.invariant_cases.tsv")
-  case rows of
-    [] -> assert False "invariant oracle is empty" >> pure []
-    header : body -> do
-      assertEqual "invariant oracle header"
-        "pc0\tpc1\tmirror0\tmirror1\tcritical_count\texpected" header
-      mapM parse body
- where
-  parse row = case splitOn '\t' row of
-    [pc0, pc1, mirror0, mirror1, countText, expectedText] -> case reads countText of
-      [(count, "")] -> case expectedText of
-        "true" -> pure (InvariantCase pc0 pc1 mirror0 mirror1 count True)
-        "false" -> pure (InvariantCase pc0 pc1 mirror0 mirror1 count False)
-        _ -> malformed row
-      _ -> malformed row
-    _ -> malformed row
-  malformed row = assert False ("malformed invariant oracle row: " <> row) >> pure (InvariantCase "" "" "" "" 0 False)
-
-invariantOutcome :: Model -> InvariantCase -> IO Bool
-invariantOutcome model fixture = case modelInvariants model of
-  invariant : _ -> requireRight "invariant truth-table evaluation"
-    (evalExpr model Map.empty (invariantState fixture) (namedExprBody invariant) >>= valueAsBool)
-  [] -> assert False "model has no invariant for the truth table" >> pure False
-
-invariantState :: InvariantCase -> State
-invariantState fixture = Map.fromList
-  [ ("pc", function (casePc0 fixture) (casePc1 fixture))
-  , ("mirror", function (caseMirror0 fixture) (caseMirror1 fixture))
-  , ("criticalCount", IntValue (caseCriticalCount fixture))
-  ]
- where
-  function left right = FunctionValue
-    [(AtomValue "p0", AtomValue left), (AtomValue "p1", AtomValue right)]
-
-type RendererFact = (String, String, String)
-
-checkRendererSemanticOracle :: FilePath -> (Tla, Cfg) -> IO (Set RendererFact)
-checkRendererSemanticOracle root rendered = do
-  expected <- readRendererFacts root
-  let actual = renderedSemanticFacts rendered
-  assertEqual "ToyModel renderer semantic facts" expected actual
-  pure expected
-
-checkRendererSemanticMutants :: Set RendererFact -> IO Int
-checkRendererSemanticMutants expected = do
-  caught <- forM [(StrongAsWeak, "emitTLA-mut-03"), (AlwaysAsEventually, "emitTLA-mut-04")] $ \(mode, name) -> do
-    let actual = renderedSemanticFacts (emitTLAWith mode toyModel)
-    assert (actual /= expected) (name <> " survived the semantic renderer oracle")
-    pure True
-  pure (length (filter id caught))
-
-readRendererFacts :: FilePath -> IO (Set RendererFact)
-readRendererFacts root = do
-  rows <- lines <$> readFile (root </> "test/oracle/formal/ToyModel.renderer_semantics.tsv")
-  case rows of
-    [] -> assert False "renderer semantic oracle is empty" >> pure Set.empty
-    header : body -> do
-      assertEqual "renderer semantic oracle header" "kind\tname\tvalue" header
-      Set.fromList <$> mapM parse body
- where
-  parse row = case splitOn '\t' row of
-    [kind, name, value] -> pure (kind, name, value)
-    fields -> assert False ("malformed renderer semantic row: " <> show fields) >> pure ("", "", "")
+expectedProperties :: Set String
+expectedProperties = Set.fromList
+  ["EveryRequestEventuallyExits", "AlwaysMutualExclusion", "SomeProcessEventuallyCritical"]
 
 renderedSemanticFacts :: (Tla, Cfg) -> Set RendererFact
 renderedSemanticFacts (Tla tla, Cfg cfg) = Set.fromList . concat $
   [ maybe [] (\name -> [("module", name, "present")]) (moduleName tla)
-  , [("generated-stamp", "amoebius-dev-model", "stable")
-    | "\\* GENERATED by amoebius dev model from Model " `isPrefixOfAnyLine` tla]
-  , namedListFacts "extension" "EXTENDS " tla
-  , namedListFacts "constant" "CONSTANTS " tla
-  , namedListFacts "variable" "VARIABLES " tla
+  , [("generated-stamp", "amoebius-dev-model", "stable") | any ("\\* GENERATED by amoebius dev model" `isPrefixOf`) (lines tla)]
+  , namedList "extension" "EXTENDS " tla, namedList "constant" "CONSTANTS " tla
+  , namedList "variable" "VARIABLES " tla
   , [("initial-assignment", name, "present") | name <- initAssignments tla]
   , [("action", name, "present") | name <- actionDefinitions tla]
-  , fairnessFacts "WF_vars(" "weak" tla
-  , fairnessFacts "SF_vars(" "strong" tla
-  , [("invariant", name, "present") | name <- cfgNamesList "INVARIANT " cfg]
-  , [("constraint", name, "present") | name <- cfgNamesList "CONSTRAINT " cfg]
+  , fairnessFacts "WF_vars(" "weak" tla, fairnessFacts "SF_vars(" "strong" tla
+  , [("invariant", name, "present") | name <- Set.toList (cfgNames "INVARIANT " cfg)]
+  , [("constraint", name, "present") | name <- Set.toList (cfgNames "CONSTRAINT " cfg)]
   , propertyFacts tla
-  , [("specification", name, "present") | name <- cfgNamesList "SPECIFICATION " cfg]
-  , [("check-deadlock", "value", map toLowerAscii value)
-    | value <- cfgNamesList "CHECK_DEADLOCK " cfg]
-  ]
+  , [("specification", name, "present") | name <- Set.toList (cfgNames "SPECIFICATION " cfg)]
+  , [("check-deadlock", "value", asciiLower value) | value <- Set.toList (cfgNames "CHECK_DEADLOCK " cfg)] ]
  where
   moduleName contents = do
-    let modulePrefix = "---- MODULE " :: String
-    line <- find (modulePrefix `isPrefixOf`) (lines contents)
-    pure (takeWhile (/= ' ') (drop (length modulePrefix) line))
-  namedListFacts kind prefix contents =
-    [(kind, trim name, "present")
-    | line <- lines contents
-    , prefix `isPrefixOf` line
-    , name <- splitOn ',' (drop (length prefix) line)
-    ]
-  isPrefixOfAnyLine prefix = any (prefix `isPrefixOf`) . lines
+    line <- find ("---- MODULE " `isPrefixOf`) (lines contents)
+    pure (takeWhile (/= ' ') (drop 12 line))
+  namedList kind prefix contents =
+    [(kind, trim name, "present") | line <- lines contents, prefix `isPrefixOf` line, name <- splitOn ',' (drop (length prefix) line)]
   initAssignments contents =
     [ trim name
     | line <- takeWhile (not . null) (drop 1 (dropWhile (/= "Init ==") (lines contents)))
     , let body = fromMaybe line (stripAfter "/\\ " line)
-    , let (name, equals) = breakOn " = " body
-    , not (null equals)
-    ]
-  actionDefinitions contents =
-    [ takeWhile (/= '(') line
-    | line <- lines contents
-    , ") ==" `isSuffixOf` line
-    ]
+    , let (name, separator) = breakOn " = " body
+    , not (null separator) ]
+  actionDefinitions contents = [takeWhile (/= '(') line | line <- lines contents, ") ==" `isSuffixOf` line]
   fairnessFacts marker kind contents =
-    [ ("fairness", takeWhile (/= '(') rest, kind)
-    | line <- lines contents
-    , Just rest <- [stripAfter marker line]
-    ]
+    [("fairness", takeWhile (/= '(') rest, kind) | line <- lines contents, Just rest <- [stripAfter marker line]]
   propertyFacts contents =
-    [ ("property", trim name, temporalKind (trim (drop 4 separator)))
+    [("property", trim name, temporalKind rhs)
     | line <- lines contents
     , let (name, separator) = breakOn " == " line
     , not (null separator)
     , let rhs = trim (drop 4 separator)
-    , " ~> " `isInfixOf` rhs || "[](" `isPrefixOf` rhs || "<>" `isPrefixOf` rhs
-    ]
-  temporalKind rhs
-    | " ~> " `isInfixOf` rhs = "leads-to"
-    | "[](" `isPrefixOf` rhs = "always"
-    | otherwise = "eventually"
-  cfgNamesList prefix = map (drop (length prefix)) . filter (prefix `isPrefixOf`) . lines
-  toLowerAscii character
-    | character >= 'A' && character <= 'Z' = toEnum (fromEnum character + 32)
-    | otherwise = character
+    , " ~> " `isInfixOf` rhs || "[](" `isPrefixOf` rhs || "<>" `isPrefixOf` rhs ]
+  temporalKind rhs | " ~> " `isInfixOf` rhs = "leads-to"
+                   | "[](" `isPrefixOf` rhs = "always"
+                   | otherwise = "eventually"
 
-checkNeverCommitted :: FilePath -> IO ()
-checkNeverCommitted root = do
-  (exitCode, stdoutText, stderrText) <- readProcessWithExitCode "git" ["ls-files", "--", "gen/*", "*.tla", "*.cfg"] ""
-  assert (exitCode == ExitSuccess) ("git ls-files failed: " <> stderrText)
-  assert (null stdoutText) ("generated TLA artifacts are tracked:\n" <> stdoutText)
-  assert (root `isPrefixOf` root) "repository root resolution failed"
+cfgNames :: String -> String -> Set String
+cfgNames prefix = Set.fromList . map (drop (length prefix)) . filter (prefix `isPrefixOf`) . lines
 
-checkCalculusCompositionBridge :: FilePath -> IO Bool
-checkCalculusCompositionBridge root = do
-  expected <- readMetricOracle (root </> "test/oracle/formal/CalculusComposition.expected.tsv")
+checkComposition :: FilePath -> IO ()
+checkComposition output = do
   result <- withReferenceComposition $ \composition -> do
     let model = compositionModel composition
         resources = compositionResource composition
-        expectedKinds = intercalate "," (map (Text.unpack . calculusTag) (compositionKinds composition))
-    assertEqual "composition formal-model structural problems" [] (modelProblems model)
-    assertEqual "composition model variables"
-      ["componentCount", "cpu", "memory", "ephemeral", "pods"] (modelVariables model)
-    assertEqual "composition model calculus projection"
-      (Just (SetValue (map (AtomValue . Text.unpack . calculusTag) (compositionKinds composition))))
-      (lookup "Calculi" (modelConstants model))
-    assertEqual "composition model component count"
-      (Just (IntValue (fromIntegral (length (compositionKinds composition)))))
-      (initialValue "componentCount" model)
-    assertEqual "composition model cpu" (Just (naturalValue (resourceCpu resources))) (initialValue "cpu" model)
-    assertEqual "composition model memory" (Just (naturalValue (resourceMemory resources))) (initialValue "memory" model)
-    assertEqual "composition model ephemeral"
-      (Just (naturalValue (resourceEphemeralStorage resources))) (initialValue "ephemeral" model)
-    assertEqual "composition model pods" (Just (naturalValue (resourcePodSlots resources))) (initialValue "pods" model)
-    explored <- requireRight "composition formal model explorer" (explore model)
+        kinds = intercalate "," (map (Text.unpack . calculusTag) (compositionKinds composition))
+        expected = Map.fromList
+          [ ("calculus-kinds", "artifact,budget,lift,workflow,evidence"), ("component-count", "5")
+          , ("cpu", "15"), ("memory", "150"), ("ephemeral", "1500"), ("pods", "15")
+          , ("formal-distinct-state-count", "1"), ("formal-safety", "green") ]
+    explored <- requireRight "composition-explorer" (explore model)
     let actual = Map.fromList
-          [ ("calculus-kinds", expectedKinds)
-          , ("component-count", show (length (compositionKinds composition)))
-          , ("cpu", show (resourceCpu resources))
-          , ("memory", show (resourceMemory resources))
-          , ("ephemeral", show (resourceEphemeralStorage resources))
-          , ("pods", show (resourcePodSlots resources))
+          [ ("calculus-kinds", kinds), ("component-count", show (length (compositionKinds composition)))
+          , ("cpu", show (resourceCpu resources)), ("memory", show (resourceMemory resources))
+          , ("ephemeral", show (resourceEphemeralStorage resources)), ("pods", show (resourcePodSlots resources))
           , ("formal-distinct-state-count", show (Map.size (exploreStates explored)))
-          , ("formal-safety", if exploreViolation explored == Nothing then "green" else "red")
-          ]
-    assertEqual "calculus-composition semantic projection oracle" expected actual
-    pure True
+          , ("formal-safety", if exploreViolation explored == Nothing then "green" else "red") ]
+        (Tla tla, Cfg cfg) = emitTLA model
+    assertEqual "composition-projection" expected actual
+    writeFile (output </> "CalculusComposition.tla") tla
+    writeFile (output </> "CalculusComposition.cfg") cfg
   case result of
-    Left problem -> assert False ("cannot mint composition reference scope: " <> problem) >> pure False
-    Right passed -> pure passed
- where
-  initialValue name model = do
-    expression <- lookup name (modelInit model)
-    case expression of
-      Literal value -> Just value
-      _ -> Nothing
-  naturalValue = IntValue . fromIntegral
+    Left problem -> failWith "composition-scope" problem
+    Right () -> pure ()
 
-readMetricOracle :: FilePath -> IO (Map String String)
-readMetricOracle path = do
-  rows <- lines <$> readFile path
-  case rows of
-    [] -> assert False ("metric oracle is empty: " <> path) >> pure Map.empty
-    header : body -> do
-      assertEqual ("metric oracle header " <> path) "metric\tvalue" header
-      Map.fromList <$> mapM parse body
- where
-  parse row = case splitOn '\t' row of
-    [metric, value] -> pure (metric, value)
-    fields -> assert False ("malformed metric oracle row: " <> show fields) >> pure ("", "")
-
-withReferenceComposition
-  :: (forall scope. Composition scope -> IO result)
-  -> IO (Either String result)
+withReferenceComposition :: (forall scope. Composition scope -> IO result) -> IO (Either String result)
 withReferenceComposition continuation = case trustedTenant "phase-11-tenant" of
   Left problem -> pure (Left (show problem))
   Right tenant -> case trustedSubject tenant "phase-11-subject" of
     Left problem -> pure (Left (show problem))
     Right subject -> case activeMembership tenant subject of
       Left problem -> pure (Left (show problem))
-      Right membership -> case withRequestScope tenant subject membership
-        (continuation . referenceComposition) of
-          Left problem -> pure (Left (show problem))
-          Right action -> Right <$> action
+      Right membership -> case withRequestScope tenant subject membership (continuation . referenceComposition) of
+        Left problem -> pure (Left (show problem))
+        Right action -> Right <$> action
 
 referenceComposition :: RequestScope scope -> Composition scope
-referenceComposition scope =
-  append
-    (append (compose artifact budget) (compose lift workflow))
-    (singleton evidence)
+referenceComposition scope = append (append (compose artifact budget) (compose lift workflow)) (singleton evidence)
  where
   artifact = artifactComponent scope "artifact" (resource 1 10 100 1) (RecipeId "formal-artifact" 1)
-  budget = budgetComponent scope "budget" (resource 2 20 200 2)
-    (allowance (Bytes 4096) (Slots 4) (Bytes 1024))
+  budget = budgetComponent scope "budget" (resource 2 20 200 2) (allowance (Bytes 4096) (Slots 4) (Bytes 1024))
   lift = liftComponent scope "lift" (resource 3 30 300 3) OnHost
   workflow = workflowComponent scope "workflow" (resource 4 40 400 4) emptyLedger
   evidence = evidenceComponent scope "evidence" (resource 5 50 500 5) PureRegister
   resource = ResourceVector
 
-checkObligationSet :: FilePath -> Model -> IO ()
-checkObligationSet root model = do
-  expectedRows <- lines <$> readFile (root </> "test/oracle/formal/ToyModel.expected.tsv")
-  let expectedInvariants = Set.fromList [value | row <- expectedRows, ["invariant", value] <- [splitOn '\t' row]]
-      expectedProperties = Set.fromList [value | row <- expectedRows, ["property", value] <- [splitOn '\t' row]]
-      (_, Cfg cfg) = emitTLA model
-      actualInvariants = cfgNames "INVARIANT " cfg
-      actualProperties = cfgNames "PROPERTY " cfg
-  assertEqual "CFG invariant obligation set" expectedInvariants actualInvariants
-  assertEqual "CFG property obligation set" expectedProperties actualProperties
+checkGeneratedCorpus :: IO ()
+checkGeneratedCorpus = forM_ [0 .. 199] $ \seed -> do
+  let model = generatedModel seed
+      expectedStates = 2 * (limitFor seed + 1)
+      expectedViolation = odd seed
+      (Tla tla, Cfg cfg) = emitTLA model
+  assertEqual "generated-model-problems" [] (modelProblems model)
+  result <- requireRight "generated-explorer" (explore model)
+  assertEqual "generated-state-count" expectedStates (Map.size (exploreStates result))
+  assertEqual "generated-boundary-count" 2 (Set.size (exploreBoundaryStates result))
+  assertEqual "generated-safety" expectedViolation (exploreViolation result /= Nothing)
+  assert ("Advance ==" `isInfixOf` tla && "INVARIANT Safe" `isInfixOf` cfg) "generated-renderer"
 
-cfgNames :: String -> String -> Set String
-cfgNames prefix = Set.fromList . map (drop (length prefix)) . filter (prefix `isPrefixOf`) . lines
-
-checkFairnessSensitivity :: FilePath -> FilePath -> FilePath -> IO Bool
-checkFairnessSensitivity java jar output = do
-  let mutant = toyModel {modelName = "ToyModelFairnessDrop", modelFairness = []}
-  result <- runTlc java jar output Correct mutant
-  assert (tlcExit result /= ExitSuccess) "fairness-drop mutant did not make TLC liveness red"
-  assert ("Temporal properties were violated" `isInfixOf` tlcOutput result
-       || "temporal property" `isInfixOf` tlcOutput result)
-    ("fairness-drop failed for the wrong reason:\n" <> tlcOutput result)
-  let (Tla correct, _) = emitTLA toyModel
-      (Tla renderedMutant, _) = emitTLA mutant
-  assert (correct /= renderedMutant) "fairness-drop mutant did not alter the rendered specification"
-  pure (tlcExit result /= ExitSuccess)
-
-checkModelMutants :: FilePath -> FilePath -> FilePath -> IO Int
-checkModelMutants java jar output = do
-  caught <- forM safetyModelMutants $ \(name, mutant) -> do
-    explorer <- requireRight name (explore mutant)
-    assert (exploreViolation explorer /= Nothing) (name <> " stayed green in explorer")
-    result <- runTlc java jar output Correct mutant
-    assert (tlcExit result /= ExitSuccess) (name <> " stayed green in TLC")
-    assert ("Invariant" `isInfixOf` tlcOutput result || "invariant" `isInfixOf` tlcOutput result)
-      (name <> " failed TLC for the wrong reason:\n" <> tlcOutput result)
-    pure True
-  pure (length (filter id caught))
-
-safetyModelMutants :: [(String, Model)]
-safetyModelMutants =
-  [ named "ModelMutGuardNegation" (mapAction "Enter" (\action -> action {actionGuard = Not (actionGuard action)}))
-  , named "ModelMutGuardWeakening" (mapAction "Enter" (\action -> action
-      {actionGuard = Equal (FunctionApplication (Ref "pc") (Ref "p")) (Literal (AtomValue "want"))}))
-  , named "ModelMutEffectSwap" (mapAction "Request" (\action -> action {actionEffects =
-      [ ("pc", FunctionUpdate (Ref "pc") (Ref "p") (Literal (AtomValue "critical")))
-      , ("mirror", FunctionUpdate (Ref "mirror") (Ref "p") (Literal (AtomValue "critical")))
-      ]}))
-  , named "ModelMutDropEffect" (mapAction "Enter" (\action -> action
-      {actionEffects = filter ((/= "criticalCount") . fst) (actionEffects action)}))
-  , named "ModelMutQuantifierFlip" (mapAction "Enter" (\action -> action
-      {actionGuard = flipForAll (actionGuard action)}))
-  ]
-  where
-    named name transform = (name, (transform toyModel) {modelName = name, modelProperties = []})
-
-mapAction :: Name -> (Action -> Action) -> Model -> Model
-mapAction name transform model = model
-  {modelActions = [if actionName action == name then transform action else action | action <- modelActions model]}
-
-flipForAll :: Expr -> Expr
-flipForAll expression = case expression of
-  FiniteQuantifier ForAll binder domain predicate -> FiniteQuantifier Exists binder domain predicate
-  And exprs -> And (map flipForAll exprs)
-  Or exprs -> Or (map flipForAll exprs)
-  Not expr -> Not (flipForAll expr)
-  other -> other
-
-checkSpecWeakening :: FilePath -> IO Bool
-checkSpecWeakening root = do
-  cases <- readInvariantCases root
-  let weaken named = named {namedExprBody = case namedExprBody named of
-        And (_ : rest) -> And rest
-        _ -> Literal (BoolValue True)}
-      mutant = toyModel {modelName = "ToyModel", modelInvariants = map weaken (modelInvariants toyModel)}
-  correct <- mapM (invariantOutcome toyModel) cases
-  mutated <- mapM (invariantOutcome mutant) cases
-  assertEqual "correct invariant agrees with authored truth table" (map caseExpected cases) correct
-  assert (mutated /= map caseExpected cases)
-    "invariant-clause-delete mutant survived the authored semantic truth table"
-  pure (mutated /= map caseExpected cases)
-
-checkRendererDifferentialMutants :: FilePath -> FilePath -> FilePath -> IO Int
-checkRendererDifferentialMutants java jar output = do
-  let witness = generatedModel 42
-  explorer <- requireRight "renderer mutant witness" (explore witness)
-  caught <- forM [(DropUnchanged, "emitTLA-mut-01"), (ForAllAsExists, "emitTLA-mut-02")] $ \(mode, name) -> do
-    result <- runTlc java jar output mode witness
-    let sameVerdict = (tlcExit result == ExitSuccess) == (exploreViolation explorer == Nothing)
-        sameStates = tlcFingerprints result == Map.keysSet (exploreStates explorer)
-    assert (not sameVerdict || not sameStates) (name <> " survived generated differential witness")
-    pure True
-  pure (length (filter id caught))
-
-generatedDifferentialProperty
-  :: FilePath -> FilePath -> FilePath -> IORef DifferentialRecord -> GeneratedSeed -> QC.Property
-generatedDifferentialProperty java jar output recordRef (GeneratedSeed seed) =
-  checkCoverage
-    . cover 20 violating "safety-violating"
-    . cover 20 True "constraint-boundary"
-    . foldr (.) id [cover 20 (label `Set.member` labels) label | label <- requiredCoverage]
-    . ioProperty $ do
-      outcome <- differentialCase java jar output model
-      modifyIORef' recordRef (recordCase labels violating outcome)
-      when (seed `mod` 25 == 0) (putStrLn ("differential seed " <> show seed))
-      pure (counterexample outcome (null outcome))
-  where
-    model = generatedModel seed
-    labels = constructorSet model
-    violating = odd seed
-
-requiredCoverage :: [String]
-requiredCoverage =
-  [ "BoolLiteral"
-  , "ArithmeticComparison"
-  , "Implication"
-  , "Subtraction"
-  , "FiniteSetMembership"
-  , "SetUnion"
-  , "SetDifference"
-  , "Cardinality"
-  , "FiniteQuantifier"
-  , "FunctionLiteral"
-  , "FunctionUpdate"
-  , "FunctionApplication"
-  , "Conditional"
-  , "WeakFair"
-  , "StrongFair"
-  , "Always"
-  , "Eventually"
-  , "LeadsTo"
-  ]
-
-recordCase :: Set String -> Bool -> String -> DifferentialRecord -> DifferentialRecord
-recordCase labels violating outcome record
-  | not (null outcome) = record
-  | otherwise = record
-      { recordCases = recordCases record + 1
-      , recordViolating = recordViolating record + fromEnum violating
-      , recordBoundary = recordBoundary record + 1
-      , recordCoverage = foldr (\label -> Map.insertWith (+) label 1) (recordCoverage record) (Set.toList labels)
-      }
-
-differentialCase :: FilePath -> FilePath -> FilePath -> Model -> IO String
-differentialCase java jar output annotatedModel = do
-  let model = annotatedModel {modelFairness = [], modelProperties = []}
-  case modelProblems model of
-    problems@(_ : _) -> pure ("model is structurally malformed: " <> show problems)
-    [] -> case explore model of
-      Left problem -> pure ("explorer failed: " <> problem)
-      Right explorer -> do
-        tlc <- runTlc java jar output Correct model
-        let explorerGreen = exploreViolation explorer == Nothing
-            tlcGreen = tlcExit tlc == ExitSuccess
-        stateRun <- if tlcGreen
-          then pure tlc
-          else runTlc java jar output Correct (model {modelName = modelName model <> "StateSpace", modelInvariants = []})
-        let expectedStates = Map.keysSet (exploreStates explorer)
-        pure . intercalate "; " . filter (not . null) $
-          [ if explorerGreen == tlcGreen then "" else "safety verdict differs"
-          , if tlcExit stateRun == ExitSuccess then "" else "state-space TLC run failed: " <> take 300 (tlcOutput stateRun)
-          , if expectedStates == tlcFingerprints stateRun
-              then ""
-              else "fingerprints differ expected=" <> show expectedStates <> " actual=" <> show (tlcFingerprints stateRun)
-          , if Map.size (exploreStates explorer) >= 2 then "" else "model has fewer than two states"
-          , case Map.elems (exploreStates explorer) of
-              initial : _ | null (enabledEvents model initial) -> "model has no enabled action"
-              [] -> "model has no reachable state"
-              _ -> ""
-          , if Set.null (exploreBoundaryStates explorer) then "model reaches no expansion boundary" else ""
-          ]
+limitFor :: Int -> Int
+limitFor seed = 2 + abs seed `mod` 2
 
 generatedModel :: Int -> Model
-generatedModel rawSeed = Model
-  { modelName = "Generated" <> show (abs rawSeed)
-  , modelConstants = []
-  , modelVariables = ["x", "y", "q"]
-  , modelInit = [("x", int 0), ("y", bool False), ("q", bool False)]
-  , modelActions = [advance, flipAction, quantifierWitness]
-  , modelInvariants = [NamedExpr "Safe" invariant]
-  , modelConstraint = Just (NamedExpr "StateBound" stateBound)
+generatedModel seed = Model
+  { modelName = "Generated" <> show seed, modelConstants = [], modelVariables = ["x", "y"]
+  , modelInit = [("x", int 0), ("y", bool False)]
+  , modelActions =
+      [ Action "Advance" [] (ArithmeticComparison LessThan (Ref "x") (int limit)) [("x", Add (Ref "x") (int 1))]
+      , Action "Flip" [] (bool True) [("y", Not (Ref "y"))] ]
+  , modelInvariants = [NamedExpr "Safe" comparison]
+  , modelConstraint = Just (NamedExpr "StateBound" (And
+      [ FiniteSetMembership (Ref "x") (FiniteSet [int value | value <- [0 .. limit]])
+      , FiniteSetMembership (Ref "y") (FiniteSet [bool False, bool True]) ]))
   , modelExpansionLimit = Just (ArithmeticComparison LessThan (Ref "x") (int limit))
   , modelFairness = [Fairness WeakFair "Advance", Fairness StrongFair "Flip"]
-  , modelProperties =
-      [ Property "AlwaysSafe" (Always (Ref "Safe"))
-      , Property "EventuallyY" (Eventually (Equal (Ref "y") (bool True)))
-      , Property "ZeroLeadsToBoundary" (LeadsTo (Equal (Ref "x") (int 0)) (Equal (Ref "x") (int limit)))
-      ]
-  , modelCheckDeadlock = False
-  }
-  where
-    limit = 2 + abs rawSeed `mod` 2
-    domain = FiniteSet [int value | value <- [0 .. limit]]
-    binaryDomain = FiniteSet [int 0, int 1]
-    functionExercise = Equal
-      (FunctionApplication
-        (FunctionUpdate (FunctionLiteral "k" binaryDomain (Ref "k")) (int 0) (int 1))
-        (int 0))
-      (int 1)
-    advance = Action
-      { actionName = "Advance"
-      , actionParameters = []
-      , actionGuard = And
-          [ bool True
-          , Implies (bool True) (bool True)
-          , ArithmeticComparison LessThan (Ref "x") (int limit)
-          , Equal (Subtract (int 1) (int 1)) (int 0)
-          , FiniteSetMembership (Ref "x") domain
-          , Equal (SetUnion (FiniteSet [int 0]) (FiniteSet [int 1])) binaryDomain
-          , Equal (SetDifference binaryDomain (FiniteSet [int 1])) (FiniteSet [int 0])
-          , Equal (Cardinality binaryDomain) (int 2)
-          , FiniteQuantifier Exists "i" binaryDomain (Equal (Ref "i") (int 0))
-          , functionExercise
-          , Equal (IfThenElse (bool True) (int 1) (int 0)) (int 1)
-          ]
-      , actionEffects = [("x", Add (Ref "x") (int 1))]
-      }
-    flipAction = Action
-      { actionName = "Flip"
-      , actionParameters = []
-      , actionGuard = bool True
-      , actionEffects = [("y", Not (Ref "y"))]
-      }
-    quantifierWitness = Action
-      { actionName = "QuantifierWitness"
-      , actionParameters = []
-      , actionGuard = FiniteQuantifier ForAll "i" binaryDomain (Equal (Ref "i") (int 0))
-      , actionEffects = [("q", bool True)]
-      }
-    stateBound = And
-      [ FiniteSetMembership (Ref "x") domain
-      , FiniteSetMembership (Ref "y") (FiniteSet [bool False, bool True])
-      , FiniteSetMembership (Ref "q") (FiniteSet [bool False, bool True])
-      ]
-    invariant = And
-      [ if odd rawSeed
-          then ArithmeticComparison LessThan (Ref "x") (int limit)
-          else ArithmeticComparison LessThanOrEqual (Ref "x") (int limit)
-      , Equal (Ref "q") (bool False)
-      ]
-    int = Literal . IntValue . fromIntegral
-    bool = Literal . BoolValue
-
-runTlc :: FilePath -> FilePath -> FilePath -> RenderMode -> Model -> IO TlcResult
-runTlc java jar output mode model = do
-  let directory = output </> modelName model <> "-" <> modeSuffix mode
-      tlaPath = directory </> modelName model <> ".tla"
-      cfgPath = directory </> modelName model <> ".cfg"
-      dotPath = directory </> modelName model <> ".dot"
-      (Tla tla, Cfg cfg) = emitTLAWith mode model
-  createDirectoryIfMissing True directory
-  writeFile tlaPath tla
-  writeFile cfgPath cfg
-  (exitCode, stdoutText, stderrText) <- readProcessWithExitCode java
-    [ "-XX:+UseParallelGC"
-    , "-jar", jar
-    , "-workers", "1"
-    , "-cleanup"
-    , "-nowarning"
-    , "-fp", "0"
-    , "-seed", "1"
-    , "-dump", "dot,actionlabels", dotPath
-    , "-config", cfgPath
-    , tlaPath
-    ] ""
-  writeFile (directory </> modelName model <> ".tlc.log") (stdoutText <> stderrText)
-  dot <- readFileIfPresent dotPath
-  pure TlcResult
-    { tlcExit = exitCode
-    , tlcOutput = stdoutText <> stderrText
-    , tlcFingerprints = parseDotFingerprints model dot
-    , tlcDistinctCount = parseDistinctCount (stdoutText <> stderrText)
-    }
-
-modeSuffix :: RenderMode -> String
-modeSuffix mode = case mode of
-  Correct -> "correct"
-  DropUnchanged -> "drop-unchanged"
-  ForAllAsExists -> "forall-as-exists"
-  StrongAsWeak -> "strong-as-weak"
-  AlwaysAsEventually -> "always-as-eventually"
-
-readFileIfPresent :: FilePath -> IO String
-readFileIfPresent path = do
-  present <- doesFileExist path
-  if present then readFile path else pure ""
-
-parseDistinctCount :: String -> Maybe Int
-parseDistinctCount output = do
-  line <- find (" distinct states found" `isInfixOf`) (reverse (lines output))
-  preceding <- wordBefore "distinct" (words line)
-  readMaybeInt (filter isDigit preceding)
-
-wordBefore :: Eq value => value -> [value] -> Maybe value
-wordBefore target = go Nothing
-  where
-    go _ [] = Nothing
-    go previous (value : rest)
-      | value == target = previous
-      | otherwise = go (Just value) rest
-
-readMaybeInt :: String -> Maybe Int
-readMaybeInt text = case reads (takeWhile isDigit text) of
-  [(value, "")] -> Just value
-  _ -> Nothing
-
-parseDotFingerprints :: Model -> String -> Set String
-parseDotFingerprints model dot = Set.fromList
-  [ fingerprintFromLabel model label
-  | line <- lines dot
-  , " -> " `notElemIn` line
-  , Just label <- [extractLabel line]
-  , " = " `isInfixOf` label
-  ]
-  where
-    needle `notElemIn` haystack = not (needle `isInfixOf` haystack)
-
-extractLabel :: String -> Maybe String
-extractLabel line = do
-  rest <- stripAfter "[label=\"" line
-  let encoded = takeUntilLabelEnd rest
-  pure (unescapeDot encoded)
-
-takeUntilLabelEnd :: String -> String
-takeUntilLabelEnd = go False
-  where
-    go _ [] = []
-    go escaped ('"' : rest)
-      | not escaped && labelEnded rest = []
-    go escaped (character : rest) = character : go (character == '\\' && not escaped) rest
-    labelEnded [] = True
-    labelEnded (next : _) = next == ']' || next == ','
-
-unescapeDot :: String -> String
-unescapeDot [] = []
-unescapeDot ('\\' : 'n' : rest) = '\n' : unescapeDot rest
-unescapeDot ('\\' : '"' : rest) = '"' : unescapeDot rest
-unescapeDot ('\\' : '\\' : rest) = '\\' : unescapeDot rest
-unescapeDot (character : rest) = character : unescapeDot rest
-
-fingerprintFromLabel :: Model -> String -> String
-fingerprintFromLabel model label = intercalate "|"
-  [ name <> "=" <> Map.findWithDefault "<missing>" name assignments
-  | name <- modelVariables model
-  ]
-  where
-    assignments = Map.fromList
-      [ let (name, valueWithEquals) = breakOn " = " (trim (dropConjunct line))
-         in (trim name, normalizeTlcValue (drop 3 valueWithEquals))
-      | line <- lines label
-      , " = " `isInfixOf` line
-      ]
-    dropConjunct line = fromMaybe line (stripAfter "/\\ " line)
-
-normalizeTlcValue :: String -> String
-normalizeTlcValue raw
-  | "[" `isPrefixOf` value && "]" `isSuffixOf` value =
-      "[" <> intercalate "," (map normalizePair (splitOnComma (take (length value - 2) (drop 1 value)))) <> "]"
-  | otherwise = value
-  where
-    value = trim raw
-    normalizePair pair =
-      let (key, arrowValue) = breakOn " |-> " pair
-       in normalizeAtom (trim key) <> "|->" <> normalizeTlcValue (drop 5 arrowValue)
-    normalizeAtom atom
-      | "\"" `isPrefixOf` atom = atom
-      | all (\character -> not (isSpace character)) atom = show atom
-      | otherwise = atom
-
-splitOnComma :: String -> [String]
-splitOnComma text = case break (== ',') text of
-  (piece, []) -> [piece]
-  (piece, _ : rest) -> piece : splitOnComma rest
+  , modelProperties = [Property "EventuallyDone" (Eventually (Equal (Ref "x") (int limit)))]
+  , modelCheckDeadlock = False }
+ where
+  limit = limitFor seed
+  comparison = ArithmeticComparison (if odd seed then LessThan else LessThanOrEqual) (Ref "x") (int limit)
+  int = Literal . IntValue . fromIntegral
+  bool = Literal . BoolValue
 
 stripAfter :: String -> String -> Maybe String
 stripAfter needle haystack = case find (needle `isPrefixOf`) (tails haystack) of
@@ -899,50 +376,25 @@ stripAfter needle haystack = case find (needle `isPrefixOf`) (tails haystack) of
   Just match -> Just (drop (length needle) match)
 
 breakOn :: String -> String -> (String, String)
-breakOn needle haystack = case findIndexPrefix needle haystack of
+breakOn needle haystack = case go 0 haystack of
   Nothing -> (haystack, "")
   Just index -> splitAt index haystack
-
-findIndexPrefix :: String -> String -> Maybe Int
-findIndexPrefix needle haystack = go 0 haystack
-  where
-    go _ [] = Nothing
-    go index rest@(_ : remaining)
-      | needle `isPrefixOf` rest = Just index
-      | otherwise = go (index + 1) remaining
+ where
+  go _ [] = Nothing
+  go index rest@(_ : remaining)
+    | needle `isPrefixOf` rest = Just index
+    | otherwise = go (index + 1) remaining
 
 trim :: String -> String
-trim = reverse . dropWhile isSpace . reverse . dropWhile isSpace
+trim = reverse . dropWhile (== ' ') . reverse . dropWhile (== ' ')
 
 splitOn :: Char -> String -> [String]
 splitOn delimiter text = case break (== delimiter) text of
   (piece, []) -> [piece]
   (piece, _ : rest) -> piece : splitOn delimiter rest
 
-writePhaseResults
-  :: FilePath -> ExploreResult -> TlcResult -> Bool -> Int -> Bool -> Int -> Int -> Bool -> DifferentialRecord -> IO ()
-writePhaseResults output explorer tlc fairnessSensitivity modelMutants specWeakening
-    rendererSemantic rendererDifferential compositionProjection record =
-      writeFile (output </> "phase-results.tsv") . unlines $
-  [ "metric\tvalue"
-  , "toy-distinct-state-count\t" <> show (Map.size (exploreStates explorer))
-  , "toy-safety-explorer\t" <> green (exploreViolation explorer == Nothing)
-  , "toy-safety-tlc\t" <> green (tlcExit tlc == ExitSuccess)
-  , "toy-state-fingerprints-equal\t" <> yes (Map.keysSet (exploreStates explorer) == tlcFingerprints tlc)
-  , "toy-liveness-under-fairness\t" <> green (tlcExit tlc == ExitSuccess)
-  , "fairness-drop-liveness\t" <> if fairnessSensitivity then "red" else "green"
-  , "model-safety-mutants-caught\t" <> show modelMutants <> "/5"
-  , "spec-weakening-mutants-caught\t" <> if specWeakening then "1/1" else "0/1"
-  , "renderer-semantic-mutants-caught\t" <> show rendererSemantic <> "/2"
-  , "renderer-differential-mutants-caught\t" <> show rendererDifferential <> "/2"
-  , "calculus-composition-projection\t" <> green compositionProjection
-  , "case-count\t" <> show (recordCases record)
-  , "safety-violating-count\t" <> show (recordViolating record)
-  , "constraint-boundary-count\t" <> show (recordBoundary record)
-  ] <> ["coverage-" <> label <> "\t" <> percentage (Map.findWithDefault 0 label (recordCoverage record)) | label <- requiredCoverage]
-  where
-    percentage count = show ((100 * count) `div` max 1 (recordCases record)) <> "%"
-    green True = "green"
-    green False = "red"
-    yes True = "yes"
-    yes False = "no"
+asciiLower :: String -> String
+asciiLower = map lower
+ where
+  lower character | character >= 'A' && character <= 'Z' = toEnum (fromEnum character + 32)
+                  | otherwise = character

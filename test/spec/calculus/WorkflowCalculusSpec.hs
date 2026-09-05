@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | The Phase-6 suite: the workflow calculus against its authored obligation ledger.
+-- | The Phase-6 suite: the workflow calculus against an independent Haskell ledger.
 --
--- The table is the independent side. It is written from
+-- The relation below is the independent side. It is written from
 -- 'workflow_calculus_doctrine.md' section 3 and never from the ledger it judges: for each
 -- of five workflows it names every resource provisioned and how that obligation left the
 -- outstanding set. The suite runs each workflow and replays the table against what the run
@@ -55,7 +55,6 @@ import Amoebius.Calculus.Workflow.Run
 import Data.List (nub, sort)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text (Text)
-import Data.Text qualified as Text
 import System.Exit (exitFailure)
 
 main :: IO ()
@@ -75,22 +74,17 @@ data Row = Row
   }
   deriving stock (Eq, Ord, Show)
 
-readTable :: IO [Row]
-readTable = do
-  contents <- readFile "test/oracle/workflow_calculus/obligation_ledger.tsv"
-  pure [row | line <- lines contents, row <- parse (splitTabs line)]
-  where
-    parse fields = case fields of
-      (first : _) | Text.isPrefixOf "#" first -> []
-      [workflow, resource, discharge, condition] -> [Row workflow resource discharge condition]
-      _ -> []
-
-splitTabs :: String -> [Text]
-splitTabs = fmap Text.pack . go
-  where
-    go text = case break (== '\t') text of
-      (field, []) -> [field]
-      (field, _ : rest) -> field : go rest
+independentObligationOracle :: [Row]
+independentObligationOracle =
+  [ Row "single-resource" "db-volume" "tore-down" "-"
+  , Row "transferred" "cluster-lease" "transferred" "until the retained deployment that took it is deleted"
+  , Row "nested" "vpc" "tore-down" "-"
+  , Row "nested" "subnet" "tore-down" "-"
+  , Row "parallel" "left-volume" "tore-down" "-"
+  , Row "parallel" "right-volume" "tore-down" "-"
+  , Row "mixed" "bucket" "tore-down" "-"
+  , Row "mixed" "queue" "transferred" "when the owning tenant is deleted"
+  ]
 
 -- --------------------------------------------------------------------------
 -- the corpus
@@ -177,8 +171,8 @@ observed = observe
 
 checks :: IO ()
 checks = do
-  table <- readTable
-  let outcomes =
+  let table = independentObligationOracle
+      outcomes =
         [ ("arm-set-is-closed", armSetIsClosed)
         , ("oracle-covers-every-workflow", oracleCoversEveryWorkflow table)
         , ("provisioned-and-released-sets-are-equal", setsAreEqual)

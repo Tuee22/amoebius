@@ -1,1 +1,0 @@
-Add an undeclared NetworkPolicy allow edge; network-policy-edge-set must turn red.

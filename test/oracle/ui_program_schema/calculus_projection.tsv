@@ -1,5 +1,0 @@
-metric	value
-calculus-kinds	artifact,budget,lift,workflow,evidence
-component-names	program-semantics,diagnostic-budget,generated-rejection-classes,graph-check-workflow,mutant-evidence
-projection-counts	3,10,8,3,6
-resource-vector	5,30,0,0

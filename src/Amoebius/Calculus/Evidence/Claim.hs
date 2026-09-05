@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | A claim is a value, and it names its fixture.
@@ -36,12 +37,21 @@ import Amoebius.Calculus.Evidence.Fixture
   , fixtureKind
   , fixtureRegister
   )
+#ifdef EVIDENCE_CALCULUS_CLAIM_FIXTURE_OPTIONAL_MUTANT
+import Amoebius.Calculus.Evidence.Fixture (FixtureKind (Oracle), fixture)
+#endif
 import Amoebius.Calculus.Evidence.Register
   ( GateRegister
   , Register
   , gateRegisterReaches
   , weakestRegister
   )
+#ifdef EVIDENCE_CALCULUS_CLAIM_FIXTURE_OPTIONAL_MUTANT
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+#endif
+#ifdef EVIDENCE_CALCULUS_GATE_REGISTER_OPTIONAL_MUTANT
+import Amoebius.Calculus.Evidence.Register (GateRegister (GateRegisterOne))
+#endif
 import Data.Text (Text)
 import Data.Text qualified as Text
 
@@ -63,8 +73,19 @@ data ClaimError
   deriving stock (Eq, Show)
 
 -- | Bind a statement to the one fixture that would falsify it.
+#ifdef EVIDENCE_CALCULUS_CLAIM_FIXTURE_OPTIONAL_MUTANT
+claim :: Text -> Strength -> Either ClaimError Claim
+claim statement strength =
+  case fixture Oracle "unstated-fixture" PureRegister of
+    Just discharge -> claimWithFixture statement discharge strength
+    Nothing -> Left ClaimStatesNothing
+#else
 claim :: Text -> Fixture -> Strength -> Either ClaimError Claim
-claim statement discharge strength
+claim = claimWithFixture
+#endif
+
+claimWithFixture :: Text -> Fixture -> Strength -> Either ClaimError Claim
+claimWithFixture statement discharge strength
   | Text.null (Text.strip statement) = Left ClaimStatesNothing
   | not (admitsStrength (fixtureKind discharge) strength) =
       Left (StrengthExceedsFixtureKind (fixtureKind discharge) strength)
@@ -96,14 +117,26 @@ data EvidenceError
 --
 -- The register comes last so that a caller who omits it has a function rather than a gate
 -- with an unstated register, and the committed compile-fail twin is exactly that program.
+#ifdef EVIDENCE_CALCULUS_GATE_REGISTER_OPTIONAL_MUTANT
+declareGate :: Text -> [Claim] -> Either EvidenceError GateEvidence
+declareGate name claims = declareGateAt name claims GateRegisterOne
+#else
 declareGate :: Text -> [Claim] -> GateRegister -> Either EvidenceError GateEvidence
-declareGate name claims declared = case weakestRegister (fmap (fixtureRegister . claimFixture) claims) of
+declareGate = declareGateAt
+#endif
+
+declareGateAt :: Text -> [Claim] -> GateRegister -> Either EvidenceError GateEvidence
+declareGateAt name claims declared = case weakestRegister (fmap (fixtureRegister . claimFixture) claims) of
   Nothing -> Left GateDischargesNothing
+#ifdef EVIDENCE_CALCULUS_DECLARE_GATE_IGNORES_REACHED_MUTANT
+  Just _reached -> Right GateEvidence {gateName = name, gateClaims = claims, gateDeclared = declared}
+#else
   Just reached
     | gateRegisterReaches declared > reached ->
         Left (DeclaredRegisterExceedsFixtures (gateRegisterReaches declared) reached)
     | otherwise ->
         Right GateEvidence {gateName = name, gateClaims = claims, gateDeclared = declared}
+#endif
 
 -- | The weakest register the gate's fixtures actually reached.
 gateReached :: GateEvidence -> Maybe Register

@@ -1,1 +1,0 @@
-{"mutate":{"request":"MutationV1","response":"MutationReceiptV1"},"start":{"request":"WorkflowStartV1","response":"WorkflowReceiptV1"}}

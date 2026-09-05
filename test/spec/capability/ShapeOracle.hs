@@ -4,7 +4,6 @@ module ShapeOracle
   ( objectNodeMultiset
   , structurallyDifferentByNodeMultiset
   , validateBoundExecutionInventory
-  , normalizedAppSlice
   ) where
 
 import Amoebius.Capability.Types
@@ -17,10 +16,6 @@ import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Data.Text (Text)
-import Data.Text qualified as Text
-import Dhall qualified
-import Dhall.Core qualified as Core
-import System.Directory (makeAbsolute)
 
 -- | Independently classify object nodes only by kind and role.  Identities,
 -- shape tags, and every scalar field are excluded from this oracle.
@@ -66,9 +61,3 @@ validateBoundExecutionInventory service =
   childJoinsUnit child =
     childSourceObject child == childIdentity child
       && Map.lookup (childIdentity child) units == Just (childExecutionUnit child)
-
-normalizedAppSlice :: FilePath -> IO Text
-normalizedAppSlice path = do
-  absolute <- makeAbsolute path
-  expression <- Dhall.inputExpr ("(" <> Text.pack absolute <> ").app")
-  pure (Core.pretty expression)

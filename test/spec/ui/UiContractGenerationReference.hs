@@ -1,0 +1,21 @@
+module UiContractGenerationReference (contractRows) where
+
+contractRows :: [(String, String, String, String)]
+contractRows =
+  [ ("value", "Text", "string", "public")
+  , ("value", "Natural", "natural", "public")
+  , ("value", "Boolean", "boolean", "public")
+  , ("value", "View", "string", "public")
+  , ("value", "TenantChoice", "string", "public")
+  , ("value", "WorkflowStart", "string", "public")
+  , ("value", "WorkflowProgress", "string", "public")
+  , ("client-plan", "abi", "string", "public")
+  , ("client-plan", "events", "array-string", "public")
+  , ("client-plan", "links", "array-string", "public")
+  , ("client-plan", "routes", "array-string", "public")
+  , ("transition", "visibleState", "string", "public")
+  , ("transition", "effect", "string", "public")
+  , ("transition", "cancelled", "boolean", "public")
+  , ("transition", "route", "string", "public")
+  , ("transition", "focus", "string", "public")
+  ]

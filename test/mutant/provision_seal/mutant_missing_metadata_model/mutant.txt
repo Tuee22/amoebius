@@ -1,1 +1,0 @@
-Provision runtime metadata without resolving the referenced kubelet metadata model version.

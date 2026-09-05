@@ -452,20 +452,22 @@ unguarded, change a handler id without changing the policy, and serve the privat
 client asset; each must fail before effects or private disclosure. Black-box direct action and manifest
 requests are the live oracle, not a click-visibility test.
 
-**Permanently invalidated Phase-38 run report.** The Register-1 gate matches five normalized registry tuples and byte-equal client/server
-projections against an independent extractor, matches six allow/deny rows and four exact stale-epoch failures,
-requires every denial to leave an empty pure effect trace, and kills both `default_allow` and
-`visibility_is_authorization` at distinct loci. Nine generated classes meet their floor, the real five-calculus
-projection composes counts `5,6,8,9,2` to `5,30,0,0`, all 15 metrics match, and 46 surfaces join to 63 items.
-Live gateway, UI-server, identity-provider, and provider-policy enforcement is still UNVERIFIED. See
+**Current Phase-38 validation contract.** The Register-1 gate matches five normalized registry tuples and
+byte-equal client/server projections against `AuthorizationOracle.hs`, matches six allow/deny rows and four
+exact stale-epoch failures, and requires every denial to leave an empty pure effect trace. Its acquired Haskell
+supervisor builds and executes the `default-allow` and `visibility-is-authorization` production CPP mutations
+serially in a fresh run root; both must fail at their independently named loci. Nine generated classes meet
+their floor and the five-calculus projection composes counts `5,6,8,9,2` to `5,30,0,0`. Serialized tables,
+the Python gate, and materialized mutant descriptors are retired authorities. Live gateway, UI-server,
+identity-provider, and provider-policy enforcement remains UNVERIFIED. See
 [Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md).
 
-**Permanently invalidated Phase-43 run report.** The Register-2 `serve-ui` process derives tenant, subject, permission, grant, and epoch
-from a signed credential minted by a separate authority process. Own-scope read/mutation reaches a separate
-capability-guarded handler, while foreign, forged-header, revoked, wrong-origin, and stale twins produce zero
-handler bytes; startup, private-plan, idempotency, and WebSocket pairs also pass, and nine mutants turn red.
-The startup battery now includes an extra unreferenced linked handler, and the real five-calculus projection
-accounts for 80 units.
+**Current Phase-43 validation contract.** The Register-2 `serve-ui` Haskell boundary derives tenant, subject,
+permission, and epoch from a signed credential. Own-scope read/mutation reaches the modeled guarded handler,
+while foreign, forged-header, wrong-origin, and stale twins produce no handler invocation; startup,
+private-plan, idempotency, and WebSocket pairs are independently pinned, and nine production mutations must
+turn red. The startup battery includes an extra unreferenced linked handler, and the real five-calculus
+projection accounts for 80 units. The complete integrated gate remains **NOT VALIDATED**.
 Live Keycloak, edge exclusivity, provider policy, cluster deployment, and HA remain UNVERIFIED. See
 [Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md).
 
@@ -516,7 +518,7 @@ drop only the tenant predicate, trust a browser-supplied tenant, key a cache by 
 grant after revocation; every cross-scope result must be indistinguishable from an unavailable resource and no
 mutation may occur.
 
-**Permanently invalidated Phase-8 run report.** The Register-1 scope gate matches six owner/grant joins and the exact same-tenant
+**Phase-8 bounded evidence contract.** The Register-1 scope gate matches six owner/grant joins and the exact same-tenant
 `OwnerMismatch` and cross-tenant `TenantMismatch` swaps. Legal twins compile while raw `ResourceId`
 construction, scope retagging, request-index escape, and request-scope forgery fail at pinned compiler reasons;
 the registry-backed owner-equality mutant makes both swaps red. Provider enforcement remains the live residue.
@@ -570,7 +572,7 @@ formatter into a public response, log a labelled secret, key a cache without its
 topic, and feed untrusted model/browser text into an authority sink; each must identify the complete offending
 path before effects.
 
-**Permanently invalidated Phase-8 run report.** The Register-1 flow gate matches four independently authored direct/transitive decisions
+**Phase-8 bounded evidence contract.** The Register-1 flow gate matches four independently authored direct/transitive decisions
 and exact subject-mismatch, cycle, missing-member, and missing-path diagnostic rows. Nine generated rejection
 classes meet their floors, general declassification fails at its pinned compiler reason, and the total checker
 reports transitive leaks with complete paths. Live sink behavior remains `UNVERIFIED`. See
@@ -624,12 +626,12 @@ current registry, publish only one plan half, swap equal-shaped client/server ge
 browser's claimed generation. Every stale or mixed replay must fail closed; a cosmetic-only change outside the
 declared source set remains executable, preventing an oracle that merely rejects all old bundles.
 
-**Permanently invalidated Phase-40 run report.** The Register-1 compiler matches four logical projections, four canonical JSON goldens,
-four run-time-derived SHA-256 identities, and six finite-demand cells. The logical rows, not the same-commit
-regression goldens, provide the independent semantic relation. An independently assembled authority-source
-list detects both change and omission, opposite insertion orders in fresh processes are byte-identical, and all
-six projection/digest mutants turn red at exact loci. The real five-calculus composition accounts for 32 units.
-Request-time freshness and live release pairing remain UNVERIFIED. See
+**Current Phase-40 contract.** The Register-1 compiler must match four logical projections, four canonical
+artifacts declared in typed Haskell, four independently derived SHA-256 identities, and six finite-demand
+cells. An independently assembled authority-source list detects change and omission, opposite insertion
+orders in fresh processes must be byte-identical, and six changed-production projection/digest mutants must
+turn red at exact loci. The five-calculus composition accounts for 32 units. Request-time freshness and live
+release pairing remain UNVERIFIED; validation status is owned only by the qualified phase gate. See
 [Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md).
 
 ---

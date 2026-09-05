@@ -1,1 +1,0 @@
-Always provision Prometheus monitoring work, including for deployments without an Observability capability.

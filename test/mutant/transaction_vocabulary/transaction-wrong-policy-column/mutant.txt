@@ -1,4 +1,0 @@
-operator=field-alteration
-subject=row policy projection
-mutation=derive the policy from subject_id instead of the row declaration scope column
-expected_locus=shared-declaration

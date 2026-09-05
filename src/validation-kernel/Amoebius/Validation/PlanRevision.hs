@@ -105,7 +105,7 @@ revisedPhases =
   , RevisedPhase 24 "dhall_schema_generation" GenerativeSurface "Register1" "NoSubstrate" "NoLane" PhaseIdentity.ResourceProvisionRequired
   , RevisedPhase 25 "decode_schema_seam" GenerativeSurface "Register1" "NoSubstrate" "NoLane" PhaseIdentity.ResourceProvisionAbsent
   , RevisedPhase 26 "decode_ir_seam" GenerativeSurface "Register1" "NoSubstrate" "NoLane" PhaseIdentity.ResourceProvisionAbsent
-  , RevisedPhase 27 "illegal_state_covering" GenerativeSurface "Register1" "NoSubstrate" "NoLane" PhaseIdentity.ResourceProvisionRequired
+  , RevisedPhase 27 "illegal_state_covering" GenerativeSurface "Register1" "NoSubstrate" "NoLane" PhaseIdentity.ResourceProvisionAbsent
   , RevisedPhase 28 "storage_geometry_folds" GenerativeSurface "Register1" "NoSubstrate" "NoLane" PhaseIdentity.ResourceProvisionAbsent
   , RevisedPhase 29 "execution_accelerator_folds" GenerativeSurface "Register1" "NoSubstrate" "NoLane" PhaseIdentity.ResourceProvisionAbsent
   , RevisedPhase 30 "capability_bind" GenerativeSurface "Register1" "NoSubstrate" "NoLane" PhaseIdentity.ResourceProvisionAbsent

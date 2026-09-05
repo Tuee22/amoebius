@@ -1,1 +1,0 @@
-Remove one workload identity while retaining its owner source identity.

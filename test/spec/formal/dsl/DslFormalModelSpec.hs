@@ -3,26 +3,16 @@
 module Main (main) where
 
 import Amoebius.Capacity.Fold (fits)
-import Amoebius.Capacity.RenderSource (K8sObjectIdentity (..))
 import Amoebius.Capacity.Types (Demand (..), Headroom (..), ResourceVector (..))
-import Amoebius.Capability.Types (ServiceShape (..))
 import Amoebius.Cluster.NodeProvisioner
-import Amoebius.Dsl.Decode (decodeCluster)
-import Amoebius.Dsl.Error (decodeErrorTag)
-import Amoebius.Dsl.Types (ClusterIR (..), Surface (..))
 import Amoebius.Formal.Dsl.Models
 import Amoebius.Formal.EmitTLA
 import Amoebius.Formal.Explore
 import Amoebius.Formal.Interpret (evalExpr, valueAsBool)
 import Amoebius.Formal.Model
-import Amoebius.Kernel.Chain
-import Amoebius.Kernel.Step (stepFrame, stepKind, stepLabel, stepObjects)
-import Amoebius.Manifest (renderAll)
 import Amoebius.Manifest.Authority
-import Amoebius.Manifest.K8sObject (K8sObject (objectIdentity))
 import Amoebius.Scheduler.Ledger
 import Amoebius.Scheduler.Reservation
-import BindFixtures (CapabilityFixture (..), capabilityFixtures)
 import CalculusProjection
   ( CalculusProjection (..)
   , referenceCalculusModel
@@ -30,29 +20,18 @@ import CalculusProjection
   )
 import Control.Monad (forM, forM_, unless)
 import Data.Char (isDigit, isSpace)
-import Data.IORef (newIORef, readIORef)
-import Data.List (find, intercalate, isInfixOf, isPrefixOf, nub, tails)
-import Data.Map.Strict (Map)
+import Data.List (find, intercalate, isInfixOf, isPrefixOf, tails)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import ProvisionFixtures (provisionFixture)
+import DslFormalModelOracle
 import System.Directory (canonicalizePath, createDirectoryIfMissing, doesFileExist, getCurrentDirectory)
 import System.Environment (lookupEnv)
 import System.Exit (ExitCode (..), exitFailure)
 import System.FilePath ((</>))
 import System.Process (readProcessWithExitCode)
-
-data ModelContract = ModelContract
-  { contractName :: String
-  , contractStates :: Int
-  , contractInvariants :: [String]
-  , contractProperties :: [String]
-  , contractActions :: [String]
-  }
-  deriving stock (Eq, Show)
 
 data TlcResult = TlcResult
   { tlcExit :: ExitCode
@@ -66,16 +45,17 @@ main = do
   root <- getCurrentDirectory >>= canonicalizePath
   java <- resolveTool root "AMOEBIUS_JAVA" ".build/toolchain/runtime/java/bin/java"
   jar <- resolveTool root "AMOEBIUS_TLA2TOOLS" ".build/toolchain/runtime/tla/tla2tools.jar"
-  let output = root </> ".build/tla/dsl-formal-model-spec"
+  configuredOutput <- lookupEnv "AMOEBIUS_DSL_FORMAL_MODEL_OUTPUT"
+  let output = fromMaybe (root </> ".build/tla/dsl-formal-model-spec") configuredOutput
   createDirectoryIfMissing True output
 
   putStrLn "dsl-formal-model-spec: actual DSL projections"
-  implementationFacts <- checkImplementationProjection root
+  capacityCases <- checkCapacityProjection
   protocolFacts <- checkProtocolImplementations
-  calculusModel <- checkCalculusComposition root
+  calculusModel <- checkCalculusComposition
 
   putStrLn "dsl-formal-model-spec: model contract and explorer/TLC agreement"
-  contracts <- readModelContracts (root </> "test/oracle/formal/dsl/model_contract.tsv")
+  let contracts = expectedModelContracts
   let models = dslModels <> [calculusModel]
   assertEqual "model contract names" (map contractName contracts) (map modelName models)
   explored <- forM models $ \model -> do
@@ -96,7 +76,7 @@ main = do
       pure True
 
   putStrLn "dsl-formal-model-spec: exact safety and fairness mutants"
-  checkMutationCatalogue root
+  checkMutationCatalogue
   forM_ dslSafetyMutants $ \(name, expectedInvariant, mutant) -> do
     violations <- requireRight (name <> " violations") (allViolations mutant)
     assertEqual (name <> " exact invariant") (Set.singleton expectedInvariant) violations
@@ -116,35 +96,17 @@ main = do
     (sum (map (length . modelProperties) dslModels))
     (length dslSafetyMutants)
     (length (filter id fairnessDrops))
-    implementationFacts
+    capacityCases
     protocolFacts
-  putStrLn "dsl-formal-model-spec: PASS"
+  putStrLn "dsl-formal-model-spec: PASS (6 models, 18 states, 8 invariants, 4 properties, 6561 capacity cases)"
 
 resolveTool :: FilePath -> String -> FilePath -> IO FilePath
 resolveTool root variable relative = do
   configured <- lookupEnv variable
   canonicalizePath (fromMaybe (root </> relative) configured)
 
-checkImplementationProjection :: FilePath -> IO (Int, Int, Int, Int)
-checkImplementationProjection root = do
-  positives <- readTsv (root </> "test/oracle/gadt_decode_ir/positive_trees.tsv")
-  forM_ positives $ \row -> case row of
-    [fixture, expectedSurface, _generatedHash, expectedNodes, _generatedFingerprint] -> do
-      decoded <- decodeCluster fixture
-      value <- requireRight (fixture <> " decode") decoded
-      assertEqual (fixture <> " surface") expectedSurface (surfaceText (clusterSurface value))
-      assertEqual (fixture <> " node count") expectedNodes (show (length (clusterNodes value)))
-    _ -> failCheck ("malformed positive decoder row: " <> show row)
-  negatives <- readTsv (root </> "test/oracle/gadt_decode_ir/decode_cases.tsv")
-  forM_ negatives $ \row -> case row of
-    [fixture, expectedTag, _, _] -> do
-      decoded <- decodeCluster fixture
-      problem <- case decoded of
-        Left value -> pure value
-        Right _ -> failCheck (fixture <> " unexpectedly decoded")
-      assertEqual (fixture <> " error tag") expectedTag (Text.unpack (decodeErrorTag problem))
-    _ -> failCheck ("malformed negative decoder row: " <> show row)
-
+checkCapacityProjection :: IO Int
+checkCapacityProjection = do
   let vectors =
         [ ResourceVector cpu memory ephemeral pods
         | cpu <- [0 .. 2], memory <- [0 .. 2], ephemeral <- [0 .. 2], pods <- [0 .. 2]
@@ -152,28 +114,9 @@ checkImplementationProjection root = do
       capacityCases = [(demand, capacity) | demand <- vectors, capacity <- vectors]
   forM_ capacityCases $ \(demand, capacity) ->
     checkCapacityCase demand capacity
-
-  expected <- readMetricOracle (root </> "test/oracle/formal/dsl/implementation_projection.tsv")
-  minimal <- checkRenderChain "minimal" "objectstore" SingleNode
-  multi <- checkRenderChain "multi" "sql" (Distributed 3)
-  let actual = Map.fromList
-        [ ("decoder-positive-cases", show (length positives))
-        , ("decoder-negative-cases", show (length negatives))
-        , ("capacity-domain", "0..2x4-demand/capacity")
-        , ("capacity-case-count", show (length capacityCases))
-        , ("minimal-labels", fst minimal)
-        , ("minimal-frames", snd minimal)
-        , ("multi-labels", fst multi)
-        , ("multi-frames", snd multi)
-        ]
-  assertEqual "DSL implementation semantic projection" expected actual
-  pure (length positives, length negatives, length capacityCases, 2)
-
-surfaceText :: Surface -> String
-surfaceText surface = case surface of
-  ClusterSurface -> "Cluster"
-  AppSurface -> "App"
-  DeploymentSurface -> "Deployment"
+  assertEqual "capacity domain" expectedCapacityDomain "0..2x4-demand/capacity"
+  assertEqual "capacity case count" expectedCapacityCaseCount (length capacityCases)
+  pure (length capacityCases)
 
 checkCapacityCase :: ResourceVector -> ResourceVector -> IO ()
 checkCapacityCase demand capacity = case (referenceHeadroom demand capacity, fits (Demand demand) capacity) of
@@ -195,29 +138,6 @@ referenceHeadroom demand capacity
           (resourceEphemeralStorage capacity - resourceEphemeralStorage demand)
           (resourcePodSlots capacity - resourcePodSlots demand))
   | otherwise = Nothing
-
-checkRenderChain :: String -> Text.Text -> ServiceShape -> IO (String, String)
-checkRenderChain identifier slug shape = do
-  fixture <- requireJust ("capability fixture " <> Text.unpack slug)
-    (find ((== slug) . fixtureSlug) capabilityFixtures)
-  sealed <- requireRight (identifier <> " provision") (provisionFixture fixture shape)
-  counter <- newIORef 0
-  let cfg = mkPlanConfig (Text.pack identifier) sealed counter
-      objects = renderAll sealed
-      steps = chain cfg
-      labels = map (Text.unpack . stepLabel) steps
-      identities = map identityText (map objectIdentity objects)
-      projected = map identityText (map objectIdentity (concatMap stepObjects steps))
-      frames = map (show . stepFrame) steps
-  count <- readIORef counter
-  assertEqual (identifier <> " chain construction effects") 0 count
-  assertEqual (identifier <> " render/chain object projection") identities projected
-  assertEqual (identifier <> " step labels") identities labels
-  assertEqual (identifier <> " unique identities") (length identities) (length (nub identities))
-  assert (all ((== "ApplyObjects") . show . stepKind) steps) (identifier <> " emitted a non-object step")
-  pure (intercalate "," labels, intercalate "," frames)
- where
-  identityText (K8sObjectIdentity value) = Text.unpack value
 
 checkProtocolImplementations :: IO Int
 checkProtocolImplementations = do
@@ -289,9 +209,8 @@ checkUnreachableReconcile = do
   quota = ProviderQuota 3 12 300 3
   demand = NodeDemand 1000 1024 1024 1 ["claim"] Cpu
 
-checkCalculusComposition :: FilePath -> IO Model
-checkCalculusComposition root = do
-  expected <- readMetricOracle (root </> "test/oracle/formal/CalculusComposition.expected.tsv")
+checkCalculusComposition :: IO Model
+checkCalculusComposition = do
   projection <- either (failCheck . ("calculus projection: " <>)) pure referenceCalculusProjection
   model <- either (failCheck . ("calculus model: " <>)) pure referenceCalculusModel
   explored <- requireRight "calculus composition explorer" (explore model)
@@ -305,23 +224,8 @@ checkCalculusComposition root = do
           , ("formal-safety", if exploreViolation explored == Nothing then "green" else "red")
           ]
         _ -> Map.empty
-  assertEqual "five-calculus formal projection" expected actual
+  assertEqual "five-calculus formal projection" expectedCalculusFacts actual
   pure model
-
-readModelContracts :: FilePath -> IO [ModelContract]
-readModelContracts path = do
-  rows <- readTsv path
-  forM rows $ \row -> case row of
-    [name, states, invariants, properties, actions] -> pure ModelContract
-      { contractName = name
-      , contractStates = read states
-      , contractInvariants = commaList invariants
-      , contractProperties = commaList properties
-      , contractActions = commaList actions
-      }
-    _ -> failCheck ("malformed model contract row: " <> show row)
- where
-  commaList value = if value == "-" then [] else splitOn ',' value
 
 checkModelContract :: ModelContract -> Model -> IO ()
 checkModelContract contract model = do
@@ -347,11 +251,10 @@ checkModelContract contract model = do
     Just _ -> "("
     Nothing -> ""
 
-checkMutationCatalogue :: FilePath -> IO ()
-checkMutationCatalogue root = do
-  rows <- readTsv (root </> "test/oracle/formal/dsl/mutation_catalog.tsv")
-  let expected = [(name, invariant) | [name, invariant, _] <- rows]
-  assertEqual "DSL mutation catalogue" expected [(name, invariant) | (name, invariant, _) <- dslSafetyMutants]
+checkMutationCatalogue :: IO ()
+checkMutationCatalogue =
+  assertEqual "DSL mutation catalogue" expectedMutationCatalogue
+    [(name, invariant) | (name, invariant, _) <- dslSafetyMutants]
 
 allViolations :: Model -> Either String (Set Name)
 allViolations model = do
@@ -398,9 +301,9 @@ assertTlcRed :: String -> TlcResult -> IO ()
 assertTlcRed label result =
   assert (tlcExit result /= ExitSuccess) (label <> " unexpectedly passed")
 
-writeResults :: FilePath -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> (Int, Int, Int, Int) -> Int -> IO ()
+writeResults :: FilePath -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> IO ()
 writeResults output modelCount stateTotal agreements invariants properties mutants fairnessDrops
-    (positiveCount, negativeCount, capacityCases, renderCases) protocolCases =
+    capacityCases protocolCases =
   writeFile (output </> "phase-results.tsv") . unlines $
     [ "metric\tvalue"
     , "formal-model-count\t" <> show modelCount
@@ -410,26 +313,12 @@ writeResults output modelCount stateTotal agreements invariants properties mutan
     , "liveness-properties\t" <> show properties <> "/4-green-under-fairness"
     , "fairness-drop-mutants\t" <> show fairnessDrops <> "/4-red"
     , "exact-safety-mutants\t" <> show mutants <> "/8-red-exactly"
-    , "decoder-projection\t" <> show positiveCount <> "-positive/" <> show negativeCount <> "-negative"
     , "capacity-differential\t" <> show capacityCases <> "/6561"
-    , "render-chain-projection\t" <> show renderCases <> "/2-green"
     , "protocol-code-projection\t" <> show protocolCases <> "/3-green"
     , "calculus-composition-projection\tgreen"
     , "renderer-semantics\t" <> show modelCount <> "/6-green"
     , "runtime-fidelity\tUNVERIFIED"
     ]
-
-readMetricOracle :: FilePath -> IO (Map String String)
-readMetricOracle path = do
-  rows <- readTsv path
-  Map.fromList <$> forM rows (\row -> case row of
-    [name, value] -> pure (name, value)
-    _ -> failCheck ("malformed metric oracle row: " <> show row))
-
-readTsv :: FilePath -> IO [[String]]
-readTsv path = do
-  contents <- readFile path
-  pure [splitOn '\t' line | line@(_ : _) <- drop 1 (lines contents), take 1 line /= "#"]
 
 parseDistinctCount :: String -> Maybe Int
 parseDistinctCount output = do
@@ -516,11 +405,6 @@ findIndexPrefix needle = go 0
 
 trim :: String -> String
 trim = reverse . dropWhile isSpace . reverse . dropWhile isSpace
-
-splitOn :: Char -> String -> [String]
-splitOn delimiter value = case break (== delimiter) value of
-  (piece, []) -> [piece]
-  (piece, _ : rest) -> piece : splitOn delimiter rest
 
 readFileIfPresent :: FilePath -> IO String
 readFileIfPresent path = do

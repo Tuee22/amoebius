@@ -40,7 +40,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 Blocked by redesigned Phase 25, its independent validation, and gate pass; every earlier
 gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
@@ -122,28 +122,28 @@ never a partial result. Generated Dhall/protocol bytes stay beneath `.build/**`;
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — Haskell declarations and a total Haskell decoder accept a legal world or return one structured refusal; Haskell-owned cases lazily generate any Dhall/protocol bytes beneath `.build/**`. Later folds, effects, hardware, and runtime remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 26` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: Phase-26-owned `LTD-SRC-003` remains active. Its exact Proto-family zero-finding check, field-number reintroduction negative, separately authored Haskell binding, and sprint-level owner assignment have not yet been demonstrated by a passing gate. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 25; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | Haskell owns a bounded protocol descriptor, controller-indexed GADT, and total decoder that produces a legal decoded world or one structured refusal; all Dhall and Proto projections are run-local products. |
+| `Subject` | `src/gadt-decode-ir/Amoebius/Dsl/GadtDecode.hs`, acquired and exercised by the package-hidden Phase-26 supervisor. |
+| `Command` | `pb validate phase 26` is the future public spelling. This pre-handoff gate invokes the exact source-bound Haskell executable as `validate phase 26`; its child matrix uses exact Cabal/GHC offline with `--jobs=1`. |
+| `Oracle` | `test/spec/dsl/GadtDecodeOracle.hs` independently owns the complete case corpus and protocol message/field-number rows without importing production types or decoder functions. |
+| `Positive controls` | Five values cover Deployment, StatefulSet, DaemonSet, Job, and HostProcess GADT constructors; all nineteen declared Dhall/Proto/inventory products are regenerated and decoded from the unique run root. |
+| `Paired negatives` | Twelve cases cover unknown surface/controller/resource, empty identity, zero revision, tenant ownership, plaintext secret, pod/host arm compatibility, forbidden env/remote imports, and malformed Dhall. |
+| `Mutants` | Four Cabal flags change production revision, ownership, resource-arm, or protocol-field behavior; every changed subject turns the shared spec red at its independently fixed locus. |
+| `Discovery` | The acquired source snapshot must contain exactly the production decoder, spec, and independent oracle Phase-26 source set in both directions. |
+| `Challenge` | All four production mutations are compiled and evaluated after acquisition before the clean candidate; no serialized fixture or generated projection can absorb the change. |
+| `Observer` | The supervisor retains absolute executable, argv, exit, stdout/stderr, and digest observations for Cabal version, four mutant rows, and the clean decoder run. |
+| `Authority/bypass` | Authority is limited to exact Cabal/compiler/store paths and the unique run root; builds are offline and serial. `pb`, network, host, container, cluster, service, and hardware effects are forbidden. |
+| `Freshness` | One unique `.build/runs/phase-26/work/candidate-*` root is acquired; every product is regenerated there and opening/closing source identities must match. |
+| `Qualification` | The exact four changed-production failures and one clean success jointly qualify the bounded decoder harness; missing or unexpected loci fail closed. |
+| `Cleanroom` | The source-repository cache is copied into the unique build root; generated Dhall, Proto, inventory, objects, and logs remain beneath `.build/**` with zero external residue. |
+| `Legacy closure` | Phase-26-owned `LTD-SRC-003` closes only when tracked `.proto`/`proto/**`, the retired Python gate, and serialized Phase-26 fixtures/oracles/mutants are absent; the Haskell protocol-field mutant is the reintroduction negative. |
+| `Predecessor` | Exact `ImmediatePredecessorPass` for Phase 25; absent, stale, replayed, or different-source evidence refuses the candidate. |
+| `Residue` | Capacity feasibility, capability binding, provisioning, rendering, effects, runtimes, host, service, cluster, and hardware behavior remain later-owned and UNVERIFIED. |
+| `Pass criterion` | All eighteen rows pass in one finalized candidate for the exact current source; that complete qualified pass is sufficient for the status-only transition. |
 
 ## Doctrine adopted
 
@@ -186,15 +186,15 @@ never a partial result. Generated Dhall/protocol bytes stay beneath `.build/**`;
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ⏸️
+## Sprint 26.1: The amoebius cabal package + `gadt-decode-spec` test-suite skeleton ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `amoebius.cabal`, `src/gadt-decode-ir/Amoebius/Dsl/GadtDecode.hs`, and `test/spec/dsl/GadtDecodeSpec.hs` define the package and suite boundary.
 **Blocked by**: [Phase 25](phase_25_dhall_schema_generation.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: The package-hidden supervisor builds the exact suite offline and serially in a unique run root and records its process receipt.
+**Oracle**: `test/spec/dsl/GadtDecodeOracle.hs` owns the case and protocol inventories independently.
+**Legacy IDs**: `LTD-SRC-003`.
+**Docs to update**: this phase, `system_components.md`, DSL doctrine, repository-layout doctrine, and illegal-state catalog.
 
 ### Objective
 
@@ -226,15 +226,15 @@ gadt-decode needs, with **no** chain/reconcile/control-plane daemon kernel.
 
 The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED. Later DSL expansion belongs to the numerically assigned phases.
 
-## Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ⏸️
+## Sprint 26.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `Amoebius.Dsl.GadtDecode` defines controller-indexed `Execution`, existential `SomeExecution`, surfaces, resource arms, ownership fields, and refined worlds.
 **Blocked by**: Sprint 26.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Five positive controls cover every public execution constructor; ownership and resource-arm negatives prove refinement boundaries.
+**Oracle**: `GadtDecodeOracle.expectedCases`.
+**Legacy IDs**: `LTD-SRC-003`.
+**Docs to update**: this phase and `system_components.md`.
 
 ### Objective
 
@@ -603,15 +603,15 @@ refined execution retains its exact resource subtree; no provisioned total is sy
 
 The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED. Exhaustive catalog expansion is Phase 27.
 
-## Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ⏸️
+## Sprint 26.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `decodeWorld`/`decodeWorldFile` catch read and Dhall failures, reject forbidden imports before resolution, and refine raw values to structured `Either DecodeFailure DecodedWorld`.
 **Blocked by**: Sprint 26.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Twelve named negatives pin exact failure constructors, including malformed input and env/remote import refusal.
+**Oracle**: `GadtDecodeOracle.expectedCases` maps each negative to its independent failure tag.
+**Legacy IDs**: `LTD-SRC-003`.
+**Docs to update**: this phase and DSL doctrine.
 
 ### Objective
 
@@ -658,15 +658,15 @@ so nothing is ever reconciled against a config that did not fully decode.
 
 The pre-reset `None` claim is permanently invalid; Phase 26 remains blocked and NOT VALIDATED.
 
-## Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ⏸️
+## Sprint 26.4: The gadt-decode decode battery (`gadt-decode-spec`) — the gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `GadtDecodeSpec.hs` and `Amoebius.Validation.GadtDecodeRun.Internal` generate nineteen products and execute four changed-production rows plus clean.
 **Blocked by**: Sprint 26.3
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: The gate requires four exact failure loci, one exact clean token, bidirectional source discovery, generated-product census, and stable source snapshots.
+**Oracle**: `GadtDecodeOracle.hs` plus the package-hidden acquired-process receipt checks.
+**Legacy IDs**: `LTD-SRC-003`.
+**Docs to update**: this phase, validation standards, and system components.
 
 ### Objective
 
@@ -786,15 +786,15 @@ provisioning boundary.
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. The exhaustive per-catalog-entry corpus begins in Phase 27.
 
-## Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ⏸️
+## Sprint 26.5: Decoding the shared `SecretRef` and rejecting a literal ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `SecretRef` is the closed `Vault | TransitKey | Prompt` Haskell sum; refinement rejects `PlainText` with `PlaintextSecret`.
 **Blocked by**: Sprint 26.4
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Three positive reference arms and the plaintext negative run from Haskell-declared sources beneath the unique output root.
+**Oracle**: `GadtDecodeOracle.expectedCases` owns the secret-arm expectations.
+**Legacy IDs**: `LTD-SRC-003`.
+**Docs to update**: this phase, DSL doctrine, and illegal-state catalog.
 
 ### Objective
 

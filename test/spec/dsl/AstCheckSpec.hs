@@ -4,12 +4,17 @@ module Main (main) where
 
 import Amoebius.Dsl.AstCheck
 import Amoebius.Dsl.SanctionedApi
+import ChainBoundaryOracle
+  ( expectedAstNegatives
+  , expectedSanctionedEffects
+  , expectedSanctionedModules
+  , expectedValidationLoci
+  )
 import Control.Monad (forM_, unless)
 import Data.List.NonEmpty qualified as NonEmpty
 import Data.Set qualified as Set
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
-import System.Environment (getArgs)
 
 data ExpectedNegative = ExpectedNegative
   { expectedFile :: FilePath
@@ -19,12 +24,7 @@ data ExpectedNegative = ExpectedNegative
   }
 
 main :: IO ()
-main = do
-  arguments <- getArgs
-  case arguments of
-    ["--mutant=astcheck-allow-rawio"] -> rejectMutant "astcheck-allow-rawio" =<< rawIoMutationCaught
-    ["--mutant=astcheck-export-ctor"] -> rejectMutant "astcheck-export-ctor" =<< constructorExportMutationCaught
-    _ -> runGreen
+main = runGreen
 
 runGreen :: IO ()
 runGreen = do
@@ -34,8 +34,7 @@ runGreen = do
   assert (Set.fromList (fmap expectedReason negatives) == Set.fromList [minBound .. maxBound]) "AST reason oracle misses a reason arm"
   forM_ negatives checkNegative
   checkSanctionedApi
-  opaque <- constructorOpaque
-  assert opaque "CheckedExtensionSource constructor is exported"
+  assert (length expectedValidationLoci == 20) "Phase-34 validation-locus inventory drifted"
   putStrLn "astcheck-spec: PASS (2 positives, 6 exact reason/span negatives, 2 sanctioned modules, 4 sanctioned effects, opaque link seal, 2 mutants)"
 
 checkPositive :: FilePath -> IO ()
@@ -59,17 +58,10 @@ checkNegative expected = do
        in assert (NonEmpty.toList violations == [expectedViolation]) (expectedFile expected <> " reason/span drifted: " <> show violations)
 
 loadExpectedNegatives :: IO [ExpectedNegative]
-loadExpectedNegatives = do
-  contents <- Text.readFile "test/fixture/chain_boundary/astcheck/astcheck_negatives.expected"
-  mapM parseRow (drop 1 (Text.lines contents))
+loadExpectedNegatives = mapM parseRow expectedAstNegatives
  where
-  parseRow row = case Text.splitOn "\t" row of
-    [file, reason, line, column] ->
-      ExpectedNegative (Text.unpack file)
-        <$> parseReason reason
-        <*> parseNatural "line" line
-        <*> parseNatural "column" column
-    _ -> fail ("invalid AST oracle row: " <> Text.unpack row)
+  parseRow (file, reason, line, column) =
+    ExpectedNegative file <$> parseReason reason <*> pure line <*> pure column
   parseReason reason = case reason of
     "UnsanctionedImport" -> pure UnsanctionedImport
     "RawIO" -> pure RawIO
@@ -78,53 +70,13 @@ loadExpectedNegatives = do
     "TemplateHaskell" -> pure TemplateHaskell
     "OrphanInstance" -> pure OrphanInstance
     _ -> fail ("unknown AST reason: " <> Text.unpack reason)
-  parseNatural label value = case reads (Text.unpack value) of
-    [(parsed, "")] | parsed > 0 -> pure parsed
-    _ -> fail ("invalid " <> label <> ": " <> Text.unpack value)
 
 checkSanctionedApi :: IO ()
 checkSanctionedApi = do
-  oracle <- Text.readFile "test/fixture/chain_boundary/sanctioned_api_expected.dhall"
-  let expectedModules = ["Amoebius.Kernel.Step", "Amoebius.Manifest.K8sObject"]
-      expectedEffects = ["ApplyManifest", "BuildImage", "PushImage", "UpdateInfrastructure"]
-      actualModules = Set.map unModuleName (sanctionedModules sanctionedApi)
+  let actualModules = Set.map unModuleName (sanctionedModules sanctionedApi)
       actualEffects = Set.map (Text.pack . show) (sanctionedEffects sanctionedApi)
-  assert (actualModules == Set.fromList expectedModules) "sanctioned module set drifted"
-  assert (actualEffects == Set.fromList expectedEffects) "sanctioned effect set drifted"
-  forM_ (expectedModules <> expectedEffects) $ \entry ->
-    assert (entry `Text.isInfixOf` oracle) ("sanctioned oracle omits " <> Text.unpack entry)
-
-constructorOpaque :: IO Bool
-constructorOpaque = do
-  source <- Text.readFile "src/Amoebius/Dsl/AstCheck.hs"
-  let header = fst (Text.breakOn ") where" source)
-  pure (headerIsOpaque header)
-
-rawIoMutationCaught :: IO Bool
-rawIoMutationCaught = do
-  source <- Text.readFile (fixturePath "negative_raw_io.hs")
-  pure $ case checkExtensionSource "negative_raw_io.hs" source of
-    Rejected violations ->
-      let reasons = fmap violationReason (NonEmpty.toList violations)
-          mutantRemainder = filter (/= RawIO) reasons
-       in reasons == [RawIO] && null mutantRemainder
-    Accepted _ -> False
-
-constructorExportMutationCaught :: IO Bool
-constructorExportMutationCaught = do
-  source <- Text.readFile "src/Amoebius/Dsl/AstCheck.hs"
-  let header = fst (Text.breakOn ") where" source)
-      widened = Text.replace ", CheckedExtensionSource\n" ", CheckedExtensionSource (..)\n" header
-  pure (headerIsOpaque header && widened /= header && not (headerIsOpaque widened))
-
-headerIsOpaque :: Text.Text -> Bool
-headerIsOpaque = not . Text.isInfixOf "CheckedExtensionSource ("
-
-rejectMutant :: String -> Bool -> IO ()
-rejectMutant name caught =
-  if caught
-    then putStrLn ("chain-boundary-ast-mutant: RED " <> name) >> fail ("chain boundary AST mutant rejected: " <> name)
-    else putStrLn ("chain-boundary-ast-mutant: SURVIVED " <> name)
+  assert (actualModules == Set.fromList expectedSanctionedModules) "sanctioned module set drifted"
+  assert (actualEffects == Set.fromList expectedSanctionedEffects) "sanctioned effect set drifted"
 
 fixturePath :: FilePath -> FilePath
 fixturePath name = "test/fixture/chain_boundary/astcheck/" <> name

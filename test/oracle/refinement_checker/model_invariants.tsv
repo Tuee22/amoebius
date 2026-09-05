@@ -1,3 +1,0 @@
-model	invariant	post
-Counter	NonNegative	result >= 0
-Pair	NonNegativeSum	result >= 0

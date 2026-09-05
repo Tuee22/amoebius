@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Declaration-derived suite inventory, passing-run seal, and verdict-gated link set.
@@ -170,6 +171,9 @@ deriveGatePlan version declaration peers =
     [ makeCase PropertySuite law axis Nothing
     | (law, axes) <- propertyAxes
     , axis <- axes
+#if defined(EXTENSION_CONFORMANCE_OMIT_LAW_MUTANT)
+    , law /= "L5"
+#endif
     ]
   normalizedPeers = sortOn (\peer -> (extensionName peer, declarationDigest peer)) peers
   compositionCases =
@@ -310,7 +314,11 @@ runGeneratedGate plan observedFiles observations
   | otherwise = Right verdict
  where
   wantedSuiteDigest = gatePlanSuiteDigest plan
+#if defined(EXTENSION_CONFORMANCE_IGNORE_SUITE_DIGEST_MUTANT)
+  actualSuiteDigest = wantedSuiteDigest
+#else
   actualSuiteDigest = generatedDigest observedFiles
+#endif
   wantedIds = sort (fmap gateCaseId (gatePlanCases plan))
   observedIds = sort (fmap observedCaseId observations)
   failures =
@@ -366,7 +374,11 @@ admitExtension
 admitExtension plan declaration verdict (LinkSet members)
   | gatePlanDeclarationDigest plan /= declarationDigest declaration =
       Left (PlanDeclarationMismatch (declarationDigest declaration) (gatePlanDeclarationDigest plan))
+#if defined(EXTENSION_CONFORMANCE_IGNORE_VERDICT_MUTANT)
+  | False = Left VerdictDidNotVerify
+#else
   | not (verifyVerdict plan verdict) = Left VerdictDidNotVerify
+#endif
   | declarationDigest declaration `elem` [digest | (_name, digest, _seal) <- members] =
       Left (ExtensionAlreadyAdmitted (declarationDigest declaration))
   | otherwise =

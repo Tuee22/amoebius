@@ -1,9 +1,0 @@
-pc0	pc1	mirror0	mirror1	critical_count	expected
-idle	idle	idle	idle	0	true
-want	idle	want	idle	0	true
-critical	idle	critical	idle	1	true
-critical	critical	critical	critical	1	false
-want	idle	idle	idle	0	false
-idle	idle	idle	idle	-1	false
-idle	idle	idle	idle	2	false
-critical	idle	critical	idle	0	false

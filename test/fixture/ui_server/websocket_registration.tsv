@@ -1,8 +1,0 @@
-case	status	coordinator_count
-wrong-origin	409	0
-stale-program	409	0
-cross-scope	409	0
-missing-envelope	409	0
-valid	101	1
-replayed-nonce	409	0
-coordinator-loss	409	0

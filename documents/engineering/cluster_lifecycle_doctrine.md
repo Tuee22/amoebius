@@ -476,13 +476,15 @@ flowchart TD
 
 *Target boundary: the diagram mixes Phase-18/19 obligations with later design intent; none is a current result.*
 
-Phase 18 must check a six-state reconcile-protocol model with four safety invariants and one fair-liveness
-property. Its actual-code projection distinguishes only the adjacent `Unreachable → RefuseOnUnreachable` and
-`Present → RemoveNode 1` decisions in `NodeProvisioner`. Phase 19 must add a standalone pure
+The bound Phase-18 suite checks a six-state reconcile-protocol model with four safety invariants and one
+fair-liveness property. Its actual-code projection distinguishes only the adjacent `Unreachable → RefuseOnUnreachable` and
+`Present → RemoveNode 1` decisions in `NodeProvisioner`. The bound
+[Phase-19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md) implementation adds a standalone pure
 `ObservedInventory → DesiredIndex → Either Refusal ActionSet` core: nine actual/reference cases, two exact
 fixed points, four convergent modeled-store schedules, and a Delete constructor requiring an
 `Observation 'IsPresent`. Its snapshot-token race accepts one writer, and its actual scheduler reservation
-reading retains one debit across three crash cuts. The wider effectful loop and bounded-time convergence
+reading retains one debit across three crash cuts. Five changed-production mutations challenge those exact
+properties. The wider effectful loop and bounded-time convergence
 against real infrastructure remain UNVERIFIED; prodbox remains corroborating sibling evidence, not proof.
 
 - **`discover → diff → enact → re-observe`, idempotent by construction.** The loop runs until stable or it

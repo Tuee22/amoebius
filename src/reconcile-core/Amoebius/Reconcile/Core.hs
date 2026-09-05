@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
@@ -85,8 +86,13 @@ data Action (presence :: Presence) where
     -> Action 'IsPresent
   DeleteObject
     :: ResourceId
+#ifdef RECONCILE_CORE_DELETE_UNREACHABLE_MUTANT
+    -> Observation presence
+    -> Action 'IsPresent
+#else
     -> Observation 'IsPresent
     -> Action 'IsPresent
+#endif
 
 deriving instance Show (Action presence)
 
@@ -121,7 +127,11 @@ planReconcile (ObservedInventory observed) (DesiredIndex desired)
 
   decide identifier = case (Map.lookup identifier observed, Map.lookup identifier desired) of
     (Just (SomeObservation present@(PresentObservation current)), Just wanted)
+#ifdef RECONCILE_CORE_FIXED_POINT_REEMIT_MUTANT
+      | current == unDesiredRevision wanted -> [SomeAction (ApplyObject identifier wanted present)]
+#else
       | current == unDesiredRevision wanted -> []
+#endif
       | otherwise -> [SomeAction (ApplyObject identifier wanted present)]
     (Just (SomeObservation absent@AbsentObservation), Just wanted) ->
       [SomeAction (CreateObject identifier wanted absent)]
@@ -137,8 +147,13 @@ renderAction (SomeAction action) = case action of
     "create:" <> unResourceId identifier <> "@" <> unDesiredRevision revision
   ApplyObject identifier revision (PresentObservation current) ->
     "apply:" <> unResourceId identifier <> ":" <> current <> "->" <> unDesiredRevision revision
+#ifdef RECONCILE_CORE_DELETE_UNREACHABLE_MUTANT
+  DeleteObject identifier witness ->
+    "delete:" <> unResourceId identifier <> "@" <> renderObservation (SomeObservation witness)
+#else
   DeleteObject identifier (PresentObservation current) ->
     "delete:" <> unResourceId identifier <> "@" <> current
+#endif
 
 renderObservation :: SomeObservation -> Text
 renderObservation (SomeObservation observation) = case observation of
@@ -154,7 +169,13 @@ applyActionToInventory :: SomeAction -> ObservedInventory -> ObservedInventory
 applyActionToInventory (SomeAction action) (ObservedInventory entries) =
   ObservedInventory $ case action of
     CreateObject identifier revision _ -> present identifier revision
-    ApplyObject identifier revision _ -> present identifier revision
+#ifdef RECONCILE_CORE_OSCILLATING_APPLY_MUTANT
+    ApplyObject identifier _ witness ->
+      case witness of PresentObservation prior -> present identifier (DesiredRevision prior)
+#else
+    ApplyObject identifier revision _ ->
+      present identifier revision
+#endif
     DeleteObject identifier _ -> Map.insert identifier (SomeObservation AbsentObservation) entries
  where
   present identifier revision =

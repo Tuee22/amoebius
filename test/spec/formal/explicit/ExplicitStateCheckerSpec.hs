@@ -9,8 +9,10 @@ import Data.Char (isHexDigit)
 import Data.List (find)
 import Data.Map.Strict qualified as Map
 import System.Directory (createDirectoryIfMissing)
+import System.Environment (getArgs)
 import System.Exit (exitFailure)
 import System.FilePath ((</>))
+import System.IO (hPutStrLn, stderr)
 
 data Expected = Expected
   { expectedModel :: String
@@ -24,7 +26,11 @@ data Expected = Expected
 
 main :: IO ()
 main = do
-  rows <- readOracle
+  output <- getArgs >>= \case
+    [] -> pure (".build" </> "checkers" </> "explicit-state")
+    [path] -> pure path
+    arguments -> failTest ("expected at most one output root, got " <> show arguments) >> pure ""
+  let rows = oracleRows
   assertEqual "fixture names" (map fst fixtureModels) (map expectedModel rows)
   observations <- forM rows checkRow
   let verdicts = map fst observations
@@ -38,7 +44,7 @@ main = do
   assertEqual "invalid zero bound" (Left (InvalidSearchBound 0)) (mkSearchBound 0)
   assertDigestBinding verdicts
   assertTraceTamper rows verdicts
-  writeResults verdicts parityPassed replayed
+  writeResults output verdicts parityPassed replayed
   putStrLn "explicit-state-checker-spec: PASS (7 fixtures, 5 explorer parity rows, 2 replayed counterexamples)"
  where
   modelFor rows verdict = case
@@ -128,10 +134,9 @@ assertTraceTamper rows verdicts = case find ((== "unsafe-counter") . expectedMod
           outcome -> failTest ("forged trace failed at the wrong reason: " <> show outcome)
     _ -> failTest "unsafe-counter verdict missing"
 
-writeResults :: [Verdict] -> Int -> Int -> IO ()
-writeResults verdicts parityPassed replayed = do
-  let output = ".build" </> "checkers" </> "explicit-state"
-      count predicate = length (filter (predicate . verdictResult) verdicts)
+writeResults :: FilePath -> [Verdict] -> Int -> Int -> IO ()
+writeResults output verdicts parityPassed replayed = do
+  let count predicate = length (filter (predicate . verdictResult) verdicts)
   createDirectoryIfMissing True output
   writeFile (output </> "results.tsv") . unlines $
     [ "metric\tvalue"
@@ -153,25 +158,16 @@ writeResults verdicts parityPassed replayed = do
   isBoundExceeded (BoundExceeded _) = True
   isBoundExceeded _ = False
 
-readOracle :: IO [Expected]
-readOracle = do
-  rows <- lines <$> readFile "test/oracle/explicit_state_checker/models.tsv"
-  case rows of
-    [] -> failTest "explicit-state oracle is empty" >> pure []
-    header : body -> do
-      assertEqual "oracle header"
-        "model\tbound\tstatus\tdistinct_states\tviolation\ttrace_length" header
-      mapM parseRow body
-
-parseRow :: String -> IO Expected
-parseRow row = case splitOn '\t' row of
-  [name, boundText, status, statesText, violation, traceText] ->
-    Expected name <$> parseInt boundText <*> pure status <*> parseInt statesText <*> pure violation <*> parseInt traceText
-  fields -> failTest ("malformed oracle row: " <> show fields) >> pure (Expected "" 0 "" 0 "" 0)
- where
-  parseInt text = case reads text of
-    [(value, "")] -> pure value
-    _ -> failTest ("invalid integer in oracle row: " <> text) >> pure 0
+oracleRows :: [Expected]
+oracleRows =
+  [ Expected "toy-safe" 8 "safe" 8 "-" 0
+  , Expected "toy-too-small" 7 "bound-exceeded" 7 "-" 0
+  , Expected "safe-counter" 3 "safe" 3 "-" 0
+  , Expected "unsafe-counter" 3 "unsafe-invariant" 3 "BelowTwo" 2
+  , Expected "deadlock" 1 "unsafe-deadlock" 1 "deadlock" 0
+  , Expected "constraint" 4 "safe" 2 "-" 0
+  , Expected "branching" 3 "safe" 3 "-" 0
+  ]
 
 fixtureModels :: [(String, Model)]
 fixtureModels =
@@ -276,9 +272,4 @@ assertEqual label expected actual =
   assert (expected == actual) (label <> ": expected " <> show expected <> ", got " <> show actual)
 
 failTest :: String -> IO ()
-failTest message = putStrLn ("FAIL: " <> message) >> exitFailure
-
-splitOn :: Char -> String -> [String]
-splitOn delimiter text = case break (== delimiter) text of
-  (piece, []) -> [piece]
-  (piece, _ : rest) -> piece : splitOn delimiter rest
+failTest message = hPutStrLn stderr ("FAIL: " <> message) >> exitFailure

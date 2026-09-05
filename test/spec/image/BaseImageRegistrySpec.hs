@@ -9,6 +9,7 @@ module Main (main) where
 
 import Amoebius.Image.Artifact qualified as Artifact
 import Amoebius.Image.BakeInventory qualified as Catalog
+import Amoebius.Image.CanonicalBakeCatalog (canonicalBakeCatalog)
 import Amoebius.Image.BootstrapRegistry qualified as Bootstrap
 import Amoebius.Image.BuildAdmission qualified as Admission
 import Amoebius.Image.BuildRuntime qualified as Runtime
@@ -137,7 +138,7 @@ data BootstrapOracle = BootstrapOracle
 
 main :: IO ()
 main = do
-  catalog <- Catalog.decodeBakeCatalog "dhall/amoebius/BakeCatalog.dhall" >>= either (die . show) pure
+  let catalog = canonicalBakeCatalog
   either (die . show) pure (Catalog.validateBakeCatalog catalog)
   verifyIndependentInventory catalog
   verifyCatalogInjectionClosure catalog

@@ -1,9 +1,0 @@
-{
-  "scheduleName": "crash-before-apply",
-  "scheduleSeed": 17,
-  "scheduleBound": 9,
-  "scheduleDuplicateDelivery": false,
-  "scheduleCrashBeforeApply": true,
-  "scheduleStaleSnapshot": false,
-  "scheduleDelayMicros": 1
-}

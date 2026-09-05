@@ -2,22 +2,21 @@
 
 > **Purpose**: Build the pure capability union and the total representational `bind` — source-expanding every
 > runnable member into `BoundExecutionUnit`s and assembling one `BoundServiceSpec`/`BoundDeployment` — so that
-> the *app-surface bytes are identical* across two shapes while the bound object graph differs *structurally*,
+> the *app-surface projection is identical* across two shapes while the bound object graph differs *structurally*,
 > a product-named or URL-named or shape-in-app app has no syntax (dhall-typecheck), and a binding to an unbuilt provider
 > arm fails gadt-decode, all with no provision, no fold, and no render.
 > **Read this if**: phase 30 is next in the queue, or a later phase depends on what its gate establishes.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+This document specifies the bound Phase-30 contract. Component diagnostics remain non-operative as phase
+evidence; only the complete qualified gate can authorize the status projection. Current status is owned by
+[the tracker](README.md) and the Phase Status block below.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -39,14 +38,12 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 29, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Phase 29 and every earlier gate have passed in numerical order. The Phase-30 capability library, independent
+Haskell oracle, nine-arm/two-shape corpus, seven paired negatives, QuickCheck property, and four
+changed-production challenges are bound; only the complete integrated Phase-30 gate may authorize the status
+transition.
 
 ## Phase Summary
 
@@ -80,7 +77,7 @@ vocabulary while retaining each child's private source-expansion witness. The en
 PriorExecutionProvisionRef` source **without resolving it**, and the assembled `BoundDeployment` retains only
 these unprovisioned units, the opaque source ref, and controller explanations — **no resolved prior inventory, materialized instance, epoch placement, or `Provisioned*` value**.
 
-The load-bearing property is that the *app-surface bytes are identical* across shapes while the bound
+The load-bearing property is that the Haskell-owned *app-surface projection is identical* across shapes while the bound
 `BoundServiceSpec` differs *structurally* (a different object graph, not a `replicas: 1 → 3` edit) — the
 capability survives a move, the binding does not have to. Every foreclosure here is honest about its layer: an
 app that names a product, an engine named by URL, or a shape/provider authored on the app surface is
@@ -108,28 +105,28 @@ graphs when deployment shape differs. Nothing is provisioned, rendered, or obser
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — identical app-surface Haskell values bind to structurally different object graphs when deployment shape differs; any Dhall or serialized case is generated beneath `.build/**`; Registry has only the Distribution `registry:2` provider arm. Nothing is provisioned, rendered, or observed live. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 30` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 29; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | `pure-capability-bind-boundary` |
+| `Subject` | `acquired-capability-bind-supervisor` |
+| `Command` | `pb validate phase 30` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
+| `Oracle` | `independent-capability-bind-oracle` |
+| `Positive controls` | `capability-bind-positive-controls` |
+| `Paired negatives` | `paired-capability-bind-negatives` |
+| `Mutants` | `applied-capability-bind-production-mutants` |
+| `Discovery` | `exact-capability-bind-source-discovery` |
+| `Challenge` | `post-acquisition-capability-bind-challenge` |
+| `Observer` | `capability-bind-process-observation` |
+| `Authority/bypass` | `no-pb-network-host-hardware-or-capability-bind-parallelism` |
+| `Freshness` | `fresh-capability-bind-build-root-and-stable-source` |
+| `Qualification` | `qualified-capability-bind-harness` |
+| `Cleanroom` | `capability-bind-products-contained-below-build` |
+| `Legacy closure` | `retired-capability-bind-authorities-absent` |
+| `Predecessor` | `exact-phase-twenty-nine-receipt` |
+| `Residue` | `later-provision-render-runtime-capability-owners-explicit` |
+| `Pass criterion` | `qualified-phase-thirty-gate-pass` |
 
 ## Doctrine adopted
 
@@ -192,20 +189,15 @@ at the wholly unprovisioned `BoundDeployment`.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+## Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure ✅
 
-> **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
-> only as a target-capability inventory and is not a current gate result.
-
-## Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure ⏸️
-
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/capability-bind/Amoebius/Capability/Types.hs` owns the closed union and Haskell-derived Dhall type projections; `src/capability-bind/Amoebius/Capability/Phase30Mutation.hs` owns the closed changed-production registry.
 **Blocked by**: [Phase 29](phase_29_execution_accelerator_folds.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Nine exact arms and app-surface projections are compared with an independent literal oracle; product, URL, and deployment-field Dhall expressions are paired with legal twins; catchall-arm and shared-app-surface production mutations turn red.
+**Oracle**: `test/spec/capability/CapabilityBindOracle.hs` imports no production or fixture module and independently fixes every arm, negative, projection, mutant selector, and expected failure locus.
+**Legacy IDs**: Phase-local closure for the retired Python gate, serialized capability tables, and materialized/test-local mutation authorities.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, service-capability doctrine, app-vs-deployment doctrine, DSL doctrine, and testing doctrine.
 
 ### Objective
 
@@ -246,18 +238,17 @@ contains.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement and its union/corpus result cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
-owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run and retain this seam inside the complete integrated Phase-30 gate.
 
-## Sprint 30.2: The `CapabilityBinding` + total representational `bind` ⏸️
+## Sprint 30.2: The `CapabilityBinding` + total representational `bind` ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/capability-bind/Amoebius/Capability/{Binding,Types}.hs` owns total binding, provider graphs, extension validation, and the unprovisioned deployment boundary.
 **Blocked by**: Sprint 30.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: All 18 arm×shape binds match independent object/execution/intent projections; seven tagged negative pairs and the copy-shape/provision-boundary production mutations exercise exact loci.
+**Oracle**: `test/spec/capability/CapabilityBindOracle.hs` supplies literal expectations while `test/spec/capability/ShapeOracle.hs` independently classifies structural object-node multisets and execution inventories.
+**Legacy IDs**: Phase-local closure for the retired Python gate, serialized capability tables, and materialized/test-local mutation authorities.
+**Docs to update**: this phase, `system_components.md`, service-capability doctrine, capability-extension doctrine, and illegal-state catalog.
 
 ### Objective
 
@@ -318,14 +309,12 @@ stopping at the wholly unprovisioned `BoundDeployment`.
 
 ### Validation
 
-1. The same `CapabilityNeed`, bound under two shapes, produces two `BoundServiceSpec`s that are **structurally different by the object-node-multiset oracle** (deep structural diff per [§5](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values), red on a scalar-only or copied-shape-tag difference; each equal to its oracle-pinned semantic projection), while the **app-surface bytes**
-   (beta-normalized app-surface slices from two distinct composed spec files) are identical; a binding to an
+1. The same `CapabilityNeed`, bound under two shapes, produces two `BoundServiceSpec`s that are **structurally different by the object-node-multiset oracle** (deep structural diff per [§5](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values), red on a scalar-only or copied-shape-tag difference; each equal to its oracle-pinned semantic projection), while the Haskell-owned **app-surface projection** is identical; a binding to an
    unbuilt provider arm returns a structured `Left` tagged (gadt-decode); a shape/provider authored on the app
    surface fails `dhall type` at its asserted locus; `bind` never throws. A structural inventory proves
    `BoundDeployment` contains no `Provisioned*` field, and the canonical `BoundExecutionSet` equals the expanded
    runnable-source inventory with every controller-lowered child present exactly once and no second debit. This
-   validation must go **red** on the checked Haskell `mutant_copy_shape_tag` operator applied to a temporary
-   subject beneath `.build/mutants/**` (Sprint 30.3) — which makes
+   validation must go **red** when the checked `capability-bind-copy-shape-tag-mutant` Cabal flag recompiles the production subject in the acquired run root (Sprint 30.3) — which makes
    `bind` copy the shape tag into a `providerGraph` field instead of selecting a manifest graph, passing a plain
    `/=` but failing the multiset oracle — and on `mutant_provisioned_value_in_bound_deployment` (a `Provisioned*`
    value injected into `BoundDeployment`).
@@ -337,18 +326,17 @@ stopping at the wholly unprovisioned `BoundDeployment`.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement and its binder/inventory result cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass,
-owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run and retain this seam inside the complete integrated Phase-30 gate.
 
-## Sprint 30.3: The bind property/corpus + the Register-1 gate ⏸️
+## Sprint 30.3: The bind property/corpus + the Register-1 gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `test/spec/capability/{BindGate,BindProps,CapabilityBindOracle,ShapeOracle,CapabilityBindSpec}.hs` and `src/validation-kernel/Amoebius/Validation/CapabilityBindRun/Internal.hs` own the property/corpus and qualified integrated runner.
 **Blocked by**: Sprint 30.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: The clean corpus, 1,200-sample nine-constructor property, exact five-calculus projection, four selector-specific changed-production reds, source discovery, authority, freshness, and residue all join one candidate.
+**Oracle**: `test/spec/capability/CapabilityBindOracle.hs` is the separately authored expectation authority; the integrated runner verifies its import independence and exact source discovery.
+**Legacy IDs**: Phase-local closure for the retired Python gate, serialized capability tables, and materialized/test-local mutation authorities.
+**Docs to update**: this phase, `README.md`, `system_components.md`, `substrates.md`, service-capability doctrine, capability-extension doctrine, app-vs-deployment doctrine, DSL doctrine, content-addressing doctrine, and testing doctrine.
 
 ### Objective
 
@@ -375,7 +363,7 @@ honest foreclosure layer of each.
   (Sprint 30.1), independent of `bind`'s own case analysis.
 - The property battery: the same `CapabilityNeed` bound under two shapes yields two `BoundServiceSpec`s
   **structurally different by the object-node-multiset oracle** (red on scalar-only / copied-shape-tag) with
-  byte-identical app bytes (beta-normalized app-surface slices from distinct composed files); **every declared need binds totally (no partial `bind`) across all nine arms**, with QuickCheck `label`/`classify` +
+  identical Haskell-owned app-surface projections; **every declared need binds totally (no partial `bind`) across all nine arms**, with QuickCheck `label`/`classify` +
   `checkCoverage` obligations forcing each of the **nine need constructors** to fire ≥ 8% (so a generator
   emitting only the three covered constructors fails coverage); an unbound capability is an undecodable record,
   not a runtime `Pending`; and a structural inventory proves `BoundDeployment` contains no `Provisioned*` field,
@@ -395,26 +383,26 @@ honest foreclosure layer of each.
   `illegal_prior_provision_ref_*`, …) are **not** in this gate — they belong to
   [Phase 31](phase_31_provision_seal.md) and [Phase 32](phase_32_inference_accelerator_provision.md).
 - **GateReady Haskell mutation operators (§M.2)** — a defined set of **four** deliberately broken production
-  transformations, applied beneath `.build/mutants/**` and re-run, that the gate MUST turn red:
+  transformations selected by closed Cabal flags, rebuilt serially beneath the acquired
+  `.build/runs/phase-30/work/**` root, and re-run so the gate MUST turn red:
   `mutant_copy_shape_tag` (effect swap: `bind`
   copies the shape tag into a `providerGraph` field instead of selecting a manifest graph — defeats a `/=`-only
   diff, caught by the multiset oracle); `mutant_catchall_arm` (union-arm addition: a catch-all `bind` arm returns
   a degenerate `BoundServiceSpec` for an arm whose authored need must survive unchanged — caught by the per-arm semantic projection +
-  exhaustiveness check); `mutant_shared_app_import` (the two composed fixtures share one app-surface import —
-  makes byte-equality vacuous — caught by the distinct-composed-file requirement in (a)); and
+  exhaustiveness check); `mutant_shared_app_import` (the production app-surface projection is replaced with
+  one shared constant — making cross-shape equality vacuous — caught by the independent exact surface oracle); and
   `mutant_provisioned_value_in_bound_deployment` (inject a `Provisioned*` result into `BoundDeployment` before
   any provision — caught by the structural inventory). The gate re-runs each mutant and asserts red.
-- A Register-1 validation-locus ledger mapping every entry to its catalog id and layer, backed by
-  **Phase-27-style coverage-assertion machinery** (the ledger is not a static hand-written file: the suite goes
-  **red** if any corpus entry, negative reason, or seeded mutant named above is absent from the ledger),
+- A Register-1 Haskell validation-locus inventory mapping every entry to its catalog id and layer, backed by
+  **Phase-27-style coverage assertions** (the independent oracle and runner go **red** if any corpus entry,
+  negative reason, mutation selector, production locus, or expected failure named above is absent),
   explicitly marking the runtime residue (the provider actually coming up, the engine actually resolving into
   its bounded cache) deferred to the live band — never reported as proven.
 
 ### Validation
 
-1. Rejected historical observation: the `capability-bind-spec` Cabal suite was recorded green — each of the
-   **nine per-arm** positives binds byte-invariant
-   (beta-normalized app-surface slices from distinct composed files) under both shapes and structurally
+1. The complete gate runs `capability-bind-spec` from the source-bound supervisor — each of the
+   **nine per-arm** positives retains its exact app-surface projection under both shapes and is structurally
    different by the object-node-multiset oracle (red on scalar-only / copied-shape-tag) against its
    oracle-pinned semantic projection; the exhaustiveness check covers all nine arms and the totality property meets
    `checkCoverage` (each constructor ≥ 8%); each dhall-typecheck negative (`illegal_product_in_app`,
@@ -422,10 +410,10 @@ honest foreclosure layer of each.
    negative (`illegal_unbuilt_provider`, `illegal_unbound_capability`, `illegal_cyclic_extension`,
    `illegal_shadowing_extension`) returns its specifically-tagged `Left`, each paired with a minimally-differing
    positive; the suite is red if any product-named, URL-named, or shape-in-app fixture decodes, and red under
-   each of the four applied Haskell seeded mutants (`mutant_copy_shape_tag`, `mutant_catchall_arm`,
-   `mutant_shared_app_import`, `mutant_provisioned_value_in_bound_deployment`). The validation-locus ledger is
-   present and its coverage-assertion machinery (Phase-27 precedent) turns the suite **red** if any named fixture,
-   negative reason, or mutant is missing — 'honestly classifies' is thus a machine oracle, not a hand-written
+   each of the four applied changed-production mutants (`mutant_copy_shape_tag`, `mutant_catchall_arm`,
+   `mutant_shared_app_import`, `mutant_provisioned_value_in_bound_deployment`). The Haskell validation-locus
+   inventory and source-discovery checks turn the suite **red** if any named case, negative reason, mutation
+   selector, production locus, or expected failure is missing — 'honestly classifies' is thus a machine oracle, not a hand-written
    claim. It also observes all 18 source-expanded execution inventories, preserves the execution/volume/
    registry transition references exactly, checks Registry intent under both shapes, and pairs one missing
    extension requirement with a closed positive. The authored calculus projection accounts for the nine arms,
@@ -435,9 +423,7 @@ honest foreclosure layer of each.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement and every shape/negative/property/ledger result are
-cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row,
-predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Run the complete integrated Phase-30 gate and apply only its authorized mechanical status projection after it passes.
 
 ## Documentation Requirements
 

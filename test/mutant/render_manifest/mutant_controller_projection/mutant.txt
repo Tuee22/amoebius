@@ -1,1 +1,0 @@
-Change the workload arm while preserving its object kind; controller-kind alone must turn red.

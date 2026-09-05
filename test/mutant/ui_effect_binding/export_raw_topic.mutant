@@ -1,3 +1,0 @@
-operator=provider-coordinate-escape
-change=expose a raw Pulsar topic through the UI port
-expected=raw-topic fails

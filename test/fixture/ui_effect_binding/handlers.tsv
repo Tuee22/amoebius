@@ -1,8 +1,0 @@
-handler	request	response	scope	idempotency	audit
-data-read	ReadQuery	ReadResult	owner	none	read
-data-write	Mutation	MutationReceipt	owner	required	mutation
-workflow-start	WorkflowStart	WorkflowReceipt	owner	required	workflow
-workflow-observe	WorkflowCursor	WorkflowEvent	owner	none	workflow
-stream-subscribe	Subscription	StreamEvent	owner	none	stream
-blob-upload	BoundedBlob	ReadyBlob	owner	required	blob
-artifact-use	ReadyArtifactHandle	ArtifactResult	owner	required	artifact

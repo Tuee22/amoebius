@@ -78,6 +78,12 @@ The two indices every declaration threads are the **resource index** (what capac
 **scope index** (whose data a value belongs to). They appear in every calculus below and are the reason the
 laws can be stated once rather than once per domain.
 
+The base composition seam is the pure `Amoebius.Calculus.Composition` module. Its private component and
+composition constructors admit only values minted under one generative `RequestScope`, preserve authored
+order and payloads, and fold the Phase-9 `ResourceVector` with exact `Natural` addition. Its bounded Phase-10
+oracle exhausts the 25 ordered kind pairs and 125 kind triples and samples numeric laws; it does not construct
+an extension declaration or discharge the later extension-law families.
+
 ---
 
 ## 3. The obligation surface: one component per calculus
@@ -97,13 +103,13 @@ core needs, and an extension that has left one empty is not a partial extension 
 The surface is deliberately small. A domain author's freedom is in the *logic*, which the core never inspects;
 the obligations are about the seams where that logic meets everything else.
 
-**Target declaration boundary — NOT VALIDATED.** `lib:extension-declaration` must store five Phase-10
+**Phase-20 declaration boundary — implemented, gate pending.** `lib:extension-declaration` stores five Phase-10
 `Component scope` values behind a private constructor. Its checked introduction rule must require them in
 calculus order, with one shared generative request-scope index; its resource observation must be the exact
 natural-number composition fold. Five readers must derive the per-calculus singleton sets. The declaration
 identity must hash a versioned, length-framed projection
 of the name, calculus tags, component names, resource coordinates, and explicit canonical payload fields.
-`Show` output is diagnostic only and does not participate. Phase 20 must test that boundary over two declarations
+`Show` output is diagnostic only and does not participate. Phase 20 tests that boundary over two declarations
 and ten authored component rows, with a separately implemented digest oracle and compiler barriers for a
 missing component and mixed scopes. This is finite Register-1 evidence. It does not establish L1–L5, prevent
 an implementation from using an undeclared side channel, or make either fixture a conforming extension.
@@ -308,7 +314,10 @@ Stated plainly, because a conformance verdict is exactly the kind of artifact th
   20](../../DEVELOPMENT_PLAN/phase_20_extension_declaration.md) owns the complete declaration; [Phases
   21–23](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) own bounded L, C, and S evaluators;
   and Phase 24 owns the derived plan, suite bytes, modeled passing verdict, and guarded pure link set
-  described above. P instances await Phase 36's transaction vocabulary. None of these authenticates a result
+  described above. The bounded Phase-24 implementation is
+  `src/extension-conformance-gate/Amoebius/Extension/Conformance/Gate.hs`; its independently authored finite
+  inventory and package-hidden supervisor retain the generator, digest, admission, compiler-boundary, and
+  changed-production checks without upgrading the residue below. P instances await Phase 36's transaction vocabulary. None of these authenticates a result
   observer, proves C1, closes S/P composition, or establishes runtime correspondence. Status lives only in the
   [tracker](../../DEVELOPMENT_PLAN/README.md).
 

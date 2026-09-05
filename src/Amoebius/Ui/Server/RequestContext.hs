@@ -7,6 +7,7 @@ module Amoebius.Ui.Server.RequestContext
   , CredentialError (..)
   , signingKey
   , verifyCredential
+  , signCredential
   , credentialSubject
   , credentialTenant
   , credentialPermission
@@ -67,6 +68,12 @@ verifyCredential (SigningKey key) token = do
   if signature /= expected
     then Left InvalidCredentialSignature
     else parseClaims claims
+
+signCredential :: SigningKey -> Text -> Text -> Text -> Text -> Int -> Text -> Text
+signCredential (SigningKey key) subject tenant permission grant epoch nonce =
+  claims <> "." <> hex (SHA256.hmac key (Text.encodeUtf8 claims))
+ where
+  claims = Text.intercalate "|" [subject, tenant, permission, grant, Text.pack (show epoch), nonce]
 
 serverRequestContext :: VerifiedCredential -> ServerRequestContext
 serverRequestContext credential = ServerRequestContext

@@ -1,1 +1,0 @@
-./trivial_app.dhall

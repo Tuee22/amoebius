@@ -1,3 +1,0 @@
-operator=union-arm-addition
-change=add RawUrl to the closed link union
-expected=raw_external_link_url.dhall is accepted and the gate fails

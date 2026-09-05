@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Compile.ClientPlan
@@ -54,9 +55,19 @@ encodeClientPlan :: ClientPlan -> ByteString
 encodeClientPlan plan = object
   [ ("abi", string "ui-client-v1")
   , ("events", array (map (string . eventNameText . fst) (planEvents plan)))
-  , ("links", array (map (string . externalLinkIdText) (planLinks plan)))
+  , ("links", array (map (string . renderLink) (planLinks plan)))
   , ("routes", array (map (string . routeIdText) (planRoutes plan)))
+#ifdef UI_PLAN_EMIT_PRIVATE_MUTANT
+  , ("private", string "server-handle")
+#endif
   ]
+
+renderLink :: ExternalLinkId -> Text
+#ifdef UI_PLAN_LINK_AS_FETCH_MUTANT
+renderLink link = "fetch:" <> externalLinkIdText link
+#else
+renderLink = externalLinkIdText
+#endif
 
 clientActionPorts :: ClientPlan -> [PortId]
 clientActionPorts = sort . map snd . planEvents
@@ -71,7 +82,11 @@ clientRouteIds :: ClientPlan -> [Text]
 clientRouteIds = map routeIdText . planRoutes
 
 uniqueSorted :: Ord value => [value] -> [value]
+#ifdef UI_PLAN_INSERTION_ORDER_MUTANT
+uniqueSorted = id
+#else
 uniqueSorted = Set.toAscList . Set.fromList
+#endif
 
 string :: Text -> ByteString
 string = Aeson.encode

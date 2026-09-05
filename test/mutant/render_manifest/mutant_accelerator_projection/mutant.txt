@@ -1,1 +1,0 @@
-Drop an accelerator owner claim; accelerator-claim must turn red.

@@ -1,9 +1,0 @@
-{
-  "scheduleName": "baseline",
-  "scheduleSeed": 11,
-  "scheduleBound": 8,
-  "scheduleDuplicateDelivery": false,
-  "scheduleCrashBeforeApply": false,
-  "scheduleStaleSnapshot": false,
-  "scheduleDelayMicros": 0
-}

@@ -14,13 +14,6 @@
 .test_data
 .test_data/**
 
-# Pre-containment migration surfaces.
-gen
-gen/**
-DEVELOPMENT_PLAN/evidence
-DEVELOPMENT_PLAN/evidence/**
-test/enumeration
-test/enumeration/**
 test/golden/phase_*_ledger.json
 
 # Dependency resolution is refreshed dynamically.

@@ -1,4 +1,0 @@
-case	role	name	state
-single-submit	heading	Workflow	level=1
-single-submit	status	Pending: fresh-challenge	live=polite
-multi-choose	button	Submit	enabled

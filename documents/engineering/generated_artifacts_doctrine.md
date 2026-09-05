@@ -47,14 +47,23 @@ document explains the generated side of that boundary.
 
 ## 2. What is generated (and from what)
 
+Phase 41 names `emit-client-offline-plan` and `emit-server-replay-plan` as the two deterministic projections of
+one validated Haskell `OfflineSource`. Their bytes are lazy `.build/**` products; neither generated plan nor a
+serialized expectation is tracked source.
+
+Phase 42 adds a pure Haskell projection of the generic browser interpreter. The projection's structure is
+checked in Haskell for trusted text and same-origin request primitives and for the absence of evaluation,
+remote imports, provider SDKs, and browser persistence mechanisms; generated browser-language bytes remain
+ignored `.build/**` output.
+
 | Generated artifact | Tracked Haskell source of truth | Lazy materialization |
 |---|---|---|
 | Dhall schema, prelude, examples, frame values, and test values | checked intermediate-representation and external-input projection types | `.build/dhall/**` |
 | Explicit-state, symbolic, and refinement-checker inputs | Haskell model, formula, and named-invariant declarations | `.build/checkers/**` |
-| TLA+ module and TLC configuration | reifiable `Model` and semantic renderer | `.build/tla/**` |
+| TLA+ module and TLC configuration | reifiable `Model` and semantic renderer; authored Haskell semantic facts are the oracle | `.build/tla/**` |
 | Kubernetes/provider objects | opaque checked and provisioned deployment values | `.build/manifests/**` |
 | Dockerfile and bake inputs | typed Haskell bake catalog and recipe renderer | `.build/docker/**` |
-| SQL schema, statements, constraints, and policies | scope-bearing Haskell transaction declarations | `.build/sql/**` |
+| SQL schema, statements, constraints, and policies | Phase-36 scope-bearing declarations in `Amoebius.Transaction.Vocabulary`, independently constrained by `TransactionVocabularyOracle` | `.build/sql/**` |
 | Proto, generated bindings, and protocol fixtures | Haskell protocol declarations and recipes | `.build/proto/**` |
 | Pulumi programs and provider inputs | Haskell infrastructure declarations | `.build/pulumi/**` |
 | PureScript/JavaScript client runtime, codecs, CSS/HTML/assets, and bundle | Haskell client-runtime and public-contract declarations | `.build/ui/**` |
@@ -99,6 +108,9 @@ renderer with its own previous bytes.
 - A new union arm regenerates the test-surface enumeration, exposing an unbound expectation rather than
   relying on a hand-maintained inventory.
 - A generated client and its server plan can share one typed source without tracking either projection.
+- Canonical UI-plan regression bytes may be independently declared in Haskell, but a materialized JSON plan,
+  manifest, digest table, or surface registry remains generated output beneath `.build/**`, never tracked
+  behavioral authority.
 
 These properties do not prove that a renderer is correct. Correctness depends on independent Haskell
 expectations, adversarial controls, and the gate-integrity contract. Content addressing proves which bytes an
@@ -139,6 +151,12 @@ accept and store it outside Git.
 Repository tests for schema evolution use Haskell values that render old and new Dhall inputs under
 `.build/test-corpora/**`. The expected compatibility classification is an separately authored Haskell
 value, not a committed `.dhall` corpus.
+
+### 5.2 Browser runtime projection
+
+The encrypted offline runtime's IndexedDB, OPFS, service-worker, Web-Locks, BroadcastChannel, and WebCrypto
+sources are projections of closed Haskell declarations. Tests may materialize two run-local copies beneath
+`.build/runs/**` to compare their structure and bytes; no projected browser source is tracked.
 
 ## 6. Planning ownership
 

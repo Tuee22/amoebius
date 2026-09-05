@@ -1,6 +1,0 @@
-case	handler	count	body_contains
-read-own	data-read	1	fresh-challenge
-read-foreign	-	0	-
-mutate-own	data-write	1	fresh-challenge
-bad-origin	-	0	-
-stale	-	0	-

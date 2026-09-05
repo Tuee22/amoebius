@@ -638,7 +638,7 @@ simpleExpected =
                         "source-consumer.binding.amoebius.cabal"
                         "CabalPackageDescription\tHaskellSourceBoundaryStructureChecker,HaskellRepositoryRootLocator,CabalBuildTool"
                    , observation
-                        "source-consumer.pending-haskell.A.hs"
+                        "source-consumer.pending-haskell.src/A.hs"
                         "100644\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                    ]
                 <> acquiredObservations
@@ -679,6 +679,10 @@ maximumExpected =
                 ( "snapshot acquired-maximum has 0 exact Haskell subjects but lacks compiler-derived facts: "
                     <> requiredFactsText
                 )
+            , finding
+                "SRC-COMPILER-SUBJECT-REGISTRY"
+                "<haskell-subject-inventory>"
+                "exact Haskell subject inventory is empty"
             ]
                 <> acquiredRefusalFindings
         }
@@ -764,8 +768,18 @@ acquiredFixture identity entries =
 
 simpleEntries :: [TrackedEntry]
 simpleEntries =
-    [ tracked "A.hs" "module A where\n"
-    , tracked "amoebius.cabal" "cabal-version: 3.0\n"
+    [ tracked "src/A.hs" "module A where\n"
+    , tracked
+        "amoebius.cabal"
+        ( "cabal-version: 3.0\n"
+            <> "name: fixture\n"
+            <> "version: 0\n"
+            <> "build-type: Simple\n"
+            <> "library\n"
+            <> "  exposed-modules: A\n"
+            <> "  hs-source-dirs: src\n"
+            <> "  default-language: GHC2024\n"
+        )
     ]
 
 boundaryEntries :: Int -> [TrackedEntry]

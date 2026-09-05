@@ -2,15 +2,18 @@
 
 -- | Independent expectations for the @repository_layout_conformance@ runner.
 --
--- Expectations are authored from the capability's two owned legacy families and
--- the contract rows it leaves unbound, never restated from a run. Each negative
+-- Expectations are authored from the capability's two owned legacy families,
+-- never restated from a run. Each negative
 -- differs from 'cleanSnapshot' in exactly one dimension and must add exactly
 -- one refusal code.
 module RepositoryLayoutRunOracle
   ( runRepositoryLayoutRunOracle
   ) where
 
-import Amoebius.Validation.RepositoryLayoutRun (repositoryLayoutRunCheck)
+import Amoebius.Validation.RepositoryLayoutRun
+  ( repositoryLayoutQualificationDiagnostic
+  , repositoryLayoutRunCheck
+  )
 import Amoebius.Validation.SourceClosure.Internal
   ( IndexEntry (..)
   , IndexMode (RegularFile)
@@ -34,19 +37,34 @@ runRepositoryLayoutRunOracle = do
     )
  where
   problems =
-    exactly "a snapshot with no open layout debt" cleanSnapshot unresolvedCodes
+    [ "the production qualification projection differs from the independent four-case expectation: "
+        <> show repositoryLayoutQualificationDiagnostic
+    | repositoryLayoutQualificationDiagnostic /= expectedQualification
+    ]
+      <> exactly "a snapshot with no open layout debt" cleanSnapshot []
       <> exactly
         "an ignore contract naming a retired generated root"
         (entryWith ".gitignore" ".build/\ngen/\n" : drop 1 cleanSnapshot)
-        ("REPOSITORY-LAYOUT-RETIRED-IGNORE-ROOT" : unresolvedCodes)
+        ["REPOSITORY-LAYOUT-RETIRED-IGNORE-ROOT"]
       <> exactly
         "a runtime identity spelling a plan ordinal"
         (cleanSnapshot <> [entryWith "src/Amoebius/Gate.hs" "name = \"phase-07\"\n"])
-        ("REPOSITORY-LAYOUT-PHASE-ORDINAL-IN-SOURCE" : unresolvedCodes)
+        ["REPOSITORY-LAYOUT-PHASE-ORDINAL-IN-SOURCE"]
+      <> exactly
+        "phase-labelled validation evidence outside the runtime identity namespace"
+        (cleanSnapshot <> [entryWith "src/validation-kernel/Amoebius/Validation/Gate.hs" "name = \"phase-07\"\n"])
+        []
       <> [ "a constructed identity must not be reported as a spelled ordinal, observed "
              <> show (observed constructedIdentitySnapshot)
-         | observed constructedIdentitySnapshot /= unresolvedCodes
+         | observed constructedIdentitySnapshot /= []
          ]
+
+  expectedQualification =
+    [ ("clean", [])
+    , ("retired-ignore-root", ["REPOSITORY-LAYOUT-RETIRED-IGNORE-ROOT"])
+    , ("runtime-phase-ordinal", ["REPOSITORY-LAYOUT-PHASE-ORDINAL-IN-SOURCE"])
+    , ("validation-phase-label", [])
+    ]
 
   exactly label entries expected =
     [ label <> " must produce exactly " <> show expected <> ", observed " <> show (observed entries)
@@ -60,13 +78,6 @@ runRepositoryLayoutRunOracle = do
               (sourceClosureInternalTestAcquire (SourceSnapshot "/fixture" snapshotIdentityValue entries))
           )
       )
-
--- | The rows the capability's contract leaves unbound; every case carries them.
-unresolvedCodes :: [String]
-unresolvedCodes =
-  [ "REPOSITORY-LAYOUT-SUBJECT-UNRESOLVED"
-  , "REPOSITORY-LAYOUT-ORACLE-UNRESOLVED"
-  ]
 
 -- | An ignore contract naming only admitted contained roots, and Haskell whose
 -- identities name capabilities.

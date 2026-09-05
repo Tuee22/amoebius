@@ -50,7 +50,6 @@ import Amoebius.Validation.CompilerSubjectRegistry.Internal
   , compilerSubjectContractDigest
   , compilerSubjectRegistryCheck
   , deriveCompilerSubjectRegistry
-  , foldCompilerSubjectContractProblem
   )
 import Amoebius.Validation.SourceConsumerGraph.Internal
   ( RequiredCompilerFact (..)
@@ -1191,10 +1190,10 @@ acquireCompilerSourceGraph acquired =
   pure
     ( CompilerSourceRefused
         diagnostic
-        (compilerAcquisitionProblems identity registryReady contractProblems)
+        (compilerAcquisitionProblems identity registryReady)
     )
  where
-  (diagnostic, identity, registryReady, contractProblems) = prepareAcquiredCompilerSourceGraph acquired
+  (diagnostic, identity, registryReady, _) = prepareAcquiredCompilerSourceGraph acquired
 
 analyzeAcquiredCompilerSourceGraph
   :: AcquiredSourceSnapshot
@@ -1274,25 +1273,16 @@ prepareAcquiredCompilerSourceGraph acquired =
 compilerAcquisitionProblems
   :: Text
   -> Bool
-  -> [CompilerSubjectContractProblem]
   -> NonEmpty CompilerAcquisitionProblem
-compilerAcquisitionProblems identity registryReady contractProblems =
+compilerAcquisitionProblems identity registryReady =
   CompilerGraphFactsUnavailable identity
     :| ( [CompilerSubjectOutcomeRegistryUnavailable identity | not registryReady]
-           <> map (compilerSubjectContractAcquisitionProblem identity) contractProblems
            <> [ CompilerElaboratedMultiRunUnavailable identity
               , CompilerToolchainAuthorityUnavailable identity
               , CompilerExecutionSupervisionUnavailable identity
               , CompilerSemanticClosureUnavailable identity
               ]
        )
-
-compilerSubjectContractAcquisitionProblem
-  :: Text
-  -> CompilerSubjectContractProblem
-  -> CompilerAcquisitionProblem
-compilerSubjectContractAcquisitionProblem identity =
-  foldCompilerSubjectContractProblem (CompilerSubjectContractRejected identity)
 
 assembleAcquiredCompilerSourceGraph :: Text -> CheckResult -> AcquiredCompilerSourceGraph
 assembleAcquiredCompilerSourceGraph identity result =

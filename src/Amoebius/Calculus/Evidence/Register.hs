@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | The register model as a value: how far a fixture's evidence actually reaches.
@@ -93,7 +94,11 @@ gateRegister :: Register -> Maybe GateRegister
 gateRegister = \case
   PureRegister -> Just GateRegisterOne
   BoundaryRegister -> Just GateRegisterTwo
+#ifdef EVIDENCE_CALCULUS_SIMULATION_IS_GATE_REGISTER_MUTANT
+  SimulationRegister -> Just GateRegisterTwo
+#else
   SimulationRegister -> Nothing
+#endif
   LiveRegister -> Just GateRegisterThree
 
 -- | The register a gate register stands for, so a declaration can be compared against what

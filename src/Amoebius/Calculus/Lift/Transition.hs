@@ -98,16 +98,20 @@ data SomeLift where
 admits :: Layer -> Layer -> Bool
 admits from to = case (from, to) of
   (OnHost, OnHost) -> True
+#ifndef LIFT_CALCULUS_REMOVE_ENTER_FRAME_RELATION_MUTANT
   (OnHost, InFrame) -> True
+#endif
   (OnHost, InContainer) -> False
   (InFrame, InFrame) -> True
+#ifndef LIFT_CALCULUS_REMOVE_ENTER_CONTAINER_RELATION_MUTANT
   (InFrame, InContainer) -> True
+#endif
   (InContainer, InContainer) -> True
 #ifdef LIFT_CALCULUS_DISPATCH_ADMITS_A_FALLBACK_MUTANT
-  -- The seeded fallback. It answers exactly what the three named arms below answered, so
-  -- the authored pair table stays green and only the scan sees it — which is the point:
-  -- the defect is the arm, not the answer it happens to give today.
-  (_from, _to) -> False
+  -- The seeded fallback admits every otherwise-refused inward/skip pair. The independent
+  -- relation rejects those exact cells, while the source-shape check separately keeps a
+  -- wildcard from becoming the authority for any future layer.
+  (_from, _to) -> True
 #else
   (InFrame, OnHost) -> False
   (InContainer, OnHost) -> False

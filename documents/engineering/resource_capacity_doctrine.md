@@ -89,20 +89,23 @@ illegal and the technique that forecloses them is
 [illegal_state_catalog.md §3.17-§3.21 / §4.6](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded); this doc is the normative home of
 the model that catalog names.
 
-The target below begins with Phase 9's base index, continues through the schema, provision, and render band,
-and ends with later live phases that enact and cross-check it. The
-[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) must validate the **base**
+The model below begins with Phase 9's implemented base index, continues through the schema, provision, and
+render band, and ends with later live phases that enact and cross-check it. The bound
+[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) validates the **base**
 `Amoebius.Capacity.Types` / `Amoebius.Capacity.Fold` slice: CPU,
 memory, logical pod-ephemeral storage, pod and driver-scoped CSI slots, finite CPU-limit policy, headroom,
 taint/anti-affinity eligibility, and fixed/elastic placement. Its 15 direct negatives, 15 legal twins, two
-carried positives, four sampled properties, and 19 mutants must distinguish the subject at Register 1.
-The [Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) must validate the
+carried positives, four sampled properties, and 19 changed-production mutants distinguish the subject at
+Register 1. This is a bound gate contract, not a live-enforcement claim.
+The [Phase 28 candidate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) implements the five-module
+`storage-geometry-folds` library, and its gate validates the
 closed storage budget/growth arithmetic, BookKeeper/MinIO physical expansion, presentation/allocation
 rounding, uniform claims, six-arm object inventory, service/migration/cache/root/control-plane geometry,
 backup/restore/pool checks, both Pulsar ceilings, and snapshot-bound policy-only scaling. Its 30 exact
 variant/twin rows, two positive specs, six sampled equivalence properties, and 31 mutants must distinguish the
 subject at Register 1; the independently authored five-calculus projection must account for all 99 projected
-units, with transient run evidence beneath `.build/runs/phase_28/`.
+units, with transient run evidence beneath `.build/runs/phase-28/`. The separately authored
+`StorageGeometryOracle` replaces the retired serialized storage-case and calculus tables.
 The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) must validate execution
 epochs, aggregate scheduler reservations, structural runtime/image accounting, physical partition and
 provider-root arithmetic, accelerator residency against net VRAM, host-only compute derivations, and the
@@ -315,10 +318,11 @@ enaction in **Phase 79**, realtime Redis/WebSocket demand in **Phases 63 and 81�
 upload, compatibility, and multi-zone fault demand in **Phases 67–70**. This doc never maintains a competing status ledger; it states the target shape and
 links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
-[Phase 19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md) owns a bounded reservation target
+[Phase 19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md) owns a bounded reservation implementation
 against the `Amoebius.Capacity.Scheduler` algebra. Two concurrent modeled-store attempts must create exactly one `Reserved`
 row; `beginBinding`, `confirmBound`, and `ledgerOnlyAbsentRecovery` then retain one complete-resource debit and
-reach `Bound` across crashes at `Reserved`, `BindingInFlight`, and `Bound`. This targets Register-2 evidence
+reach `Bound` across crashes at `Reserved`, `BindingInFlight`, and `Bound`. A changed-production crash-drop
+mutation must fail at the direct debit observation. This targets Register-2 evidence
 over three authored cuts, linked to Phase 18's `OneDebitPerReservation` invariant name. It cannot prove
 model-to-code refinement nor replaces Phase 59's live scheduler observations; modeled-store fidelity is
 ASSUMED and live runtime fidelity is UNVERIFIED here.

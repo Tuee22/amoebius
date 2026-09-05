@@ -1,5 +1,0 @@
-source	current	presented	expected
-policy	4	3	StalePolicyEpoch
-membership	7	6	StaleMembershipEpoch
-grant	9	8	StaleGrantEpoch
-scope	12	11	StaleScopeEpoch

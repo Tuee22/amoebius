@@ -1,9 +1,0 @@
-case	error
-missing-handler	MissingHandler
-duplicate-handler	DuplicateHandler
-codec-mismatch	ContractMismatch
-missing-capability	MissingCapability
-scope-mismatch	ScopeMismatch
-unsafe-retry	IdempotencyRequired
-raw-topic	ProviderCoordinateForbidden
-link-as-url	ExternalLinkNotAnEffect

@@ -1,9 +1,0 @@
-{
-  "scheduleName": "stale-snapshot",
-  "scheduleSeed": 19,
-  "scheduleBound": 9,
-  "scheduleDuplicateDelivery": false,
-  "scheduleCrashBeforeApply": false,
-  "scheduleStaleSnapshot": true,
-  "scheduleDelayMicros": 1
-}

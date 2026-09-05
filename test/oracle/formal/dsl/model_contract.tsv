@@ -1,7 +1,0 @@
-model	states	invariants	properties	actions
-DslProjection	1	DslProjectionExact	-	ObserveProjection
-SnapshotToken	3	NoTokenReuse	IssuedTokenEventuallyConsumed	Mint,Consume
-ReservationProtocol	4	OneDebitPerReservation	ReservationEventuallyBound	Reserve,PrepareBinding,ConfirmBound
-LeaseAuthority	3	AtMostOneLeaseHolder	EmptyEventuallyHeld	Acquire,Release
-ReconcileProtocol	6	OneLeaseHolderActs,RefuseOnUnreachable,DeleteAfterBoundReady,ConvergedIsStable	PendingEventuallyConverged	ObserveAbsent,ObservePresent,BindReplacement,DeleteOld,MarkAbsentConverged
-CalculusComposition	1	CompositionProjectionExact,CompositionIndicesNonNegative	-	-

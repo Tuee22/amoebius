@@ -14,7 +14,7 @@ model-as-data machinery it is expressed in, owned by
 
 **Status**: Authoritative source
 **Supersedes**: documents/engineering/tla_modelling_assumptions.md
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -262,14 +262,22 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
   complete later, but renderer faithfulness remains a differential-test obligation —
   the inversion the superseded doc left "empty and UNVERIFIED until Phase 74" is dissolved. The residual
   **runtime-fidelity** obligation (that the effectful daemon only takes transitions the `Model` sanctions) is
-  discharged in two stages, not one: **trace validation**
+  is assigned in two stages, not one: **trace validation**
   ([formal_model_doctrine.md §8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge)) —
   the daemon's observed transition log is checked step-by-step against the emitted spec's `Next` relation —
-  now runs in **Register 2.5** against `Amoebius.Multicluster.GatewayMigration`: both pinned traces are legal
-  `interpret` sequences and all five named invariants hold across 256 deterministic lag/fault schedules.
-  Register 3 then covers every modeled migration action in a real three-cluster forest. This is runtime
-  correspondence at the tested edge, not proof that a local authoritative DNS server is Route53 or that a
-  single-host pause reproduces WAN physics.
+  is owned by the later runtime-correspondence phase against `Amoebius.Multicluster.GatewayMigration`, while
+  Register 3 is owned by the later live-drill phase. Until those gates pass, runtime fidelity is
+  **UNVERIFIED**: the Phase-17 explorer/TLC/IOSimPOR agreement proves only the bounded model and does not show
+  that a local authoritative DNS server is Route53 or that a single-host pause reproduces WAN physics.
+
+**Current source boundary.** Phase 17's production model is
+`Amoebius.Formal.GatewayMigration`; its per-spec cutoff is
+`Amoebius.Multicluster.StructuralFit`. A separately authored Haskell oracle fixes constants, actions,
+obligations, renderer facts, cutoff cases, and cutoff-deletion expectations. The source-bound supervisor
+invokes Cabal serially and offline, injects digest-pinned Java 21.0.9 and TLA+ 1.8.0 inputs, and confines every
+rendered TLA/CFG/DOT/log/result product to a fresh `.build/runs/phase-17/**` root. Three CPP-selected mutations
+change production ownership, cutoff, and fairness loci; tracked Python gates and serialized behavioral
+expectations are not part of this boundary.
 
 ---
 

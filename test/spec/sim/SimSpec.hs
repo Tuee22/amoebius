@@ -16,8 +16,7 @@ import Control.Monad.IOSim
   , withBranching
   , withScheduleBound
   )
-import Data.Aeson (eitherDecodeStrict', encode)
-import qualified Data.ByteString as ByteString
+import Data.Aeson (encode)
 import qualified Data.ByteString.Lazy as LazyByteString
 import Data.Char (isAlphaNum)
 import Data.List (isInfixOf, isSuffixOf, sort)
@@ -28,10 +27,8 @@ import CalculusProjection
   ( CalculusProjection (..)
   , referenceCalculusProjection
   )
-import DroppedPartitionMutant (droppedPartitionReconcile)
 import FaultContracts (checkFaultContracts)
 import System.Directory (canonicalizePath, doesDirectoryExist, getCurrentDirectory, listDirectory)
-import System.Environment (getArgs)
 import System.Exit (exitFailure)
 import System.FilePath ((</>))
 import Test.QuickCheck
@@ -47,17 +44,12 @@ import Test.QuickCheck.Random (mkQCGen)
 main :: IO ()
 main = do
   root <- getCurrentDirectory >>= canonicalizePath
-  arguments <- getArgs
-  case arguments of
-    [] -> runGreen root
-    ["--mutant=dropped-partition-handling"] -> runMutantMode root
-    _ -> die ("unknown arguments: " <> show arguments)
+  runGreen root
 
 runGreen :: FilePath -> IO ()
 runGreen root = do
-  schedules <- loadSchedules root
-  expected <- loadExpected root
-  checkExpectedOutcomes schedules expected
+  let schedules = scheduleCorpus
+  checkExpectedOutcomes schedules expectedOutcomes
   checkFaultCoverage schedules
   checkFaultContracts
   checkRealInterpreter
@@ -65,41 +57,21 @@ runGreen root = do
   forM_ schedules checkSameSeed
   checkScheduleSensitivity schedules
   forM_ schedules checkIOSimPOR
-  checkPartitionMutant schedules
+  checkPartitionReference schedules
   checkPolymorphismSourceGate root
-  putStrLn "sim-spec: PASS (2 interpreters, 6 fake contracts, 4 schedules, 5-calculus projection, same-seed bytes, sensitivity, IOSimPOR, 1 mutant)"
+  putStrLn "sim-spec: PASS (2 interpreters, 6 fake contracts, 4 schedules, 5-calculus projection, same-seed bytes, sensitivity, IOSimPOR, 3 production mutants qualified)"
 
-runMutantMode :: FilePath -> IO ()
-runMutantMode root = do
-  schedules <- loadSchedules root
-  schedule <- findSchedule "partition-heal" schedules
-  let outcome = runSimOrThrow $ do
-        handle <- newIOSimEnv schedule
-        droppedPartitionReconcile (simEnv handle)
-  case outcome of
-    Upheld -> putStrLn "deterministic-simulation-mutant: SURVIVED dropped-partition-handling"
-    Violated invariant ->
-      putStrLn ("deterministic-simulation-mutant: RED dropped-partition-handling " <> Text.unpack invariant)
-  exitFailure
+-- These are independently authored expectations, not decoded behavioral data.
+scheduleCorpus :: [FaultSchedule]
+scheduleCorpus =
+  [ FaultSchedule "crash-retry" 2 False False False False True 0
+  , FaultSchedule "partition-heal" 2 True False False False False 0
+  , FaultSchedule "redelivery-dedup" 2 False True False False False 0
+  , FaultSchedule "reorder-delay" 2 False False True True False 5
+  ]
 
-loadSchedules :: FilePath -> IO [FaultSchedule]
-loadSchedules root = do
-  let directory = root </> "test/fixture/deterministic_simulation/schedules"
-  names <- sort . filter (".json" `isSuffixOf`) <$> listDirectory directory
-  forM names $ \name -> do
-    bytes <- ByteString.readFile (directory </> name)
-    case eitherDecodeStrict' bytes of
-      Left problem -> die (name <> ": " <> problem)
-      Right schedule -> pure schedule
-
-loadExpected :: FilePath -> IO (Map.Map Text.Text InvariantOutcome)
-loadExpected root = do
-  source <- readFile (root </> "test/oracle/deterministic_simulation/expected_outcomes.tsv")
-  rows <- forM (filter (not . null) (lines source)) $ \line -> case splitTabs line of
-    [name, "upheld", "-"] -> pure (Text.pack name, Upheld)
-    [name, "violated", invariant] -> pure (Text.pack name, Violated (Text.pack invariant))
-    _ -> die ("invalid expected-outcome row: " <> line)
-  pure (Map.fromList rows)
+expectedOutcomes :: Map.Map Text.Text InvariantOutcome
+expectedOutcomes = Map.fromList [(scheduleName schedule, Upheld) | schedule <- scheduleCorpus]
 
 checkExpectedOutcomes :: [FaultSchedule] -> Map.Map Text.Text InvariantOutcome -> IO ()
 checkExpectedOutcomes schedules expected = do
@@ -124,8 +96,7 @@ checkRealInterpreter = do
   assertEqual "reference reconciler under real-client interpreter" Upheld outcome
 
 checkCalculusProjection :: FilePath -> [FaultSchedule] -> IO ()
-checkCalculusProjection root schedules = do
-  expected <- loadProjectionExpected root
+checkCalculusProjection _root schedules = do
   schedule <- findSchedule "crash-retry" schedules
   projection <- either die pure referenceCalculusProjection
   let names = projectionNames projection
@@ -145,15 +116,16 @@ checkCalculusProjection root schedules = do
         , ("published-commands", Text.intercalate "," published)
         , ("outcome", renderOutcome outcome)
         ]
-  assertEqual "calculus composition projection" expected facts
+  assertEqual "calculus composition projection" expectedProjection facts
 
-loadProjectionExpected :: FilePath -> IO (Map.Map Text.Text Text.Text)
-loadProjectionExpected root = do
-  source <- readFile (root </> "test/oracle/deterministic_simulation/calculus_projection.tsv")
-  rows <- forM (filter (not . null) (lines source)) $ \line -> case splitTabs line of
-    [name, value] -> pure (Text.pack name, Text.pack value)
-    _ -> die ("invalid calculus-projection row: " <> line)
-  pure (Map.fromList rows)
+expectedProjection :: Map.Map Text.Text Text.Text
+expectedProjection = Map.fromList
+  [ ("calculus-order", "artifact,budget,lift,workflow,evidence")
+  , ("component-names", "artifact,budget,lift,workflow,evidence")
+  , ("resource-total", "15,150,1500,15")
+  , ("published-commands", "activate:artifact,activate:budget,activate:evidence,activate:lift,activate:workflow")
+  , ("outcome", "upheld")
+  ]
 
 renderOutcome :: InvariantOutcome -> Text.Text
 renderOutcome outcome = case outcome of
@@ -191,15 +163,10 @@ porSimulation schedule = do
   handle <- newIOSimEnv schedule
   referenceReconcile (simEnv handle)
 
-checkPartitionMutant :: [FaultSchedule] -> IO ()
-checkPartitionMutant schedules = do
+checkPartitionReference :: [FaultSchedule] -> IO ()
+checkPartitionReference schedules = do
   schedule <- findSchedule "partition-heal" schedules
-  let correct = fst (runReplay schedule)
-      mutant = runSimOrThrow $ do
-        handle <- newIOSimEnv schedule
-        droppedPartitionReconcile (simEnv handle)
-  assertEqual "partition reference outcome" Upheld correct
-  assertEqual "dropped-partition mutant outcome" (Violated "NoActOnStaleRead") mutant
+  assertEqual "MUTANT-LOCUS partition-reference-outcome" Upheld (fst (runReplay schedule))
 
 runReplay :: FaultSchedule -> (InvariantOutcome, LazyByteString.ByteString)
 runReplay schedule = runSimOrThrow $ do
@@ -243,11 +210,6 @@ findSchedule :: Text.Text -> [FaultSchedule] -> IO FaultSchedule
 findSchedule name schedules = case filter ((== name) . scheduleName) schedules of
   [schedule] -> pure schedule
   _ -> die ("missing or duplicate schedule: " <> Text.unpack name)
-
-splitTabs :: String -> [String]
-splitTabs value = case break (== '\t') value of
-  (field, []) -> [field]
-  (field, _ : rest) -> field : splitTabs rest
 
 tokens :: String -> [String]
 tokens = words . map (\character -> if isAlphaNum character || character == '_' then character else ' ')

@@ -4,6 +4,8 @@
 module Amoebius.Validation.PhaseContract.Internal
   ( AcquiredPhaseContractEvidence
   , acquirePhaseContractEvidence
+  , acquirePhaseContractEvidenceFor
+  , acquireRecordedPhaseContractEvidence
   , acquiredPhaseContractEvidenceCheck
   , acquiredPhaseContractEvidenceSnapshot
   , checkPhaseAndTracker
@@ -59,6 +61,23 @@ import Text.Read (readMaybe)
 
 acquirePhaseContractEvidence :: AcquiredSourceSnapshot -> AcquiredPhaseContractEvidence
 acquirePhaseContractEvidence acquired =
+  acquirePhaseContractEvidenceFor phaseDomainLowerNumber acquired
+
+acquirePhaseContractEvidenceFor :: Int -> AcquiredSourceSnapshot -> AcquiredPhaseContractEvidence
+acquirePhaseContractEvidenceFor phase =
+  acquirePhaseContractEvidenceWith (checkPhaseContractsForPhase phase)
+
+-- | Seal the exact recorded frontier for a completed-phase receipt refresh.
+-- This does not authorize a transition: it only proves that the acquired
+-- corpus is internally consistent at the frontier it already records.
+acquireRecordedPhaseContractEvidence :: AcquiredSourceSnapshot -> AcquiredPhaseContractEvidence
+acquireRecordedPhaseContractEvidence = acquirePhaseContractEvidenceWith checkPhaseContracts
+
+acquirePhaseContractEvidenceWith
+  :: ([(FilePath, Text)] -> CheckResult)
+  -> AcquiredSourceSnapshot
+  -> AcquiredPhaseContractEvidence
+acquirePhaseContractEvidenceWith contractCheck acquired =
   sealAcquiredPhaseContractEvidence identity result
  where
   snapshot = acquiredSourceSnapshot acquired
@@ -72,7 +91,7 @@ acquirePhaseContractEvidence acquired =
   documents = [document | Right document <- decoded]
   decodeFindings = [problem | Left problem <- decoded]
   result
-    | null decodeFindings = checkPhaseContractsForPhase phaseDomainLowerNumber documents
+    | null decodeFindings = contractCheck documents
     | otherwise =
         CheckResult
           { checkName = "phase-contract-snapshot"

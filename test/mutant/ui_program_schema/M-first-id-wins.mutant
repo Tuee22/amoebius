@@ -1,3 +1,0 @@
-operator=duplicate-collapse
-change=retain the first duplicate qualified identity
-expected=duplicate_qualified_id.dhall is accepted and the gate fails

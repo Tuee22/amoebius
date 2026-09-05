@@ -1,0 +1,11 @@
+module UiServerBoundaryReference (httpRows, startupRows, publicAssets, privateAssets, websocketTags) where
+httpRows :: [(String, Int, String)]
+httpRows = [("read-own",200,"OK"),("mutate-own",202,"Accepted"),("foreign",404,"Unavailable"),("bad-origin",403,"Forbidden"),("stale",409,"ReloadRequired")]
+startupRows :: [(String, Bool)]
+startupRows = [("exact",True),("missing",False),("duplicate",False),("incompatible",False),("wrong-abi",False),("unreferenced",True)]
+publicAssets :: [String]
+publicAssets = ["/","/index.html","/ui.js","/ui.css","/ui/client-plan"]
+privateAssets :: [String]
+privateAssets = ["/ui/server-plan","/ui/handler-registry","/ui/policy","/ui/private-contract","/ui/server-codecs"]
+websocketTags :: [String]
+websocketTags = ["accepted","origin","subprotocol","nonce","program","scope","coordinator"]

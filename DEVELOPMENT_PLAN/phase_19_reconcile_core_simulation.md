@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_20_extension_declaration.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/resource_capacity_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_20_extension_declaration.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/resource_capacity_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -38,28 +38,23 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 18, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+Phase 18 and every earlier gate have current passing receipts. The Phase-19 implementation and compiled
+semantic contract are bound below; completion still requires the exact integrated Phase-19 gate.
 
 > **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
-This phase specifies a Haskell target capability; it does not report a current implementation or
-result. The target is to plan from observed inventory to desired index with a pure Haskell decision
-core and exercise fixed-point, bounded-convergence, token, reservation, and three-valued-observation
-behavior under deterministic modeled schedules.
+This phase has a bound Haskell implementation but does not report a passing result until its complete gate
+runs. It plans from observed inventory to desired index with a pure typed decision core and exercises
+fixed-point, bounded-convergence, token, reservation, and three-valued-observation behavior under deterministic
+modeled schedules.
 
-The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
-`.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
-tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
-code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
-`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
-evidence contract remain UNRESOLVED and block validation.
+The production subject, behavioral controls, independent oracle, fixtures, and mutants are authored as `.hs`.
+The former JSON/TSV behavioral declarations and test-local mutant module are retired. Derived results are
+created lazily beneath the acquired `.build/runs/phase-19/**` root and remain run-scoped evidence only.
 
 This phase precedes Phase 49 and is confined to modeled Register-2 boundary behavior only. It cannot
 use host, hardware, live-service, or cluster observations to make its claim pass.
@@ -79,28 +74,28 @@ three-valued-observation behavior under deterministic modeled schedules. NOT VAL
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — plan from observed inventory to desired index with a pure Haskell decision core and exercise fixed-point, bounded-convergence, token, reservation, and three-valued-observation behavior under deterministic modeled schedules. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 19` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 18; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | The complete Phase-19 claim is the pure typed reconcile decision core plus four deterministic modeled schedules, bounded POR, snapshot-token and reservation protocols, typed deletion authority, and four honest Phase-18 formal links. Effectful runtime fidelity is excluded. |
+| `Subject` | `src/reconcile-core/Amoebius/Reconcile/{Core,Sim}.hs` and the reservation debit fold in `src/execution-accelerator-folds/Amoebius/Capacity/Scheduler.hs`, acquired and exercised by the package-hidden Phase-19 supervisor. |
+| `Command` | `pb validate phase 19` is the future public spelling. This pre-handoff gate instead invokes the exact absolute source-bound Haskell executable as `validate phase 19`, then runs exact Cabal 3.16.1.0 and GHC 9.12.4 paths offline with `--jobs=1`; `pb` is not used. |
+| `Oracle` | `test/spec/reconcile/ReconcileCoreOracle.hs` owns the closed semantic corpus, while `test/harness/reconcile_core/ReferencePlanner.hs` independently plans from its textual vocabulary without importing production reconcile modules. |
+| `Positive controls` | Nine actual/reference cases with exactly two fixed points; four schedules converging to the exact three-object inventory; four same-seed and POR controls; one changed-seed control; token and reservation races; four formal links; and the present-observation delete twin. |
+| `Paired negatives` | Reachable versus unreachable observation, present versus unreachable deletion witness, same versus changed seed, first token use versus reuse, and retained reservation versus every crash cut are checked at exact properties. |
+| `Mutants` | Four Cabal flags change production fixed-point, apply convergence, token reuse, and reservation crash behavior and must fail at `FixedPoint`, `Convergence`, `NoTokenReuse`, and `BoundRetainedAfterCrash`; the fifth weakens the production delete constructor and is killed when the unreachable witness compiles. |
+| `Discovery` | The acquired source snapshot must equal the exact three production and four oracle/harness `.hs` paths in both directions; empty, missing, or extra discovery fails. |
+| `Challenge` | The production mutation matrix and changed-seed schedule are evaluated after source acquisition; each exact property must change while the clean controls remain green. |
+| `Observer` | The supervisor retains absolute executable, argv, exit, stdout/stderr, and digest observations for Cabal version, each production mutant, the delete pair, and the clean run. |
+| `Authority/bypass` | Authority is limited to the exact Cabal/compiler/store paths and run root; every build is offline and serial. `pb`, network, host, container, cluster, service, and hardware arguments are forbidden. |
+| `Freshness` | One unique `.build/runs/phase-19/work/candidate-*` root is acquired; the clean result is regenerated there and opening/closing Git source identities must match. |
+| `Qualification` | The supervisor first kills all five changed-production mutations at exact loci, then requires the legal delete twin and clean independent corpus to pass. |
+| `Cleanroom` | The authenticated source repository cache is copied beneath the unique run root, Cabal builds there, and the clean generated result must exist only below that root. |
+| `Legacy closure` | The four JSON schedules, five serialized TSV/surface authorities, and test-local mutant module are absent; reintroduction is an exact failure. |
+| `Predecessor` | Exact durable `ImmediatePredecessorPass` for Phase 18 on the current source snapshot; absent, stale, replayed, or different-source evidence fails. |
+| `Residue` | Modeled environment fidelity is `ASSUMED`; effectful runtime, host, service, cluster, and hardware correspondence remain `UNVERIFIED` and later-phase-owned. |
+| `Pass criterion` | Every one of the eighteen rows passes in one qualified run for the exact source; that complete pass is sufficient for the mechanical status-only transition. |
 
 ## Doctrine adopted
 
@@ -113,15 +108,15 @@ three-valued-observation behavior under deterministic modeled schedules. NOT VAL
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 19.1: Pure typed decision core ⏸️
+## Sprint 19.1: Pure typed decision core ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/reconcile-core/Amoebius/Reconcile/Core.hs`; typed observations and actions, total planner, fixed points, and production mutation loci.
 **Blocked by**: [Phase 18](phase_18_dsl_formal_model.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Nine exact actual/reference rows, two fixed points, and the present/unreachable compile pair.
+**Oracle**: `test/spec/reconcile/ReconcileCoreOracle.hs`; `test/harness/reconcile_core/ReferencePlanner.hs`.
+**Legacy IDs**: Phase-local legacy closure for the retired core/schedule TSV/JSON declarations and test-local mutant.
+**Docs to update**: `cluster_lifecycle_doctrine.md`; `system_components.md`.
 
 ### Objective
 
@@ -145,15 +140,15 @@ the observation type rather than a runtime flag.
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 19.2: Four deterministic reconcile schedules ⏸️
+## Sprint 19.2: Four deterministic reconcile schedules ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/reconcile-core/Amoebius/Reconcile/Sim.hs`; four schedule values, versioned snapshot tokens, and bounded deterministic execution.
 **Blocked by**: Sprint 19.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Exact final inventories and transition counts, two fresh same-seed readings, changed-seed order, and four bounded POR runs.
+**Oracle**: `test/spec/reconcile/ReconcileCoreOracle.hs`; `test/spec/reconcile/ReconcileCoreSimulationSpec.hs`.
+**Legacy IDs**: Phase-local legacy closure for the retired four JSON schedule fixtures and schedule-outcome TSV.
+**Docs to update**: `deterministic_simulation_doctrine.md`; `system_components.md`.
 
 ### Objective
 
@@ -177,15 +172,15 @@ convergent semantic evidence without committing trace bytes.
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 19.3: Protocol correspondence and sealed gate ⏸️
+## Sprint 19.3: Protocol correspondence and sealed gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/reconcile-core/Amoebius/Reconcile/Sim.hs`; `src/execution-accelerator-folds/Amoebius/Capacity/Scheduler.hs`; package-hidden `Amoebius.Validation.ReconcileCoreRun.Internal`.
 **Blocked by**: Sprint 19.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: Concurrent token and reservation controls, three recovery cuts, four exact formal links, five production mutations, source discovery, containment, and acquired evidence.
+**Oracle**: `test/spec/reconcile/ReconcileCoreOracle.hs`; typed deletion witness in `test/negative/compile_fail/reconcile_core/DeleteWitnessCompile.hs`.
+**Legacy IDs**: Phase-local legacy closure for all ten retired Phase-19 behavioral paths.
+**Docs to update**: `resource_capacity_doctrine.md`; `formal_model_doctrine.md`; `system_components.md`.
 
 ### Objective
 

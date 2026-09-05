@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Amoebius.Formal.ToyModel
   ( toyModel
   , toyProcesses
@@ -31,6 +33,9 @@ noCritical = FiniteQuantifier ForAll "p" toyProcesses (NotEqual (pcAt (Ref "p"))
 
 mutualExclusion :: Expr
 mutualExclusion = And
+#ifdef FORMAL_MODEL_WEAKENS_INVARIANT_MUTANT
+  [ Equal (Ref "pc") (Ref "mirror")
+#else
   [ FiniteQuantifier ForAll "p" toyProcesses
       (FiniteQuantifier ForAll "q" toyProcesses
         (Or
@@ -41,6 +46,7 @@ mutualExclusion = And
               ]
           ]))
   , Equal (Ref "pc") (Ref "mirror")
+#endif
   , ArithmeticComparison LessThanOrEqual (integer 0) (Ref "criticalCount")
   , ArithmeticComparison LessThanOrEqual (Ref "criticalCount") (integer 1)
   , Or

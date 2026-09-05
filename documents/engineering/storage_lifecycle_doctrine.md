@@ -284,13 +284,14 @@ node-level precondition for the cluster-level guarantee in [§6](#6-the-lossless
 
 ### 5.2 The storage backing is bounded — the closed `StorageBacking` union
 
-**Pure read-side target — NOT VALIDATED.** The
-[Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) must implement the closed Haskell
+**Pure read-side candidate — NOT VALIDATED.** The
+[Phase 28 candidate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) implements the closed Haskell
 `StorageBudget`/`StorageBacking` read side and independently test physical
 geometry, filesystem presentation, allocation rounding, uniform per-backing claims, migrations, backup,
 restore, disjoint pools, and bounded snapshot-driven scaling. It consumes authored
 in-process backing capacities only. Live capacity observation, allocation, rebind, healing, migration, and
-declared≤observed reconciliation remain **UNVERIFIED** until their owning live phases.
+declared≤observed reconciliation remain **UNVERIFIED** until their owning live phases. Its complete gate runs
+the Haskell oracle, paired corpus, six sampled properties, and 31 changed-production challenges directly.
 
 [§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim) caps each *volume*; this subsection caps the *backing* a set of volumes draws from, so "unbounded storage"
 ([illegal_state_catalog.md §3.18](../illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)) has no syntax. There is no such thing as

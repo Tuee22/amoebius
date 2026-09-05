@@ -38,6 +38,7 @@ nor the phase gates that consume its registers, owned by
 - [11. Planning ownership](#11-planning-ownership)
 - [12. Spoof-resistant evidence](#12-spoof-resistant-evidence)
 - [13. End-to-end tests run in the Playwright image, against three browsers](#13-end-to-end-tests-run-in-the-playwright-image-against-three-browsers)
+- [14. Offline-state semantic evidence](#14-offline-state-semantic-evidence)
 - [Related Documents](#related-documents)
 
 ---
@@ -122,7 +123,7 @@ Cheapest first, and never confuse one for another.
 
 | Register | Name | What it exercises | Where it runs | Mocking posture |
 |----------|------|-------------------|---------------|-----------------|
-| **1** | **Pure** | DSL decoding, renderers, validation helpers, decision functions, DAG logic | in-process, no cluster; an acquired hermetic checker over input freshly generated from Haskell (for example TLC) counts as Register 1 | **none** — pure code never touches a mock |
+| **1** | **Pure** | DSL decoding, renderers, validation helpers, decision functions, DAG logic | in-process, no cluster; a later owner may acquire a hermetic checker over input freshly generated from Haskell, but a producer kernel cannot require its consumer checker to seal | **none** — pure code never touches a mock |
 | **2** | **Boundary integration** | The binary's CLI routing, subprocess behaviour, config load — through fake tools or controlled subprocesses | in-process + fake/real tool binaries | mocking only at the subprocess/interpreter boundary |
 | **2.5** | **Deterministic simulation** (an activity, never a phase gate) | The **real** daemon/reconciler code (lifted onto `io-classes`) run under `IOSim`/`IOSimPOR` against a modeled, fault-injectable environment — concurrent schedules + injected partition/reorder/redelivery/crash, deterministically replayable | in-process, no cluster | no mocks — the *real* code against *modeled* substrates (fake Pulsar/MinIO/apiserver/route53/Vault/clock) |
 | **3** | **Test-`.dhall` topology** | The whole system: a real cluster spun up, a real workflow run, real chaos injected, then torn down | a live substrate ([§8](#8-one-substrate-per-validation)) | no mocks — the real platform |
@@ -505,6 +506,11 @@ CUDA/Metal run may never relabel itself CPU after failure.
 
 ## 9. Derivation: generated enumeration, authored expectation
 
+The Phase-42 browser-interpreter Register-1 differential is a closed typed Haskell interaction corpus against
+an independently authored Haskell expectation module. It covers pure trace, focus/accessibility, request-plan,
+freshness, and projected-source structure; actual browser fidelity and OS-boundary observation remain live,
+post-barrier obligations.
+
 A test suite maintained by hand drifts from the specification it covers. A component added to an
 `InForceSpec` acquires no fault drill; a union arm added to a workflow ADT acquires no driven interaction;
 an entry added to the illegal-state catalog acquires no negative fixture. The drift is silent at author
@@ -535,6 +541,68 @@ The boundary applies uniformly:
 - every external-language fixture, client program, browser interaction script, or encoded oracle is generated
   beneath `.build/**` immediately before the relevant boundary or live check.
 
+Phase 8 is the bounded scoped-identity instance of this split: Git discovery enumerates the two production
+modules, one Haskell oracle, and ten Haskell compiler twins, while `test/spec/ui/ScopeSpec.hs` independently
+states the owner, flow, diagnostic, and generated reject-class expectations. No TSV, `.hs.fail`, or serialized
+mutant is an input to that verdict.
+
+Phase 9 applies the same boundary to capacity and topology: Git discovery enumerates three production
+modules, four Haskell oracle modules, and fourteen compiler twins; separately authored Haskell values state
+the fifteen fold outcomes, nine compatibility decisions, eight-current/three-deferred locus join, and four
+property predicates. Nineteen serial CPP builds alter production modules while keeping that oracle fixed.
+
+Phase 10 exhausts the finite five-calculus surface in Haskell: its authored table covers all 25 ordered pairs,
+the suite constructs all 125 kind triples, and a same-scope/different-scope compiler pair pins conjunction of
+the generative index. Three serial changed-production challenges independently weaken resource addition,
+label-transform preservation, and scope conjunction. The 500-case numeric properties are sampled evidence,
+not a claim of exhaustive `Natural` arithmetic.
+
+Phase 14 applies the split to source refinement: six real Haskell fixture modules and a compiled Phase-11
+model projection provide the enumerated subjects, while `RefinementCheckerSpec.hs` independently owns exact
+statuses, reasons, line numbers, source digests, and required correspondence pairs. Three CPP builds change
+the production checker without changing that oracle; generated invariant and result tables remain run-local
+observations.
+
+Phase 15 applies the split to compile-time foreclosure. `Amoebius.Compiler.CompileFailHarness` parses only
+structured GHC diagnostics and requires each illegal source to match its authored code, start, and message
+fragments after its legal twin compiles cleanly. `CompileFailHarnessSpec.hs` independently owns the ten
+claim/twin rows across Phases 4, 5, 6, 7, and 10. A compile-fail observation therefore proves only
+*this expression was rejected for this pinned reason*; it does not prove every expression outside the legal
+language is rejected. Wrong-reason, omitted-positive, and impossible-pin changed-production subjects keep
+that boundary executable, and all compiler products and result tables remain run-local.
+
+Phase 16 applies Register 2 to deterministic modeled effects. The ten-module
+`deterministic-simulation-substrate` library carries one `Env m` reference reconciler through injected
+real-client and `IOSim` interpreters; `SimSpec.hs`, `FaultContracts.hs`, and `CalculusProjection.hs`
+independently author four schedules, six fake-boundary contracts, and five Phase-10 composition facts.
+Same-seed trace bytes, changed-seed sensitivity, bounded `IOSimPOR`, and three CPP-selected production
+mutants establish the modeled claim. The result says only that the code upholds its invariants against those
+models: model fidelity is `ASSUMED`, and live-substrate behavior remains `UNVERIFIED`.
+
+Phase 27 applies the split to the complete illegal-state inventory. The production catalogue enumerates 121
+subcases and emits its catalogue and validation-locus ledger only beneath the fresh run root; the separately
+authored Haskell oracle fixes the expected digest, counts, Phase-9 join, foreclosure pairs, compiler loci, and
+product census. Seven structural, thirteen decode, and five compile-refusal pairs discharge 43 reached rows,
+while 78 later-owned rows remain explicit ledger deferrals. Four QuickCheck claims run with coverage floors
+and are labelled `TESTED (sampled)`; only exhaustive traversal of the three `Rke2Servers` arms is labelled
+`PROVEN`. Four changed-production mutants challenge structural, decode, indexed, and property behavior.
+
+[Phase 28](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) applies Register 1 to the pure
+logical-to-physical storage fold. A separately authored Haskell oracle
+fixes 30 negative/legal pairs, two composed positive rows, six sampled equivalence properties, and 31 exact
+production-mutation loci. Every property carries accepting and rejecting coverage floors; compiler
+exhaustiveness supplies the totality evidence that sampling cannot. The supervisor builds each mutation and
+the clean subject serially in one fresh run root. Live backing observation, allocation, migration, healing,
+and scaling enactment remain `UNVERIFIED` with their later owners.
+
+[Phase 29](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) applies Register 1 to the pure
+execution-epoch, scheduler-reservation, runtime/node-local storage, accelerator-residency, provider-root, and
+composed-placement folds. The independent Haskell oracle fixes 37 negative/legal pairs across 18 named
+families, two composed positives, seven sampled properties with coverage floors, a 128-unit five-calculus
+projection, and 45 exact changed-production loci. The supervisor executes every mutation and the clean suite
+serially in a unique run root. Model-to-runtime correspondence, live scheduling, device attachment, provider
+allocation, and physical enforcement remain `UNVERIFIED` with their later owners.
+
 The split also applies to lint and mutation corpora. A positive seed, mutation operator, and expected
 diagnostic identity may be committed only as Haskell. Materialized negative copies and serialized diagnostics
 are generated under `.build/test-corpora/` or `.build/tmp/`. The gate joins each case to its Haskell
@@ -557,6 +625,19 @@ both and that they are treated differently.
 expectation. Each enumerated surface is either bound to a committed Haskell expectation or it is not, and an unbound
 surface emits an **UNVERIFIED** row in the ledger's `coverage` array ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)),
 naming the surface — the `coverage` axis exists precisely so an uncovered surface is recorded, not lost.
+
+[Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md) applies the same separation to the pure
+UI authorization boundary. `AuthorizationCases.hs` supplies typed subject inputs, while
+`AuthorizationOracle.hs` imports neither production nor the case module and fixes the exact registry,
+decision, refusal, calculus, and production-mutant expectations. The acquired supervisor runs both changed
+production subjects and the clean suite serially beneath a fresh `.build/runs/phase-38/**` root; a test-local
+Boolean surrogate or serialized matrix cannot qualify the production authorization transition.
+
+[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) applies it to hardware-free application
+composition. `UiLocalCompositionCases.hs` names the generated interaction and calculus surfaces, while
+`UiLocalCompositionReference.hs` independently fixes visible, effect, access, and denial observations without
+importing production or the case module. Five CPP-selected production mutations must each fail at its named
+semantic locus; the retired Node, Python, TSV, and materialized-mutant corpus is not an oracle.
 
 ```mermaid
 flowchart TD
@@ -650,6 +731,14 @@ Two rules keep the exception bounded:
   engines are a test-only payload, and publishing it would put that payload in the lineage every pod pulls
   ([image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)).
 
+## 14. Offline-state semantic evidence
+
+The hardware-free offline-state gate joins a Haskell case declaration to a separately authored Haskell
+expectation module, then changes seven production loci covering ciphertext, credential exclusion, single-owner
+fencing, generation advance, dependency-aware quota refusal, partition scope, and generated-runtime fence
+hooks. Run-local file materialization proves deterministic projection mechanics only; real browser behavior
+remains a later observation.
+
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Evidence Calculus Doctrine](./evidence_calculus_doctrine.md) — the evidence calculus, which binds each claim to its fixture and defers to this document for what a discharged claim is worth
@@ -669,4 +758,4 @@ Two rules keep the exception bounded:
 - [Documentation Standards](../documentation_standards.md)
 - [Repository Layout and Artifact Provenance](./repository_layout_doctrine.md)
 - [Phase 11](../../DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md) — first formal-model gate using the testing registers
-- [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) — capability-binding gate using derived test surfaces
+- [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) — capability-binding gate using a Haskell-owned nine-arm corpus, independent oracle, paired Dhall/decode negatives, QuickCheck coverage, and changed-production mutations

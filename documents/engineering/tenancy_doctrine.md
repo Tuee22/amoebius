@@ -308,9 +308,10 @@ The six security laws stated over it — attestation as an index, the skolemised
 indistinguishable refusal, derived injective namespaces, and honest revocation bounds — are owned by
 [`extension_conformance_security.md`](./extension_conformance_security.md), and the states they foreclose are
 catalogued in [`../illegal_state/illegal_state_tenancy.md`](../illegal_state/illegal_state_tenancy.md).
-[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) owns the future lexical Register-1 mechanism: its
-rank-2 request eliminator, private constructors, and Haskell compile pairs must prevent request-index forgery,
-retagging, and escape. Phase 8 is **NOT VALIDATED**; persisted re-entry, law-family conformance, and provider
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) owns the lexical Register-1 mechanism in
+`Amoebius.Scope.Index` and `Amoebius.Scope.Flow`: its rank-2 request eliminator, private constructors, and
+Haskell compile pairs prevent request-index forgery, retagging, and escape. While its gate remains Active,
+persisted re-entry, law-family conformance, and provider
 enforcement are later claims.
 
 **Application code is shared; authority is not.** Low-code applications use the same generic client and server

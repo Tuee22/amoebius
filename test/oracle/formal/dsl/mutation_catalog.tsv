@@ -1,9 +1,0 @@
-mutant	expected_invariant	operator
-projection-count-drift	DslProjectionExact	initial-value-substitution
-token-reuse	NoTokenReuse	guard-weakening
-reservation-double-debit	OneDebitPerReservation	guard-weakening
-lease-second-holder	AtMostOneLeaseHolder	guard-deletion
-reconcile-second-holder	OneLeaseHolderActs	effect-substitution
-reconcile-delete-unreachable	RefuseOnUnreachable	guard-deletion
-reconcile-delete-before-ready	DeleteAfterBoundReady	guard-deletion
-reconcile-post-convergence-write	ConvergedIsStable	effect-addition

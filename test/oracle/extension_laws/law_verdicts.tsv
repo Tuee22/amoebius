@@ -1,8 +1,0 @@
-subject	extension	L1	L2	L3	L4	L5
-infernix-lawful	infernix	PASS	PASS	PASS	PASS	PASS
-jitml-lawful	jitml	PASS	PASS	PASS	PASS	PASS
-l1-partial	infernix	FAIL:OperationEscaped	PASS	PASS	PASS	PASS
-l2-ambient-render	infernix	PASS	FAIL:ArtifactBytesDiffer	PASS	PASS	PASS
-l3-reaper-omitted	infernix	PASS	PASS	FAIL:RetainedOutputHasNoReaper	PASS	PASS
-l4-scope-widened	infernix	PASS	PASS	PASS	FAIL:ScopeWasWidened	PASS
-l5-fixture-omitted	infernix	PASS	PASS	PASS	PASS	FAIL:ClaimHasNoFixture

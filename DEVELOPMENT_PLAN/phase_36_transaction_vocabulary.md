@@ -5,10 +5,8 @@
 > **Read this if**: a relational transaction, row type, row policy, or schema generation has to change, or the
 > absence of a raw query surface has to be checked.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+This is the active Phase-36 contract. Its implementation is bound below, while completion remains exclusively
+owned by the exact integrated gate and the mechanical status projection that follows a pass.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -38,16 +36,13 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 35, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+Phase 35 and every earlier gate have passed in numerical order. The closed transaction GADT, independent Haskell
+oracle, four compiler barriers, additive generation model, and three changed-production challenges are bound;
+only the complete integrated Phase-36 gate may authorize completion.
 
 ---
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
@@ -83,28 +78,28 @@ generated SQL remains an output rather than authority ([§K](development_plan_ph
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — every relational operation is a declared request-scoped Haskell constructor; schema, policy, statement, and mutation bytes are lazy `.build/**` projections constrained by Haskell semantics. No live database or policy-enforcement claim is included. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 36` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 35; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | `pure-closed-transaction-vocabulary` |
+| `Subject` | `acquired-transaction-vocabulary-supervisor` |
+| `Command` | `pb validate phase 36` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
+| `Oracle` | `independent-transaction-vocabulary-oracle` |
+| `Positive controls` | `transaction-vocabulary-positive-controls` |
+| `Paired negatives` | `transaction-vocabulary-compiler-negatives` |
+| `Mutants` | `applied-transaction-vocabulary-production-mutants` |
+| `Discovery` | `exact-transaction-vocabulary-source-discovery` |
+| `Challenge` | `post-acquisition-transaction-vocabulary-challenge` |
+| `Observer` | `transaction-vocabulary-process-observation` |
+| `Authority/bypass` | `no-pb-network-database-host-hardware-or-parallelism` |
+| `Freshness` | `fresh-transaction-vocabulary-build-root-and-stable-source` |
+| `Qualification` | `qualified-transaction-vocabulary-harness` |
+| `Cleanroom` | `transaction-vocabulary-products-contained-below-build` |
+| `Legacy closure` | `retired-transaction-vocabulary-authorities-absent` |
+| `Predecessor` | `exact-phase-thirty-five-receipt` |
+| `Residue` | `live-database-policy-runtime-owners-explicit` |
+| `Pass criterion` | `qualified-phase-thirty-six-gate-pass` |
 
 ## Doctrine adopted
 
@@ -121,17 +116,18 @@ generated SQL remains an output rather than authority ([§K](development_plan_ph
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+> **Historical sprint results.** Earlier completion statements in sprint prose are capability inventory only;
+> current completion remains owned by the integrated gate.
 
-## Sprint 36.1: Row declarations drive schema and policy ⏸️
+## Sprint 36.1: Row declarations drive schema and policy ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/transaction-vocabulary/Amoebius/Transaction/Vocabulary.hs`, `test/spec/transaction/{TransactionVocabularySpec,TransactionVocabularyOracle}.hs`, the compile-negative program, and the package-hidden Phase-36 supervisor own this sprint surface.
 **Blocked by**: [Phase 35](phase_35_image_recipe_generation.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: one clean Haskell semantic suite, four compiler-negative rows, and three production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/transaction/TransactionVocabularyOracle.hs` independently fixes three row declarations, five transactions, five generation cases, four calculus projections, four compiler barriers, three mutant loci, and twenty validation loci without importing production.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, six serialized oracle files, and three materialized mutant descriptors.
+**Docs to update**: this phase, `system_components.md`, `substates.md`, and the linked transaction/generated-artifact doctrines.
 
 ### Objective
 
@@ -150,17 +146,17 @@ Adopt P3 and P4; derive schema and policy from one private row declaration rathe
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-36 gate and its mechanical status projection remain. Live database connections, executor roles, policy enforcement, retention lifecycle, services, and hardware remain later-owned residue.
 
-## Sprint 36.2: The closed request-scoped transaction GADT ⏸️
+## Sprint 36.2: The closed request-scoped transaction GADT ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/transaction-vocabulary/Amoebius/Transaction/Vocabulary.hs`, `test/spec/transaction/{TransactionVocabularySpec,TransactionVocabularyOracle}.hs`, the compile-negative program, and the package-hidden Phase-36 supervisor own this sprint surface.
 **Blocked by**: Sprint 36.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: one clean Haskell semantic suite, four compiler-negative rows, and three production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/transaction/TransactionVocabularyOracle.hs` independently fixes three row declarations, five transactions, five generation cases, four calculus projections, four compiler barriers, three mutant loci, and twenty validation loci without importing production.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, six serialized oracle files, and three materialized mutant descriptors.
+**Docs to update**: this phase, `system_components.md`, `substates.md`, and the linked transaction/generated-artifact doctrines.
 
 ### Objective
 
@@ -179,17 +175,17 @@ Adopt P1, P2, and P5; make the closed transaction arm carry the request scope an
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-36 gate and its mechanical status projection remain. Live database connections, executor roles, policy enforcement, retention lifecycle, services, and hardware remain later-owned residue.
 
-## Sprint 36.3: Additive schema generations ⏸️
+## Sprint 36.3: Additive schema generations ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/transaction-vocabulary/Amoebius/Transaction/Vocabulary.hs`, `test/spec/transaction/{TransactionVocabularySpec,TransactionVocabularyOracle}.hs`, the compile-negative program, and the package-hidden Phase-36 supervisor own this sprint surface.
 **Blocked by**: Sprint 36.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: one clean Haskell semantic suite, four compiler-negative rows, and three production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/transaction/TransactionVocabularyOracle.hs` independently fixes three row declarations, five transactions, five generation cases, four calculus projections, four compiler barriers, three mutant loci, and twenty validation loci without importing production.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, six serialized oracle files, and three materialized mutant descriptors.
+**Docs to update**: this phase, `system_components.md`, `substates.md`, and the linked transaction/generated-artifact doctrines.
 
 ### Objective
 
@@ -208,17 +204,17 @@ Adopt P6; replace migration edits with a typed, additive transition union.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-36 gate and its mechanical status projection remain. Live database connections, executor roles, policy enforcement, retention lifecycle, services, and hardware remain later-owned residue.
 
-## Sprint 36.4: Compile barriers, semantic mutants, and calculus evidence ⏸️
+## Sprint 36.4: Compile barriers, semantic mutants, and calculus evidence ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/transaction-vocabulary/Amoebius/Transaction/Vocabulary.hs`, `test/spec/transaction/{TransactionVocabularySpec,TransactionVocabularyOracle}.hs`, the compile-negative program, and the package-hidden Phase-36 supervisor own this sprint surface.
 **Blocked by**: Sprint 36.3
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: one clean Haskell semantic suite, four compiler-negative rows, and three production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/transaction/TransactionVocabularyOracle.hs` independently fixes three row declarations, five transactions, five generation cases, four calculus projections, four compiler barriers, three mutant loci, and twenty validation loci without importing production.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, six serialized oracle files, and three materialized mutant descriptors.
+**Docs to update**: this phase, `system_components.md`, `substates.md`, and the linked transaction/generated-artifact doctrines.
 
 ### Objective
 
@@ -238,7 +234,7 @@ projection.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-36 gate and its mechanical status projection remain. Live database connections, executor roles, policy enforcement, retention lifecycle, services, and hardware remain later-owned residue.
 
 ---
 

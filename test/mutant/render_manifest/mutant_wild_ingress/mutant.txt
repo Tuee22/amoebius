@@ -1,1 +1,0 @@
-Expose an undeclared internal service as a load balancer; service-exposure must turn red.

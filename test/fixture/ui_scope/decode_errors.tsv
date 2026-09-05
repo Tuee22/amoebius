@@ -1,6 +1,0 @@
-case	error
-raw-resource-id	UntrustedResourceId
-scope-retag	ScopeRetagForbidden
-general-declassify	DeclassificationForbidden
-handle-escape	ScopeEscapeForbidden
-forge-request-scope	RequestScopeConstructorPrivate

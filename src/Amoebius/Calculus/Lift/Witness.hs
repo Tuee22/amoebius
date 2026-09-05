@@ -24,7 +24,11 @@ module Amoebius.Calculus.Lift.Witness
   , observationTag
   , observationFromTag
   , everyObservation
+#ifdef LIFT_CALCULUS_WITNESS_CONSTRUCTOR_EXPOSED_MUTANT
+  , Witness (..)
+#else
   , Witness
+#endif
   , witnessDetail
   , observe
   ) where

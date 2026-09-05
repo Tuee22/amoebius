@@ -1,8 +1,0 @@
-case	method	path	authority	origin	csrf	epoch	body
-client-plan	GET	/ui/client-plan	anonymous	same-origin	-	current	-
-read-own	POST	/ui/action/read	own	same-origin	valid	current	fresh-challenge
-read-foreign	POST	/ui/action/read	foreign	same-origin	valid	current	fresh-challenge
-mutate-own	POST	/ui/action/mutate	own	same-origin	valid	current	fresh-challenge
-bad-origin	POST	/ui/action/mutate	own	foreign	valid	current	fresh-challenge
-stale	POST	/ui/action/mutate	own	same-origin	valid	stale	fresh-challenge
-server-plan-probe	GET	/ui/server-plan/known-digest	own	same-origin	-	current	-

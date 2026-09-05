@@ -1,2 +1,0 @@
-operator=scope-guard-deletion
-expected=foreign tenant reuses a ready handle

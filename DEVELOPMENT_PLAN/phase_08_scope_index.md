@@ -6,10 +6,9 @@
 > **Read this if**: Phase 8 is the open contract, or a later phase needs the type-level scope boundary it
 > establishes.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+This document binds the Phase-8 scoped-identity capability to its current Haskell subject, independent oracle,
+serial compiler matrix, and durable evidence lifecycle. Current status is owned by [the tracker](README.md)
+and the Phase Status block below; only the complete integrated gate may authorize a status transition.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -36,27 +35,22 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 7, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+The complete Phase-7 gate is recorded as the verified immediate-predecessor frontier fact. Phase 8's complete
+integrated gate authorized the recorded mechanical status projection.
 
 ## Phase Summary
 
-This phase specifies a Haskell target capability; it does not report a current implementation or
-result. The target is to provide a constructor-private Haskell request-scope index and total
+This phase implements a constructor-private Haskell request-scope index and total
 information-flow relation that reject forging, retagging, widening, and cross-scope exchange.
 
 The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
 `.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
 tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
 code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
-`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
-evidence contract remain UNRESOLVED and block validation.
+`pb` is not used by this pre-`BOOTSTRAP_HANDOFF` gate. The source-bound Haskell dispatcher invokes the
+authenticated compiler directly and synchronously.
 
 This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
 behavior only. It cannot use host, hardware, live-service, or cluster observations to make its claim pass.
@@ -76,28 +70,34 @@ exchange. NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-8 semantic payload, package-hidden serial
+supervisor, independent Haskell oracle, five compile-negative pairs, and changed-production subject are
+complete; only a fresh integrated run may authorize status.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — provide a constructor-private Haskell request-scope index and total information-flow relation that reject forging, retagging, widening, and cross-scope exchange. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 08` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 07; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | The single rank-2 request-scope introduction, private identity/handle constructors, and total flow relation reject forging, retagging, owner swaps, widening, elevation, and malformed paths. |
+| `Subject` | `Amoebius.Scope.{Index,Flow}` is acquired only through package-hidden `Amoebius.Validation.ScopeIndexRun.Internal`. |
+| `Command` | Future public spelling is `pb validate phase 08`; before `BOOTSTRAP_HANDOFF`, the exact absolute Haskell executable and authenticated GHC 9.12.4 compiler run directly, synchronously, and without `-j`. |
+| `Oracle` | `test/spec/ui/ScopeSpec.hs` contains separately authored owner, swap, flow, diagnostic, and nine-class Haskell expectations and observes only public production interfaces. |
+| `Positive controls` | The clean oracle and all five legal compile twins succeed. |
+| `Paired negatives` | Raw resource construction, scope retagging, declassification, scoped-handle escape, and request-scope forgery fail at separately pinned GHC reason/locus pairs. |
+| `Mutants` | `SCOPE_INDEX_DROP_OWNER_EQUALITY_MUTANT` changes the production owner join and must admit both same-tenant and cross-tenant swaps while clean controls remain green. |
+| `Discovery` | The two subject modules, Haskell oracle, and ten compile twins are discovered from the Git snapshot and equal the fixed thirteen-file inventory bidirectionally. |
+| `Challenge` | The changed-production owner-equality subject runs after acquisition and must be distinguished by the exact two-swap observation. |
+| `Observer` | The supervisor records absolute executable, exact argv, exit, transcript digest, and bounded failure text for every compiler and oracle process. |
+| `Authority/bypass` | Constructor closure and pure-source scans pass; `pb`, network, hardware, live services, compiler substitution, and compiler/linker overlap are forbidden. |
+| `Freshness` | Every run creates a fresh `.build/runs/phase-08/work/**` root and the dispatcher requires equal opening/closing source identities. |
+| `Qualification` | Clean controls, five exact negative pairs, source discipline, and the changed-production subject pass together; a survivor or wrong-locus result refuses. |
+| `Cleanroom` | Every binary, interface, object, stub, and transcript is generated lazily beneath the fresh run root. |
+| `Legacy closure` | Phase 8 owns no legacy-debt identifier; all non-circular prerequisites must pass while later-owned source debt remains residue. |
+| `Predecessor` | Consume exactly one durable Phase-7 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Residue` | Persisted-value re-entry, resource indexing, five-calculus composition, effects, runtimes, hardware, and live services remain explicitly later-owned. |
+| `Pass criterion` | `qualified-phase-eight-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
+
+**This phase owns its compile-negative evidence.** Each illegal twin requires a phase-local source-bound GHC
+invocation, a minimally different positive control, and a separately authored exact diagnostic expectation.
+[Phase 15](phase_15_compile_fail_harness.md) later consolidates reusable machinery; it is not a prerequisite.
 
 ## Doctrine adopted
 
@@ -110,17 +110,17 @@ exchange. NOT VALIDATED.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint seam is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 8.1: Rank-2 scope index and total flow checking ⏸️
+## Sprint 8.1: Rank-2 scope index and total flow checking ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/Scope/{Index,Flow}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/ScopeIndexRun/Internal.hs`
 **Blocked by**: [Phase 7](phase_07_evidence_calculus.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: six owner rows, two exact swap errors, four flow decisions, four exact diagnostics, nine generated reject classes, five exact compile-negative pairs, and one assigned changed-production subject
+**Oracle**: `test/spec/ui/ScopeSpec.hs`, separately authored in Haskell against public scope modules
+**Legacy IDs**: none; later-owned tracked-source debt remains in the typed central registry
+**Docs to update**: this phase file plus the scoped-identity doctrine and illegal-state projections named below
 
 ### Objective
 
@@ -153,7 +153,9 @@ and [`low_code_ui_runtime_doctrine.md` §10.3 — information-flow labels](../do
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+Persisted-value re-entry deliberately remains absent because lexical scope indices are erased across storage and
+message boundaries. Resource indexing, calculus composition, runtime authorization, provider enforcement, and
+hardware observations remain assigned to their later phase owners.
 
 ## Documentation Requirements
 

@@ -1,8 +1,0 @@
-handler	capability
-data-read	SqlRead
-data-write	SqlWrite
-workflow-start	Workflow
-workflow-observe	Workflow
-stream-subscribe	PulsarSubscription
-blob-upload	ContentStore
-artifact-use	InferenceEngine

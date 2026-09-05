@@ -1,1 +1,0 @@
-Retain a stale revision number in a desired materialized execution instance.

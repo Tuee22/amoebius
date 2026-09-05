@@ -7,9 +7,10 @@ import Control.Monad (forM, forM_, unless)
 import Data.Char (isHexDigit)
 import Data.List (isInfixOf)
 import System.Directory (createDirectoryIfMissing)
-import System.Environment (lookupEnv)
+import System.Environment (getArgs)
 import System.Exit (exitFailure)
 import System.FilePath ((</>))
+import System.IO (hPutStrLn, stderr)
 
 data Expected = Expected
   { expectedModel :: String
@@ -30,8 +31,10 @@ data Observation = Observation
 
 main :: IO ()
 main = do
-  solverPath <- lookupEnv "AMOEBIUS_Z3" >>= maybe
-    (failTest "AMOEBIUS_Z3 was not injected" >> pure "") pure
+  arguments <- getArgs
+  (solverPath, output) <- case arguments of
+    [path, root] -> pure (path, root)
+    _ -> failTest "expected exact argv: SOLVER OUTPUT_ROOT" >> pure ("", "")
   solver <- mkSolver solverPath >>= requireRight "absolute solver"
   relative <- mkSolver "z3"
   assertEqual "ambient solver path rejected" (Left (SolverPathNotAbsolute "z3")) relative
@@ -49,7 +52,7 @@ main = do
         , verdictModelDigest (observedSymbolic observation) == Explicit.modelDigest model
         ]
   assertEqual "shared model digests" 7 sharedDigests
-  writeResults observations agreementCount conservativeCount sharedDigests
+  writeResults output observations agreementCount conservativeCount sharedDigests
   putStrLn "symbolic-checker-spec: PASS (7 fixtures, 5 explicit agreements, 3 induction witnesses)"
 
 checkRow :: Solver -> Expected -> IO Observation
@@ -138,10 +141,9 @@ explicitStatus result = case result of
     "unsafe-deadlock"
   Explicit.BoundExceeded _ -> "bound-exceeded"
 
-writeResults :: [Observation] -> Int -> Int -> Int -> IO ()
-writeResults observations agreements conservative sharedDigests = do
-  let output = ".build" </> "checkers" </> "symbolic"
-      results = map (verdictResult . observedSymbolic) observations
+writeResults :: FilePath -> [Observation] -> Int -> Int -> Int -> IO ()
+writeResults output observations agreements conservative sharedDigests = do
+  let results = map (verdictResult . observedSymbolic) observations
       count predicate = length (filter predicate results)
   createDirectoryIfMissing True output
   writeFile (output </> "results.tsv") . unlines $
@@ -169,27 +171,18 @@ writeResults observations agreements conservative sharedDigests = do
   isUnsupported _ = False
 
 readOracle :: IO [Expected]
-readOracle = do
-  rows <- lines <$> readFile "test/oracle/symbolic_checker/models.tsv"
-  case rows of
-    [] -> failTest "symbolic oracle is empty" >> pure []
-    header : body -> do
-      assertEqual "oracle header"
-        "model\tbound\tsymbolic_status\tfailing_invariant\tfailing_action\texplicit_status\trelation\tobligations"
-        header
-      mapM parseRow body
+readOracle = pure oracleRows
 
-parseRow :: String -> IO Expected
-parseRow row = case splitOn '\t' row of
-  [name, boundText, symbolic, invariant, action, explicit, relation, obligationText] ->
-    Expected name <$> parseInt boundText <*> pure symbolic <*> pure invariant <*> pure action
-      <*> pure explicit <*> pure relation <*> parseInt obligationText
-  fields -> failTest ("malformed oracle row: " <> show fields)
-    >> pure (Expected "" 0 "" "" "" "" "" 0)
- where
-  parseInt text = case reads text of
-    [(value, "")] -> pure value
-    _ -> failTest ("invalid oracle integer " <> text) >> pure 0
+oracleRows :: [Expected]
+oracleRows =
+  [ Expected "inductive-counter" 3 "inductive" "-" "-" "safe" "agree" 2
+  , Expected "base-failure" 1 "base-failure" "NonNegative" "-" "unsafe-invariant" "agree" 1
+  , Expected "step-failure" 3 "step-failure" "BelowTwo" "Advance" "unsafe-invariant" "agree" 2
+  , Expected "safe-noninductive" 2 "step-failure" "NotOne" "PoisonUnreachable" "safe" "conservative" 3
+  , Expected "coupled-invariants" 1 "inductive" "-" "-" "safe" "agree" 4
+  , Expected "guarded-boolean" 1 "inductive" "-" "-" "safe" "agree" 2
+  , Expected "unsupported-set" 1 "unsupported" "-" "-" "safe" "unsupported" 0
+  ]
 
 fixtureModels :: [(String, Model)]
 fixtureModels =
@@ -300,9 +293,4 @@ assertEqual label expected actual =
   assert (expected == actual) (label <> ": expected " <> show expected <> ", got " <> show actual)
 
 failTest :: String -> IO ()
-failTest message = putStrLn ("FAIL: " <> message) >> exitFailure
-
-splitOn :: Char -> String -> [String]
-splitOn delimiter text = case break (== delimiter) text of
-  (piece, []) -> [piece]
-  (piece, _ : rest) -> piece : splitOn delimiter rest
+failTest message = hPutStrLn stderr ("FAIL: " <> message) >> exitFailure

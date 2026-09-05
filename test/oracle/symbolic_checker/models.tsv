@@ -1,8 +1,0 @@
-model	bound	symbolic_status	failing_invariant	failing_action	explicit_status	relation	obligations
-inductive-counter	3	inductive	-	-	safe	agree	2
-base-failure	1	base-failure	NonNegative	-	unsafe-invariant	agree	1
-step-failure	3	step-failure	BelowTwo	Advance	unsafe-invariant	agree	2
-safe-noninductive	2	step-failure	NotOne	PoisonUnreachable	safe	conservative	3
-coupled-invariants	1	inductive	-	-	safe	agree	4
-guarded-boolean	1	inductive	-	-	safe	agree	2
-unsupported-set	1	unsupported	-	-	safe	unsupported	0

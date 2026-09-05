@@ -1,3 +1,0 @@
-operator=invariant-clause-delete
-change=omit event-table exhaustiveness checking
-expected=non_exhaustive_event.dhall is accepted and the gate fails

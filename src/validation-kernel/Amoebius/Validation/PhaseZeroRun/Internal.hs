@@ -9,6 +9,7 @@ module Amoebius.Validation.PhaseZeroRun.Internal
   ( AcquiredPhaseZeroRun
   , acquiredPhaseZeroRunCheck
   , assembleAcquiredPhaseZeroRun
+  , assembleAcquiredPhaseZeroRefreshRun
   , foldAcquiredPhaseZeroRun
   , phaseZeroSnapshotDocuments
   , phaseZeroUnavailablePhaseContractCheck
@@ -34,6 +35,7 @@ import Amoebius.Validation.MutationCoverage
 import Amoebius.Validation.PhaseContract.Internal
   ( AcquiredPhaseContractEvidence
   , acquirePhaseContractEvidence
+  , acquireRecordedPhaseContractEvidence
   , acquiredPhaseContractEvidenceCheck
   )
 import Amoebius.Validation.PhaseRunner.Internal
@@ -82,7 +84,39 @@ assembleAcquiredPhaseZeroRun
   -> SourceDebtEvidence
   -> AcquiredPhaseZeroRun
 assembleAcquiredPhaseZeroRun acquired trust qualification debtEvidence =
-  let contractEvidence = acquirePhaseContractEvidence acquired
+  assembleAcquiredPhaseZeroRunWith
+    acquirePhaseContractEvidence
+    acquired
+    trust
+    qualification
+    debtEvidence
+
+-- | Re-run the complete Phase-0 subject at an already-recorded frontier.
+-- The distinct constructor path prevents a receipt refresh from masquerading
+-- as, or authorizing, a second status transition.
+assembleAcquiredPhaseZeroRefreshRun
+  :: AcquiredSourceSnapshot
+  -> GenesisTrust
+  -> QualifiedBootstrapProtocol
+  -> SourceDebtEvidence
+  -> AcquiredPhaseZeroRun
+assembleAcquiredPhaseZeroRefreshRun acquired trust qualification debtEvidence =
+  assembleAcquiredPhaseZeroRunWith
+    acquireRecordedPhaseContractEvidence
+    acquired
+    trust
+    qualification
+    debtEvidence
+
+assembleAcquiredPhaseZeroRunWith
+  :: (AcquiredSourceSnapshot -> AcquiredPhaseContractEvidence)
+  -> AcquiredSourceSnapshot
+  -> GenesisTrust
+  -> QualifiedBootstrapProtocol
+  -> SourceDebtEvidence
+  -> AcquiredPhaseZeroRun
+assembleAcquiredPhaseZeroRunWith acquireContract acquired trust qualification debtEvidence =
+  let contractEvidence = acquireContract acquired
       result = runPhaseZeroSubject acquired trust qualification debtEvidence contractEvidence
    in AcquiredPhaseZeroRun acquired trust qualification debtEvidence contractEvidence result
 

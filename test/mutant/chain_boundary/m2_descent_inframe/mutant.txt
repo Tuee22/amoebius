@@ -1,1 +1,0 @@
-Place the managed-capacity step in the cutover frame; the authored frame oracle must diverge without executing an action.

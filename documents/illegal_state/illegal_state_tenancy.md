@@ -221,7 +221,7 @@ oracle independent of the API walks every exported scoped function and requires 
 share a type. Mutants collapse two identifier newtypes into one, export a raw constructor, and add a coercion
 between scopes.
 
-**Permanently invalidated Phase-8 run report.** The Register-1 kernel gives tenant and subject distinct private types and introduces a
+**Phase-8 bounded evidence contract.** The Register-1 kernel gives tenant and subject distinct private types and introduces a
 fresh request index through one rank-2 eliminator. Legal twins compile; scope retagging, request-index escape,
 and forged scope construction fail at pinned reasons. Constructor scans reject a second introduction or
 retagging rule. Live authentication and persisted-value re-entry remain `UNVERIFIED`. See

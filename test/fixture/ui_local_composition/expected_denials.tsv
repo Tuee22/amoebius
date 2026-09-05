@@ -1,6 +1,0 @@
-case	status	tag	body_excludes
-same-tenant-foreign	404	Unavailable	fresh-challenge
-foreign-tenant	404	Unavailable	fresh-challenge
-caller-tenant-header	404	Unavailable	fresh-challenge
-non-ready-handle	409	NotReady	artifact-identity
-direct-browser-backend	network-denied	BypassDenied	provider-bytes

@@ -1,5 +1,0 @@
-case	expected	negative	legal
-unbuilt-provider	UnbuiltProviderArm	dhall/examples/illegal_unbuilt_provider.dhall	dhall/examples/legal_built_provider.dhall
-unbound-capability	UnboundCapability	dhall/examples/illegal_unbound_capability.dhall	dhall/examples/legal_bound_capability.dhall
-cyclic-extension	CyclicExtension	dhall/examples/illegal_cyclic_extension.dhall	dhall/examples/legal_extension_graph.dhall
-shadowing-extension	ShadowingExtension	dhall/examples/illegal_shadowing_extension.dhall	dhall/examples/legal_extension_graph.dhall

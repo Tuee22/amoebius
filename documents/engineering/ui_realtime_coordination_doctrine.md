@@ -111,10 +111,11 @@ and refresh tokens are absent.
 
 ## 4. Typed routing and resume envelope
 
-[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) must eventually validate the pure paired-plan
-and finite-demand compiler that owns this envelope's generated location. Its controls and five-calculus
-projection require reconstruction as separately authored Haskell evidence. It cannot execute WebSockets,
-Redis routing, resume, or cross-pod dispatch. Phase 40 is **NOT VALIDATED**.
+[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) owns the pure paired-plan and finite-demand
+compiler that fixes this envelope's generated location. Its typed Haskell cases, independent reference
+relation, five-calculus projection, and six production mutants constrain compilation without executing
+WebSockets, Redis routing, resume, or cross-pod dispatch. Its status remains owned solely by the development
+plan and qualified gate.
 
 [Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) is limited to hardware-free Haskell
 browser-interpreter semantics and lazy projection. It must not start a browser, fake server, network service,

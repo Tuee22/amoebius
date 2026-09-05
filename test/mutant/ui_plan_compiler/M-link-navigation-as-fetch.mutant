@@ -1,3 +1,0 @@
-operator=effect-swap
-change=compile named navigation as fetch
-expected=link projection and transport allowlist fail

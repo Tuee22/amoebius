@@ -56,12 +56,12 @@ substrate doctrine already owns (Lima on apple, WSL2 on windows). This document 
 topology it induces; it owns **no** substrate names, no detection, no VM-provider mechanics, and no capacity
 numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and [resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
-The pure relation begins with Phase 9, its reflected schema/decoder consumers arrive in Phases 25–26, and
+The pure relation is implemented for Phase 9, its reflected schema/decoder consumers arrive in Phases 25–26, and
 runtime engine realization belongs to Phases 52–54.
-The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) must validate
+The bound [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) validates
 `Amoebius.Dsl.Topology` at Register 1: seven compile-time index pairs, the exhausted 3×3 engine/environment
-compatibility matrix, host distinctness, fixed placement, and elastic growth must be accepted with their
-mutants red.
+compatibility matrix, host distinctness, fixed placement, and elastic growth are accepted only with all
+changed-production mutants red.
 The three corresponding Dhall-typecheck loci remain Phase-25 work rather than a backward dependency.
 No EKS resource was created, no VM booted, and no node joined; those runtime facts remain **UNVERIFIED**.
 Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).

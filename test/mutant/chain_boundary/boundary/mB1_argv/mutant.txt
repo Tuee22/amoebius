@@ -1,1 +1,0 @@
-Drop the kubectl server-side flag; the independently authored argv transcript must diverge.

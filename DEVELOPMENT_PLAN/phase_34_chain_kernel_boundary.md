@@ -8,10 +8,8 @@
 > cluster or effectful interpreter exists.
 > **Read this if**: phase 34 is next in the queue, or a later phase depends on what its gate establishes.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+This is the active Phase-34 contract. Its implementation is bound below, while completion remains exclusively
+owned by the exact integrated gate and the mechanical status projection that follows a pass.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -28,7 +26,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
+- [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 34.1: The `Step` algebra + `chain :: cfg -> \[Step\]` builder](#sprint-341-the-step-algebra--chain--cfg---step-builder-)
@@ -47,14 +45,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 33, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Phase 33 and every earlier gate have passed in numerical order. The pure plan, exact binary boundary,
+run-local Haskell fakes, independent Haskell oracle, AST checker, opaque link seal, and seven
+changed-production challenges are bound; only the complete integrated Phase-34 gate may authorize completion.
 
 ## Phase Summary
 
@@ -119,33 +114,36 @@ tool, corpus, and mutant generation; it does not supply a prerequisite retroacti
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — the plan is a pure Haskell value and the Haskell binary's external-tool protocol is observed only through Haskell-generated fakes beneath `.build/**`; no live infrastructure is contacted. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 34` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 33; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | `pure-chain-and-fake-boundary` |
+| `Subject` | `acquired-chain-boundary-supervisor` |
+| `Command` | `pb validate phase 34` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
+| `Oracle` | `independent-chain-boundary-oracle` |
+| `Positive controls` | `chain-boundary-positive-controls` |
+| `Paired negatives` | `paired-chain-boundary-negatives` |
+| `Mutants` | `applied-chain-boundary-production-mutants` |
+| `Discovery` | `exact-chain-boundary-source-discovery` |
+| `Challenge` | `post-acquisition-chain-boundary-challenge` |
+| `Observer` | `chain-boundary-process-observation` |
+| `Authority/bypass` | `no-pb-network-live-host-hardware-or-parallelism` |
+| `Freshness` | `fresh-chain-boundary-build-root-and-stable-source` |
+| `Qualification` | `qualified-chain-boundary-harness` |
+| `Cleanroom` | `chain-boundary-products-contained-below-build` |
+| `Legacy closure` | `retired-chain-boundary-authorities-absent` |
+| `Predecessor` | `exact-phase-thirty-three-receipt` |
+| `Residue` | `live-interpreter-runtime-and-hardware-owners-explicit` |
+| `Pass criterion` | `qualified-phase-thirty-four-gate-pass` |
 
-## Resource provision — UNRESOLVED
+## Resource provision
 
-> **UNRESOLVED — blocks validation.** No live mutation may begin. The owner marker, preflight, complete
-> allowed/forbidden mutations, external observer, scoped cleanup, and zero-owned-residue contract are absent.
+The only phase-owned resources are the unique `.build/runs/phase-34/work/**` candidate root and the Haskell
+fake executables and transcripts contained beneath it. The supervisor creates the owner-marked root after
+source acquisition, permits only contained build products and fake-boundary observations, forbids `pb`,
+network, host mutation, live tools, clusters, and hardware, observes every child exit/stdout/stderr/digest,
+and records zero external residue. No live cleanup authority is requested or implied.
 
 ## Doctrine adopted
 
@@ -195,15 +193,15 @@ tool, corpus, and mutant generation; it does not supply a prerequisite retroacti
 > **Historical sprint results.** Every earlier completion statement or result in the sprint bodies below is historical context. The material is retained
 > only as a target-capability inventory and is not a current gate result.
 
-## Sprint 34.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ⏸️
+## Sprint 34.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: [Phase 33](phase_33_render_manifest_oracles.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently fixes plan rows, calculus projection, boundary argv/bytes, AST reasons/spans, sanctioned API, validation loci, and mutant expectations without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, shell fakes, serialized oracle/golden/fixture files, surface registry, and five materialized mutants.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked DSL, conformance, generated-artifact, security, and testing doctrines.
 
 ### Objective
 
@@ -236,17 +234,17 @@ seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `ch
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked) ⏸️
+## Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked) ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently fixes plan rows, calculus projection, boundary argv/bytes, AST reasons/spans, sanctioned API, validation loci, and mutant expectations without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, shell fakes, serialized oracle/golden/fixture files, surface registry, and five materialized mutants.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked DSL, conformance, generated-artifact, security, and testing doctrines.
 
 ### Objective
 
@@ -279,17 +277,17 @@ Part B (Register 2) and Register 3.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ⏸️
+## Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently fixes plan rows, calculus projection, boundary argv/bytes, AST reasons/spans, sanctioned API, validation loci, and mutant expectations without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, shell fakes, serialized oracle/golden/fixture files, surface registry, and five materialized mutants.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked DSL, conformance, generated-artifact, security, and testing doctrines.
 
 ### Objective
 
@@ -321,17 +319,17 @@ only on the (here-absent) apply path.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate ⏸️
+## Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.3
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently fixes plan rows, calculus projection, boundary argv/bytes, AST reasons/spans, sanctioned API, validation loci, and mutant expectations without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, shell fakes, serialized oracle/golden/fixture files, surface registry, and five materialized mutants.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked DSL, conformance, generated-artifact, security, and testing doctrines.
 
 ### Objective
 
@@ -386,17 +384,17 @@ correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Regis
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton ⏸️
+## Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.4
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently fixes plan rows, calculus projection, boundary argv/bytes, AST reasons/spans, sanctioned API, validation loci, and mutant expectations without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, shell fakes, serialized oracle/golden/fixture files, surface registry, and five materialized mutants.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked DSL, conformance, generated-artifact, security, and testing doctrines.
 
 ### Objective
 
@@ -421,17 +419,17 @@ prodbox single-IO-seam shape as *sibling evidence, not an amoebius result*.
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ⏸️
+## Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.5
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently fixes plan rows, calculus projection, boundary argv/bytes, AST reasons/spans, sanctioned API, validation loci, and mutant expectations without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, shell fakes, serialized oracle/golden/fixture files, surface registry, and five materialized mutants.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked DSL, conformance, generated-artifact, security, and testing doctrines.
 
 ### Objective
 
@@ -456,17 +454,17 @@ prerequisite — that distinction is what keeps Register 2 honestly separate fro
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ⏸️
+## Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.6
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently fixes plan rows, calculus projection, boundary argv/bytes, AST reasons/spans, sanctioned API, validation loci, and mutant expectations without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, shell fakes, serialized oracle/golden/fixture files, surface registry, and five materialized mutants.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked DSL, conformance, generated-artifact, security, and testing doctrines.
 
 ### Objective
 
@@ -512,17 +510,17 @@ is owned by [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) and the l
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.8: The sanctioned-API surface — what extension source may reach ⏸️
+## Sprint 34.8: The sanctioned-API surface — what extension source may reach ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.7
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently fixes plan rows, calculus projection, boundary argv/bytes, AST reasons/spans, sanctioned API, validation loci, and mutant expectations without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, shell fakes, serialized oracle/golden/fixture files, surface registry, and five materialized mutants.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked DSL, conformance, generated-artifact, security, and testing doctrines.
 
 ### Objective
 
@@ -546,17 +544,17 @@ so that widening it is a checked amendment rather than something an extension au
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
-## Sprint 34.9: extension-astcheck — the extension AST checker and the link seal ⏸️
+## Sprint 34.9: extension-astcheck — the extension AST checker and the link seal ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/{Kernel/{Step,Chain,Descent,Plan},Exec/{Tool,Boundary},Dsl/{AstCheck,SanctionedApi}}.hs`, the three Phase-34 test suites, independent oracle, compile-negative client, and package-hidden supervisor own this sprint surface.
 **Blocked by**: Sprint 34.8
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: clean plan, fake-boundary, AST, and compile-negative controls plus seven production CPP mutations execute serially from one acquired fresh build root.
+**Oracle**: `test/spec/chain_boundary/ChainBoundaryOracle.hs` independently fixes plan rows, calculus projection, boundary argv/bytes, AST reasons/spans, sanctioned API, validation loci, and mutant expectations without importing production or fixtures.
+**Legacy IDs**: Phase-local closure covers the retired Python gate, shell fakes, serialized oracle/golden/fixture files, surface registry, and five materialized mutants.
+**Docs to update**: this phase, `system_components.md`, `substrates.md`, and the linked DSL, conformance, generated-artifact, security, and testing doctrines.
 
 ### Objective
 
@@ -585,7 +583,7 @@ Deliver extension-astcheck: admit extension source against the Sprint-33.8 surfa
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
+The complete integrated Phase-34 gate and its mechanical status projection remain. Live interpreter, runtime fidelity, live services, cluster admission, and hardware remain later-owned residue.
 
 ## Documentation Requirements
 

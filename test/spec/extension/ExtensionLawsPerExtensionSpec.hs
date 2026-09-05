@@ -52,19 +52,15 @@ import Data.List (sort)
 import Data.Kind (Type)
 import Data.Text (Text)
 import Data.Text qualified as Text
-import ExtensionLawMutants (ambientRender, partialOperation)
+import ExtensionLawsPerExtensionOracle qualified as Oracle
 import LawFixtures
   ( infernixDeclaration
   , jitmlDeclaration
   , lawfulOperation
   , lawfulRender
   )
-import System.Directory
-  ( canonicalizePath
-  , createDirectoryIfMissing
-  , getCurrentDirectory
-  )
-import System.Environment (getArgs, getEnvironment, getExecutablePath)
+import System.Directory (createDirectoryIfMissing)
+import System.Environment (getArgs, getEnvironment, getExecutablePath, lookupEnv)
 import System.Exit (exitFailure)
 import System.FilePath ((</>))
 import System.Process (CreateProcess (env), proc, readCreateProcess)
@@ -117,23 +113,23 @@ main = do
   case arguments of
     ["--render", extension, _seed] -> ByteString.Char8.putStr (lawfulRender (Text.pack extension) "declared-input")
     ["--render-mutant", extension, _seed] -> ambientRender (Text.pack extension) "declared-input" >>= ByteString.Char8.putStr
-    [] -> getCurrentDirectory >>= canonicalizePath >>= runGreen
-    [argument] | "--mutant=" `prefixOf` argument ->
-      getCurrentDirectory >>= canonicalizePath >>= \root -> runMutant root (dropPrefix "--mutant=" argument)
+    [] -> runGreen
     _ -> die ("unknown arguments: " <> show arguments)
 
-runGreen :: FilePath -> IO ()
-runGreen root = do
-  operationCases <- loadOperationCases root
+runGreen :: IO ()
+runGreen = do
+  let operationCases = [OperationCase extension input expected | Oracle.OracleOperationCase extension input expected <- Oracle.operationCases]
   executable <- getExecutablePath
   subjects <- buildSubjects executable operationCases
-  expected <- loadExpectedVerdicts root
+  let expected = [ExpectedVerdict subject extension laws | Oracle.OracleVerdict subject extension laws <- Oracle.expectedVerdicts]
   actual <- forM subjects evaluateSubject
   assertEqual "seven law subjects" 7 (length subjects)
+  mapM_ (checkExpected actual) expected
   assertEqual "authored per-law verdict table" (sort expected) (sort actual)
   assertEqual "two lawful subjects" 2 (length (filter (all (== "PASS") . expectedLaws) actual))
   assertEqual "five single-law defects" 5 (length (filter singleFailure actual))
-  writeResults root
+  output <- maybe ".build/dsl/extension-laws" id <$> lookupEnv "AMOEBIUS_EXTENSION_LAWS_OUTPUT"
+  writeResults output
   putStrLn "extension-laws-per-extension-spec: PASS (7 subjects, 35 verdicts, 6 generated inputs, 5 single-law defects)"
 
 configs :: [FixtureConfig]
@@ -230,7 +226,7 @@ actualBudgetObservation config = do
 actualClaimObservation :: FixtureConfig -> IO ClaimObservation
 actualClaimObservation config = do
   discharge <- maybe (die "oracle fixture path was refused") pure
-    (fixture Oracle "test/oracle/extension_laws/law_verdicts.tsv" PureRegister)
+    (fixture Oracle "test/spec/extension/ExtensionLawsPerExtensionOracle.hs" PureRegister)
   bound <- either (die . show) pure
     (Evidence.claim (configEvidence config) discharge SatisfiesAuthoredPredicate)
   pure
@@ -256,6 +252,16 @@ l2Ambient executable config baseline = do
   first <- seededRender executable "--render-mutant" (configExtension config) "seed-a"
   second <- seededRender executable "--render-mutant" (configExtension config) "seed-b"
   pure baseline {observedArtifacts = [ArtifactObservation (configArtifact config) first second]}
+
+partialOperation :: Text -> OperationOutcome
+partialOperation input
+  | input == "panic" = error "partial extension operation"
+  | otherwise = OperationReturned input
+
+ambientRender :: Text -> Text -> IO ByteString
+ambientRender extension input = do
+  seed <- lookupEnv "AMOEBIUS_EXTENSION_LAW_SEED"
+  pure (ByteString.Char8.pack (Text.unpack (extension <> ":artifact:" <> input <> ":" <> Text.pack (show seed))))
 
 l3ReaperOmitted :: LawObservations -> LawObservations
 l3ReaperOmitted baseline = baseline
@@ -320,59 +326,17 @@ failureTag failure = case failure of
   ClaimHasNoFixture {} -> "ClaimHasNoFixture"
   ClaimFixtureMissedPinnedReason {} -> "ClaimFixtureMissedPinnedReason"
 
-runMutant :: FilePath -> String -> IO ()
-runMutant root mutant = do
-  cases <- loadOperationCases root
-  executable <- getExecutablePath
-  subjects <- buildSubjects executable cases
-  let mapping = case mutant of
-        "partial-operation" -> ("l1-partial", L1, "Totality")
-        "ambient-render" -> ("l2-ambient-render", L2, "Determinism")
-        "retained-reaper-omitted" -> ("l3-reaper-omitted", L3, "BudgetHonesty")
-        "scope-widened" -> ("l4-scope-widened", L4, "ScopePropagation")
-        "claim-fixture-omitted" -> ("l5-fixture-omitted", L5, "EvidenceBinding")
-        _ -> ("", L1, "unknown")
-      (wantedSubject, wantedLaw, propertyName) = mapping
-  subject <- case filter ((== Text.pack wantedSubject) . subjectName) subjects of
-    [found] -> pure found
-    _ -> die ("unknown mutant " <> mutant)
-  verdicts <- withDeclaration (subjectConfig subject) $ \declaration ->
-    evaluateLaws declaration (subjectObservations subject)
-  let failed = [law | (law, verdict) <- verdicts, not (lawPassed verdict)]
-  if failed == [wantedLaw]
-    then do
-      putStrLn ("extension-laws-mutant: RED " <> mutant <> " " <> propertyName)
-      exitFailure
-    else die ("mutant did not redden only " <> show wantedLaw <> ": " <> show failed)
-
-loadOperationCases :: FilePath -> IO [OperationCase]
-loadOperationCases root = do
-  rows <- rowsOf (root </> "test/oracle/extension_laws/operation_cases.tsv")
-  case rows of
-    header : body -> do
-      assertEqual "operation case header" ["extension", "input", "expected"] header
-      cases <- forM body $ \row -> case row of
-        [extension, input, expected] -> pure (OperationCase extension input expected)
-        _ -> die ("invalid operation row: " <> show row)
-      assertEqual "generated input count" 6 (length cases)
-      pure cases
-    [] -> die "empty operation case oracle"
-
-loadExpectedVerdicts :: FilePath -> IO [ExpectedVerdict]
-loadExpectedVerdicts root = do
-  rows <- rowsOf (root </> "test/oracle/extension_laws/law_verdicts.tsv")
-  case rows of
-    header : body -> do
-      assertEqual "law verdict header" ["subject", "extension", "L1", "L2", "L3", "L4", "L5"] header
-      forM body $ \row -> case row of
-        [subject, extension, l1, l2, l3, l4, l5] -> pure (ExpectedVerdict subject extension [l1, l2, l3, l4, l5])
-        _ -> die ("invalid law verdict row: " <> show row)
-    [] -> die "empty law verdict oracle"
+checkExpected :: [ExpectedVerdict] -> ExpectedVerdict -> IO ()
+checkExpected actual expected = case filter ((== expectedSubject expected) . expectedSubject) actual of
+  [observed] -> unless (expected == observed) $ do
+    let mismatches = [property | (wanted, got, property) <- zip3 (expectedLaws expected) (expectedLaws observed) lawProperties, wanted /= got]
+    die (Text.unpack (Text.intercalate "," mismatches) <> ": expected " <> show expected <> ", got " <> show observed)
+  _ -> die ("LawSubjectDiscovery: missing or duplicate " <> Text.unpack (expectedSubject expected))
+ where lawProperties = ["Totality", "Determinism", "BudgetHonesty", "ScopePropagation", "EvidenceBinding"]
 
 writeResults :: FilePath -> IO ()
-writeResults root = do
-  let output = root </> ".build/dsl/extension-laws"
-      metrics =
+writeResults output = do
+  let metrics =
         [ ("subjects", "7/7-exact")
         , ("law-verdicts", "35/35-authored")
         , ("lawful-verdicts", "10/10-green")
@@ -389,15 +353,6 @@ writeResults root = do
 
 singleFailure :: ExpectedVerdict -> Bool
 singleFailure verdict = length (filter (/= "PASS") (expectedLaws verdict)) == 1
-
-rowsOf :: FilePath -> IO [[Text]]
-rowsOf path = map (Text.splitOn "\t") . filter (not . Text.null) . Text.lines . Text.pack <$> readFile path
-
-prefixOf :: String -> String -> Bool
-prefixOf prefix value = take (length prefix) value == prefix
-
-dropPrefix :: String -> String -> String
-dropPrefix prefix value = drop (length prefix) value
 
 assertEqual :: (Eq value, Show value) => String -> value -> value -> IO ()
 assertEqual label expected actual =

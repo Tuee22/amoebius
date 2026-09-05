@@ -32,6 +32,7 @@ replay. It does not own the online runtime it pairs with, owned by
 - [10. Offline blobs](#10-offline-blobs)
 - [11. Release, schema, and compatibility horizon](#11-release-schema-and-compatibility-horizon)
 - [12. Deployment policy, resources, and honesty](#12-deployment-policy-resources-and-honesty)
+- [13. Hardware-free semantic boundary](#13-hardware-free-semantic-boundary)
 - [Related Documents](#related-documents)
 
 ---
@@ -118,6 +119,11 @@ bodies have no persistable representation.
 ---
 
 ## 4. Queueable ports are a stricter port class
+
+The Register-1 implementation is the closed Haskell `Continuity`/`OfflineSource` language in
+`offline-language-types`, with total validation in `Amoebius.Ui.Offline.Decode`. Typed Haskell cases cover the
+three authored continuity declarations and every bounded-contract or online-only-operation refusal; no
+serialized fixture is an executable authority.
 
 A `QueuedPort` references an existing typed mutating/workflow port and adds a contract equivalent to:
 
@@ -366,6 +372,16 @@ copy the sibling's app-specific record schema, fixed grace periods, Redis replay
 the application DSL. This is sibling evidence, not an amoebius implementation claim.
 
 ---
+
+## 13. Hardware-free semantic boundary
+
+The Phase-45 implementation expresses encrypted-envelope opacity, tenant/subject/device/program/epoch
+partitioning, quota refusal, fenced single ownership, adjacent schema migration, ordered recovery, the closed
+six-facility set, and its generic runtime projection as Haskell values. The projection is materialized only
+beneath `.build/**`; tracked PureScript and JavaScript copies are not authorities.
+
+This boundary does not claim IndexedDB, OPFS, Web Locks, BroadcastChannel, service-worker, WebCrypto,
+cross-tab, or browser-quota fidelity. Those require later post-barrier browser observation.
 
 ## Related Documents
 - [Low-Code UI Runtime](./low_code_ui_runtime_doctrine.md)

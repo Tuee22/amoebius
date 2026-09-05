@@ -1,6 +1,0 @@
-action	effect	permission	visibility	idempotent
-read-data	ReadData	read	visible	true
-mutate-data	MutateData	write	visible	true
-start-workflow	StartWorkflow	invoke	hidden	true
-observe-workflow	ObserveWorkflow	read	visible	true
-end-session	EndSession	invoke	visible	false

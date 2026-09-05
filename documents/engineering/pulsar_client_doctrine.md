@@ -329,13 +329,14 @@ choice so the omissions are auditable, not silent.
 
 ## 6. The declarative topology algebra
 
-**Storage-fold target — NOT VALIDATED.** The
-[Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) must implement and validate at
+**Storage-fold candidate — NOT VALIDATED.** The
+[Phase 28 candidate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) implements, and its gate validates at
 Register 1 Pulsar's two independent ceilings: BookKeeper logical hot bytes must expand
 through write-quorum/reserve/re-replication geometry before fitting the bookie backing, and durable offload
 requires a finite size ceiling against its selected budget. The physically-hot-over-bookie and time-only
 cases must reject, their twins must fit, and the sampled equivalence property must meet both coverage
-directions. No current ledger is asserted here. Broker retention,
+directions. The two exact paired rows and their production mutants are Haskell-owned; no serialized oracle is
+an authority. No current ledger is asserted here. Broker retention,
 BookKeeper recovery, tiered offload, and replay fidelity remain **UNVERIFIED** live effects.
 
 **Nobody writes a topic string by hand.** A topic name is a *derived* function of a typed

@@ -66,7 +66,7 @@ infernixLawObservations =
     [FlowObservation "inference-workflow" RequestFlow RequestFlow]
     [ ClaimObservation
         "inference-evidence"
-        (FixturePassedAtPinnedReason "test/oracle/extension_laws/law_verdicts.tsv")
+        (FixturePassedAtPinnedReason "test/spec/extension/ExtensionLawsPerExtensionOracle.hs")
     ]
 
 jitmlLawObservations :: LawObservations
@@ -83,7 +83,7 @@ jitmlLawObservations =
     [FlowObservation "training-workflow" RequestFlow RequestFlow]
     [ ClaimObservation
         "training-evidence"
-        (FixturePassedAtPinnedReason "test/oracle/extension_laws/law_verdicts.tsv")
+        (FixturePassedAtPinnedReason "test/spec/extension/ExtensionLawsPerExtensionOracle.hs")
     ]
 
 artifact :: Text -> ByteString -> ArtifactObservation

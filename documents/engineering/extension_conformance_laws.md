@@ -16,7 +16,7 @@ discharges them, and the closure argument that consumes C1 are owned by the hub,
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, documents/README.md, documents/engineering/README.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -44,10 +44,14 @@ seams — belong to [`extension_conformance_security.md`](./extension_conformanc
 [Phase 10](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md) owns the target base five-calculus operation
 and finite Register-1 instances of C2, C3, C5, and C6: five component arms, 25 ordered pairs, 125 kind triples,
 exact resource addition, and a request-scope compiler barrier. That result is not an extension-law verdict.
+[The implementation](../../src/calculus-composition/Amoebius/Calculus/Composition.hs) keeps constructors
+private, uses exact `Natural` addition, and makes scope weakening, saturation, and transform-index loss three
+separate changed-production challenges. Exhaustion applies to the finite kind surface only; the numeric
+properties remain sampled at their declared 500-case bounds.
 [Phase 20](../../DEVELOPMENT_PLAN/phase_20_extension_declaration.md) owns the complete five-component
 declaration that law observations name.
 
-[Phase 21](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) owns a target pure L1–L5 evaluator
+[Phase 21](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) owns the bound pure L1–L5 evaluator
 over explicit operation, artifact, budget, flow, and claim observations joined to that declaration. Its bounded
 Register-1 suite covers two declaration shapes, six authored operation inputs, two independently seeded child-
 process render comparisons, actual budget and evidence values, and five single-law negative subjects. Finite
@@ -55,9 +59,9 @@ source scanners and the Phase-15 pinned claim/fixture compiler negative suppleme
 does not prove termination or scanner completeness, generate a gate for an arbitrary declaration, certify a
 runtime extension, or mint a conformance verdict.
 
-[Phase 22](../../DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md) must implement a separate normalized
+[Phase 22](../../DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md) owns the bound separate normalized
 composite value and a bounded C1–C7 evaluator. Seven ordered identity/link cases over the two declaration
-fixtures must yield 49 accepted pair-law cells; a separate 63-cell table must cover two lawful address controls
+fixtures yield 49 accepted pair-law cells; a separate Haskell-owned 63-cell inventory covers two lawful address controls
 and seven exact negative subjects. Composition must preserve one request-scope index, union Phase-21
 vocabularies, and fold exact resource vectors. An independent Haskell oracle must check pair sums and four
 SHA-256 addresses. These samples
@@ -160,16 +164,16 @@ compile-fail case and requires failure *for its pinned reason* rather than any f
 authored `.hs` mutant operator to redden a named assertion. This is the [`testing_doctrine.md`](./testing_doctrine.md) evidence discipline applied per
 extension.
 
-### Target discharge boundary — NOT VALIDATED
+### Bound discharge boundary — NOT VALIDATED
 
-The Phase-21 evaluator must make each L-law a separate typed verdict. Before deciding a verdict, it must require the
+The Phase-21 evaluator in `src/extension-laws/Amoebius/Extension/Laws/PerExtension.hs` makes each L-law a
+separate typed verdict. Before deciding a verdict, it requires the
 observed operation, artifact, budget, flow, or claim names to cover the corresponding sets derived from the
 Phase-20 declaration. The executable case inventory and expected outcomes are a separately authored Haskell
-`NonEmpty LawVerdictCase`; neither this list nor an encoded table supplies a verdict. Each case carries its
-subject, expected per-law verdict vector, required negative control, and stable identity. The evaluator joins
-actual results to that Haskell inventory by identity and refuses missing, duplicate, or extra cases. Any
-serialized corpus or report is generated only beneath `.build/test-corpora/**` or `.build/docs/**`. Its target
-executable corpus is deliberately finite:
+oracle in `test/spec/extension/ExtensionLawsPerExtensionOracle.hs`; neither this list nor an encoded table
+supplies a verdict. The spec joins actual results to the independent inventory and refuses missing, duplicate,
+or extra cases. Any serialized result is generated only beneath the acquired `.build/runs/phase-21/**` root.
+Its executable corpus is deliberately finite:
 
 - L1 catches exceptions over six authored inputs and scans one pure fixture for known partial tokens and
   wildcard dispatch; looping and scanner completeness remain UNVERIFIED.

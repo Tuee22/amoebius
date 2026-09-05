@@ -9,11 +9,14 @@
 --
 -- The tracked-source boundary itself is decided by the source-closure subject
 -- and is not re-decided here. What this runner owns are the two legacy families
--- assigned to this capability and the contract rows it leaves unbound. Both
--- families are decidable from an acquired snapshot, and both are open, so this
--- runner reports real debt rather than an absence of evidence.
+-- assigned to this capability. Both families are decidable from an acquired
+-- snapshot. Phase-labelled validation contracts and evidence are deliberately
+-- outside the runtime-identity subject: a phase gate must be able to name the
+-- phase whose evidence it records without becoming a product identity.
 module Amoebius.Validation.RepositoryLayoutRun
   ( repositoryLayoutRunCheck
+  , repositoryLayoutQualificationDiagnostic
+  , repositoryLayoutRawDiagnostic
   ) where
 
 import Amoebius.Validation.SourceClosure.Internal
@@ -23,25 +26,39 @@ import Amoebius.Validation.SourceClosure.Internal
   , TrackedEntry (..)
   , acquiredSourceSnapshot
   )
-import Amoebius.Validation.Types (CheckResult (..), finding, observation)
+import Amoebius.Validation.Types (CheckResult (..), finding, findingCode, observation)
+import Data.ByteString (ByteString)
+import Data.ByteString.Char8 qualified as ByteString8
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
 
 repositoryLayoutRunCheck :: AcquiredSourceSnapshot -> CheckResult
-repositoryLayoutRunCheck acquired =
+repositoryLayoutRunCheck acquired = repositoryLayoutCheck entries
+ where
+  entries =
+    [ (indexPath (trackedIndex entry), trackedBytes entry)
+    | entry <- snapshotEntries (acquiredSourceSnapshot acquired)
+    ]
+
+-- | Refusal-free pure seam for independently authored small corpora. It has no
+-- acquired-source constructor and therefore cannot itself become gate evidence.
+repositoryLayoutRawDiagnostic :: [(FilePath, ByteString)] -> CheckResult
+repositoryLayoutRawDiagnostic = repositoryLayoutCheck
+
+repositoryLayoutCheck :: [(FilePath, ByteString)] -> CheckResult
+repositoryLayoutCheck entries =
   CheckResult
     { checkName = "repository-layout-conformance"
     , checkObservations =
         [ observation "repository-layout.retired-ignore-root-count" (countText retiredIgnoreHits)
         , observation "repository-layout.phase-ordinal-source-count" (countText ordinalHits)
         ]
-    , checkFindings = ignoreFindings <> ordinalFindings <> unresolvedFindings
+    , checkFindings = ignoreFindings <> ordinalFindings
     }
  where
-  entries = snapshotEntries (acquiredSourceSnapshot acquired)
-  pathOf = indexPath . trackedIndex
-  textOf entry = either (const "") id (TextEncoding.decodeUtf8' (trackedBytes entry))
+  pathOf = fst
+  textOf entry = either (const "") id (TextEncoding.decodeUtf8' (snd entry))
 
   -- LTD-META-001. Generated material has no admitted home outside .build/**,
   -- .data/** and the marker-owned .test_data/** root, so an ignore file naming
@@ -61,7 +78,7 @@ repositoryLayoutRunCheck acquired =
   ordinalHits =
     [ (pathOf entry, literal)
     | entry <- entries
-    , hasSuffix ".hs" (pathOf entry)
+    , runtimeIdentitySourcePath (pathOf entry)
     , literal <- phaseOrdinalLiterals (textOf entry)
     ]
 
@@ -81,16 +98,28 @@ repositoryLayoutRunCheck acquired =
     | (path, literal) <- ordinalHits
     ]
 
-  unresolvedFindings =
-    [ finding
-        "REPOSITORY-LAYOUT-SUBJECT-UNRESOLVED"
-        "DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md"
-        "no production module and entry point are bound as this capability's Subject"
-    , finding
-        "REPOSITORY-LAYOUT-ORACLE-UNRESOLVED"
-        "DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md"
-        "no separately authored oracle, independence boundary, or provenance is bound"
+-- | Fixed clean and minimally different subjects used to qualify the layout
+-- checker. The gate compares this production projection with an independently
+-- authored oracle expectation.
+repositoryLayoutQualificationDiagnostic :: [(Text, [Text])]
+repositoryLayoutQualificationDiagnostic =
+  [ (label, map findingCode (checkFindings (repositoryLayoutRawDiagnostic corpus)))
+  | (label, corpus) <- qualificationCorpora
+  ]
+ where
+  qualificationCorpora =
+    [ ("clean", clean)
+    , ("retired-ignore-root", replaceIgnore ".build/\ngen/\n")
+    , ("runtime-phase-ordinal", clean <> [("src/Amoebius/Gate.hs", bytes "name = \"phase-07\"\n")])
+    , ("validation-phase-label", clean <> [("src/validation-kernel/Amoebius/Validation/Gate.hs", bytes "name = \"phase-07\"\n")])
     ]
+  clean =
+    [ (".gitignore", bytes ".build/\n.data/\n.test_data/\n")
+    , (".dockerignore", bytes ".build/\n.data/\n")
+    , ("src/Amoebius/Kernel.hs", bytes "capability = \"documentation_suite\"\n")
+    ]
+  replaceIgnore contents = (".gitignore", bytes contents) : drop 1 clean
+  bytes = ByteString8.pack
 
 -- | The two files that carry the ignore contract.
 ignoreContractPaths :: [FilePath]
@@ -122,8 +151,19 @@ phaseOrdinalLiterals contents =
  where
   isDigitChar character = character >= '0' && character <= '9'
 
+-- | Product/runtime modules are the only possible runtime-identity owners.
+-- The source-bound validation kernel names phase contracts and evidence, and
+-- tests name the exact phase whose negative they exercise; neither namespace
+-- is admitted as a product identity.
+runtimeIdentitySourcePath :: FilePath -> Bool
+runtimeIdentitySourcePath path =
+  hasPrefix "src/Amoebius/" path && hasSuffix ".hs" path
+
 countText :: [value] -> Text
 countText = Text.pack . show . length
 
 hasSuffix :: String -> FilePath -> Bool
 hasSuffix suffix = Text.isSuffixOf (Text.pack suffix) . Text.pack
+
+hasPrefix :: String -> FilePath -> Bool
+hasPrefix prefix = Text.isPrefixOf (Text.pack prefix) . Text.pack

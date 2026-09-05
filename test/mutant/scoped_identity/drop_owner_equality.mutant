@@ -1,3 +1,0 @@
-operator=guard-deletion
-change=omit equality between request owner and resource owner
-expected=both owner_tenant_swaps.tsv rows become allowed and the gate fails

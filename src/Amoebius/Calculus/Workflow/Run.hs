@@ -41,6 +41,9 @@ import Amoebius.Calculus.Workflow.Arm
   , Evidence (Evidence)
   , Resource (Resource)
   )
+#ifdef WORKFLOW_CALCULUS_TRANSFER_CONDITION_OPTIONAL_MUTANT
+import Amoebius.Calculus.Workflow.Arm qualified as WorkflowArm
+#endif
 import Amoebius.Calculus.Workflow.Ledger
   ( Ledger
   , emptyLedger
@@ -99,11 +102,19 @@ inParallel
   -> Workflow '[] cs y
   -> Workflow rs (Append bs (Append cs rs)) (x, y)
 inParallel (Workflow left) (Workflow right) =
+#ifdef WORKFLOW_CALCULUS_PARALLEL_REVERSES_BRANCHES_MUTANT
+  Workflow
+    ( \ledger -> case right ledger of
+        (rightValue, afterRight) -> case left afterRight of
+          (leftValue, afterLeft) -> ((leftValue, rightValue), afterLeft)
+    )
+#else
   Workflow
     ( \ledger -> case left ledger of
         (leftValue, afterLeft) -> case right afterLeft of
           (rightValue, afterRight) -> ((leftValue, rightValue), afterRight)
     )
+#endif
 
 -- | Bring a declared resource into existence, yielding a handle that witnesses it and an
 -- obligation that is now in the type.
@@ -158,6 +169,14 @@ teardown name = Workflow (\ledger -> ((), released (recordArm Teardown ledger)))
 -- The condition is an argument and not a field with a default, so a caller that forgets it
 -- does not get a transfer with a hole in it — it gets a function, and the committed
 -- compile-fail twin is exactly that program.
+#ifdef WORKFLOW_CALCULUS_TRANSFER_CONDITION_OPTIONAL_MUTANT
+transfer :: KnownSymbol r => Proxy r -> Workflow rs (Remove r rs) ()
+transfer name =
+  Workflow
+    ( \ledger ->
+        ((), recordRelease (resourceOf name) (TransferredTo (WorkflowArm.Condition "unstated")) (recordArm Teardown ledger))
+    )
+#else
 transfer :: KnownSymbol r => Proxy r -> Condition -> Workflow rs (Remove r rs) ()
 transfer name condition =
   Workflow
@@ -174,13 +193,18 @@ transfer name condition =
 #else
     dischargeFor = TransferredTo
 #endif
+#endif
 
 -- | Run a workflow that begins owing nothing and ends owing nothing.
 --
 -- The two @'[]@s are the whole of section 3's compile-time claim. A workflow still holding
 -- an obligation has a different type, so it is not that this function refuses it — it is
 -- that the application does not typecheck.
+#ifdef WORKFLOW_CALCULUS_RUN_ACCEPTS_OUTSTANDING_MUTANT
+runWorkflow :: Workflow '[] after a -> (a, Ledger)
+#else
 runWorkflow :: Workflow '[] '[] a -> (a, Ledger)
+#endif
 runWorkflow (Workflow fold) = fold emptyLedger
 
 resourceOf :: KnownSymbol r => Proxy r -> Resource

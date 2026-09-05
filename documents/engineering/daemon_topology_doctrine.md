@@ -87,10 +87,11 @@ PureScript assets and Haskell UI-server interpreter specified by
 behaviour. infernix and jitML remain linked trusted workflow and component adapters behind typed ports. The
 named behaviours are libraries inside one binary, not separate products.
 
-[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) owns the future hardware-free Haskell
-executable-boundary contract. It must admit the `serve-ui` responsibility and refuse missing, duplicate,
-contract-mismatched, or ABI-mismatched handler registries while allowing one unreferenced handler to remain
-unreachable. Phase 43 is **NOT VALIDATED**; it cannot establish an in-cluster worker or replica lifecycle.
+[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) owns the hardware-free Haskell
+executable-boundary contract. Its implemented pure boundary admits the `serve-ui` responsibility and refuses
+missing, duplicate, contract-mismatched, or ABI-mismatched handler registries while allowing one unreferenced
+handler to remain unreachable. The integrated Phase-43 gate remains **NOT VALIDATED**; this contract cannot
+establish an in-cluster worker or replica lifecycle.
 
 This document owns *which contexts exist and what each is for*. **How** the host daemon communicates — the
 distro-mTLS path to `kube-apiserver`, and the host-only NodePort peering with no mTLS — is owned by

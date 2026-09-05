@@ -30,6 +30,7 @@ import Amoebius.Validation.StatusProjection.Internal (
     statusProjectionInternalTestMarkerReplacement,
     statusProjectionInternalTestMixedPhases,
     statusProjectionInternalTestPrepare,
+    statusProjectionInternalTestPrepareRefresh,
     statusProjectionInternalTestRecoveryClassification,
     statusProjectionInternalTestRecoveryRebind,
     statusProjectionInternalTestRecoveryStates,
@@ -105,10 +106,25 @@ runStatusProjectionInternalOracle =
                 canonicalClassification = statusProjectionInternalTestRecoveryClassification preimage
                 mixedClassification = statusProjectionInternalTestRecoveryClassification mixedSnapshot
                 conflictClassification = statusProjectionInternalTestRecoveryClassification conflictSnapshot
+                completedSnapshot = snapshotWithImages preimage files expectedPaths
+                refresh = statusProjectionInternalTestPrepareRefresh 0 completedSnapshot
+                activeRefresh = statusProjectionInternalTestPrepareRefresh 0 preimage
              in expectEqual
                     "the projection has the exact three-file nonterminal target set"
                     expectedPaths
                     (map first files)
+                    <> expectEqual
+                        "a Done phase refresh has no status targets and preserves the exact source image"
+                        ( Right
+                            ( []
+                            , snapshotIdentity completedSnapshot
+                            , snapshotIdentity completedSnapshot
+                            )
+                        )
+                        refresh
+                    <> expectLeft
+                        "an Active phase cannot use receipt refresh instead of its frontier transition"
+                        activeRefresh
                     <> expectEqual
                         "an all-before frontier is not an interrupted mixed write"
                         []

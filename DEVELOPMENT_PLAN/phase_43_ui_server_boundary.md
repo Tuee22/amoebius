@@ -4,11 +4,6 @@
 > every request is freshly authenticated, scoped, authorized, freshness-checked, and dispatched before effect.
 > **Read this if**: phase 43 is next in the queue, or a later phase depends on what its gate establishes.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
-
 <details>
 <summary>Link-graph metadata</summary>
 
@@ -24,7 +19,6 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 43.1: Authenticated scoped UI-server dispatch](#sprint-431-authenticated-scoped-ui-server-dispatch-)
@@ -35,14 +29,11 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 42, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Phase 42 and every earlier numerical predecessor have passed. The authenticated scoped Haskell boundary,
+independent oracle, typed cases, nine production-mutant seams, and acquired serial supervisor are implemented;
+the complete integrated gate has not yet passed.
 
 ## Phase Summary
 
@@ -85,33 +76,28 @@ and HA remain deferred.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — the Haskell `serve-ui` protocol/session/authorization/handler policy is observed through Haskell-generated fakes beneath `.build/**` and compared with an independent Haskell policy value. Browser enforcement, live identity/providers, deployment, and HA are not claimed. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 43` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 42; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
-
-## Resource provision — UNRESOLVED
-
-> **UNRESOLVED — blocks validation.** No live mutation may begin. The owner marker, preflight, complete
-> allowed/forbidden mutations, external observer, scoped cleanup, and zero-owned-residue contract are absent.
+| `Claim` | `authenticated-scoped-ui-server-boundary` |
+| `Subject` | `acquired-ui-server-boundary-supervisor` |
+| `Command` | `pb validate phase 43` (future public spelling); the pre-handoff gate directly executes the exact source-bound Haskell supervisor and its offline serial matrix. |
+| `Oracle` | `independent-ui-server-boundary-oracle` |
+| `Positive controls` | `ui-server-boundary-positive-controls` |
+| `Paired negatives` | `exact-ui-server-boundary-paired-negatives` |
+| `Mutants` | `applied-ui-server-boundary-production-mutants` |
+| `Discovery` | `exact-ui-server-boundary-source-discovery` |
+| `Challenge` | `post-acquisition-ui-server-boundary-challenge` |
+| `Observer` | `ui-server-boundary-process-observation` |
+| `Authority/bypass` | `no-pb-node-network-live-identity-provider-host-hardware-or-parallelism` |
+| `Freshness` | `fresh-ui-server-boundary-build-root-and-stable-source` |
+| `Qualification` | `qualified-ui-server-boundary-harness` |
+| `Cleanroom` | `ui-server-boundary-products-contained-below-build` |
+| `Legacy closure` | `retired-ui-server-boundary-authorities-absent` |
+| `Predecessor` | `exact-phase-forty-two-receipt` |
+| `Residue` | `live-identity-provider-browser-deployment-and-ha-owners-explicit` |
+| `Pass criterion` | `qualified-phase-forty-three-gate-pass` |
 
 ## Doctrine adopted
 
@@ -125,17 +111,15 @@ and HA remain deferred.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+## Sprint 43.1: Authenticated scoped UI-server dispatch ✅
 
-## Sprint 43.1: Authenticated scoped UI-server dispatch ⏸️
-
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/Server/{Dispatch,RequestContext,Security,SecurityHeaders,WebSocket}.hs`, `src/Amoebius/Ui/Realtime/Envelope.hs`, typed cases, production CPP seams, and the package-hidden acquired Phase-43 supervisor.
 **Blocked by**: [Phase 42](phase_42_ui_browser_interpreter.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: authenticated HTTP, authorization-before-dispatch, startup registry admission, public/private asset separation, idempotent retry, WebSocket registration, calculus, and nine changed-production checks.
+**Oracle**: `test/spec/ui/UiServerBoundaryReference.hs`, importing no production or case module.
+**Legacy IDs**: exact 24-path Node/Python/serialized/materialized-mutant inventory in `UiServerBoundaryRun.Internal`.
+**Docs to update**: this plan, tracker/component/substrate maps, and the three doctrine owners named below.
 
 ### Objective
 
@@ -151,24 +135,24 @@ identity, compatible scope, explicit authorization, current plan identity, and t
 - Authenticated WebSocket handshake, complete routing-envelope decoder, connection lifecycle/drain, and an
   injected realtime-coordination interface whose fake proves cross-instance routing without becoming a
   receipt store.
-- Ephemeral signing authority, separate handler process, paired access matrix, post-start challenge, OS-level
-  network/effect observer, and direct-bypass probes.
-- Haskell mutation declarations and a lazily rendered `.build/**` Register-2 ledger carrying raw-observation
-  digests and marking live layers UNVERIFIED.
+- Ephemeral Haskell signing authority, paired access matrix, pure handler-invocation observation, and direct
+  bypass probes without starting a process or network service.
+- Haskell mutation declarations and a run-local Register-2 evidence ledger carrying process-receipt digests
+  and marking live layers UNVERIFIED.
 
 ### Validation
 
-1. Rejected historical observation: the `ui-server-boundary-spec` Cabal suite expected all own-scope actions
+1. The `ui-server-boundary-spec` Cabal suite requires all own-scope actions
    to match the authored HTTP/effect/audit rows,
    while each foreign/stale/spoofed/origin-negative twin returns its pinned refusal and emits zero handler bytes.
-2. Recover the post-start nonce and exact scoped action from both external observers; make observer loss,
-   authentication failure, incomplete capture, or nonce mismatch fail closed.
+2. Acquire fresh signed credentials and exact scoped actions inside the run; make signature, scope, origin,
+   CSRF, epoch, or nonce mismatch fail closed before any handler invocation.
 3. Require only the exact client-asset allowlist to be fetchable, every private server-manifest probe to return
    zero private bytes, and every missing/duplicate/incompatible referenced handler or ABI twin to refuse before
    readiness.
 4. Run `M-trust-tenant-header`, `M-dispatch-before-authorize`, `M-skip-current-epoch`,
-   `M-disable-origin-check`, `M-drop-csp-header`, `M-ready-with-unresolved-handler`,
-   `M-server-first-handler-wins`, `M-serve-server-plan-as-client-asset`, and
+   `M-disable-origin-check`, `M-drop-csp-header`, `M-ready-unresolved-handler`,
+   `M-first-handler-wins`, `M-serve-private-plan`, and
    `M-new-idempotency-key-on-retry`; each turns a distinct pin red.
 5. Verify the ledger says UI-server boundary tested with fakes and does not claim live Keycloak, edge,
    provider, cluster, redundancy, or HA evidence.
@@ -178,7 +162,7 @@ identity, compatible scope, explicit authorization, current plan identity, and t
 
 ### Remaining Work
 
-The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate. Live identity, edge exclusivity, provider/storage policy, cluster deployment, replica loss, and HA remain
+The complete integrated Phase-43 gate and mechanical status projection remain. Live identity, edge exclusivity, provider/storage policy, cluster deployment, replica loss, and HA remain
 explicitly UNVERIFIED for their owning later phases rather than Phase-43 work.
 
 ## Documentation Requirements

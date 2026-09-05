@@ -1,3 +1,0 @@
-operator=effect-swap
-change=swap mutate and start handler identities
-expected=handler projections fail

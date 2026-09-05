@@ -1,4 +1,0 @@
-surface=absolute-tool-argv
-operator=ambient-lookup-reintroduction
-mutation=invoke dhall by its bare name under the observer's environment
-expected_oracle=the refusing shim records an ambient row and the invocation exits non-zero

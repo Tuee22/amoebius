@@ -1,2 +1,0 @@
-operator=freshness-guard-deletion
-expected=stale digest is executed instead of ReloadRequired

@@ -154,6 +154,28 @@ projections. JSON plans and manifests are generated under `.build/**`, never use
 removed for a clean-room rerun. The browser gate must compile freshly generated PureScript and compare its
 transitions and observations with a distinct Haskell reference semantics plus required red controls.
 
+The Phase-40 implementation follows this boundary with one `compileUiPlans` entry point, typed Haskell
+projection/artifact expectations, an independent digest and authority-source relation, and six CPP-selected
+production mutations. Its Register-1 claim ends at pure plan, manifest, digest, and finite-demand compilation;
+it does not imply browser or server interpretation.
+
+Phase 42 supplies the generic interpreter as pure Haskell state/event/route, focus, freshness, trusted-text,
+challenge, and same-origin request-plan semantics plus a deterministic Haskell projection of browser-language
+source. Its independent Haskell differential and nine production mutations establish the semantic boundary;
+they do not claim that a browser, CSP, or operating-system network boundary executed it.
+
+Phase 43 supplies the server side as pure Haskell authenticated request, current-epoch authorization,
+authorization-before-dispatch, exact handler-registry admission, public-only asset, idempotent retry, and
+WebSocket registration semantics. Its independent Haskell policy values and nine production mutations
+establish the hardware-free boundary; live identity, browser and OS enforcement, provider dispatch,
+deployment, redundancy, and HA remain later-owned.
+
+Phase 44 composes the browser/server semantic boundary with typed workflow and artifact handles in pure
+Haskell. Its two application shapes, independent visible/effect/access/denial values, and five production
+mutations enforce tenant and owner scope, ready-receipt order, paired-plan identity, and denial of direct
+browser-to-domain access. Live adapters, browser/server execution, deployment, release, and HA remain
+later-owned.
+
 ---
 
 ```mermaid
@@ -600,9 +622,10 @@ Confidentiality may be narrowed without new authority. Audience widening or cros
 closed named release/grant action with current authorization, declared purpose, target audience, audit class,
 and a server-issued result carrying the new label. There is no general declassification function.
 
-The standalone pure scope gate must exercise fresh request indices, owner joins, swaps, flow decisions, graph
-diagnostics, compiler-negative pairs, generated reject classes, and production-source mutants. Its expected
-relations are Haskell values checked independently of the implementation.
+The standalone pure Phase-8 scope gate exercises `Amoebius.Scope.Index` and `Amoebius.Scope.Flow` through
+fresh request indices, owner joins, swaps, flow decisions, graph diagnostics, compiler-negative pairs,
+generated reject classes, and a changed-production subject. Its expected relations are separately authored
+Haskell values; tracked serialized fixtures do not influence the verdict.
 
 Browser input and model output begin with untrusted integrity. They cannot flow to an authority-bearing sink,
 policy decision, provider coordinate, executable action identity, ownership field, or release decision until a
@@ -788,7 +811,7 @@ horizon; `ReloadRequired` cannot discard queued intent. The complete rule is own
 The committed behavioral sources are Haskell only. External `UiSource` values are untracked inputs, and the
 PureScript runtime is generated lazily. The following build/release artifacts are never committed:
 
-- normalized and checked UI plans;
+- normalized and checked UI plans, including Phase-41 paired offline client/replay key projections;
 - reflected Dhall schemas and public-contract manifests;
 - PureScript contract/catalog types and codecs built into the generic runtime;
 - one immutable generic client bundle per runtime ABI/component-catalog identity;

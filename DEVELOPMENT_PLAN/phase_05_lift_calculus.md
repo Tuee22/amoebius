@@ -36,27 +36,24 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 4, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+The complete Phase-4 gate is recorded for the same source identity before this phase may run. The phase remains
+Active until its complete integrated gate authorizes the mechanical status projection.
 
 ## Phase Summary
 
-This phase specifies a Haskell target capability; it does not report a current implementation or
-result. The target is to represent the closed effect-layer set, total transition relation, and
-consumed transition witness as one typed Haskell lift calculus.
+This phase implements the closed effect-layer set, total transition relation, observation-produced
+witnesses, and layer-safe composition as one typed Haskell lift calculus. A package-hidden supervisor
+builds the independent Haskell relations, seven changed-production subjects, and both compile-negative pairs
+directly and serially.
 
 The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
 `.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
 tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
 code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
-`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
-evidence contract remain UNRESOLVED and block validation.
+`pb` is not used by this pre-`BOOTSTRAP_HANDOFF` gate. The source-bound Haskell dispatcher invokes the
+authenticated compiler directly and synchronously.
 
 This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
 behavior only. It cannot use host, hardware, live-service, or cluster observations to make its claim pass.
@@ -75,33 +72,35 @@ relation, and consumed transition witness as one typed Haskell lift calculus. NO
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-5 semantic payload, package-hidden serial
+supervisor, independent Haskell relations, paired compile negatives, and changed-production matrix are complete;
+only a fresh integrated run may authorize status.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — represent the closed effect-layer set, total transition relation, and consumed transition witness as one typed Haskell lift calculus. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 05` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 04; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | The closed three-layer set, total primitive relation, observation-produced transition witness, and meeting-layer composition satisfy one source-bound lift calculus contract. |
+| `Subject` | `Amoebius.Calculus.Lift.{Layer,Transition,Witness,Compose}` is acquired only through package-hidden `Amoebius.Validation.LiftCalculusRun.Internal`. |
+| `Command` | Future public spelling is `pb validate phase 05`; before `BOOTSTRAP_HANDOFF`, the exact absolute Haskell executable and authenticated GHC 9.12.4 compiler run directly, synchronously, and without `-j`. |
+| `Oracle` | `test/spec/calculus/LiftCalculusSpec.hs` contains separately authored nine-pair and twenty-observation Haskell relations and observes only public production interfaces. |
+| `Positive controls` | All eleven clean predicates pass and both legal compile twins succeed. |
+| `Paired negatives` | An asserted witness is refused for the hidden constructor; paths whose boundary layers differ are refused at the exact type mismatch. |
+| `Mutants` | Fallback admission, witness forgery, unchecked runtime joins, two missing relation arms, exposed witness constructor, and relaxed typed composition are each killed at their assigned observation. |
+| `Discovery` | The four lift modules, Haskell oracle, and four compile twins are discovered from the Git snapshot and equal the fixed inventory bidirectionally. |
+| `Challenge` | All seven changed-production subjects execute after acquisition and must be distinguished at their assigned locus. |
+| `Observer` | The supervisor records absolute executable, exact argv, exit, transcript digest, and bounded failure text for every compiler and oracle process. |
+| `Authority/bypass` | `pb`, network, hardware, live services, compiler substitution, and compiler/linker overlap are forbidden. |
+| `Freshness` | Every run creates a fresh `.build/runs/phase-05/work/**` root and the dispatcher requires equal opening/closing source identities. |
+| `Qualification` | Clean controls, exact negatives, totality diagnostics, and all seven mutants pass together; any survivor or wrong-locus failure refuses. |
+| `Cleanroom` | Every binary, interface, object, stub, and transcript is generated lazily beneath the fresh run root. |
+| `Legacy closure` | Phase 5 owns no legacy-debt identifier; all non-circular prerequisites must pass while later-owned source debt remains residue. |
+| `Predecessor` | Consume exactly one durable Phase-4 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Residue` | Workflow obligations, five-calculus composition, actual effects, runtimes, hardware, and live services remain explicitly later-owned. |
+| `Pass criterion` | `qualified-phase-five-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 **This phase owns its compile-negative evidence.** Each illegal twin below requires a phase-local, source-bound
 GHC invocation, a minimally different positive control, and a separately authored exact-diagnostic oracle.
 [Phase 15](phase_15_compile_fail_harness.md) later consolidates reusable compile-fail machinery; it is not a
-prerequisite of this earlier gate. Until the local runner and oracle exist, these rows remain `UNRESOLVED`.
+prerequisite of this earlier gate. The local runner owns these pairs until Phase 15 consolidates their reusable machinery.
 
 ## Doctrine adopted
 
@@ -109,17 +108,17 @@ prerequisite of this earlier gate. Until the local runner and oracle exist, thes
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint seam is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 5.1: The lift calculus ⏸️
+## Sprint 5.1: The lift calculus ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/Calculus/Lift/{Layer,Transition,Witness,Compose}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/LiftCalculusRun/Internal.hs`
 **Blocked by**: [Phase 4](phase_04_budget_calculus.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: eleven clean predicates over nine pairs and twenty observations; two exact compile-negative pairs; seven assigned changed-production subjects; later effects remain residue
+**Oracle**: `test/spec/calculus/LiftCalculusSpec.hs`, separately authored in Haskell against public calculus modules
+**Legacy IDs**: none; later-owned tracked-source debt remains in the typed central registry
+**Docs to update**: this phase file, `DEVELOPMENT_PLAN/README.md`, and `documents/engineering/lift_and_compose_doctrine.md`
 
 ### Objective
 
@@ -160,7 +159,7 @@ missing import satisfies nothing
 
 ### Remaining Work
 
-The pre-reset `None` claim is permanently invalid; the phase remains blocked and NOT VALIDATED. The relation is over primitive transitions and is deliberately not transitive, so
+The relation is over primitive transitions and is deliberately not transitive, so
 `on-host → in-container` has no inhabitant and reaching a container from the host is a composition; that
 distinction is what a path is for, and a relation closed under transitivity would erase it. Whether teardown
 is an obligation the type system tracks is the workflow calculus's claim, which is the next phase's and is
@@ -181,7 +180,7 @@ to observe.
 
 **Cross-references to add:**
 
-- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+- `DEVELOPMENT_PLAN/README.md` and the adjacent Phase 4/6 backlinks remain the phase-order routing authority.
 
 ## Related Documents
 

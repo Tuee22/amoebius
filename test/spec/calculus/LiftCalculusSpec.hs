@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | The Phase-5 suite: the lift calculus against its two authored tables.
+-- | The Phase-5 suite: the lift calculus against two independent Haskell relations.
 --
--- The tables are the independent side. Both are written from
+-- The relations below are the independent side. Both are written from
 -- 'lift_and_compose_doctrine.md' section 7 and never from the modules they judge: the
 -- pair table says which of the nine ordered layer pairs the relation admits, and the
 -- observation table says which evidence licenses which move. Each is joined in both
@@ -70,7 +70,7 @@ main :: IO ()
 main = checks
 
 -- --------------------------------------------------------------------------
--- the authored tables
+-- the independent relations
 -- --------------------------------------------------------------------------
 
 -- | One row of the pair table: an ordered layer pair and whether the relation admits it.
@@ -91,37 +91,32 @@ data WitnessRow = WitnessRow
   }
   deriving stock (Eq, Ord, Show)
 
-readRows :: FilePath -> IO [[Text]]
-readRows path = do
-  contents <- readFile path
-  pure [fields | line <- lines contents, fields <- usable (splitTabs line)]
-  where
-    usable fields = case fields of
-      (first : _) | Text.isPrefixOf "#" first -> []
-      [] -> []
-      _ -> [fields]
+independentPairOracle :: [PairRow]
+independentPairOracle =
+  [ PairRow "on-host" "on-host" True
+  , PairRow "on-host" "in-frame" True
+  , PairRow "on-host" "in-container" False
+  , PairRow "in-frame" "on-host" False
+  , PairRow "in-frame" "in-frame" True
+  , PairRow "in-frame" "in-container" True
+  , PairRow "in-container" "on-host" False
+  , PairRow "in-container" "in-frame" False
+  , PairRow "in-container" "in-container" True
+  ]
 
-readPairTable :: IO [PairRow]
-readPairTable = fmap (concatMap build) (readRows "test/oracle/lift_calculus/transition_pairs.tsv")
-  where
-    build fields = case fields of
-      [source, target, admitted, _why] -> [PairRow source target (admitted == "yes")]
-      _ -> []
-
-readWitnessTable :: IO [WitnessRow]
-readWitnessTable =
-  fmap (concatMap build) (readRows "test/oracle/lift_calculus/witness_observations.tsv")
-  where
-    build fields = case fields of
-      [source, target, seen, admitted] -> [WitnessRow source target seen (admitted == "yes")]
-      _ -> []
-
-splitTabs :: String -> [Text]
-splitTabs = fmap Text.pack . go
-  where
-    go text = case break (== '\t') text of
-      (field, []) -> [field]
-      (field, _ : rest) -> field : go rest
+independentWitnessOracle :: [WitnessRow]
+independentWitnessOracle =
+  [ WitnessRow source target seen admitted
+  | (source, target, accepted) <-
+      [ ("on-host", "in-frame", "frame-running")
+      , ("in-frame", "in-container", "engine-responding")
+      , ("on-host", "on-host", "host-responding")
+      , ("in-frame", "in-frame", "frame-running")
+      , ("in-container", "in-container", "engine-responding")
+      ]
+  , seen <- ["host-responding", "frame-running", "engine-responding", "nothing-observed"]
+  , let admitted = seen == accepted
+  ]
 
 -- --------------------------------------------------------------------------
 -- the corpus
@@ -167,15 +162,14 @@ containerPath built = step (corpusContainer built) (here SInFrame)
 -- --------------------------------------------------------------------------
 
 checks :: IO ()
-checks = do
-  pairs <- readPairTable
-  witnesses <- readWitnessTable
-  case corpus of
+checks = case corpus of
     Nothing -> do
       putStrLn "  FAIL corpus-observable"
       putStrLn "lift-calculus-spec: FAIL corpus-observable"
       exitFailure
-    Just built -> report pairs witnesses (results pairs witnesses built)
+    Just built ->
+      report independentPairOracle independentWitnessOracle
+        (results independentPairOracle independentWitnessOracle built)
 
 results :: [PairRow] -> [WitnessRow] -> Corpus -> [(String, Bool)]
 results pairs witnesses built =
@@ -267,7 +261,13 @@ oracleCoversEveryObservation table =
       ]
 
 admittedPairs :: [(Layer, Layer)]
-admittedPairs = [(from, to) | from <- layerValues, to <- layerValues, admits from to]
+admittedPairs =
+  [ (from, to)
+  | row <- independentPairOracle
+  , pairAdmitted row
+  , Just from <- [layerFromTag (pairSource row)]
+  , Just to <- [layerFromTag (pairTarget row)]
+  ]
 
 -- | The refusing half of section 7: a witness exists exactly where the table says
 -- something was seen that reports the transition's precondition.

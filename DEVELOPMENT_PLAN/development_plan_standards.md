@@ -151,6 +151,17 @@ exists; every later phase remains Blocked. The validator emits the verified patc
 never changes a tracked file. After that process exits, a human, agent, or CI job may recheck the bound preimage
 and apply the exact patch. Any other byte change creates a new candidate and requires the gate to run again.
 
+A later implementation change does not invalidate an earlier pass merely because the repository-wide source
+digest changes. A verified immediate-predecessor receipt is a monotonic frontier fact: the active gate projects
+that fact onto its exact opening snapshot and owns compatibility between the current source and every capability
+it consumes. Receipt refresh remains available when a completed phase itself is deliberately revalidated, uses
+an identity projection, changes no status, and installs a new durable receipt; it is not a recursive prerequisite
+for later development. Multiple valid receipts for one phase are one deterministic equivalence class, not
+ambiguous authority: the verifier checks every entry and selects the lexicographically least content digest.
+Malformed, detached, wrong-phase, and non-green evidence remains fail-closed. This rule prevents an edit to the
+current validator or a later phase from forcing replay of the entire completed prefix while keeping each new
+candidate bound to both an authentic predecessor fact and its exact current-source gate result.
+
 ---
 
 ## D. The per-phase document skeleton

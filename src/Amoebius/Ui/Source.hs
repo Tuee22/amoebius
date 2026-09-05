@@ -1,5 +1,7 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Source
   ( TenantMode (..)
@@ -10,9 +12,14 @@ module Amoebius.Ui.Source
   , ExternalLinkRequirement (..)
   , UiSource (..)
   , decodeUiSource
+  , decodeUiSourceText
   ) where
 
+#if defined(UI_PROGRAM_SCHEMA_ADD_RAW_JS_ARM_MUTANT) || defined(UI_PROGRAM_SCHEMA_ADD_RAW_URL_ARM_MUTANT)
+import Amoebius.Ui.Offline.Types (Continuity (OnlineOnly))
+#else
 import Amoebius.Ui.Offline.Types (Continuity)
+#endif
 import Control.Exception (SomeException, displayException, try)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -83,3 +90,24 @@ decodeUiSource path = do
   pure $ case attempted of
     Left exception -> Left (Text.pack (displayException (exception :: SomeException)))
     Right source -> Right source
+
+-- | Decode an externally supplied UI declaration without giving tracked fixture
+-- bytes any authority over the language. Repository-owned cases are Haskell.
+decodeUiSourceText :: Text -> IO (Either Text UiSource)
+decodeUiSourceText source
+#ifdef UI_PROGRAM_SCHEMA_ADD_RAW_JS_ARM_MUTANT
+  | "rawJs" `Text.isInfixOf` source = pure (Right mutantSafeSource)
+#endif
+#ifdef UI_PROGRAM_SCHEMA_ADD_RAW_URL_ARM_MUTANT
+  | "rawUrl" `Text.isInfixOf` source = pure (Right mutantSafeSource)
+#endif
+  | otherwise = do
+      attempted <- try (Dhall.input Dhall.auto source)
+      pure $ case attempted of
+        Left exception -> Left (Text.pack (displayException (exception :: SomeException)))
+        Right decoded -> Right decoded
+
+#if defined(UI_PROGRAM_SCHEMA_ADD_RAW_JS_ARM_MUTANT) || defined(UI_PROGRAM_SCHEMA_ADD_RAW_URL_ARM_MUTANT)
+mutantSafeSource :: UiSource
+mutantSafeSource = UiSource "mutant-safe" SingleTenant OnlineOnly [] []
+#endif

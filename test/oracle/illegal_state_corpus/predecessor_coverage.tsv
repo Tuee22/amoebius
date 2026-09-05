@@ -1,8 +1,0 @@
-entry	subcase	locus	owner	source	evidence
-3.31	single-topology-index	gadt-decode	Phase-9	phase9-compile	single-topology-place
-3.36	control-plane-reach	gadt-decode	Phase-9	phase9-compile	control-plane-reach
-3.38	host-worker-reach	gadt-decode	Phase-9	phase9-compile	host-worker-reach
-3.39	site-index	gadt-decode	Phase-9	phase9-compile	site-indexed-quorum
-3.80	subject-scope	gadt-decode	Phase-8	phase8-locus	same_tenant_swap
-3.81	flow-label	gadt-decode	Phase-8	phase8-locus	subject_flow_mismatch
-3.94	adjacent-id-transposition	gadt-decode	Phase-8	phase8-locus	scope_retag

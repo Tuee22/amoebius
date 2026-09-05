@@ -1,9 +1,0 @@
-mutant	deleted_clause	expected
-drop-pairwise	pairwise	red
-drop-graph-independence	graph-independent	red
-drop-resource-independence	resource-independent	red
-drop-acyclic	acyclic	red
-drop-budget	budget	red
-drop-ttl	ttl	red
-drop-freshness	freshness	red
-drop-offset-domain	offset-domain	red

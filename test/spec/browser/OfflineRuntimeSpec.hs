@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main (main) where
@@ -6,20 +5,6 @@ module Main (main) where
 import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
 import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
 import Amoebius.Calculus.Composition
-  ( append
-  , artifactComponent
-  , budgetComponent
-  , calculusTag
-  , compose
-  , compositionKinds
-  , compositionNames
-  , compositionResource
-  , evidenceComponent
-  , everyCalculus
-  , liftComponent
-  , singleton
-  , workflowComponent
-  )
 import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
 import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
 import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
@@ -28,179 +13,112 @@ import Amoebius.Scope.Index qualified as CalculusScope
 import Amoebius.Ui.Offline.Browser.Crypto
 import Amoebius.Ui.Offline.Browser.Leader
 import Amoebius.Ui.Offline.Browser.Partition
+import Amoebius.Ui.Offline.Browser.Runtime
 import Amoebius.Ui.Offline.Browser.ServiceWorker
 import Amoebius.Ui.Offline.Browser.Store
 import Control.Monad (forM_, unless)
-import Data.Aeson (FromJSON, eitherDecode)
-import Data.ByteString.Lazy qualified as Lazy
 import Data.List (isInfixOf)
-import Data.Text (Text)
 import Data.Text qualified as Text
-import GHC.Generics (Generic)
-import System.Directory (doesFileExist, getCurrentDirectory, setCurrentDirectory)
+import OfflineRuntimeCases qualified as Cases
+import OfflineRuntimeReference qualified as Reference
+import System.Directory (createDirectory, createDirectoryIfMissing, getCurrentDirectory, removeDirectoryRecursive, removeFile)
 import System.Exit (die)
-import System.FilePath ((</>), takeDirectory)
-
-data ActionTrace = ActionTrace
-  { actions :: [Text]
-  , expected :: Text
-  }
-  deriving stock (Eq, Show, Generic)
-
-instance FromJSON ActionTrace
+import System.FilePath ((</>))
+import System.IO (hClose, openTempFile)
 
 main :: IO ()
 main = do
-  root <- projectRoot
-  setCurrentDirectory root
-  verifyCustody root
-  checkActionTrace root
-  checkStorageOracle root
-  checkAssetOracle root
-  checkQuotaOracle root
-  checkPartitionOracle root
-  checkReferenceModel
-  checkCalculus root
-  putStrLn "offline-browser-runtime-calculus: PASS (5 kinds, 50 projected units)"
-  putStrLn "offline-browser-runtime-spec: PASS (14 actions, 3 storage rows, 2 assets, 3 quota rows, 3 partition rows, 6 mutants)"
-
-checkActionTrace :: FilePath -> IO ()
-checkActionTrace root = do
-  bytes <- Lazy.readFile (root </> "test/golden/browser/encrypted_browser_runtime/action_trace.json")
-  trace <- either (die . ("action trace: " <>)) pure (eitherDecode bytes)
-  assertEqual "action trace outcome" "PASS" (expected trace)
-  assertEqual "action trace"
-    [ "derive-partition", "unlock", "queue", "inspect-ciphertext", "restart", "unlock", "recover"
-    , "claim-tab-a", "refuse-tab-b", "release-tab-a", "claim-tab-b", "upgrade-assets"
-    , "switch-partition", "quota-refusal"
-    ] (actions trace)
-
-checkStorageOracle :: FilePath -> IO ()
-checkStorageOracle root = do
-  rows <- loadWordsTable (root </> "test/golden/browser/encrypted_browser_runtime/storage_inventory.tbl")
-  assertEqual "storage inventory"
-    [ ["records", "partition/record", "ciphertext", "true"]
-    , ["metadata", "partition", "offline-auth-metadata", "true"]
-    , ["keys", "-", "none", "credential,refresh-token,private-plan"]
-    ] rows
-  assertEqual "prohibited fields" [] prohibitedPersistenceFields
-
-checkAssetOracle :: FilePath -> IO ()
-checkAssetOracle root = do
-  rows <- loadWordsTable (root </> "test/golden/browser/encrypted_browser_runtime/asset_manifest.tbl")
-  let assets = [Asset path digest (visibility == "public") (mutable == "false") | [path, digest, visibility, mutable] <- rows]
-  assertEqual "asset row count" 2 (length assets)
-  assertEqual "asset manifest" (Right assets) (admitAssetManifest assets)
-
-checkQuotaOracle :: FilePath -> IO ()
-checkQuotaOracle root = do
-  rows <- loadWordsTable (root </> "test/golden/browser/encrypted_browser_runtime/quota_outcomes.tbl")
-  assertEqual "quota oracle"
-    [ ["within-budget", "Stored", "true"]
-    , ["over-budget-independent", "RejectedQuota", "true"]
-    , ["over-budget-depended", "RejectedQuota", "true"]
-    ] rows
-  assertEqual "within quota" Stored (admitBytes 100 70 20 True)
-  assertEqual "independent quota" RejectedQuota (admitBytes 100 90 20 False)
-  assertEqual "depended quota" RejectedQuota (admitBytes 100 90 20 True)
-
-checkPartitionOracle :: FilePath -> IO ()
-checkPartitionOracle root = do
-  rows <- loadWordsTable (root </> "test/golden/browser/encrypted_browser_runtime/partition_access.tbl")
-  assertEqual "partition row count" 3 (length rows)
-  assertEqual "partition decisions" ["allow", "deny", "deny"] [decision | [_record, _requester, decision] <- rows]
-  let own = partitionKey "tenant-a" "alice" "device-1" "program-1" 1
-      otherSubject = partitionKey "tenant-a" "bob" "device-1" "program-1" 1
-      otherTenant = partitionKey "tenant-b" "alice" "device-1" "program-1" 1
-  assert (own /= otherSubject) "subject partition collision"
-  assert (own /= otherTenant) "tenant partition collision"
-
-checkReferenceModel :: IO ()
-checkReferenceModel = do
   let canary = "fresh-offline-canary"
       secret = Secret "local-unlock-secret"
       encrypted = sealRecord secret canary
       own = partitionKey "tenant-a" "alice" "device-1" "program-1" 1
-  assert (not (canary `isInfixOf` rawCiphertext encrypted)) "plaintext canary visible"
-  assertEqual "decrypt" (Just canary) (openRecord secret encrypted)
-  first <- either (die . show) pure (claimLeader own (TabId "tab-a") emptyLeaderState)
-  assertLeft "concurrent tab" (claimLeader own (TabId "tab-b") first)
-  second <- either (die . show) pure (claimLeader own (TabId "tab-b") (releaseLeader (TabId "tab-a") first))
-  assertEqual "single leader" [TabId "tab-b"] (leaderOwners second)
+      otherSubject = partitionKey "tenant-a" "bob" "device-1" "program-1" 1
+      otherTenant = partitionKey "tenant-b" "alice" "device-1" "program-1" 1
+      assets = [Asset "app.js" "sha256-js" True True, Asset "app.css" "sha256-css" True True]
+  assertEqual "ciphertext envelope" False (canary `isInfixOf` rawCiphertext encrypted)
+  assertEqual "credential persistence fields" [] prohibitedPersistenceFields
+  first <- requireRight "first owner" (claimLeader own (TabId "tab-a") emptyLeaderState)
+  assertLeft "concurrent owner refusal" (claimLeader own (TabId "tab-b") first)
+  second <- requireRight "replacement owner" (claimLeader own (TabId "tab-b") (releaseLeader (TabId "tab-a") first))
   assertEqual "fencing generation" (Generation 2) (leaderGeneration second)
+  assertEqual "dependency quota refusal" RejectedQuota (admitBytes 100 90 20 True)
+  assertEqual "tenant partition separation" True (own /= otherTenant)
+  assertEqual "projection fencing hook" True (all (isInfixOf "fenceGeneration" . snd) (filter ((`elem` ["web-locks.js", "broadcast-channel.js"]) . fst) renderRuntimeProjection))
+  assertEqual "decrypt" (Just canary) (openRecord secret encrypted)
+  assertEqual "single owner" [TabId "tab-b"] (leaderOwners second)
+  assertEqual "subject partition separation" True (own /= otherSubject)
+  assertEqual "actions" 14 (length Cases.actionNames)
+  assertEqual "storage rows" Reference.storageRows [("protected-record", "ciphertext", True), ("offline-auth-metadata", "partition-only", True), ("credentials", "absent", null prohibitedPersistenceFields)]
+  admitted <- requireRight "asset manifest" (admitAssetManifest assets)
+  assertEqual "asset rows" Reference.assetRows [(assetPath asset, "admitted") | asset <- admitted]
+  assertEqual "quota rows" Reference.quotaRows [("within-budget", show (admitBytes 100 70 20 True)), ("over-budget-independent", show (admitBytes 100 90 20 False)), ("over-budget-depended", show (admitBytes 100 90 20 True))]
+  assertEqual "access rows" Reference.accessRows [("own", "allow"), ("foreign-subject", if own == otherSubject then "allow" else "deny"), ("foreign-tenant", if own == otherTenant then "allow" else "deny")]
+  let initial = initialOfflineState own (Generation 2)
+  assertEqual "migration rows" Reference.migrationRows [("next-epoch", eitherShow (migrateState 2 initial)), ("skip-epoch", eitherShow (migrateState 3 initial)), ("regress", eitherShow (migrateState 1 initial))]
+  assertEqual "replay rows" Reference.replayRows [("ordered", eitherShow (recoverReplay own (Generation 2) [1,2] initial)), ("sequence-gap", eitherShow (recoverReplay own (Generation 2) [1,3] initial)), ("foreign-partition", eitherShow (recoverReplay otherTenant (Generation 2) [1] initial)), ("stale-fence", eitherShow (recoverReplay own (Generation 1) [1] initial))]
+  assertEqual "facility rows" Reference.facilityRows (map show supportedFacilities)
+  assertEqual "projection paths" Cases.projectionPaths (map fst renderRuntimeProjection)
+  checkProjectionMaterialization
+  checkCalculus
+  putStrLn "offline-browser-runtime-calculus: PASS (5 kinds, 69 projected units)"
+  putStrLn "offline-browser-runtime-spec: PASS (14 actions, 3 storage rows, 2 assets, 3 quota rows, 3 access rows, 3 migrations, 4 replay rows, 6 facilities, 7 mutants)"
 
-checkCalculus :: FilePath -> IO ()
-checkCalculus root = do
-  expectedRows <- loadWordsTable (root </> "test/oracle/encrypted_browser_runtime/calculus_projection.tsv")
+eitherShow :: Either problem value -> String
+eitherShow (Left _) = "deny"
+eitherShow (Right _) = "allow"
+
+checkProjectionMaterialization :: IO ()
+checkProjectionMaterialization = do
+  root <- getCurrentDirectory
+  let parent = root </> ".build/runs/phase-45/projected"
+  createDirectoryIfMissing True parent
+  (leaf, handle) <- openTempFile parent "runtime-"
+  hClose handle
+  removeFile leaf
+  let first = leaf <> "-a"; second = leaf <> "-b"
+  createDirectory first
+  createDirectory second
+  forM_ renderRuntimeProjection $ \(path, contents) -> do
+    writeFile (first </> path) contents
+    writeFile (second </> path) contents
+  firstRows <- mapM (readFile . (first </>) . fst) renderRuntimeProjection
+  secondRows <- mapM (readFile . (second </>) . fst) renderRuntimeProjection
+  assertEqual "deterministic runtime projection" firstRows secondRows
+  removeDirectoryRecursive first
+  removeDirectoryRecursive second
+
+checkCalculus :: IO ()
+checkCalculus = do
   tenant <- requireRight "calculus tenant" (CalculusScope.trustedTenant "offline-browser-calculus-tenant")
   subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "offline-browser-calculus-subject")
   membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
-  action <- requireRight "calculus request scope" $
-    CalculusScope.withRequestScope tenant subject membership $ \scope -> do
-      let resources count = ResourceVector 1 (fromIntegral count) 0 0
-          counts = [2, 3, 25, 14, 6] :: [Int]
-          artifact = artifactComponent scope "production-offline-artifacts" (resources 2)
-            (RecipeId "encrypted-browser-runtime" 2)
-          budget = budgetComponent scope "closed-offline-budget" (resources 3)
-            (allowance (Bytes 3) (Slots 1) (Bytes 3))
-          lift = liftComponent scope "browser-offline-corpus" (resources 25) OnHost
-          workflow = workflowComponent scope "fenced-tab-workflow" (resources 14) emptyLedger
-          evidence = evidenceComponent scope "mutant-evidence" (resources 6) PureRegister
-          composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
-          ResourceVector cpu memory ephemeral pods = compositionResource composition
-          render = Text.unpack . Text.intercalate ","
-          actual =
-            [ ["calculus-kinds", render (map calculusTag (compositionKinds composition))]
-            , ["component-names", render (compositionNames composition)]
-            , ["projection-counts", render (map (Text.pack . show) counts)]
-            , ["resource-vector", render (map (Text.pack . show) [cpu, memory, ephemeral, pods])]
-            ]
-      assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
-      assertEqual "offline browser calculus projection" expectedRows actual
+  action <- requireRight "calculus request scope" $ CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+    let resources count = ResourceVector 1 (fromIntegral (count :: Int)) 0 0
+        counts = [6, 7, 35, 14, 7] :: [Int]
+        artifact = artifactComponent scope "production-offline-artifacts" (resources 6) (RecipeId "encrypted-browser-runtime" 6)
+        budget = budgetComponent scope "closed-offline-budget" (resources 7) (allowance (Bytes 7) (Slots 1) (Bytes 7))
+        lift = liftComponent scope "browser-offline-corpus" (resources 35) OnHost
+        workflow = workflowComponent scope "fenced-tab-workflow" (resources 14) emptyLedger
+        evidence = evidenceComponent scope "mutant-evidence" (resources 7) PureRegister
+        composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+        ResourceVector cpu memory ephemeral pods = compositionResource composition
+        render = Text.unpack . Text.intercalate ","
+        actual =
+          [ ["calculus-kinds", render (map calculusTag (compositionKinds composition))]
+          , ["component-names", render (compositionNames composition)]
+          , ["projection-counts", render (map (Text.pack . show) counts)]
+          , ["resource-vector", render (map (Text.pack . show) [cpu, memory, ephemeral, pods])]
+          ]
+    assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
+    assertEqual "offline browser calculus projection" Cases.calculusRows actual
   action
 
-verifyCustody :: FilePath -> IO ()
-verifyCustody root = do
-  rows <- drop 1 . lines <$> readFile (root </> "test/oracle/preimplementation_artifacts.tsv")
-  let phaseRows = [fields | fields@(phase : _) <- map splitTabs rows, phase == "28"]
-  assertEqual "phase-0 custody" 11 (length phaseRows)
-  forM_ phaseRows $ \row -> case row of
-    (_phase : _kind : path : _) -> doesFileExist (root </> path) >>= flip assert ("missing " <> path)
-    _ -> die "bad Phase-28 custody row"
-
-loadWordsTable :: FilePath -> IO [[String]]
-loadWordsTable path = do
-  rows <- lines <$> readFile path
-  case rows of
-    [] -> die ("empty table: " <> path)
-    _header : body -> do
-      assert (not (null body)) ("table has no rows: " <> path)
-      pure (map words body)
-
-splitTabs :: String -> [String]
-splitTabs value = case break (== '\t') value of
-  (field, []) -> [field]
-  (field, _ : rest) -> field : splitTabs rest
-
-assertLeft :: String -> Either problem value -> IO ()
+assertLeft :: Show value => String -> Either problem value -> IO ()
 assertLeft _ (Left _) = pure ()
-assertLeft label (Right _) = die (label <> " unexpectedly succeeded")
+assertLeft label (Right value) = die (label <> ": expected Left, got Right " <> show value)
 
 requireRight :: Show problem => String -> Either problem value -> IO value
 requireRight label = either (die . ((label <> ": ") <>) . show) pure
 
-assert :: Bool -> String -> IO ()
-assert condition message = unless condition (die message)
-
 assertEqual :: (Eq value, Show value) => String -> value -> value -> IO ()
-assertEqual label wanted actual =
-  unless (wanted == actual) (die (label <> ": expected " <> show wanted <> ", got " <> show actual))
-
-projectRoot :: IO FilePath
-projectRoot = getCurrentDirectory >>= go
-  where
-    go path = do
-      found <- doesFileExist (path </> "cabal.project")
-      if found then pure path else
-        let parent = takeDirectory path
-        in if parent == path then die "encrypted-browser-runtime-root" else go parent
+assertEqual label expected actual = unless (expected == actual) (die (label <> ": expected " <> show expected <> ", got " <> show actual))

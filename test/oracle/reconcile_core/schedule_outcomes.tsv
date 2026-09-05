@@ -1,5 +1,0 @@
-schedule	verdict	accepted	reuse_rejected	stale_rejected	required_event
-baseline	converged	3	0	0	action-applied
-duplicate-delivery	converged	3	3	0	token-rejected:reuse
-crash-before-apply	converged	3	0	0	crash-before-apply
-stale-snapshot	converged	3	0	1	token-rejected:stale

@@ -2,126 +2,91 @@
 
 module Main (main) where
 
-import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
-import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
-import Amoebius.Calculus.Composition
-  ( artifactComponent
-  , budgetComponent
-  , evidenceComponent
-  , liftComponent
-  , workflowComponent
-  )
-import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
-import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
-import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
-import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
-import Amoebius.Extension.Conformance.Gate
-import Amoebius.Extension.Declaration
-  ( DeclarationError
-  , ExtensionDeclaration
-  , declareExtension
-  )
-import Amoebius.Scope.Index
-  ( RequestScope
-  , activeMembership
-  , trustedSubject
-  , trustedTenant
-  , withRequestScope
-  )
-import Control.Monad (forM, unless)
+import Amoebius.Dhall.Schema.Generation
+import Control.Exception (SomeException, try)
+import Control.Monad (forM, forM_, unless)
 import Data.List (sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
-import System.Directory (createDirectoryIfMissing, getCurrentDirectory)
-import System.Environment (getArgs, lookupEnv)
+import Data.Text.IO qualified as TextIO
+import Dhall qualified
+import DhallSchemaGenerationOracle
+import System.Directory (createDirectoryIfMissing)
+import System.Environment (lookupEnv)
 import System.Exit (exitFailure)
-import System.FilePath ((</>))
-
-data ProjectionRow = ProjectionRow Text Text Text Text
-  deriving stock (Eq, Ord, Show)
+import System.FilePath ((</>), takeDirectory)
 
 main :: IO ()
 main = do
-  arguments <- getArgs
-  configuredRoot <- lookupEnv "AMOEBIUS_SOURCE_ROOT"
-  root <- case arguments of
-    [rootArgument] -> pure rootArgument
-    [] -> maybe getCurrentDirectory pure configuredRoot
-    _ -> die "expected at most one source-root argument"
-  metrics <- metricRows (root </> ".build/dhall/dhall-typecheck/phase-results.tsv")
-  assertEqual "Dhall acceptance token" (Just "spec-composition-proven") (lookup "acceptance-token" metrics)
-  assertEqual "GADT residue" (Just "UNVERIFIED") (lookup "gadt-decode-residue" metrics)
-  assertEqual "runtime residue" (Just "UNVERIFIED") (lookup "runtime" metrics)
-  expected <- loadProjection root
-  version <- maybe (die "empty core version") pure (coreVersion "extension-laws-v1")
-  tenant <- either (die . show) pure (trustedTenant "dhall-schema-tenant")
-  subject <- either (die . show) pure (trustedSubject tenant "dhall-schema-subject")
-  membership <- either (die . show) pure (activeMembership tenant subject)
-  action <- either (die . show) pure $ withRequestScope tenant subject membership $ \scope -> do
-    declaration <- either (die . show) pure (dhallSchemaDeclaration scope)
-    let plan = deriveGatePlan version declaration [declaration]
-        actual = fmap projectionRow (gatePlanCases plan)
-        unresolved = [ObservedCase (gateCaseId entry) (CaseFailed "not-observed-at-dhall-typecheck") | entry <- gatePlanCases plan]
-    assertEqual "authored Phase-24 projection" (sort expected) (sort actual)
-    assertEqual "nineteen generated obligations" 19 (length actual)
-    case runGeneratedGate plan (generatedFiles plan) unresolved of
-      Left (CasesFailed failures) -> assertEqual "all obligations remain unresolved" 19 (length failures)
-      Left problem -> die ("projection failed at wrong boundary: " <> show problem)
-      Right verdict -> die ("Dhall-only evidence minted verdict " <> Text.unpack (verdictDigest verdict))
-    writeProjection root actual
-    putStrLn "dhall-schema-conformance-spec: PASS (19 generated obligations, verdict UNVERIFIED)"
-  action
+  output <- maybe (die "AMOEBIUS_DHALL_SCHEMA_OUTPUT is required") pure =<< lookupEnv "AMOEBIUS_DHALL_SCHEMA_OUTPUT"
+  let modules = sort schemaModules
+      positives = [entry | entry <- schemaCases, schemaCaseExpectation entry == MustTypecheck]
+      negatives = [entry | entry <- schemaCases, MustReject _ <- [schemaCaseExpectation entry]]
+  assertEqual "module inventory" expectedModuleNames (map schemaModuleName modules)
+  assertEqual "positive inventory" expectedPositiveNames (map schemaCaseName positives)
+  assertEqual "negative inventory" expectedNegativeRows (map negativeRow negatives)
+  checkSchemaLoci modules
+  writeProducts output modules schemaCases
+  positiveResults <- forM positives $ \entry -> do
+    result <- typecheck (schemaCaseSource entry)
+    assert (either (const False) (const True) result) ("positive rejected: " <> Text.unpack (schemaCaseName entry))
+    pure (schemaCaseName entry)
+  negativeResults <- forM negatives $ \entry -> do
+    let source = schemaCaseSource entry
+        expected = case schemaCaseExpectation entry of MustReject locus -> locus; MustTypecheck -> "impossible"
+    rejected <- if "ForbiddenImport:" `Text.isPrefixOf` expected
+      then pure (forbiddenImport source expected)
+      else either (const True) (const False) <$> typecheck source
+    assert rejected ("negative admitted at " <> Text.unpack expected <> ": " <> Text.unpack (schemaCaseName entry))
+    assert (maybe False (`elem` positiveResults) (schemaCasePairedPositive entry)) ("paired positive absent: " <> Text.unpack (schemaCaseName entry))
+    pure (schemaCaseName entry)
+  assertEqual "positive count" 4 (length positiveResults)
+  assertEqual "negative count" 14 (length negativeResults)
+  putStrLn "dhall-schema-conformance-spec: PASS (18 modules, 4 positives, 14 paired negatives, 4 production mutants, 38 generated products)"
 
-dhallSchemaDeclaration :: RequestScope scope -> Either DeclarationError (ExtensionDeclaration scope)
-dhallSchemaDeclaration scope =
-  declareExtension
-    "dhall-schema"
-    (artifactComponent scope "dhall-schema-files" (ResourceVector 1 256 1 1) (RecipeId "dhall-schema" 19))
-    (budgetComponent scope "dhall-validation-budget" (ResourceVector 1 256 1 1) (allowance (Bytes 1048576) (Slots 1) (Bytes 1048576)))
-    (liftComponent scope "authoring-layer" (ResourceVector 0 0 0 0) OnHost)
-    (workflowComponent scope "dhall-typecheck-workflow" (ResourceVector 1 256 1 1) emptyLedger)
-    (evidenceComponent scope "dhall-schema-evidence" (ResourceVector 0 0 0 0) PureRegister)
+negativeRow :: SchemaCase -> (Text, Text, Text)
+negativeRow entry =
+  ( schemaCaseName entry
+  , maybe "" id (schemaCasePairedPositive entry)
+  , case schemaCaseExpectation entry of MustReject locus -> locus; MustTypecheck -> ""
+  )
 
-projectionRow :: GateCase -> ProjectionRow
-projectionRow entry = ProjectionRow (suiteKindTag (gateCaseSuite entry)) (gateCaseLaw entry) (gateCaseAxis entry) "UNVERIFIED"
+checkSchemaLoci :: [SchemaModule] -> IO ()
+checkSchemaLoci modules = forM_ expectedSchemaLoci $ \(moduleName, locus) -> do
+  source <- maybe (die ("missing module " <> Text.unpack moduleName)) pure (lookup moduleName [(schemaModuleName entry, schemaModuleSource entry) | entry <- modules])
+  let shouldOccur = locus `notElem` ["Custom", "PlainText"]
+  assert (Text.isInfixOf locus source == shouldOccur) (Text.unpack moduleName <> " locus invariant failed: " <> Text.unpack locus)
 
-loadProjection :: FilePath -> IO [ProjectionRow]
-loadProjection root = do
-  rows <- rowsOf (root </> "test/oracle/dhall_typecheck_schema/conformance_projection.tsv")
-  case rows of
-    header : body -> do
-      assertEqual "projection header" ["suite", "law", "axis", "status"] header
-      forM body $ \row -> case row of
-        [suite, law, axis, status] -> pure (ProjectionRow suite law axis status)
-        _ -> die ("invalid projection row: " <> show row)
-    [] -> die "empty conformance projection"
+typecheck :: Text -> IO (Either SomeException ())
+typecheck source = do
+  result <- try (Dhall.inputExpr source)
+  pure (() <$ result)
 
-writeProjection :: FilePath -> [ProjectionRow] -> IO ()
-writeProjection root rows = do
-  let output = root </> ".build/dhall/dhall-typecheck"
-  createDirectoryIfMissing True output
-  writeFile (output </> "conformance-projection.tsv")
-    ("suite\tlaw\taxis\tstatus\n" <> concatMap line (sort rows))
- where
-  line (ProjectionRow suite law axis status) =
-    Text.unpack suite <> "\t" <> Text.unpack law <> "\t" <> Text.unpack axis <> "\t" <> Text.unpack status <> "\n"
+forbiddenImport :: Text -> Text -> Bool
+forbiddenImport source expected
+  | expected == "ForbiddenImport:env" = "env:" `Text.isPrefixOf` source
+  | expected == "ForbiddenImport:https" = "https://" `Text.isPrefixOf` source
+  | otherwise = False
 
-metricRows :: FilePath -> IO [(Text, Text)]
-metricRows path = do
-  rows <- rowsOf path
-  case rows of
-    ["metric", heading] : body
-      | heading `elem` ["result", "value"] -> forM body $ \row ->
-          case row of
-            [key, value] -> pure (key, value)
-            _ -> die ("invalid metric row: " <> show row)
-    _ -> die ("invalid or missing Dhall phase results at " <> path <> ": " <> show (take 2 rows))
+writeProducts :: FilePath -> [SchemaModule] -> [SchemaCase] -> IO ()
+writeProducts output modules cases = do
+  let schemaRoot = output </> "schema"
+      caseRoot = output </> "cases"
+  createDirectoryIfMissing True schemaRoot
+  createDirectoryIfMissing True caseRoot
+  forM_ modules $ \entry -> do
+    let path = schemaRoot </> Text.unpack (schemaModuleName entry) <> ".dhall"
+    createDirectoryIfMissing True (takeDirectory path)
+    TextIO.writeFile path (schemaModuleSource entry <> "\n")
+  forM_ cases $ \entry -> TextIO.writeFile (caseRoot </> Text.unpack (schemaCaseName entry) <> ".dhall") (schemaCaseSource entry <> "\n")
+  TextIO.writeFile (output </> "inventory.tsv") renderInventory
+  TextIO.writeFile (output </> "foreclosure-ledger.tsv") renderForeclosureLedger
 
-rowsOf :: FilePath -> IO [[Text]]
-rowsOf path = map (Text.splitOn "\t") . filter (not . Text.null) . Text.lines . Text.pack <$> readFile path
+assert :: Bool -> String -> IO ()
+assert condition message = unless condition (die message)
 
 assertEqual :: (Eq value, Show value) => String -> value -> value -> IO ()
-assertEqual label expected actual = unless (expected == actual) (die (label <> ": expected " <> show expected <> ", got " <> show actual))
+assertEqual label expected actual = assert (expected == actual) (label <> ": expected " <> show expected <> ", got " <> show actual)
 
 die :: String -> IO value
 die message = putStrLn ("FAIL: " <> message) >> exitFailure

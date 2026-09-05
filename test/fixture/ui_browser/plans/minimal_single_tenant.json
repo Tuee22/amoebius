@@ -1,1 +1,0 @@
-{"digest":"plan-single-v1","mode":"single-tenant","routes":["home","workflow"],"events":["edit","submit","cancel","open-docs"]}

@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -38,19 +38,17 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 17, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
+Phase 17 and every earlier gate have current passing receipts. The Phase-18 implementation and compiled
+semantic contract are bound below; completion still requires the exact integrated Phase-18 gate.
 
 > **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
 
 ## Phase Summary
 
-This phase specifies a Haskell target capability; it does not report a current implementation or
-result. The target is to project a bounded tranche of DSL decisions and concurrent protocols from
+This phase has a bound Haskell implementation but does not report a passing result until its complete gate
+runs. It projects a bounded tranche of DSL decisions and concurrent protocols from
 Haskell values into executable and formal-model readings, with every Dhall, TLA+, CFG, or rendered
 fixture product generated only beneath `.build/**`.
 
@@ -64,7 +62,7 @@ evidence contract remain UNRESOLVED and block validation.
 This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
 behavior only. It cannot use host, hardware, live-service, or cluster observations to make its claim pass.
 
-**Phase scope:** Target capability only — project a bounded tranche of DSL decisions and concurrent
+**Phase scope:** Bound capability — project a bounded tranche of DSL decisions and concurrent
 protocols from Haskell values into executable and formal-model readings, with every Dhall, TLA+,
 CFG, or rendered fixture product generated only beneath `.build/**`. NOT VALIDATED.
 
@@ -79,28 +77,30 @@ CFG, or rendered fixture product generated only beneath `.build/**`. NOT VALIDAT
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-18 semantic payload, package-hidden serial
+supervisor, pure production models and decision subjects, separately authored Haskell oracle, fixed offline
+JVM/TLC inputs, and three changed-production subjects are complete; only a fresh integrated run may authorize status.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — project a bounded tranche of DSL decisions and concurrent protocols from Haskell values into executable and formal-model readings, with every Dhall, TLA+, CFG, or rendered fixture product generated only beneath `.build/**`. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 18` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 17; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | Six Haskell `Model` values cover the bounded projection, token, reservation, Lease, reconcile, and five-calculus claims; explorer and TLC agree for the five transition-bearing DSL models. |
+| `Subject` | `Amoebius.Formal.Dsl.Models`, the Phase-9 capacity fold, three protocol decision modules, and the calculus projection are acquired only through package-hidden `DslFormalModelRun.Internal`. |
+| `Command` | Future public spelling is `pb validate phase 18`; before `BOOTSTRAP_HANDOFF`, the exact source-bound Haskell executable invokes absolute Cabal 3.16.1.0 and GHC 9.12.4 directly, offline and serially, with digest-pinned Java 21.0.9/TLA+ 1.8.0. |
+| `Oracle` | `DslFormalModelOracle.hs` separately declares exact model structure, state totals, capacity domain, calculus facts, and mutation catalogue without reading production renderings. |
+| `Positive controls` | Six exact model contracts, 18 explorer states, five explorer/TLC fingerprint equalities, 6,561 capacity pairs, eight calculus facts, and three actual protocol decisions pass. |
+| `Paired negatives` | Overcommit/admitted capacity pairs, token first/second consumption, unreachable/present reconciliation, eight exact safety mutants, and four fairness deletions all distinguish their intended boundary. |
+| `Mutants` | Three Cabal flags change production projection count, token reuse, and unreachable deletion; each fresh build must fail at its exact independent oracle locus before the clean row. |
+| `Discovery` | The closed five-production/three-oracle Haskell source set is joined bidirectionally to the captured source snapshot. |
+| `Challenge` | The three changed-production builds are post-acquisition challenges and must each fail while the clean subject passes. |
+| `Observer` | Exact process argv, exits, stdout/stderr digests, generated-product inventory, and source snapshots are captured outside the test subject. |
+| `Authority/bypass` | No `pb`, network, host, hardware, or live service is admitted; only absolute Cabal, GHC, JVM, and TLC paths run, with compiler and TLC workers fixed to one. |
+| `Freshness` | One unique `.build/runs/phase-18/work/candidate-*` root is created after acquisition; opening and closing source identities must match. |
+| `Qualification` | Exact toolchain digests, all three production mutants, the independent oracle, paired negatives, discovery, containment, and legacy absence must pass before the clean result can qualify. |
+| `Cleanroom` | All TLA/CFG/DOT/log/result products are created beneath the fresh run root; the authenticated network-independent source-package cache is copied into that root. |
+| `Legacy closure` | The Python Phase-18 gate and four serialized behavioral oracle files are absent and independently enumerated. |
+| `Predecessor` | Exact durable Phase-17 receipt for the current evolutionary source lineage; absent, stale, replayed, or wrong-phase evidence refuses execution. |
+| `Residue` | Runtime/effect fidelity remains UNVERIFIED; decoder and provision/render/chain projections remain assigned to Phases 26, 31, 33, and 34. |
+| `Pass criterion` | Every one of these 18 rows must be execution-derived green in one qualified run for the exact source snapshot. |
 
 ## Doctrine adopted
 
@@ -114,15 +114,15 @@ CFG, or rendered fixture product generated only beneath `.build/**`. NOT VALIDAT
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 18.1: Actual bounded DSL projections ⏸️
+## Sprint 18.1: Actual bounded DSL projections ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/capacity-topology/Amoebius/Capacity/Fold.hs`, `test/harness/deterministic_simulation/CalculusProjection.hs`, and the capacity/calculus sections of `DslFormalModelSpec.hs`
 **Blocked by**: [Phase 17](phase_17_gateway_migration_model.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: exhaustive componentwise reference subtraction over all 6,561 pairs and eight exact five-calculus facts
+**Oracle**: `DslFormalModelOracle.hs` plus the independently constructed `referenceCalculusProjection`
+**Legacy IDs**: none; retired serialized Phase-18 oracles are checked absent directly
+**Docs to update**: this phase file, `formal_model_doctrine.md`, `dsl_doctrine.md`, and `system_components.md`
 
 ### Objective
 
@@ -156,15 +156,15 @@ The pre-reset record said `None`; that statement cannot support a gate pass. Cur
 carried as obligations on Phases 26 and 34 rather than as residue here, because this phase no longer claims
 them.
 
-## Sprint 18.2: Protocol models and correspondence ⏸️
+## Sprint 18.2: Protocol models and correspondence ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/Formal/Dsl/Models.hs`, `Manifest/Authority.hs`, `Scheduler/Reservation.hs`, `Cluster/NodeProvisioner.hs`, and `DslFormalModelSpec.hs`
 **Blocked by**: Sprint 18.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: exact 18-state structure plus actual one-use token, reservation, and unreachable/present decision pairs
+**Oracle**: `DslFormalModelOracle.hs` owns exact model/action/invariant/property expectations
+**Legacy IDs**: none; no serialized protocol result is admitted
+**Docs to update**: this phase file, `formal_model_doctrine.md`, `dsl_doctrine.md`, and `cluster_lifecycle_doctrine.md`
 
 ### Objective
 
@@ -187,15 +187,15 @@ code correspondence explicitly bounded.
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 18.3: Explorer, TLC, mutation, and gate ⏸️
+## Sprint 18.3: Explorer, TLC, mutation, and gate ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `DslFormalModelSpec.hs`, `DslFormalModelOracle.hs`, and package-hidden `DslFormalModelRun.Internal`
 **Blocked by**: Sprint 18.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: five explorer/TLC fingerprint comparisons, eight exact safety mutants, four fairness deletions, and three compiled production mutants
+**Oracle**: Haskell model/capacity/calculus expectations and supervisor-bound exact failure loci
+**Legacy IDs**: none; five retired Phase-18 behavioral files are enumerated and checked absent
+**Docs to update**: this phase file, `formal_model_doctrine.md`, `dsl_doctrine.md`, `cluster_lifecycle_doctrine.md`, and `system_components.md`
 
 ### Objective
 

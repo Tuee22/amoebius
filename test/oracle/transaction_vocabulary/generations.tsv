@@ -1,6 +1,0 @@
-case	from	to	verdict	retained	added	clause_kind
-generation-1-to-2	1	2	admitted	document	job	create-table
-generation-2-to-3	2	3	admitted	document,job	release	create-table
-generation-2-to-1	2	1	generation-regression	—	—	—
-generation-1-to-3	1	3	generation-skipped	—	—	—
-generation-3-to-3	3	3	generation-current	—	—	—

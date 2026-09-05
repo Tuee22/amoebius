@@ -481,6 +481,13 @@ GADT-indexed state machines, ownership indices, content-address totality, the ca
 topology relations over a collection) are owned in full by
 [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) — do not look for them restated here.
 
+The bounded formal bridge does not pull later DSL artifacts forward. Phase 18 compares the Phase-9 capacity
+fold against separately authored componentwise subtraction over the complete `0..2` four-axis domain and
+projects the already available five-calculus composition into the shared formal model. Its token,
+reservation, Lease, and reconcile models cover temporal protocol obligations, not decoder totality or live
+runtime behavior. `decodeCluster`, `provision`, `renderAll`, and `chain` acquire their own correspondence
+evidence only in the phases that own those artifacts.
+
 ### dhall-typecheck — the Dhall typechecker
 
 Dhall is a *total*, strongly-normalizing, side-effect-free configuration language. An expression that does
@@ -495,7 +502,20 @@ Its oracle is an separately authored Haskell classification of the required clos
 types, and diagnostics. Missing generated cases, a no-op typecheck, or a retained tracked `.dhall` copy must
 make the gate fail.
 
+The bounded Phase-25 implementation is
+`src/dhall-schema-generation/Amoebius/Dhall/Schema/Generation.hs`. It owns eighteen Haskell-declared module
+projections, four representative positives, fourteen paired structural/import refusals, and four
+changed-production projection mutations. The in-process `dhall-1.42.3` engine observes the generated cases;
+the separately authored Haskell oracle owns names, pairs, and loci. This establishes only Gate-1 shape.
+Binding, indexed decode, arithmetic feasibility, effects, and runtime enforcement remain later-owned.
+
 ### gadt-decode — the Haskell typed decoder
+
+The bounded Phase-26 implementation is `Amoebius.Dsl.GadtDecode`: Haskell owns the protocol-field table,
+controller-indexed execution GADT, resource-arm refinement, tenant/owner check, closed secret-reference sum,
+and total file/in-memory decoder. Its independent Haskell oracle declares five positive controller values and
+twelve structured refusals. Dhall cases, the protocol projection, and the inventory are generated only beneath
+the unique `.build/runs/phase-26/**` root; tracked Proto and serialized decoder authorities are forbidden.
 
 A well-typed Dhall value still has to become a Haskell value before the chain ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)) can use it. The
 local `amoebius.dhall` `FrameConfig` is decoded from the sibling file; the uploaded `InForceSpec` is
@@ -516,6 +536,14 @@ The gadt-decode gate must exercise the production decoder against separately aut
 negative classifications, and compile-fail pairs. It must prove that each negative reaches the intended
 constructor after a valid generated Dhall precondition, and that no normalized byte snapshot or legacy
 Python gate decides the result.
+
+Phase 27 closes the bounded catalogue relation around these two gates. The production Haskell catalogue
+contains 121 named subcases across all 97 reader-facing entries; its independent Haskell oracle fixes the
+catalogue digest and exact Phase-9 two-way join. Seven structural pairs, thirteen decode pairs, and five
+indexed compiler-refusal pairs exercise the 43 currently reached rows. Four covered QuickCheck properties
+remain `TESTED (sampled)`, while only the exhausted three-arm `Rke2Servers` domain is `PROVEN`. The generated
+catalogue and locus ledger explicitly defer the other 78 rows to their fold, render, or live-effect owners;
+none is promoted by this Register-1 gate.
 
 ### extension-astcheck — the extension AST checker
 

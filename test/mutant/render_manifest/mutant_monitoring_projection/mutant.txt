@@ -1,1 +1,0 @@
-Alter an observability resource field; resource-projection must turn red.

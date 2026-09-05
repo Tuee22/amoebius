@@ -15,7 +15,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, documents/engineering/jit_budget_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_artifact_calculus.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, documents/engineering/jit_budget_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -37,27 +37,23 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 3, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+The complete Phase-3 gate is recorded for the same source identity before this phase may run. The phase remains
+Active until its complete integrated gate authorizes the mechanical status projection.
 
 ## Phase Summary
 
-This phase specifies a Haskell target capability; it does not report a current implementation or
-result. The target is to represent storage authority, concurrency, admission, and reaping as one
-typed Haskell budget calculus in which no allocation lacks a prior bound.
+This phase implements storage authority, concurrency, admission, and reaping as one typed Haskell budget
+calculus in which no allocation lacks a prior bound. A package-hidden supervisor builds the independent Haskell
+oracle and five changed-production subjects and compiles both constructor/reaper pairs serially.
 
 The production subject, behavioral controls, independent oracle, fixtures, and mutants must be authored as
 `.hs`. Except for the `pb/**` bootstrap, no non-`.hs` behavioral source, fixture, oracle, or mutant may be
 tracked. Any foreign representation, rendered specification, compiler transcript, suite manifest, generated
 code, or other derived product must be created lazily beneath `.build/**` and remain run-scoped evidence only.
-`pb` may only make the minimal platform distinction, establish the contained toolchain, build the source-bound binary, and exec that exact Haskell verdict binary with argv unchanged; that entry point and its independent
-evidence contract remain UNRESOLVED and block validation.
+`pb` is not used by this pre-`BOOTSTRAP_HANDOFF` gate. The source-bound Haskell dispatcher invokes the
+authenticated compiler directly and synchronously.
 
 This phase precedes Phase 49 and is confined to pure, build, compiler, or model-level Register-1
 behavior only. It cannot use host, hardware, live-service, or cluster observations to make its claim pass.
@@ -77,28 +73,30 @@ NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-4 semantic payload, package-hidden serial
+supervisor, independent Haskell relation, paired compile negatives, and changed-production matrix are complete;
+only a fresh integrated run may authorize status.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — represent storage authority, concurrency, admission, and reaping as one typed Haskell budget calculus in which no allocation lacks a prior bound. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 04` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 03; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | The finite issuer, paired ceiling/concurrency allowance, pre-write admission, staging store, and reaper-bearing retention grant satisfy one source-bound budget calculus contract. |
+| `Subject` | `Amoebius.Calculus.Budget.{Grant,Admission,Store,Retention}` is acquired only through package-hidden `Amoebius.Validation.BudgetCalculusRun.Internal`. |
+| `Command` | Future public spelling is `pb validate phase 04`; before `BOOTSTRAP_HANDOFF`, the exact absolute Haskell executable and authenticated GHC 9.12.4 compiler run directly, synchronously, and without `-j`. |
+| `Oracle` | `test/spec/calculus/BudgetCalculusSpec.hs` contains the separately authored 24-row admission relation and observes only public production interfaces. |
+| `Positive controls` | All ten clean predicates pass, clean refusal leaves both store images identical, and both legal compile twins succeed. |
+| `Paired negatives` | A forged grant is refused because hidden constructors are not in scope; reaper omission is refused by the exact `Reaper` function/result mismatch. |
+| `Mutants` | Partial-write, unbounded-default, dropped-concurrency, exposed-constructor, and omitted-reaper selectors each change production and are killed by their assigned exact observation. |
+| `Discovery` | The four budget modules, Haskell oracle, and four compile twins are discovered from the Git snapshot and equal the fixed inventory bidirectionally. |
+| `Challenge` | All five changed-production subjects execute after acquisition and must be distinguished at their assigned locus. |
+| `Observer` | The supervisor records absolute executable, exact argv, exit, transcript digest, and bounded failure text for every compiler and oracle process. |
+| `Authority/bypass` | `pb`, network, hardware, live services, compiler substitution, and compiler/linker overlap are forbidden. |
+| `Freshness` | Every run creates a fresh `.build/runs/phase-04/work/**` root and the dispatcher requires equal opening/closing source identities. |
+| `Qualification` | Clean controls, exact negatives, and all five mutants pass together; any survivor or wrong-locus failure refuses. |
+| `Cleanroom` | Every binary, interface, object, stub, and transcript is generated lazily beneath the fresh run root. |
+| `Legacy closure` | Phase 4 owns no legacy-debt identifier; all non-circular prerequisites must pass while later-owned source debt remains residue. |
+| `Predecessor` | Consume exactly one durable Phase-3 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Residue` | Calculus composition, actual free-space observation, effects, runtimes, hardware, and live services remain explicitly later-owned. |
+| `Pass criterion` | `qualified-phase-four-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 ## Doctrine adopted
 
@@ -106,17 +104,17 @@ NOT VALIDATED.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+The sprint seam is bound to the same Haskell-only subject, oracle, and serial supervisor as the gate.
 
-## Sprint 4.1: The budget calculus ⏸️
+## Sprint 4.1: The budget calculus ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/Calculus/Budget/{Grant,Admission,Store,Retention}.hs`; package-hidden supervisor `src/validation-kernel/Amoebius/Validation/BudgetCalculusRun/Internal.hs`
 **Blocked by**: [Phase 3](phase_03_artifact_calculus.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: ten clean predicates and identical refusal store images; exact constructor/reaper compile negatives; five assigned changed-production mutants; composition and live free-space remain residue
+**Oracle**: `test/spec/calculus/BudgetCalculusSpec.hs`, separately authored against public calculus modules with its 24-row expectation relation in Haskell
+**Legacy IDs**: none; later-owned tracked-source debt remains in the typed central registry
+**Docs to update**: this phase file, `DEVELOPMENT_PLAN/README.md`, and `documents/engineering/jit_budget_doctrine.md`
 
 ### Objective
 
@@ -159,9 +157,10 @@ fails for a parse error, an unbound name, or a missing import satisfies none of 
 
 ### Remaining Work
 
-The pre-reset `None` claim is permanently invalid; the phase remains blocked and NOT VALIDATED. Whether a composition's grant is the sum of its parts' is C5's claim over the lift
-calculus, which is the next phase's, and is recorded `UNVERIFIED` here; nothing in this register observes a
-running system, so the substrate's actual free space remains the live-effect observation
+The implementation and phase-local evidence contract are complete. The phase remains Active until the exact
+Phase-3 receipt is refreshed for the final source and the integrated Phase-4 gate passes. Whether a
+composition's grant is the sum of its parts is C5's later claim; nothing here observes a running system, so
+the substrate's actual free space remains the live-effect observation
 [`jit_budget_doctrine.md` §7](../documents/engineering/jit_budget_doctrine.md#7-the-residue) says it is.
 
 ## Documentation Requirements

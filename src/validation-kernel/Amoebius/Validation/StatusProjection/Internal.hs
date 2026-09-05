@@ -15,9 +15,11 @@ module Amoebius.Validation.StatusProjection.Internal (
     JournalCutpoint (..),
     StatusTarget (..),
     authorizeStatusProjection,
+    prepareValidationProjection,
     prepareStatusProjection,
     projectionDigest,
     projectionPhase,
+    projectionIsReceiptRefresh,
     projectionPostimageDigest,
     projectionPreimageDigest,
     projectionTargets,
@@ -33,6 +35,7 @@ module Amoebius.Validation.StatusProjection.Internal (
     statusProjectionInternalTestRecoveryRebind,
     statusProjectionInternalTestMixedPhases,
     statusProjectionInternalTestPrepare,
+    statusProjectionInternalTestPrepareRefresh,
     statusProjectionInternalTestRecoveryStates,
     statusProjectionInternalTestWritePlan,
 ) where
@@ -46,6 +49,7 @@ import Amoebius.Validation.GatePass.Internal (
     verifiedPassSourceDigest,
  )
 import Amoebius.Validation.PhaseContract.Internal (
+    checkPhaseContracts,
     checkPhaseContractsAfterPass,
  )
 import Amoebius.Validation.PhaseIdentity qualified as PhaseIdentity
@@ -324,6 +328,13 @@ newtype AppliedStatusProjection
 projectionPhase :: ProposedStatusProjection -> Int
 projectionPhase = proposedPhase
 
+-- | A refresh has an identity source projection and no tracked status target.
+-- Only this module constructs proposals, so callers cannot forge this mode.
+projectionIsReceiptRefresh :: ProposedStatusProjection -> Bool
+projectionIsReceiptRefresh projection =
+    null (proposedEdits projection)
+        && proposedPreimageDigest projection == proposedPostimageDigest projection
+
 projectionPreimageDigest :: ProposedStatusProjection -> Text
 projectionPreimageDigest = proposedPreimageDigest
 
@@ -520,6 +531,90 @@ prepareStatusProjection ::
     Either [Finding] ProposedStatusProjection
 prepareStatusProjection phase =
     prepareStatusProjectionFromSnapshot phase . acquiredSourceSnapshot
+
+-- | Prepare either the ordinary one-step frontier transition for an Active
+-- phase or the empty identity projection used to refresh evidence for a phase
+-- that is already Done. The acquired phase document selects the mode; a
+-- caller cannot request refresh as a way around an Active transition.
+prepareValidationProjection ::
+    Int ->
+    AcquiredSourceSnapshot ->
+    Either [Finding] ProposedStatusProjection
+prepareValidationProjection phase acquired = do
+    identity <-
+        maybe
+            (Left [projectionFinding "STATUS-PROJECTION-PHASE" "<phase>" "the validation phase has no typed identity"])
+            Right
+            (PhaseIdentity.lookupPhaseIdentity phase)
+    let snapshot = acquiredSourceSnapshot acquired
+        path = PhaseIdentity.phaseIdentityPath identity
+        byteMap =
+            Map.fromList
+                [ (indexPath (trackedIndex entry), trackedBytes entry)
+                | entry <- snapshotEntries snapshot
+                ]
+    contents <- requiredBytes path byteMap >>= decodeStatusText path
+    case () of
+        _ | exactlyOneLine "🔄 Active — NOT VALIDATED." contents -> prepareStatusProjection phase acquired
+          | exactlyOneLine "✅ Done." contents -> prepareRevalidationProjection phase snapshot
+          | otherwise ->
+              Left
+                [ projectionFinding
+                    "STATUS-PROJECTION-VALIDATION-MODE"
+                    path
+                    "the phase must contain exactly one canonical Active or Done status line"
+                ]
+
+prepareRevalidationProjection :: Int -> SourceSnapshot -> Either [Finding] ProposedStatusProjection
+prepareRevalidationProjection =
+    prepareRevalidationProjectionWith $ \entries -> do
+        documents <- markdownDocuments entries
+        case checkFindings (checkPhaseContracts documents) of
+            [] -> pure ()
+            findings -> Left findings
+
+prepareRevalidationProjectionWith ::
+    ([TrackedEntry] -> Either [Finding] ()) ->
+    Int ->
+    SourceSnapshot ->
+    Either [Finding] ProposedStatusProjection
+prepareRevalidationProjectionWith contractCheck phase snapshot = do
+    contractCheck (snapshotEntries snapshot)
+    identity <-
+        maybe
+            (Left [projectionFinding "STATUS-PROJECTION-PHASE" "<phase>" "the refresh phase has no typed identity"])
+            Right
+            (PhaseIdentity.lookupPhaseIdentity phase)
+    let path = PhaseIdentity.phaseIdentityPath identity
+        byteMap =
+            Map.fromList
+                [ (indexPath (trackedIndex entry), trackedBytes entry)
+                | entry <- snapshotEntries snapshot
+                ]
+    phaseText <- requiredBytes path byteMap >>= decodeStatusText path
+    unless
+        (exactlyOneLine "✅ Done." phaseText)
+        ( Left
+            [ projectionFinding
+                "STATUS-PROJECTION-REFRESH-STATUS"
+                path
+                "receipt refresh is available only for an already-Done phase"
+            ]
+        )
+    let unsigned =
+            ProposedStatusProjection
+                { proposedPhase = phase
+                , proposedRoot = snapshotRoot snapshot
+                , proposedPreimageDigest = snapshotIdentity snapshot
+                , proposedPostimageDigest = snapshotIdentity snapshot
+                , proposedDigest = ""
+                , proposedEdits = []
+                , proposedFiles = []
+                }
+    Right (unsigned{proposedDigest = projectionHash unsigned})
+
+exactlyOneLine :: Text -> Text -> Bool
+exactlyOneLine wanted = (== 1) . length . filter (== wanted) . Text.lines
 
 prepareStatusProjectionFromSnapshot ::
     Int ->
@@ -1252,6 +1347,18 @@ statusProjectionInternalTestPrepare phase snapshot = do
         [ (projectionFilePath item, projectionFileBefore item, projectionFileAfter item)
         | item <- proposedFiles projection
         ]
+
+statusProjectionInternalTestPrepareRefresh ::
+    Int ->
+    SourceSnapshot ->
+    Either [Finding] ([StatusTarget], Text, Text)
+statusProjectionInternalTestPrepareRefresh phase snapshot = do
+    projection <- prepareRevalidationProjectionWith (const (Right ())) phase snapshot
+    Right
+        ( projectionTargets projection
+        , projectionPreimageDigest projection
+        , projectionPostimageDigest projection
+        )
 
 statusProjectionInternalTestMixedPhases :: SourceSnapshot -> [Int]
 statusProjectionInternalTestMixedPhases snapshot =

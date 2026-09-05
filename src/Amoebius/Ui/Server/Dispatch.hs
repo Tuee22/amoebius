@@ -32,6 +32,10 @@ module Amoebius.Ui.Server.Dispatch
   , admitServerPlan
   , authorizeAndDispatch
   , parseBoundaryMutant
+  , compiledBoundaryMutant
+  , securityHeadersFor
+  , assetVisible
+  , retryIdempotencyKey
   , publicResponse
   , unavailableResponse
   ) where
@@ -46,7 +50,9 @@ import Amoebius.Ui.Server.RequestContext
   , credentialPermission
   )
 import Amoebius.Ui.Server.Security
+import Amoebius.Ui.Server.SecurityHeaders (productionSecurityHeaders)
 import Data.Text (Text)
+import Data.Text qualified
 
 data DispatchTrace = DispatchTrace
   { handlerEffects :: Int
@@ -97,6 +103,41 @@ data BoundaryMutant
   | ServeServerPlanAsClientAsset
   | NewIdempotencyKeyOnRetry
   deriving stock (Bounded, Enum, Eq, Show)
+
+compiledBoundaryMutant :: BoundaryMutant
+#if defined(UI_SERVER_TRUST_TENANT_HEADER_MUTANT)
+compiledBoundaryMutant = TrustTenantHeader
+#elif defined(UI_SERVER_DISPATCH_BEFORE_AUTHORIZE_MUTANT)
+compiledBoundaryMutant = DispatchBeforeAuthorize
+#elif defined(UI_SERVER_SKIP_CURRENT_EPOCH_MUTANT)
+compiledBoundaryMutant = SkipCurrentEpoch
+#elif defined(UI_SERVER_DISABLE_ORIGIN_CHECK_MUTANT)
+compiledBoundaryMutant = DisableOriginCheck
+#elif defined(UI_SERVER_DROP_CSP_HEADER_MUTANT)
+compiledBoundaryMutant = DropCspHeader
+#elif defined(UI_SERVER_READY_UNRESOLVED_HANDLER_MUTANT)
+compiledBoundaryMutant = ReadyWithUnresolvedHandler
+#elif defined(UI_SERVER_FIRST_HANDLER_WINS_MUTANT)
+compiledBoundaryMutant = ServerFirstHandlerWins
+#elif defined(UI_SERVER_SERVE_PRIVATE_PLAN_MUTANT)
+compiledBoundaryMutant = ServeServerPlanAsClientAsset
+#elif defined(UI_SERVER_NEW_RETRY_KEY_MUTANT)
+compiledBoundaryMutant = NewIdempotencyKeyOnRetry
+#else
+compiledBoundaryMutant = NoBoundaryMutant
+#endif
+
+securityHeadersFor :: BoundaryMutant -> [(Text, Text)]
+securityHeadersFor DropCspHeader = filter ((/= "Content-Security-Policy") . fst) productionSecurityHeaders
+securityHeadersFor _ = productionSecurityHeaders
+
+assetVisible :: BoundaryMutant -> Text -> Bool
+assetVisible ServeServerPlanAsClientAsset "/ui/server-plan" = True
+assetVisible _ path = path `elem` ["/", "/index.html", "/ui.js", "/ui.css", "/ui/client-plan"]
+
+retryIdempotencyKey :: BoundaryMutant -> Text -> Int -> Text
+retryIdempotencyKey NewIdempotencyKeyOnRetry key attempt = key <> "-" <> Data.Text.pack (show attempt)
+retryIdempotencyKey _ key _ = key
 
 -- | Why the worker refused to become ready. Startup refusals are pre-readiness by
 -- construction: an HTTP error from an already-serving worker is a different, weaker claim.

@@ -1480,7 +1480,7 @@ expectedControlFlow =
 expectedStaticClaims :: Text
 expectedStaticClaims =
   Text.intercalate
-    "\n"
+    "\\n"
     [ "argv|sys.argv[1:]|arguments|binary"
     , "binary|exe:amoebius|0.2.6.2|9.12.4|3.16.1.0|contained cabal list-bin|os.execv through BootstrapAdapter.handoff"
     , "injection|bootstrap|adapter|arguments|main|if __name__ == \"__main__\": main()"

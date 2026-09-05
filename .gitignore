@@ -10,10 +10,6 @@
 /.data/
 /.test_data/
 
-# Pre-containment migration surfaces; remove these rules with their legacy paths.
-/gen/
-/DEVELOPMENT_PLAN/evidence/
-/test/enumeration/
 /test/golden/phase_*_ledger.json
 
 # Dependency resolution is refreshed dynamically and never committed.

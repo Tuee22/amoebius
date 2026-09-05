@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -166,11 +167,17 @@ mkTopology engine supply = case checkCompatibility engine supply of
 
 mkRke2Topology :: ServerQuorum -> [Node] -> [Node] -> Either TopologyError Topology
 mkRke2Topology _ servers agents =
+#if defined(CAPACITY_RKE2_DUPLICATE_HOST_MUTANT)
+  case NonEmpty.nonEmpty (servers <> agents) of
+    Nothing -> Left EmptyRke2Topology
+    Just nodes -> mkTopology Rke2Engine (FixedSupply nodes)
+#else
   case duplicateHost (servers <> agents) of
     Just host -> Left (DuplicateHostId host)
     Nothing -> case NonEmpty.nonEmpty (servers <> agents) of
       Nothing -> Left EmptyRke2Topology
       Just nodes -> mkTopology Rke2Engine (FixedSupply nodes)
+#endif
 
 checkCompatibility :: ComputeEngine -> NodeSupply -> [IncompatibleEntry]
 checkCompatibility engine supply =
@@ -193,6 +200,9 @@ checkCompatibility engine supply =
            ]
 
 engineAcceptsEnvironment :: ComputeEngine -> HostEnvironment -> Bool
+#if defined(CAPACITY_COMPATIBILITY_ADMIT_ALL_MUTANT)
+engineAcceptsEnvironment _ _ = True
+#else
 engineAcceptsEnvironment engine environment = case (engine, environment) of
   (KindEngine, NativeLinux) -> True
   (KindEngine, VirtualizedLinux) -> True
@@ -200,6 +210,7 @@ engineAcceptsEnvironment engine environment = case (engine, environment) of
   (Rke2Engine, VirtualizedLinux) -> True
   (ManagedEksEngine, ManagedAws) -> True
   _ -> False
+#endif
 
 duplicateHost :: [Node] -> Maybe Text
 duplicateHost = go Set.empty

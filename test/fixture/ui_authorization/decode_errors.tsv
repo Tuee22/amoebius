@@ -1,5 +1,0 @@
-case	error
-missing-action	MissingAction
-extra-action	UnexpectedAction
-duplicate-action	DuplicateAction
-permission-swap	ProjectionMismatch

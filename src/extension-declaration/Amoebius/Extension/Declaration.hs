@@ -211,7 +211,12 @@ declarationResource :: ExtensionDeclaration scope -> ResourceVector
 declarationResource = compositionResource . declarationComposition
 
 declarationArtifactSet :: ExtensionDeclaration scope -> Set DeclaredComponent
+#ifdef EXTENSION_DECLARATION_OMIT_DECLARED_RECIPE_MUTANT
+-- Seeded defect: the production artifact reader silently drops its component.
+declarationArtifactSet _ = Set.empty
+#else
 declarationArtifactSet = setFor ArtifactCalculus
+#endif
 
 declarationBudgetSet :: ExtensionDeclaration scope -> Set DeclaredComponent
 declarationBudgetSet = setFor BudgetCalculus

@@ -16,7 +16,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -38,7 +38,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+✅ Done.
 
 Blocked by redesigned Phase 15, its independent validation, and gate pass; every earlier
 gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
@@ -78,28 +78,30 @@ NOT VALIDATED.
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED. The compiled Phase-16 semantic payload, package-hidden serial
+supervisor, ten-module production substrate, independently authored Haskell oracle, and three
+changed-production subjects are complete; only a fresh integrated run may authorize status.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target capability only — execute one polymorphic Haskell reconcile program under deterministic modeled effects and fault schedules while making no claim of live-substrate fidelity. NOT VALIDATED. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 16` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: stable owned legacy IDs and their exact zero-finding check have not been reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 15; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | One polymorphic Haskell reconcile program runs under injected real-client and deterministic `IOSim` interpreters across six modeled boundaries and four fault schedules. |
+| `Subject` | The ten `Amoebius.Sim` modules are acquired only through package-hidden `Amoebius.Validation.DeterministicSimulationRun.Internal`. |
+| `Command` | Future public spelling is `pb validate phase 16`; before `BOOTSTRAP_HANDOFF`, the exact source-bound Haskell executable invokes absolute Cabal 3.16.1.0 and authenticated GHC 9.12.4 directly, offline, and with `--jobs=1`. |
+| `Oracle` | `SimSpec.hs`, `FaultContracts.hs`, and `CalculusProjection.hs` independently author schedules, outcomes, fake contracts, and the Phase-10 composition projection as Haskell values. |
+| `Positive controls` | Both interpreters uphold the reference invariant; six fake contracts, four schedules, the five-calculus projection, same-seed replay, and four bounded POR checks pass. |
+| `Paired negatives` | Enabled/disabled fake knobs, same/different seed traces, and partition-heal/stale-action behavior establish minimally different semantic boundaries. |
+| `Mutants` | Dropped-partition handling, ignored schedule seed, and bypassed fault coverage are CPP-selected changed production subjects and turn red at exact loci. |
+| `Discovery` | The ten production modules and three Haskell oracle modules equal the fixed thirteen-file inventory bidirectionally. |
+| `Challenge` | All three production mutations run before the clean candidate and must be distinguished at `NoActOnStaleRead`, trace sensitivity, and fault-axis coverage. |
+| `Observer` | The supervisor records absolute executable, argv, exit, stdout/stderr, and transcript digest for Cabal version, mutant, and clean processes. |
+| `Authority/bypass` | `pb`, PATH tool discovery, network, host/hardware/live-service effects, external credentials, and compiler/linker overlap are forbidden; this phase owns no external resource provision. |
+| `Freshness` | Every run creates a fresh `.build/runs/phase-16/work/**` root and requires equal opening/closing source identities. |
+| `Qualification` | The three exact mutant deaths, closed source inventory, source discipline, oracle controls, and legacy closure qualify the harness before the clean candidate is accepted. |
+| `Cleanroom` | Cabal products, foreign-source cache copies, logs, and transcripts stay below the fresh run root; the shared package store is only an offline contained input. |
+| `Legacy closure` | The Python gate, JSON schedules, TSV expectations/locus/surfaces, and materialized Haskell mutant are absent. |
+| `Predecessor` | Consume exactly one durable Phase-15 receipt for this opening source; absent, stale, replayed, malformed, or ambiguous receipts refuse. |
+| `Residue` | Modeled-environment fidelity remains `ASSUMED`; concrete model claims, runtime correspondence, host behavior, hardware, and live substrate remain later-owned. |
+| `Pass criterion` | `qualified-phase-sixteen-gate-pass`: all eighteen rows are execution-derived green in one stable-source candidate with exact predecessor and empty mandatory residue. |
 
 ## Doctrine adopted
 
@@ -112,15 +114,15 @@ NOT VALIDATED.
 
 > **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
 
-## Sprint 16.1: Polymorphic environment and interpreters ⏸️
+## Sprint 16.1: Polymorphic environment and interpreters ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: `src/Amoebius/Sim/{Env,Interp/Real,Interp/Sim,Reconcile}.hs` and the six modules under `src/Amoebius/Sim/Fakes/`
 **Blocked by**: [Phase 15](phase_15_compile_fail_harness.md) gate pass
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: one reference program green under injected `IO` clients and `IOSim`; exact ten-module polymorphism scan
+**Oracle**: `test/spec/sim/SimSpec.hs` and `test/spec/sim/FaultContracts.hs`
+**Legacy IDs**: none; retired non-Haskell behavioral sources are checked absent directly
+**Docs to update**: this phase file, `deterministic_simulation_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
 
 ### Objective
 
@@ -143,15 +145,15 @@ Keep concurrency-bearing reconcile code independent of the interpreter used to e
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 16.2: Modeled contracts and semantic schedules ⏸️
+## Sprint 16.2: Modeled contracts and semantic schedules ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: the six typed fake modules, Haskell `scheduleCorpus`, and `test/harness/deterministic_simulation/CalculusProjection.hs`
 **Blocked by**: Sprint 16.1
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: four authored schedule outcomes, enabled/disabled fault pairs, and five exact composition facts
+**Oracle**: the independently authored Haskell values in `SimSpec.hs`, `FaultContracts.hs`, and `CalculusProjection.hs`
+**Legacy IDs**: none; JSON/TSV behavioral authorities are retired and checked absent
+**Docs to update**: this phase file, `deterministic_simulation_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
 
 ### Objective
 
@@ -176,15 +178,15 @@ implementation snapshots.
 
 The pre-reset record said `None`; that statement cannot support a gate pass. Current remaining work includes every `UNRESOLVED`/`MISSING` contract row, predecessor gate pass, owned legacy closure, and phase-specific obligation in the redesigned gate.
 
-## Sprint 16.3: Determinism, exploration, and mutation ⏸️
+## Sprint 16.3: Determinism, exploration, and mutation ✅
 
-**Status**: Blocked — NOT VALIDATED
-**Implementation**: UNRESOLVED — blocks validation: exact authored Haskell implementation paths have not been bound to this sprint.
+**Status**: Done
+**Implementation**: CPP mutant loci in `Amoebius.Sim.{Reconcile,Interp.Sim}` and package-hidden `DeterministicSimulationRun.Internal`
 **Blocked by**: Sprint 16.2
-**Independent Validation**: UNRESOLVED — blocks validation: independent positive, paired-negative, changed-subject mutant, and residue observations have not been bound to this sprint.
-**Oracle**: UNRESOLVED — blocks validation: a separately authored Haskell oracle, and its provenance have not been bound to this sprint.
-**Legacy IDs**: UNRESOLVED — blocks validation: this sprint has not been joined to exact typed Haskell legacy-inventory IDs.
-**Docs to update**: UNRESOLVED — blocks validation: the governed documentation owners and exact update set have not been checked for this sprint.
+**Independent Validation**: same-seed byte equality, changed-seed inequality, four bounded POR runs, and three exact production-mutant deaths
+**Oracle**: the Haskell simulation oracle; the supervisor independently pins mutant flags and red loci
+**Legacy IDs**: none; Python gate, TSV surface registry, and materialized mutant are checked absent
+**Docs to update**: this phase file, `deterministic_simulation_doctrine.md`, `testing_doctrine.md`, and `system_components.md`
 
 ### Objective
 

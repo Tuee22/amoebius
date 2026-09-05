@@ -1,6 +1,0 @@
-case	step	authority	action	input	expected_state
-single	1	own	start	fresh-challenge	progress
-single	2	own	observe	-	ready
-single	3	own	use-artifact	-	result:fresh-challenge
-multi	1	tenant-a/start	start	fresh-challenge	progress
-multi	2	tenant-b/foreign	use-artifact	copied-handle	denied

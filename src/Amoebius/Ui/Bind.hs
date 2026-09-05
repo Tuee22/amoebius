@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Bind
@@ -270,6 +271,12 @@ parsePortEffectTarget value = case value of
   "UploadBounded" -> Right PortUploadBounded
   "UseReadyArtifact" -> Right PortUseReadyArtifact
   _
+#ifdef UI_EFFECT_RAW_TOPIC_MUTANT
+    | any (`Text.isPrefixOf` value) ["pulsar://", "topic:"] -> Right PortSubscribe
+#endif
+#ifdef UI_EFFECT_LINK_AS_URL_MUTANT
+    | any (`Text.isPrefixOf` value) ["https://", "http://", "link:"] -> Right PortReadData
+#endif
     | any (`Text.isPrefixOf` value) ["pulsar://", "topic:", "sql:", "bucket:", "vault:"] ->
         Left (ProviderCoordinateForbidden value)
     | any (`Text.isPrefixOf` value) ["https://", "http://", "link:"] ->
@@ -375,17 +382,27 @@ bindPort
 bindPort handlers capabilities port = do
   checkBounded port
   handler <- selectHandler port handlers
+#ifndef UI_EFFECT_SWAP_RESPONSE_MUTANT
   if handlerResponse handler /= requiredResponse port
     then Left (ContractMismatch (requiredPort port))
     else Right ()
+#endif
+#ifndef UI_EFFECT_ERASE_SCOPE_MUTANT
   if handlerScope handler /= requiredScope port
     then Left (ScopeMismatch (requiredPort port))
     else Right ()
+#endif
+#ifndef UI_EFFECT_RETRY_MUTANT
   if requiresIdempotency (requiredEffect port) && handlerRetry handler /= IdempotentRetry
     then Left (IdempotencyRequired (requiredPort port))
     else Right ()
+#endif
+#ifdef UI_EFFECT_DROP_CAPABILITY_MUTANT
+  let capability = Map.findWithDefault SqlRead (handlerId handler) capabilities
+#else
   capability <- maybe (Left (MissingCapability (handlerId handler))) Right
     (Map.lookup (handlerId handler) capabilities)
+#endif
   pure BoundPortProjection
     { boundPort = requiredPort port
     , boundHandler = handlerId handler
@@ -442,7 +459,11 @@ selectHandler :: PortRequirement -> [HandlerSpec] -> Either UiBindError HandlerS
 selectHandler port handlers = case filter ((== requiredRequest port) . handlerRequest) handlers of
   [] -> Left (MissingHandler (requiredPort port))
   [handler] -> Right handler
+#ifdef UI_EFFECT_FIRST_HANDLER_MUTANT
+  first : _ -> Right first
+#else
   _first : second : _ -> Left (DuplicateHandler (handlerId second))
+#endif
 
 checkBounded :: PortRequirement -> Either UiBindError ()
 checkBounded port = case requiredEffect port of

@@ -1,2 +1,0 @@
-operator=freshness-guard-deletion
-expected=stale request reaches the handler
