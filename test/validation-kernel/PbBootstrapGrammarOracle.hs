@@ -531,7 +531,7 @@ selectorRegistryIntegrityProblems =
 selectorIndependentControlProblems :: [String]
 selectorIndependentControlProblems =
   concat
-    [ expectEqual "selector control keeps oracle-local fixture size" 4770 (ByteString.length canonicalBytes)
+    [ expectEqual "selector control keeps oracle-local fixture size" 4795 (ByteString.length canonicalBytes)
     , expectEqual "selector control keeps oracle-local fixture SHA-256" expectedSha256 (sha256Hex canonicalBytes)
     , expectEqual "selector control keeps SHA-256 abc vector" "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" (sha256Hex "abc")
     ]
@@ -651,16 +651,16 @@ selectorTargetProblems target
         target
         (hardExpected [(canonicalPath, canonicalMode, shortBytes)]
           [preflightFinding "PB-GRAMMAR-BYTE-COUNT-EXACT"
-            "expected exactly 4770 bytes; observed 4769"])
+            "expected exactly 4795 bytes; observed 4794"])
         (runDiagnostic shortBytes)
   | target == overByteIdentityCaseLabel =
       expectExact
         target
         (hardExpected [(canonicalPath, canonicalMode, overByteBytes)]
           [ preflightFinding "PB-GRAMMAR-RESOURCE-LIMIT"
-              "source-bytes exceeds the 4770 bound; observed 4771"
+              "source-bytes exceeds the 4795 bound; observed 4796"
           , preflightFinding "PB-GRAMMAR-BYTE-COUNT-EXACT"
-              "expected exactly 4770 bytes; observed 4771"
+              "expected exactly 4795 bytes; observed 4796"
           ])
         (runDiagnostic overByteBytes)
   | target == changedIdentityCaseLabel =
@@ -691,7 +691,7 @@ selectorTargetProblems target
 fixtureIntegrityProblems :: [String]
 fixtureIntegrityProblems =
   concat
-    [ expectEqual "local fixture byte count" 4770 (ByteString.length canonicalBytes)
+    [ expectEqual "local fixture byte count" 4795 (ByteString.length canonicalBytes)
     , expectEqual "local fixture SHA-256" expectedSha256 (sha256Hex canonicalBytes)
     , expectEqual
         "local fixture resource metrics"
@@ -709,7 +709,7 @@ fixtureIntegrityProblems =
     , concatMap verifyGrammarFixture grammarCases
     , expectEqual
         "problem-boundary fixtures remain exact-size and independently literal"
-        ((4770, 46, 64), (4770, 47, 65))
+        ((4795, 46, 64), (4795, 47, 65))
         ( ( ByteString.length problemBoundaryBytes
           , unsupportedImportCount problemBoundaryBytes
           , modeledMinimalProgramProblemCount problemBoundaryBytes
@@ -783,15 +783,15 @@ identityProblems =
         "one byte under the exact byte count refuses before semantic parsing"
         (hardExpected [(canonicalPath, canonicalMode, shortBytes)]
           [preflightFinding "PB-GRAMMAR-BYTE-COUNT-EXACT"
-            "expected exactly 4770 bytes; observed 4769"])
+            "expected exactly 4795 bytes; observed 4794"])
         (runDiagnostic shortBytes)
     , expectExact
         "one byte over the byte resource bound and exact size both remain visible"
         (hardExpected [(canonicalPath, canonicalMode, overByteBytes)]
           [ preflightFinding "PB-GRAMMAR-RESOURCE-LIMIT"
-              "source-bytes exceeds the 4770 bound; observed 4771"
+              "source-bytes exceeds the 4795 bound; observed 4796"
           , preflightFinding "PB-GRAMMAR-BYTE-COUNT-EXACT"
-              "expected exactly 4770 bytes; observed 4771"
+              "expected exactly 4795 bytes; observed 4796"
           ])
         (runDiagnostic overByteBytes)
     , expectExact
@@ -1423,7 +1423,7 @@ verifyGrammarFixture item =
   concat
     [ expectEqual
         (grammarLabel item <> " keeps the exact preflight byte count")
-        4770
+        4795
         (ByteString.length (grammarBytes item))
     , expectEqual
         (grammarLabel item <> " changes at least one local wire byte")
@@ -1443,7 +1443,7 @@ canonicalProofObservations :: [Observation]
 canonicalProofObservations =
   [ Observation "proof.subject.path" canonicalPathText
   , Observation "proof.subject.mode" canonicalMode
-  , Observation "proof.subject.bytes" "4770"
+  , Observation "proof.subject.bytes" "4795"
   , Observation "proof.subject.sha256" expectedSha256
   , Observation "proof.expected.sha256" expectedSha256
   ]
@@ -1575,7 +1575,7 @@ preflightObservations inventory =
   , Observation "limit.input-files" "1"
   , Observation "expected.path" canonicalPathText
   , Observation "expected.mode" canonicalMode
-  , Observation "expected.bytes" "4770"
+  , Observation "expected.bytes" "4795"
   , Observation "expected.sha256" expectedSha256
   ]
     <> case (boundedLength 2 inventory, take 1 inventory) of
@@ -1586,7 +1586,7 @@ preflightObservations inventory =
         ]
           <> [Observation "input.path" (Text.pack path) | boundedLength 1025 path <= 1024]
           <> [Observation "input.mode" mode | Text.length mode <= 6]
-          <> if ByteString.length bytes <= 4770
+          <> if ByteString.length bytes <= 4795
             then
               [Observation "input.sha256" (sha256Hex bytes)]
                 <> metricObservations (measure bytes)
@@ -1607,7 +1607,7 @@ data Metrics = Metrics
   deriving (Eq, Show)
 
 canonicalMetrics :: Metrics
-canonicalMetrics = Metrics 4770 90 389 839 4 72 25 28 0
+canonicalMetrics = Metrics 4795 90 392 843 4 72 25 28 0
 
 metricObservations :: Metrics -> [Observation]
 metricObservations metrics =
@@ -1620,7 +1620,7 @@ metricObservations metrics =
   , Observation "resource.effect-markers" (decimal (metricEffects metrics))
   , Observation "resource.control-flow-markers" (decimal (metricControlFlow metrics))
   , Observation "resource.problem-markers" (decimal (metricProblems metrics))
-  , Observation "limit.source-bytes" "4770"
+  , Observation "limit.source-bytes" "4795"
   , Observation "limit.path-characters" "1024"
   , Observation "limit.mode-characters" "6"
   , Observation "limit.physical-lines" "128"
@@ -1648,65 +1648,65 @@ resourceBoundaryFixtures =
   [ ResourceBoundary
       "physical lines"
       astBoundaryBytes
-      (Metrics 4770 128 128 128 0 0 0 0 0)
+      (Metrics 4795 128 128 128 0 0 0 0 0)
       astOverBytes
-      (Metrics 4770 129 129 129 0 0 0 0 0)
+      (Metrics 4795 129 129 129 0 0 0 0 0)
       [resourceFinding "physical-lines" 128 129]
   , ResourceBoundary
       "AST nodes"
       astNodeBoundaryBytes
-      (Metrics 4770 1 512 512 0 0 0 0 0)
+      (Metrics 4795 1 512 512 0 0 0 0 0)
       astNodeOverBytes
-      (Metrics 4770 1 513 513 0 0 0 0 0)
+      (Metrics 4795 1 513 513 0 0 0 0 0)
       [resourceFinding "ast-nodes" 512 513]
   , ResourceBoundary
       "lexical tokens"
       tokenBoundaryBytes
-      (Metrics 4770 1 1 1024 0 0 0 0 0)
+      (Metrics 4795 1 1 1024 0 0 0 0 0)
       tokenOverBytes
-      (Metrics 4770 1 1 1025 0 0 0 0 0)
+      (Metrics 4795 1 1 1025 0 0 0 0 0)
       [resourceFinding "lexical-tokens" 1024 1025]
   , ResourceBoundary
       "syntax depth"
       depthBoundaryBytes
-      (Metrics 4770 1 17 33 16 16 0 0 0)
+      (Metrics 4795 1 17 33 16 16 0 0 0)
       depthOverBytes
-      (Metrics 4770 1 18 35 17 17 0 0 0)
+      (Metrics 4795 1 18 35 17 17 0 0 0)
       [resourceFinding "syntax-depth" 16 17]
   , ResourceBoundary
       "indentation depth"
       indentationBoundaryBytes
-      (Metrics 4770 1 1 1 16 0 0 0 0)
+      (Metrics 4795 1 1 1 16 0 0 0 0)
       indentationOverBytes
-      (Metrics 4770 1 1 1 17 0 0 0 0)
+      (Metrics 4795 1 1 1 17 0 0 0 0)
       [resourceFinding "syntax-depth" 16 17]
   , ResourceBoundary
       "call markers"
       callBoundaryBytes
-      (Metrics 4770 1 257 513 2 128 0 0 0)
+      (Metrics 4795 1 257 513 2 128 0 0 0)
       callOverBytes
-      (Metrics 4770 1 259 517 2 129 0 0 0)
+      (Metrics 4795 1 259 517 2 129 0 0 0)
       [resourceFinding "resolved-call-markers" 128 129]
   , ResourceBoundary
       "effect markers"
       effectBoundaryBytes
-      (Metrics 4770 64 128 192 1 64 64 0 0)
+      (Metrics 4795 64 128 192 1 64 64 0 0)
       effectOverBytes
-      (Metrics 4770 65 130 195 1 65 65 0 0)
+      (Metrics 4795 65 130 195 1 65 65 0 0)
       [resourceFinding "potential-effect-markers" 64 65]
   , ResourceBoundary
       "control-flow markers"
       controlBoundaryBytes
-      (Metrics 4770 33 49 113 1 16 0 32 0)
+      (Metrics 4795 33 49 113 1 16 0 32 0)
       controlOverBytes
-      (Metrics 4770 34 51 118 1 17 0 33 0)
+      (Metrics 4795 34 51 118 1 17 0 33 0)
       [resourceFinding "control-flow-markers" 32 33]
   , ResourceBoundary
       "problem markers"
       problemMarkerBoundaryBytes
-      (Metrics 4770 1 1 65 0 0 0 0 64)
+      (Metrics 4795 1 1 65 0 0 0 0 64)
       problemMarkerOverBytes
-      (Metrics 4770 1 1 66 0 0 0 0 65)
+      (Metrics 4795 1 1 66 0 0 0 0 65)
       [resourceFinding "problem-markers" 64 65]
   ]
 
@@ -1723,7 +1723,7 @@ verifyBoundaryFixture boundary =
         (measure (boundaryOverBytes boundary))
     , expectEqual
         (boundaryLabel boundary <> " exact-size controls")
-        (4770, 4770)
+        (4795, 4795)
         ( ByteString.length (boundaryExactBytes boundary)
         , ByteString.length (boundaryOverBytes boundary)
         )
@@ -1955,17 +1955,17 @@ modeledMinimalProgramProblemCount bytes = unsupportedImportCount bytes + 18
 
 exactSize :: ByteString -> ByteString
 exactSize bytes
-  | ByteString.length bytes > 4770 = ByteString.take 4770 bytes
+  | ByteString.length bytes > 4795 = ByteString.take 4795 bytes
   | otherwise = case ByteString.unsnoc bytes of
-      Nothing -> ByteString8.replicate 4769 ' ' <> "\n"
+      Nothing -> ByteString8.replicate 4794 ' ' <> "\n"
       Just (prefix, finalByte)
         | finalByte == 10 ->
             prefix
-              <> ByteString8.replicate (4770 - ByteString.length bytes) ' '
+              <> ByteString8.replicate (4795 - ByteString.length bytes) ' '
               <> "\n"
         | otherwise ->
             bytes
-              <> ByteString8.replicate (4769 - ByteString.length bytes) ' '
+              <> ByteString8.replicate (4794 - ByteString.length bytes) ' '
               <> "\n"
 
 measure :: ByteString -> Metrics
@@ -2150,7 +2150,7 @@ twoFileInventory =
   ]
 
 shortBytes, overByteBytes, changedButLexicalBytes :: ByteString
-shortBytes = ByteString.take 4769 canonicalBytes
+shortBytes = ByteString.take 4794 canonicalBytes
 overByteBytes = canonicalBytes <> "#"
 changedButLexicalBytes = replaceFirstByte 35 canonicalBytes
 
@@ -2161,7 +2161,7 @@ canonicalPathText, canonicalMode, expectedSha256, diagnosticName :: Text
 canonicalPathText = "pb/__main__.py"
 canonicalMode = "100644"
 expectedSha256 =
-  "e210494d3ad4bcaad716daed5bb89cb5611107547e83eb018a6369e134cd5418"
+  "c82b525dd47e831338598d495ce5ed5ee8eb87333cf1607e8b91807b5f6a162c"
 diagnosticName = "pb-bootstrap-grammar-diagnostic"
 
 diagnosticSubject :: FilePath
@@ -2401,7 +2401,7 @@ canonicalBytes =
     , "    cabal = toolchain / \".ghcup\" / \"bin\" / (\"cabal\" + artifact[4])"
     , "    builddir = toolchain / \"dist-newstyle\""
     , "    store = toolchain / \"cabal-store\""
-    , "    adapter.run(root, [str(cabal), \"--store-dir=\" + str(store), \"build\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), BUILD_TARGET], environment)"
+    , "    adapter.run(root, [str(cabal), \"--store-dir=\" + str(store), \"build\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), \"--offline\", \"--jobs=1\", BUILD_TARGET], environment)"
     , "    binary_bytes = adapter.capture(root, [str(cabal), \"--store-dir=\" + str(store), \"list-bin\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), BUILD_TARGET], environment)"
     , "    binary_text = binary_bytes.decode(\"utf-8\")"
     , "    binary = binary_text.strip()"

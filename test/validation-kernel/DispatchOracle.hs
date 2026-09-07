@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module DispatchOracle
-  ( dispatchSelectorNames
+  ( dispatchSelectorAssignments
+  , dispatchSelectorNames
   , runDispatchOracle
   , runDispatchSelectorOracle
   ) where
@@ -82,6 +83,10 @@ dispatchSelectorIntents =
 
 dispatchSelectorNames :: [String]
 dispatchSelectorNames = [selector | (selector, _, _) <- dispatchSelectorIntents]
+
+dispatchSelectorAssignments :: [(String, [String], String)]
+dispatchSelectorAssignments =
+  [(selector, [target], "PolicyContractOracle") | (selector, _, target) <- dispatchSelectorIntents]
 
 runDispatchOracle :: IO ()
 runDispatchOracle = do

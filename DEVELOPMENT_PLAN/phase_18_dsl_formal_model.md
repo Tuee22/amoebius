@@ -77,6 +77,12 @@ CFG, or rendered fixture product generated only beneath `.build/**`. NOT VALIDAT
 
 ## Gate integrity
 
+The admitted model-check runtime is shared with Phase 17: Temurin 21.0.9+10 x86_64 Linux JRE
+`bin/java` SHA-256 `e865867065e48928c58293f30e7ae26a79c842f8607fa51d7e2e9fb90b602786` and TLA+ 1.8.0
+calver `2026.09.04.170753` jar SHA-256
+`b658b4e504fdf0b721caf7066320f6b6fe5805f4dd2f717d0e47baba4097205e`. Both are ignored local-custody
+inputs and both exact digests are rechecked by the Haskell supervisor.
+
 **Contract check**: BOUND — NOT VALIDATED. The compiled Phase-18 semantic payload, package-hidden serial
 supervisor, pure production models and decision subjects, separately authored Haskell oracle, fixed offline
 JVM/TLC inputs, and three changed-production subjects are complete; only a fresh integrated run may authorize status.

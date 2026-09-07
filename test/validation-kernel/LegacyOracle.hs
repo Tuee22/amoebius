@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module LegacyOracle
@@ -14,6 +15,9 @@ module LegacyOracle
 -- public facade and performs no ambient I/O.
 
 import Amoebius.Validation.Legacy (legacyDiagnostic)
+#if defined(VALIDATION_LEGACY_INTERNAL_SELECTOR_QUALIFICATION)
+import Amoebius.Validation.Legacy.Internal qualified as LegacyInternal
+#endif
 import Amoebius.Validation.Types (CheckResult (..), Finding (..), Observation (..))
 import Control.Monad (unless)
 import Crypto.Hash qualified as Crypto
@@ -1102,9 +1106,6 @@ legacySelectorIntents =
   , ("VALIDATION_LEGACY_INTERNAL_TRANSITION_UNRECORDED_CODE_MUTANT", "Legacy Internal transition unrecorded code locus", "canonical legacy wire")
   , ("VALIDATION_LEGACY_INTERNAL_TRANSITION_UNRECORDED_DETAIL_MUTANT", "Legacy Internal transition unrecorded detail locus", "canonical legacy wire")
   , ("VALIDATION_LEGACY_INTERNAL_TRANSITION_UNRECORDED_SUBJECT_MUTANT", "Legacy Internal transition unrecorded subject locus", "canonical legacy wire")
-  , ("VALIDATION_LEGACY_INTERNAL_UNIMPLEMENTED_LATER_UNAVAILABLE_MUTANT", "Legacy Internal unimplemented later unavailable locus", "canonical legacy wire")
-  , ("VALIDATION_LEGACY_INTERNAL_UNIMPLEMENTED_OWNER_PREDICATE_BYPASS_MUTANT", "Legacy Internal unimplemented owner predicate bypass locus", "canonical legacy wire")
-  , ("VALIDATION_LEGACY_INTERNAL_UNIMPLEMENTED_REFUSAL_DETAIL_MUTANT", "Legacy Internal unimplemented refusal detail locus", "canonical legacy wire")
   , ("VALIDATION_LEGACY_INTERNAL_UNIVERSE_LTD_DOC001_DROP_MUTANT", "Legacy Internal universe LTD doc001 drop locus", "canonical legacy wire")
   , ("VALIDATION_LEGACY_INTERNAL_UNIVERSE_LTD_HOST001_DROP_MUTANT", "Legacy Internal universe LTD host001 drop locus", "canonical legacy wire")
   , ("VALIDATION_LEGACY_INTERNAL_UNIVERSE_LTD_HOST002_DROP_MUTANT", "Legacy Internal universe LTD host002 drop locus", "canonical legacy wire")
@@ -1410,17 +1411,69 @@ runLegacyOracle = do
 runLegacySelectorOracle :: String -> IO ()
 runLegacySelectorOracle selector = do
   caseProblems <- case literalIntegrityProblems of
-    [] | null unaffectedControlProblems && null (selectorProductControlProblems selector) -> case selectorIntentCases selector of
-      [(requirement, candidate)] -> runAssignedExactCase selector requirement candidate
-      candidates -> pure
-        [ "selector intent is not exactly resolvable: selector="
-            <> selector <> "; exact-case-count=" <> show (length candidates)
-        ]
+    [] | null unaffectedControlProblems && null (selectorProductControlProblems selector) ->
+      runAssignedSelectorCase selector
     _ -> pure []
   let problems = literalIntegrityProblems <> unaffectedControlProblems
         <> selectorProductControlProblems selector <> caseProblems
   unless (null problems)
     (fail (unlines ("LegacyOracle selector diagnostics failed:" : map ("  " <>) problems)))
+
+runAssignedSelectorCase :: String -> IO [String]
+#if defined(VALIDATION_LEGACY_INTERNAL_SELECTOR_QUALIFICATION)
+runAssignedSelectorCase selector
+  | selector `elem` bootstrapBindingSelectors = runBootstrapBindingCase selector
+  | otherwise = runAssignedPublicCase selector
+#else
+runAssignedSelectorCase = runAssignedPublicCase
+#endif
+
+runAssignedPublicCase :: String -> IO [String]
+runAssignedPublicCase selector = case selectorIntentCases selector of
+  [(requirement, candidate)] -> runAssignedExactCase selector requirement candidate
+  candidates -> pure
+    [ "selector intent is not exactly resolvable: selector="
+        <> selector <> "; exact-case-count=" <> show (length candidates)
+    ]
+
+#if defined(VALIDATION_LEGACY_INTERNAL_SELECTOR_QUALIFICATION)
+bootstrapBindingSelectors :: [String]
+bootstrapBindingSelectors =
+  [ "VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_ANALYZER_MUTANT"
+  , "VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_CLOSURE_MUTANT"
+  , "VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_OBSERVATION_MUTANT"
+  , "VALIDATION_LEGACY_INTERNAL_RENDER_LTD_BOOT001_REINTRODUCTION_MUTANT"
+  , "VALIDATION_LEGACY_LTD_BOOT001_ANALYZER_MUTANT"
+  , "VALIDATION_LEGACY_LTD_BOOT001_CLOSURE_MUTANT"
+  , "VALIDATION_LEGACY_LTD_BOOT001_DISPOSITION_MUTANT"
+  , "VALIDATION_LEGACY_LTD_BOOT001_ID_MUTANT"
+  , "VALIDATION_LEGACY_LTD_BOOT001_OBSERVATION_MUTANT"
+  , "VALIDATION_LEGACY_LTD_BOOT001_OWNER_MUTANT"
+  , "VALIDATION_LEGACY_LTD_BOOT001_REINTRODUCTION_MUTANT"
+  ]
+
+runBootstrapBindingCase :: String -> IO [String]
+runBootstrapBindingCase selector =
+  pure $ case reverse LegacyInternal.legacyRawDiagnosticBindings of
+    actual : _ ->
+      [ "selector=" <> selector
+          <> "; assigned-production-locus=LTD-BOOT-001 internal rendered binding changed:\nexpected="
+          <> show bootstrapRenderedBinding <> "\nactual=" <> show actual
+      | actual /= bootstrapRenderedBinding
+      ]
+    [] -> ["selector=" <> selector <> "; internal rendered binding inventory is empty"]
+
+bootstrapRenderedBinding :: RawBinding
+bootstrapRenderedBinding =
+  ( "LTD-BOOT-001"
+  , "Active"
+  , "01"
+  , "bootstrap-toolchain"
+  , "bootstrap-toolchain-provenance"
+  , "bootstrap-toolchain"
+  , ["reject-unverified-bootstrap-toolchain"]
+  )
+#endif
 
 runLegacyUnaffectedControl :: IO ()
 runLegacyUnaffectedControl =
@@ -1514,8 +1567,8 @@ sequenceDifferences label expected actual =
 
 literalIntegrityProblems :: [String]
 literalIntegrityProblems =
-  [ "selector intent cardinality changed: expected=1320; observed=" <> show (length legacySelectorIntents)
-  | length legacySelectorIntents /= 1320
+  [ "selector intent cardinality changed: expected=1317; observed=" <> show (length legacySelectorIntents)
+  | length legacySelectorIntents /= 1317
   ]
     <> ["duplicate selector intent: " <> value | value <- duplicateStrings legacySelectorNames]
     <> ["duplicate atomic requirement: " <> value | value <- duplicateStrings requirements]

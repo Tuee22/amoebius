@@ -1,15 +1,16 @@
 # Phase 44: Hardware-free Haskell UI composition
-
 > **Purpose**: Compose external/untracked low-code shapes through the Haskell client semantics, UI-server
 > boundary, and fake domain ports, modeling authorization and tenant-scope plans without browser or hardware.
 > **Read this if**: phase 44 is next in the queue, or a later phase depends on what its gate establishes.
+
+This contract owns the hardware-free composition of client plans, server authorization, and fake domain ports.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, documents/engineering/app_vs_deployment_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, documents/engineering/app_vs_deployment_doctrine.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>

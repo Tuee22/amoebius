@@ -348,10 +348,10 @@ inherits the universal postcondition above.
 | 44 | Hardware-free Haskell UI composition | none | `none` | 2 | ✅ Done | [Contract](phase_44_ui_local_composition.md) |
 | 45 | Haskell offline-state semantics and runtime projection | none | `none` | 1 | ✅ Done | [Contract](phase_45_encrypted_browser_runtime.md) |
 | 46 | Haskell-generated browser contracts and bundle | none | `none` | 1 | ✅ Done | [Contract](phase_46_ui_contract_generation.md) |
-| 47 | Foreign-source generator closure, checking tools, and mutants | none | `none` | 1 | 🔄 Active — NOT VALIDATED | [Contract](phase_47_tool_and_mutant_generation.md) |
-| 48 | The test-workflow algebra | none | `none` | 1 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_48_test_workflow_algebra.md) |
-| 49 | No-hardware DSL gate barrier + self-referential gate suite | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_49_self_referential_gates.md) |
-| 50 | Validate the bounded `pb` → Haskell handoff | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_50_host_assert_cli.md) |
+| 47 | Foreign-source generator closure, checking tools, and mutants | none | `none` | 1 | ✅ Done | [Contract](phase_47_tool_and_mutant_generation.md) |
+| 48 | The test-workflow algebra | none | `none` | 1 | ✅ Done | [Contract](phase_48_test_workflow_algebra.md) |
+| 49 | No-hardware DSL gate barrier + self-referential gate suite | none | `none` | 2 | ✅ Done | [Contract](phase_49_self_referential_gates.md) |
+| 50 | Validate the bounded `pb` → Haskell handoff | none | `none` | 2 | 🔄 Active — NOT VALIDATED | [Contract](phase_50_host_assert_cli.md) |
 | 51 | The host-ensure kernel | none | `none` | 2 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_51_host_ensure_kernel.md) |
 | 52 | Linux: sudoless Docker and the native image | linux-cpu | `linux-cpu/amd64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_52_linux_engine_bringup.md) |
 | 53 | Apple: Homebrew, Colima, and the native image | apple | `linux-cpu/arm64` | 3 | ⏸️ Blocked — NOT VALIDATED | [Contract](phase_53_apple_engine_bringup.md) |

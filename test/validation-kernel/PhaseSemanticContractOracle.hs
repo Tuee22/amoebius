@@ -44,7 +44,7 @@ runPhaseSemanticContractOracle =
                 expectedSemanticFindings
                 phaseSemanticContractDiagnostic
             , expectExactResult
-                "the no-input resource registry has the exact five-ready, 49-unresolved inventory"
+                "the no-input resource registry has the exact eight-ready, 45-unresolved inventory"
                 "resource-provision-contract-diagnostic"
                 expectedResourceObservations
                 expectedResourceFindings
@@ -554,20 +554,20 @@ oraclePhaseVectors =
     , phaseVector 34 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "required|GATE-READY" ""
     , phaseVector 35 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
     , phaseVector 36 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
-    , phaseVector 37 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 38 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 39 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 40 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 41 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 42 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 43 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 44 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 45 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 46 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 47 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 48 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "not-required|ABSENT" ""
-    , phaseVector 49 "DirectSourceBoundHaskell" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase49:requires=all-source-migration-queries-zero,all-owners-at-or-before-49-zero"
-    , phaseVector 50 "PbChildUnderDirectHaskellSupervisor" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase50:requires=no-source-migration-ownership,phase49-gate-pass-source-snapshot,direct-haskell-supervisor-with-pb-child,identity-argv-exec-handoff,public-target-not-self-supervising"
+    , phaseVector 37 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 38 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 39 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 40 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 41 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 42 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 43 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 44 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 45 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 46 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 47 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 48 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "not-required|ABSENT" ""
+    , phaseVector 49 "DirectSourceBoundHaskell" "BBBBBBBBBBBBBBBBBB" "required|GATE-READY" "phase49:requires=all-source-migration-queries-zero,all-owners-at-or-before-49-zero"
+    , phaseVector 50 "PbChildUnderDirectHaskellSupervisor" "BBBBBBBBBBBBBBBBBB" "required|GATE-READY" "phase50:requires=no-source-migration-ownership,phase49-gate-pass-source-snapshot,direct-haskell-supervisor-with-pb-child,identity-argv-exec-handoff,public-target-not-self-supervising"
     , phaseVector 51 "GatePassBoundHaskellFakeBoundary" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase51:requires=hardware-free-execution,haskell-fake-boundaries-only"
     , phaseVector 52 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" "phase52:requires=first-hardware-validation"
     , phaseVector 53 "GatePassBoundHardware" "GGGGGGGGGGGGGGGGGG" "required|UNRESOLVED" ""
@@ -692,8 +692,8 @@ expectedSemanticObservations :: [(Text, Text)]
 expectedSemanticObservations =
     [ ("semantic.phase-count", "96")
     , ("semantic.slot-count", "1728")
-    , ("semantic.gap-count", "1062")
-    , ("semantic.bound-count", "666")
+    , ("semantic.gap-count", "810")
+    , ("semantic.bound-count", "918")
     , ("semantic.target-phase", "none")
     , ("semantic.deferred-gap-count", "0")
     , ("semantic.legacy-count", "26")
@@ -1369,6 +1369,258 @@ expectedBoundSlots =
     , "phase-36-predecessor=exact-phase-thirty-five-receipt"
     , "phase-36-residue=live-database-policy-runtime-owners-explicit"
     , "phase-36-pass-criterion=qualified-phase-thirty-six-gate-pass"
+    , "phase-37-claim=pure-bounded-ui-program-schema"
+    , "phase-37-subject=acquired-ui-program-schema-supervisor"
+    , "phase-37-command=direct-offline-serial-ui-program-schema-matrix"
+    , "phase-37-oracle=independent-ui-program-schema-oracle"
+    , "phase-37-positive-controls=ui-program-schema-positive-controls"
+    , "phase-37-paired-negatives=exact-ui-program-schema-negatives"
+    , "phase-37-mutants=applied-ui-program-schema-production-mutants"
+    , "phase-37-discovery=exact-ui-program-schema-source-discovery"
+    , "phase-37-challenge=post-acquisition-ui-program-schema-challenge"
+    , "phase-37-observer=ui-program-schema-process-observation"
+    , "phase-37-authority-bypass=no-pb-network-browser-host-hardware-or-parallelism"
+    , "phase-37-freshness=fresh-ui-program-schema-build-root-and-stable-source"
+    , "phase-37-qualification=qualified-ui-program-schema-harness"
+    , "phase-37-cleanroom=ui-program-schema-products-contained-below-build"
+    , "phase-37-legacy-closure=retired-ui-program-schema-authorities-absent"
+    , "phase-37-predecessor=exact-phase-thirty-six-receipt"
+    , "phase-37-residue=ui-runtime-and-provider-owners-explicit"
+    , "phase-37-pass-criterion=qualified-phase-thirty-seven-gate-pass"
+    , "phase-38-claim=pure-sealed-ui-authorization-kernel"
+    , "phase-38-subject=acquired-ui-authorization-supervisor"
+    , "phase-38-command=direct-offline-serial-ui-authorization-matrix"
+    , "phase-38-oracle=independent-ui-authorization-oracle"
+    , "phase-38-positive-controls=ui-authorization-positive-controls"
+    , "phase-38-paired-negatives=exact-ui-authorization-paired-negatives"
+    , "phase-38-mutants=applied-ui-authorization-production-mutants"
+    , "phase-38-discovery=exact-ui-authorization-source-discovery"
+    , "phase-38-challenge=post-acquisition-ui-authorization-challenge"
+    , "phase-38-observer=ui-authorization-process-observation"
+    , "phase-38-authority-bypass=no-pb-network-identity-provider-host-hardware-or-parallelism"
+    , "phase-38-freshness=fresh-ui-authorization-build-root-and-stable-source"
+    , "phase-38-qualification=qualified-ui-authorization-harness"
+    , "phase-38-cleanroom=ui-authorization-products-contained-below-build"
+    , "phase-38-legacy-closure=retired-ui-authorization-authorities-absent"
+    , "phase-38-predecessor=exact-phase-thirty-seven-receipt"
+    , "phase-38-residue=ui-effect-runtime-and-provider-owners-explicit"
+    , "phase-38-pass-criterion=qualified-phase-thirty-eight-gate-pass"
+    , "phase-39-claim=pure-exact-ui-effect-binding"
+    , "phase-39-subject=acquired-ui-effect-binding-supervisor"
+    , "phase-39-command=direct-offline-serial-ui-effect-binding-matrix"
+    , "phase-39-oracle=independent-ui-effect-binding-oracle"
+    , "phase-39-positive-controls=ui-effect-binding-positive-controls"
+    , "phase-39-paired-negatives=exact-ui-effect-binding-paired-negatives"
+    , "phase-39-mutants=applied-ui-effect-binding-production-mutants"
+    , "phase-39-discovery=exact-ui-effect-binding-source-discovery"
+    , "phase-39-challenge=post-acquisition-ui-effect-binding-challenge"
+    , "phase-39-observer=ui-effect-binding-process-observation"
+    , "phase-39-authority-bypass=no-pb-network-provider-browser-host-hardware-or-parallelism"
+    , "phase-39-freshness=fresh-ui-effect-binding-build-root-and-stable-source"
+    , "phase-39-qualification=qualified-ui-effect-binding-harness"
+    , "phase-39-cleanroom=ui-effect-binding-products-contained-below-build"
+    , "phase-39-legacy-closure=retired-ui-effect-binding-authorities-absent"
+    , "phase-39-predecessor=exact-phase-thirty-eight-receipt"
+    , "phase-39-residue=ui-plan-runtime-and-provider-owners-explicit"
+    , "phase-39-pass-criterion=qualified-phase-thirty-nine-gate-pass"
+    , "phase-40-claim=pure-deterministic-ui-plan-compiler"
+    , "phase-40-subject=acquired-ui-plan-compiler-supervisor"
+    , "phase-40-command=direct-offline-serial-ui-plan-compiler-matrix"
+    , "phase-40-oracle=independent-ui-plan-compiler-oracle"
+    , "phase-40-positive-controls=ui-plan-compiler-positive-controls"
+    , "phase-40-paired-negatives=exact-ui-plan-compiler-paired-negatives"
+    , "phase-40-mutants=applied-ui-plan-compiler-production-mutants"
+    , "phase-40-discovery=exact-ui-plan-compiler-source-discovery"
+    , "phase-40-challenge=post-acquisition-ui-plan-compiler-challenge"
+    , "phase-40-observer=ui-plan-compiler-process-observation"
+    , "phase-40-authority-bypass=no-pb-network-interpreter-provider-host-hardware-or-parallelism"
+    , "phase-40-freshness=fresh-ui-plan-compiler-build-root-and-stable-source"
+    , "phase-40-qualification=qualified-ui-plan-compiler-harness"
+    , "phase-40-cleanroom=ui-plan-compiler-products-contained-below-build"
+    , "phase-40-legacy-closure=retired-ui-plan-compiler-authorities-absent"
+    , "phase-40-predecessor=exact-phase-thirty-nine-receipt"
+    , "phase-40-residue=ui-interpreter-offline-runtime-and-publication-owners-explicit"
+    , "phase-40-pass-criterion=qualified-phase-forty-gate-pass"
+    , "phase-41-claim=pure-bounded-offline-continuity-language"
+    , "phase-41-subject=acquired-offline-language-plan-supervisor"
+    , "phase-41-command=direct-offline-serial-offline-language-plan-matrix"
+    , "phase-41-oracle=independent-offline-language-plan-oracle"
+    , "phase-41-positive-controls=offline-language-plan-positive-controls"
+    , "phase-41-paired-negatives=exact-offline-language-plan-paired-negatives"
+    , "phase-41-mutants=applied-offline-language-plan-production-mutants"
+    , "phase-41-discovery=exact-offline-language-plan-source-discovery"
+    , "phase-41-challenge=post-acquisition-offline-language-plan-challenge"
+    , "phase-41-observer=offline-language-plan-process-observation"
+    , "phase-41-authority-bypass=no-pb-network-browser-storage-replay-host-hardware-or-parallelism"
+    , "phase-41-freshness=fresh-offline-language-plan-build-root-and-stable-source"
+    , "phase-41-qualification=qualified-offline-language-plan-harness"
+    , "phase-41-cleanroom=offline-language-plan-products-contained-below-build"
+    , "phase-41-legacy-closure=retired-offline-language-plan-authorities-absent"
+    , "phase-41-predecessor=exact-phase-forty-receipt"
+    , "phase-41-residue=browser-storage-server-replay-and-publication-owners-explicit"
+    , "phase-41-pass-criterion=qualified-phase-forty-one-gate-pass"
+    , "phase-42-claim=pure-generic-ui-browser-interpreter-semantics"
+    , "phase-42-subject=acquired-ui-browser-interpreter-supervisor"
+    , "phase-42-command=direct-offline-serial-ui-browser-interpreter-matrix"
+    , "phase-42-oracle=independent-ui-browser-interpreter-oracle"
+    , "phase-42-positive-controls=ui-browser-interpreter-positive-controls"
+    , "phase-42-paired-negatives=exact-ui-browser-interpreter-paired-negatives"
+    , "phase-42-mutants=applied-ui-browser-interpreter-production-mutants"
+    , "phase-42-discovery=exact-ui-browser-interpreter-source-discovery"
+    , "phase-42-challenge=post-acquisition-ui-browser-interpreter-challenge"
+    , "phase-42-observer=ui-browser-interpreter-process-observation"
+    , "phase-42-authority-bypass=no-pb-browser-node-python-network-host-hardware-or-parallelism"
+    , "phase-42-freshness=fresh-ui-browser-interpreter-build-root-and-stable-source"
+    , "phase-42-qualification=qualified-ui-browser-interpreter-harness"
+    , "phase-42-cleanroom=ui-browser-interpreter-products-contained-below-build"
+    , "phase-42-legacy-closure=retired-ui-browser-interpreter-authorities-absent"
+    , "phase-42-predecessor=exact-phase-forty-one-receipt"
+    , "phase-42-residue=live-browser-server-provider-release-and-ha-owners-explicit"
+    , "phase-42-pass-criterion=qualified-phase-forty-two-gate-pass"
+    , "phase-43-claim=authenticated-scoped-ui-server-boundary"
+    , "phase-43-subject=acquired-ui-server-boundary-supervisor"
+    , "phase-43-command=direct-offline-serial-ui-server-boundary-matrix"
+    , "phase-43-oracle=independent-ui-server-boundary-oracle"
+    , "phase-43-positive-controls=ui-server-boundary-positive-controls"
+    , "phase-43-paired-negatives=exact-ui-server-boundary-paired-negatives"
+    , "phase-43-mutants=applied-ui-server-boundary-production-mutants"
+    , "phase-43-discovery=exact-ui-server-boundary-source-discovery"
+    , "phase-43-challenge=post-acquisition-ui-server-boundary-challenge"
+    , "phase-43-observer=ui-server-boundary-process-observation"
+    , "phase-43-authority-bypass=no-pb-node-network-live-identity-provider-host-hardware-or-parallelism"
+    , "phase-43-freshness=fresh-ui-server-boundary-build-root-and-stable-source"
+    , "phase-43-qualification=qualified-ui-server-boundary-harness"
+    , "phase-43-cleanroom=ui-server-boundary-products-contained-below-build"
+    , "phase-43-legacy-closure=retired-ui-server-boundary-authorities-absent"
+    , "phase-43-predecessor=exact-phase-forty-two-receipt"
+    , "phase-43-residue=live-identity-provider-browser-deployment-and-ha-owners-explicit"
+    , "phase-43-pass-criterion=qualified-phase-forty-three-gate-pass"
+    , "phase-44-claim=hardware-free-haskell-ui-composition"
+    , "phase-44-subject=acquired-ui-local-composition-supervisor"
+    , "phase-44-command=direct-offline-serial-ui-local-composition-matrix"
+    , "phase-44-oracle=independent-ui-local-composition-oracle"
+    , "phase-44-positive-controls=ui-local-composition-positive-controls"
+    , "phase-44-paired-negatives=exact-ui-local-composition-paired-negatives"
+    , "phase-44-mutants=applied-ui-local-composition-production-mutants"
+    , "phase-44-discovery=exact-ui-local-composition-source-discovery"
+    , "phase-44-challenge=post-acquisition-ui-local-composition-challenge"
+    , "phase-44-observer=ui-local-composition-process-observation"
+    , "phase-44-authority-bypass=no-pb-node-dhall-network-live-provider-host-hardware-or-parallelism"
+    , "phase-44-freshness=fresh-ui-local-composition-build-root-and-stable-source"
+    , "phase-44-qualification=qualified-ui-local-composition-harness"
+    , "phase-44-cleanroom=ui-local-composition-products-contained-below-build"
+    , "phase-44-legacy-closure=retired-ui-local-composition-authorities-absent"
+    , "phase-44-predecessor=exact-phase-forty-three-receipt"
+    , "phase-44-residue=live-workflow-provider-browser-deployment-release-and-ha-owners-explicit"
+    , "phase-44-pass-criterion=qualified-phase-forty-four-gate-pass"
+    , "phase-45-claim=haskell-encrypted-offline-state-and-runtime-projection"
+    , "phase-45-subject=acquired-encrypted-browser-runtime-supervisor"
+    , "phase-45-command=direct-offline-serial-encrypted-browser-runtime-matrix"
+    , "phase-45-oracle=independent-encrypted-browser-runtime-oracle"
+    , "phase-45-positive-controls=encrypted-browser-runtime-positive-controls"
+    , "phase-45-paired-negatives=exact-encrypted-browser-runtime-paired-negatives"
+    , "phase-45-mutants=applied-encrypted-browser-runtime-production-mutants"
+    , "phase-45-discovery=exact-encrypted-browser-runtime-source-discovery"
+    , "phase-45-challenge=post-acquisition-encrypted-browser-runtime-challenge"
+    , "phase-45-observer=encrypted-browser-runtime-process-observation"
+    , "phase-45-authority-bypass=no-pb-browser-node-purescript-javascript-dhall-network-live-host-hardware-or-parallelism"
+    , "phase-45-freshness=fresh-encrypted-browser-runtime-build-root-and-stable-source"
+    , "phase-45-qualification=qualified-encrypted-browser-runtime-harness"
+    , "phase-45-cleanroom=encrypted-browser-runtime-products-contained-below-build"
+    , "phase-45-legacy-closure=retired-encrypted-browser-runtime-authorities-absent"
+    , "phase-45-predecessor=exact-phase-forty-four-receipt"
+    , "phase-45-residue=live-browser-storage-crypto-lock-service-worker-replay-release-ha-and-hardware-owners-explicit"
+    , "phase-45-pass-criterion=qualified-phase-forty-five-gate-pass"
+    , "phase-46-claim=haskell-generated-browser-contracts-and-bundle"
+    , "phase-46-subject=acquired-ui-contract-generation-supervisor"
+    , "phase-46-command=direct-offline-serial-ui-contract-generation-matrix"
+    , "phase-46-oracle=independent-ui-contract-generation-oracle"
+    , "phase-46-positive-controls=ui-contract-generation-positive-controls"
+    , "phase-46-paired-negatives=exact-ui-contract-generation-paired-negatives"
+    , "phase-46-mutants=applied-ui-contract-generation-production-mutants"
+    , "phase-46-discovery=exact-ui-contract-generation-source-discovery"
+    , "phase-46-challenge=post-acquisition-ui-contract-generation-challenge"
+    , "phase-46-observer=ui-contract-generation-process-observation"
+    , "phase-46-authority-bypass=no-pb-browser-node-purescript-javascript-network-live-host-hardware-or-parallelism"
+    , "phase-46-freshness=fresh-ui-contract-generation-build-root-and-stable-source"
+    , "phase-46-qualification=qualified-ui-contract-generation-harness"
+    , "phase-46-cleanroom=ui-contract-generation-products-contained-below-build"
+    , "phase-46-legacy-closure=retired-ui-contract-generation-authorities-absent"
+    , "phase-46-predecessor=exact-phase-forty-five-receipt"
+    , "phase-46-residue=browser-compile-execution-protocol-publication-deployment-ha-and-hardware-owners-explicit"
+    , "phase-46-pass-criterion=qualified-phase-forty-six-gate-pass"
+    , "phase-47-claim=haskell-owned-content-addressed-support-generation-and-source-closure"
+    , "phase-47-subject=acquired-tool-and-mutant-generation-supervisor"
+    , "phase-47-command=direct-offline-serial-tool-and-mutant-generation-matrix"
+    , "phase-47-oracle=independent-tool-and-mutant-generation-oracle"
+    , "phase-47-positive-controls=closed-support-artifact-positive-controls"
+    , "phase-47-paired-negatives=exact-build-root-and-declaration-paired-negatives"
+    , "phase-47-mutants=applied-tool-and-mutant-generation-production-mutants"
+    , "phase-47-discovery=exact-support-source-and-generated-artifact-discovery"
+    , "phase-47-challenge=post-acquisition-tool-and-mutant-generation-challenge"
+    , "phase-47-observer=tool-and-mutant-generation-process-and-filesystem-observation"
+    , "phase-47-authority-bypass=no-pb-python-shell-execution-network-live-host-hardware-or-parallelism"
+    , "phase-47-freshness=fresh-generation-run-identities-and-stable-source"
+    , "phase-47-qualification=qualified-tool-and-mutant-generation-harness"
+    , "phase-47-cleanroom=generated-support-products-contained-below-build"
+    , "phase-47-legacy-closure=phase-forty-seven-source-families-zero"
+    , "phase-47-predecessor=exact-phase-forty-six-receipt"
+    , "phase-47-residue=generated-tool-execution-provider-semantics-live-runtime-and-hardware-owners-explicit"
+    , "phase-47-pass-criterion=qualified-phase-forty-seven-gate-pass"
+    , "phase-48-claim=pure-test-workflow-teardown-suggestion-inventory-and-evidence-algebra"
+    , "phase-48-subject=acquired-test-workflow-algebra-supervisor"
+    , "phase-48-command=direct-offline-serial-test-workflow-algebra-matrix"
+    , "phase-48-oracle=independent-test-workflow-algebra-oracle"
+    , "phase-48-positive-controls=closed-test-workflow-algebra-positive-controls"
+    , "phase-48-paired-negatives=exact-test-workflow-algebra-paired-negatives"
+    , "phase-48-mutants=applied-test-workflow-algebra-production-mutants"
+    , "phase-48-discovery=exact-test-workflow-algebra-source-and-projection-discovery"
+    , "phase-48-challenge=post-acquisition-test-workflow-algebra-challenge"
+    , "phase-48-observer=test-workflow-algebra-process-and-filesystem-observation"
+    , "phase-48-authority-bypass=no-pb-network-live-provider-host-hardware-or-parallelism"
+    , "phase-48-freshness=fresh-test-workflow-algebra-run-and-stable-source"
+    , "phase-48-qualification=qualified-test-workflow-algebra-harness"
+    , "phase-48-cleanroom=test-workflow-algebra-products-contained-below-build"
+    , "phase-48-legacy-closure=no-phase-forty-eight-legacy-authorities"
+    , "phase-48-predecessor=exact-phase-forty-seven-receipt"
+    , "phase-48-residue=live-test-execution-teardown-inventory-runtime-evidence-and-hardware-owners-explicit"
+    , "phase-48-pass-criterion=qualified-phase-forty-eight-gate-pass"
+    , "phase-49-claim=complete-hardware-free-dsl-barrier-and-self-referential-gate"
+    , "phase-49-subject=acquired-dsl-barrier-supervisor"
+    , "phase-49-command=direct-offline-serial-dsl-barrier-matrix"
+    , "phase-49-oracle=independent-dsl-barrier-and-qualification-oracles"
+    , "phase-49-positive-controls=complete-dsl-spine-positive-controls"
+    , "phase-49-paired-negatives=exact-dsl-barrier-paired-negatives"
+    , "phase-49-mutants=applied-dsl-barrier-and-universal-validation-mutants"
+    , "phase-49-discovery=exact-dsl-stage-selector-and-source-discovery"
+    , "phase-49-challenge=post-start-fake-boundary-challenge"
+    , "phase-49-observer=external-fake-boundary-and-process-observation"
+    , "phase-49-authority-bypass=no-pb-network-host-container-registry-cluster-provider-or-hardware"
+    , "phase-49-freshness=fresh-dsl-barrier-run-and-stable-source"
+    , "phase-49-qualification=complete-hardware-free-universal-qualification"
+    , "phase-49-cleanroom=dsl-barrier-products-contained-below-build"
+    , "phase-49-legacy-closure=all-legacy-owners-through-dsl-barrier-closed"
+    , "phase-49-predecessor=exact-phase-forty-eight-receipt"
+    , "phase-49-residue=phase-fifty-and-later-live-fidelity-owners-explicit"
+    , "phase-49-pass-criterion=qualified-phase-forty-nine-gate-pass"
+    , "phase-50-claim=complete-bounded-pb-handoff-runtime"
+    , "phase-50-subject=acquired-pb-boundary-supervisor"
+    , "phase-50-command=direct-haskell-supervised-isolated-python-child"
+    , "phase-50-oracle=independent-pb-boundary-oracle"
+    , "phase-50-positive-controls=complete-fake-and-concrete-handoff-controls"
+    , "phase-50-paired-negatives=exact-pb-boundary-paired-negatives"
+    , "phase-50-mutants=applied-pb-boundary-changed-subject-mutants"
+    , "phase-50-discovery=exact-pb-grammar-and-runtime-effect-discovery"
+    , "phase-50-challenge=post-start-argv-environment-challenge"
+    , "phase-50-observer=external-process-executable-argv-and-exit-observation"
+    , "phase-50-authority-bypass=no-self-supervision-ambient-path-network-hardware-or-parallelism"
+    , "phase-50-freshness=fresh-contained-toolchain-build-and-stable-source"
+    , "phase-50-qualification=qualified-pb-boundary-harness"
+    , "phase-50-cleanroom=pb-boundary-products-contained-below-build"
+    , "phase-50-legacy-closure=phase-forty-nine-bound-zero-source-debt"
+    , "phase-50-predecessor=exact-phase-forty-nine-receipt"
+    , "phase-50-residue=real-host-platform-and-post-handoff-runtime-owners-explicit"
+    , "phase-50-pass-criterion=qualified-phase-fifty-gate-pass"
     ]
 
 expectedSemanticFindings :: [ExpectedFinding]
@@ -1470,9 +1722,9 @@ expectedResourceObservations =
     [ ("resource.phase-domain-count", "96")
     , ("resource.required-phase-count", "53")
     , ("resource.slot-count", "371")
-    , ("resource.gap-count", "329")
+    , ("resource.gap-count", "315")
     , ("resource.draft-count", "0")
-    , ("resource.gate-ready-count", "42")
+    , ("resource.gate-ready-count", "56")
     , ("resource.target-phase", "none")
     , ("resource.deferred-gap-count", "0")
     ]
@@ -1496,7 +1748,7 @@ expectedResourceFindings =
         <> [ ExpectedFinding
                 "PLAN-RESOURCE-DIAGNOSTIC-ONLY"
                 planRoot
-                "the nullary resource view cannot authorize a run; Phases 1, 13, 14, 15, 25, and 34 are gate-ready and 47 later contracts remain unresolved"
+                "the nullary resource view cannot authorize a run; Phases 1, 13, 14, 15, 25, 34, 49, and 50 are gate-ready and 45 later contracts remain unresolved"
            ]
 
 canonicalCorpus :: [(FilePath, Text)]
@@ -1627,7 +1879,7 @@ gateRow ordinal category =
 
 resourceSection :: Int -> [Text]
 resourceSection ordinal
-    | ordinal `elem` [1, 13, 14, 15, 25, 34] =
+    | ordinal `elem` [1, 13, 14, 15, 25, 34, 49, 50] =
         [ ""
         , "## Resource provision"
         , "> Run-local owner, preflight, allowed/forbidden write boundary, observer, cleanup, and zero-residue evidence are acquired by the Haskell gate."
@@ -1794,7 +2046,7 @@ summaryOrderMutationResult =
 unresolvedMarkerMutationResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath (oraclePhaseFor 36))
+            (oraclePath (oraclePhaseFor 51))
             phase11SubjectGateRow
             "| `Subject` | blocks validation: independent subject missing. |"
             canonicalCorpus
@@ -1802,7 +2054,7 @@ unresolvedMarkerMutationResult =
 unresolvedSubstringMutationResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath (oraclePhaseFor 36))
+            (oraclePath (oraclePhaseFor 51))
             phase11SubjectGateRow
             "| `Subject` | incidental prose mentions UNRESOLVED without the governed prefix. |"
             canonicalCorpus
@@ -1906,15 +2158,15 @@ indentedSplitGateRowsResult =
 resourceHeadingMutationResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase43)
-            "## Resource provision — UNRESOLVED"
+            (oraclePath phase50)
+            "## Resource provision"
             "## Resource provision — DRAFTED"
             canonicalCorpus
         )
 indentedResourceBlockerResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase43)
+            (oraclePath phase51)
             resourceBlockerLine
             ("    " <> resourceBlockerLine)
             canonicalCorpus
@@ -1922,7 +2174,7 @@ indentedResourceBlockerResult =
 tabIndentedResourceBlockerResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase43)
+            (oraclePath phase51)
             resourceBlockerLine
             ("\t" <> resourceBlockerLine)
             canonicalCorpus
@@ -1930,7 +2182,7 @@ tabIndentedResourceBlockerResult =
 rawHtmlResourceBlockerResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase43)
+            (oraclePath phase51)
             resourceBlockerLine
             (rawScriptBlock resourceBlockerLine)
             canonicalCorpus
@@ -1938,7 +2190,7 @@ rawHtmlResourceBlockerResult =
 blockquoteRawHtmlResourceResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase43)
+            (oraclePath phase51)
             resourceBlockerLine
             (blockquoteRawScriptBlock resourceBlockerLine)
             canonicalCorpus
@@ -1946,7 +2198,7 @@ blockquoteRawHtmlResourceResult =
 blockquoteFencedResourceResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase43)
+            (oraclePath phase51)
             resourceBlockerLine
             (blockquoteFencedBlock resourceBlockerLine)
             canonicalCorpus
@@ -1954,7 +2206,7 @@ blockquoteFencedResourceResult =
 alternatingFenceResourceResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase43)
+            (oraclePath phase51)
             resourceBlockerLine
             (alternatingFenceBlock resourceBlockerLine)
             canonicalCorpus
@@ -1962,7 +2214,7 @@ alternatingFenceResourceResult =
 blockquoteAlternatingHtmlResourceResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase43)
+            (oraclePath phase51)
             resourceBlockerLine
             (alternatingRawHtmlBlock ">" resourceBlockerLine)
             canonicalCorpus
@@ -1970,7 +2222,7 @@ blockquoteAlternatingHtmlResourceResult =
 listAlternatingHtmlResourceResult =
     phaseSemanticJoinDiagnostic
         ( replaceInPath
-            (oraclePath phase43)
+            (oraclePath phase51)
             resourceBlockerLine
             (alternatingRawHtmlBlock "- " resourceBlockerLine)
             canonicalCorpus
@@ -2235,12 +2487,12 @@ phase11SubjectGateRow =
 resourceBlockerLine =
     "> **UNRESOLVED — blocks validation.** No live mutation may begin. Fixture-only inventory."
 
-phase0, phase1, phase34, phase43, phase50, phase52, phase84, phase95 :: OraclePhase
+phase0, phase1, phase34, phase50, phase51, phase52, phase84, phase95 :: OraclePhase
 phase0 = oraclePhaseFor 0
 phase1 = oraclePhaseFor 1
 phase34 = oraclePhaseFor 34
-phase43 = oraclePhaseFor 43
 phase50 = oraclePhaseFor 50
+phase51 = oraclePhaseFor 51
 phase52 = oraclePhaseFor 52
 phase84 = oraclePhaseFor 84
 phase95 = oraclePhaseFor 95
@@ -2307,10 +2559,10 @@ summaryOrderMutationFinding =
         ["Phase scope", "Lane", "Substrate", "Register", "Depends on", "Gate"]
 unresolvedMarkerMutationFinding =
     semanticMismatch
-        36
+        51
         "unresolved-shape"
-        (localGapCategoryNames 36)
-        (filter (/= "Subject") (localGapCategoryNames 36))
+        (localGapCategoryNames 51)
+        (filter (/= "Subject") (localGapCategoryNames 51))
 unresolvedSubstringMutationFinding :: ExpectedFinding
 unresolvedSubstringMutationFinding = unresolvedMarkerMutationFinding
 
@@ -2353,9 +2605,9 @@ resourceHeadingMutationFindings =
     [ semanticJoinRefusal
     , ExpectedFinding
         "PLAN-RESOURCE-JOIN-MISMATCH"
-        (oraclePath phase43)
-        ( "phase=43 field=heading expected="
-            <> showText ("Resource provision — UNRESOLVED" :: Text)
+        (oraclePath phase50)
+        ( "phase=50 field=heading expected="
+            <> showText ("Resource provision" :: Text)
             <> " actual="
             <> showText ("Resource provision — DRAFTED" :: Text)
         )
@@ -2368,8 +2620,8 @@ indentedResourceBlockerFindings =
     [ semanticJoinRefusal
     , ExpectedFinding
         "PLAN-RESOURCE-JOIN-MISMATCH"
-        (oraclePath phase43)
-        "phase=43 field=unresolved-blocker expected=True actual=False"
+        (oraclePath phase51)
+        "phase=51 field=unresolved-blocker expected=True actual=False"
     , resourceJoinRefusal
     , markdownJoinRefusal
     ]
@@ -2963,9 +3215,9 @@ oracleLiteralProblems =
            | map oraclePhaseVectorFor [0 .. 95] /= oraclePhaseVectors
                 || any ((== vectorOrdinal invalidOraclePhaseVector) . vectorOrdinal) oraclePhaseVectors
            ]
-        <> [ "the Phase-0 through Phase-36 bitmaps must be bound and every later bitmap must retain exactly eighteen ContractGap markers"
-           | any ((/= "BBBBBBBBBBBBBBBBBB") . vectorSlotBitmap) (take 37 oraclePhaseVectors)
-                || any ((/= "GGGGGGGGGGGGGGGGGG") . vectorSlotBitmap) (drop 37 oraclePhaseVectors)
+        <> [ "the Phase-0 through Phase-50 bitmaps must be bound and every later bitmap must retain exactly eighteen ContractGap markers"
+           | any ((/= "BBBBBBBBBBBBBBBBBB") . vectorSlotBitmap) (take 51 oraclePhaseVectors)
+                || any ((/= "GGGGGGGGGGGGGGGGGG") . vectorSlotBitmap) (drop 51 oraclePhaseVectors)
            ]
         <> [ "the explicit oracle stage vector must retain 50 direct, one pb-child, one fake, and 44 hardware rows"
            | Map.fromListWith (+) [(vectorStage row, 1 :: Int) | row <- oraclePhaseVectors]
@@ -2991,11 +3243,11 @@ oracleLiteralProblems =
         <> [ "oracle gate category literals must contain exactly 18 unique rows"
            | length gateCategories /= 18 || Set.size (Set.fromList gateCategories) /= 18
            ]
-        <> [ "oracle gap total must be exactly 1,062"
-           | sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 1062
+        <> [ "oracle gap total must be exactly 810"
+           | sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 810
            ]
-        <> [ "oracle bound total must be exactly 666"
-           | 1728 - sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 666
+        <> [ "oracle bound total must be exactly 918"
+           | 1728 - sum (map (length . localGapCategoryNames . oracleOrdinal) oraclePhases) /= 918
            ]
         <> [ "oracle resource-required phase set must contain exactly 53 unique ordinals"
            | length resourceRequiredOrdinals /= 53
@@ -3006,16 +3258,16 @@ oracleLiteralProblems =
                     , vectorResourceProjection row == "not-required|ABSENT"
                     ]
                     /= 43
-                || length unresolvedResourceOrdinals /= 47
+                || length unresolvedResourceOrdinals /= 45
                 || any
                     (\row -> vectorResourceProjection row `notElem` ["required|GATE-READY", "required|UNRESOLVED", "not-required|ABSENT"])
                     oraclePhaseVectors
            ]
-        <> [ "the frozen semantic and resource inventories must retain 769/104 observations and 1,063/330 findings"
-           | length expectedSemanticObservations /= 769
-                || length expectedSemanticFindings /= 1063
+        <> [ "the frozen semantic and resource inventories must retain 1021/104 observations and 811/316 findings"
+           | length expectedSemanticObservations /= 1021
+                || length expectedSemanticFindings /= 811
                 || length expectedResourceObservations /= 104
-                || length expectedResourceFindings /= 330
+                || length expectedResourceFindings /= 316
            ]
         <> [ "oracle reverse legacy map must contain exactly 26 unique IDs"
            | let identifiers = concat (Map.elems localLegacyReverseMap)

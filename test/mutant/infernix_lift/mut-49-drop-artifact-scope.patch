@@ -1,5 +1,0 @@
---- a/src/Infernix/Adapter/Core.hs
-+++ b/src/Infernix/Adapter/Core.hs
-@@
--  | authenticatedScope /= stagedScope staged = Left ArtifactUnavailable
-+  | False = Left ArtifactUnavailable

@@ -7104,36 +7104,8 @@ renderSeedDependencyLocus locus = case locus of
   SeedNamespaceModule path -> "namespace-module:" <> Text.pack path
 
 unimplementedEvidence :: SourceSnapshot -> LegacyId -> ClosedLegacyEvidence
-unimplementedEvidence snapshot identifier
-  | legacyUnimplementedOwnerDue identifier =
-      closedEvidence
-        snapshot
-        identifier
-        Nothing
-        (Just legacyUnimplementedRefusalState)
-  | otherwise = closedEvidence snapshot identifier Nothing legacyUnimplementedLaterState
-
-legacyUnimplementedOwnerDue :: LegacyId -> Bool
-#if defined(VALIDATION_LEGACY_INTERNAL_UNIMPLEMENTED_OWNER_PREDICATE_BYPASS_MUTANT)
-legacyUnimplementedOwnerDue _ = False
-#else
-legacyUnimplementedOwnerDue identifier = Policy.phaseOrdinalNumber (legacyIdOwner identifier) == 0
-#endif
-
-legacyUnimplementedRefusalState :: LegacyObservedState
-#if defined(VALIDATION_LEGACY_INTERNAL_UNIMPLEMENTED_REFUSAL_DETAIL_MUTANT)
-legacyUnimplementedRefusalState = LegacyObservationRefused "mutated"
-#else
-legacyUnimplementedRefusalState =
-  LegacyObservationRefused "the closed owner-domain analyzer has not been implemented"
-#endif
-
-legacyUnimplementedLaterState :: Maybe LegacyObservedState
-#if defined(VALIDATION_LEGACY_INTERNAL_UNIMPLEMENTED_LATER_UNAVAILABLE_MUTANT)
-legacyUnimplementedLaterState = Just LegacyObservedZero
-#else
-legacyUnimplementedLaterState = Nothing
-#endif
+unimplementedEvidence snapshot identifier =
+  closedEvidence snapshot identifier Nothing Nothing
 
 -- | Total source-debt-to-register join. Exhaustive pattern matching makes a
 -- new source family a compile-time obligation instead of a silently omitted

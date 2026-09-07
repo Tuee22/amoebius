@@ -1,5 +1,0 @@
---- a/src/Amoebius/Ui/Projection/Cursor.hs
-+++ b/src/Amoebius/Ui/Projection/Cursor.hs
-@@ key
-- CursorKey tenant owner stream
-+ CursorKey owner stream

@@ -1,7 +1,8 @@
 module Main (main) where
 
 import CompilerSourceGraphOracle
-  ( compilerSourceGraphSelectorNames
+  ( compilerSourceGraphSelectorAssignments
+  , compilerSourceGraphSelectorNames
   , runCompilerSourceGraphOracle
   , runCompilerSourceGraphSelectorOracle
   , runCompilerSourceGraphSelectorProductControlOracle
@@ -14,4 +15,5 @@ main =
     (selectorSuite "CompilerSourceGraphOracle" runCompilerSourceGraphOracle runCompilerSourceGraphSelectorOracle)
       { suiteSelectorNames = compilerSourceGraphSelectorNames
       , suiteRunControl = Just runCompilerSourceGraphSelectorProductControlOracle
+      , suiteAssignments = compilerSourceGraphSelectorAssignments
       }

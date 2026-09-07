@@ -1,5 +1,4 @@
 # Phase 39: UI effect binding
-
 > **Purpose**: Bind every checked UI port and named external link to exactly one trusted, compatible catalog
 > entry before exposing a constructor-private `BoundUiProgram`.
 > **Read this if**: the port/handler/capability relation, fixed-HTTPS link catalog, or `BoundUiProgram`
@@ -15,7 +14,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, DEVELOPMENT_PLAN/substrates.md
 **Generated sections**: none
 
 </details>

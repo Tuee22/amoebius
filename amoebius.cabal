@@ -410,6 +410,116 @@ flag ui-contract-undeclared-codec-mutant
     default:     False
     manual:      True
 
+flag tool-generation-missing-rule-mutant
+    description: Enable the checking-tool declaration omission mutant
+    default:     False
+    manual:      True
+
+flag tool-generation-drop-operator-mutant
+    description: Enable the mutation-declaration omission mutant
+    default:     False
+    manual:      True
+
+flag tool-generation-track-output-mutant
+    description: Enable the authored-tree output-policy mutant
+    default:     False
+    manual:      True
+
+flag test-workflow-optional-teardown-mutant
+    description: Enable the Phase-48 optional-teardown production mutant
+    default:     False
+    manual:      True
+
+flag test-workflow-cleanup-success-mutant
+    description: Enable the Phase-48 cleanup-failure-to-success production mutant
+    default:     False
+    manual:      True
+
+flag test-workflow-replace-primary-mutant
+    description: Enable the Phase-48 primary-failure replacement production mutant
+    default:     False
+    manual:      True
+
+flag test-workflow-drop-provider-debit-mutant
+    description: Enable the Phase-48 provider-quota debit omission production mutant
+    default:     False
+    manual:      True
+
+flag test-workflow-allow-secret-mutant
+    description: Enable the Phase-48 inline-secret acceptance production mutant
+    default:     False
+    manual:      True
+
+flag test-workflow-drop-inventory-domain-mutant
+    description: Enable the Phase-48 inventory-domain omission production mutant
+    default:     False
+    manual:      True
+
+flag test-workflow-upgrade-runtime-mutant
+    description: Enable the Phase-48 runtime-evidence overclaim production mutant
+    default:     False
+    manual:      True
+
+flag dsl-barrier-decoder-widening-mutant
+    description: Enable the Phase-49 decoder-widening production mutant
+    default:     False
+    manual:      True
+
+flag dsl-barrier-legality-drop-mutant
+    description: Enable the Phase-49 legality-stage omission production mutant
+    default:     False
+    manual:      True
+
+flag dsl-barrier-bind-arm-swap-mutant
+    description: Enable the Phase-49 bind/resolve ordering production mutant
+    default:     False
+    manual:      True
+
+flag dsl-barrier-demand-omission-mutant
+    description: Enable the Phase-49 demand-evidence omission production mutant
+    default:     False
+    manual:      True
+
+flag dsl-barrier-provision-identity-collapse-mutant
+    description: Enable the Phase-49 provision-identity collapse production mutant
+    default:     False
+    manual:      True
+
+flag dsl-barrier-render-omission-mutant
+    description: Enable the Phase-49 render-stage omission production mutant
+    default:     False
+    manual:      True
+
+flag dsl-barrier-plan-reorder-mutant
+    description: Enable the Phase-49 plan/dry-run ordering production mutant
+    default:     False
+    manual:      True
+
+flag dsl-barrier-dry-run-execution-mutant
+    description: Enable the Phase-49 dry-run effect execution production mutant
+    default:     False
+    manual:      True
+
+flag dsl-barrier-fake-call-bypass-mutant
+    description: Enable the Phase-49 external fake-observer bypass production mutant
+    default:     False
+    manual:      True
+
+flag self-referential-gates-drop-observe-mutant
+    description: Enable the Phase-49 workflow observation omission production mutant
+    default:     False
+    manual:      True
+
+flag self-referential-gates-leak-resource-mutant
+    description: Enable the Phase-49 workflow teardown leak production mutant
+    default:     False
+    manual:      True
+
+flag self-referential-gates-skip-mutant-mutant
+    description: Enable the Phase-49 mutation-qualification skip production mutant
+    default:     False
+    manual:      True
+
 flag deterministic-simulation-dropped-partition-mutant
     description: Enable the isolated Phase-16 stale-read production mutant
     default:     False
@@ -4057,6 +4167,8 @@ library validation-kernel
         Amoebius.Validation.Gate
         Amoebius.Validation.Legacy
         Amoebius.Validation.PbBootstrapGrammar
+        Amoebius.Validation.PbBoundary
+        Amoebius.Validation.PbBoundaryRun
         Amoebius.Validation.PhaseContract
         Amoebius.Validation.PhaseSemanticContract
         Amoebius.Validation.PhaseSemanticJoin
@@ -4117,6 +4229,10 @@ library validation-kernel
         Amoebius.Validation.UiLocalCompositionRun.Internal
         Amoebius.Validation.EncryptedBrowserRuntimeRun.Internal
         Amoebius.Validation.UiContractGenerationRun.Internal
+        Amoebius.Validation.ToolAndMutantGenerationRun.Internal
+        Amoebius.Validation.TestWorkflowAlgebraRun.Internal
+        Amoebius.Validation.DslBarrierRun.Internal
+        Amoebius.Validation.PbBoundaryRun.Internal
         Amoebius.Validation.BootstrapQualification.Internal
         Amoebius.Validation.BootstrapTrust.Internal
         Amoebius.Validation.CompilerBuildInfo.Internal
@@ -4356,8 +4472,19 @@ library tool-and-mutant-generation
     build-depends:
         base >=4.21 && <4.22,
         bytestring >=0.12 && <0.13,
+        cryptohash-sha256 ==0.11.102.1,
         directory >=1.3 && <1.4,
-        filepath >=1.4 && <1.6
+        filepath >=1.4 && <1.6,
+        text >=2.1 && <2.2
+
+    if flag(tool-generation-missing-rule-mutant)
+        cpp-options: -DTOOL_GENERATION_MISSING_RULE_MUTANT
+
+    if flag(tool-generation-drop-operator-mutant)
+        cpp-options: -DTOOL_GENERATION_DROP_OPERATOR_MUTANT
+
+    if flag(tool-generation-track-output-mutant)
+        cpp-options: -DTOOL_GENERATION_TRACK_OUTPUT_MUTANT
 
 library deterministic-simulation-substrate
     exposed-modules:
@@ -5983,7 +6110,65 @@ library test-workflow-algebra-core
 
     build-depends:
         base >=4.21 && <4.22,
+        bytestring >=0.12 && <0.13,
+        cryptohash-sha256 ==0.11.102.1,
         text >=2.1 && <2.2
+
+    if flag(test-workflow-optional-teardown-mutant)
+        cpp-options: -DTEST_WORKFLOW_OPTIONAL_TEARDOWN_MUTANT
+
+    if flag(test-workflow-cleanup-success-mutant)
+        cpp-options: -DTEST_WORKFLOW_CLEANUP_SUCCESS_MUTANT
+
+    if flag(test-workflow-replace-primary-mutant)
+        cpp-options: -DTEST_WORKFLOW_REPLACE_PRIMARY_MUTANT
+
+    if flag(test-workflow-drop-provider-debit-mutant)
+        cpp-options: -DTEST_WORKFLOW_DROP_PROVIDER_DEBIT_MUTANT
+
+    if flag(test-workflow-allow-secret-mutant)
+        cpp-options: -DTEST_WORKFLOW_ALLOW_SECRET_MUTANT
+
+    if flag(test-workflow-drop-inventory-domain-mutant)
+        cpp-options: -DTEST_WORKFLOW_DROP_INVENTORY_DOMAIN_MUTANT
+
+    if flag(test-workflow-upgrade-runtime-mutant)
+        cpp-options: -DTEST_WORKFLOW_UPGRADE_RUNTIME_MUTANT
+
+library dsl-barrier
+    exposed-modules:  Amoebius.Validation.DslBarrier
+    visibility:       public
+    hs-source-dirs:   src/dsl-barrier
+    default-language: GHC2024
+    ghc-options:
+        -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+        -Werror=incomplete-uni-patterns
+
+    build-depends:
+        base >=4.21 && <4.22,
+        filepath >=1.4 && <1.6,
+        amoebius:self-referential-gates,
+        amoebius:workflow-calculus,
+        text >=2.1 && <2.2
+
+    if flag(dsl-barrier-decoder-widening-mutant)
+        cpp-options: -DDSL_BARRIER_DECODE_WIDENING_MUTANT
+    if flag(dsl-barrier-legality-drop-mutant)
+        cpp-options: -DDSL_BARRIER_LEGALITY_DROP_MUTANT
+    if flag(dsl-barrier-bind-arm-swap-mutant)
+        cpp-options: -DDSL_BARRIER_BIND_ARM_SWAP_MUTANT
+    if flag(dsl-barrier-demand-omission-mutant)
+        cpp-options: -DDSL_BARRIER_DEMAND_OMISSION_MUTANT
+    if flag(dsl-barrier-provision-identity-collapse-mutant)
+        cpp-options: -DDSL_BARRIER_PROVISION_IDENTITY_COLLAPSE_MUTANT
+    if flag(dsl-barrier-render-omission-mutant)
+        cpp-options: -DDSL_BARRIER_RENDER_OMISSION_MUTANT
+    if flag(dsl-barrier-plan-reorder-mutant)
+        cpp-options: -DDSL_BARRIER_PLAN_REORDER_MUTANT
+    if flag(dsl-barrier-dry-run-execution-mutant)
+        cpp-options: -DDSL_BARRIER_DRY_RUN_EXECUTION_MUTANT
+    if flag(dsl-barrier-fake-call-bypass-mutant)
+        cpp-options: -DDSL_BARRIER_FAKE_CALL_BYPASS_MUTANT
 
 library self-referential-gates
     exposed-modules:  Amoebius.Gate.SelfReferential
@@ -5998,6 +6183,13 @@ library self-referential-gates
         base >=4.21 && <4.22,
         amoebius:workflow-calculus,
         text >=2.1 && <2.2
+
+    if flag(self-referential-gates-drop-observe-mutant)
+        cpp-options: -DSELF_REFERENTIAL_GATES_DROP_OBSERVE_MUTANT
+    if flag(self-referential-gates-leak-resource-mutant)
+        cpp-options: -DSELF_REFERENTIAL_GATES_LEAK_RESOURCE_MUTANT
+    if flag(self-referential-gates-skip-mutant-mutant)
+        cpp-options: -DSELF_REFERENTIAL_GATES_SKIP_MUTANT_MUTANT
 
 library ui-live
     exposed-modules:
@@ -6277,6 +6469,9 @@ test-suite validation-phase-contract-internal-component
         Amoebius.Validation.UiLocalCompositionRun.Internal
         Amoebius.Validation.EncryptedBrowserRuntimeRun.Internal
         Amoebius.Validation.UiContractGenerationRun.Internal
+        Amoebius.Validation.ToolAndMutantGenerationRun.Internal
+        Amoebius.Validation.TestWorkflowAlgebraRun.Internal
+        Amoebius.Validation.DslBarrierRun.Internal
         Amoebius.Validation.BootstrapPredicate
         Amoebius.Validation.BootstrapQualification.Internal
         Amoebius.Validation.BootstrapTrust.Internal
@@ -6505,6 +6700,38 @@ test-suite validation-pb-bootstrap-grammar-component
     if !os(windows)
         build-depends: unix >=2.8.6 && <2.9
 
+test-suite validation-pb-boundary-component
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    hs-source-dirs:
+        test/validation-kernel/pb-boundary test/validation-kernel
+
+    other-modules:
+        PbBoundaryOracle
+
+    default-language: GHC2024
+    ghc-options:
+        -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+        -Werror=incomplete-uni-patterns
+
+    build-depends:
+        base >=4.21 && <4.22,
+        bytestring >=0.12 && <0.13
+
+test-suite validation-pb-boundary-run-component
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    hs-source-dirs:   test/validation-kernel/pb-boundary-run
+
+    default-language: GHC2024
+    ghc-options:
+        -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+        -Werror=incomplete-uni-patterns
+
+    build-depends:
+        base >=4.21 && <4.22,
+        amoebius:validation-kernel
+
 test-suite validation-policy-contract-selector-component
     type:             exitcode-stdio-1.0
     main-is:          policy-contract-selector/Main.hs
@@ -6657,6 +6884,7 @@ test-suite validation-dispatch-selector-component
     hs-source-dirs:   test/validation-kernel
     other-modules:
         DispatchOracle
+        PolicyContractOracle
         SelectorCli
 
     default-language: GHC2024
@@ -12139,6 +12367,7 @@ test-suite test-workflow-algebra
     type:             exitcode-stdio-1.0
     main-is:          TestWorkflowAlgebraSpec.hs
     hs-source-dirs:   test/spec/workflow
+    other-modules:    TestWorkflowAlgebraOracle
     default-language: GHC2024
     ghc-options:
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
@@ -12162,6 +12391,7 @@ test-suite self-referential-gates-spec
     type:             exitcode-stdio-1.0
     main-is:          SelfReferentialGatesSpec.hs
     hs-source-dirs:   test/spec/workflow
+    other-modules:    DslBarrierOracle
     default-language: GHC2024
     ghc-options:
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
@@ -12171,8 +12401,10 @@ test-suite self-referential-gates-spec
         base >=4.21 && <4.22,
         directory >=1.3 && <1.4,
         filepath >=1.4 && <1.6,
+        amoebius:dsl-barrier,
         amoebius:self-referential-gates,
         amoebius:workflow-calculus,
+        process >=1.6 && <1.7,
         text >=2.1 && <2.2
 
 test-suite ui-single-tenant-live-ui-single-tenant-live
@@ -12321,6 +12553,7 @@ test-suite tool-and-mutant-generation-spec
     type:             exitcode-stdio-1.0
     main-is:          ToolAndMutantGenerationSpec.hs
     hs-source-dirs:   test/spec/generation
+    other-modules:    ToolAndMutantGenerationOracle
     default-language: GHC2024
     ghc-options:
         -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns

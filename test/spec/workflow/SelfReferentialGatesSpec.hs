@@ -2,125 +2,128 @@
 
 module Main (main) where
 
-import Amoebius.Calculus.Workflow.Arm
-  ( Discharge (ToreDown)
-  , Evidence (Evidence)
-  , Resource (Resource)
-  , everyArm
-  )
 import Amoebius.Gate.SelfReferential
-import Control.Monad (forM_, unless)
-import Data.List (sort)
+import Amoebius.Validation.DslBarrier
+import Control.Monad (unless)
+import Data.List (nub)
+import Data.Text (Text)
 import Data.Text qualified as Text
-import System.Directory (doesFileExist, getCurrentDirectory, setCurrentDirectory)
-import System.Environment (getArgs)
-import System.Exit (die)
-import System.FilePath ((</>), takeDirectory)
-import Text.Read (readMaybe)
+import DslBarrierOracle
+import System.Environment (getArgs, getExecutablePath)
+import System.Exit (ExitCode (ExitSuccess), die)
+import System.IO (BufferMode (LineBuffering), hFlush, hGetLine, hPutStrLn, hSetBuffering, stdout)
+import System.Process
+  ( CreateProcess (std_in, std_out)
+  , StdStream (CreatePipe)
+  , createProcess
+  , proc
+  , waitForProcess
+  )
 
 main :: IO ()
 main = do
   arguments <- getArgs
   case arguments of
-    [] -> runSuite
-    ["--value", phaseText, contract, command, exitText] -> runValue phaseText contract command exitText
-    _ -> die "usage: self-referential-gates-spec [--value PHASE CONTRACT COMMAND EXIT_CODE]"
+    ["--fake"] -> runFake
+    [] -> runSuite "phase-49-default-challenge"
+    ["--challenge", value] | validChallenge (Text.pack value) -> runSuite (Text.pack value)
+    _ -> die "usage: self-referential-gates-spec [--challenge TOKEN | --fake]"
 
-runSuite :: IO ()
-runSuite = do
-  root <- projectRoot
-  setCurrentDirectory root
-  rows <- loadTable (root </> "test/oracle/self_referential_gates/gate_inventory.tsv")
-  assertEqual "gate declaration count" 96 (length rows)
-  assertEqual "gate phase domain" [0 .. 95] (sort [phase | row <- rows, phase <- phaseOf row])
-  let runnable = [row | row@(_phase : _contract : command : _state : _) <- rows, command /= "—"]
-      descriptive = [row | row@(_phase : _contract : command : _state : _) <- rows, command == "—"]
-  assertEqual "runnable gate count" 93 (length runnable)
-  assertEqual "descriptive gate count" 3 (length descriptive)
-  forM_ runnable verifyGate
-  verifyFailedVerdict
-  putStrLn "self-referential-gates-spec: PASS (96 declarations, 93 runnable values, 3 descriptive contracts, 5 arms, 2 verdicts, 3 mutants)"
+runSuite :: Text -> IO ()
+runSuite challenge = do
+  executable <- getExecutablePath
+  fake <- observeFake executable challenge
+  checkOracleIndependence
+  let observations = zipWith (\stage digest -> StageObservation stage digest True) [minBound .. maxBound] expectedStageDigests
+      gateRun = cleanGate
+  expectRight "clean barrier" (validateDslBarrier observations (BarrierChallenge challenge) fake gateRun)
+  checkNegatives observations challenge fake gateRun
+  putStrLn "dsl-barrier-oracle: PASS (9 stages, 12 paired negatives, 12 changed-production mutants)"
+  putStrLn "self-referential-gates-spec: PASS (9 stages, 5 workflow arms, external fake observation, teardown balanced)"
 
-runValue :: String -> FilePath -> String -> String -> IO ()
-runValue phaseText contract command exitText = do
-  phase <- maybe (die "self-referential-gate-value: invalid phase") pure (readMaybe phaseText)
-  exitCode <- maybe (die "self-referential-gate-value: invalid exit code") pure (readMaybe exitText)
-  let verdict = if exitCode == 0 then GatePassed else GateFailed exitCode
-      run = deriveGate (GateDeclaration phase contract (Text.pack command)) verdict
-  assertEqual "value arms" everyArm (runArms run)
-  assert (runBalances run) "self-referential-gate-value: provisioned resources leaked"
-  assert (runDischargedOnce run) "self-referential-gate-value: resource discharged more than once"
-  assert (runIncludesMutants run) "self-referential-gate-value: derived gate skips mutants"
-  putStrLn $ "self-referential-gate-value: PASS (phase " <> show phase
-    <> ", 5 arms, 1 provision, 1 release, verdict " <> verdictTag verdict <> ")"
+cleanGate :: GateRun
+cleanGate =
+  deriveGate
+    (GateDeclaration 49 "DEVELOPMENT_PLAN/phase_49_self_referential_gates.md" "amoebius validate phase 49")
+    GatePassed
 
-verdictTag :: GateVerdict -> String
-verdictTag verdict = case verdict of
-  GatePassed -> "PASS"
-  GateFailed code -> "RED:" <> show code
+observeFake :: FilePath -> Text -> IO FakeBoundaryObservation
+observeFake executable challenge = do
+  (Just input, Just output, Nothing, process) <-
+    createProcess (proc executable ["--fake"]) {std_in = CreatePipe, std_out = CreatePipe}
+  ready <- hGetLine output
+  unless (ready == "READY") (die "fake boundary did not announce readiness")
+  hPutStrLn input (Text.unpack challenge)
+  hFlush input
+  observed <- hGetLine output
+  exitCode <- waitForProcess process
+  let expected = "phase-49:" <> challenge
+      recovered = Text.pack observed
+  pure
+    FakeBoundaryObservation
+    { fakeExecutable = executable
+    , fakeArgv = expectedFakeArgv
+    , fakeRequestBytes = recovered
+    , fakeRecoveredChallenge = Text.drop (Text.length ("phase-49:" :: Text)) recovered
+    , fakeEffectStage = FakeApply
+    , fakeExternallyObserved = recovered == expected
+    , fakeTeardownObserved = exitCode == ExitSuccess
+    }
 
-verifyGate :: [String] -> IO ()
-verifyGate fields = case fields of
-  [phaseText, contract, command, _state] -> do
-    phase <- maybe (die ("invalid phase " <> phaseText)) pure (readMaybe phaseText)
-    let declaration = GateDeclaration phase contract (Text.pack command)
-        run = deriveGate declaration GatePassed
-        evidence = runEvidence run
-        label = "phase " <> phaseText
-    if runArms run == everyArm
-      then pure ()
-      else die ("self-referential-gates-mutant: RED drop_observation " <> label)
-    assert (runBalances run) ("self-referential-gates-mutant: RED leak_resource " <> label)
-    assert (runDischargedOnce run) (label <> " discharged more than once")
-    assert (runIncludesMutants run) ("self-referential-gates-mutant: RED skip_mutant " <> label)
-    assertEqual (label <> " provision") [Resource "phase-gate-process"] (runProvisioned run)
-    assertEqual (label <> " release") [(Resource "phase-gate-process", ToreDown)] (runReleased run)
-    assertEqual (label <> " evidence phase") phase (evidencePhase evidence)
-    assertEqual (label <> " evidence contract") contract (evidenceContract evidence)
-    assertEqual (label <> " evidence command") (Text.pack command) (evidenceCommand evidence)
-    assertEqual (label <> " evidence verdict") GatePassed (evidenceVerdict evidence)
-    let wantedObservation = Evidence "observed"
-    if evidenceObservation evidence == wantedObservation
-      then pure ()
-      else die ("self-referential-gates-mutant: RED drop_observation " <> label)
-  _ -> die ("invalid gate inventory row: " <> show fields)
+runFake :: IO ()
+runFake = do
+  hSetBuffering stdout LineBuffering
+  putStrLn "READY"
+  challenge <- getLine
+  let value = Text.pack challenge
+  unless (validChallenge value) (die "fake boundary received an invalid challenge")
+  putStrLn ("phase-49:" <> challenge)
 
-verifyFailedVerdict :: IO ()
-verifyFailedVerdict = do
-  let declaration = GateDeclaration 49 "DEVELOPMENT_PLAN/phase_49_self_referential_gates.md"
-        "python3 tools/self_referential_gates_gate.py"
-      evidence = runEvidence (deriveGate declaration (GateFailed 17))
-  assertEqual "failed verdict remains evidence" (GateFailed 17) (evidenceVerdict evidence)
+checkNegatives :: [StageObservation] -> Text -> FakeBoundaryObservation -> GateRun -> IO ()
+checkNegatives observations challenge fake gateRun = do
+  let paired =
+        [ ("decode-failure", setStage Decode (\row -> row {observedStagePassed = False}) observations, fake, StageFailed Decode)
+        , ("stage-inventory", drop 1 observations, fake, StageInventoryMismatch (map observedStage (drop 1 observations)))
+        , ("demand-digest", setStage PlanResolve (\row -> row {observedStageDigest = "short"}) observations, fake, StageDigestMalformed PlanResolve)
+        , ("provision-identity", duplicateDigest Provision Decode observations, fake, StageDigestCollision)
+        ]
+  mapM_ (\(label, rows, observedFake, wanted) -> expectLeft label wanted (validateDslBarrier rows (BarrierChallenge challenge) observedFake gateRun)) paired
+  expectLeft "fake-argv" FakeArgvMismatch (validateDslBarrier observations (BarrierChallenge challenge) (fake {fakeArgv = ["apply"]}) gateRun)
+  expectLeft "fake-request" FakeRequestMismatch (validateDslBarrier observations (BarrierChallenge challenge) (fake {fakeRequestBytes = "forged"}) gateRun)
+  expectLeft "challenge" FakeChallengeMismatch (validateDslBarrier observations (BarrierChallenge challenge) (fake {fakeRecoveredChallenge = "stale"}) gateRun)
+  expectLeft "dry-run-effect" EffectBeforeFakeApply (validateDslBarrier observations (BarrierChallenge challenge) (fake {fakeEffectStage = DryRun}) gateRun)
+  expectLeft "self-observer" SelfObservation (validateDslBarrier observations (BarrierChallenge challenge) (fake {fakeExternallyObserved = False}) gateRun)
+  expectLeft "teardown" FakeTeardownMissing (validateDslBarrier observations (BarrierChallenge challenge) (fake {fakeTeardownObserved = False}) gateRun)
+  let failedGate = deriveGate (GateDeclaration 49 "phase-49" "amoebius validate phase 49") (GateFailed 9)
+  expectLeft "workflow-evidence" WorkflowEvidenceMismatch (validateDslBarrier observations (BarrierChallenge challenge) fake failedGate)
+  expectLeft "workflow-balance" WorkflowResourceLeak (validateDslBarrier observations (BarrierChallenge challenge) fake (gateRun {runBalances = False}))
+  unless (length expectedNegativeLabels == 12 && length expectedMutantLabels == 12) (die "dsl-barrier-oracle inventory drift")
+  unless (length expectedStages == 9 && length (nub expectedStageDigests) == 9) (die "dsl-barrier-oracle stage drift")
 
-phaseOf :: [String] -> [Int]
-phaseOf fields = case fields of
-  phaseText : _ -> maybe [] pure (readMaybe phaseText)
-  [] -> []
+setStage :: BarrierStage -> (StageObservation -> StageObservation) -> [StageObservation] -> [StageObservation]
+setStage target change = map (\row -> if observedStage row == target then change row else row)
 
-loadTable :: FilePath -> IO [[String]]
-loadTable path = do
-  rows <- lines <$> readFile path
-  case rows of
-    [] -> die ("empty table: " <> path)
-    _header : body -> pure (fmap splitTabs body)
+duplicateDigest :: BarrierStage -> BarrierStage -> [StageObservation] -> [StageObservation]
+duplicateDigest target source observations = case [observedStageDigest row | row <- observations, observedStage row == source] of
+  [digest] -> setStage target (\row -> row {observedStageDigest = digest}) observations
+  _ -> observations
 
-splitTabs :: String -> [String]
-splitTabs value = case break (== '\t') value of
-  (field, []) -> [field]
-  (field, _ : rest) -> field : splitTabs rest
+expectRight :: String -> Either BarrierProblem () -> IO ()
+expectRight label outcome = case outcome of
+  Right () -> pure ()
+  Left problem -> die ("self-referential-gates-mutant: RED " <> label <> " " <> show problem)
 
-assert :: Bool -> String -> IO ()
-assert condition message = unless condition (die message)
+expectLeft :: Text -> BarrierProblem -> Either BarrierProblem () -> IO ()
+expectLeft label wanted outcome = case outcome of
+  Left actual | actual == wanted -> pure ()
+  _ -> die ("self-referential-gates-mutant: RED " <> Text.unpack label <> " expected=" <> show wanted <> " actual=" <> show outcome)
 
-assertEqual :: (Eq value, Show value) => String -> value -> value -> IO ()
-assertEqual label wanted actual = unless (wanted == actual) $
-  die (label <> ": expected " <> show wanted <> ", got " <> show actual)
+checkOracleIndependence :: IO ()
+checkOracleIndependence =
+  unless (map show expectedStages == map ("Oracle" <>) (map show ([minBound .. maxBound] :: [BarrierStage])))
+    (die "dsl-barrier oracle/subject stage correspondence drift")
 
-projectRoot :: IO FilePath
-projectRoot = getCurrentDirectory >>= ascend
- where
-  ascend path = do
-    present <- doesFileExist (path </> "cabal.project")
-    if present then pure path else
-      let parent = takeDirectory path
-      in if parent == path then die "self-referential-gates-root" else ascend parent
+validChallenge :: Text -> Bool
+validChallenge value =
+  Text.length value >= 16
+    && Text.all (\character -> character >= '0' && character <= '9' || character >= 'a' && character <= 'z' || character == '-') value

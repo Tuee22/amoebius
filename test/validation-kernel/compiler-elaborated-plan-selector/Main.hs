@@ -1,7 +1,8 @@
 module Main (main) where
 
 import CompilerElaboratedPlanOracle
-  ( compilerElaboratedPlanSelectorNames
+  ( compilerElaboratedPlanSelectorAssignments
+  , compilerElaboratedPlanSelectorNames
   , runCompilerElaboratedPlanOracle
   , runCompilerElaboratedPlanSelectorImpactOracle
   , runCompilerElaboratedPlanSelectorIsolationOracle
@@ -16,4 +17,5 @@ main =
       { suiteSelectorNames = compilerElaboratedPlanSelectorNames
       , suiteRunImpacted = Just runCompilerElaboratedPlanSelectorImpactOracle
       , suiteRunUnaffected = Just runCompilerElaboratedPlanSelectorIsolationOracle
+      , suiteAssignments = compilerElaboratedPlanSelectorAssignments
       }

@@ -1,3 +1,0 @@
-surface=linux/arm64:/usr/bin/redis-cli
-mutation=expected-version:7.0.15->7.0.14
-expected_oracle=BinaryVersionMismatch

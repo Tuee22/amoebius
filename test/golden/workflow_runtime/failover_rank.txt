@@ -1,3 +1,0 @@
-worker-a
-worker-b
-worker-c

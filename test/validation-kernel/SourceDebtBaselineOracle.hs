@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module SourceDebtBaselineOracle
-  ( runSourceDebtBaselineOracle
+  ( sourceDebtBaselineSelectorAssignments
+  , runSourceDebtBaselineOracle
   , runSourceDebtBaselineExactCaseOracle
   , runSourceDebtBaselineSelectorImpactOracle
   , runSourceDebtBaselineSelectorIsolationOracle
@@ -25,6 +26,12 @@ import Data.List (group, sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as TextEncoding
+
+sourceDebtBaselineSelectorAssignments :: [(String, [String], String)]
+sourceDebtBaselineSelectorAssignments =
+  [ (selector, impacts, "source-debt-selector-control")
+  | (selector, impacts) <- mutationImpact
+  ]
 
 runSourceDebtBaselineOracle :: IO ()
 runSourceDebtBaselineOracle =
@@ -214,7 +221,7 @@ mutationIntent =
   , ("VALIDATION_SOURCE_DEBT_MISSING_OBSERVATION_ZERO_MUTANT", "empty diagnostic result")
   , ("VALIDATION_SOURCE_DEBT_OBJECT_ID_LIMIT_WIDEN_MUTANT", "object-id maximum-plus-one refuses before hashing")
   , ("VALIDATION_SOURCE_DEBT_OBSERVATION_LIMIT_NARROW_MUTANT", resultBoundCase)
-  , ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_SET_BYPASS_MUTANT", "empty diagnostic result")
+  , ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_SET_INVERSION_MUTANT", "empty diagnostic result")
   , ("VALIDATION_SOURCE_DEBT_OBSERVER_FABRICATION_MUTANT", centralCase)
   , ("VALIDATION_SOURCE_DEBT_OMISSION_MUTANT", centralCase)
   , ("VALIDATION_SOURCE_DEBT_PATH_INVENTORY_BYPASS_MUTANT", centralCase)
@@ -222,7 +229,7 @@ mutationIntent =
   , ("VALIDATION_SOURCE_DEBT_PATH_UTF8_LIMIT_WIDEN_MUTANT", "UTF-8 path maximum-plus-one refuses before hashing")
   , ("VALIDATION_SOURCE_DEBT_PB_ZERO_BYPASS_MUTANT", "pb debt is an exact semantic refusal")
   , ("VALIDATION_SOURCE_DEBT_PREALLOCATION_LIMIT_WIDEN_MUTANT", "preallocation maximum-plus-one refuses before hashing")
-  , ("VALIDATION_SOURCE_DEBT_PROBLEM_LIMIT_WIDEN_MUTANT", resultBoundCase)
+  , ("VALIDATION_SOURCE_DEBT_PROBLEM_LIMIT_NARROW_MUTANT", centralCase)
   , ("VALIDATION_SOURCE_DEBT_RAW_MODE_BYPASS_MUTANT", "invalid raw mode refuses exactly")
   , ("VALIDATION_SOURCE_DEBT_TRAVERSAL_LIMIT_WIDEN_MUTANT", "traversal maximum-plus-one refuses before observation")
   , ("VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_COUNT_PROJECTION_MUTANT", centralCase)
@@ -333,7 +340,7 @@ mutationIntent =
   , ("VALIDATION_SOURCE_DEBT_PATH_LENGTH_EARLY_PREDICATE_MUTANT", "UTF-8 path maximum is admitted exactly")
   , ("VALIDATION_SOURCE_DEBT_PATH_LENGTH_TRANSITION_MUTANT", "UTF-8 path maximum-plus-one refuses before hashing")
   , ("VALIDATION_SOURCE_DEBT_PB_PROBLEM_COMPOSITION_MUTANT", "pb debt is an exact semantic refusal")
-  , ("VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_ORDER_MUTANT", "executable raw mode maps exactly")
+  , ("VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_DUPLICATION_MUTANT", centralCase)
   , ("VALIDATION_SOURCE_DEBT_RAW_RESOURCE_RESULT_ROUTE_MUTANT", "UTF-8 path maximum-plus-one refuses before hashing")
   , ("VALIDATION_SOURCE_DEBT_RAW_TRAVERSAL_RESULT_ROUTE_MUTANT", "traversal maximum-plus-one refuses before observation")
   , ("VALIDATION_SOURCE_DEBT_RENDER_MODE_EXECUTABLE_MUTANT", "executable raw mode maps exactly")
@@ -370,9 +377,12 @@ mutationIntentProblems =
        , length (filter (== target) exactCaseLabels) /= 1]
 
 mutationImpact :: [(String, [String])]
-mutationImpact =
+mutationImpact = map reconcileMutationImpact mutationImpactSeed
+
+mutationImpactSeed :: [(String, [String])]
+mutationImpactSeed =
   [ ("VALIDATION_SOURCE_DEBT_AGGREGATE_BLOB_LIMIT_WIDEN_MUTANT", ["aggregate blob maximum-plus-one refuses before hashing", "aggregate preflight wins before a later path excess"])
-  , ("VALIDATION_SOURCE_DEBT_BASELINE_BYTE_COMMITMENT_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_BASELINE_BYTE_COMMITMENT_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem first-excess bound refuses exactly while nine-family observations remain exact"])
   , ("VALIDATION_SOURCE_DEBT_BASELINE_DHALL_COUNT_MUTANT", ["all-family exact result and result-bound maxima"])
   , ("VALIDATION_SOURCE_DEBT_BASELINE_DHALL_OMISSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem first-excess bound refuses exactly while nine-family observations remain exact"])
   , ("VALIDATION_SOURCE_DEBT_BASELINE_FAMILY_SET_INVERSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
@@ -397,7 +407,7 @@ mutationImpact =
   , ("VALIDATION_SOURCE_DEBT_MISSING_OBSERVATION_ZERO_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
   , ("VALIDATION_SOURCE_DEBT_OBJECT_ID_LIMIT_WIDEN_MUTANT", ["object-id maximum-plus-one refuses before hashing", "object preflight wins before a later blob excess"])
   , ("VALIDATION_SOURCE_DEBT_OBSERVATION_LIMIT_NARROW_MUTANT", ["problem first-excess bound refuses exactly while nine-family observations remain exact"])
-  , ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_SET_BYPASS_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_SET_INVERSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
   , ("VALIDATION_SOURCE_DEBT_OBSERVER_FABRICATION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
   , ("VALIDATION_SOURCE_DEBT_OMISSION_MUTANT", ["empty diagnostic result", "executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "traversal maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly", "problem first-excess bound refuses exactly while nine-family observations remain exact"])
   , ("VALIDATION_SOURCE_DEBT_PATH_INVENTORY_BYPASS_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
@@ -405,7 +415,7 @@ mutationImpact =
   , ("VALIDATION_SOURCE_DEBT_PATH_UTF8_LIMIT_WIDEN_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "path preflight wins before a later object excess"])
   , ("VALIDATION_SOURCE_DEBT_PB_ZERO_BYPASS_MUTANT", ["pb debt is an exact semantic refusal", "problem first-excess bound refuses exactly while nine-family observations remain exact"])
   , ("VALIDATION_SOURCE_DEBT_PREALLOCATION_LIMIT_WIDEN_MUTANT", ["preallocation maximum-plus-one refuses before hashing"])
-  , ("VALIDATION_SOURCE_DEBT_PROBLEM_LIMIT_WIDEN_MUTANT", ["problem first-excess bound refuses exactly while nine-family observations remain exact"])
+  , ("VALIDATION_SOURCE_DEBT_PROBLEM_LIMIT_NARROW_MUTANT", ["all-family exact result and result-bound maxima"])
   , ("VALIDATION_SOURCE_DEBT_RAW_MODE_BYPASS_MUTANT", ["invalid raw mode refuses exactly"])
   , ("VALIDATION_SOURCE_DEBT_TRAVERSAL_LIMIT_WIDEN_MUTANT", ["traversal maximum-plus-one refuses before observation"])
   , ("VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_COUNT_PROJECTION_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "all-family exact result and result-bound maxima", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
@@ -516,7 +526,7 @@ mutationImpact =
   , ("VALIDATION_SOURCE_DEBT_PATH_LENGTH_EARLY_PREDICATE_MUTANT", ["UTF-8 path maximum is admitted exactly"])
   , ("VALIDATION_SOURCE_DEBT_PATH_LENGTH_TRANSITION_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "path preflight wins before a later object excess"])
   , ("VALIDATION_SOURCE_DEBT_PB_PROBLEM_COMPOSITION_MUTANT", ["pb debt is an exact semantic refusal", "problem first-excess bound refuses exactly while nine-family observations remain exact"])
-  , ("VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_ORDER_MUTANT", ["executable raw mode maps exactly", "symbolic-link raw mode maps exactly", "pb debt is an exact semantic refusal", "preallocation maximum is admitted exactly", "UTF-8 path maximum is admitted exactly", "object-id maximum is admitted exactly", "blob maximum is admitted exactly", "aggregate blob maximum is admitted exactly"])
+  , ("VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_DUPLICATION_MUTANT", ["all-family exact result and result-bound maxima"])
   , ("VALIDATION_SOURCE_DEBT_RAW_RESOURCE_RESULT_ROUTE_MUTANT", ["UTF-8 path maximum-plus-one refuses before hashing", "ASCII path maximum-plus-one refuses before hashing", "three-byte path maximum-plus-one refuses before hashing", "four-byte path maximum-plus-one refuses before hashing", "object-id maximum-plus-one refuses before hashing", "blob maximum-plus-one refuses before hashing", "aggregate blob maximum-plus-one refuses before hashing", "path preflight wins before a later object excess", "object preflight wins before a later blob excess", "blob preflight wins before a later path excess", "aggregate preflight wins before a later path excess"])
   , ("VALIDATION_SOURCE_DEBT_RAW_TRAVERSAL_RESULT_ROUTE_MUTANT", ["traversal maximum-plus-one refuses before observation"])
   , ("VALIDATION_SOURCE_DEBT_RENDER_MODE_EXECUTABLE_MUTANT", ["executable raw mode maps exactly"])
@@ -550,6 +560,162 @@ mutationImpact =
     , "problem first-excess bound refuses exactly while nine-family observations remain exact"
     ]
 
+reconcileMutationImpact :: (String, [String]) -> (String, [String])
+reconcileMutationImpact (selector, labels) =
+  ( selector
+  , filter (`notElem` removed) labels
+      <> [label | label <- added, label `notElem` labels]
+  )
+ where
+  added = concat [values | (candidate, values) <- mutationImpactAdditions, candidate == selector]
+  removed = concat [values | (candidate, values) <- mutationImpactRemovals, candidate == selector]
+
+-- These deltas are the literal result of executing every changed binary
+-- against the complete exact-case inventory. Keeping the shared result-bound
+-- expansion and the repeated narrow projections named here makes the closed
+-- impact signatures reviewable without duplicating long case lists in dozens
+-- of declaration rows.
+mutationImpactAdditions :: [(String, [String])]
+mutationImpactAdditions =
+  [(selector, [resultBoundCaseLabel]) | selector <- resultBoundImpactAdditions]
+    <> [ ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_SET_INVERSION_MUTANT", [centralCaseLabel])
+       , ("VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_PROJECTION_MUTANT", ["empty diagnostic result", "pb debt is an exact semantic refusal", "traversal maximum is admitted exactly"])
+       , ("VALIDATION_SOURCE_DEBT_RESULT_FINDING_ORDER_MUTANT", [centralCaseLabel, "pb debt is an exact semantic refusal"])
+       , ("VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_PROBLEM_COMPOSITION_MUTANT", [centralCaseLabel])
+       , ("VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_DUPLICATION_MUTANT", ["preallocation maximum is admitted exactly"])
+       ]
+
+resultBoundImpactAdditions :: [String]
+resultBoundImpactAdditions =
+  [ "VALIDATION_SOURCE_DEBT_BASELINE_DHALL_COUNT_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_BASELINE_FAMILY_SET_INVERSION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_BASELINE_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_BASELINE_PROBE_COUNT_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_BASELINE_TEST_COUNT_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_BASELINE_UI_COUNT_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_BASELINE_VENDOR_COUNT_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_COUNT_OBSERVER_FABRICATION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_OBSERVER_FABRICATION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_SET_INVERSION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_OBSERVER_FABRICATION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PATH_INVENTORY_BYPASS_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PATH_OBSERVER_FABRICATION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PROBLEM_LIMIT_NARROW_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_COUNT_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_BASELINE_COUNT_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_BOUNDED_OBSERVATION_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_BOUNDED_PREFIX_PREDICATE_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_BOUNDED_PROBLEM_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_COMPARISON_FAMILY_ORDER_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_COUNT_ACTUAL_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_COUNT_EXPECTED_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_DECLARED_FAMILY_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_EXPECTED_FAMILY_COUNT_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_BLOB_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_DOMAIN_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_IDENTITY_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_MEMBER_ORDER_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_MODE_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_OBJECT_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_PATH_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_MEMBER_ORDER_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_OBSERVATION_COUNT_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_OBSERVATION_FINGERPRINT_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_OBSERVATION_PATH_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_ORDER_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PATH_DIGEST_DOMAIN_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PATH_DIGEST_IDENTITY_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PATH_DIGEST_MEMBER_ORDER_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PATH_DIGEST_PATH_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PREPARED_ENTRY_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RAW_ENTRY_BLOB_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RAW_ENTRY_MODE_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RAW_ENTRY_OBJECT_ID_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RAW_MODE_REGULAR_MAPPING_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RENDER_COUNT_KEY_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RENDER_COUNT_VALUE_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RENDER_FINGERPRINT_KEY_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RENDER_FINGERPRINT_VALUE_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RENDER_OBSERVATION_ORDER_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RENDER_PATH_KEY_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RENDER_PATH_VALUE_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_BLOB_SEPARATOR_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_IDENTIFIER_SEPARATOR_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_MODE_SEPARATOR_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_OBJECT_SEPARATOR_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_FINGERPRINT_PATH_SEPARATOR_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_HEX_HIGH_NIBBLE_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_HEX_LOW_NIBBLE_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_PROBLEM_COMPOSITION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PATH_DIGEST_IDENTIFIER_SEPARATOR_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PATH_DIGEST_MEMBER_SEPARATOR_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_DUPLICATION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_RENDER_MODE_REGULAR_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_UPDATE_TEXT_ENCODING_MUTANT"
+  ]
+
+mutationImpactRemovals :: [(String, [String])]
+mutationImpactRemovals =
+  [(selector, narrowProjectionRemovals) | selector <- narrowProjectionSelectors]
+    <> [(selector, [resultBoundCaseLabel]) | selector <- resultBoundImpactRemovals]
+    <> [ ("VALIDATION_SOURCE_DEBT_MISSING_OBSERVATION_ZERO_MUTANT", "preallocation maximum is admitted exactly" : narrowProjectionRemovals)
+       , ("VALIDATION_SOURCE_DEBT_BOUNDED_PREFIX_PREDICATE_MUTANT", [centralCaseLabel])
+       , ("VALIDATION_SOURCE_DEBT_BOUNDED_PROBLEM_PROJECTION_MUTANT", boundedCompositionRemovals)
+       , ("VALIDATION_SOURCE_DEBT_RESULT_FINDING_COMPOSITION_MUTANT", boundedCompositionRemovals)
+       ]
+
+narrowProjectionSelectors :: [String]
+narrowProjectionSelectors =
+  [ "VALIDATION_SOURCE_DEBT_COUNT_COMPARISON_BYPASS_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_COUNT_ACTUAL_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_COUNT_EXPECTED_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_ANALYSIS_RESULT_PROJECTION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_COUNT_PROBLEM_COMPOSITION_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_DIAGNOSTIC_RESULT_COMPOSITION_MUTANT"
+  ]
+
+narrowProjectionRemovals :: [String]
+narrowProjectionRemovals =
+  [ "executable raw mode maps exactly"
+  , "symbolic-link raw mode maps exactly"
+  , "UTF-8 path maximum is admitted exactly"
+  , "object-id maximum is admitted exactly"
+  , "blob maximum is admitted exactly"
+  , "aggregate blob maximum is admitted exactly"
+  ]
+
+boundedCompositionRemovals :: [String]
+boundedCompositionRemovals =
+  [ "empty diagnostic result"
+  , "executable raw mode maps exactly"
+  , "symbolic-link raw mode maps exactly"
+  , "traversal maximum is admitted exactly"
+  , "UTF-8 path maximum is admitted exactly"
+  , "object-id maximum is admitted exactly"
+  , "blob maximum is admitted exactly"
+  , "aggregate blob maximum is admitted exactly"
+  ]
+
+resultBoundImpactRemovals :: [String]
+resultBoundImpactRemovals =
+  [ "VALIDATION_SOURCE_DEBT_BOUNDED_PREFIX_LENGTH_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_LIMIT_FINDING_CODE_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_LIMIT_FINDING_DETAIL_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_LIMIT_FINDING_SUBJECT_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_LIMIT_MAXIMUM_KEY_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_LIMIT_MAXIMUM_VALUE_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_LIMIT_OBSERVATION_ORDER_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_LIMIT_OBSERVED_KEY_MUTANT"
+  , "VALIDATION_SOURCE_DEBT_LIMIT_OBSERVED_VALUE_MUTANT"
+  ]
+
+centralCaseLabel :: String
+centralCaseLabel = "all-family exact result and result-bound maxima"
+
+resultBoundCaseLabel :: String
+resultBoundCaseLabel = "problem first-excess bound refuses exactly while nine-family observations remain exact"
+
 mutationImpactProblems :: [String]
 mutationImpactProblems =
   -- Row cardinality is not asserted: an authored Int against the length of an
@@ -573,6 +739,38 @@ mutationImpactProblems =
        | (selector, labels) <- mutationImpact
        , label <- labels
        , label `notElem` exactCaseLabels]
+    <> mutationImpactAdjustmentProblems
+
+mutationImpactAdjustmentProblems :: [String]
+mutationImpactAdjustmentProblems =
+  [ "mutation-impact addition is not a closed selector/case pair: " <> selector <> " -> " <> label
+  | (selector, labels) <- mutationImpactAdditions
+  , label <- labels
+  , selector `notElem` map fst mutationImpactSeed || label `notElem` exactCaseLabels
+  ]
+    <> [ "mutation-impact addition was already present: " <> selector <> " -> " <> label
+       | (selector, labels) <- mutationImpactAdditions
+       , label <- labels
+       , label `elem` concat [values | (candidate, values) <- mutationImpactSeed, candidate == selector]
+       ]
+    <> [ "mutation-impact removal is not a declared selector/case pair: " <> selector <> " -> " <> label
+       | (selector, labels) <- mutationImpactRemovals
+       , label <- labels
+       , label `notElem` concat [values | (candidate, values) <- mutationImpactSeed, candidate == selector]
+       ]
+    <> [ "mutation-impact adjustment is contradictory: " <> selector <> " -> " <> label
+       | (selector, label) <- impactAdditionPairs
+       , (selector, label) `elem` impactRemovalPairs
+       ]
+    <> [ "duplicate mutation-impact addition: " <> selector <> " -> " <> label
+       | (selector, label) : _ : _ <- group (sort impactAdditionPairs)
+       ]
+    <> [ "duplicate mutation-impact removal: " <> selector <> " -> " <> label
+       | (selector, label) : _ : _ <- group (sort impactRemovalPairs)
+       ]
+ where
+  impactAdditionPairs = [(selector, label) | (selector, labels) <- mutationImpactAdditions, label <- labels]
+  impactRemovalPairs = [(selector, label) | (selector, labels) <- mutationImpactRemovals, label <- labels]
 
 exactCaseLabels :: [String]
 exactCaseLabels = map fst exactCaseProblems

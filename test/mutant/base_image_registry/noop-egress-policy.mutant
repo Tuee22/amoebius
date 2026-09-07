@@ -1,3 +1,0 @@
-surface=public-registry-denial
-mutation=replace-node-firewall-with-kindnet-networkpolicy
-expected_oracle=PublicPullCanaryUnexpectedlySucceeded

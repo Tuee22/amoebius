@@ -77,6 +77,10 @@ data PhaseRunner
     | UiLocalCompositionRunner
     | EncryptedBrowserRuntimeRunner
     | UiContractGenerationRunner
+    | ToolAndMutantGenerationRunner
+    | TestWorkflowAlgebraRunner
+    | DslBarrierRunner
+    | PbBoundaryRunner
     deriving (Eq, Ord, Show)
 
 data RegisteredRunner = RegisteredRunner
@@ -274,6 +278,22 @@ registeredRunners =
     , RegisteredRunner
         { registeredCapability = "ui_contract_generation"
         , registeredRunner = UiContractGenerationRunner
+        }
+    , RegisteredRunner
+        { registeredCapability = "tool_and_mutant_generation"
+        , registeredRunner = ToolAndMutantGenerationRunner
+        }
+    , RegisteredRunner
+        { registeredCapability = "test_workflow_algebra"
+        , registeredRunner = TestWorkflowAlgebraRunner
+        }
+    , RegisteredRunner
+        { registeredCapability = "self_referential_gates"
+        , registeredRunner = DslBarrierRunner
+        }
+    , RegisteredRunner
+        { registeredCapability = "host_assert_cli"
+        , registeredRunner = PbBoundaryRunner
         }
     ]
 

@@ -1,7 +1,0 @@
-[
-  "UniqueGatewayOwner",
-  "SessionAlwaysRebindable",
-  "PlannedIsLossless",
-  "NoWriteAfterStaleFailover",
-  "NoTakeWithoutProvenFreshness"
-]

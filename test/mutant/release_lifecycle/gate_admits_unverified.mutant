@@ -1,2 +1,0 @@
-operator=guard-weakening
-expected=release_unverified advances Prod without a Runtime EvidenceWitness

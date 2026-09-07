@@ -115,8 +115,8 @@ maximumSourceDebtTraversalEntries = 16384
 #endif
 
 maximumSourceDebtProblems :: Int
-#if defined(VALIDATION_SOURCE_DEBT_PROBLEM_LIMIT_WIDEN_MUTANT)
-maximumSourceDebtProblems = 25
+#if defined(VALIDATION_SOURCE_DEBT_PROBLEM_LIMIT_NARROW_MUTANT)
+maximumSourceDebtProblems = 1
 #else
 maximumSourceDebtProblems = 24
 #endif
@@ -274,7 +274,7 @@ sourceDebtBaseline SourceTools =
   Just
     ( SourceDebtBaseline
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_MUTANT)
-        238
+        0
 #else
         237
 #endif
@@ -287,7 +287,7 @@ sourceDebtBaseline SourceDhall =
   Just
     ( SourceDebtBaseline
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_DHALL_COUNT_MUTANT)
-        280
+        0
 #else
         279
 #endif
@@ -313,7 +313,7 @@ sourceDebtBaseline SourceUi =
   Just
     ( SourceDebtBaseline
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_UI_COUNT_MUTANT)
-        17
+        0
 #else
         16
 #endif
@@ -339,7 +339,7 @@ sourceDebtBaseline SourceTest =
   Just
     ( SourceDebtBaseline
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_TEST_COUNT_MUTANT)
-        891
+        0
 #else
         890
 #endif
@@ -352,7 +352,7 @@ sourceDebtBaseline SourceProbe =
   Just
     ( SourceDebtBaseline
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_PROBE_COUNT_MUTANT)
-        8
+        0
 #else
         7
 #endif
@@ -366,7 +366,7 @@ sourceDebtBaseline SourceVendor =
   Just
     ( SourceDebtBaseline
 #if defined(VALIDATION_SOURCE_DEBT_BASELINE_VENDOR_COUNT_MUTANT)
-        29
+        0
 #else
         28
 #endif
@@ -1114,7 +1114,7 @@ analyzeBoundedSourceDebt prepared =
 #if defined(VALIDATION_SOURCE_DEBT_RESULT_FINDING_COMPOSITION_MUTANT)
           observationLimitFindings `seq` boundedProblemFindings `seq` stateIntegrityFindings states
 #elif defined(VALIDATION_SOURCE_DEBT_RESULT_FINDING_ORDER_MUTANT)
-          stateIntegrityFindings states <> boundedProblemFindings <> observationLimitFindings
+          reverse (observationLimitFindings <> boundedProblemFindings <> stateIntegrityFindings states)
 #else
           observationLimitFindings <> boundedProblemFindings <> stateIntegrityFindings states
 #endif
@@ -1368,11 +1368,12 @@ nulByte = ByteString.singleton 0
 
 sourceDebtProblems :: Map SourceDebtId SourceDebtObservation -> [SourceDebtProblem]
 sourceDebtProblems observed =
-#if defined(VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_ORDER_MUTANT)
-  comparisonProblems
-    <> pbProblems
+#if defined(VALIDATION_SOURCE_DEBT_PROBLEM_CATEGORY_DUPLICATION_MUTANT)
+  baselineFamilyProblems
     <> observedFamilyProblems
-    <> baselineFamilyProblems
+    <> pbProblems
+    <> comparisonProblems
+    <> comparisonProblems
 #else
   baselineFamilyProblems
     <> observedFamilyProblems
@@ -1398,13 +1399,14 @@ sourceDebtProblems observed =
     ]
   actualLaterOwned =
 #if defined(VALIDATION_SOURCE_DEBT_ACTUAL_FAMILY_PROJECTION_MUTANT)
-    Set.delete SourcePb (Map.keysSet observed) `seq` Set.empty
+    Set.delete SourcePb (Map.keysSet observed) `seq` Set.singleton SourcePb
 #else
     Set.delete SourcePb (Map.keysSet observed)
 #endif
   observedFamilyProblems =
 #if defined(VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_PROBLEM_COMPOSITION_MUTANT)
-    sourceDebtObservedFamilySetMatches laterOwnedSourceDebtIds actualLaterOwned `seq` []
+    sourceDebtObservedFamilySetMatches laterOwnedSourceDebtIds actualLaterOwned
+      `seq` [SourceDebtFamilySetMismatch laterOwnedSourceDebtIds Set.empty]
 #else
     [ SourceDebtFamilySetMismatch laterOwnedSourceDebtIds actualLaterOwned
     | not (sourceDebtObservedFamilySetMatches laterOwnedSourceDebtIds actualLaterOwned)
@@ -1461,8 +1463,8 @@ sourceDebtBaselineFamilySetMatches expected actual = expected == actual
 -- refused. A subset still refuses an observed family outside the closed
 -- universe, which is the property that matters.
 sourceDebtObservedFamilySetMatches :: Set SourceDebtId -> Set SourceDebtId -> Bool
-#if defined(VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_SET_BYPASS_MUTANT)
-sourceDebtObservedFamilySetMatches expected actual = expected `seq` actual `seq` True
+#if defined(VALIDATION_SOURCE_DEBT_OBSERVED_FAMILY_SET_INVERSION_MUTANT)
+sourceDebtObservedFamilySetMatches expected actual = not (actual `Set.isSubsetOf` expected)
 #else
 sourceDebtObservedFamilySetMatches expected actual = actual `Set.isSubsetOf` expected
 #endif

@@ -1,4 +1,0 @@
-operator=invariant-clause-delete
-target=Amoebius.Store.Budget
-change=omit-full-failed-write-window-from-peak
-expected=write-budget-boundary-mismatch

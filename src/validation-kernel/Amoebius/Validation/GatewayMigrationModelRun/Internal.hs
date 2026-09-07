@@ -365,4 +365,4 @@ retiredSources =
 
 expectedJavaDigest, expectedTlcDigest :: Text
 expectedJavaDigest = "e865867065e48928c58293f30e7ae26a79c842f8607fa51d7e2e9fb90b602786"
-expectedTlcDigest = "dbcc75552f21978a4846688b8e23be1a6b6c0b3fcee35d78fec2df167958ec94"
+expectedTlcDigest = "b658b4e504fdf0b721caf7066320f6b6fe5805f4dd2f717d0e47baba4097205e"

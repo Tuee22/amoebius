@@ -1,5 +1,4 @@
 # Phase 36: The closed transaction vocabulary
-
 > **Purpose**: Make the relational data plane a closed, request-scoped transaction GADT whose row
 > declarations generate schema, policies, statements, and additive generation transitions.
 > **Read this if**: a relational transaction, row type, row policy, or schema generation has to change, or the
@@ -13,7 +12,7 @@ owned by the exact integrated gate and the mechanical status projection that fol
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/extension_conformance_transactions.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/extension_conformance_transactions.md, DEVELOPMENT_PLAN/substrates.md
 **Generated sections**: none
 
 </details>

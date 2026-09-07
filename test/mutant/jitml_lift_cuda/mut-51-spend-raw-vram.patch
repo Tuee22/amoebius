@@ -1,6 +1,0 @@
-diff --git a/src/Amoebius/JitML/CudaArtifactLift.hs b/src/Amoebius/JitML/CudaArtifactLift.hs
---- a/src/Amoebius/JitML/CudaArtifactLift.hs
-+++ b/src/Amoebius/JitML/CudaArtifactLift.hs
-@@
--capacityForAdmission = cudaNetAllocatableBytes
-+capacityForAdmission = cudaTotalVramBytes

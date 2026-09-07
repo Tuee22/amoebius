@@ -4,6 +4,7 @@
 module CompilerElaboratedPlanOracle
   ( compilerElaboratedPlanAffectedExactCaseLabels
   , compilerElaboratedPlanExactCaseLabels
+  , compilerElaboratedPlanSelectorAssignments
   , compilerElaboratedPlanSelectorNames
   , runCompilerElaboratedPlanOracle
   , runCompilerElaboratedPlanSelectorImpactOracle
@@ -24,6 +25,12 @@ import Data.List (isPrefixOf)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Text.Read (readMaybe)
+
+compilerElaboratedPlanSelectorAssignments :: [(String, [String], String)]
+compilerElaboratedPlanSelectorAssignments =
+  [ (selector, selectorAffectedTargets selector, "compiler-elaborated-plan-unaffected-corpus")
+  | selector <- compilerElaboratedPlanSelectorNames
+  ]
 
 -- This diagnostic vocabulary is intentionally restated in the oracle.  It is
 -- decoded from the public CheckResult's text, not imported from the production

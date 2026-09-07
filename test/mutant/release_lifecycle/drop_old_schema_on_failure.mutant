@@ -1,2 +1,0 @@
-operator=failure-residency-drop
-expected=failed migration releases the old schema before verified cleanup

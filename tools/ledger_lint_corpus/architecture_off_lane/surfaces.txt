@@ -1,1 +1,0 @@
-bootstrap.substrate_detect

@@ -214,15 +214,13 @@ sourceDisciplineCheck :: FilePath -> IO CheckResult
 sourceDisciplineCheck root = do
   production <- Text.concat <$> mapM (fmap Text.pack . readFile . (root </>)) productionSources
   oracle <- Text.pack <$> readFile (root </> oracleSource)
-  registry <- Text.pack <$> readFile (root </> "test/mutant/registry.tsv")
   pure (CheckResult "chain-boundary-source-discipline"
     [observation "chain-boundary.production-module-count" "8", observation "chain-boundary.effect-boundary" "pure plan plus exact run-local Haskell fakes; no pb, network, host mutation, cluster, or hardware"]
     ([finding "CHAIN-BOUNDARY-SOURCE-SHAPE" "<production>" ("missing production element: " <> token) |
        token <- ["data Step", "chain ::", "nextFrameAfter", "renderChainPlan", "mkToolPath", "runBoundaryCorpus", "checkExtensionSource", "sanctionedApi"], notContains token production]
      <> [finding "CHAIN-BOUNDARY-ORACLE-SHAPE" oracleSource ("missing oracle element: " <> token) |
        token <- ["expectedPlanRows", "expectedCalculusProjection", "expectedBoundaryArgv", "expectedBoundaryManifest", "expectedAstNegatives", "expectedValidationLoci", "expectedMutants"], notContains token oracle]
-     <> [finding "CHAIN-BOUNDARY-ORACLE-INDEPENDENCE" oracleSource "independent oracle imports production or fixture modules" | any (`Text.isInfixOf` oracle) ["import Amoebius", "import BindFixtures", "import ProvisionFixtures"]]
-     <> [finding "CHAIN-BOUNDARY-REGISTRY" "test/mutant/registry.tsv" "retired serialized Phase-34 mutant authority remains" | "chain_boundary\t" `Text.isInfixOf` registry]))
+     <> [finding "CHAIN-BOUNDARY-ORACLE-INDEPENDENCE" oracleSource "independent oracle imports production or fixture modules" | any (`Text.isInfixOf` oracle) ["import Amoebius", "import BindFixtures", "import ProvisionFixtures"]]))
 
 discoveryCheck :: AcquiredSourceSnapshot -> CheckResult
 discoveryCheck acquired = CheckResult "chain-boundary-discovery"
@@ -394,6 +392,7 @@ retiredSources =
   , "test/harness/chain_boundary/fakes/docker", "test/harness/chain_boundary/fakes/helm", "test/harness/chain_boundary/fakes/kubectl", "test/harness/chain_boundary/fakes/pulumi"
   , "test/mutant/chain_boundary/boundary/mB1_argv/mutant.txt", "test/mutant/chain_boundary/boundary/mB2_byte/mutant.txt", "test/mutant/chain_boundary/boundary/mB3_path_resolve/mutant.txt", "test/mutant/chain_boundary/m1_cfg_drop_service/mutant.txt", "test/mutant/chain_boundary/m2_descent_inframe/mutant.txt"
   , "test/fixture/chain_boundary/astcheck/astcheck_negatives.expected", "test/fixture/chain_boundary/boundary/apply_input.json", "test/fixture/chain_boundary/sanctioned_api_expected.dhall"
+  , "test/mutant/registry.tsv"
   ]
 
 oracleSource, compileNegativeSource :: FilePath

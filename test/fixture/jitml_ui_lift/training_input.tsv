@@ -1,3 +1,0 @@
-fixture	shape	dtype	expected_result
-bounded-linear	1x4	float32	stable-reference-vector
-authority-shaped-output	1x2	text	escaped-presentation-only

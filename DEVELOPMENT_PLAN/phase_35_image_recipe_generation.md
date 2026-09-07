@@ -1,5 +1,4 @@
 # Phase 35: The amoebius image recipe
-
 > **Purpose**: Constrain the generated image recipe with independently authored semantics, and constrain the
 > plain native build invocation token by token, without retaining renderer output under version control or running a container
 > engine.
@@ -14,7 +13,7 @@ owned by the exact integrated gate and the mechanical status projection that fol
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/image_build_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/image_build_doctrine.md, DEVELOPMENT_PLAN/substrates.md
 **Generated sections**: none
 
 </details>

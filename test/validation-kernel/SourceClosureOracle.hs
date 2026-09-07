@@ -3,6 +3,7 @@
 module SourceClosureOracle
   ( runSourceClosureOracle
   , runSourceClosureSelectorOracle
+  , runSourceClosureSelectorControlOracle
   , sourceClosureSelectorIntents
   , sourceClosureSelectorNames
   ) where
@@ -611,6 +612,22 @@ runSourceClosureSelectorOracle selector = do
     (null problems)
     (fail (unlines ("SourceClosureOracle selector diagnostics failed:" : map ("  " <>) problems)))
 
+-- | Retain the independently authored selector-to-case registry as the
+-- same-binary unaffected control for every changed SourceClosure subject.
+-- The impacted runner above exercises production behavior; this control
+-- separately proves that the changed executable still carries and executes
+-- the complete oracle assignment boundary.
+runSourceClosureSelectorControlOracle :: String -> IO ()
+runSourceClosureSelectorControlOracle selector = do
+  let problems =
+        [ "control selector is absent from the closed selector inventory: " <> selector
+        | selector `notElem` sourceClosureSelectorNames
+        ]
+          <> literalIntegrityProblems
+  unless
+    (null problems)
+    (fail (unlines ("SourceClosureOracle selector control failed:" : map ("  " <>) problems)))
+
 selectorTargets :: String -> [String]
 selectorTargets selector =
   [ target
@@ -636,11 +653,11 @@ firstFailingCase cases = case cases of
 literalIntegrityProblems :: [String]
 literalIntegrityProblems =
   [ "canonical pb literal byte count changed"
-  | ByteString.length canonicalPbBytes /= 4770
+  | ByteString.length canonicalPbBytes /= 4795
   ]
     <> [ "canonical pb literal SHA-256 changed"
        | sha256Hex canonicalPbBytes
-           /= "e210494d3ad4bcaad716daed5bb89cb5611107547e83eb018a6369e134cd5418"
+           /= "c82b525dd47e831338598d495ce5ed5ee8eb87333cf1607e8b91807b5f6a162c"
        ]
     -- Selector cardinality is not asserted: an authored Int against the length
     -- of an authored list in the same module refuses only a half-finished edit
@@ -748,7 +765,7 @@ identityMismatchCase =
             , failureCommitmentSha256 = commitment
             , failureClaimedObservation = claimed
             , failureEntryCount = "1"
-            , failureAggregateBytes = "4770"
+            , failureAggregateBytes = "4795"
             , failureComputedSnapshot = computed
             , failureProblemCount = "1"
             , failureFindingsWithoutCommitment =
@@ -1405,6 +1422,7 @@ classificationCatalog =
           , ("config.proto", "value\n")
           , ("dhall/config.txt", "value\n")
           , ("documents/renamed_program.md", "# renamed\n")
+          , ("documents/renamed_program.txt", "renamed text\n")
           , ("package.json", "value\n")
           , ("probe/Probe.hs", "module Probe where\n")
           , ("probe/helper.py", "value\n")
@@ -1610,7 +1628,7 @@ canonicalPbBytes =
     , "    cabal = toolchain / \".ghcup\" / \"bin\" / (\"cabal\" + artifact[4])"
     , "    builddir = toolchain / \"dist-newstyle\""
     , "    store = toolchain / \"cabal-store\""
-    , "    adapter.run(root, [str(cabal), \"--store-dir=\" + str(store), \"build\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), BUILD_TARGET], environment)"
+    , "    adapter.run(root, [str(cabal), \"--store-dir=\" + str(store), \"build\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), \"--offline\", \"--jobs=1\", BUILD_TARGET], environment)"
     , "    binary_bytes = adapter.capture(root, [str(cabal), \"--store-dir=\" + str(store), \"list-bin\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), BUILD_TARGET], environment)"
     , "    binary_text = binary_bytes.decode(\"utf-8\")"
     , "    binary = binary_text.strip()"

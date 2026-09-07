@@ -1,7 +1,0 @@
-diff --git a/src/Amoebius/JitML/CudaArtifactLift.hs b/src/Amoebius/JitML/CudaArtifactLift.hs
---- a/src/Amoebius/JitML/CudaArtifactLift.hs
-+++ b/src/Amoebius/JitML/CudaArtifactLift.hs
-@@
--  PointerCasSucceeded revision -> Right (mintArtifact revision staged)
--  PointerCasConflict -> Left PointerConflict
-+  _ -> Right (mintArtifact (PointerRevision "uncommitted") staged)

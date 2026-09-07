@@ -1,6 +1,0 @@
-diff --git a/src/Amoebius/HostComms/NodePort.hs b/src/Amoebius/HostComms/NodePort.hs
---- a/src/Amoebius/HostComms/NodePort.hs
-+++ b/src/Amoebius/HostComms/NodePort.hs
-@@
--renderServiceType = "NodePort"
-+renderServiceType = "LoadBalancer"

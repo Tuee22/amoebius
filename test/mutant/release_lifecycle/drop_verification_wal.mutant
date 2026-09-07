@@ -1,2 +1,0 @@
-operator=dropped-input
-expected=the migration exact-fit omits verification WAL bytes

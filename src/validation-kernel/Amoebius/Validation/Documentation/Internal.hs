@@ -3,6 +3,7 @@
 
 module Amoebius.Validation.Documentation.Internal
   ( checkCorpus
+  , boundDocumentationResult
   , checkCorpusDiagnostic
   , checkDocumentStructure
   , checkInventoryDiagnostic
@@ -1785,14 +1786,13 @@ pathPrefixOf prefix candidate =
   candidate == prefix || Text.pack (prefix <> "/") `Text.isPrefixOf` Text.pack candidate
 
 normalizePath :: FilePath -> FilePath
-normalizePath = dropDocumentationDotPrefix . normalise . map normalizePathSeparator
-
-dropDocumentationDotPrefix :: FilePath -> FilePath
 #ifdef VALIDATION_DOCUMENT_NORMALIZE_DOT_PREFIX_OMISSION_MUTANT
-dropDocumentationDotPrefix path = path
+normalizePath rawPath =
+  case map normalizePathSeparator rawPath of
+    dotPrefixed@('.' : '/' : _) -> dotPrefixed
+    path -> normalise path
 #else
-dropDocumentationDotPrefix ('.' : '/' : rest) = dropDocumentationDotPrefix rest
-dropDocumentationDotPrefix path = path
+normalizePath = normalise . map normalizePathSeparator
 #endif
 
 normalizePathSeparator :: Char -> Char
@@ -2905,7 +2905,7 @@ documentationHeaderTitlePrefix = "# "
 
 documentationHeaderTitleCardinality :: [(Int, Text)] -> Bool
 #ifdef VALIDATION_DOCUMENT_HEADER_TITLE_CARDINALITY_MUTANT
-documentationHeaderTitleCardinality occurrences = length occurrences `seq` True
+documentationHeaderTitleCardinality occurrences = length occurrences `seq` False
 #else
 documentationHeaderTitleCardinality occurrences = case occurrences of
   [_] -> True
@@ -3056,7 +3056,7 @@ documentationHeaderCloseCardinality values = case values of
 documentationHeaderDetailsLimit :: [Int] -> Bool
 #ifdef VALIDATION_DOCUMENT_HEADER_DETAILS_LIMIT_MUTANT
 documentationHeaderDetailsLimit values = case values of
-  [lineNumber] -> lineNumber <= 39
+  [lineNumber] -> lineNumber <= 37
   _ -> True
 #else
 documentationHeaderDetailsLimit values = case values of
@@ -3067,7 +3067,7 @@ documentationHeaderDetailsLimit values = case values of
 documentationHeaderSummaryLimit :: [Int] -> Bool
 #ifdef VALIDATION_DOCUMENT_HEADER_SUMMARY_LIMIT_MUTANT
 documentationHeaderSummaryLimit values = case values of
-  [lineNumber] -> lineNumber <= 39
+  [lineNumber] -> lineNumber <= 38
   _ -> True
 #else
 documentationHeaderSummaryLimit values = case values of
@@ -3102,7 +3102,7 @@ documentationHeaderPurposeReadThisOrder purposeLine readLine = purposeLine <= re
 
 documentationHeaderReadThisDetailsOrder :: Int -> Int -> Bool
 #ifdef VALIDATION_DOCUMENT_HEADER_ORIENTATION_READ_THIS_DETAILS_MUTANT
-documentationHeaderReadThisDetailsOrder readLine detailsLine = readLine < detailsLine `seq` True
+documentationHeaderReadThisDetailsOrder readLine detailsLine = readLine < detailsLine `seq` False
 #else
 documentationHeaderReadThisDetailsOrder readLine detailsLine = readLine < detailsLine
 #endif
@@ -3160,7 +3160,7 @@ documentationHeaderLeadNonQuote line = not (">" `Text.isPrefixOf` Text.stripStar
 
 documentationHeaderMetadataSummaryStatusOrder :: Int -> Int -> Bool
 #ifdef VALIDATION_DOCUMENT_HEADER_METADATA_SUMMARY_STATUS_ORDER_MUTANT
-documentationHeaderMetadataSummaryStatusOrder summaryLine statusLine = summaryLine < statusLine `seq` True
+documentationHeaderMetadataSummaryStatusOrder summaryLine statusLine = summaryLine < statusLine `seq` False
 #else
 documentationHeaderMetadataSummaryStatusOrder summaryLine statusLine = summaryLine < statusLine
 #endif
@@ -3188,7 +3188,7 @@ documentationHeaderMetadataReferencedGeneratedOrder referencedLine generatedLine
 
 documentationHeaderMetadataGeneratedCloseOrder :: Int -> Int -> Bool
 #ifdef VALIDATION_DOCUMENT_HEADER_METADATA_GENERATED_CLOSE_ORDER_MUTANT
-documentationHeaderMetadataGeneratedCloseOrder generatedLine closeLine = generatedLine < closeLine `seq` True
+documentationHeaderMetadataGeneratedCloseOrder generatedLine closeLine = generatedLine < closeLine `seq` False
 #else
 documentationHeaderMetadataGeneratedCloseOrder generatedLine closeLine = generatedLine < closeLine
 #endif
@@ -3240,8 +3240,8 @@ documentationStatusValues = documentationStatusValueOrder $
     ]
 
 documentationStatusValueOrder :: [Text] -> [Text]
-#ifdef VALIDATION_DOCUMENT_METADATA_STATUS_LEGAL_ORDER_MUTANT
-documentationStatusValueOrder = reverse
+#ifdef VALIDATION_DOCUMENT_METADATA_STATUS_LEGAL_VALUE_OMISSION_MUTANT
+documentationStatusValueOrder = drop 1
 #else
 documentationStatusValueOrder = id
 #endif

@@ -1,7 +1,8 @@
 module Main (main) where
 
 import CompilerBuildInfoOracle
-  ( compilerBuildInfoSelectorNames
+  ( compilerBuildInfoSelectorAssignments
+  , compilerBuildInfoSelectorNames
   , runCompilerBuildInfoOracle
   , runCompilerBuildInfoSelectorImpactOracle
   , runCompilerBuildInfoSelectorIsolationOracle
@@ -18,4 +19,5 @@ main =
       , suiteRunImpacted = Just runCompilerBuildInfoSelectorImpactOracle
       , suiteRunUnaffected = Just runCompilerBuildInfoSelectorIsolationOracle
       , suiteRunControl = Just runCompilerBuildInfoSelectorProductControlOracle
+      , suiteAssignments = compilerBuildInfoSelectorAssignments
       }

@@ -1,4 +1,0 @@
-ordinal	phase	observed_condition
-0	base-apply	deployment/release-lifecycle-base:Available
-1	schema-migration	job/release-lifecycle-migrate:Complete+sql-copy:verified
-2	finalize	deployment/release-lifecycle-final:Available+old-schema:retired

@@ -1,3 +1,0 @@
-surface=BuildKit-worker-envelope
-mutation=remove-cpu-memory-and-backing-cgroup-controls
-expected_oracle=BuildWorkerEnvelopeMismatch

@@ -5,6 +5,7 @@ module DocumentationOracle
   , documentationSelectorMatrixRows
   , documentationSelectorNames
   , runDocumentationOracle
+  , runDocumentationInputEnvelopeRouteOracle
   , runDocumentationOutputOracle
   , runDocumentationResourceOracle
   , runDocumentationSelectorOracle
@@ -16,6 +17,7 @@ module DocumentationOracle
 
 import Amoebius.Validation.Documentation
   ( documentationInventoryDiagnostic
+  , documentationOutputBoundDiagnostic
   , documentationPolicyOwnerDiagnostic
   , documentationStructureDiagnostic
   , documentationWorktreeDiagnostic
@@ -26,7 +28,7 @@ import Control.Monad (filterM, forM_, unless)
 import Crypto.Hash (Digest, SHA256, hash)
 import Data.ByteString qualified as ByteString
 import Data.ByteString.Char8 qualified as ByteString8
-import Data.List (sort)
+import Data.List (isPrefixOf, sort)
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Data.Text (Text)
@@ -59,6 +61,7 @@ runDocumentationOracle = do
         <> proseBudgetProblems
         <> resourceEnvelopeProblems
         <> outputEnvelopeProblems
+        <> documentationInternalContractProblems
         <> concat
         [ expectClean "minimal governed documentation corpus" linkedCorpus
         , expectOnlyPolicyDiagnostic
@@ -79,6 +82,18 @@ runDocumentationOracle = do
                 (replaceIn registryPlacementOwnerPath registryPlacementOwnerHeading "## 2. Wrong registry placement owner" policyOwnerCorpus)
             )
         , expectClean "minimal governed corpus without local links" unlinkedCorpus
+        , expectObservation
+            "closed governed path classification"
+            "governed-count"
+            "7"
+            ( documentationStructureDiagnostic
+                ( unlinkedCorpus
+                    <> [ ( "DEVELOPMENT_PLAN/synthetic_phase.md"
+                         , governedDocument "Synthetic Phase" "Exercise the DEVELOPMENT_PLAN governance family." "none" "## Contract\n\nSynthetic phase contract."
+                         )
+                       ]
+                )
+            )
         , expectClean "body Status field is not header metadata" bodyStatusCorpus
         , expectClean "parent traversal and multiline Markdown resolve inside the repository" parentTraversalCorpus
         , expectClean "non-governed Markdown contributes inbound backlink edges" auxiliaryInboundCorpus
@@ -96,6 +111,16 @@ runDocumentationOracle = do
                 "This lead paragraph fixes the orientation shape without borrowing production prose."
                 "This lead paragraph fixes the orientation shape without borrowing production prose.\n> **Purpose**: Duplicate header value."
                 linkedCorpus
+            )
+        , expectFinding
+            "duplicate normalized document path"
+            "DOC-DUPLICATE"
+            "AGENTS.md"
+            ( linkedCorpus
+                <> [ ( "AGENTS.md"
+                     , governedDocument "Duplicate Agent Instructions" "Duplicate agent policy." "none" "## Rules\n\nDuplicate agent rules."
+                     )
+                   ]
             )
         , expectFinding
             "canonical CLAUDE import exception"
@@ -244,6 +269,17 @@ runDocumentationOracle = do
             "documents/"
             (documentationStructureDiagnostic [("scratch/README.md", governedDocument "Decoy" "Decoy purpose." "none" "## Notes\n\nDecoy only.")])
         ]
+    )
+
+runDocumentationInputEnvelopeRouteOracle :: IO ()
+runDocumentationInputEnvelopeRouteOracle =
+  finishDiagnostics
+    "DocumentationOracle input-envelope route"
+    ( expectFindingInResult
+        "entry-count boundary plus one refuses before parsing"
+        "DOC-INPUT-ENTRY-LIMIT"
+        "documents/"
+        (documentationStructureDiagnostic (replicate 257 ("scratch/repeated.md", "")))
     )
 
 runDocumentationResourceOracle :: IO ()
@@ -744,6 +780,324 @@ sentenceSecondHalf =
 sentenceLong :: Text
 sentenceLong = sentenceFirstHalf <> " " <> sentenceSecondHalf
 
+documentationInternalContractProblems :: [String]
+documentationInternalContractProblems =
+  headerContractProblems
+    <> normalizationContractProblems
+    <> requiredCorpusContractProblems
+    <> ownerRouteContractProblems
+    <> outputRetentionContractProblems
+
+headerContractProblems :: [String]
+headerContractProblems =
+  expectHeaderFindingSignatures
+    "ordered aggregate header findings"
+    emptyHeaderFindingSignatures
+    (agentHeaderResult "")
+    <> expectHeaderFindingSignatures
+      "ordered mixed metadata field findings"
+      mixedFieldFindingSignatures
+      (agentHeaderResult mixedFieldAgentDocument)
+    <> expectFindingInResult
+      "duplicate details tag"
+      "DOC-HEADER-DETAILS"
+      "AGENTS.md"
+      (agentHeaderResult (duplicateHeaderToken "<details>"))
+    <> expectFindingInResult
+      "duplicate metadata summary tag"
+      "DOC-HEADER-DETAILS"
+      "AGENTS.md"
+      (agentHeaderResult (duplicateHeaderToken "<summary>Link-graph metadata</summary>"))
+    <> expectFindingInResult
+      "duplicate details close tag"
+      "DOC-HEADER-DETAILS"
+      "AGENTS.md"
+      (agentHeaderResult (duplicateHeaderToken "</details>"))
+    <> expectNoFindingCode
+      "Purpose remains admitted on line forty"
+      "DOC-HEADER-PURPOSE"
+      (agentHeaderResult purposeAtLineForty)
+    <> expectNoFindingCode
+      "Read-this-if remains admitted on line forty"
+      "DOC-HEADER-READ-THIS-IF"
+      (agentHeaderResult readThisAtLineForty)
+    <> expectNoFindingCode
+      "details, summary, and close remain admitted at lines thirty-eight through forty"
+      "DOC-HEADER-DETAILS"
+      (agentHeaderResult tagBoundaryHeader)
+    <> expectCleanResult
+      "complete orientation header ending on line forty"
+      (agentHeaderResult completeBoundaryHeader)
+    <> expectFindingInResult
+      "title must precede Purpose"
+      "DOC-HEADER-ORDER"
+      "AGENTS.md"
+      (agentHeaderResult (swapHeaderBlock canonicalAgentDocument titlePurposeBlock purposeTitleBlock))
+    <> expectFindingInResult
+      "Purpose must precede Read-this-if"
+      "DOC-HEADER-ORDER"
+      "AGENTS.md"
+      (agentHeaderResult (swapHeaderBlock canonicalAgentDocument purposeReadThisBlock readThisPurposeBlock))
+    <> expectFindingInResult
+      "details must precede its summary"
+      "DOC-HEADER-ORDER"
+      "AGENTS.md"
+      (agentHeaderResult (swapHeaderBlock canonicalAgentDocument detailsSummaryBlock summaryDetailsBlock))
+    <> expectFindingInResult
+      "orientation requires lead prose"
+      "DOC-HEADER-ORDER"
+      "AGENTS.md"
+      (agentHeaderResult noLeadAgentDocument)
+    <> expectFindingInResult
+      "quoted orientation text is not lead prose"
+      "DOC-HEADER-ORDER"
+      "AGENTS.md"
+      (agentHeaderResult quotedLeadAgentDocument)
+    <> expectNoFindingCode
+      "leading whitespace does not precede the title"
+      "DOC-HEADER-TITLE"
+      (agentHeaderResult ("   \n" <> canonicalAgentDocument))
+    <> expectFindingInResult
+      "nonblank prose before the title"
+      "DOC-HEADER-TITLE"
+      "AGENTS.md"
+      (agentHeaderResult ("Unexpected lead before title.\n" <> canonicalAgentDocument))
+    <> expectFindingInResult
+      "Read-this-if value is nonempty"
+      "DOC-HEADER-READ-THIS-IF"
+      "AGENTS.md"
+      (agentHeaderResult (Text.replace canonicalReadThisLine "> **Read this if**:" canonicalAgentDocument))
+    <> concatMap metadataOrderProblem metadataOrderMutations
+ where
+  metadataOrderProblem (label, original, replacement) =
+    expectFindingInResult
+      label
+      "DOC-HEADER-METADATA-BLOCK"
+      "AGENTS.md"
+      (agentHeaderResult (swapHeaderBlock canonicalAgentDocument original replacement))
+
+normalizationContractProblems :: [String]
+normalizationContractProblems =
+  expectCleanResult
+    "backslash-separated governed paths normalize before classification"
+    (documentationStructureDiagnostic (map mapBackslashes linkedCorpus))
+    <> expectCleanResult
+      "dot-prefixed governed paths normalize before classification"
+      (documentationStructureDiagnostic [("./" <> path, contents) | (path, contents) <- linkedCorpus])
+ where
+  mapBackslashes (path, contents) = (map replaceSlash path, contents)
+  replaceSlash '/' = '\\'
+  replaceSlash character = character
+
+requiredCorpusContractProblems :: [String]
+requiredCorpusContractProblems =
+  concat
+    [ missingExact "required README" "README.md"
+    , missingExact "required AGENTS" "AGENTS.md"
+    , missingExact "required CLAUDE" "CLAUDE.md"
+    , missingFamily "required documents subtree" "documents"
+    , missingFamily "required DEVELOPMENT_PLAN subtree" "DEVELOPMENT_PLAN"
+    ]
+ where
+  missingExact label path =
+    expectFindingInResult
+      label
+      "DOC-DISCOVERY-MISSING"
+      path
+      (documentationStructureDiagnostic (filter ((/= path) . fst) linkedCorpus))
+  missingFamily label prefix =
+    expectFindingInResult
+      label
+      "DOC-DISCOVERY-MISSING"
+      prefix
+      (documentationStructureDiagnostic (filter (not . inFamily prefix . fst) linkedCorpus))
+  inFamily prefix path = path == prefix || (prefix <> "/") `isPrefixOf` path
+
+ownerRouteContractProblems :: [String]
+ownerRouteContractProblems =
+  expectFindingInResult
+    "inventory path retains policy-owner findings"
+    "DOC-POLICY-OWNER-ANCHOR"
+    registryOwnerPath
+    ( documentationInventoryDiagnostic
+        (replaceIn registryOwnerPath "## 3. Canonical providers; extension is capability-specific" "## 3. Wrong registry owner" policyOwnerCorpus)
+    )
+
+outputRetentionContractProblems :: [String]
+outputRetentionContractProblems =
+  concat
+    [ expectFindingCodeCount "corpus refusal survives output bounding" "DOC-CORPUS-DIAGNOSTIC-ONLY" 1 retainedOutputResult
+    , expectFindingCodeCount "inventory refusal survives output bounding" "DOC-INVENTORY-DIAGNOSTIC-ONLY" 1 retainedOutputResult
+    , expectFindingCodeCount "structure refusal survives output bounding" "DOC-STRUCTURE-DIAGNOSTIC-ONLY" 1 retainedOutputResult
+    , expectFindingCodeCount "discovery refusal survives output bounding" "DOC-DISCOVERY-MISSING" 1 retainedOutputResult
+    , expectFindingCount "mandatory output finding bound" 65 mandatoryBoundaryResult
+    ]
+
+retainedOutputResult :: CheckResult
+retainedOutputResult =
+  documentationOutputBoundDiagnostic
+    CheckResult
+      { checkName = "synthetic-output-retention"
+      , checkObservations = []
+      , checkFindings = ordinaryOutputFindings <> mandatoryOutputFindings
+      }
+
+mandatoryBoundaryResult :: CheckResult
+mandatoryBoundaryResult =
+  documentationOutputBoundDiagnostic
+    CheckResult
+      { checkName = "synthetic-mandatory-boundary"
+      , checkObservations = []
+      , checkFindings = ordinaryOutputFindings <> replicate 65 (Finding "DOC-DISCOVERY-MISSING" "documents" "synthetic mandatory finding")
+      }
+
+ordinaryOutputFindings :: [Finding]
+ordinaryOutputFindings =
+  [ Finding "DOC-SYNTHETIC" ("synthetic/" <> show ordinal) "ordinary bounded-output finding"
+  | ordinal <- [(1 :: Int) .. 4097]
+  ]
+
+mandatoryOutputFindings :: [Finding]
+mandatoryOutputFindings =
+  [ Finding "DOC-CORPUS-DIAGNOSTIC-ONLY" "corpus" "synthetic corpus refusal"
+  , Finding "DOC-INVENTORY-DIAGNOSTIC-ONLY" "inventory" "synthetic inventory refusal"
+  , Finding "DOC-STRUCTURE-DIAGNOSTIC-ONLY" "structure" "synthetic structure refusal"
+  , Finding "DOC-DISCOVERY-MISSING" "documents" "synthetic discovery refusal"
+  ]
+
+agentHeaderResult :: Text -> CheckResult
+agentHeaderResult contents =
+  documentationStructureDiagnostic (replaceDocument "AGENTS.md" contents linkedCorpus)
+
+expectCleanResult :: String -> CheckResult -> [String]
+expectCleanResult label result =
+  case checkFindings result of
+    [item]
+      | item == structureDiagnosticRefusal -> []
+    findings -> [label <> ": unexpected findings " <> show findings]
+
+expectHeaderFindingSignatures :: String -> [(Text, Text)] -> CheckResult -> [String]
+expectHeaderFindingSignatures label expected result =
+  [ label <> ": expected header finding signatures " <> show expected <> ", observed " <> show actual
+  | actual /= expected
+  ]
+ where
+  actual =
+    [ (findingCode item, findingDetail item)
+    | item <- checkFindings result
+    , findingSubject item == "AGENTS.md"
+    , "DOC-HEADER-" `Text.isPrefixOf` findingCode item || "DOC-METADATA-" `Text.isPrefixOf` findingCode item
+    ]
+
+emptyHeaderFindingSignatures :: [(Text, Text)]
+emptyHeaderFindingSignatures =
+  [ ("DOC-HEADER-TITLE", "document must contain exactly one H1 title at its first non-blank line")
+  , ("DOC-HEADER-PURPOSE", "Purpose must occur exactly once, within the first forty lines, with a non-empty value")
+  , ("DOC-HEADER-READ-THIS-IF", "Read this if must occur exactly once, within the first forty lines, with a non-empty value")
+  , ("DOC-HEADER-DETAILS", "link-graph metadata details/summary/closing tags must occur exactly once in the first forty lines")
+  , ("DOC-HEADER-ORDER", "title, Purpose, Read-this-if, lead prose, and link-graph metadata must occur in that order")
+  , ("DOC-HEADER-METADATA-BLOCK", "the four metadata fields must occur in canonical order between the metadata summary and closing tag")
+  , ("DOC-METADATA-CARDINALITY", "Status must occur exactly once at column zero inside the first-forty-lines metadata block")
+  , ("DOC-METADATA-CARDINALITY", "Supersedes must occur exactly once at column zero inside the first-forty-lines metadata block")
+  , ("DOC-METADATA-CARDINALITY", "Referenced by must occur exactly once at column zero inside the first-forty-lines metadata block")
+  , ("DOC-METADATA-CARDINALITY", "Generated sections must occur exactly once at column zero inside the first-forty-lines metadata block")
+  ]
+
+mixedFieldFindingSignatures :: [(Text, Text)]
+mixedFieldFindingSignatures =
+  [ ("DOC-HEADER-METADATA-BLOCK", "the four metadata fields must occur in canonical order between the metadata summary and closing tag")
+  , ("DOC-METADATA-CARDINALITY", "Status must occur exactly once at column zero inside the first-forty-lines metadata block")
+  , ("DOC-METADATA-VALUE", "Supersedes must not be empty")
+  , ("DOC-METADATA-VALUE", "Referenced by must not be empty")
+  , ("DOC-METADATA-GENERATED", "Generated sections must be exactly 'none'")
+  ]
+
+canonicalAgentDocument :: Text
+canonicalAgentDocument =
+  governedDocument "Agent Instructions" "Agent policy." "CLAUDE.md" "## Rules\n\nAgent rules live here."
+
+canonicalReadThisLine :: Text
+canonicalReadThisLine = "> **Read this if**: You need this synthetic component-diagnostic document."
+
+mixedFieldAgentDocument :: Text
+mixedFieldAgentDocument =
+  Text.replace "**Generated sections**: none" "**Generated sections**: generated"
+    ( Text.replace "**Referenced by**: CLAUDE.md" "**Referenced by**:"
+        ( Text.replace "**Supersedes**: N/A" "**Supersedes**:"
+            ( Text.replace
+                "**Status**: Authoritative source"
+                "**Status**: Authoritative source\n**Status**: Reference only"
+                canonicalAgentDocument
+            )
+        )
+    )
+
+duplicateHeaderToken :: Text -> Text
+duplicateHeaderToken token = Text.replace token (token <> "\n" <> token) canonicalAgentDocument
+
+swapHeaderBlock :: Text -> Text -> Text -> Text
+swapHeaderBlock document original replacement = Text.replace original replacement document
+
+titlePurposeBlock, purposeTitleBlock, purposeReadThisBlock, readThisPurposeBlock, detailsSummaryBlock, summaryDetailsBlock :: Text
+titlePurposeBlock = "# Agent Instructions\n> **Purpose**: Agent policy."
+purposeTitleBlock = "> **Purpose**: Agent policy.\n# Agent Instructions"
+purposeReadThisBlock = "> **Purpose**: Agent policy.\n" <> canonicalReadThisLine
+readThisPurposeBlock = canonicalReadThisLine <> "\n> **Purpose**: Agent policy."
+detailsSummaryBlock = "<details>\n<summary>Link-graph metadata</summary>"
+summaryDetailsBlock = "<summary>Link-graph metadata</summary>\n<details>"
+
+noLeadAgentDocument :: Text
+noLeadAgentDocument = Text.replace "This lead paragraph fixes the orientation shape without borrowing production prose." "" canonicalAgentDocument
+
+quotedLeadAgentDocument :: Text
+quotedLeadAgentDocument = Text.replace "This lead paragraph fixes the orientation shape without borrowing production prose." "> Quoted orientation text." canonicalAgentDocument
+
+purposeAtLineForty :: Text
+purposeAtLineForty = Text.unlines (["# Boundary Purpose"] <> replicate 38 "" <> ["> **Purpose**: Boundary value."])
+
+readThisAtLineForty :: Text
+readThisAtLineForty = Text.unlines (["# Boundary Read", "> **Purpose**: Boundary value."] <> replicate 37 "" <> [canonicalReadThisLine])
+
+tagBoundaryHeader :: Text
+tagBoundaryHeader =
+  Text.unlines
+    ( ["# Boundary Tags", "> **Purpose**: Boundary value.", canonicalReadThisLine, "", "Boundary lead prose."]
+        <> replicate 32 ""
+        <> ["<details>", "<summary>Link-graph metadata</summary>", "</details>"]
+    )
+
+completeBoundaryHeader :: Text
+completeBoundaryHeader =
+  Text.unlines
+    ( ["# Complete Boundary", "> **Purpose**: Boundary value.", canonicalReadThisLine, "Boundary lead prose."]
+        <> replicate 28 ""
+        <> [ "<details>"
+           , "<summary>Link-graph metadata</summary>"
+           , "**Status**: Authoritative source"
+           , "**Supersedes**: N/A"
+           , "**Referenced by**: CLAUDE.md"
+           , "**Generated sections**: none"
+           , ""
+           , "</details>"
+           ]
+    )
+
+metadataOrderMutations :: [(String, Text, Text)]
+metadataOrderMutations =
+  [ ( "Status must precede Supersedes"
+    , "**Status**: Authoritative source\n**Supersedes**: N/A"
+    , "**Supersedes**: N/A\n**Status**: Authoritative source"
+    )
+  , ( "Supersedes must precede Referenced by"
+    , "**Supersedes**: N/A\n**Referenced by**: CLAUDE.md"
+    , "**Referenced by**: CLAUDE.md\n**Supersedes**: N/A"
+    )
+  , ( "Referenced by must precede Generated sections"
+    , "**Referenced by**: CLAUDE.md\n**Generated sections**: none"
+    , "**Generated sections**: none\n**Referenced by**: CLAUDE.md"
+    )
+  ]
+
 -- Worktree component diagnostic only. These values are intentionally stated
 -- independently of Documentation's production baseline. The exact live
 -- finding manifest is closed: every known Phase-0 reset-residue class is
@@ -768,6 +1122,9 @@ productionCorpusProblems = do
           ]
             <> [ "the live corpus published no governed-path digest observation"
                | not (present "governed-path-manifest-sha256")
+               ]
+            <> [ "the live corpus published no phase-contract document count"
+               | not (present "phase-document-count")
                ]
             <> [ "the live corpus published no prose-budget residue: " <> Text.unpack key
                | key <-

@@ -1,5 +1,4 @@
 # Phase 37: Bounded UI-program schema
-
 > **Purpose**: Admit bounded declarative UI programs through a total checker and expose only a
 > constructor-private `CheckedUiProgram` to later UI phases.
 > **Read this if**: the UI source algebra, graph checker, Haskell program-case corpus, or checked-program boundary
@@ -15,7 +14,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/substrates.md
 **Generated sections**: none
 
 </details>

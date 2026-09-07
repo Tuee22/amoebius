@@ -78,7 +78,7 @@ def bootstrap(adapter, arguments):
     cabal = toolchain / ".ghcup" / "bin" / ("cabal" + artifact[4])
     builddir = toolchain / "dist-newstyle"
     store = toolchain / "cabal-store"
-    adapter.run(root, [str(cabal), "--store-dir=" + str(store), "build", "--builddir=" + str(builddir), "--with-compiler=" + str(ghc), BUILD_TARGET], environment)
+    adapter.run(root, [str(cabal), "--store-dir=" + str(store), "build", "--builddir=" + str(builddir), "--with-compiler=" + str(ghc), "--offline", "--jobs=1", BUILD_TARGET], environment)
     binary_bytes = adapter.capture(root, [str(cabal), "--store-dir=" + str(store), "list-bin", "--builddir=" + str(builddir), "--with-compiler=" + str(ghc), BUILD_TARGET], environment)
     binary_text = binary_bytes.decode("utf-8")
     binary = binary_text.strip()

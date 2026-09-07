@@ -229,11 +229,11 @@ maximumModeCharacters = 7
 #else
 maximumModeCharacters = 6
 #endif
-exactBootstrapBytes = 4770
+exactBootstrapBytes = 4795
 #if defined(VALIDATION_PB_GRAMMAR_SOURCE_BYTE_LIMIT_WIDEN_MUTANT)
 maximumSourceBytes = 4771
 #else
-maximumSourceBytes = 4770
+maximumSourceBytes = 4795
 #endif
 
 maximumPhysicalLines, maximumAstNodes, maximumLexicalUnits, maximumSyntaxDepth :: Int
@@ -289,7 +289,7 @@ maximumDiagnosticProblems = 64
 
 expectedBootstrapSha256 :: Text
 expectedBootstrapSha256 =
-  "e210494d3ad4bcaad716daed5bb89cb5611107547e83eb018a6369e134cd5418"
+  "c82b525dd47e831338598d495ce5ed5ee8eb87333cf1607e8b91807b5f6a162c"
 
 preflightRawInventory
   :: [(FilePath, Text, ByteString)]
@@ -388,7 +388,7 @@ preflightSingleHard path mode bytes =
 #else
     [ preflightFinding
         "PB-GRAMMAR-BYTE-COUNT-EXACT"
-        ( "expected exactly 4770 bytes; observed "
+        ( "expected exactly 4795 bytes; observed "
             <> decimal (ByteString.length bytes)
         )
     | ByteString.length bytes /= exactBootstrapBytes
@@ -633,7 +633,7 @@ preflightObservations rawInventory =
         <> retained retainPreflightExpectedModeObservation
           [observation "expected.mode" "100644"]
         <> retained retainPreflightExpectedBytesObservation
-          [observation "expected.bytes" "4770"]
+          [observation "expected.bytes" "4795"]
         <> retained retainPreflightExpectedSha256Observation
           [observation "expected.sha256" expectedBootstrapSha256]
         <> case (boundedLength 2 rawInventory, take 1 rawInventory) of
@@ -2771,7 +2771,7 @@ canonicalBootstrapBytes =
     , "    cabal = toolchain / \".ghcup\" / \"bin\" / (\"cabal\" + artifact[4])"
     , "    builddir = toolchain / \"dist-newstyle\""
     , "    store = toolchain / \"cabal-store\""
-    , "    adapter.run(root, [str(cabal), \"--store-dir=\" + str(store), \"build\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), BUILD_TARGET], environment)"
+    , "    adapter.run(root, [str(cabal), \"--store-dir=\" + str(store), \"build\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), \"--offline\", \"--jobs=1\", BUILD_TARGET], environment)"
     , "    binary_bytes = adapter.capture(root, [str(cabal), \"--store-dir=\" + str(store), \"list-bin\", \"--builddir=\" + str(builddir), \"--with-compiler=\" + str(ghc), BUILD_TARGET], environment)"
     , "    binary_text = binary_bytes.decode(\"utf-8\")"
     , "    binary = binary_text.strip()"
@@ -4907,8 +4907,12 @@ proveToolchainExecutables ast = do
     , PyString command
     , prefixed "--builddir=" "builddir"
     , prefixed "--with-compiler=" "ghc"
-    , PyName "BUILD_TARGET"
     ]
+      <> ( if command == "build"
+             then [PyString "--offline", PyString "--jobs=1"]
+             else []
+         )
+      <> [PyName "BUILD_TARGET"]
 
 assignedExpressionForTool :: Text -> [PyStmt] -> Either PbProblem PyExpr
 assignedExpressionForTool name statements =

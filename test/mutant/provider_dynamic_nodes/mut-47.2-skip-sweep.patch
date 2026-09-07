@@ -1,5 +1,0 @@
---- a/src/Amoebius/Pulumi/Teardown.hs
-+++ b/src/Amoebius/Pulumi/Teardown.hs
-@@ seeded mutant: return green without enumerating tagged run-owned resources
--  sweepRunOwned criteria inventory
-+  []

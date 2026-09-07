@@ -2,7 +2,8 @@ module Main (main) where
 
 import SelectorCli (SelectorSuite (..), runSelectorCli, selectorSuite)
 import SourceDebtBaselineOracle
-  ( runSourceDebtBaselineExactCaseOracle
+  ( sourceDebtBaselineSelectorAssignments
+  , runSourceDebtBaselineExactCaseOracle
   , runSourceDebtBaselineOracle
   , runSourceDebtBaselineSelectorControlOracle
   , runSourceDebtBaselineSelectorImpactOracle
@@ -22,4 +23,5 @@ main =
       , suiteRunImpacted = Just runSourceDebtBaselineSelectorImpactOracle
       , suiteRunUnaffected = Just runSourceDebtBaselineSelectorIsolationOracle
       , suiteRunControl = Just runSourceDebtBaselineSelectorControlOracle
+      , suiteAssignments = sourceDebtBaselineSelectorAssignments
       }

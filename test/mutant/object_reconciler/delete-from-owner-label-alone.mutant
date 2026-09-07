@@ -1,3 +1,0 @@
-surface=authenticated-delete
-mutation=authorize-delete-from-owner-label-without-generation-resourceversion-retention-guards
-expected_oracle=DeleteAuthorityMismatch

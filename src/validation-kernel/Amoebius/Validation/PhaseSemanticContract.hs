@@ -162,6 +162,10 @@ data GateRequirement
   | RequirePhaseFortyFour PhaseFortyFourRequirement
   | RequirePhaseFortyFive PhaseFortyFiveRequirement
   | RequirePhaseFortySix PhaseFortySixRequirement
+  | RequirePhaseFortySeven PhaseFortySevenRequirement
+  | RequirePhaseFortyEight PhaseFortyEightRequirement
+  | RequirePhaseFortyNine PhaseFortyNineRequirement
+  | RequirePhaseFifty PhaseFiftyRequirement
   deriving (Eq, Ord, Show)
 
 -- | The Phase-1 payload is compiled independently of its Markdown projection.
@@ -1138,6 +1142,90 @@ data PhaseFortySixRequirement
   | RequireQualifiedPhaseFortySixGatePass
   deriving (Eq, Ord, Show)
 
+data PhaseFortySevenRequirement
+  = RequireHaskellOwnedContentAddressedSupportGenerationAndSourceClosure
+  | RequireAcquiredToolAndMutantGenerationSupervisor
+  | RequireDirectOfflineSerialToolAndMutantGenerationMatrix
+  | RequireIndependentToolAndMutantGenerationOracle
+  | RequireClosedSupportArtifactPositiveControls
+  | RequireExactBuildRootAndDeclarationPairedNegatives
+  | RequireAppliedToolAndMutantGenerationProductionMutants
+  | RequireExactSupportSourceAndGeneratedArtifactDiscovery
+  | RequirePostAcquisitionToolAndMutantGenerationChallenge
+  | RequireToolAndMutantGenerationProcessAndFilesystemObservation
+  | RequireNoPbPythonShellExecutionNetworkLiveHostHardwareOrParallelism
+  | RequireFreshGenerationRunIdentitiesAndStableSource
+  | RequireQualifiedToolAndMutantGenerationHarness
+  | RequireGeneratedSupportProductsContainedBelowBuild
+  | RequirePhaseFortySevenSourceFamiliesZero
+  | RequireExactPhaseFortySixReceipt
+  | RequireGeneratedToolExecutionProviderSemanticsLiveRuntimeAndHardwareOwnersExplicit
+  | RequireQualifiedPhaseFortySevenGatePass
+  deriving (Eq, Ord, Show)
+
+data PhaseFortyEightRequirement
+  = RequirePureTestWorkflowTeardownSuggestionInventoryAndEvidenceAlgebra
+  | RequireAcquiredTestWorkflowAlgebraSupervisor
+  | RequireDirectOfflineSerialTestWorkflowAlgebraMatrix
+  | RequireIndependentTestWorkflowAlgebraOracle
+  | RequireClosedTestWorkflowAlgebraPositiveControls
+  | RequireExactTestWorkflowAlgebraPairedNegatives
+  | RequireAppliedTestWorkflowAlgebraProductionMutants
+  | RequireExactTestWorkflowAlgebraSourceAndProjectionDiscovery
+  | RequirePostAcquisitionTestWorkflowAlgebraChallenge
+  | RequireTestWorkflowAlgebraProcessAndFilesystemObservation
+  | RequireNoPbNetworkLiveProviderHostHardwareOrParallelism
+  | RequireFreshTestWorkflowAlgebraRunAndStableSource
+  | RequireQualifiedTestWorkflowAlgebraHarness
+  | RequireTestWorkflowAlgebraProductsContainedBelowBuild
+  | RequireNoPhaseFortyEightLegacyAuthorities
+  | RequireExactPhaseFortySevenReceipt
+  | RequireLiveTestExecutionTeardownInventoryRuntimeEvidenceAndHardwareOwnersExplicit
+  | RequireQualifiedPhaseFortyEightGatePass
+  deriving (Eq, Ord, Show)
+
+data PhaseFortyNineRequirement
+  = RequireCompleteHardwareFreeDslBarrierAndSelfReferentialGate
+  | RequireAcquiredDslBarrierSupervisor
+  | RequireDirectOfflineSerialDslBarrierMatrix
+  | RequireIndependentDslBarrierAndQualificationOracles
+  | RequireCompleteDslSpinePositiveControls
+  | RequireExactDslBarrierPairedNegatives
+  | RequireAppliedDslBarrierAndUniversalValidationMutants
+  | RequireExactDslStageSelectorAndSourceDiscovery
+  | RequirePostStartFakeBoundaryChallenge
+  | RequireExternalFakeBoundaryAndProcessObservation
+  | RequireNoPbNetworkHostContainerRegistryClusterProviderOrHardware
+  | RequireFreshDslBarrierRunAndStableSource
+  | RequireCompleteHardwareFreeUniversalQualification
+  | RequireDslBarrierProductsContainedBelowBuild
+  | RequireAllLegacyOwnersThroughDslBarrierClosed
+  | RequireExactPhaseFortyEightReceipt
+  | RequirePhaseFiftyAndLaterLiveFidelityOwnersExplicit
+  | RequireQualifiedPhaseFortyNineGatePass
+  deriving (Eq, Ord, Show)
+
+data PhaseFiftyRequirement
+  = RequireCompleteBoundedPbHandoffRuntime
+  | RequireAcquiredPbBoundarySupervisor
+  | RequireDirectHaskellSupervisedIsolatedPythonChild
+  | RequireIndependentPbBoundaryOracle
+  | RequireCompleteFakeAndConcreteHandoffControls
+  | RequireExactPbBoundaryPairedNegatives
+  | RequireAppliedPbBoundaryChangedSubjectMutants
+  | RequireExactPbGrammarAndRuntimeEffectDiscovery
+  | RequirePostStartArgvEnvironmentChallenge
+  | RequireExternalProcessExecutableArgvAndExitObservation
+  | RequireNoSelfSupervisionAmbientPathNetworkHardwareOrParallelism
+  | RequireFreshContainedToolchainBuildAndStableSource
+  | RequireQualifiedPbBoundaryHarness
+  | RequirePbBoundaryProductsContainedBelowBuild
+  | RequirePhaseFortyNineBoundZeroSourceDebt
+  | RequireExactPhaseFortyNineReceipt
+  | RequireRealHostPlatformAndPostHandoffRuntimeOwnersExplicit
+  | RequireQualifiedPhaseFiftyGatePass
+  deriving (Eq, Ord, Show)
+
 -- | A gate-table slot is exactly @Bound specification@ or @ContractGap@
 -- (development_plan_gate_integrity.md section M.6).  The former three-state
 -- encoding could not represent a bound contract without tripping the registry
@@ -1697,9 +1785,17 @@ slotFor 45 category =
   BoundSpecification (GateSpecification 45 category (RequirePhaseFortyFive (phaseFortyFiveRequirement category)))
 slotFor 46 category =
   BoundSpecification (GateSpecification 46 category (RequirePhaseFortySix (phaseFortySixRequirement category)))
+slotFor 47 category =
+  BoundSpecification (GateSpecification 47 category (RequirePhaseFortySeven (phaseFortySevenRequirement category)))
+slotFor 48 category =
+  BoundSpecification (GateSpecification 48 category (RequirePhaseFortyEight (phaseFortyEightRequirement category)))
+slotFor 49 category =
+  BoundSpecification (GateSpecification 49 category (RequirePhaseFortyNine (phaseFortyNineRequirement category)))
+slotFor 50 category =
+  BoundSpecification (GateSpecification 50 category (RequirePhaseFifty (phaseFiftyRequirement category)))
 #ifdef VALIDATION_PHASE_SEMANTIC_GAP_ACCEPTANCE_MUTANT
-slotFor 1 Subject =
-  BoundSpecification (GateSpecification 1 Subject RequireExactSourceBoundPhaseZeroDispatcher)
+slotFor 51 Subject =
+  BoundSpecification (GateSpecification 51 Subject RequireExactSourceBoundPhaseZeroDispatcher)
 #endif
 slotFor ordinal category = ContractGap (GapId ordinal category)
 
@@ -2648,6 +2744,90 @@ phaseFortySixRequirement category = case category of
   Residue -> RequireBrowserCompileExecutionProtocolPublicationDeploymentHaAndHardwareOwnersExplicit
   PassCriterion -> RequireQualifiedPhaseFortySixGatePass
 
+phaseFortySevenRequirement :: GateCategory -> PhaseFortySevenRequirement
+phaseFortySevenRequirement category = case category of
+  Claim -> RequireHaskellOwnedContentAddressedSupportGenerationAndSourceClosure
+  Subject -> RequireAcquiredToolAndMutantGenerationSupervisor
+  Command -> RequireDirectOfflineSerialToolAndMutantGenerationMatrix
+  Oracle -> RequireIndependentToolAndMutantGenerationOracle
+  PositiveControls -> RequireClosedSupportArtifactPositiveControls
+  PairedNegatives -> RequireExactBuildRootAndDeclarationPairedNegatives
+  Mutants -> RequireAppliedToolAndMutantGenerationProductionMutants
+  Discovery -> RequireExactSupportSourceAndGeneratedArtifactDiscovery
+  Challenge -> RequirePostAcquisitionToolAndMutantGenerationChallenge
+  Observer -> RequireToolAndMutantGenerationProcessAndFilesystemObservation
+  AuthorityBypass -> RequireNoPbPythonShellExecutionNetworkLiveHostHardwareOrParallelism
+  Freshness -> RequireFreshGenerationRunIdentitiesAndStableSource
+  Qualification -> RequireQualifiedToolAndMutantGenerationHarness
+  Cleanroom -> RequireGeneratedSupportProductsContainedBelowBuild
+  LegacyClosure -> RequirePhaseFortySevenSourceFamiliesZero
+  PredecessorCategory -> RequireExactPhaseFortySixReceipt
+  Residue -> RequireGeneratedToolExecutionProviderSemanticsLiveRuntimeAndHardwareOwnersExplicit
+  PassCriterion -> RequireQualifiedPhaseFortySevenGatePass
+
+phaseFortyEightRequirement :: GateCategory -> PhaseFortyEightRequirement
+phaseFortyEightRequirement category = case category of
+  Claim -> RequirePureTestWorkflowTeardownSuggestionInventoryAndEvidenceAlgebra
+  Subject -> RequireAcquiredTestWorkflowAlgebraSupervisor
+  Command -> RequireDirectOfflineSerialTestWorkflowAlgebraMatrix
+  Oracle -> RequireIndependentTestWorkflowAlgebraOracle
+  PositiveControls -> RequireClosedTestWorkflowAlgebraPositiveControls
+  PairedNegatives -> RequireExactTestWorkflowAlgebraPairedNegatives
+  Mutants -> RequireAppliedTestWorkflowAlgebraProductionMutants
+  Discovery -> RequireExactTestWorkflowAlgebraSourceAndProjectionDiscovery
+  Challenge -> RequirePostAcquisitionTestWorkflowAlgebraChallenge
+  Observer -> RequireTestWorkflowAlgebraProcessAndFilesystemObservation
+  AuthorityBypass -> RequireNoPbNetworkLiveProviderHostHardwareOrParallelism
+  Freshness -> RequireFreshTestWorkflowAlgebraRunAndStableSource
+  Qualification -> RequireQualifiedTestWorkflowAlgebraHarness
+  Cleanroom -> RequireTestWorkflowAlgebraProductsContainedBelowBuild
+  LegacyClosure -> RequireNoPhaseFortyEightLegacyAuthorities
+  PredecessorCategory -> RequireExactPhaseFortySevenReceipt
+  Residue -> RequireLiveTestExecutionTeardownInventoryRuntimeEvidenceAndHardwareOwnersExplicit
+  PassCriterion -> RequireQualifiedPhaseFortyEightGatePass
+
+phaseFortyNineRequirement :: GateCategory -> PhaseFortyNineRequirement
+phaseFortyNineRequirement category = case category of
+  Claim -> RequireCompleteHardwareFreeDslBarrierAndSelfReferentialGate
+  Subject -> RequireAcquiredDslBarrierSupervisor
+  Command -> RequireDirectOfflineSerialDslBarrierMatrix
+  Oracle -> RequireIndependentDslBarrierAndQualificationOracles
+  PositiveControls -> RequireCompleteDslSpinePositiveControls
+  PairedNegatives -> RequireExactDslBarrierPairedNegatives
+  Mutants -> RequireAppliedDslBarrierAndUniversalValidationMutants
+  Discovery -> RequireExactDslStageSelectorAndSourceDiscovery
+  Challenge -> RequirePostStartFakeBoundaryChallenge
+  Observer -> RequireExternalFakeBoundaryAndProcessObservation
+  AuthorityBypass -> RequireNoPbNetworkHostContainerRegistryClusterProviderOrHardware
+  Freshness -> RequireFreshDslBarrierRunAndStableSource
+  Qualification -> RequireCompleteHardwareFreeUniversalQualification
+  Cleanroom -> RequireDslBarrierProductsContainedBelowBuild
+  LegacyClosure -> RequireAllLegacyOwnersThroughDslBarrierClosed
+  PredecessorCategory -> RequireExactPhaseFortyEightReceipt
+  Residue -> RequirePhaseFiftyAndLaterLiveFidelityOwnersExplicit
+  PassCriterion -> RequireQualifiedPhaseFortyNineGatePass
+
+phaseFiftyRequirement :: GateCategory -> PhaseFiftyRequirement
+phaseFiftyRequirement category = case category of
+  Claim -> RequireCompleteBoundedPbHandoffRuntime
+  Subject -> RequireAcquiredPbBoundarySupervisor
+  Command -> RequireDirectHaskellSupervisedIsolatedPythonChild
+  Oracle -> RequireIndependentPbBoundaryOracle
+  PositiveControls -> RequireCompleteFakeAndConcreteHandoffControls
+  PairedNegatives -> RequireExactPbBoundaryPairedNegatives
+  Mutants -> RequireAppliedPbBoundaryChangedSubjectMutants
+  Discovery -> RequireExactPbGrammarAndRuntimeEffectDiscovery
+  Challenge -> RequirePostStartArgvEnvironmentChallenge
+  Observer -> RequireExternalProcessExecutableArgvAndExitObservation
+  AuthorityBypass -> RequireNoSelfSupervisionAmbientPathNetworkHardwareOrParallelism
+  Freshness -> RequireFreshContainedToolchainBuildAndStableSource
+  Qualification -> RequireQualifiedPbBoundaryHarness
+  Cleanroom -> RequirePbBoundaryProductsContainedBelowBuild
+  LegacyClosure -> RequirePhaseFortyNineBoundZeroSourceDebt
+  PredecessorCategory -> RequireExactPhaseFortyNineReceipt
+  Residue -> RequireRealHostPlatformAndPostHandoffRuntimeOwnersExplicit
+  PassCriterion -> RequireQualifiedPhaseFiftyGatePass
+
 phaseOneRequirement :: GateCategory -> PhaseOneRequirement
 phaseOneRequirement category = case category of
   Claim -> RequireAuthenticatedReproducibleToolchainAndProbeClosure
@@ -3071,6 +3251,10 @@ requirementCategory requirement = case requirement of
   RequirePhaseFortyFour phaseFortyFour -> phaseFortyFourRequirementCategory phaseFortyFour
   RequirePhaseFortyFive phaseFortyFive -> phaseFortyFiveRequirementCategory phaseFortyFive
   RequirePhaseFortySix phaseFortySix -> phaseFortySixRequirementCategory phaseFortySix
+  RequirePhaseFortySeven phaseFortySeven -> phaseFortySevenRequirementCategory phaseFortySeven
+  RequirePhaseFortyEight phaseFortyEight -> phaseFortyEightRequirementCategory phaseFortyEight
+  RequirePhaseFortyNine phaseFortyNine -> phaseFortyNineRequirementCategory phaseFortyNine
+  RequirePhaseFifty phaseFifty -> phaseFiftyRequirementCategory phaseFifty
 
 phaseOneRequirementCategory :: PhaseOneRequirement -> GateCategory
 phaseOneRequirementCategory requirement = case requirement of
@@ -4038,6 +4222,90 @@ phaseFortySixRequirementCategory requirement = case requirement of
   RequireBrowserCompileExecutionProtocolPublicationDeploymentHaAndHardwareOwnersExplicit -> Residue
   RequireQualifiedPhaseFortySixGatePass -> PassCriterion
 
+phaseFortySevenRequirementCategory :: PhaseFortySevenRequirement -> GateCategory
+phaseFortySevenRequirementCategory requirement = case requirement of
+  RequireHaskellOwnedContentAddressedSupportGenerationAndSourceClosure -> Claim
+  RequireAcquiredToolAndMutantGenerationSupervisor -> Subject
+  RequireDirectOfflineSerialToolAndMutantGenerationMatrix -> Command
+  RequireIndependentToolAndMutantGenerationOracle -> Oracle
+  RequireClosedSupportArtifactPositiveControls -> PositiveControls
+  RequireExactBuildRootAndDeclarationPairedNegatives -> PairedNegatives
+  RequireAppliedToolAndMutantGenerationProductionMutants -> Mutants
+  RequireExactSupportSourceAndGeneratedArtifactDiscovery -> Discovery
+  RequirePostAcquisitionToolAndMutantGenerationChallenge -> Challenge
+  RequireToolAndMutantGenerationProcessAndFilesystemObservation -> Observer
+  RequireNoPbPythonShellExecutionNetworkLiveHostHardwareOrParallelism -> AuthorityBypass
+  RequireFreshGenerationRunIdentitiesAndStableSource -> Freshness
+  RequireQualifiedToolAndMutantGenerationHarness -> Qualification
+  RequireGeneratedSupportProductsContainedBelowBuild -> Cleanroom
+  RequirePhaseFortySevenSourceFamiliesZero -> LegacyClosure
+  RequireExactPhaseFortySixReceipt -> PredecessorCategory
+  RequireGeneratedToolExecutionProviderSemanticsLiveRuntimeAndHardwareOwnersExplicit -> Residue
+  RequireQualifiedPhaseFortySevenGatePass -> PassCriterion
+
+phaseFortyEightRequirementCategory :: PhaseFortyEightRequirement -> GateCategory
+phaseFortyEightRequirementCategory requirement = case requirement of
+  RequirePureTestWorkflowTeardownSuggestionInventoryAndEvidenceAlgebra -> Claim
+  RequireAcquiredTestWorkflowAlgebraSupervisor -> Subject
+  RequireDirectOfflineSerialTestWorkflowAlgebraMatrix -> Command
+  RequireIndependentTestWorkflowAlgebraOracle -> Oracle
+  RequireClosedTestWorkflowAlgebraPositiveControls -> PositiveControls
+  RequireExactTestWorkflowAlgebraPairedNegatives -> PairedNegatives
+  RequireAppliedTestWorkflowAlgebraProductionMutants -> Mutants
+  RequireExactTestWorkflowAlgebraSourceAndProjectionDiscovery -> Discovery
+  RequirePostAcquisitionTestWorkflowAlgebraChallenge -> Challenge
+  RequireTestWorkflowAlgebraProcessAndFilesystemObservation -> Observer
+  RequireNoPbNetworkLiveProviderHostHardwareOrParallelism -> AuthorityBypass
+  RequireFreshTestWorkflowAlgebraRunAndStableSource -> Freshness
+  RequireQualifiedTestWorkflowAlgebraHarness -> Qualification
+  RequireTestWorkflowAlgebraProductsContainedBelowBuild -> Cleanroom
+  RequireNoPhaseFortyEightLegacyAuthorities -> LegacyClosure
+  RequireExactPhaseFortySevenReceipt -> PredecessorCategory
+  RequireLiveTestExecutionTeardownInventoryRuntimeEvidenceAndHardwareOwnersExplicit -> Residue
+  RequireQualifiedPhaseFortyEightGatePass -> PassCriterion
+
+phaseFortyNineRequirementCategory :: PhaseFortyNineRequirement -> GateCategory
+phaseFortyNineRequirementCategory requirement = case requirement of
+  RequireCompleteHardwareFreeDslBarrierAndSelfReferentialGate -> Claim
+  RequireAcquiredDslBarrierSupervisor -> Subject
+  RequireDirectOfflineSerialDslBarrierMatrix -> Command
+  RequireIndependentDslBarrierAndQualificationOracles -> Oracle
+  RequireCompleteDslSpinePositiveControls -> PositiveControls
+  RequireExactDslBarrierPairedNegatives -> PairedNegatives
+  RequireAppliedDslBarrierAndUniversalValidationMutants -> Mutants
+  RequireExactDslStageSelectorAndSourceDiscovery -> Discovery
+  RequirePostStartFakeBoundaryChallenge -> Challenge
+  RequireExternalFakeBoundaryAndProcessObservation -> Observer
+  RequireNoPbNetworkHostContainerRegistryClusterProviderOrHardware -> AuthorityBypass
+  RequireFreshDslBarrierRunAndStableSource -> Freshness
+  RequireCompleteHardwareFreeUniversalQualification -> Qualification
+  RequireDslBarrierProductsContainedBelowBuild -> Cleanroom
+  RequireAllLegacyOwnersThroughDslBarrierClosed -> LegacyClosure
+  RequireExactPhaseFortyEightReceipt -> PredecessorCategory
+  RequirePhaseFiftyAndLaterLiveFidelityOwnersExplicit -> Residue
+  RequireQualifiedPhaseFortyNineGatePass -> PassCriterion
+
+phaseFiftyRequirementCategory :: PhaseFiftyRequirement -> GateCategory
+phaseFiftyRequirementCategory requirement = case requirement of
+  RequireCompleteBoundedPbHandoffRuntime -> Claim
+  RequireAcquiredPbBoundarySupervisor -> Subject
+  RequireDirectHaskellSupervisedIsolatedPythonChild -> Command
+  RequireIndependentPbBoundaryOracle -> Oracle
+  RequireCompleteFakeAndConcreteHandoffControls -> PositiveControls
+  RequireExactPbBoundaryPairedNegatives -> PairedNegatives
+  RequireAppliedPbBoundaryChangedSubjectMutants -> Mutants
+  RequireExactPbGrammarAndRuntimeEffectDiscovery -> Discovery
+  RequirePostStartArgvEnvironmentChallenge -> Challenge
+  RequireExternalProcessExecutableArgvAndExitObservation -> Observer
+  RequireNoSelfSupervisionAmbientPathNetworkHardwareOrParallelism -> AuthorityBypass
+  RequireFreshContainedToolchainBuildAndStableSource -> Freshness
+  RequireQualifiedPbBoundaryHarness -> Qualification
+  RequirePbBoundaryProductsContainedBelowBuild -> Cleanroom
+  RequirePhaseFortyNineBoundZeroSourceDebt -> LegacyClosure
+  RequireExactPhaseFortyNineReceipt -> PredecessorCategory
+  RequireRealHostPlatformAndPostHandoffRuntimeOwnersExplicit -> Residue
+  RequireQualifiedPhaseFiftyGatePass -> PassCriterion
+
 pathMatchesCapability :: PhaseSemanticContract -> Bool
 pathMatchesCapability contract =
   semanticPath contract == phaseFile (semanticOrdinal contract) (semanticCapabilityId contract)
@@ -4158,6 +4426,10 @@ gateRequirementSlug requirement = case requirement of
   RequirePhaseFortyFour phaseFortyFour -> phaseFortyFourRequirementSlug phaseFortyFour
   RequirePhaseFortyFive phaseFortyFive -> phaseFortyFiveRequirementSlug phaseFortyFive
   RequirePhaseFortySix phaseFortySix -> phaseFortySixRequirementSlug phaseFortySix
+  RequirePhaseFortySeven phaseFortySeven -> phaseFortySevenRequirementSlug phaseFortySeven
+  RequirePhaseFortyEight phaseFortyEight -> phaseFortyEightRequirementSlug phaseFortyEight
+  RequirePhaseFortyNine phaseFortyNine -> phaseFortyNineRequirementSlug phaseFortyNine
+  RequirePhaseFifty phaseFifty -> phaseFiftyRequirementSlug phaseFifty
 
 phaseOneRequirementSlug :: PhaseOneRequirement -> Text
 phaseOneRequirementSlug requirement = case requirement of
@@ -5124,6 +5396,90 @@ phaseFortySixRequirementSlug requirement = case requirement of
   RequireExactPhaseFortyFiveReceipt -> "exact-phase-forty-five-receipt"
   RequireBrowserCompileExecutionProtocolPublicationDeploymentHaAndHardwareOwnersExplicit -> "browser-compile-execution-protocol-publication-deployment-ha-and-hardware-owners-explicit"
   RequireQualifiedPhaseFortySixGatePass -> "qualified-phase-forty-six-gate-pass"
+
+phaseFortySevenRequirementSlug :: PhaseFortySevenRequirement -> Text
+phaseFortySevenRequirementSlug requirement = case requirement of
+  RequireHaskellOwnedContentAddressedSupportGenerationAndSourceClosure -> "haskell-owned-content-addressed-support-generation-and-source-closure"
+  RequireAcquiredToolAndMutantGenerationSupervisor -> "acquired-tool-and-mutant-generation-supervisor"
+  RequireDirectOfflineSerialToolAndMutantGenerationMatrix -> "direct-offline-serial-tool-and-mutant-generation-matrix"
+  RequireIndependentToolAndMutantGenerationOracle -> "independent-tool-and-mutant-generation-oracle"
+  RequireClosedSupportArtifactPositiveControls -> "closed-support-artifact-positive-controls"
+  RequireExactBuildRootAndDeclarationPairedNegatives -> "exact-build-root-and-declaration-paired-negatives"
+  RequireAppliedToolAndMutantGenerationProductionMutants -> "applied-tool-and-mutant-generation-production-mutants"
+  RequireExactSupportSourceAndGeneratedArtifactDiscovery -> "exact-support-source-and-generated-artifact-discovery"
+  RequirePostAcquisitionToolAndMutantGenerationChallenge -> "post-acquisition-tool-and-mutant-generation-challenge"
+  RequireToolAndMutantGenerationProcessAndFilesystemObservation -> "tool-and-mutant-generation-process-and-filesystem-observation"
+  RequireNoPbPythonShellExecutionNetworkLiveHostHardwareOrParallelism -> "no-pb-python-shell-execution-network-live-host-hardware-or-parallelism"
+  RequireFreshGenerationRunIdentitiesAndStableSource -> "fresh-generation-run-identities-and-stable-source"
+  RequireQualifiedToolAndMutantGenerationHarness -> "qualified-tool-and-mutant-generation-harness"
+  RequireGeneratedSupportProductsContainedBelowBuild -> "generated-support-products-contained-below-build"
+  RequirePhaseFortySevenSourceFamiliesZero -> "phase-forty-seven-source-families-zero"
+  RequireExactPhaseFortySixReceipt -> "exact-phase-forty-six-receipt"
+  RequireGeneratedToolExecutionProviderSemanticsLiveRuntimeAndHardwareOwnersExplicit -> "generated-tool-execution-provider-semantics-live-runtime-and-hardware-owners-explicit"
+  RequireQualifiedPhaseFortySevenGatePass -> "qualified-phase-forty-seven-gate-pass"
+
+phaseFortyEightRequirementSlug :: PhaseFortyEightRequirement -> Text
+phaseFortyEightRequirementSlug requirement = case requirement of
+  RequirePureTestWorkflowTeardownSuggestionInventoryAndEvidenceAlgebra -> "pure-test-workflow-teardown-suggestion-inventory-and-evidence-algebra"
+  RequireAcquiredTestWorkflowAlgebraSupervisor -> "acquired-test-workflow-algebra-supervisor"
+  RequireDirectOfflineSerialTestWorkflowAlgebraMatrix -> "direct-offline-serial-test-workflow-algebra-matrix"
+  RequireIndependentTestWorkflowAlgebraOracle -> "independent-test-workflow-algebra-oracle"
+  RequireClosedTestWorkflowAlgebraPositiveControls -> "closed-test-workflow-algebra-positive-controls"
+  RequireExactTestWorkflowAlgebraPairedNegatives -> "exact-test-workflow-algebra-paired-negatives"
+  RequireAppliedTestWorkflowAlgebraProductionMutants -> "applied-test-workflow-algebra-production-mutants"
+  RequireExactTestWorkflowAlgebraSourceAndProjectionDiscovery -> "exact-test-workflow-algebra-source-and-projection-discovery"
+  RequirePostAcquisitionTestWorkflowAlgebraChallenge -> "post-acquisition-test-workflow-algebra-challenge"
+  RequireTestWorkflowAlgebraProcessAndFilesystemObservation -> "test-workflow-algebra-process-and-filesystem-observation"
+  RequireNoPbNetworkLiveProviderHostHardwareOrParallelism -> "no-pb-network-live-provider-host-hardware-or-parallelism"
+  RequireFreshTestWorkflowAlgebraRunAndStableSource -> "fresh-test-workflow-algebra-run-and-stable-source"
+  RequireQualifiedTestWorkflowAlgebraHarness -> "qualified-test-workflow-algebra-harness"
+  RequireTestWorkflowAlgebraProductsContainedBelowBuild -> "test-workflow-algebra-products-contained-below-build"
+  RequireNoPhaseFortyEightLegacyAuthorities -> "no-phase-forty-eight-legacy-authorities"
+  RequireExactPhaseFortySevenReceipt -> "exact-phase-forty-seven-receipt"
+  RequireLiveTestExecutionTeardownInventoryRuntimeEvidenceAndHardwareOwnersExplicit -> "live-test-execution-teardown-inventory-runtime-evidence-and-hardware-owners-explicit"
+  RequireQualifiedPhaseFortyEightGatePass -> "qualified-phase-forty-eight-gate-pass"
+
+phaseFortyNineRequirementSlug :: PhaseFortyNineRequirement -> Text
+phaseFortyNineRequirementSlug requirement = case requirement of
+  RequireCompleteHardwareFreeDslBarrierAndSelfReferentialGate -> "complete-hardware-free-dsl-barrier-and-self-referential-gate"
+  RequireAcquiredDslBarrierSupervisor -> "acquired-dsl-barrier-supervisor"
+  RequireDirectOfflineSerialDslBarrierMatrix -> "direct-offline-serial-dsl-barrier-matrix"
+  RequireIndependentDslBarrierAndQualificationOracles -> "independent-dsl-barrier-and-qualification-oracles"
+  RequireCompleteDslSpinePositiveControls -> "complete-dsl-spine-positive-controls"
+  RequireExactDslBarrierPairedNegatives -> "exact-dsl-barrier-paired-negatives"
+  RequireAppliedDslBarrierAndUniversalValidationMutants -> "applied-dsl-barrier-and-universal-validation-mutants"
+  RequireExactDslStageSelectorAndSourceDiscovery -> "exact-dsl-stage-selector-and-source-discovery"
+  RequirePostStartFakeBoundaryChallenge -> "post-start-fake-boundary-challenge"
+  RequireExternalFakeBoundaryAndProcessObservation -> "external-fake-boundary-and-process-observation"
+  RequireNoPbNetworkHostContainerRegistryClusterProviderOrHardware -> "no-pb-network-host-container-registry-cluster-provider-or-hardware"
+  RequireFreshDslBarrierRunAndStableSource -> "fresh-dsl-barrier-run-and-stable-source"
+  RequireCompleteHardwareFreeUniversalQualification -> "complete-hardware-free-universal-qualification"
+  RequireDslBarrierProductsContainedBelowBuild -> "dsl-barrier-products-contained-below-build"
+  RequireAllLegacyOwnersThroughDslBarrierClosed -> "all-legacy-owners-through-dsl-barrier-closed"
+  RequireExactPhaseFortyEightReceipt -> "exact-phase-forty-eight-receipt"
+  RequirePhaseFiftyAndLaterLiveFidelityOwnersExplicit -> "phase-fifty-and-later-live-fidelity-owners-explicit"
+  RequireQualifiedPhaseFortyNineGatePass -> "qualified-phase-forty-nine-gate-pass"
+
+phaseFiftyRequirementSlug :: PhaseFiftyRequirement -> Text
+phaseFiftyRequirementSlug requirement = case requirement of
+  RequireCompleteBoundedPbHandoffRuntime -> "complete-bounded-pb-handoff-runtime"
+  RequireAcquiredPbBoundarySupervisor -> "acquired-pb-boundary-supervisor"
+  RequireDirectHaskellSupervisedIsolatedPythonChild -> "direct-haskell-supervised-isolated-python-child"
+  RequireIndependentPbBoundaryOracle -> "independent-pb-boundary-oracle"
+  RequireCompleteFakeAndConcreteHandoffControls -> "complete-fake-and-concrete-handoff-controls"
+  RequireExactPbBoundaryPairedNegatives -> "exact-pb-boundary-paired-negatives"
+  RequireAppliedPbBoundaryChangedSubjectMutants -> "applied-pb-boundary-changed-subject-mutants"
+  RequireExactPbGrammarAndRuntimeEffectDiscovery -> "exact-pb-grammar-and-runtime-effect-discovery"
+  RequirePostStartArgvEnvironmentChallenge -> "post-start-argv-environment-challenge"
+  RequireExternalProcessExecutableArgvAndExitObservation -> "external-process-executable-argv-and-exit-observation"
+  RequireNoSelfSupervisionAmbientPathNetworkHardwareOrParallelism -> "no-self-supervision-ambient-path-network-hardware-or-parallelism"
+  RequireFreshContainedToolchainBuildAndStableSource -> "fresh-contained-toolchain-build-and-stable-source"
+  RequireQualifiedPbBoundaryHarness -> "qualified-pb-boundary-harness"
+  RequirePbBoundaryProductsContainedBelowBuild -> "pb-boundary-products-contained-below-build"
+  RequirePhaseFortyNineBoundZeroSourceDebt -> "phase-forty-nine-bound-zero-source-debt"
+  RequireExactPhaseFortyNineReceipt -> "exact-phase-forty-nine-receipt"
+  RequireRealHostPlatformAndPostHandoffRuntimeOwnersExplicit -> "real-host-platform-and-post-handoff-runtime-owners-explicit"
+  RequireQualifiedPhaseFiftyGatePass -> "qualified-phase-fifty-gate-pass"
 
 renderGateCategory :: GateCategory -> Text
 renderGateCategory category = case category of

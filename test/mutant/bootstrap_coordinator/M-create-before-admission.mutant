@@ -1,3 +1,0 @@
-operator=invoke kind create before consuming ValidatedKindCreate
-locus=Amoebius.Cluster.Kind.enact
-expected=one-byte host overdraw records zero kind create

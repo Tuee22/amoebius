@@ -64,6 +64,7 @@ runSelectorCli suite = do
     ["--assignments"] ->
       forM_ (suiteAssignments suite) $ \(selector, impacts, control) ->
         putStrLn (selector <> "\t" <> commaSeparated impacts <> "\t" <> control)
+    ["--qualify", selector] -> qualifySelector suite selector
     ["--case", label] -> withOperation "--case" (suiteRunExactCase suite) label
     ["--case-results"] -> runCaseResults suite
     ["--impacted", selector] -> withOperation "--impacted" (suiteRunImpacted suite) selector
@@ -75,6 +76,39 @@ runSelectorCli suite = do
   withOperation verb operation argument = case operation of
     Just run -> run argument
     Nothing -> fail (suiteName suite <> " does not support " <> verb <> "; " <> usage suite)
+
+-- | Observe one already-compiled changed subject at its independently
+-- assigned locus and retain an unrelated same-binary control. The Cabal
+-- supervisor owns compilation with exactly one selector enabled.
+qualifySelector :: SelectorSuite -> String -> IO ()
+qualifySelector suite selector = case assignments of
+  [(impacts, control)] -> do
+    unless (selector `elem` suiteSelectorNames suite) $
+      fail (suiteName suite <> " qualification selector is absent from the closed selector inventory: " <> selector)
+    unless (not (null impacts) && not (null control)) $
+      fail (suiteName suite <> " qualification assignment is empty: " <> selector)
+    case suiteRunImpacted suite of
+      Just runImpacted -> runImpacted selector
+      Nothing -> do
+        attempted <- try (suiteRunSelector suite selector)
+        case (attempted :: Either SomeException ()) of
+          Right () -> fail (suiteName suite <> " changed subject left its assigned locus green: " <> selector)
+          Left _ -> pure ()
+    case suiteRunUnaffected suite of
+      Just runUnaffected -> runUnaffected selector
+      Nothing -> pure ()
+    case suiteRunControl suite of
+      Just runControl -> runControl selector
+      Nothing -> unless (present (suiteRunUnaffected suite)) $
+        fail (suiteName suite <> " qualification has no unaffected control runner: " <> selector)
+    putStrLn ("selector-qualification: PASS: " <> selector <> " -> " <> commaSeparated impacts <> "; control=" <> control)
+  [] -> fail (suiteName suite <> " qualification assignment is missing: " <> selector)
+  _ -> fail (suiteName suite <> " qualification assignment is duplicated: " <> selector)
+ where
+  assignments = [(impacts, control) | (candidate, impacts, control) <- suiteAssignments suite, candidate == selector]
+  present value = case value of
+    Just _ -> True
+    Nothing -> False
 
 runCaseResults :: SelectorSuite -> IO ()
 runCaseResults suite = case suiteRunExactCase suite of
@@ -93,7 +127,7 @@ runCaseResults suite = case suiteRunExactCase suite of
 usage :: SelectorSuite -> String
 usage suite =
   "expected no argument, one SELECTOR, or one of: "
-    <> commaSeparated (["--all", "--list", "--cases", "--case-list", "--assignments"] <> optional)
+    <> commaSeparated (["--all", "--list", "--cases", "--case-list", "--assignments", "--qualify SELECTOR"] <> optional)
  where
   optional =
     [verb | (verb, supported) <- offered, supported]

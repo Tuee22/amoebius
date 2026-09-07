@@ -1,1 +1,0 @@
-{"trace":["queue-scalar","queue-infernix-start","disconnect","reauthenticate-current","claim-replay","send-replica-b","durable-effect","drop-response","flush-route","lookup-replica-a","exact-resend","foreign-replay-denied"],"acceptedEffects":2,"duplicateEffects":0}

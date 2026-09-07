@@ -8,7 +8,7 @@ import Amoebius.Gate.SelfReferential
 legal :: (GateEvidence, Ledger)
 legal = runWorkflow (gateWorkflow declaration GatePassed)
  where
-  declaration = GateDeclaration 49 "phase-49" "python3 tools/self_referential_gates_gate.py"
+  declaration = GateDeclaration 49 "phase-49" "amoebius validate phase 49"
 
 main :: IO ()
 main = print legal

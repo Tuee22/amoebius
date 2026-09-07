@@ -1,3 +1,0 @@
-surface=BootstrapRegistryAction
-mutation=append:Deployment/default/foreign
-expected_oracle=BootstrapDomainMismatch

@@ -1,5 +1,4 @@
 # Extension Conformance — The Transaction Laws
-
 > **Purpose**: The slice of the extension family owning **P1–P6**, the laws governing the relational data
 > plane: no general query surface, the scope as a required field, the schema derived from the row types, the
 > statement and the row policy derived from one declaration, results indexed by the scope that produced them,
@@ -30,7 +29,7 @@ the family: the closure argument does not carry them across a seam. The algebra 
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, documents/README.md, documents/engineering/README.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/platform_services_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, documents/README.md, documents/engineering/README.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/platform_services_doctrine.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>

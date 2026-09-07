@@ -1,15 +1,16 @@
 # Phase 43: Haskell UI-server boundary
-
 > **Purpose**: Define the UI-server responsibility in the amoebius executable and constrain with Haskell-generated boundary fakes that
 > every request is freshly authenticated, scoped, authorized, freshness-checked, and dispatched before effect.
 > **Read this if**: phase 43 is next in the queue, or a later phase depends on what its gate establishes.
+
+This contract owns the hardware-free authenticated request boundary; live identity providers and browser execution remain later-owned.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md, DEVELOPMENT_PLAN/substrates.md
 **Generated sections**: none
 
 </details>

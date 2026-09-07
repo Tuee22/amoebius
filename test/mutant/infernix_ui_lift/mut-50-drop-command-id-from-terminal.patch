@@ -1,5 +1,0 @@
---- a/src/Amoebius/Infernix/UiAdapter.hs
-+++ b/src/Amoebius/Infernix/UiAdapter.hs
-@@ terminal-receipt
--terminalCommandId = id
-+terminalCommandId _ = "unrelated-command"

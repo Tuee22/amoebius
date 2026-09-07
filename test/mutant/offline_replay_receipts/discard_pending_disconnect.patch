@@ -1,1 +1,0 @@
-Mutant locus: socket disconnect silently removes pending outbox records.

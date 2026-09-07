@@ -1,5 +1,4 @@
 # Phase 38: UI authorization kernel
-
 > **Purpose**: Make one sealed action registry and current-authority transition decide whether a scoped UI
 > action may produce an effect.
 > **Read this if**: action declarations, client/server projection parity, authorization freshness, or the
@@ -15,7 +14,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, documents/illegal_state/illegal_state_security.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>

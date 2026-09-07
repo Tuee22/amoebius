@@ -1,3 +1,0 @@
-surface=BakeCatalog
-mutation=remove:/pulsar/offloaders
-expected_oracle=PublishedPayloadMissing

@@ -104,7 +104,7 @@ deterministic paired plans, not a browser or server-storage mechanism.
 **Blocked by**: [Phase 40](phase_40_ui_plan_compiler.md) gate pass
 **Independent Validation**: three exact continuity rows and thirteen exact refusal tags in `offline-plan-spec`.
 **Oracle**: `test/spec/ui/OfflinePlanReference.hs`, independently authored and importing no production or case module.
-**Legacy IDs**: two serialized fixture tables formerly under `test/fixture/offline_language_plan/`.
+**Legacy IDs**: two retired serialized fixture tables now represented by typed Haskell case declarations.
 **Docs to update**: this plan, `DEVELOPMENT_PLAN/{substrates,system_components}.md`, and `documents/engineering/{browser_offline_runtime_doctrine,low_code_ui_runtime_doctrine,generated_artifacts_doctrine}.md`.
 
 ### Objective
@@ -133,7 +133,7 @@ The complete integrated Phase-41 gate and mechanical status projection remain. B
 **Blocked by**: Sprint 41.1
 **Independent Validation**: eight exact plan rows, three paired key sets, determinism, private-field/mechanism exclusions, and two artifact commands in `offline-plan-spec`.
 **Oracle**: `test/spec/ui/OfflinePlanReference.hs` supplies the independent plan relation.
-**Legacy IDs**: `test/golden/offline_language_plan/plan_keys.tbl`.
+**Legacy IDs**: the retired serialized plan-key golden, now represented by an independent Haskell expectation.
 **Docs to update**: the paired-plan and generated-artifact owners named by Sprint 41.1.
 
 ### Objective
@@ -164,7 +164,7 @@ The complete integrated Phase-41 gate and mechanical status projection remain. G
 **Blocked by**: Sprint 41.2
 **Independent Validation**: exact source discovery, five serial production-mutant rows, source stability, cleanroom containment, legacy absence, and the eighteen-row acquired gate.
 **Oracle**: the Phase-41 runner binds `OfflinePlanReference`, typed cases, process observations, and changed-production failures.
-**Legacy IDs**: exact twelve-path retired inventory in `OfflineLanguagePlanRun.Internal` and zero Phase-41 entries in `test/mutant/registry.tsv`.
+**Legacy IDs**: exact twelve-path retired inventory in `OfflineLanguagePlanRun.Internal` and zero Phase-41 entries in the compiled Haskell mutation registry.
 **Docs to update**: this plan and the tracker/component/substrate/doctrine cross-references before integrated validation.
 
 ### Objective

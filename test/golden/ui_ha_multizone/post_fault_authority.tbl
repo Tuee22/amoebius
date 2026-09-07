@@ -1,5 +1,0 @@
-surface authority_source expected
-oidc keycloak-current fresh-session
-cursor pulsar-projection exact-resume
-receipt durable-effect-owner exact-command
-redis ephemeral-coordination never-authority

@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module CompilerSourceGraphOracle
-  ( compilerSourceGraphSelectorNames
+  ( compilerSourceGraphSelectorAssignments
+  , compilerSourceGraphSelectorNames
   , runCompilerSourceGraphOracle
   , runCompilerSourceGraphSelectorProductControlOracle
   , runCompilerSourceGraphSelectorOracle
@@ -26,6 +27,12 @@ import Data.ByteString qualified as ByteString
 import Data.List (group, intercalate, sort)
 import Data.Text (Text)
 import Data.Text qualified as Text
+
+compilerSourceGraphSelectorAssignments :: [(String, [String], String)]
+compilerSourceGraphSelectorAssignments =
+  [ (selector, selectorTargets selector, "compiler-source-graph-product-control")
+  | selector <- compilerSourceGraphSelectorNames
+  ]
 
 type RawTuple = (FilePath, Text, Text, ByteString)
 

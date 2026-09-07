@@ -1,5 +1,0 @@
---- a/src/Amoebius/Multicluster/Spawn.hs
-+++ b/src/Amoebius/Multicluster/Spawn.hs
-@@
--executorPeak = sum (take boundedParallel runnableExecutors)
-+executorPeak = maximum runnableExecutors

@@ -1,3 +1,0 @@
-surface=idempotent-diff
-mutation=stamp-per-run-generation-label-after-computing-diff
-expected_oracle=ExternalObjectSnapshotChanged

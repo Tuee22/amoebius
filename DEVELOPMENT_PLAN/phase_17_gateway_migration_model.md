@@ -83,6 +83,12 @@ supervisor, pure model and structural-fit subject, independently authored Haskel
 offline JVM/TLC inputs, and three changed-production subjects are complete; only a fresh integrated run may
 authorize status.
 
+The admitted runtime inputs are the Temurin 21.0.9+10 x86_64 Linux JRE whose `bin/java` SHA-256 is
+`e865867065e48928c58293f30e7ae26a79c842f8607fa51d7e2e9fb90b602786` and the TLA+ 1.8.0 calver
+`2026.09.04.170753` jar whose SHA-256 is
+`b658b4e504fdf0b721caf7066320f6b6fe5805f4dd2f717d0e47baba4097205e`. They are local-custody ignored
+inputs; a later rolling `v1.8.0` asset is not silently substituted for the pinned jar.
+
 | Key | Contract |
 |---|---|
 | `Claim` | One reifiable Haskell `GatewayMigration` model expresses planned and failover branches; the in-process explorer, generated TLC projection, bounded `IOSimPOR` reading, and total structural-fit fold agree within the declared finite envelope. |

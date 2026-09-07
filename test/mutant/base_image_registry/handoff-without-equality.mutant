@@ -1,3 +1,0 @@
-surface=adoptBootstrapRegistry
-mutation=skip-identity-source-owned-field-digest-equality
-expected_oracle=BootstrapHandoffDigestMismatch

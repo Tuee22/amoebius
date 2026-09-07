@@ -1,3 +1,0 @@
-surface=BakeCatalog
-mutation=remove:/usr/bin/redis-server
-expected_oracle=BakeInventoryMissing

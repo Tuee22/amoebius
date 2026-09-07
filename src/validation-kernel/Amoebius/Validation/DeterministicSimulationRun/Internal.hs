@@ -225,11 +225,9 @@ observerCheck receipts = CheckResult "deterministic-simulation-observer"
 legacyCheck :: FilePath -> IO CheckResult
 legacyCheck root = do
   files <- filterM (doesFileExist . (root </>)) retiredSources
-  registry <- Text.pack <$> readFile (root </> "test/mutant/registry.tsv")
   pure (CheckResult "deterministic-simulation-legacy-closure"
-    [observation "deterministic-simulation.legacy.retired-count" (Text.pack (show (length retiredSources + 1)))]
-    ([finding "DETERMINISTIC-SIM-LEGACY" path "retired Python or serialized behavioral authority remains" | path <- files]
-      <> [finding "DETERMINISTIC-SIM-LEGACY" "test/mutant/registry.tsv" "retired materialized Phase-16 mutant registry row remains" | "deterministic_simulation\t" `Text.isInfixOf` registry]))
+    [observation "deterministic-simulation.legacy.retired-count" (Text.pack (show (length retiredSources)))]
+    [finding "DETERMINISTIC-SIM-LEGACY" path "retired Python or serialized behavioral authority remains" | path <- files])
 
 phaseRows :: CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> CheckResult -> [CheckResult]
 phaseRows pre toolchain oracle positive negatives mutants discovery authority observer freshness qualification cleanroom legacy =
@@ -332,4 +330,5 @@ retiredSources =
    "test/fixture/deterministic_simulation/schedules/crash.json", "test/fixture/deterministic_simulation/schedules/partition.json",
    "test/fixture/deterministic_simulation/schedules/redelivery.json", "test/fixture/deterministic_simulation/schedules/reorder.json",
    "test/mutant/deterministic_simulation/dropped_partition_handling/DroppedPartitionMutant.hs",
-   "test/mutant/deterministic_simulation/dropped_partition_handling/README.md"]
+   "test/mutant/deterministic_simulation/dropped_partition_handling/README.md",
+   "test/mutant/registry.tsv"]

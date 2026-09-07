@@ -1,3 +1,0 @@
-surface=publishManifestList
-mutation=record-tag-before-index-put
-expected_oracle=RegistryTagAdvertisedAfterPartialFailure

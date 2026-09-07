@@ -1,3 +1,0 @@
-ModelInteractor.request = { requestId : Text, readyModel : OpaqueHandle, input : BoundedTensor }
-ModelInteractor.response = { requestId : Text, output : BoundedTensor }
-Checkpoint paths, CUDA coordinates, credentials, and device identities remain private.

@@ -1,5 +1,0 @@
-origin csrf session expected effect_count
-same valid own allow 1
-foreign valid own Forbidden 0
-same invalid own Forbidden 0
-same replayed own Forbidden 0

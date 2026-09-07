@@ -1,2 +1,0 @@
-mutation=remove the size threshold and retain only the time trigger
-expected_red=size-triggered offload provision

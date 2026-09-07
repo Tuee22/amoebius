@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module CompilerBuildInfoOracle
-  ( runCompilerBuildInfoOracle
+  ( compilerBuildInfoSelectorAssignments
+  , runCompilerBuildInfoOracle
   , runCompilerBuildInfoSelectorImpactOracle
   , runCompilerBuildInfoSelectorIsolationOracle
   , runCompilerBuildInfoSelectorOracle
@@ -40,6 +41,12 @@ runCompilerBuildInfoOracle =
         <> opacityInventoryProblems
         <> concatMap exactCaseProblems allExactCases
     )
+
+compilerBuildInfoSelectorAssignments :: [(String, [String], String)]
+compilerBuildInfoSelectorAssignments =
+  [ (selector, selectorAffectedTargets selector, "compiler-buildinfo-product-control")
+  | selector <- compilerBuildInfoSelectorNames
+  ]
 
 -- Run the one independently named exact case assigned to a selector.  The
 -- matrix invokes the isolation runner from the same linked executable to keep

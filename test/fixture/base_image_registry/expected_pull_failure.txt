@@ -1,2 +1,0 @@
-ErrImagePull|ImagePullBackOff
-connection timeout to denied public registry endpoint

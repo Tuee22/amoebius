@@ -1,2 +1,0 @@
-operator=current-membership-guard-deletion
-expected=never-member or revoked choice creates a scope epoch

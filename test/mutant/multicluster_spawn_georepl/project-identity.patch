@@ -1,5 +1,0 @@
---- a/src/Amoebius/Dsl/ChildInForceSpec.hs
-+++ b/src/Amoebius/Dsl/ChildInForceSpec.hs
-@@
--childVisibleClusters = flatten selectedSubtree
-+childVisibleClusters = flatten parentForest

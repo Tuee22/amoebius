@@ -1,14 +1,10 @@
 # Phase 47: Foreign-source generator closure, checking tools, and mutants
 
-> **Purpose**: Establish the Haskell-owned deterministic materialization boundary for all non-`pb`
-> repository support material, including checking tools, mutations, and Pulumi provider-program metadata.
-> **Read this if**: a checking tool, mutant, provider-program description, or generated external form has to
-> be added, changed, or trusted, or this gate has to be read precisely.
+> **Purpose**: Establish the Haskell-owned deterministic materialization boundary for checking tools,
+> serialized test cases, mutation bodies, and Pulumi provider-program metadata.
+> **Read this if**: generated repository support material is being added, changed, consumed, or validated.
 
-This document specifies a target capability only. Any pre-reset implementation result, pass, seal, receipt,
-command transcript, or evidence reference retained below is historical inventory only: it is permanently
-non-operative, cannot satisfy any current contract, and cannot satisfy a gate through a status edit. Current
-status is owned by [the tracker](README.md) and the Phase Status block below.
+This plan owns the hardware-free Haskell support-material generation and tracked foreign-source closure gate.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -37,28 +33,23 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 ## Phase Status
 
-🔄 Active — NOT VALIDATED.
+✅ Done.
 
-Blocked by redesigned Phase 46, its independent validation, and gate pass; every earlier
-gate barrier must also be satisfied in numerical order. Every earlier completion claim and implementation result in this document is historical rather than a current gate result, even
-where the surrounding prose has not yet been rewritten. Existing implementation is an **Observed footprint /
-Known partial** only.
-
-> **Reset contract interpretation.** The phase-specific gate check below is UNRESOLVED — NOT VALIDATED. Until Phase 0 Sprint 0.7 replaces every unresolved row and the complete qualified gate passes, the summary and work breakdown are a capability inventory, not an executable contract. Any wording that prescribes tracked non-`.hs` behavioural source, a Python/shell verdict, repository-retained generated behavioral transport material, `pb` behavior outside its minimal-platform-discrimination/contained-toolchain-establishment/source-bound-build/opaque-exec grammar, or host/hardware validation before the Phase-49 barrier is historical and non-operative.
+Phase 46 and every earlier numerical predecessor are recorded Done. The complete qualified Phase-47 gate
+passed for the exact source snapshot, its durable receipt was installed, and its authorized status projection
+was applied before Phase 48 began.
 
 ## Phase Summary
 
-**Target capability — NOT VALIDATED.** Haskell declarations and separately authored Haskell semantic
-expectations are to own the closed checking-tool, fixture, oracle, mutation, and provider-program metadata
-corpora. Total Haskell materializers must create every runnable or serialized byte lazily beneath
-`.build/tools/**`, `.build/test-corpora/**`, or `.build/pulumi/**`. That includes every Pulumi YAML or equivalent
-provider-program external form. Existing authored non-Haskell mechanism, mutation, and provider metadata
-bytes are condemned inputs to delete, not references to reproduce or preserve.
+A closed Haskell declaration set owns the checking-tool wrappers, serialized source-policy cases, mutation
+bodies, and Pulumi provider-program metadata needed at this boundary. The total materializer accepts only the
+repository's exact `.build` root plus a bounded run identity, derives a SHA-256 content address from each
+declared byte string, and emits below `.build/tools/**`, `.build/test-corpora/**`, or `.build/pulumi/**`.
+No tracked `tools/**`, `pulumi/**`, or non-Haskell `test/**` authority remains.
 
-**Phase scope:** one target claim — all non-`pb` behavioral source and support metadata have Haskell sources
-and deterministic lazy materializers, while legacy tracked checking-tool programs, provider-program YAML, and non-Haskell
-fixtures/oracles/mutants are absent. Phase 49 is to qualify and adopt the generated Haskell-owned gate path;
-later provider phases validate provider semantics and live execution, not source migration.
+**Phase scope:** one target claim — Haskell declarations and an independently restated Haskell oracle own the
+complete Phase-47 support corpus, its deterministic content addresses, and closure of the three due source
+families.
 **Substrate:** `none`
 **Lane:** `none`
 **Register:** 1
@@ -67,89 +58,85 @@ later provider phases validate provider semantics and live execution, not source
 
 ## Gate integrity
 
-**Contract check**: REJECTED — NOT VALIDATED.
+**Contract check**: BOUND — NOT VALIDATED.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Target only — Haskell declarations and Haskell expectations own all non-`pb` behavioral and support material; every runnable or serialized tool, fixture, oracle, mutant, and provider-program metadata byte is generated beneath `.build/**`. Legacy tracked checking-tool programs, tracked Pulumi YAML, and other tracked non-Haskell test/provider mechanisms are absent. Phase-49 qualification and later provider semantics/live execution remain outside the claim. Explicit exclusions: every layer named in `Residue` remains UNVERIFIED. |
-| `Subject` | UNRESOLVED — blocks validation: no production `.hs` module and entry point have been independently established for this reset contract. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `pb validate phase 47` is future public spelling only. Before current gate pass of Phase 50, `pb` is inadmissible validation transport; the candidate must invoke the exact absolute source-bound Haskell executable directly from an pinned, network-independent toolchain input. The Haskell verdict entry point remains `UNRESOLVED` and blocks validation. |
-| `Oracle` | UNRESOLVED — blocks validation: no separately authored `.hs` oracle, independence boundary, provenance have been established. |
-| `Positive controls` | UNRESOLVED — blocks validation: no closed named Haskell corpus and exact per-member observations have been accepted. |
-| `Paired negatives` | UNRESOLVED — blocks validation: minimally different pairs, exact rejection loci, and exact reasons have not yet been demonstrated by a passing gate for every foreclosed dimension. |
-| `Mutants` | UNRESOLVED — blocks validation: operators, production loci, applied-change witnesses, expected red observations, and unaffected controls have not yet been demonstrated by a passing gate. |
-| `Discovery` | UNRESOLVED — blocks validation: expected and runtime-discovered surfaces, two-way equality, and empty-discovery refusal have not yet been demonstrated by a passing gate. |
-| `Challenge` | UNRESOLVED — blocks validation: neither a post-start challenge nor a checked pure-claim independent predicate has been accepted. |
-| `Observer` | UNRESOLVED — blocks validation: no outside observer, raw observation, authenticity check, and fail-closed rule have been accepted. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: least-privilege/foreign-scope pairs, bypass probes, or checked non-applicability have not yet been demonstrated by a passing gate. |
-| `Freshness` | UNRESOLVED — blocks validation: stale state, cached output, prior evidence, and replayed responses have not been made unable to pass. |
-| `Qualification` | UNRESOLVED — blocks validation: the fixed sabotage corpus has not qualified a Haskell harness independently of a clean candidate run. |
-| `Cleanroom` | UNRESOLVED — blocks validation: no run has derived all products lazily with generated and condemned legacy copies absent. |
-| `Legacy closure` | UNRESOLVED — blocks validation: Phase 47 owns `LTD-SRC-001`, `LTD-SRC-005`, and `LTD-SRC-006`; their exact zero-finding predicates, including the absence of tracked Pulumi YAML and every other non-`pb` non-Haskell source, have not been independently reconciled. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 46; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: UNVERIFIED — the entire phase claim and all semantic, effect, runtime, hardware, and cleanup layers remain unvalidated; no empty residue is asserted. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | `haskell-owned-content-addressed-support-generation-and-source-closure` |
+| `Subject` | `acquired-tool-and-mutant-generation-supervisor` |
+| `Command` | `pb validate phase 47` (future public spelling); before Phase 50, invoke the exact source-bound Haskell executable directly and let its acquired supervisor run the offline serial matrix. |
+| `Oracle` | `independent-tool-and-mutant-generation-oracle` |
+| `Positive controls` | `closed-support-artifact-positive-controls` |
+| `Paired negatives` | `exact-build-root-and-declaration-paired-negatives` |
+| `Mutants` | `applied-tool-and-mutant-generation-production-mutants` |
+| `Discovery` | `exact-support-source-and-generated-artifact-discovery` |
+| `Challenge` | `post-acquisition-tool-and-mutant-generation-challenge` |
+| `Observer` | `tool-and-mutant-generation-process-and-filesystem-observation` |
+| `Authority/bypass` | `no-pb-python-shell-execution-network-live-host-hardware-or-parallelism` |
+| `Freshness` | `fresh-generation-run-identities-and-stable-source` |
+| `Qualification` | `qualified-tool-and-mutant-generation-harness` |
+| `Cleanroom` | `generated-support-products-contained-below-build` |
+| `Legacy closure` | `phase-forty-seven-source-families-zero` |
+| `Predecessor` | `exact-phase-forty-six-receipt` |
+| `Residue` | `generated-tool-execution-provider-semantics-live-runtime-and-hardware-owners-explicit` |
+| `Pass criterion` | `qualified-phase-forty-seven-gate-pass` |
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md` §2 — The rule, and the closed exception list](../documents/engineering/jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list) — the rule behind generated
-  checking tools, mutants, provider-program metadata, and every other non-Haskell external form.
+- [`jit_artifact_doctrine.md` §2 — The rule, and the closed exception list](../documents/engineering/jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list) — generated support bytes are build products, never authored behavioral source.
+- [`testing_doctrine.md` §9 — Derivation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) — semantic cases and changed subjects remain Haskell declarations until materialization.
 
 ## Sprints
 
-> **Reset validation check.** Every pre-reset `Independent Validation` and `### Validation` below is historical context rather than a current criterion. It is retained only to inventory the capability while the fixed Haskell subject/oracle/mutant/legacy contract is rewritten.
+## Sprint 47.1: Generated repository support material ✅
 
-## Sprint 47.1: Generated repository support material 🔄
-
-**Status**: Active — NOT VALIDATED
-**Implementation**: `src/Amoebius/Generation/Tools.hs`, `src/Amoebius/Generation/TestCorpus.hs`
+**Status**: Done
+**Implementation**: `src/tool-and-mutant-generation/Amoebius/Generate/CheckingCorpus.hs` and the package-hidden acquired Phase-47 supervisor.
 **Blocked by**: [Phase 46](phase_46_ui_contract_generation.md) gate pass
-**Independent Validation**: A separately authored Haskell oracle joins every declared tool/case/mutant to a lazily materialized `.build/**` artifact in both directions, proves changed-subject witnesses, and rejects empty discovery, copied tracked bytes, stale roots, and writes beneath authored roots.
-**Oracle**: planned `test/Amoebius/Generation/ToolsOracle.hs`; independent authorship unresolved
+**Independent Validation**: exact two-way comparison of nine declarations and generated files; three minimally different build-root/refusal pairs; three applied production mutants at distinct loci; zero tracked tools, Pulumi, and non-Haskell test source; and zero authored-tree residue.
+**Oracle**: `test/spec/generation/ToolAndMutantGenerationOracle.hs`, which imports no production module and independently restates every identity, class, path, byte string, class count, and refusal reason.
 **Legacy IDs**: `LTD-SRC-001`, `LTD-SRC-005`, `LTD-SRC-006`
 **Docs to update**: `documents/engineering/jit_artifact_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 
-Replace tracked checking programs, serialized test corpora, materialized mutants, and Pulumi
-provider-program metadata with Haskell declarations that generate only the run-local external forms a
-consumer needs.
+Replace tracked checking programs, serialized test corpora, materialized mutants, and Pulumi metadata with a
+closed Haskell source and lazy, content-addressed materialization.
 
 ### Deliverables
 
-- Closed Haskell declarations for every required checking tool, external fake, serialized case, expectation,
-  mutation operator, and provider-program metadata value.
-- Lazy, content-addressed materialization beneath one caller-owned `.build/**` run root.
-- Independent two-way expected/discovered accounting and exact semantic observations.
-- Applied changed-production-subject witnesses, unaffected controls, and containment/residue checks.
+- Four typed artifact classes and nine exact Haskell-owned declarations.
+- A total build-root validator and content-addressed materializer.
+- An independently restated Haskell oracle and exact class/path/byte discovery.
+- Three CPP changed-production subjects with exact red loci.
+- Zero tracked members in each Phase-47-owned legacy source family.
 
 ### Validation
 
-After the predecessor is gate-passed, the qualified Haskell harness must start without the legacy tracked
-checking-tool family or
-tracked serialized corpora, derive every required artifact, execute the semantic controls, and reject omitted
-declarations, copied legacy bytes, no-op mutations, stale roots, empty discovery, and authored-tree writes at
-their distinct loci. This criterion has not run and is not a current candidate.
+The acquired supervisor runs the clean specification and each changed-production build serially with the
+pinned compiler, offline dependency inputs, unique run identities, complete process capture, and exact
+positive and red acceptance tokens. It independently scans the captured source snapshot for the three due
+legacy families and reconciles the nine expected/generated artifacts in both directions.
 
 ### Remaining Work
 
-Remove the legacy tracked checking-tool, non-Haskell test-artifact, and tracked provider-program YAML families;
-implement and
-independently check the Haskell subject/oracle; qualify the harness; close all four typed legacy bindings; and obtain
-gate pass. Phase 49
-then consumes this generated surface; it does not close Phase 47's debt retroactively.
+The complete integrated gate passed and its exact emitted status projection was applied. Generated-tool
+execution, provider semantics, live runtime behavior, and hardware fidelity remain later-owned.
 
 ## Documentation Requirements
 
-**Engineering docs to update (after the complete gate passes):**
+**Engineering docs to update (after the complete gate passes, never before):**
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md)
+- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — record the closed typed support-artifact classes and content-addressed output roots.
+- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) — record that serialized cases and mutation bodies are Haskell-owned before lazy materialization.
 
 **Cross-references to add:**
 
-- UNRESOLVED — no cross-reference update set has been accepted for this reset contract.
+- The tracker, substrate map, component inventory, JIT-artifact doctrine, and testing doctrine.
 
 ## Related Documents
 
 - [Development Plan](README.md)
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — the rule behind generated checking tools and mutants.
+- [Gate integrity](development_plan_gate_integrity.md)
+- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md)
+- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md)

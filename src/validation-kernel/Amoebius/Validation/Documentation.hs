@@ -1,12 +1,14 @@
 module Amoebius.Validation.Documentation
   ( documentationInventoryDiagnostic
+  , documentationOutputBoundDiagnostic
   , documentationPolicyOwnerDiagnostic
   , documentationStructureDiagnostic
   , documentationWorktreeDiagnostic
   ) where
 
 import Amoebius.Validation.Documentation.Internal
-  ( checkCorpusDiagnostic
+  ( boundDocumentationResult
+  , checkCorpusDiagnostic
   , checkDocumentStructure
   , checkInventoryDiagnostic
   , checkPolicyOwnerDiagnostic
@@ -22,6 +24,9 @@ documentationStructureDiagnostic = checkDocumentStructure
 
 documentationInventoryDiagnostic :: [(FilePath, Text)] -> CheckResult
 documentationInventoryDiagnostic = checkInventoryDiagnostic
+
+documentationOutputBoundDiagnostic :: CheckResult -> CheckResult
+documentationOutputBoundDiagnostic = boundDocumentationResult
 
 documentationPolicyOwnerDiagnostic :: [(FilePath, Text)] -> CheckResult
 documentationPolicyOwnerDiagnostic = checkPolicyOwnerDiagnostic

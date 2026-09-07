@@ -1,3 +1,0 @@
-surface=generated-Dockerfile
-mutation=append:RUN touch /unlicensed
-expected_oracle=GeneratedDockerfileMismatch

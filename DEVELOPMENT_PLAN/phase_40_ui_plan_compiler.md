@@ -1,5 +1,4 @@
 # Phase 40: UI plan compiler
-
 > **Purpose**: Compile one sealed `BoundUiProgram` deterministically into matching immutable client, server,
 > public-contract, content-manifest, digest, and finite-demand projections.
 > **Read this if**: the paired-plan compiler, its canonical artifact boundary, or its Register-1 evidence has
@@ -15,7 +14,7 @@ status is owned by [the tracker](README.md) and the Phase Status block below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md, DEVELOPMENT_PLAN/substrates.md
 **Generated sections**: none
 
 </details>
@@ -184,7 +183,7 @@ The complete integrated Phase-40 gate and its mechanical status projection remai
 **Blocked by**: Sprint 40.2
 **Independent Validation**: exact source discovery, serial compiler receipts, source stability, cleanroom containment, legacy absence, and the eighteen-row acquired gate.
 **Oracle**: the Phase-40 runner binds `PlanCompilerReference`, typed cases, process observations, and changed-production mutant failures.
-**Legacy IDs**: exact fifteen-path retired inventory in `UiPlanCompilerRun.Internal` and zero Phase-40 entries in `test/mutant/registry.tsv`.
+**Legacy IDs**: exact fifteen-path retired inventory in `UiPlanCompilerRun.Internal` and zero Phase-40 entries in the compiled Haskell mutation registry.
 **Docs to update**: this plan and the tracker/component/substrate cross-references before integrated validation.
 
 ### Objective

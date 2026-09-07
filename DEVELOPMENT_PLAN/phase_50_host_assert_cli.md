@@ -26,7 +26,7 @@ version logic into Python.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Resource provision — UNRESOLVED](#resource-provision--unresolved)
+- [Resource provision](#resource-provision)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 50.1: Bind the already-bounded bootstrap surface](#sprint-501-bind-the-already-bounded-bootstrap-surface-)
@@ -40,7 +40,7 @@ version logic into Python.
 
 ## Phase Status
 
-⏸️ Blocked — NOT VALIDATED.
+🔄 Active — NOT VALIDATED.
 
 Blocked by the redesigned Phase 49 no-hardware DSL barrier and its gate pass, including zero
 `LTD-SRC-008` findings. Every prior `pb` quality
@@ -76,34 +76,33 @@ satisfy this contract.
 
 ## Gate integrity
 
-**Contract check**: REWRITTEN — NOT VALIDATED; implementation and independent check remain open.
+**Contract check**: BOUND — NOT VALIDATED; implementation and independent execution remain open.
 
 | Key | Contract |
 |---|---|
-| `Claim` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Given the already accepted `PbBootstrapGrammar`, `pb` makes only the platform distinction required to establish the contained toolchain, builds the exact source-bound Haskell executable, and execs it with every user argument unchanged. Python never interprets a public command, host-floor policy, help/version behavior, product result, evidence, or verdict. Real-host capability claims are excluded. |
-| `Subject` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: The exact Phase-0-classified `pb/__main__.py` bytes and their single injected `BootstrapAdapter`, exercising toolchain establishment, build, and exec handoff. No other tracked `pb/**` path or packaging file is admitted. The Haskell validator `Amoebius.Validation.PbBoundary` and its OS supervisor are the harness, not the subject; admin/runtime/test/verdict paths are forbidden. |
-| `Command` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: The admissible candidate starts the exact absolute source-built Haskell OS supervisor directly from the Phase-49-passed pinned, network-independent toolchain input; it does not use `pb` as outer transport. That supervisor invokes the production-declared authenticated absolute interpreter as exactly `-I`, `-S`, `-B`, the absolute repository `pb` directory, then the opaque argument tail containing `validate phase 50`, and observes the child subject through replacement and exit. The future public spelling remains `pb validate phase 50`, but it cannot supervise or validate its own handoff. |
-| `Oracle` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Planned `test/Amoebius/Validation/PbBoundaryOracle.hs`, separately authored from the bootstrap implementation. It states `PbBootstrapGrammar`, the exact allowed imports/effect adapter, build identity, opaque argv handoff, and platform-specific exec observation. Its independence boundary is unresolved. |
-| `Positive controls` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Haskell-described fake adapters cover the injectable `bootstrap(adapter, arguments)` seam for the minimal supported platform choices, absent/present toolchain, first build/converged rebuild, and opaque argv cases including empty, help, version, validation, unknown, and adversarial-looking values. A separate OS-observed control invokes the concrete `main` path, proves it constructs exactly one real `BootstrapAdapter`, and records its actual effects, executable replacement, argv bytes, and exit propagation. Fake-adapter observations cannot satisfy that concrete-entry control. |
-| `Paired negatives` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Minimal pairs cover unsupported platform, ambient `PATH` selection, user-home/system-temp writes, source-adjacent cache, skipped ensure, stale or non-source-built binary, direct effects outside `BootstrapAdapter`, no exec, reordered/rewritten/dropped argv, swallowed/forged exit, and every forbidden syntax/import/effect family named by `PbBootstrapGrammar`. |
-| `Mutants` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Haskell copies the indexed `pb` source into a run-owned `.build/source-snapshot/**`, applies one witnessed mutation per forbidden family and handoff invariant, builds and executes only that changed snapshot, and proves the Git index and worktree are byte-identical before and after. Mutants include skipped probe, ambient command, external write, stale binary, return instead of exec, argv rewrite, forced zero exit, and each dynamic-execution/import/reflection/hook/decorator/metaclass/monkeypatch/plugin/shell/FFI/network bypass. Each named row turns red while unrelated controls remain green. |
-| `Discovery` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: The already accepted complete supported authored AST/import/resolved-direct-call/control-flow/potential-effect graph is replayed and joined bidirectionally to the closed Haskell `PbBootstrapGrammar`; unsupported syntax and unresolved authored calls refuse. Runtime observation independently covers interpreter/import startup, standard-library/native/transitive effects, and every exercised filesystem/process/acquisition request at the single `BootstrapAdapter`, then proves every successful terminal path reaches exact-binary exec. Authored direct Python networking is forbidden; an adapter acquisition request is permitted only through the declared adapter and is not evidence of real network fidelity. Empty/partial discovery, a lexical-only scan, an unclassified path, or an unobserved exercised effect refuses the run. |
-| `Challenge` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: The fake Haskell binary is created after `pb` starts and receives a fresh unpredictable argv/environment canary. Its independent process observer must recover that canary and exact source-built binary digest after the handoff. |
-| `Observer` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: An OS-boundary Haskell supervisor separately labels the injectable fake-adapter seam and the concrete `main` entry. For the concrete entry it records executable paths, argv, environment allowlist, interpreter/import/stdlib/native/transitive effects, file operations, process replacement/tree, stdin/stdout/stderr, and exit propagation. Subject-emitted logs, fake-adapter summaries, or ledgers are not evidence. Missing concrete-entry, replacement, process, argv, or exit observation fails closed. |
-| `Authority/bypass` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Probes supply command-looking and adversarial argv, call internal modules directly, supply caller-selected executable paths, seed stale binaries, inject `PATH` tools, and exercise every forbidden grammar/effect family. User argv remains opaque and reaches Haskell unchanged; every attempt to route an effect around `BootstrapAdapter` or execute another binary refuses. |
-| `Freshness` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Toolchain/build roots and fake executable are run-owned beneath a fresh `.build/**` tree; first and converged runs prove which path executed. Pre-existing stable binaries, caches, evidence, or worktree-generated inputs cannot satisfy the gate. |
-| `Qualification` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: The Haskell harness first rejects constant success, no-op bootstrap, wrong binary, empty AST/effect discovery, missing oracle, skipped/no-op mutant, wrong-locus failure, stale evidence, self-reported exec, argv bypass, external writes, an unsupported grammar node, and an effect outside `BootstrapAdapter`. |
-| `Cleanroom` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: The run starts without `.build/**`, source-adjacent Python caches, prior binary, evidence, or condemned `pb` residue. Mutations occur only in indexed copies beneath `.build/source-snapshot/**`; toolchain/build/test output stays beneath `.build/**`; the external observer proves the Git index and worktree are unchanged. |
-| `Legacy closure` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: Phase 50 owns no typed migration binding. The exact Phase-49 gate pass binds a snapshot on which the Haskell source query explained to readers as `LTD-SRC-008`, and every other source-migration query, was already zero; this run refuses any mismatch or reintroduction rather than attempting to close one. Markdown row content is not an input. |
-| `Predecessor` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: Exact `ImmediatePredecessorPass` for Phase 49; candidate execution refuses an absent, stale, replayed, or different-source result. |
-| `Residue` | UNRESOLVED — blocks validation: typed semantic payload and gate evidence missing; prior prose: `UNVERIFIED`: real host package managers and permissions; the Phase-51 Haskell ensure algebra; Docker/Colima/WSL; hardware; images; registry; cluster; and all runtime behaviour after Haskell handoff. |
-| `Pass criterion` | UNRESOLVED — blocks validation: typed semantic payload and complete gate execution missing; prior prose: `qualified-gate-pass` — every required gate row must succeed in one qualified run for the exact current source; that complete pass is sufficient for the status-only transition. |
+| `Claim` | Given the already accepted `PbBootstrapGrammar`, `pb` makes only the platform distinction required to establish the contained toolchain, builds the exact source-bound Haskell executable offline and serially, and execs it with every user argument unchanged. Python never interprets a public command, host-floor policy, help/version behavior, product result, evidence, or verdict. Real-host capability claims are excluded. |
+| `Subject` | The exact Phase-0-classified `pb/__main__.py` bytes and their single injected `BootstrapAdapter`, exercised by the acquired `Amoebius.Validation.PbBoundary` Haskell supervisor. No other tracked `pb/**` path or packaging file is admitted. |
+| `Command` | The candidate starts the exact absolute source-built Haskell OS supervisor directly. It invokes the authenticated absolute interpreter as `-I`, `-S`, `-B`, the absolute snapshot `pb` directory, and the opaque `validate phase 50` tail. A fresh inherited challenge selects the Haskell observation continuation after exec, so `pb validate phase 50` never supervises itself. |
+| `Oracle` | `test/validation-kernel/PbBoundaryOracle.hs`, authored without importing the production boundary implementation, states the exact adapter transcript, containment, unchanged argv, process replacement, and exit expectations. |
+| `Positive controls` | Haskell-authored fake-adapter cases cover all four supported platform choices, absent/present verified acquisition, contained environment, exact serial offline build, locator, empty/help/version/validation/unknown/adversarial argv, and one concrete OS-observed `main` handoff. |
+| `Paired negatives` | Minimal pairs cover unsupported platform, ambient executable selection, external writes, skipped ensure, stale or non-source-built binary, missing `--offline`/`--jobs=1`, no exec, rewritten/dropped argv, self-supervision, forged observation, and swallowed exit. |
+| `Mutants` | Each changed `pb` subject is materialized only under the run-owned source snapshot. Skipped ensure, ambient Cabal, external write, stale locator, non-serial/network-capable build, return instead of exec, argv rewrite, and forced-zero exit each redden one named row while the clean subject remains green. |
+| `Discovery` | Static `PbBootstrapGrammar` discovery is joined to the exact tracked byte/mode/path identity; the runtime supervisor independently inventories every fake-adapter request and the concrete interpreter, filesystem, process, executable, argv, challenge, replacement, and exit observations. Empty, partial, unresolved, or unclassified observations refuse. |
+| `Challenge` | After the concrete `pb` process starts, the supervisor publishes a fresh unpredictable canary through a run-owned challenge path. Only the execed source-built Haskell continuation can acknowledge it while the parent independently observes that process. |
+| `Observer` | The Haskell parent records the child PID before handoff and independently reads the live OS executable and argv after the continuation blocks for acknowledgement, then checks exact binary digest and final exit propagation. Subject-authored summaries alone are insufficient. |
+| `Authority/bypass` | The run admits only the authenticated interpreter, verified `ghcup`, exact contained GHC/Cabal paths, offline serial Cabal, run-owned filesystem effects, and the final exact Haskell executable. It rejects ambient `PATH`, network, host package managers, containers, providers, hardware, and recursive Phase-50 supervision. |
+| `Freshness` | The copied indexed source and phase-specific toolchain/build/observation roots are unique and absent at acquisition; the post-start canary is unique; first and converged observations identify their exact products; opening and closing tracked-source identities match. |
+| `Qualification` | The Haskell harness rejects constant success, no-op bootstrap, wrong binary, incomplete discovery, missing oracle, skipped/no-op/wrong-locus mutants, stale challenge, subject-forged process evidence, argv bypass, external writes, and incorrect exit. |
+| `Cleanroom` | Mutations and all generated source, toolchain, build, transcript, challenge, and observation material remain under the uniquely owned `.build/runs/phase-50/**` root; no source-adjacent Python cache or tracked-tree write is permitted; cleanup proves zero owned processes and explicit retained evidence only. |
+| `Legacy closure` | Phase 50 owns no migration binding. It consumes the exact refreshed Phase-49 pass whose source snapshot has zero source-migration queries and refuses any mismatch or reintroduction. |
+| `Predecessor` | Exact `ImmediatePredecessorPass` for Phase 49; candidate execution refuses an absent, stale, replayed, or different-source result. |
+| `Residue` | `UNVERIFIED`: other native platforms, real package-manager and permission fidelity, Phase-51 host ensure, container engines, VMs, clusters, images, registry, hardware, and all product behavior after the Haskell handoff. |
+| `Pass criterion` | `qualified-gate-pass` — all eighteen rows pass in one source-bound qualified candidate, the external observer sees the clean concrete handoff, and every named changed-subject mutant is red. |
 
-## Resource provision — UNRESOLVED
+## Resource provision
 
-> **UNRESOLVED — blocks validation.** No live mutation may begin. The seven-label draft below is
-> non-operative capability inventory until its Haskell `ResourceProvisionContract`, interpreter, independent
-> observer, exact run binding, and complete gate execution exist.
+> The typed `ResourceProvisionContract` binds these seven fields to the Phase-50 Haskell supervisor. They are
+> gate-ready contract terms, not evidence that the still-open gate has passed.
 
 - **Owner marker:** a run-local Haskell value binds the source snapshot, Phase-49 gate pass, supervisor identity,
   authenticated interpreter, contained toolchain/build root, fake executable, and run identifier.
@@ -131,9 +130,9 @@ satisfy this contract.
 
 ## Sprints
 
-## Sprint 50.1: Bind the already-bounded bootstrap surface ⏸️
+## Sprint 50.1: Bind the already-bounded bootstrap surface 🔄
 
-**Status**: Blocked — NOT VALIDATED
+**Status**: Active — NOT VALIDATED
 **Implementation**: `src/Amoebius/Validation/PbBoundary.hs`
 **Blocked by**: [Phase 49](phase_49_self_referential_gates.md) gate pass
 **Independent Validation**: A valid bounded module is accepted, a one-node forbidden dynamic-execution variant is refused at the grammar locus, a changed indexed-snapshot bypass mutant reddens only its named row, and runtime/toolchain behavior remains explicit residue.

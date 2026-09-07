@@ -1,5 +1,0 @@
---- a/src/Amoebius/Ui/Release.hs
-+++ b/src/Amoebius/Ui/Release.hs
-@@ image
-- reuseGenericRuntimeImage
-+ buildProgramSpecificImage

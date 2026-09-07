@@ -17,8 +17,11 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 
 runQualificationOracle :: IO ()
-runQualificationOracle =
+runQualificationOracle = do
   finishDiagnostics "QualificationOracle" (structuralProblems <> behaviorProblems <> failClosedProblems)
+  mapM_
+    (\required -> putStrLn ("qualification-sabotage-observation\t" <> Text.unpack (caseName required) <> "\t" <> Text.unpack (caseFindingCode required)))
+    requiredCases
  where
   cleanRuns = fmap cleanRun requiredCases
   cleanReportCheck = checkQualificationReportDiagnostic qualificationBaseline cleanRuns

@@ -108,6 +108,10 @@ expectedResourceSlots 25 =
   [ResourceGateReady (ResourceDraft 25 field) | field <- resourceFields]
 expectedResourceSlots 34 =
   [ResourceGateReady (ResourceDraft 34 field) | field <- resourceFields]
+expectedResourceSlots 49 =
+  [ResourceGateReady (ResourceDraft 49 field) | field <- resourceFields]
+expectedResourceSlots 50 =
+  [ResourceGateReady (ResourceDraft 50 field) | field <- resourceFields]
 expectedResourceSlots ordinal =
   [ResourceContractGap (ResourceGapId ordinal field) | field <- resourceFields]
 
@@ -139,7 +143,7 @@ resourceProvisionRegistryCheck target =
                  ( renderOrdinal ordinal
                      <> "|"
              <> if Set.member ordinal resourceRequiredPhases
-                       then if ordinal `elem` [1, 13, 14, 15, 25, 34] then "required|GATE-READY" else "required|UNRESOLVED"
+                       then if ordinal `elem` gateReadyResourcePhases then "required|GATE-READY" else "required|UNRESOLVED"
                        else "not-required|ABSENT"
                  )
              | ordinal <- [0 .. 95]
@@ -171,7 +175,7 @@ resourcePermanentRefusal =
   finding
     "PLAN-RESOURCE-DIAGNOSTIC-ONLY"
     "DEVELOPMENT_PLAN/"
-    "the nullary resource view cannot authorize a run; Phases 1, 13, 14, 15, 25, and 34 are gate-ready and 47 later contracts remain unresolved"
+    "the nullary resource view cannot authorize a run; Phases 1, 13, 14, 15, 25, 34, 49, and 50 are gate-ready and 45 later contracts remain unresolved"
 
 resourceIntegrityFindings :: [Finding]
 resourceIntegrityFindings =
@@ -199,11 +203,11 @@ resourceIntegrityFindings =
         (length allSlots == 371)
         "the resource registry must retain exactly 371 typed slots"
     , integrityFinding
-        (length [() | ResourceContractGap _ <- allSlots] == 329)
-        "exactly the 47 later required phases must retain their 329 unresolved slots"
+        (length [() | ResourceContractGap _ <- allSlots] == 315)
+        "exactly the 45 later required phases must retain their 315 unresolved slots"
     , integrityFinding
-        (length [() | ResourceGateReady _ <- allSlots] == 42)
-        "Phases 1, 13, 14, 15, 25, and 34 must each own exactly seven gate-ready run-local resource slots"
+        (length [() | ResourceGateReady _ <- allSlots] == 56)
+        "Phases 1, 13, 14, 15, 25, 34, 49, and 50 must each own exactly seven gate-ready run-local resource slots"
     , integrityFinding
         (null [() | ResourceDrafted _ <- allSlots])
         "no resource slot may remain merely drafted"
@@ -336,10 +340,10 @@ compareProjection (ordinal, actualHeading, actualBlocker)
  where
   required = Set.member ordinal resourceRequiredPhases
   expectedHeading
-    | ordinal `elem` [1, 13, 14, 15, 25, 34] = "Resource provision"
+    | ordinal `elem` gateReadyResourcePhases = "Resource provision"
     | required = "Resource provision — UNRESOLVED"
     | otherwise = "ABSENT"
-  expectedBlocker = required && ordinal `notElem` [1, 13, 14, 15, 25, 34]
+  expectedBlocker = required && ordinal `notElem` gateReadyResourcePhases
   mismatch :: (Eq value, Show value) => Text -> value -> value -> [Finding]
   mismatch fieldName wanted observed =
     [ finding
@@ -386,6 +390,9 @@ phaseSubject ordinal =
 
 renderOrdinal :: Int -> Text
 renderOrdinal ordinal = Text.justifyRight 2 '0' (showText ordinal)
+
+gateReadyResourcePhases :: [Int]
+gateReadyResourcePhases = [1, 13, 14, 15, 25, 34, 49, 50]
 
 showText :: Show value => value -> Text
 showText = Text.pack . show

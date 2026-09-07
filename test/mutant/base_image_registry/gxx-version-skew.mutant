@@ -1,3 +1,0 @@
-artifact=both:/usr/bin/g++
-mutation=replace-version-token:13.3.0->13.3.-1
-expected_oracle=BinaryVersionMismatch

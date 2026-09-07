@@ -280,6 +280,30 @@ import Amoebius.Validation.UiContractGenerationRun.Internal
   , acquireUiContractGenerationRun
   , acquiredUiContractGenerationRunCheck
   )
+import Amoebius.Validation.ToolAndMutantGenerationRun.Internal
+  ( AcquiredToolAndMutantGenerationRun
+  , acquireToolAndMutantGenerationRefreshRun
+  , acquireToolAndMutantGenerationRun
+  , acquiredToolAndMutantGenerationRunCheck
+  )
+import Amoebius.Validation.TestWorkflowAlgebraRun.Internal
+  ( AcquiredTestWorkflowAlgebraRun
+  , acquireTestWorkflowAlgebraRefreshRun
+  , acquireTestWorkflowAlgebraRun
+  , acquiredTestWorkflowAlgebraRunCheck
+  )
+import Amoebius.Validation.DslBarrierRun.Internal
+  ( AcquiredDslBarrierRun
+  , acquireDslBarrierRefreshRun
+  , acquireDslBarrierRun
+  , acquiredDslBarrierRunCheck
+  )
+import Amoebius.Validation.PbBoundaryRun.Internal
+  ( AcquiredPbBoundaryRun
+  , acquirePbBoundaryRefreshRun
+  , acquirePbBoundaryRun
+  , acquiredPbBoundaryRunCheck
+  )
 import Amoebius.Validation.Documentation.Internal (checkDocuments)
 import Amoebius.Validation.Evidence.Internal
   ( PublishedCandidateEvidence
@@ -333,6 +357,10 @@ import Amoebius.Validation.Evidence.Internal
   , captureFinalizedUiLocalCompositionCandidateEvidence
   , captureFinalizedEncryptedBrowserRuntimeCandidateEvidence
   , captureFinalizedUiContractGenerationCandidateEvidence
+  , captureFinalizedToolAndMutantGenerationCandidateEvidence
+  , captureFinalizedTestWorkflowAlgebraCandidateEvidence
+  , captureFinalizedDslBarrierCandidateEvidence
+  , captureFinalizedPbBoundaryCandidateEvidence
   , captureFinalizedDispatchCandidateEvidence
   , captureFinalizedRepositoryLayoutCandidateEvidence
   , captureFinalizedToolchainSpikeCandidateEvidence
@@ -344,7 +372,7 @@ import Amoebius.Validation.GatePass.Internal (verifyPublishedGatePass)
 import Amoebius.Validation.Legacy.Internal (legacyCheck)
 import Amoebius.Validation.PhaseContract.Internal (checkPhaseContractsForPhase)
 import Amoebius.Validation.PhaseRunner.Internal
-  ( PhaseRunner (ArtifactCalculusRunner, BudgetCalculusRunner, LiftCalculusRunner, WorkflowCalculusRunner, EvidenceCalculusRunner, ScopeIndexRunner, ResourceIndexRunner, CalculusCompositionRunner, FormalModelKernelRunner, ExplicitStateCheckerRunner, SymbolicCheckerRunner, RefinementCheckerRunner, CompileFailHarnessRunner, DeterministicSimulationRunner, GatewayMigrationModelRunner, DslFormalModelRunner, ReconcileCoreRunner, ExtensionDeclarationRunner, ExtensionLawsRunner, ExtensionCompositionRunner, ExtensionSecurityRunner, ConformanceGateRunner, DhallSchemaRunner, GadtDecodeRunner, IllegalStateCoveringRunner, StorageGeometryRunner, ExecutionAcceleratorRunner, CapabilityBindRunner, ProvisionSealRunner, InferenceAcceleratorRunner, RenderManifestRunner, ChainBoundaryRunner, ImageRecipeRunner, TransactionVocabularyRunner, UiProgramSchemaRunner, UiAuthorizationRunner, UiEffectBindingRunner, UiPlanCompilerRunner, OfflineLanguagePlanRunner, UiBrowserInterpreterRunner, UiServerBoundaryRunner, UiLocalCompositionRunner, EncryptedBrowserRuntimeRunner, UiContractGenerationRunner, DocumentationSuiteRunner, ToolchainSpikeRunner, RepositoryLayoutRunner)
+  ( PhaseRunner (ArtifactCalculusRunner, BudgetCalculusRunner, LiftCalculusRunner, WorkflowCalculusRunner, EvidenceCalculusRunner, ScopeIndexRunner, ResourceIndexRunner, CalculusCompositionRunner, FormalModelKernelRunner, ExplicitStateCheckerRunner, SymbolicCheckerRunner, RefinementCheckerRunner, CompileFailHarnessRunner, DeterministicSimulationRunner, GatewayMigrationModelRunner, DslFormalModelRunner, ReconcileCoreRunner, ExtensionDeclarationRunner, ExtensionLawsRunner, ExtensionCompositionRunner, ExtensionSecurityRunner, ConformanceGateRunner, DhallSchemaRunner, GadtDecodeRunner, IllegalStateCoveringRunner, StorageGeometryRunner, ExecutionAcceleratorRunner, CapabilityBindRunner, ProvisionSealRunner, InferenceAcceleratorRunner, RenderManifestRunner, ChainBoundaryRunner, ImageRecipeRunner, TransactionVocabularyRunner, UiProgramSchemaRunner, UiAuthorizationRunner, UiEffectBindingRunner, UiPlanCompilerRunner, OfflineLanguagePlanRunner, UiBrowserInterpreterRunner, UiServerBoundaryRunner, UiLocalCompositionRunner, EncryptedBrowserRuntimeRunner, UiContractGenerationRunner, ToolAndMutantGenerationRunner, TestWorkflowAlgebraRunner, DslBarrierRunner, PbBoundaryRunner, DocumentationSuiteRunner, ToolchainSpikeRunner, RepositoryLayoutRunner)
   , selectPhaseRunner
   )
 import Amoebius.Validation.PhaseZeroRun.Internal
@@ -1060,6 +1088,10 @@ validatePhaseLocked git root phase = do
         Right UiLocalCompositionRunner -> validateUiLocalComposition acquired
         Right EncryptedBrowserRuntimeRunner -> validateEncryptedBrowserRuntime acquired
         Right UiContractGenerationRunner -> validateUiContractGeneration acquired
+        Right ToolAndMutantGenerationRunner -> validateToolAndMutantGeneration acquired
+        Right TestWorkflowAlgebraRunner -> validateTestWorkflowAlgebra acquired
+        Right DslBarrierRunner -> validateDslBarrier acquired
+        Right PbBoundaryRunner -> validatePbBoundary acquired
  where
   validateBootstrap acquired = do
     trustResult <- acquireGenesisTrust root
@@ -1845,6 +1877,70 @@ validatePhaseLocked git root phase = do
         finalSnapshot <- loadGitSnapshot git root
         finishGateLifecycle git root phase acquired (Just (FinalizedPhaseFortySix phaseFortySixRun predecessor)) finalSnapshot projectionResult
           (bindFinalSourceSnapshot acquired finalSnapshot (acquiredUiContractGenerationRunCheck phaseFortySixRun))
+  validateToolAndMutantGeneration acquired = do
+    let opening = snapshotIdentity (acquiredSourceSnapshot acquired)
+        projectionResult = prepareValidationProjection phase acquired
+    predecessorResult <- acquireImmediatePredecessorEvidence root phase opening
+    trustResult <- acquireGenesisTrust root
+    case (predecessorResult, trustResult) of
+      (Left predecessorProblems, _) -> finalizeGeneric acquired (CheckResult "phase-47-predecessor" [] predecessorProblems)
+      (_, Left trustProblems) -> finalizeGeneric acquired (CheckResult "phase-47-genesis-trust" [] trustProblems)
+      (Right predecessor, Right trust) -> do
+        projectionResult `seq` pure ()
+        phaseFortySevenRun <- case projectionResult of
+          Right projection | projectionIsReceiptRefresh projection -> acquireToolAndMutantGenerationRefreshRun root acquired trust
+          _ -> acquireToolAndMutantGenerationRun root acquired trust
+        finalSnapshot <- loadGitSnapshot git root
+        finishGateLifecycle git root phase acquired (Just (FinalizedPhaseFortySeven phaseFortySevenRun predecessor)) finalSnapshot projectionResult
+          (bindFinalSourceSnapshot acquired finalSnapshot (acquiredToolAndMutantGenerationRunCheck phaseFortySevenRun))
+  validateTestWorkflowAlgebra acquired = do
+    let opening = snapshotIdentity (acquiredSourceSnapshot acquired)
+        projectionResult = prepareValidationProjection phase acquired
+    predecessorResult <- acquireImmediatePredecessorEvidence root phase opening
+    trustResult <- acquireGenesisTrust root
+    case (predecessorResult, trustResult) of
+      (Left predecessorProblems, _) -> finalizeGeneric acquired (CheckResult "phase-48-predecessor" [] predecessorProblems)
+      (_, Left trustProblems) -> finalizeGeneric acquired (CheckResult "phase-48-genesis-trust" [] trustProblems)
+      (Right predecessor, Right trust) -> do
+        projectionResult `seq` pure ()
+        phaseFortyEightRun <- case projectionResult of
+          Right projection | projectionIsReceiptRefresh projection -> acquireTestWorkflowAlgebraRefreshRun root acquired trust
+          _ -> acquireTestWorkflowAlgebraRun root acquired trust
+        finalSnapshot <- loadGitSnapshot git root
+        finishGateLifecycle git root phase acquired (Just (FinalizedPhaseFortyEight phaseFortyEightRun predecessor)) finalSnapshot projectionResult
+          (bindFinalSourceSnapshot acquired finalSnapshot (acquiredTestWorkflowAlgebraRunCheck phaseFortyEightRun))
+  validateDslBarrier acquired = do
+    let opening = snapshotIdentity (acquiredSourceSnapshot acquired)
+        projectionResult = prepareValidationProjection phase acquired
+    predecessorResult <- acquireImmediatePredecessorEvidence root phase opening
+    trustResult <- acquireGenesisTrust root
+    case (predecessorResult, trustResult) of
+      (Left predecessorProblems, _) -> finalizeGeneric acquired (CheckResult "phase-49-predecessor" [] predecessorProblems)
+      (_, Left trustProblems) -> finalizeGeneric acquired (CheckResult "phase-49-genesis-trust" [] trustProblems)
+      (Right predecessor, Right trust) -> do
+        projectionResult `seq` pure ()
+        phaseFortyNineRun <- case projectionResult of
+          Right projection | projectionIsReceiptRefresh projection -> acquireDslBarrierRefreshRun root acquired trust
+          _ -> acquireDslBarrierRun root acquired trust
+        finalSnapshot <- loadGitSnapshot git root
+        finishGateLifecycle git root phase acquired (Just (FinalizedPhaseFortyNine phaseFortyNineRun predecessor)) finalSnapshot projectionResult
+          (bindFinalSourceSnapshot acquired finalSnapshot (acquiredDslBarrierRunCheck phaseFortyNineRun))
+  validatePbBoundary acquired = do
+    let opening = snapshotIdentity (acquiredSourceSnapshot acquired)
+        projectionResult = prepareValidationProjection phase acquired
+    predecessorResult <- acquireImmediatePredecessorEvidence root phase opening
+    trustResult <- acquireGenesisTrust root
+    case (predecessorResult, trustResult) of
+      (Left predecessorProblems, _) -> finalizeGeneric acquired (CheckResult "phase-50-predecessor" [] predecessorProblems)
+      (_, Left trustProblems) -> finalizeGeneric acquired (CheckResult "phase-50-genesis-trust" [] trustProblems)
+      (Right predecessor, Right trust) -> do
+        projectionResult `seq` pure ()
+        phaseFiftyRun <- case projectionResult of
+          Right projection | projectionIsReceiptRefresh projection -> acquirePbBoundaryRefreshRun root acquired trust
+          _ -> acquirePbBoundaryRun root acquired trust
+        finalSnapshot <- loadGitSnapshot git root
+        finishGateLifecycle git root phase acquired (Just (FinalizedPhaseFifty phaseFiftyRun predecessor)) finalSnapshot projectionResult
+          (bindFinalSourceSnapshot acquired finalSnapshot (acquiredPbBoundaryRunCheck phaseFiftyRun))
   finalizeGeneric acquired result = do
     let projectionResult = prepareValidationProjection phase acquired
     finalSnapshot <- loadGitSnapshot git root
@@ -1906,6 +2002,10 @@ data FinalizedDispatchRun
   | FinalizedPhaseFortyFour AcquiredUiLocalCompositionRun PredecessorEvidence
   | FinalizedPhaseFortyFive AcquiredEncryptedBrowserRuntimeRun PredecessorEvidence
   | FinalizedPhaseFortySix AcquiredUiContractGenerationRun PredecessorEvidence
+  | FinalizedPhaseFortySeven AcquiredToolAndMutantGenerationRun PredecessorEvidence
+  | FinalizedPhaseFortyEight AcquiredTestWorkflowAlgebraRun PredecessorEvidence
+  | FinalizedPhaseFortyNine AcquiredDslBarrierRun PredecessorEvidence
+  | FinalizedPhaseFifty AcquiredPbBoundaryRun PredecessorEvidence
 
 statusLifecycleFailure :: Int -> [Finding] -> CheckResult
 statusLifecycleFailure phase problems =
@@ -2273,6 +2373,34 @@ finishGateLifecycle git root phase opening finalizedRun closing projectionResult
         Just (FinalizedPhaseFortySix acquiredRun predecessor)
           | phase == 46 ->
             captureFinalizedUiContractGenerationCandidateEvidence
+              acquiredRun predecessor closing
+              (either (const Nothing) (Just . projectionDigest) projectionResult)
+              (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)
+              executablePath executableDigest processArgv
+        Just (FinalizedPhaseFortySeven acquiredRun predecessor)
+          | phase == 47 ->
+            captureFinalizedToolAndMutantGenerationCandidateEvidence
+              acquiredRun predecessor closing
+              (either (const Nothing) (Just . projectionDigest) projectionResult)
+              (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)
+              executablePath executableDigest processArgv
+        Just (FinalizedPhaseFortyEight acquiredRun predecessor)
+          | phase == 48 ->
+            captureFinalizedTestWorkflowAlgebraCandidateEvidence
+              acquiredRun predecessor closing
+              (either (const Nothing) (Just . projectionDigest) projectionResult)
+              (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)
+              executablePath executableDigest processArgv
+        Just (FinalizedPhaseFortyNine acquiredRun predecessor)
+          | phase == 49 ->
+            captureFinalizedDslBarrierCandidateEvidence
+              acquiredRun predecessor closing
+              (either (const Nothing) (Just . projectionDigest) projectionResult)
+              (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)
+              executablePath executableDigest processArgv
+        Just (FinalizedPhaseFifty acquiredRun predecessor)
+          | phase == 50 ->
+            captureFinalizedPbBoundaryCandidateEvidence
               acquiredRun predecessor closing
               (either (const Nothing) (Just . projectionDigest) projectionResult)
               (either (const Nothing) (Just . projectionPostimageDigest) projectionResult)

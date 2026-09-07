@@ -3769,6 +3769,10 @@ admittedDocumentationPath path =
 retainedDocumentationSuffix :: FilePath -> Bool
 #if defined(VALIDATION_SOURCE_CLOSURE_DOCUMENTATION_SUFFIX_REMOVAL_MUTANT)
 retainedDocumentationSuffix _ = False
+#elif defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_INVENTORY_WIDEN_MUTANT)
+retainedDocumentationSuffix path =
+  hasSuffix canonicalDocumentationSuffix path
+    || path == "documents/renamed_program.txt"
 #else
 retainedDocumentationSuffix = hasSuffix canonicalDocumentationSuffix
 #endif
@@ -3798,10 +3802,6 @@ retainedDocumentationPlanRoot = under "DEVELOPMENT_PLAN"
 
 canonicalDocumentationSuffix :: String
 canonicalDocumentationSuffix = ".md"
-
-#if defined(VALIDATION_SOURCE_CLOSURE_DOCUMENT_INVENTORY_WIDEN_MUTANT)
-    `Set.union` Set.singleton "documents/renamed_program.md"
-#endif
 
 rawEntryFacetOrder :: [SourceFacet] -> [SourceFacet]
 #if defined(VALIDATION_SOURCE_CLOSURE_ENTRY_FACET_ORDER_MUTANT)

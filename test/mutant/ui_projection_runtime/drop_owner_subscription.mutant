@@ -1,2 +1,0 @@
-operator=subscription-scope-weakening
-expected=alice resume advances bob cursor or exposes bob value
